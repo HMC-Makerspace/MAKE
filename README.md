@@ -1,2 +1,2 @@
 # MAKE
- Unified managment application for HMC's Makerspace
+ Monorepo for all MAKE applications. For HMC's Makerspace
