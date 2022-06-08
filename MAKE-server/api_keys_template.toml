@@ -11,11 +11,9 @@
 #
 # ====================================================
 
-[checkout_system]
-api_key = "YOUR_API_KEY"
+[api_keys]
+checkout = "YOUR_API_KEY"
 
-[student_storage]
-api_key = "YOUR_API_KEY"
+student_storage = "YOUR_API_KEY"
 
-[printers]
-api_key = "YOUR_API_KEY"
+printers = "YOUR_API_KEY"

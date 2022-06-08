@@ -1,6 +1,6 @@
 {
   "inventory": {
-    "last_updated": 1654719223,
+    "last_updated": 1654731338,
     "items": [
       {
         "name": "Glue Sticks",
@@ -3480,7 +3480,7 @@
         "is_tool": true,
         "quantity": -3,
         "location_room": "Cage",
-        "location_area": "",
+        "location_area": "2d",
         "reorder_url": "",
         "specific_name": "",
         "serial_number": "",
@@ -3499,16 +3499,17 @@
         "passed_quizzes": [
           "General"
         ],
-        "auth_level": "System"
+        "auth_level": "User"
       }
     }
   },
   "printers": {
-    "printers": []
+    "printers": {},
+    "print_log": []
   },
   "quizzes": [
     {
-      "last_updated": 1654719224,
+      "last_updated": 1654731339,
       "responses": [
         {
           "timestamp": "6/6/2022 14:15:29",
@@ -3522,37 +3523,37 @@
       "name": "General"
     },
     {
-      "last_updated": 1654719224,
+      "last_updated": 1654731340,
       "responses": [],
       "id": "1524924728",
       "name": "Laser3D"
     },
     {
-      "last_updated": 1654719225,
+      "last_updated": 1654731340,
       "responses": [],
       "id": "1841312496",
       "name": "SprayPaint"
     },
     {
-      "last_updated": 1654719225,
+      "last_updated": 1654731341,
       "responses": [],
       "id": "913890505",
       "name": "Composite"
     },
     {
-      "last_updated": 1654719226,
+      "last_updated": 1654731342,
       "responses": [],
       "id": "482685426",
       "name": "Welding"
     },
     {
-      "last_updated": 1654719226,
+      "last_updated": 1654731342,
       "responses": [],
       "id": "2079405017",
       "name": "Studio"
     },
     {
-      "last_updated": 1654719226,
+      "last_updated": 1654731343,
       "responses": [],
       "id": "1859058984",
       "name": "Waterjet"

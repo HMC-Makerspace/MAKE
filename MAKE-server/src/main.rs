@@ -54,9 +54,33 @@ pub struct Data {
     pub checkout_log: CheckoutLog,
 }
 
+#[derive(Default, Deserialize, Serialize)]
+pub struct ApiKeysToml {
+    pub api_keys: ApiKeys,
+}
+
+#[derive(Default, Deserialize, Serialize)]
+pub struct ApiKeys {
+    checkout: String,
+    student_storage: String,
+    printers: String,
+}
+
+impl ApiKeys {
+    // Print the keys to the console, only showing the first few characters of each key
+    pub fn peek_print(&self) {
+        info!("Checkout key:         {}...", &self.checkout[..10]);
+        info!("Student storage key:  {}...", &self.student_storage[..10]);
+        info!("Printers key:         {}...", &self.printers[..10]);
+    }
+}
+
 lazy_static! {
     pub static ref MEMORY_DATABASE: Arc<Mutex<Data>> =
         Arc::new(Mutex::new(Data::default()));
+    
+    pub static ref API_KEYS: Arc<Mutex<ApiKeys>> =
+        Arc::new(Mutex::new(ApiKeys::default()));
 }
 
 const DB_NAME: &str = "db.json";
@@ -97,10 +121,34 @@ pub async fn save_database() -> Result<(), Error> {
     Ok(())
 }
 
+pub async fn load_api_keys() -> Result<(), Error> {
+    info!("Loading API keys...");
+
+    let mut file = OpenOptions::new().read(true).open("api_keys.toml").expect("Failed to open api_keys.toml");
+    let mut data = String::new();
+    file.read_to_string(&mut data)?;
+
+    let data: ApiKeysToml = toml::from_str(&data).expect("Failed to parse api_keys.toml");
+
+    let api_keys = data.api_keys;
+
+    api_keys.peek_print();
+
+    let mut lock = API_KEYS.lock().await;
+
+    *lock = api_keys;
+
+    info!("API keys loaded!");
+
+    Ok(())
+}
 /// Main function to run both actix_web server and API update loop
 /// API update loops lives inside a tokio thread while the actix_web
 /// server is run in the main thread and blocks until done.
 async fn async_main() -> std::io::Result<()> {
+    // Load api keys
+    load_api_keys().await.expect("Could not load API keys!");
+
     // Load all databases
     let data = load_database().unwrap();
     let mut lock = MEMORY_DATABASE.lock().await;
@@ -183,17 +231,17 @@ async fn update_loop() {
     // Update quizzes
     let mut quizzes = get_all_quizzes();
 
-    for quiz in quizzes.iter_mut() {
-        info!("Updating quiz: {:?}", quiz.name);
+    info!("Updating quizzes...");
 
+    for quiz in quizzes.iter_mut() {
         let update_result = quiz.update().await;
 
         if update_result.is_err() {
-            info!("Failed to update quiz: {}", update_result.err().unwrap());
-        } else {
-            info!("Quiz updated!");
+            warn!("Failed to update quiz: {}", update_result.err().unwrap());
         }
     }
+
+    info!("Quizzes updated!");
 
     MEMORY_DATABASE.lock().await.quizzes = quizzes.clone();
 

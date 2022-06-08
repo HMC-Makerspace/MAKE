@@ -1,3 +1,5 @@
+#![feature(is_some_with)]
+
 use crate::*;
 use ::serde::{Deserialize, Serialize};
 use actix_web::{error::*, *};
@@ -202,7 +204,17 @@ pub async fn update_printer_status(
 ) -> Result<HttpResponse, Error> {
     let mut data = MEMORY_DATABASE.lock().await;
 
-    data.printers.add_printer_status(body.into_inner());
+    let result = data.printers.add_printer_status(body.into_inner()).await;
+    
+    if result.is_err() {
+        let error = result.unwrap_err();
+
+        if error == "Invalid API Key" {
+            warn!("Invalid printer API key!");
+        } else {
+            warn!("Error adding printer status: {}", error);
+        }
+    }
 
     Ok(HttpResponse::Ok()
         .status(http::StatusCode::CREATED)

@@ -1,5 +1,8 @@
+use log::info;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, time::SystemTime};
+
+use crate::API_KEYS;
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct PrinterWebhookUpdate {
@@ -137,8 +140,15 @@ impl Printers {
         self.add_log(entry);
     }
 
-    pub fn add_printer_status(&mut self, printer_webhook_update: PrinterWebhookUpdate) {
+    pub async fn add_printer_status(&mut self, printer_webhook_update: PrinterWebhookUpdate) -> Result<(), String> {
+        // Validate api key
+        if printer_webhook_update.api_key != API_KEYS.lock().await.printers {
+            return Err("Invalid API key".to_string());
+        }
+
         let mut printer = self.get_printer_by_id(&printer_webhook_update.id).unwrap();
+
+        info!("Updating printer {} status: {:?}", &printer.id, printer_webhook_update.message);
 
         printer.status = PrinterStatus::from_webhook(&printer_webhook_update.state);
         printer.last_updated = SystemTime::now()
@@ -149,6 +159,8 @@ impl Printers {
         printer.current_time_left = printer_webhook_update.progress.printTimeLeft;
 
         self.add_set_printer(printer);
+
+        Ok(())
     }
 }
 
