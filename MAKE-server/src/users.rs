@@ -6,6 +6,20 @@ use crate::quizzes::*;
 use crate::inventory::*;
 use crate::checkout::*;
 
+#[derive(Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub enum AuthLevel {
+    User,
+    Steward,
+    Admin,
+    System,
+}
+
+impl Default for AuthLevel {
+    fn default() -> Self {
+        AuthLevel::User
+    }
+}
+
 #[derive(Default, Deserialize, Serialize, Clone)]
 pub struct Users {
     users: HashMap<u64, User>,
@@ -20,7 +34,7 @@ impl Users {
         self.users.get(&user.college_id_number).cloned()
     }
 
-    pub fn add_user(&mut self, user: User) {
+    pub fn add_set_user(&mut self, user: User) {
         self.users.insert(user.college_id_number, user);
     }
 
@@ -31,6 +45,27 @@ impl Users {
     pub fn len(&self) -> usize {
         self.users.len()
     }
+
+    pub fn update_from(&mut self, other: &Users) {
+        // If the user doesn't exist, add it
+        for (id_number, user) in other.users.iter() {
+            if !self.users.contains_key(id_number) {
+                self.users.insert(*id_number, user.clone());
+            } else {
+                // If the user exists, update passed quizzes, but don't delete any quizzes
+                        
+                let mut current_user = self.users.get(id_number).unwrap().clone();
+
+                current_user.update_soft_from(user);
+
+                self.users.insert(*id_number, current_user.clone());
+            }            
+        }
+    }
+
+    pub fn exists(&self, id_number: &u64) -> bool {
+        self.users.contains_key(id_number)
+    }
 }
 
 #[derive(Default, Deserialize, Serialize, Clone)]
@@ -39,6 +74,7 @@ pub struct User {
     college_id_number: u64,
     college_email: String,
     passed_quizzes: Vec<QuizName>,
+    auth_level: AuthLevel,
 }
 
 impl User {
@@ -48,6 +84,7 @@ impl User {
             college_id_number: response.college_id,
             college_email: response.college_email.clone(),
             passed_quizzes: vec![],
+            auth_level: AuthLevel::User,
         }
     }
 
@@ -84,6 +121,40 @@ impl User {
             .cloned()
             .collect()
     }
+
+    pub fn update_soft_from(&mut self, other: &User) {
+        // Take union of passed quizzes
+        self.passed_quizzes = self.passed_quizzes
+            .iter()
+            .chain(other.passed_quizzes.iter())
+            .cloned()
+            .collect();
+
+        // Remove duplicates
+        self.passed_quizzes.sort();
+        self.passed_quizzes.dedup();
+
+        // Then, update auth level
+        if other.auth_level > self.auth_level {
+            self.auth_level = other.auth_level.clone();
+        }
+    }
+
+    pub fn get_auth_level(&self) -> AuthLevel {
+        self.auth_level.clone()
+    }
+
+    pub fn set_auth_level(&mut self, auth_level: AuthLevel) {
+        self.auth_level = auth_level;
+    }
+
+    pub fn set_quiz_passed(&mut self, quiz_name: &QuizName, passed: bool) {
+        if passed {
+            self.passed_quizzes.push(quiz_name.clone());
+        } else {
+            self.passed_quizzes.retain(|x| x != quiz_name);
+        }
+    }
 }
 
 pub fn create_users_from_quizzes(quizzes: &Vec<Quiz>) -> Users {
@@ -99,7 +170,7 @@ pub fn create_users_from_quizzes(quizzes: &Vec<Quiz>) -> Users {
 
             user.log_quiz(quiz.get_name().clone(), response.passed);
 
-            users.add_user(user);
+            users.add_set_user(user);
         }
     }
 

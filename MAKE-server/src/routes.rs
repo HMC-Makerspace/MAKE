@@ -11,6 +11,7 @@ struct UserInfo {
     passed_quizzes: Vec<QuizName>,
     pending_checkouts: Vec<CheckoutLogEntry>,
     all_checkouts: Vec<CheckoutLogEntry>,
+    auth_level: AuthLevel,
 }
 
 impl UserInfo {
@@ -26,9 +27,16 @@ impl UserInfo {
             passed_quizzes: user.get_passed_quizzes(),
             pending_checkouts,
             all_checkouts,
+            auth_level: user.get_auth_level(),
         }
     }
 }
+
+/*
+================
+    GET REQUESTS
+================
+*/
 
 #[get("/v1/inventory")]
 pub async fn get_inventory(path: web::Path<()>) -> Result<HttpResponse, Error> {
@@ -77,6 +85,42 @@ pub async fn checkout_item_by_name(path: web::Path<(u64, String)>) -> Result<Htt
         .finish())
 }
 
+#[get("/v1/checkout_log")]
+pub async fn get_checkout_log(path: web::Path<()>) -> Result<HttpResponse, Error> {
+    let data = MEMORY_DATABASE.lock().await;
+    let checkout_log = data.checkout_log.clone();
+    Ok(HttpResponse::Ok().json(checkout_log))
+}
+
+#[get("/v1/user_info/{id_number}")]
+pub async fn get_user_info(path: web::Path<u64>) -> Result<HttpResponse, Error> {
+    let data = MEMORY_DATABASE.lock().await;
+    let user = data.users.get_user_by_id(&path.into_inner());
+    if user.is_none() {
+        return Err(ErrorBadRequest("User not found".to_string()));
+    }
+
+    let user = user.unwrap();
+
+    // Get checkout log entries for user
+    let pending_checkouts = &user.get_pending_checked_out_items(&data.checkout_log);
+    let all_checkouts = &user.get_all_checked_out_items(&data.checkout_log);
+
+    let user_info = UserInfo::from_user_and_checkouts(
+        &user,
+        pending_checkouts.to_vec(),
+        all_checkouts.to_vec(),
+    );
+
+    Ok(HttpResponse::Ok().json(user_info))
+}
+
+/*
+=================
+    POST REQUESTS
+=================
+*/
+
 #[post("/v1/checkout_uuid/{id_number}/{item_uuid}")]
 pub async fn checkout_item_by_uuid(path: web::Path<(u64, String)>) -> Result<HttpResponse, Error> {
     let (id_number, item_uuid) = path.into_inner();
@@ -103,33 +147,122 @@ pub async fn checkout_item_by_uuid(path: web::Path<(u64, String)>) -> Result<Htt
         .finish())
 }
 
-#[get("/v1/checkout_log")]
-pub async fn get_checkout_log(path: web::Path<()>) -> Result<HttpResponse, Error> {
-    let data = MEMORY_DATABASE.lock().await;
-    let checkout_log = data.checkout_log.clone();
-    Ok(HttpResponse::Ok().json(checkout_log))
-}
+#[post("/v1/auth/set_level/{id_number}/{auth_level}")]
+pub async fn set_auth_level(path: web::Path<(u64, AuthLevel)>) -> Result<HttpResponse, Error> {
+    let (id_number, auth_level) = path.into_inner();
 
-#[get("/v1/user_info/{id_number}")]
-pub async fn get_user_info(path: web::Path<u64>) -> Result<HttpResponse, Error> {
-    let data = MEMORY_DATABASE.lock().await;
-    let user = data.users.get_user_by_id(&path.into_inner());
+    let mut data = MEMORY_DATABASE.lock().await;
+
+    let user = data.users.get_user_by_id(&id_number);
+
     if user.is_none() {
         return Err(ErrorBadRequest("User not found".to_string()));
     }
 
-    let user = user.unwrap();
+    let mut user = user.unwrap();
 
-    // Get checkout log entries for user
-    let pending_checkouts = &user
-        .get_pending_checked_out_items(&data.checkout_log);
-    let all_checkouts = &user.get_all_checked_out_items(&data.checkout_log);
+    user.set_auth_level(auth_level);
 
-    let user_info = UserInfo::from_user_and_checkouts(
-        &user,
-        pending_checkouts.to_vec(),
-        all_checkouts.to_vec(),
-    );
+    data.users.add_set_user(user);
 
-    Ok(HttpResponse::Ok().json(user_info))
+    Ok(HttpResponse::Ok()
+        .status(http::StatusCode::CREATED)
+        .finish())
 }
+
+#[post("/v1/auth/set_quiz/{id_number}/{quiz_name}/{passed}")]
+pub async fn set_quiz_passed(path: web::Path<(u64, QuizName, bool)>) -> Result<HttpResponse, Error> {
+    let (id_number, quiz_name, passed) = path.into_inner();
+
+    let mut data = MEMORY_DATABASE.lock().await;
+
+    let user = data.users.get_user_by_id(&id_number);
+
+    if user.is_none() {
+        return Err(ErrorBadRequest("User not found".to_string()));
+    }
+
+    let mut user = user.unwrap();
+
+    user.set_quiz_passed(&quiz_name, passed);
+
+    data.users.add_set_user(user);
+
+    Ok(HttpResponse::Ok()
+        .status(http::StatusCode::CREATED)
+        .finish())
+}
+
+#[post("/v1/printers/set_status/{id}/{status}")]
+pub async fn set_printer_status(path: web::Path<(String, PrinterStatus)>) -> Result<HttpResponse, Error> {
+    let (id, status) = path.into_inner();
+
+    let mut data = MEMORY_DATABASE.lock().await;
+
+    let printer = data.printers.get_printer_by_id(&id);
+
+    if printer.is_none() {
+        return Err(ErrorBadRequest("Printer not found".to_string()));
+    }
+
+    let mut printer = printer.unwrap();
+
+    printer.set_status(status);
+
+    data.printers.add_set_printer(printer);
+
+    Ok(HttpResponse::Ok()
+        .status(http::StatusCode::CREATED)
+        .finish())
+}
+
+#[post("/v1/printers/set_time_left/{id}/{seconds}")]
+pub async fn set_printer_time_left(path: web::Path<(String, u64)>) -> Result<HttpResponse, Error> {
+    let (id, seconds) = path.into_inner();
+
+    let mut data = MEMORY_DATABASE.lock().await;
+
+    let printer = data.printers.get_printer_by_id(&id);
+
+    if printer.is_none() {
+        return Err(ErrorBadRequest("Printer not found".to_string()));
+    }
+
+    let mut printer = printer.unwrap();
+
+    printer.set_time_left(seconds);
+
+    data.printers.add_set_printer(printer);
+
+    Ok(HttpResponse::Ok()
+        .status(http::StatusCode::CREATED)
+        .finish())
+}
+
+
+#[post("/v1/printers/add_log/{student_id}/{printer_id}")]
+pub async fn add_printer_log(path: web::Path<(u64, String)>) -> Result<HttpResponse, Error> {
+    let (student_id, printer_id) = path.into_inner();
+
+    let mut data = MEMORY_DATABASE.lock().await;
+
+    let student = data.users.exists(&student_id);
+
+    if !student {
+        return Err(ErrorBadRequest("Student not found".to_string()));
+    }
+
+    let printer = data.printers.exists(&printer_id);
+
+    if !printer {
+        return Err(ErrorBadRequest("Printer not found".to_string()));
+    }
+
+    data.printers.create_add_log(printer_id, student_id);
+
+    Ok(HttpResponse::Ok()
+        .status(http::StatusCode::CREATED)
+        .finish())
+}
+
+    

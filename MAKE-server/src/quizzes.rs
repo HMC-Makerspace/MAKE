@@ -13,7 +13,7 @@ const welding: &str = "482685426";
 const studio: &str = "2079405017";
 const waterjet: &str = "1859058984";
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd, Eq, Ord)]
 pub enum QuizName {
     General,
     Laser3D,

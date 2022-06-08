@@ -138,6 +138,8 @@ async fn async_main() -> std::io::Result<()> {
             .service(checkout_item_by_uuid)
             .service(get_checkout_log)
             .service(get_user_info)
+            .service(set_auth_level)
+            .service(set_quiz_passed)
     })
     .bind(ADDRESS)?
     .run()
@@ -200,6 +202,6 @@ async fn update_loop() {
 
     info!("Updated {} users!", users.len());
 
-    MEMORY_DATABASE.lock().await.users = users;
+    MEMORY_DATABASE.lock().await.users.update_from(&users);
 
 }
