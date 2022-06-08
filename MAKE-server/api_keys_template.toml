@@ -1,0 +1,21 @@
+# ====================================================
+#                       API KEYS
+#
+# Create a copy of this file (api_keys_template.toml)
+# and fill in the values when running the server.
+#
+# These keys should then be kept on the computers that
+# are running the relevant services.
+#
+# Make sure to rename the file "api_keys.toml"
+#
+# ====================================================
+
+[checkout_system]
+api_key = "YOUR_API_KEY"
+
+[student_storage]
+api_key = "YOUR_API_KEY"
+
+[printers]
+api_key = "YOUR_API_KEY"

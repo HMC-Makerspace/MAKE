@@ -171,7 +171,9 @@ pub async fn set_auth_level(path: web::Path<(u64, AuthLevel)>) -> Result<HttpRes
 }
 
 #[post("/v1/auth/set_quiz/{id_number}/{quiz_name}/{passed}")]
-pub async fn set_quiz_passed(path: web::Path<(u64, QuizName, bool)>) -> Result<HttpResponse, Error> {
+pub async fn set_quiz_passed(
+    path: web::Path<(u64, QuizName, bool)>,
+) -> Result<HttpResponse, Error> {
     let (id_number, quiz_name, passed) = path.into_inner();
 
     let mut data = MEMORY_DATABASE.lock().await;
@@ -193,76 +195,16 @@ pub async fn set_quiz_passed(path: web::Path<(u64, QuizName, bool)>) -> Result<H
         .finish())
 }
 
-#[post("/v1/printers/set_status/{id}/{status}")]
-pub async fn set_printer_status(path: web::Path<(String, PrinterStatus)>) -> Result<HttpResponse, Error> {
-    let (id, status) = path.into_inner();
-
+#[post("/v1/printers/update_status")]
+pub async fn update_printer_status(
+    path: web::Path<()>,
+    body: web::Json<PrinterWebhookUpdate>,
+) -> Result<HttpResponse, Error> {
     let mut data = MEMORY_DATABASE.lock().await;
 
-    let printer = data.printers.get_printer_by_id(&id);
-
-    if printer.is_none() {
-        return Err(ErrorBadRequest("Printer not found".to_string()));
-    }
-
-    let mut printer = printer.unwrap();
-
-    printer.set_status(status);
-
-    data.printers.add_set_printer(printer);
+    data.printers.add_printer_status(body.into_inner());
 
     Ok(HttpResponse::Ok()
         .status(http::StatusCode::CREATED)
         .finish())
 }
-
-#[post("/v1/printers/set_time_left/{id}/{seconds}")]
-pub async fn set_printer_time_left(path: web::Path<(String, u64)>) -> Result<HttpResponse, Error> {
-    let (id, seconds) = path.into_inner();
-
-    let mut data = MEMORY_DATABASE.lock().await;
-
-    let printer = data.printers.get_printer_by_id(&id);
-
-    if printer.is_none() {
-        return Err(ErrorBadRequest("Printer not found".to_string()));
-    }
-
-    let mut printer = printer.unwrap();
-
-    printer.set_time_left(seconds);
-
-    data.printers.add_set_printer(printer);
-
-    Ok(HttpResponse::Ok()
-        .status(http::StatusCode::CREATED)
-        .finish())
-}
-
-
-#[post("/v1/printers/add_log/{student_id}/{printer_id}")]
-pub async fn add_printer_log(path: web::Path<(u64, String)>) -> Result<HttpResponse, Error> {
-    let (student_id, printer_id) = path.into_inner();
-
-    let mut data = MEMORY_DATABASE.lock().await;
-
-    let student = data.users.exists(&student_id);
-
-    if !student {
-        return Err(ErrorBadRequest("Student not found".to_string()));
-    }
-
-    let printer = data.printers.exists(&printer_id);
-
-    if !printer {
-        return Err(ErrorBadRequest("Printer not found".to_string()));
-    }
-
-    data.printers.create_add_log(printer_id, student_id);
-
-    Ok(HttpResponse::Ok()
-        .status(http::StatusCode::CREATED)
-        .finish())
-}
-
-    

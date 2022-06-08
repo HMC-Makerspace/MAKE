@@ -2,17 +2,95 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, time::SystemTime};
 
 #[derive(Deserialize, Serialize, Clone)]
+pub struct PrinterWebhookUpdate {
+    id: String,
+    api_key: String,
+    topic: String,
+    message: String,
+    state: PrinterWebhookState,
+    job: PrinterWebhookJob,
+    progress: PrinterWebhookProgress,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+pub struct PrinterWebhookState {
+    text: String,
+    flags: PrinterWebhookStateFlags,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+pub struct PrinterWebhookStateFlags {
+    operational: bool,
+    printing: bool,
+    cancelling: bool,
+    pausing: bool,
+    resuming: bool,
+    finishing: bool,
+    closedOrError: bool,
+    error: bool,
+    paused: bool,
+    ready: bool,
+    sdReady: bool,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+pub struct PrinterWebhookJob {
+    file: PrinterWebhookJobFile,
+    estimatedPrintTime: f64,
+    averagePrintTime: f64,
+    lastPrintTime: f64,
+    user: String,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+pub struct PrinterWebhookJobFile {
+    name: String,
+    path: String,
+    display: String,
+    origin: String,
+    size: u64,
+    date: u64,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+pub struct PrinterWebhookProgress {
+    completion: f64,
+    filepos: u64,
+    printTime: u64,
+    printTimeLeft: u64,
+    printTimeLeftOrigin: String,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
 pub enum PrinterStatus {
     Idle,
     Printing,
+    Paused,
     Offline,
-    FilamentRunout,
     Error,
 }
 
 impl Default for PrinterStatus {
     fn default() -> Self {
         PrinterStatus::Idle
+    }
+}
+
+impl PrinterStatus {
+    pub fn from_webhook(state: &PrinterWebhookState) -> Self {
+        if state.flags.operational {
+            if state.flags.printing {
+                PrinterStatus::Printing
+            } else if state.flags.paused {
+                PrinterStatus::Paused
+            } else if state.flags.error {
+                PrinterStatus::Error
+            } else {
+                PrinterStatus::Idle
+            }
+        } else {
+            PrinterStatus::Offline
+        }
     }
 }
 
@@ -57,6 +135,20 @@ impl Printers {
         };
 
         self.add_log(entry);
+    }
+
+    pub fn add_printer_status(&mut self, printer_webhook_update: PrinterWebhookUpdate) {
+        let mut printer = self.get_printer_by_id(&printer_webhook_update.id).unwrap();
+
+        printer.status = PrinterStatus::from_webhook(&printer_webhook_update.state);
+        printer.last_updated = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_secs();
+
+        printer.current_time_left = printer_webhook_update.progress.printTimeLeft;
+
+        self.add_set_printer(printer);
     }
 }
 
