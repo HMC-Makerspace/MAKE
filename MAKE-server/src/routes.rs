@@ -40,28 +40,28 @@ impl UserInfo {
 ================
 */
 
-#[get("/v1/inventory")]
+#[get("/api/v1/inventory")]
 pub async fn get_inventory(path: web::Path<()>) -> Result<HttpResponse, Error> {
     let mut data = MEMORY_DATABASE.lock().await;
     let inventory = data.inventory.clone();
     Ok(HttpResponse::Ok().json(inventory))
 }
 
-#[get("/v1/quizzes")]
+#[get("/api/v1/quizzes")]
 pub async fn get_quizzes(path: web::Path<()>) -> Result<HttpResponse, Error> {
     let mut data = MEMORY_DATABASE.lock().await;
     let quizzes = data.quizzes.clone();
     Ok(HttpResponse::Ok().json(quizzes))
 }
 
-#[get("/v1/users")]
+#[get("/api/v1/users")]
 pub async fn get_users(path: web::Path<()>) -> Result<HttpResponse, Error> {
     let mut data = MEMORY_DATABASE.lock().await;
     let users = data.users.clone();
     Ok(HttpResponse::Ok().json(users))
 }
 
-#[post("/v1/checkout/{id_number}/{item_name}")]
+#[post("/api/v1/checkout/{id_number}/{item_name}")]
 pub async fn checkout_item_by_name(path: web::Path<(u64, String)>) -> Result<HttpResponse, Error> {
     let (id_number, item_name) = path.into_inner();
 
@@ -87,14 +87,14 @@ pub async fn checkout_item_by_name(path: web::Path<(u64, String)>) -> Result<Htt
         .finish())
 }
 
-#[get("/v1/checkout_log")]
+#[get("/api/v1/checkout_log")]
 pub async fn get_checkout_log(path: web::Path<()>) -> Result<HttpResponse, Error> {
     let data = MEMORY_DATABASE.lock().await;
     let checkout_log = data.checkout_log.clone();
     Ok(HttpResponse::Ok().json(checkout_log))
 }
 
-#[get("/v1/user_info/{id_number}")]
+#[get("/api/v1/user_info/{id_number}")]
 pub async fn get_user_info(path: web::Path<u64>) -> Result<HttpResponse, Error> {
     let data = MEMORY_DATABASE.lock().await;
     let user = data.users.get_user_by_id(&path.into_inner());
@@ -123,7 +123,7 @@ pub async fn get_user_info(path: web::Path<u64>) -> Result<HttpResponse, Error> 
 =================
 */
 
-#[post("/v1/checkout_uuid/{id_number}/{item_uuid}")]
+#[post("/api/v1/checkout_uuid/{id_number}/{item_uuid}")]
 pub async fn checkout_item_by_uuid(path: web::Path<(u64, String)>) -> Result<HttpResponse, Error> {
     let (id_number, item_uuid) = path.into_inner();
 
@@ -149,7 +149,7 @@ pub async fn checkout_item_by_uuid(path: web::Path<(u64, String)>) -> Result<Htt
         .finish())
 }
 
-#[post("/v1/auth/set_level/{id_number}/{auth_level}")]
+#[post("/api/v1/auth/set_level/{id_number}/{auth_level}")]
 pub async fn set_auth_level(path: web::Path<(u64, AuthLevel)>) -> Result<HttpResponse, Error> {
     let (id_number, auth_level) = path.into_inner();
 
@@ -172,7 +172,7 @@ pub async fn set_auth_level(path: web::Path<(u64, AuthLevel)>) -> Result<HttpRes
         .finish())
 }
 
-#[post("/v1/auth/set_quiz/{id_number}/{quiz_name}/{passed}")]
+#[post("/api/v1/auth/set_quiz/{id_number}/{quiz_name}/{passed}")]
 pub async fn set_quiz_passed(
     path: web::Path<(u64, QuizName, bool)>,
 ) -> Result<HttpResponse, Error> {
@@ -197,7 +197,7 @@ pub async fn set_quiz_passed(
         .finish())
 }
 
-#[post("/v1/printers/update_status")]
+#[post("/api/v1/printers/update_status")]
 pub async fn update_printer_status(
     path: web::Path<()>,
     body: web::Json<PrinterWebhookUpdate>,

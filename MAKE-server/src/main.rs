@@ -7,6 +7,8 @@ use std::fs::OpenOptions;
 use actix_cors::*;
 use actix_web::*;
 use actix_web::rt::spawn;
+use actix_web_static_files::ResourceFiles;
+
 use env_logger::Logger;
 use lazy_static::__Deref;
 use log::*;
@@ -44,6 +46,7 @@ const ADDRESS: &str = "127.0.0.1:8080";
 #[cfg(not(debug_assertions))]
 const ADDRESS: &str = "0.0.0.0:8080";
 
+include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
 #[derive(Default, Deserialize, Serialize)]
 pub struct Data {
@@ -179,6 +182,7 @@ async fn async_main() -> std::io::Result<()> {
             .wrap(actix_web::middleware::Logger::default())
             .wrap(actix_web::middleware::Compress::default())
             .wrap(cors)
+            .service(ResourceFiles::new("/", generate()))
             .service(get_inventory)
             .service(get_quizzes)
             .service(get_users)
