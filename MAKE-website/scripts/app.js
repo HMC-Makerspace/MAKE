@@ -1,0 +1,39 @@
+function parseCollegeID(collegeID) {
+    collegeID = collegeID.trim();
+
+    if (collegeID.length == 0) {
+        return null;
+    }
+
+    if (collegeID.includes("-") || collegeID.includes("_") || collegeID.includes(" ")) {
+        collegeID = collegeID.replace(/[_ ]/g, "-");
+
+        return parseInt(collegeID.split("-")[0]);
+    } else {
+        return parseInt(collegeID);
+    }
+}
+
+function setPage(page) {
+    const all_pages = document.getElementsByClassName("main-content");
+    for (let i = 0; i < all_pages.length; i++) {
+        all_pages[i].classList.add("hidden");
+    }
+
+    const page_element = document.getElementById(`page-${page}`);
+    if (page_element) {
+        page_element.classList.remove("hidden");
+    }
+}
+
+function removeAllChildren(element, keep_first_n = 0) {
+    while (element.childNodes.length > keep_first_n) {
+        element.removeChild(element.firstChild);
+    }
+}
+
+function appendChildren(element, children) {
+    for (let i = 0; i < children.length; i++) {
+        element.appendChild(children[i]);
+    }
+}

@@ -12,6 +12,8 @@
 # ====================================================
 
 [api_keys]
+admin = "YOUR_API_KEY"
+
 checkout = "YOUR_API_KEY"
 
 student_storage = "YOUR_API_KEY"

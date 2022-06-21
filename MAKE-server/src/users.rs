@@ -8,6 +8,7 @@ use crate::checkout::*;
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum AuthLevel {
+    Banned,
     User,
     Steward,
     Admin,

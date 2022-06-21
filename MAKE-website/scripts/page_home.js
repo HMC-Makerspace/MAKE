@@ -1,0 +1,19 @@
+async function validateID() {
+    const id = document.getElementById('college-id-input').value ?? "";
+
+    let collegeID = parseCollegeID(id);
+
+    if (collegeID !== null) {
+        const response = await fetch(`${API}/user_info/${collegeID}`);
+
+        if (response.status == 200) {
+            const user_object = await response.json();
+
+            state.user_object = user_object;
+
+            state.college_id_number = user_object.college_id_number;
+
+            console.log(state.user_object);
+        }
+    }
+}

@@ -4,41 +4,120 @@
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>MAKE</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="css/main.css">
-        <script src="scripts/prelude.js"></script>
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Righteous&display=swap" rel="stylesheet"> 
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>MAKE</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="scripts/prelude.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Righteous&display=swap"
+        rel="stylesheet">
 
 
+</head>
 
-
-    </head>
-    <body>
-        <!--[if lt IE 7]>
+<body>
+    <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
-        <div id="main-grid">
-            <div id="left-bar">
-                <div id="main-logo">MAKE</div>
-                    <button>Login</button>
-                    <button>Sign Up</button>
-                    <button>Test1</button>
-                    <button>Test2</button>
-                    <button>Test3</button>
+    <div id="main-grid">
+        <div id="left-bar">
+            <div id="main-logo">MAKE</div>
+            <button onclick="setPage('home')">Home</button>
+            <button onclick="setPage('inventory')">Inventory</button>
+            <button>Student<br>Storage</button>
+            <button>Checkouts</button>
+            <button>3D Printers</button>
+            <button>Project<br>Applications</button>
+            <button>Info<br>& FAQ</button>
+            <button>Settings</button>
+        </div>
+        
+        <!-- 
+        
+        HOME PAGE
+        
+        -->
+        <div id="page-home" class="main-content">
+            <div id="header">
+                <span class="title">Home</span>
+                <span id="news-content">Loading news...</span>
             </div>
 
-            <div id="main-content">
-                
+            <div id="welcome-message">
+                <p1>Welcome to <span class="title-font">MAKE</span></p1>
+                <p2>To use all features of this website,<br>please enter your college ID number below:</p2>
+            </div>
+
+            <div id="college-id-container">
+                <input type="text" id="college-id-input" placeholder="Enter your college ID number">
+                <button id="college-id-button" class="big" onclick="validateID()">Submit</button>
             </div>
         </div>
-    </body>
+
+        <!--
+
+        INVENTORY PAGE
+
+        -->
+        <div id="page-inventory" class="main-content hidden">
+            <div id="header">
+                <span class="title">Inventory</span>
+            </div>
+
+            <div id="inventory-container">
+                <div id="inventory-search">
+                    <input type="text" id="inventory-search-input" placeholder="Search for item...">
+                    
+                    <span>
+                        <input type="checkbox" id="inventory-in-stock">
+                        <label for="inventory-in-stock">In Stock</label>
+                    </span>
+
+                    <span>
+                        <select id="room-select">
+                            <option value="">----</option>
+                            <option value="Main">Main Makerspace</option>
+                            <option value="Laser3D">3D Printer & Laser Cutter Room</option>
+                            <option value="Studio">Studio</option>
+                            <option value="Cage">The Cage</option>
+                            <option value="Welding">Welding Area</option>
+                            <option value="Electronics">Electronics Benches</option>
+                            <option value="Composite">Composite Room</option>
+                        </select>
+                        <label for="room-select">Room/Area</label>
+                    </span>
+
+                    <span>
+                        <select id="tool-material-select">
+                            <option value="">----</option>
+                            <option value="T">Tool</option>
+                            <option value="M">Material</option>
+                        </select>
+                        <label for="tool-material-select">Tool/Material</label>
+                    </span>
+
+                </div>
+
+                <div id="inventory-results">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="scripts/libs/fuzzysort.min.js"></script>
+
+<script src="scripts/app.js"></script>
+<script src="scripts/page_home.js"></script>
+<script src="scripts/page_inventory.js"></script>
+
 </html>

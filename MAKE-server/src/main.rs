@@ -182,7 +182,7 @@ async fn async_main() -> std::io::Result<()> {
             .wrap(actix_web::middleware::Logger::default())
             .wrap(actix_web::middleware::Compress::default())
             .wrap(cors)
-            .service(ResourceFiles::new("/", generate()))
+            // Static files for frontend website
             .service(get_inventory)
             .service(get_quizzes)
             .service(get_users)
@@ -192,6 +192,8 @@ async fn async_main() -> std::io::Result<()> {
             .service(get_user_info)
             .service(set_auth_level)
             .service(set_quiz_passed)
+            .service(update_printer_status)
+            .service(ResourceFiles::new("/", generate()))
     })
     .bind(ADDRESS)?
     .run()
