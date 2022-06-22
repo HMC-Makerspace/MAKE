@@ -1,6 +1,6 @@
 {
   "inventory": {
-    "last_updated": 1655851437,
+    "last_updated": 1655870224,
     "items": [
       {
         "name": "Glue Sticks",
@@ -3632,7 +3632,7 @@
         "name": "Audio-Technica AT4033 Cardioid Condenser Microphone",
         "is_material": false,
         "is_tool": true,
-        "quantity": 1,
+        "quantity": 2,
         "location_room": "Studio",
         "location_area": "In Cabinet 2nd from the top",
         "reorder_url": "",
@@ -3674,7 +3674,7 @@
         "name": "MXL V89 Condenser Microphone",
         "is_material": false,
         "is_tool": true,
-        "quantity": 1,
+        "quantity": 2,
         "location_room": "Studio",
         "location_area": "In Cabinet 3rd from the top",
         "reorder_url": "",
@@ -3688,7 +3688,7 @@
         "name": "MXL WS-002 Foam Windscreen",
         "is_material": false,
         "is_tool": true,
-        "quantity": 1,
+        "quantity": 2,
         "location_room": "Studio",
         "location_area": "In Cabinet 3rd from the top (inside MXL V89 box)",
         "reorder_url": "",
@@ -3702,7 +3702,7 @@
         "name": "MXL BJ-6-SS Shock Mount",
         "is_material": false,
         "is_tool": true,
-        "quantity": 1,
+        "quantity": 2,
         "location_room": "Studio",
         "location_area": "In Cabinet 3rd from the top (inside MXL V89 box)",
         "reorder_url": "",
@@ -3795,6 +3795,132 @@
         "brand": "",
         "model_number": "",
         "uuid": ""
+      },
+      {
+        "name": "",
+        "is_material": false,
+        "is_tool": false,
+        "quantity": 0,
+        "location_room": "",
+        "location_area": "",
+        "reorder_url": "",
+        "specific_name": "",
+        "serial_number": "",
+        "brand": "",
+        "model_number": "",
+        "uuid": ""
+      },
+      {
+        "name": "MXL Genesis Microphone w/ Case",
+        "is_material": false,
+        "is_tool": true,
+        "quantity": 2,
+        "location_room": "Studio",
+        "location_area": "In Cabinet 5th from the top",
+        "reorder_url": "",
+        "specific_name": "",
+        "serial_number": "",
+        "brand": "",
+        "model_number": "",
+        "uuid": ""
+      },
+      {
+        "name": "MXL Genesis Pop Filter",
+        "is_material": false,
+        "is_tool": true,
+        "quantity": 2,
+        "location_room": "Studio",
+        "location_area": "In Cabinet 5th from the top (inside MXL Genesis box)",
+        "reorder_url": "",
+        "specific_name": "",
+        "serial_number": "",
+        "brand": "",
+        "model_number": "",
+        "uuid": ""
+      },
+      {
+        "name": "MXL Genesis PSU w/ Cable",
+        "is_material": false,
+        "is_tool": true,
+        "quantity": 2,
+        "location_room": "Studio",
+        "location_area": "In Cabinet 5th from the top (inside MXL Genesis box)",
+        "reorder_url": "",
+        "specific_name": "",
+        "serial_number": "",
+        "brand": "",
+        "model_number": "",
+        "uuid": ""
+      },
+      {
+        "name": "MXL-60 Shock Mount",
+        "is_material": false,
+        "is_tool": true,
+        "quantity": 2,
+        "location_room": "Studio",
+        "location_area": "In Cabinet 5th from the top (inside MXL Genesis box)",
+        "reorder_url": "",
+        "specific_name": "",
+        "serial_number": "",
+        "brand": "",
+        "model_number": "",
+        "uuid": ""
+      },
+      {
+        "name": "Mogami 7-Pin Tube Cable",
+        "is_material": false,
+        "is_tool": true,
+        "quantity": 2,
+        "location_room": "Studio",
+        "location_area": "In Cabinet 5th from the top (inside MXL Genesis box)",
+        "reorder_url": "",
+        "specific_name": "",
+        "serial_number": "",
+        "brand": "",
+        "model_number": "",
+        "uuid": ""
+      },
+      {
+        "name": "Mogami XLR Cable",
+        "is_material": false,
+        "is_tool": true,
+        "quantity": 1,
+        "location_room": "Studio",
+        "location_area": "In Cabinet 5th from the top (inside MXL Genesis box)",
+        "reorder_url": "",
+        "specific_name": "",
+        "serial_number": "",
+        "brand": "",
+        "model_number": "",
+        "uuid": ""
+      },
+      {
+        "name": "MXL-MT001 Mic Stand Adaptor",
+        "is_material": false,
+        "is_tool": true,
+        "quantity": 1,
+        "location_room": "Studio",
+        "location_area": "In Cabinet 5th from the top (inside MXL Genesis box)",
+        "reorder_url": "",
+        "specific_name": "",
+        "serial_number": "",
+        "brand": "",
+        "model_number": "",
+        "uuid": ""
+      },
+      {
+        "name": "RadioShack Sound Level Meter w/ Bag",
+        "is_material": false,
+        "is_tool": true,
+        "quantity": 1,
+        "location_room": "Studio",
+        "location_area": "In Cabinet 1st from the top",
+        "reorder_url": "",
+        "specific_name": "",
+        "serial_number": "",
+        "brand": "",
+        "model_number": "",
+        "uuid": ""
       }
     ]
   },
@@ -3817,7 +3943,7 @@
   },
   "quizzes": [
     {
-      "last_updated": 1655851437,
+      "last_updated": 1655870225,
       "responses": [
         {
           "timestamp": "6/6/2022 14:15:29",
@@ -3831,37 +3957,37 @@
       "name": "General"
     },
     {
-      "last_updated": 1655851438,
+      "last_updated": 1655870225,
       "responses": [],
       "id": "1524924728",
       "name": "Laser3D"
     },
     {
-      "last_updated": 1655851438,
+      "last_updated": 1655870225,
       "responses": [],
       "id": "1841312496",
       "name": "SprayPaint"
     },
     {
-      "last_updated": 1655851444,
+      "last_updated": 1655870226,
       "responses": [],
       "id": "913890505",
       "name": "Composite"
     },
     {
-      "last_updated": 1655851444,
+      "last_updated": 1655870226,
       "responses": [],
       "id": "482685426",
       "name": "Welding"
     },
     {
-      "last_updated": 1655851445,
+      "last_updated": 1655870226,
       "responses": [],
       "id": "2079405017",
       "name": "Studio"
     },
     {
-      "last_updated": 1655851446,
+      "last_updated": 1655870227,
       "responses": [],
       "id": "1859058984",
       "name": "Waterjet"

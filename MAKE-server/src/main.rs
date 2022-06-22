@@ -26,6 +26,7 @@ mod printers;
 mod quizzes;
 mod users;
 mod checkout;
+mod student_storage;
 
 use crate::routes::*;
 use crate::inventory::*;
@@ -35,6 +36,7 @@ use crate::printers::*;
 use crate::quizzes::*;
 use crate::users::*;
 use crate::checkout::*;
+use crate::student_storage::*;
 
 use lazy_static::lazy_static;
 use tokio::sync::Mutex;
@@ -55,6 +57,7 @@ pub struct Data {
     pub printers: Printers,
     pub quizzes: Vec<Quiz>,
     pub checkout_log: CheckoutLog,
+    pub student_storage: StudentStorage,
 }
 
 #[derive(Default, Deserialize, Serialize)]
