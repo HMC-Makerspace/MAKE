@@ -1,6 +1,6 @@
 {
   "inventory": {
-    "last_updated": 1655870224,
+    "last_updated": 1655886966,
     "items": [
       {
         "name": "Glue Sticks",
@@ -3943,7 +3943,7 @@
   },
   "quizzes": [
     {
-      "last_updated": 1655870225,
+      "last_updated": 1655886967,
       "responses": [
         {
           "timestamp": "6/6/2022 14:15:29",
@@ -3957,37 +3957,37 @@
       "name": "General"
     },
     {
-      "last_updated": 1655870225,
+      "last_updated": 1655886968,
       "responses": [],
       "id": "1524924728",
       "name": "Laser3D"
     },
     {
-      "last_updated": 1655870225,
+      "last_updated": 1655886968,
       "responses": [],
       "id": "1841312496",
       "name": "SprayPaint"
     },
     {
-      "last_updated": 1655870226,
+      "last_updated": 1655886969,
       "responses": [],
       "id": "913890505",
       "name": "Composite"
     },
     {
-      "last_updated": 1655870226,
+      "last_updated": 1655886969,
       "responses": [],
       "id": "482685426",
       "name": "Welding"
     },
     {
-      "last_updated": 1655870226,
+      "last_updated": 1655886970,
       "responses": [],
       "id": "2079405017",
       "name": "Studio"
     },
     {
-      "last_updated": 1655870227,
+      "last_updated": 1655886971,
       "responses": [],
       "id": "1859058984",
       "name": "Waterjet"
@@ -3995,5 +3995,8 @@
   ],
   "checkout_log": {
     "log": []
+  },
+  "student_storage": {
+    "slots": []
   }
 }

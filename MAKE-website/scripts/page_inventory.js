@@ -136,15 +136,6 @@ function generateInventoryDiv(result, index) {
     }
     main_div.appendChild(quantity);
 
-    const show_lower_div_button = document.createElement("button");
-    show_lower_div_button.classList.add("inventory-result-show-lower-div");
-    show_lower_div_button.classList.add("grayed-out");
-    show_lower_div_button.innerText = "Details";
-    show_lower_div_button.addEventListener("click", () => {
-        const lower_div = document.getElementById(`inventory-result-${index}-lower-div`);
-        lower_div.classList.toggle("hidden");
-    });
-
     const lower_div = document.createElement("div");
     lower_div.id = `inventory-result-${index}-lower-div`;
     lower_div.classList.add("inventory-result-lower");
@@ -185,8 +176,17 @@ function generateInventoryDiv(result, index) {
         lower_div.appendChild(uuid);
     }
 
+    const show_lower_div_button = document.createElement("button");
+    show_lower_div_button.classList.add("inventory-result-show-lower-div");
+    show_lower_div_button.classList.add("grayed-out");
+    show_lower_div_button.innerText = "Details";
+
     if (lower_div.childNodes.length > 0) {
         show_lower_div_button.classList.remove("grayed-out");
+        show_lower_div_button.addEventListener("click", () => {
+            const lower_div = document.getElementById(`inventory-result-${index}-lower-div`);
+            lower_div.classList.toggle("hidden");
+        });
     }
 
     main_div.appendChild(show_lower_div_button);
@@ -195,4 +195,4 @@ function generateInventoryDiv(result, index) {
     div.appendChild(lower_div);
 
     return div;
-}   
+}  

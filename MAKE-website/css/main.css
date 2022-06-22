@@ -175,6 +175,10 @@ select {
     border:unset;
 }
 
+label {
+    margin-left: 10px;
+}
+
 /*
 
 HOME
@@ -183,7 +187,7 @@ HOME
 
 #college-id-container, #welcome-message {
     border-radius: var(--roundness);
-    background-color: var(--theme-color-1);
+    background-color: var(--theme-color-5);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -271,7 +275,7 @@ INVENTORY
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    background-color: var(--theme-color-5);
+    background-color: var(--theme-color-4);
     border-radius: var(--roundness);
     padding: 10px;
     color: var(--text-color-main);
