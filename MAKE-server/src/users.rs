@@ -28,15 +28,15 @@ pub struct Users {
 
 impl Users {
     pub fn has_user(&self, user: &User) -> bool {
-        self.users.contains_key(&user.college_id_number)
+        self.users.contains_key(&user.college_id)
     }
 
     pub fn get_user(&self, user: &User) -> Option<User> {
-        self.users.get(&user.college_id_number).cloned()
+        self.users.get(&user.college_id).cloned()
     }
 
     pub fn add_set_user(&mut self, user: User) {
-        self.users.insert(user.college_id_number, user);
+        self.users.insert(user.college_id, user);
     }
 
     pub fn get_user_by_id(&self, id_number: &u64) -> Option<User> {
@@ -72,7 +72,7 @@ impl Users {
 #[derive(Default, Deserialize, Serialize, Clone)]
 pub struct User {
     name: String,
-    college_id_number: u64,
+    college_id: u64,
     college_email: String,
     passed_quizzes: Vec<QuizName>,
     auth_level: AuthLevel,
@@ -82,7 +82,7 @@ impl User {
     pub fn from_response(response: &Response) -> Self {
         User {
             name: response.name.clone(),
-            college_id_number: response.college_id,
+            college_id: response.college_id,
             college_email: response.college_email.clone(),
             passed_quizzes: vec![],
             auth_level: AuthLevel::User,
@@ -94,7 +94,7 @@ impl User {
     }
 
     pub fn get_id(&self) -> u64 {
-        self.college_id_number
+        self.college_id
     }
 
     pub fn get_email(&self) -> String {
@@ -111,14 +111,14 @@ impl User {
 
     pub fn get_pending_checked_out_items(&self, checkout_log: &CheckoutLog) -> Vec<CheckoutLogEntry> {
         checkout_log.log.iter()
-            .filter(|x| x.user_id == self.get_id() && x.checked_in == false)
+            .filter(|x| x.college_id == self.get_id() && x.checked_in == false)
             .cloned()
             .collect()
     }
 
     pub fn get_all_checked_out_items(&self, checkout_log: &CheckoutLog) -> Vec<CheckoutLogEntry> {
         checkout_log.log.iter()
-            .filter(|x| x.user_id == self.get_id())
+            .filter(|x| x.college_id == self.get_id())
             .cloned()
             .collect()
     }

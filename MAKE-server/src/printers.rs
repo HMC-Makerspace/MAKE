@@ -127,10 +127,10 @@ impl Printers {
         self.print_log.push(entry);
     }
 
-    pub fn create_add_log(&mut self, printer_id: String, college_id_number: u64) {
+    pub fn create_add_log(&mut self, printer_id: String, college_id: u64) {
         let entry = PrintLogEntry {
             printer_id,
-            college_id_number,
+            college_id,
             timestamp: SystemTime::now()
                 .duration_since(SystemTime::UNIX_EPOCH)
                 .expect("Time went backwards")
@@ -168,7 +168,7 @@ impl Printers {
 pub struct PrintLogEntry {
     pub timestamp: u64,
     pub printer_id: String,
-    pub college_id_number: u64,
+    pub college_id: u64,
 }
 
 #[derive(Default, Deserialize, Serialize, Clone)]

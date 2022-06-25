@@ -15,7 +15,7 @@ impl CheckoutLog {
 
 #[derive(Default, Deserialize, Serialize, Clone, Debug)]
 pub struct CheckoutLogEntry {
-    pub user_id: u64,
+    pub college_id: u64,
     pub timestamp: u64,
     pub item_name: String,
     pub item_uuid: String,
@@ -25,7 +25,7 @@ pub struct CheckoutLogEntry {
 impl CheckoutLogEntry {
     pub fn new(user: &User, item: &InventoryItem) -> Self {
         CheckoutLogEntry {
-            user_id: user.get_id(),
+            college_id: user.get_id(),
             timestamp: SystemTime::now()
                 .duration_since(SystemTime::UNIX_EPOCH)
                 .expect("Time went backwards")

@@ -11,7 +11,7 @@ async function login() {
 
             state.user_object = user_object;
 
-            state.college_id_number = user_object.college_id_number;
+            state.college_id = user_object.college_id;
 
             console.log(state.user_object);
 
@@ -24,7 +24,7 @@ async function login() {
 
 function logout() {
     state.user_object = null;
-    state.college_id_number = null;
+    state.college_id = null;
 
     saveState();
 

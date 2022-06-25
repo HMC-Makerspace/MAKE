@@ -8,7 +8,7 @@ use openssl::stack::Stack;
 #[derive(Deserialize, Serialize, Clone)]
 struct UserInfo {
     name: String,
-    college_id_number: u64,
+    college_id: u64,
     college_email: String,
     passed_quizzes: Vec<QuizName>,
     pending_checkouts: Vec<CheckoutLogEntry>,
@@ -24,7 +24,7 @@ impl UserInfo {
     ) -> Self {
         UserInfo {
             name: user.get_name(),
-            college_id_number: user.get_id(),
+            college_id: user.get_id(),
             college_email: user.get_email(),
             passed_quizzes: user.get_passed_quizzes(),
             pending_checkouts,

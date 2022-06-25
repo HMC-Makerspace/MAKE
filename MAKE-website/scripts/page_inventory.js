@@ -22,6 +22,8 @@ async function fetchInventory() {
         const inventory = await response.json();
 
         state.inventory = inventory;
+
+        saveState();
     }
 }
 

@@ -14,7 +14,7 @@ Global variables
 */
 
 var state = {
-    college_id_number: null,
+    college_id: null,
     auth_keys: {
         checkout: null,
         student_storage: null,
@@ -23,13 +23,14 @@ var state = {
     user_object: null,
     settings: null,
     inventory: null,
+    student_storage: null,
 }
 
 // Prelude function
 function prelude() {
     loadState();
 
-    if (state.college_id_number !== null) {
+    if (state.college_id !== null) {
         displayLoggedIn();
     } else {
         displayLoggedOut();
