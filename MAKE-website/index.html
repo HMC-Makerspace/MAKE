@@ -12,12 +12,11 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="css/main.css">
-    <script src="scripts/prelude.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Righteous&display=swap"
-        rel="stylesheet">      
+        rel="stylesheet">
 
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -38,14 +37,14 @@
             <div id="main-logo">MAKE</div>
             <button onclick="setPage('home')">Home</button>
             <button onclick="setPage('inventory')">Inventory</button>
-            <button>Student<br>Storage</button>
-            <button>Checkouts</button>
-            <button>3D Printers</button>
-            <button>Project<br>Applications</button>
-            <button>Info<br>& FAQ</button>
-            <button>Settings</button>
+            <button onclick="setPage('student-storage')">Student<br>Storage</button>
+            <button onclick="setPage('checkouts')">Checkouts</button>
+            <button onclick="setPage('3d-printers')">3D Printers</button>
+            <button onclick="setPage('project-applications')">Project<br>Applications</button>
+            <button onclick="setPage('info-faq')">Info<br>& FAQ</button>
+            <button onclick="setPage('settings')">Settings</button>
         </div>
-        
+
         <!-- 
         
         HOME PAGE
@@ -54,17 +53,35 @@
         <div id="page-home" class="main-content">
             <div id="header">
                 <span class="title">Home</span>
-                <span id="news-content">Loading news...</span>
             </div>
 
             <div id="welcome-message">
                 <p1>Welcome to <span class="title-font">MAKE</span></p1>
-                <p2>To use all features of this website,<br>please enter your college ID number below:</p2>
             </div>
 
-            <div id="college-id-container">
+            <div id="college-id-container" class="id-n">
                 <input type="text" id="college-id-input" placeholder="Enter your college ID number">
-                <button id="college-id-button" class="big" onclick="validateID()">Submit</button>
+                <button id="college-id-button" class="big" onclick="login()">Log In</button>
+
+                <p3>
+                    If you haven't taken the General Safety Quiz, please click <a
+                        href="https://make.ucsd.edu/safety/quiz">here</a>.
+                    <br>
+                    Please allow 5-10 minutes before attempting to log in afterwards.
+                </p3>
+
+                <p3>
+                    Don't have a college ID number?
+                    <br>
+                    Email us at <span class="email-link">makerspace-management-l@hmc.edu</span>
+                </p3>
+            </div>
+
+            <div id="logged-in-message" class="id-r">
+                <p2>
+                    Currently logged in as <span id="logged-in-name"></span>
+                </p2>
+                <button id="logout-button" onclick="logout()">Log Out</button>
             </div>
         </div>
 
@@ -81,7 +98,7 @@
             <div id="inventory-container">
                 <div id="inventory-search">
                     <input type="text" id="inventory-search-input" placeholder="Search for item...">
-                    
+
                     <span>
                         <input type="checkbox" id="inventory-in-stock">
                         <label for="inventory-in-stock">In Stock</label>
@@ -117,13 +134,115 @@
                 </div>
             </div>
         </div>
+
+
+        <!--
+
+        STUDENT STORAGE PAGE
+
+        -->
+        <div id="page-student-storage" class="main-content hidden">
+            <div id="header">
+                <span class="title">Student Storage</span>
+            </div>
+
+            <div class="no-id-message id-n">
+                Please enter your college ID number on the home page to view student storage status
+            </div>
+
+            <div id="student-storage-container" class="id-r">
+
+                <div id="current-student-storage-status">
+
+                </div>
+
+                <div id="overall-student-storage-status">
+
+                </div>
+            </div>
+        </div>
+
+        <!--
+
+        CHECKOUTS PAGE
+
+        -->
+        <div id="page-checkouts" class="main-content hidden">
+            <div id="header">
+                <span class="title">Checkouts</span>
+            </div>
+
+            <div class="no-id-message id-n">
+                Please enter your college ID number on the home page to view checkouts
+            </div>
+        </div>
+
+
+        <!--
+
+        3D PRINTERS PAGE
+
+        -->
+        <div id="page-3d-printers" class="main-content hidden">
+            <div id="header">
+                <span class="title">3D Printers</span>
+            </div>
+
+            <div class="no-id-message id-n">
+                Please enter your college ID number on the home page to view 3D printers
+            </div>
+        </div>
+
+
+        <!--
+
+        PROJECT APPLICATIONS PAGE
+
+        -->
+        <div id="page-project-applications" class="main-content hidden">
+            <div id="header">
+                <span class="title">Project Applications</span>
+            </div>
+
+            <div class="no-id-message id-n">
+                Please enter your college ID number on the home page to view project applications
+            </div>
+        </div>
+
+
+        <!--
+
+        INFO & FAQ PAGE
+
+        -->
+        <div id="page-info-faq" class="main-content hidden">
+            <div id="header">
+                <span class="title">Info & FAQ</span>
+            </div>
+        </div>
+
+
+        <!--
+
+        SETTINGS PAGE
+
+        -->
+        <div id="page-settings" class="main-content hidden">
+            <div id="header">
+                <span class="title">Settings</span>
+            </div>
+        </div>
+
+
     </div>
 </body>
+<script src="scripts/prelude.js"></script>
 
 <script src="scripts/libs/fuzzysort.min.js"></script>
 
 <script src="scripts/app.js"></script>
 <script src="scripts/page_home.js"></script>
 <script src="scripts/page_inventory.js"></script>
+<script src="scripts/page_student_storage.js"></script>
 
 </html>

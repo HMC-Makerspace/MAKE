@@ -1,4 +1,4 @@
-async function validateID() {
+async function login() {
     const id = document.getElementById('college-id-input').value ?? "";
 
     let collegeID = parseCollegeID(id);
@@ -14,6 +14,19 @@ async function validateID() {
             state.college_id_number = user_object.college_id_number;
 
             console.log(state.user_object);
+
+            saveState();
+
+            displayLoggedIn();
         }
     }
+}
+
+function logout() {
+    state.user_object = null;
+    state.college_id_number = null;
+
+    saveState();
+
+    displayLoggedOut();
 }

@@ -15,7 +15,6 @@ use log::*;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use tokio::time;
 use std::time::Duration;
-use koit::{FileDatabase, format::Json};
 use serde::{Deserialize, Serialize};
 
 mod routes;
@@ -78,6 +77,18 @@ impl ApiKeys {
         info!("Checkout key:         {}...", &self.checkout[..10]);
         info!("Student storage key:  {}...", &self.student_storage[..10]);
         info!("Printers key:         {}...", &self.printers[..10]);
+    }
+
+    pub fn validate_checkout(&self, key: &str) -> bool {
+        self.checkout == key
+    }
+
+    pub fn validate_student_storage(&self, key: &str) -> bool {
+        self.student_storage == key
+    }
+
+    pub fn validate_printers(&self, key: &str) -> bool {
+        self.printers == key
     }
 }
 
@@ -172,8 +183,57 @@ async fn async_main() -> std::io::Result<()> {
         }
     });
 
+    #[cfg(not(debug_assertions))]
+    let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
+    #[cfg(not(debug_assertions))]
+    builder
+        .set_private_key_file(
+            "/etc/letsencrypt/live/grocerylist.works/privkey.pem",
+            SslFiletype::PEM,
+        )
+        .unwrap();
+    #[cfg(not(debug_assertions))]
+    builder
+        .set_certificate_chain_file("/etc/letsencrypt/live/grocerylist.works/fullchain.pem")
+        .unwrap();
+
+    
+    #[cfg(not(debug_assertions))]
     // Create builder without ssl
-    HttpServer::new(move || {
+    return HttpServer::new(move || {
+        let cors = Cors::default()
+            .allowed_origin("https://make.hmc.edu")
+            .allow_any_header()
+            .allow_any_method()
+            .send_wildcard()
+            .max_age(3600);
+
+        App::new()
+            .wrap(actix_web::middleware::Logger::default())
+            .wrap(actix_web::middleware::Compress::default())
+            .wrap(cors)
+            // Static files for frontend website
+            .service(get_inventory)
+            .service(get_quizzes)
+            .service(get_users)
+            .service(checkout_item_by_name)
+            .service(checkout_item_by_uuid)
+            .service(get_checkout_log)
+            .service(get_user_info)
+            .service(set_auth_level)
+            .service(set_quiz_passed)
+            .service(update_printer_status)
+            .service(get_student_storage_for_user)
+            .service(ResourceFiles::new("/", generate()))
+    })
+    .bind(ADDRESS, builder)?
+    .run()
+    .await;    
+    
+    
+    #[cfg(debug_assertions)]    
+    // Create builder without ssl
+    return HttpServer::new(move || {
         let cors = Cors::default()
             .allow_any_origin()
             .allow_any_header()
@@ -196,11 +256,12 @@ async fn async_main() -> std::io::Result<()> {
             .service(set_auth_level)
             .service(set_quiz_passed)
             .service(update_printer_status)
+            .service(get_student_storage_for_user)
             .service(ResourceFiles::new("/", generate()))
     })
     .bind(ADDRESS)?
     .run()
-    .await
+    .await;
 }
 fn main() {
     std::env::set_var("RUST_LOG", "info, actix_web=trace");

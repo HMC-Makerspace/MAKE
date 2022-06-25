@@ -117,6 +117,21 @@ pub async fn get_user_info(path: web::Path<u64>) -> Result<HttpResponse, Error> 
     Ok(HttpResponse::Ok().json(user_info))
 }
 
+#[get("/api/v1/student_storage/user/{id_number}")]
+pub async fn get_student_storage_for_user(path: web::Path<u64>) -> Result<HttpResponse, Error> {
+    let data = MEMORY_DATABASE.lock().await;
+    let user = data.users.get_user_by_id(&path.into_inner());
+    if user.is_none() {
+        return Err(ErrorBadRequest("User not found".to_string()));
+    }
+
+    let user = user.unwrap();
+
+    let student_storage = data.student_storage.view_for_user(&user);
+
+    Ok(HttpResponse::Ok().json(student_storage))
+}
+
 /*
 =================
     POST REQUESTS
@@ -216,6 +231,60 @@ pub async fn update_printer_status(
         }
     }
 
+    Ok(HttpResponse::Ok()
+        .status(http::StatusCode::CREATED)
+        .finish())
+}
+
+#[post("/api/v1/student_storage/auth/{api_key}/checkout/{id_number}/{slot_id}")]
+pub async fn checkout_student_storage(
+    path: web::Path<(String, u64, String)>,
+) -> Result<HttpResponse, Error> {
+    let (api_key, id_number, slot_id) = path.into_inner();
+
+    if !API_KEYS.lock().await.validate_student_storage(&api_key) {
+        return Err(ErrorBadRequest("Invalid API key".to_string()));
+    }
+
+    let mut data = MEMORY_DATABASE.lock().await;
+
+    let user = data.users.get_user_by_id(&id_number);
+
+    if user.is_none() {
+        return Err(ErrorBadRequest("User not found".to_string()));
+    }
+
+    let user = user.unwrap();
+
+    let finished = data.student_storage.checkout_slot_by_id(&user.get_id(), &slot_id);
+
+    if !finished {
+        return Err(ErrorBadRequest("Slot not found".to_string()));
+    }
+
+    Ok(HttpResponse::Ok()
+        .status(http::StatusCode::CREATED)
+        .finish())
+}
+
+#[post("/api/v1/student_storage/renew/{id_number}/{slot_id}")]
+pub async fn renew_student_storage_slot(
+    path: web::Path<(u64, String)>,
+) -> Result<HttpResponse, Error> {
+    let (id_number, slot_id) = path.into_inner();
+
+    let mut data = MEMORY_DATABASE.lock().await;
+
+    let user = data.users.get_user_by_id(&id_number);
+
+    if user.is_none() {
+        return Err(ErrorBadRequest("User not found".to_string()));
+    }
+
+    let user = user.unwrap();
+
+    data.student_storage.renew_by_id(&user.get_id(), &slot_id);
+    
     Ok(HttpResponse::Ok()
         .status(http::StatusCode::CREATED)
         .finish())

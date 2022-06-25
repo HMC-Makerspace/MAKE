@@ -6,6 +6,7 @@
     --theme-color-3: #eeeeee;
     --theme-color-4: #2a71db;
     --theme-color-5: #444444;
+    --theme-color-6: #e0cf34;
     --news-color: #ec413b;
 
     --text-color-main: #ffffff;
@@ -42,9 +43,14 @@ p1 {
 }
 
 p2 {
-    padding: 40px;
-    font-size: 2em;
+    padding: 20px;
+    font-size: 26px;
     font-weight: bold;
+}
+
+p3 {
+    padding: 10px;
+    font-size: 14px;
 }
 
 .title-font {
@@ -179,21 +185,38 @@ label {
     margin-left: 10px;
 }
 
+.no-id-message {
+    background-color: var(--theme-color-6);
+    display: flex;
+    align-items: center;
+    padding: 100px;
+    color: var(--text-color-alt);
+    font-size: 32px;
+    line-height: 60px;
+    text-align: center;
+    font-weight: bold;
+    border-style: dashed;
+    border-color: var(--theme-color-2);
+    border-width: 10px;
+    height: 50vh;
+}
+
 /*
 
 HOME
     
 */
 
-#college-id-container, #welcome-message {
+#college-id-container, #welcome-message, #logged-in-message {
     border-radius: var(--roundness);
     background-color: var(--theme-color-5);
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-evenly;
-    gap: 20px;
+    justify-content: space-around;
+    gap: 10px;
     min-height: 200px;
+    padding: 30px;
 }
 
 #welcome-message {
