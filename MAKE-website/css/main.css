@@ -7,6 +7,7 @@
     --theme-color-4: #2a71db;
     --theme-color-5: #444444;
     --theme-color-6: #e0cf34;
+    --theme-color-7: #a05fcc;
     --news-color: #ec413b;
 
     --text-color-main: #ffffff;
@@ -304,4 +305,50 @@ INVENTORY
     color: var(--text-color-main);
     width: auto;
     margin-left: 20px;
+}
+
+/*
+
+Student Storage
+
+*/
+
+#current-student-storage, #overall-student-storage {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--theme-color-7);
+    border-radius: var(--roundness);
+    margin-bottom: 10px;
+}
+
+.student-storage-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--theme-color-5);
+    border-radius: var(--roundness);
+    width: 150px;
+    height: 150px;
+    margin: 10px;
+    gap: 5px;
+}
+
+.student-storage-slot.occupied {
+    background-color: var(--theme-color-2);
+}
+
+.student-storage-slot.user {
+    background-color: var(--theme-color-4);
+}
+
+.student-storage-slot-id {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+.student-storage-slot-expire, .student-storage-slot-status {
+    font-size: 12px;
 }

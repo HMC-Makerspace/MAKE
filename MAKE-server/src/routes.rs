@@ -289,3 +289,26 @@ pub async fn renew_student_storage_slot(
         .status(http::StatusCode::CREATED)
         .finish())
 }
+
+#[post("/api/v1/student_storage/release/{id_number}/{slot_id}")]
+pub async fn release_student_storage_slot(
+    path: web::Path<(u64, String)>,
+) -> Result<HttpResponse, Error> {
+    let (id_number, slot_id) = path.into_inner();
+
+    let mut data = MEMORY_DATABASE.lock().await;
+
+    let user = data.users.get_user_by_id(&id_number);
+
+    if user.is_none() {
+        return Err(ErrorBadRequest("User not found".to_string()));
+    }
+
+    let user = user.unwrap();
+
+    data.student_storage.release_by_id(&user.get_id(), &slot_id);
+    
+    Ok(HttpResponse::Ok()
+        .status(http::StatusCode::CREATED)
+        .finish())
+}

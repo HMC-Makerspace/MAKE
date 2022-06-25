@@ -224,6 +224,9 @@ async fn async_main() -> std::io::Result<()> {
             .service(set_quiz_passed)
             .service(update_printer_status)
             .service(get_student_storage_for_user)
+            .service(checkout_student_storage)
+            .service(renew_student_storage_slot)
+            .service(release_student_storage_slot)
             .service(ResourceFiles::new("/", generate()))
     })
     .bind(ADDRESS, builder)?
@@ -257,6 +260,9 @@ async fn async_main() -> std::io::Result<()> {
             .service(set_quiz_passed)
             .service(update_printer_status)
             .service(get_student_storage_for_user)
+            .service(checkout_student_storage)
+            .service(renew_student_storage_slot)
+            .service(release_student_storage_slot)
             .service(ResourceFiles::new("/", generate()))
     })
     .bind(ADDRESS)?

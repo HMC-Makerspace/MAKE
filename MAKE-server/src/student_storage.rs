@@ -72,6 +72,14 @@ impl StudentStorage {
         }
         false
     }
+
+    pub fn release_by_id(&mut self, college_id: &u64, slot_id: &String) {
+        for slot in self.slots.iter_mut() {
+            if slot.get_id() == slot_id {
+                slot.release(college_id.clone());
+            }
+        }
+    }
 }
 
 impl Default for StudentStorage {
@@ -146,6 +154,15 @@ impl Slot {
             details.renew();
 
             self.occupied_details = Some(details);
+        }
+    }
+
+    pub fn release(&mut self, college_id: u64) {
+        if let Some(details) = &self.occupied_details {
+            if details.college_id == college_id {
+                self.occupied = false;
+                self.occupied_details = None;
+            }
         }
     }
 }
