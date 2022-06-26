@@ -207,6 +207,10 @@ impl OccupiedDetails {
         self.timestamp_end += length_of_checkout;
     }
 
+    pub fn set_timestamp_end(&mut self, timestamp_end: u64) {
+        self.timestamp_end = timestamp_end;
+    }
+
     pub fn censor(&self) -> Self {
         OccupiedDetails {
             college_id: 0,
@@ -216,6 +220,12 @@ impl OccupiedDetails {
     }
 
     pub fn renew(&mut self) {
-        self.extend_checkout(RENEW_LENGTH);
+        // Extend checkout length by RENEW_LENGTH from now
+        let now = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_secs();
+
+        self.timestamp_end = now + RENEW_LENGTH;
     }
 }
