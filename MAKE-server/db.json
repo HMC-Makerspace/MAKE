@@ -1,6 +1,6 @@
 {
   "inventory": {
-    "last_updated": 1656193505,
+    "last_updated": 1656233209,
     "items": [
       {
         "name": "Drill Bits",
@@ -4412,43 +4412,59 @@
   },
   "quizzes": [
     {
-      "last_updated": 0,
-      "responses": [],
+      "last_updated": 1656233210,
+      "responses": [
+        {
+          "timestamp": "6/6/2022 14:15:29",
+          "name": "Ethan",
+          "college_id": 40210325,
+          "college_email": "evazquez@g.hmc.edu",
+          "passed": true
+        }
+      ],
       "id": "66546920",
       "name": "General"
     },
     {
-      "last_updated": 0,
+      "last_updated": 1656233211,
       "responses": [],
       "id": "1524924728",
       "name": "Laser3D"
     },
     {
-      "last_updated": 0,
+      "last_updated": 1656233212,
       "responses": [],
       "id": "1841312496",
       "name": "SprayPaint"
     },
     {
-      "last_updated": 0,
+      "last_updated": 1656233212,
       "responses": [],
       "id": "913890505",
       "name": "Composite"
     },
     {
-      "last_updated": 0,
-      "responses": [],
+      "last_updated": 1656233213,
+      "responses": [
+        {
+          "timestamp": "6/24/2022 8:20:11",
+          "name": "Kate Riggs",
+          "college_id": 40205621,
+          "college_email": "kriggs@hmc.edu",
+          "passed": false
+        }
+      ],
       "id": "482685426",
       "name": "Welding"
     },
     {
-      "last_updated": 0,
+      "last_updated": 1656233213,
       "responses": [],
       "id": "2079405017",
       "name": "Studio"
     },
     {
-      "last_updated": 0,
+      "last_updated": 1656233214,
       "responses": [],
       "id": "1859058984",
       "name": "Waterjet"
@@ -4475,7 +4491,7 @@
         "occupied_details": {
           "college_id": 40210325,
           "timestamp_start": 1656145682,
-          "timestamp_end": 1657398315
+          "timestamp_end": 1657439004
         }
       },
       {
@@ -4644,32 +4660,6 @@
       },
       {
         "id": "D5",
-        "occupied": false,
-        "occupied_details": null
-      },
-      {
-        "id": "D6",
-        "occupied": false,
-        "occupied_details": null
-      },
-      {
-        "id": "D7",
-        "occupied": false,
-        "occupied_details": null
-      },
-      {
-        "id": "D8",
-        "occupied": false,
-        "occupied_details": null
-      },
-      {
-        "id": "D9",
-        "occupied": false,
-        "occupied_details": null
-      }
-    ]
-  }
-}d": "D5",
         "occupied": false,
         "occupied_details": null
       },

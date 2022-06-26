@@ -110,28 +110,31 @@ function generateInventoryDiv(result, index) {
     const tool_material = document.createElement("div");
     tool_material.classList.add("inventory-result-tool-material");
     tool_material.classList.add(item.is_material ? "material" : "tool");
-    tool_material.innerText = item.is_material ? "Material" : "Tool";
+    tool_material.title = item.is_material ? "Material" : "Tool";
     main_div.appendChild(tool_material);
 
     const location = document.createElement("div");
     location.classList.add("inventory-result-location");
-    location.innerText = `${item.location_room} | ${item.location_area}`;
+    location.innerHTML = `<span class="room">${item.location_room}</span> <span class="area">${item.location_area}</span>`;
     main_div.appendChild(location);
 
     const quantity = document.createElement("div");
     quantity.classList.add("inventory-result-quantity");
-    quantity.innerText = "Stock: ";
     if (item.quantity >= 0) {
-        quantity.innerText += `${item.quantity}`;
+        quantity.classList.add("number");
+        quantity.innerText = `${item.quantity}`;
     } else {
         switch (item.quantity) {
             case -1:
+                quantity.classList.add("low");
                 quantity.innerText += "Low";
                 break;
             case -2:
+                quantity.classList.add("medium");
                 quantity.innerText += "Medium";
                 break;
             case -3:
+                quantity.classList.add("high");
                 quantity.innerText += "High";
                 break;
         }

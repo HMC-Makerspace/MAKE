@@ -8,7 +8,12 @@
     --theme-color-5: #444444;
     --theme-color-6: #e0cf34;
     --theme-color-7: #a05fcc;
+    --theme-color-8: #dbdbdb;
+    
     --news-color: #ec413b;
+    --low-color: #9c5151;
+    --medium-color: #afad59;
+    --high-color: #4e9e4e;
 
     --text-color-main: #ffffff;
     --text-color-alt: #000000;
@@ -16,6 +21,10 @@
 
     --roundness: 5px;
     --button-outline-color: #ffffff;
+
+    /* Icons */
+    --tool-icon: url(../img/tool-icon.svg);
+    --material-icon: url(../img/material-icon.svg);
 }
 
 
@@ -123,7 +132,7 @@ button {
     padding: 4px 6px;
     border: unset;
     cursor: pointer;
-    transition: background-color 0.3s ease-in-out;
+    transition: background-color 0.2s ease-in-out;
     border-radius: var(--roundness);
 }
 
@@ -257,23 +266,24 @@ INVENTORY
     background-color: var(--theme-color-3);
     border-radius: var(--roundness);
     width: 90%;
+    max-width: 1200px;
     margin: 0 auto;
     color: var(--text-color-alt);
 }
 
 .inventory-result-main {
     display: grid;
-    grid-template-columns: 2fr 1fr 2fr 1fr 1fr;
+    grid-template-columns: 2fr .5fr 2fr .5fr .5fr;
     flex-direction: row;
     align-items: center;
     justify-content: space-evenly;
-    height: 60px;
     gap: 10px;
     padding: 20px;
 }
 
 .inventory-result-show-lower-div {
     height: 40px;
+    width: 80%;
 }
 
 .inventory-result-show-lower-div.grayed-out {
@@ -305,6 +315,66 @@ INVENTORY
     color: var(--text-color-main);
     width: auto;
     margin-left: 20px;
+}
+
+.inventory-result-tool-material {
+    height: 40px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.inventory-result-tool-material.material {
+    background-image: var(--material-icon);
+}
+
+.inventory-result-tool-material.tool {
+    background-image: var(--tool-icon);
+    background-size: 30px 30px;
+}
+
+.inventory-result-location {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: left;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.inventory-result-location * {
+    color: var(--text-color-main);
+    border-radius: var(--roundness);
+    padding: 5px;
+}
+
+.inventory-result-location .room {
+    background-color: var(--theme-color-2);
+}
+
+.inventory-result-location .area {
+    background-color: var(--theme-color-5);
+}
+
+.inventory-result-quantity {
+    background-color: var(--theme-color-2);
+    color: var(--text-color-main);
+    border-radius: var(--roundness);
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.inventory-result-quantity.low {
+    background-color: var(--low-color);
+}
+
+.inventory-result-quantity.medium {
+    background-color: var(--medium-color);
+}
+
+.inventory-result-quantity.high {
+    background-color: var(--high-color);
 }
 
 /*
