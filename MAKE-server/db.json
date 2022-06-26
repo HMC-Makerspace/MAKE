@@ -1,6 +1,6 @@
 {
   "inventory": {
-    "last_updated": 1656233209,
+    "last_updated": 1656234731,
     "items": [
       {
         "name": "Drill Bits",
@@ -4412,7 +4412,7 @@
   },
   "quizzes": [
     {
-      "last_updated": 1656233210,
+      "last_updated": 1656234731,
       "responses": [
         {
           "timestamp": "6/6/2022 14:15:29",
@@ -4426,25 +4426,25 @@
       "name": "General"
     },
     {
-      "last_updated": 1656233211,
+      "last_updated": 1656234732,
       "responses": [],
       "id": "1524924728",
       "name": "Laser3D"
     },
     {
-      "last_updated": 1656233212,
+      "last_updated": 1656234733,
       "responses": [],
       "id": "1841312496",
       "name": "SprayPaint"
     },
     {
-      "last_updated": 1656233212,
+      "last_updated": 1656234733,
       "responses": [],
       "id": "913890505",
       "name": "Composite"
     },
     {
-      "last_updated": 1656233213,
+      "last_updated": 1656234734,
       "responses": [
         {
           "timestamp": "6/24/2022 8:20:11",
@@ -4458,13 +4458,13 @@
       "name": "Welding"
     },
     {
-      "last_updated": 1656233213,
+      "last_updated": 1656234735,
       "responses": [],
       "id": "2079405017",
       "name": "Studio"
     },
     {
-      "last_updated": 1656233214,
+      "last_updated": 1656234736,
       "responses": [],
       "id": "1859058984",
       "name": "Waterjet"
@@ -4491,7 +4491,7 @@
         "occupied_details": {
           "college_id": 40210325,
           "timestamp_start": 1656145682,
-          "timestamp_end": 1657439004
+          "timestamp_end": 1657443293
         }
       },
       {

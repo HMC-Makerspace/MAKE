@@ -66,22 +66,23 @@ function generateStudentStorageDivs(slots) {
 
         if (slot.occupied_details !== null) {
             div.classList.add("occupied");
-            slot_text = "Occupied";
 
             expire_div += `<div class="student-storage-slot-expire">Expires ${timestampToDate(slot.occupied_details.timestamp_end)}</div>`;
 
             if (slot.occupied_details.college_id === state.college_id) {
                 div.classList.add("user");
-                slot_text = "Your Slot";
                 expire_div += `<button onclick="releaseStudentStorage('${slot.id}')">Release</button>
                 <button onclick="renewStudentStorage('${slot.id}')">Renew</button>`;
+                slot_text = "";
+            } else {
+                slot_text = `<div class="student-storage-slot-status">Occupied</div>`;
             }
         }
 
 
         div.innerHTML = `
             <div class="student-storage-slot-id">${slot.id}</div>
-            <div class="student-storage-slot-status">${slot_text}</div>
+            ${slot_text}
             ${expire_div}
         `;
 

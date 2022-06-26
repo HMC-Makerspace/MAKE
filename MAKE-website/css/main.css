@@ -4,7 +4,7 @@
     --theme-color-1: #ee930b;
     --theme-color-2: #242424;
     --theme-color-3: #eeeeee;
-    --theme-color-4: #2a71db;
+    --theme-color-4: #3d73c5;
     --theme-color-5: #444444;
     --theme-color-6: #e0cf34;
     --theme-color-7: #a05fcc;
@@ -383,35 +383,54 @@ Student Storage
 
 */
 
-#current-student-storage, #overall-student-storage {
+#student-storage-help {
+    background-color: var(--theme-color-2);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--roundness) var(--roundness) 0 0;
+    padding: 10px;
+}
+
+#student-storage-help * {
+    width: 60%;
+}
+
+#overall-student-storage {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    background-color: var(--theme-color-7);
-    border-radius: var(--roundness);
+    background-color: var(--theme-color-5);
+    border-radius: 0 0 var(--roundness) var(--roundness);
     margin-bottom: 10px;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 .student-storage-slot {
+    color: var(--text-color-alt);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: var(--theme-color-5);
+    background-color: var(--theme-color-3);
     border-radius: var(--roundness);
-    width: 150px;
-    height: 150px;
+    width: 120px;
+    height: 120px;
     margin: 10px;
     gap: 5px;
 }
 
 .student-storage-slot.occupied {
+    color: var(--text-color-main);
     background-color: var(--theme-color-2);
 }
 
 .student-storage-slot.user {
+    color: var(--text-color-main);
     background-color: var(--theme-color-4);
 }
 
