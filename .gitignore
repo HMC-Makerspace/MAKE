@@ -1,2 +1,3 @@
 MAKE-server/target
 MAKE-server/api_keys.toml
+MAKE-server/db.json

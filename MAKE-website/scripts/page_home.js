@@ -17,6 +17,10 @@ async function login() {
 
             saveState();
 
+            // Fetch appropriate data
+            fetchStudentStorage();
+            // End fetches
+
             displayLoggedIn();
         }
     }
