@@ -66,6 +66,7 @@ pub struct ApiKeysToml {
 
 #[derive(Default, Deserialize, Serialize)]
 pub struct ApiKeys {
+    admin: String,
     checkout: String,
     student_storage: String,
     printers: String,
@@ -74,9 +75,14 @@ pub struct ApiKeys {
 impl ApiKeys {
     // Print the keys to the console, only showing the first few characters of each key
     pub fn peek_print(&self) {
-        info!("Checkout key:         {}...", &self.checkout[..10]);
-        info!("Student storage key:  {}...", &self.student_storage[..10]);
-        info!("Printers key:         {}...", &self.printers[..10]);
+        info!("Admin key:             {}...", &self.admin[..10]);
+        info!("Checkout key:          {}...", &self.checkout[..10]);
+        info!("Student storage key:   {}...", &self.student_storage[..10]);
+        info!("Printers key:          {}...", &self.printers[..10]);
+    }
+
+    pub fn validate_admin(&self, key: &str) -> bool {
+        self.admin == key
     }
 
     pub fn validate_checkout(&self, key: &str) -> bool {
@@ -227,6 +233,8 @@ async fn async_main() -> std::io::Result<()> {
             .service(checkout_student_storage)
             .service(renew_student_storage_slot)
             .service(release_student_storage_slot)
+            .service(help)
+            .service(openapi)
             .service(ResourceFiles::new("/", generate()))
     })
     .bind(ADDRESS, builder)?
@@ -263,6 +271,8 @@ async fn async_main() -> std::io::Result<()> {
             .service(checkout_student_storage)
             .service(renew_student_storage_slot)
             .service(release_student_storage_slot)
+            .service(help)
+            .service(openapi)
             .service(ResourceFiles::new("/", generate()))
     })
     .bind(ADDRESS)?

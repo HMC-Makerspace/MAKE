@@ -36,12 +36,20 @@
         <div id="left-bar">
             <div id="main-logo">MAKE</div>
             <button onclick="setPage('home')"><img class="page-icon" src="../img/home-icon.svg">Home</button>
-            <button onclick="setPage('inventory')"><img class="page-icon" src="../img/inventory-icon.svg">Inventory</button>
-            <button onclick="setPage('student-storage')"><img class="page-icon" src="../img/student-storage-icon.svg">Student<br>Storage</button>
-            <button onclick="setPage('checkouts')"><img class="page-icon" src="../img/checkout-icon.svg">Checkouts</button>
-            <button onclick="setPage('3d-printers')"><img class="page-icon" src="../img/printer-icon.svg">3D Printers</button>
-            <button onclick="setPage('info-faq')"><img class="page-icon" src="../img/info-faq-icon.svg">Info<br>& FAQ</button>
-            <button onclick="setPage('settings')"><img class="page-icon" src="../img/settings-icon.svg">Settings</button>
+            <button onclick="setPage('inventory')"><img class="page-icon"
+                    src="../img/inventory-icon.svg">Inventory</button>
+            <button onclick="setPage('student-storage')"><img class="page-icon"
+                    src="../img/student-storage-icon.svg">Student<br>Storage</button>
+            <button onclick="setPage('quiz-perm')"><img class="page-icon" src="../img/quiz-icon.svg">Quizzes<br>&
+                Permissions</button>
+            <button onclick="setPage('checkouts')"><img class="page-icon"
+                    src="../img/checkout-icon.svg">Checkouts</button>
+            <button onclick="setPage('3d-printers')"><img class="page-icon" src="../img/printer-icon.svg">3D
+                Printers</button>
+            <button onclick="setPage('info-faq')"><img class="page-icon" src="../img/info-faq-icon.svg">Info<br>&
+                FAQ</button>
+            <button onclick="setPage('settings')"><img class="page-icon"
+                    src="../img/settings-icon.svg">Settings</button>
         </div>
 
         <!-- 
@@ -152,16 +160,101 @@
             <div id="student-storage-container" class="id-r">
                 <div id="student-storage-help">
                     <p3>
-                        On this page, you can view the status of student storage, renew your storage space (for two weeks from today), and release your storage space.
+                        Here you can view the status of student storage, renew your storage space (for two
+                        weeks from today), and release your storage space.
                         <br><br>
-                        Your storage space(s) will appear in blue, other occupied spaces will appear in gray, and empty spaces will appear in white.
+                        Your storage space(s) will appear in blue, other occupied spaces will appear in gray, and empty
+                        spaces will appear in white.
                         <br><br>
-                        Please note that releasing a storage space will require you to remove your items immediately from the storage room.
+                        Please note that releasing a storage space will require you to remove your items immediately
+                        from the storage room.
                     </p3>
                 </div>
 
                 <div id="overall-student-storage">
 
+                </div>
+            </div>
+        </div>
+
+        <!--
+        
+        QUIZ PERMISSIONS PAGE
+
+        -->
+
+        <div id="page-quiz-perm" class="main-content hidden">
+            <div id="header">
+                <span class="title">Quizzes & Permissions</span>
+            </div>
+
+            <div class="no-id-message id-n">
+                Please enter your college ID number on the home page to view your quizzes and permissions
+            </div>
+
+            <div id="quiz-perm-container" class="id-r">
+                <div id="quiz-perm-storage-help">
+                    <p3>
+                        Here you can view your current authorization level and quiz status.
+                        <br><br>
+                        Your authorization level can be "User", "Steward", or "Admin".
+                        <br><br>
+                        Your quiz statuses will remain blank until you have passed the relevent safety quiz.
+                    </p3>
+                </div>
+
+                <div id="quiz-perm-auth-statuses">
+                    <div id="auth-level">
+                        <h2>
+                            Your authorization level is <span id="auth-level-text"></span>
+                        </h2>
+                    </div>
+                    <div id="quiz-status">
+                        <div class="quiz-status-container">
+                            <div class="quiz-status-item" id="quiz-General">
+                                <p3>
+                                    General Safety Quiz
+                                </p3>
+                                <div class="status"></div>
+                            </div>
+                            <div class="quiz-status-item" id="quiz-Laser3D">
+                                <p3>
+                                    3D Printer & Laser Cutter Quiz
+                                </p3>
+                                <div class="status"></div>
+                            </div>
+                            <div class="quiz-status-item" id="zuiz-SprayPaint">
+                                <p3>
+                                    Spray Paint Quiz
+                                </p3>
+                                <div class="status"></div>
+                            </div>
+                            <div class="quiz-status-item" id="zuiz-Composite">
+                                <p3>
+                                    Composite Quiz
+                                </p3>
+                                <div class="status"></div>
+                            </div>
+                            <div class="quiz-status-item" id="quiz-Welding">
+                                <p3>
+                                    Welding Quiz
+                                </p3>
+                                <div class="status"></div>
+                            </div>
+                            <div class="quiz-status-item" id="quiz-Studio">
+                                <p3>
+                                    Studio Quiz
+                                </p3>
+                                <div class="status"></div>
+                            </div>
+                            <div class="quiz-status-item" id="quiz-Waterjet">
+                                <p3>
+                                    Waterjet Quiz
+                                </p3>
+                                <div class="status"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -223,6 +316,42 @@
             <div id="header">
                 <span class="title">Info & FAQ</span>
             </div>
+
+            <div class="info-faq-container">
+                <h2>
+                    Why do I need to provide my college ID number?
+                </h2>
+
+                <p3>
+                    Your college ID number is used to verify your identity, retrieve the status of your stutent storage
+                    reservations and tool checkouts, and view the status of your 3D prints.
+                    If you don't have a college ID number, please email us at <span
+                        class="email-link">makerspace-management-l@hmc.edu</span>
+                </p3>
+            </div>
+
+            <div class="info-faq-container">
+                <h2>
+                    Contacts
+                </h2>
+
+                <p3>
+                    Current site admin: Ethan Vazquez (evazquez@g.hmc.edu)
+                    <br>
+                    Makerspace Management: Head Stewards & Kim Neal (makerspace-management-l@hmc.edu)
+                </p3>
+            </div>
+
+            <div class="info-faq-container">
+                <h2>
+                    API Help
+                </h2>
+
+                <p3>
+                    The MAKE API provides an easily accessible endpoint to access the data of the Makerspace.
+                    You can view the full OpenAPI documentation at <a href="./api/v1/help">this link</a>.
+                </p3>
+            </div>
         </div>
 
 
@@ -248,5 +377,6 @@
 <script src="scripts/page_home.js"></script>
 <script src="scripts/page_inventory.js"></script>
 <script src="scripts/page_student_storage.js"></script>
+<script src="scripts/page_quiz_perm.js"></script>
 
 </html>

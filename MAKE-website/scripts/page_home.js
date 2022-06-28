@@ -4,25 +4,11 @@ async function login() {
     let collegeID = parseCollegeID(id);
 
     if (collegeID !== null) {
-        const response = await fetch(`${API}/user_info/${collegeID}`);
+        state.college_id = collegeID;
 
-        if (response.status == 200) {
-            const user_object = await response.json();
+        await updateUserInfo();
 
-            state.user_object = user_object;
-
-            state.college_id = user_object.college_id;
-
-            console.log(state.user_object);
-
-            saveState();
-
-            // Fetch appropriate data
-            fetchStudentStorage();
-            // End fetches
-
-            displayLoggedIn();
-        }
+        displayLoggedIn();
     }
 }
 

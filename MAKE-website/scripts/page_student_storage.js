@@ -1,7 +1,5 @@
 setInterval(fetchStudentStorage, 100000);
-fetchStudentStorage().then(() => {
-    renderStudentStorage();
-});
+fetchStudentStorage();
 
 async function fetchStudentStorage() {
     if (state.college_id !== null) {
@@ -13,6 +11,8 @@ async function fetchStudentStorage() {
             state.student_storage = student_storage;
 
             saveState();
+
+            renderStudentStorage();
         }
     }
 }

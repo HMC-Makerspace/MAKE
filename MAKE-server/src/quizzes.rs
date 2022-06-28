@@ -21,7 +21,7 @@ pub enum QuizName {
     Composite,
     Welding,
     Studio,
-    Waterjet,
+    Waterjet
 }
 
 impl Default for QuizName {

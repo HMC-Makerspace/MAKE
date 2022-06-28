@@ -27,11 +27,12 @@ var state = {
 }
 
 // Prelude function
-function prelude() {
+async function prelude() {
     loadState();
 
     if (state.college_id !== null) {
         displayLoggedIn();
+        await updateUserInfo();
     } else {
         displayLoggedOut();
     }
@@ -88,6 +89,27 @@ function displayLoggedOut() {
 
     for (let el of show_elements) {
         el.classList.remove('hidden');
+    }
+}
+
+async function updateUserInfo() {
+    if (state.college_id === null) {
+        return;
+    }
+
+    const response = await fetch(`${API}/users/info/${state.college_id}`);
+
+    if (response.status == 200) {
+        const user_object = await response.json();
+
+        state.user_object = user_object;
+
+        saveState();
+
+        // Fetch/render appropriate data
+        fetchStudentStorage();
+        renderQuizPerm();
+        // End fetches
     }
 }
 

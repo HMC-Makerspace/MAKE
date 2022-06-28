@@ -1,0 +1,294 @@
+openapi: "3.0.0"
+info:
+  title: MAKE API
+  version: 1.0.0
+  description: API for HMC's MAKE server
+  contact:
+    name: Ethan Vazquez
+    email: edv121@outlook.com
+servers:
+  - url: https://make.hmc.edu/api/v1/
+components:
+  schemas:
+    UserInfoObject:
+      properties:
+        name:
+          type: string
+        college_id:
+          type: integer
+        college_email:
+          type: string
+        passed_quizzes:
+          type: array
+          items:
+            type: string
+        pending_checkouts:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckoutLogObject'
+        all_checkouts:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckoutLogObject'
+        auth_level:
+          type: string
+
+    CheckoutLogObject:
+      properties:
+        college_id:
+          type: integer
+        timestamp:
+          type: integer
+        item_name:
+          type: string
+        item_uuid:
+          type: string
+        checked_in:
+          type: boolean
+paths:
+  /inventory:
+    get:
+      summary: "Gets current inventory with timestamp"
+      operationId: "getInventory"
+      tags:
+        - Inventory
+      responses:
+        200:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        is_material:
+                          type: boolean
+                        is_tool:
+                          type: boolean
+                        quantity:
+                          type: integer
+                        location_room:
+                          type: string
+                        location_area:
+                          type: string
+                        reorder_url:
+                          type: string
+                        specific_name:
+                          type: string
+                        serial_number:
+                          type: string
+                        brand:
+                          type: string
+                        model_number:
+                          type: string
+                        uuids:
+                          type: array
+                          items:
+                            type: string
+                  timestamp:
+                    type: integer
+
+        500:
+          description: "Internal server error"
+          content:
+            application/json:
+              schema:
+                type: string
+  /quizzes{api_key}:
+    get:
+      summary: "Gets a list of all quizzes, with a list of responses for each quiz"
+      operationId: "getQuizzes"
+      tags:
+        - Quizzes
+      parameters:
+        - name: api_key
+          in: path
+          description: "Admin API Key"
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    last_updated:
+                      type: integer
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    responses:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          timestamp:
+                            type: string
+                          name:
+                            type: string
+                          college_id:
+                            type: integer
+                          college_email:
+                            type: string
+                          passed:
+                            type: boolean
+
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: string
+  /users/all/{api_key}:
+    get:
+      summary: "Gets all user information when given an API key"
+      operationId: "getUsers"
+      tags:
+        - Users
+      parameters:
+        - name: api_key
+          in: path
+          description: "Admin API Key"
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserInfoObject"
+
+        404:
+          description: "User not found"
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: string
+  /checkouts/log/{api_key}:
+    get:
+      summary: "Gets all checkouts"
+      operationId: "getCheckoutLog"
+      tags:
+        - Checkout
+      parameters:
+        - name: api_key
+          in: path
+          description: "Checkout or Admin API Key"
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  log:
+                    type: array
+                    items:
+                          $ref: "#/components/schemas/CheckoutLogObject"
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: string
+  /users/info/{id_number}:
+    get:
+      summary: "Gets user information when given a college ID number"
+      operationId: "getUserInfo"
+      tags:
+        - Users
+      parameters:
+        - name: id_number
+          in: path
+          description: "College ID Number"
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserInfoObject"
+        404:
+          description: "User not found"
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /checkouts/add_entry/{id_number}/{item_name}/{api_key}:
+    post:
+      summary: "Checks out an item"
+      operationId: "checkout"
+      tags:
+        - Checkout
+      parameters:
+        - name: id_number
+          in: path
+          description: "College ID Number"
+          required: true
+          schema:
+            type: integer
+        - name: item_name
+          in: path
+          description: "Item Name"
+          required: true
+          schema:
+            type: string
+        - name: api_key
+          in: path
+          description: "Checkout or Admin API Key"
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                type: string
+        404:
+          description: "Item not found"
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: string
