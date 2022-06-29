@@ -63,7 +63,7 @@ p2 {
 }
 
 p3 {
-    padding: 10px;
+    padding: 10px;  
     font-size: 14px;
 }
 
@@ -235,6 +235,11 @@ label {
 
 a:link {
     color: var(--link-color);
+    transition: filter 0.05s ease-in-out;
+}
+
+a:link:hover {
+    filter: invert(100%);
 }
 
 a:visited {
@@ -474,11 +479,11 @@ Student Storage
 
 /*
 
-Quiz & Permissions
+Quizzes & Information
 
 */
 
-#quiz-perm-storage-help {
+#quiz-info-storage-help {
     background-color: var(--theme-color-2);
     display: flex;
     flex-direction: row;
@@ -488,7 +493,7 @@ Quiz & Permissions
     padding: 10px;
 }
 
-#quiz-perm-auth-statuses {
+#quiz-info-auth-statuses {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -501,7 +506,7 @@ Quiz & Permissions
 }
 
 #auth-level {
-    margin-bottom: 50px;
+    margin-top: 20px;
 }
 
 #auth-level-text {
@@ -548,13 +553,59 @@ Quiz & Permissions
     padding: 10px;
 }
 
+.quiz-take {
+    position: absolute;
+    bottom: 10px;
+    border-radius: var(--roundness);
+    padding: 10px;
+}
+
+.manual-policy-list {
+    columns: 3;
+    column-gap: 70px;
+}
+
+.manual-policy-list * {
+    margin-bottom: 5px;
+}
+
+.honor-code-warning {
+    background-color: var(--theme-color-2);
+    margin-top: 20px;
+    display: inline-block;
+    width: 80%;
+    border-radius: var(--roundness);
+    line-height: 1.4em;
+}
+
+#quiz-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 /*
 
-Info & FAQ
+Checkouts
 
 */
 
-.info-faq-container {
+#checkouts-help {
+    background-color: var(--theme-color-2);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--roundness) var(--roundness) 0 0;
+    padding: 10px;
+}
+
+#checkouts-help * {
+    width: 60%;
+}
+
+#checkouts {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -566,6 +617,40 @@ Info & FAQ
     padding-bottom: 20px;
 }
 
-.info-faq-container * {
+#checkouts-current, #checkouts-history {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--theme-color-2);
+    border-radius: var(--roundness);
+    margin-bottom: 10px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    min-width: 80%;
+    min-height: 50px;
+}
+
+
+
+/*
+
+FAQ
+
+*/
+
+.faq-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--theme-color-5);
+    border-radius: 0 0 var(--roundness) var(--roundness);
+    margin-bottom: 10px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.faq-container * {
     max-width: 80%;
 }

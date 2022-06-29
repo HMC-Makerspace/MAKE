@@ -40,14 +40,13 @@
                     src="../img/inventory-icon.svg">Inventory</button>
             <button onclick="setPage('student-storage')"><img class="page-icon"
                     src="../img/student-storage-icon.svg">Student<br>Storage</button>
-            <button onclick="setPage('quiz-perm')"><img class="page-icon" src="../img/quiz-icon.svg">Quizzes<br>&
-                Permissions</button>
+            <button onclick="setPage('quiz-info')"><img class="page-icon" src="../img/quiz-icon.svg">Quizzes<br>&
+                Information</button>
             <button onclick="setPage('checkouts')"><img class="page-icon"
                     src="../img/checkout-icon.svg">Checkouts</button>
             <button onclick="setPage('3d-printers')"><img class="page-icon" src="../img/printer-icon.svg">3D
                 Printers</button>
-            <button onclick="setPage('info-faq')"><img class="page-icon" src="../img/info-faq-icon.svg">Info<br>&
-                FAQ</button>
+            <button onclick="setPage('faq')"><img class="page-icon" src="../img/faq.svg">FAQ</button>
             <button onclick="setPage('settings')"><img class="page-icon"
                     src="../img/settings-icon.svg">Settings</button>
         </div>
@@ -71,10 +70,9 @@
                 <button id="college-id-button" class="big" onclick="login()">Log In</button>
 
                 <p3>
-                    If you haven't taken the General Safety Quiz, please click <a
-                        href="https://make.ucsd.edu/safety/quiz">here</a>.
+                    If you haven't taken the General Safety Quiz, navigate to <b>Quizzes & Information</b> and take the quiz before logging in.
                     <br>
-                    Please allow 5-10 minutes before attempting to log in afterwards.
+                    Please allow 3-5 minutes for the quiz to be processed before attemping to log in again.
                 </p3>
 
                 <p3>
@@ -183,77 +181,91 @@
 
         -->
 
-        <div id="page-quiz-perm" class="main-content hidden">
+        <div id="page-quiz-info" class="main-content hidden">
             <div id="header">
-                <span class="title">Quizzes & Permissions</span>
+                <span class="title">Quizzes & Information</span>
             </div>
 
-            <div class="no-id-message id-n">
-                Please enter your college ID number on the home page to view your quizzes and permissions
-            </div>
-
-            <div id="quiz-perm-container" class="id-r">
-                <div id="quiz-perm-storage-help">
+            <div id="quiz-info-container">
+                <div id="quiz-info-storage-help">
                     <p3>
-                        Here you can view your current authorization level and quiz status.
-                        <br><br>
-                        Your authorization level can be "User", "Steward", or "Admin".
-                        <br><br>
-                        Your quiz statuses will remain blank until you have passed the relevent safety quiz.
+                        <b>General Usage Policies & Manuals</b>
+                        <br>
+                        <ul id="general-manual-policy-list" class="manual-policy-list">
+                        </ul>
+                        <br>
+                        <b>Machine-Specific Manuals</b>
+                        <br>
+                        <ul id="machine-manual-policy-list" class="manual-policy-list">
+                        </ul>
+                        <br>
+                        <b>Additional Information</b>
+                        <br>
+                        <ul id="additional-info-list" class="manual-policy-list">
                     </p3>
                 </div>
 
-                <div id="quiz-perm-auth-statuses">
-                    <div id="auth-level">
-                        <h2>
-                            Your authorization level is <span id="auth-level-text"></span>
-                        </h2>
-                    </div>
+                <div id="quiz-info-auth-statuses">
                     <div id="quiz-status">
                         <div class="quiz-status-container">
                             <div class="quiz-status-item" id="quiz-General">
                                 <p3>
                                     General Safety Quiz
                                 </p3>
-                                <div class="status"></div>
+                                <button class="quiz-take" onclick="openQuiz('general')">Take</button>
+                                <div class="quiz-status"></div>
                             </div>
                             <div class="quiz-status-item" id="quiz-Laser3D">
                                 <p3>
                                     3D Printer & Laser Cutter Quiz
                                 </p3>
-                                <div class="status"></div>
+                                <button class="quiz-take" onclick="openQuiz('laser3d')">Take</button>
+                                <div class="quiz-status"></div>
                             </div>
                             <div class="quiz-status-item" id="zuiz-SprayPaint">
                                 <p3>
                                     Spray Paint Quiz
                                 </p3>
-                                <div class="status"></div>
+                                <button class="quiz-take" onclick="openQuiz('spraypaint')">Take</button>
+                                <div class="quiz-status"></div>
                             </div>
                             <div class="quiz-status-item" id="zuiz-Composite">
                                 <p3>
                                     Composite Quiz
                                 </p3>
-                                <div class="status"></div>
+                                <button class="quiz-take" onclick="openQuiz('composite')">Take</button>
+                                <div class="quiz-status"></div>
                             </div>
                             <div class="quiz-status-item" id="quiz-Welding">
                                 <p3>
                                     Welding Quiz
                                 </p3>
-                                <div class="status"></div>
+                                <button class="quiz-take" onclick="openQuiz('welding')">Take</button>
+                                <div class="quiz-status"></div>
                             </div>
                             <div class="quiz-status-item" id="quiz-Studio">
                                 <p3>
                                     Studio Quiz
                                 </p3>
-                                <div class="status"></div>
+                                <button class="quiz-take" onclick="openQuiz('studio')">Take</button>
+                                <div class="quiz-status"></div>
                             </div>
                             <div class="quiz-status-item" id="quiz-Waterjet">
                                 <p3>
                                     Waterjet Quiz
                                 </p3>
-                                <div class="status"></div>
+                                <button class="quiz-take" onclick="openQuiz('waterjet')">Take</button>
+                                <div class="quiz-status"></div>
                             </div>
                         </div>
+
+                        <p3 class="honor-code-warning">
+                            Completion of each quiz with a 100% will grant swipe access to the relevent room and/or
+                            permission to operate the machine.
+                            <br>
+                            Failing to successfully complete the quiz prior to use is an honor code violation, and may
+                            result in a suspension or ban from the Makerspace.
+                        </p3>
                     </div>
                 </div>
             </div>
@@ -271,6 +283,30 @@
 
             <div class="no-id-message id-n">
                 Please enter your college ID number on the home page to view checkouts
+            </div>
+
+            <div id="checkouts-container" class="id-r">
+                <div id="checkouts-help">
+                    <p3>
+                        Here you can view the status of your current checkouts, as well as view your checkout history.
+                    </p3>
+                </div>
+
+                <div id="checkouts">
+                    <h2>
+                        Pending Checkouts
+                    </h2>
+                    <div id="checkouts-current">
+
+                    </div>
+                    
+                    <h2>
+                        Checkout History
+                    </h2>
+                    <div id="checkouts-history">
+                    
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -293,31 +329,15 @@
 
         <!--
 
-        PROJECT APPLICATIONS PAGE
-
-        -->
-        <div id="page-project-applications" class="main-content hidden">
-            <div id="header">
-                <span class="title">Project Applications</span>
-            </div>
-
-            <div class="no-id-message id-n">
-                Please enter your college ID number on the home page to view project applications
-            </div>
-        </div>
-
-
-        <!--
-
         INFO & FAQ PAGE
 
         -->
-        <div id="page-info-faq" class="main-content hidden">
+        <div id="page-faq" class="main-content hidden">
             <div id="header">
                 <span class="title">Info & FAQ</span>
             </div>
 
-            <div class="info-faq-container">
+            <div class="faq-container">
                 <h2>
                     Why do I need to provide my college ID number?
                 </h2>
@@ -330,7 +350,7 @@
                 </p3>
             </div>
 
-            <div class="info-faq-container">
+            <div class="faq-container">
                 <h2>
                     Contacts
                 </h2>
@@ -342,7 +362,7 @@
                 </p3>
             </div>
 
-            <div class="info-faq-container">
+            <div class="faq-container">
                 <h2>
                     API Help
                 </h2>
@@ -373,10 +393,12 @@
 
 <script src="scripts/libs/fuzzysort.min.js"></script>
 
-<script src="scripts/app.js"></script>
+<script src="scripts/utils.js"></script>
 <script src="scripts/page_home.js"></script>
 <script src="scripts/page_inventory.js"></script>
 <script src="scripts/page_student_storage.js"></script>
-<script src="scripts/page_quiz_perm.js"></script>
+<script src="scripts/page_quiz_info.js"></script>
+<script src="scripts/page_checkouts.js"></script>
 
+<script src="scripts/start.js"></script>
 </html>

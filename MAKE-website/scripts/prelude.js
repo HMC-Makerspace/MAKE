@@ -26,18 +26,6 @@ var state = {
     student_storage: null,
 }
 
-// Prelude function
-async function prelude() {
-    loadState();
-
-    if (state.college_id !== null) {
-        displayLoggedIn();
-        await updateUserInfo();
-    } else {
-        displayLoggedOut();
-    }
-}
-
 
 // Function to load/save state from localstorage
 function loadState() {
@@ -90,6 +78,9 @@ function displayLoggedOut() {
     for (let el of show_elements) {
         el.classList.remove('hidden');
     }
+
+    renderQuizInfo();
+    renderCheckouts();
 }
 
 async function updateUserInfo() {
@@ -108,9 +99,10 @@ async function updateUserInfo() {
 
         // Fetch/render appropriate data
         fetchStudentStorage();
-        renderQuizPerm();
+        renderQuizInfo();
+        renderCheckouts();
         // End fetches
     }
 }
 
-prelude();
+loadState();

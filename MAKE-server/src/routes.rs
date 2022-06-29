@@ -146,6 +146,20 @@ pub async fn get_student_storage_for_user(path: web::Path<u64>) -> Result<HttpRe
     Ok(HttpResponse::Ok().json(student_storage))
 }
 
+#[get("/api/v1/student_storage/all/{api_key}")]
+pub async fn get_student_storage_for_all(path: web::Path<(String)>) -> Result<HttpResponse, Error> {
+    let api_key = path.into_inner();
+    if API_KEYS.lock().await.validate_student_storage(&api_key)
+        || API_KEYS.lock().await.validate_admin(&api_key)
+    {
+        let data = MEMORY_DATABASE.lock().await;
+        let student_storage = data.student_storage.clone();
+        Ok(HttpResponse::Ok().json(student_storage))
+    } else {
+        Ok(HttpResponse::Unauthorized().finish())
+    }
+}
+
 /*
 =================
     POST REQUESTS
@@ -176,7 +190,7 @@ pub async fn checkout_item_by_name(
         }
 
         data.checkout_log
-            .add_checkout(CheckoutLogEntry::new(&user.unwrap(), &item.unwrap()));
+            .add_checkout(CheckoutLogEntry::new(&user.unwrap(), &item.unwrap(), None));
 
         Ok(HttpResponse::Ok()
             .status(http::StatusCode::CREATED)
@@ -210,7 +224,7 @@ pub async fn checkout_item_by_uuid(
         }
 
         data.checkout_log
-            .add_checkout(CheckoutLogEntry::new(&user.unwrap(), &item.unwrap()));
+            .add_checkout(CheckoutLogEntry::new(&user.unwrap(), &item.unwrap(), Some(item_uuid)));
 
         Ok(HttpResponse::Ok()
             .status(http::StatusCode::CREATED)

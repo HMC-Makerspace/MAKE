@@ -292,3 +292,47 @@ paths:
             application/json:
               schema:
                 type: string
+  /checkouts/add_entry_uuid/{id_number}/{item_uuid}/{ api_key}:
+    post:
+      summary: "Checks out an item"
+      operationId: "checkout"
+      tags:
+        - Checkout
+      parameters:
+        - name: id_number
+          in: path
+          description: "College ID Number"
+          required: true
+          schema:
+            type: integer
+        - name: item_uuid
+          in: path
+          description: "Item UUID"
+          required: true
+          schema:
+            type: string
+        - name: api_key
+          in: path
+          description: "Checkout or Admin API Key"
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                type: string
+        404:
+          description: "Item not found"
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: string

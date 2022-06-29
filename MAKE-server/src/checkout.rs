@@ -18,12 +18,12 @@ pub struct CheckoutLogEntry {
     pub college_id: u64,
     pub timestamp: u64,
     pub item_name: String,
-    pub item_uuid: String,
-    pub checked_in: bool,
+    pub item_uuid: Option<String>,
+    pub checked_in: bool
 }
 
 impl CheckoutLogEntry {
-    pub fn new(user: &User, item: &InventoryItem) -> Self {
+    pub fn new(user: &User, item: &InventoryItem, uuid: Option<String>) -> Self {
         CheckoutLogEntry {
             college_id: user.get_id(),
             timestamp: SystemTime::now()
@@ -31,7 +31,7 @@ impl CheckoutLogEntry {
                 .expect("Time went backwards")
                 .as_secs(),
             item_name: item.name.clone(),
-            item_uuid: item.uuid.clone(),
+            item_uuid: uuid,
             checked_in: false,
         }
     }

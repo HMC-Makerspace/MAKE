@@ -63,7 +63,7 @@ impl Inventory {
     }
 
     pub fn get_item_by_uuid(&self, uuid: &str) -> Option<InventoryItem> {
-        self.items.iter().find(|item| item.uuid == uuid).cloned()
+        self.items.iter().find(|item| item.uuids.contains(&uuid.to_string())).cloned()
     }
 }
 
@@ -80,7 +80,7 @@ pub struct InventoryItem {
     pub serial_number: String,
     pub brand: String,
     pub model_number: String,
-    pub uuid: String,
+    pub uuids: Vec<String>,
 }
 
 impl InventoryItem {
@@ -107,7 +107,7 @@ impl InventoryItem {
             serial_number: line[7].clone(),
             brand: line[8].clone(),
             model_number: line[9].clone(),
-            uuid: line[10].clone(),
+            uuids: line[10].split(&[',', '\n'][..]).map(|x| x.to_string()).collect::<Vec<String>>(),
         }
     }
 }
