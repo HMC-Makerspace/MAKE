@@ -1,17 +1,8 @@
-setInterval(fetchInventory, 100000);
-fetchInventory().then(() => {
-    submitSearch();
-    document.getElementById("inventory-search-input").addEventListener("keyup", submitSearch);
-    document.getElementById("inventory-in-stock").addEventListener("change", submitSearch);
-    document.getElementById("room-select").addEventListener("change", submitSearch);
-    document.getElementById("tool-material-select").addEventListener("change", submitSearch);
-});
-
 const search_options = {
     limit: 1000, // don't return more results than you need!
     allowTypo: true, // if you don't care about allowing typos
     threshold: -10000, // don't return bad results
-    keys: ['name', 'specific_name', 'serial_number', 'model_number', 'brand', 'uuid'], // keys to search
+    keys: ['name', 'specific_name', 'serial_number', 'model_number', 'brand', 'uuids_joined'], // keys to search
     all: true,
 }
 
@@ -22,6 +13,10 @@ async function fetchInventory() {
         const inventory = await response.json();
 
         state.inventory = inventory;
+
+        inventory.items.forEach(element => {
+            element.uuids_joined = element.uuids.join(" ");
+        });
 
         saveState();
     }
@@ -174,10 +169,10 @@ function generateInventoryDiv(result, index) {
         lower_div.appendChild(brand);
     }
 
-    if (item.uuid !== "") {
+    if (item.uuids_joined !== "") {
         const uuid = document.createElement("div");
         uuid.classList.add("inventory-result-lower-detail");
-        uuid.innerText = `UUID: ${item.uuid}`;
+        uuid.innerText = `UUID(s): ${item.uuids_joined}`;
         lower_div.appendChild(uuid);
     }
 

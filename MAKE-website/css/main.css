@@ -433,16 +433,24 @@ Student Storage
 }
 
 #overall-student-storage {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
     align-items: center;
     justify-content: center;
     background-color: var(--theme-color-5);
     border-radius: 0 0 var(--roundness) var(--roundness);
     margin-bottom: 10px;
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding: 20px;
+}
+
+.student-storage-group {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    background-color: var(--theme-color-2);
+    border-radius: var(--roundness);
+    gap: 20px;
+    padding: 20px;
 }
 
 .student-storage-slot {
@@ -453,10 +461,10 @@ Student Storage
     justify-content: center;
     background-color: var(--theme-color-3);
     border-radius: var(--roundness);
-    width: 120px;
-    height: 120px;
-    margin: 10px;
     gap: 5px;
+    height: 100px;
+    width: 100%;
+    margin: auto 0;
 }
 
 .student-storage-slot.occupied {
@@ -562,7 +570,7 @@ Quizzes & Information
 
 .manual-policy-list {
     columns: 3;
-    column-gap: 70px;
+    column-gap: 100px;
 }
 
 .manual-policy-list * {
@@ -573,9 +581,10 @@ Quizzes & Information
     background-color: var(--theme-color-2);
     margin-top: 20px;
     display: inline-block;
-    width: 80%;
+    width: 60%;
     border-radius: var(--roundness);
     line-height: 1.4em;
+    padding: 20px;
 }
 
 #quiz-status {

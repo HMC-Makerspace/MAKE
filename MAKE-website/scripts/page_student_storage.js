@@ -1,7 +1,19 @@
-setInterval(fetchStudentStorage, 100000);
-fetchStudentStorage();
+async function fetchStudentStorage(kiosk_mode=false) {
+    if (kiosk_mode) {
+        const response = await fetch(`${API}/student_storage/all/${student_storage_key}`);
 
-async function fetchStudentStorage() {
+        if (response.status == 200) {
+            const student_storage = await response.json();
+
+            student_storage_state = student_storage;
+            
+            renderStudentStorage(kiosk_mode);
+
+        }
+
+        return;
+    }
+
     if (state.college_id !== null) {
         const response = await fetch(`${API}/student_storage/user/${state.college_id}`);
 
@@ -17,15 +29,20 @@ async function fetchStudentStorage() {
     }
 }
 
-function renderStudentStorage() {
-    if (state.student_storage === null || state.college_id === null) {
-        return;
-    }
-
+function renderStudentStorage(kiosk_mode=false) {
     const storage = document.getElementById("overall-student-storage");
 
     removeAllChildren(storage);
-    appendChildren(storage, generateStudentStorageDivs(state.student_storage.slots));
+
+    if (kiosk_mode) {
+        appendChildren(storage, generateStudentStorageDivs(student_storage_state.slots, kiosk_mode=true));   
+    } else {
+        if (state.student_storage === null || state.college_id === null) {
+            return;
+        } else {
+            appendChildren(storage, generateStudentStorageDivs(state.student_storage.slots));
+        }
+    }
 
 }
 
@@ -53,23 +70,33 @@ async function renewStudentStorage(slot_id) {
     }
 }
 
-function generateStudentStorageDivs(slots) {
+function generateStudentStorageDivs(slots, kiosk_mode=false) {
     const divs = [];
+    let current_group = document.createElement("div");
+    current_group.classList.add("student-storage-group");
+    let last_group = "A";
 
     for (const slot of slots) {
+        if (!slot.id.startsWith(last_group)) {
+            divs.push(current_group);
+            current_group = document.createElement("div");
+            current_group.classList.add("student-storage-group");
+            last_group = slot.id.charAt(0);
+        }
+
         const div = document.createElement("div");
 
         div.classList.add("student-storage-slot");
 
         let slot_text = "Empty";
         let expire_div = "";
-
+        
         if (slot.occupied_details !== null) {
             div.classList.add("occupied");
 
             expire_div += `<div class="student-storage-slot-expire">Expires ${timestampToDate(slot.occupied_details.timestamp_end)}</div>`;
 
-            if (slot.occupied_details.college_id === state.college_id) {
+            if (!kiosk_mode || slot.occupied_details.college_id === state.college_id) {
                 div.classList.add("user");
                 expire_div += `<button onclick="releaseStudentStorage('${slot.id}')">Release</button>
                 <button onclick="renewStudentStorage('${slot.id}')">Renew</button>`;
@@ -86,7 +113,7 @@ function generateStudentStorageDivs(slots) {
             ${expire_div}
         `;
 
-        divs.push(div);
+        current_group.appendChild(div);
     }
 
     return divs;

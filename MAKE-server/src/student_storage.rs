@@ -19,14 +19,20 @@ impl StudentStorage {
     }
 
     pub fn new_defined() -> Self {
-        let levels = ['A', 'B', 'C', 'D'];
-        let num_slots = 10;
+        let levels_16 = ['A', 'B', 'C', 'D'];
+        let levels_4 = ['E', 'F', 'G', 'H'];
 
         let mut slots = Vec::new();
 
-        for level in levels.iter() {
-            for i in 0..num_slots {
+        for level in levels_16 {
+            for i in 1..17 {
                 slots.push(Slot::new(format!("{}{}", level, i)));
+            }
+        }
+
+        for level in levels_4 {
+            for i in 1..5 {
+                slots.push(Slot::new(format!("{level}{i}")));
             }
         }
 

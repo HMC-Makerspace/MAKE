@@ -111,5 +111,3 @@ function openQuiz(quiz_name) {
     
     window.open(encodeURI(quiz_link), "_blank");        
 }
-
-renderQuizInfo();

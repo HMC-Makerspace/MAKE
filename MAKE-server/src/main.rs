@@ -45,7 +45,7 @@ use std::{sync::Arc};
 #[cfg(debug_assertions)]
 const ADDRESS: &str = "127.0.0.1:8080";
 #[cfg(not(debug_assertions))]
-const ADDRESS: &str = "0.0.0.0:8080";
+const ADDRESS: &str = "0.0.0.0:443";
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 

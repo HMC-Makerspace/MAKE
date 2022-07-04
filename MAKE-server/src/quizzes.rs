@@ -1,5 +1,6 @@
 use std::time::SystemTime;
 
+use log::info;
 use serde::{Deserialize, Serialize};
 
 const base_quiz_url: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyOdR5ZzocTVLi02rPVQPVwoGyuPrGmULHznFB66pDnqsWrCWVTi5JM5KCbBn8oMVLa-vwIS3RvK6z/pub?gid=";
@@ -11,7 +12,7 @@ const spray_paint: &str = "1841312496";
 const composite: &str = "913890505";
 const welding: &str = "482685426";
 const studio: &str = "2079405017";
-const waterjet: &str = "1859058984";
+const waterjet: &str = "2100779718";
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd, Eq, Ord)]
 pub enum QuizName {
@@ -78,6 +79,7 @@ impl Quiz {
             self.last_updated = now;
             self.responses = responses;
 
+            info!("Updated quiz {:20?} with {} passing / {} responses", self.name, self.responses.iter().filter(|x| x.passed).count(), self.responses.len());
             Ok(())
         } else {
             Err(response.unwrap_err())
@@ -138,11 +140,7 @@ impl Response {
         let score = score_str.split("/").collect::<Vec<&str>>();
 
         // Check if both sides equal each other, eg '100 / 100'
-        if score[0].trim() == score[1].trim() {
-            true
-        } else {
-            false
-        }
+        score[0].trim() == score[1].trim()
     }
 }
 
