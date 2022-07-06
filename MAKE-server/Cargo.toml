@@ -24,6 +24,9 @@ csv = "*"
 toml = "*"
 actix-web-static-files = "4.0"
 static-files = "0.2.1"
+lettre = "*"
+lettre_email = "*"
+uuid = "*"
 
 [build-dependencies]
 static-files = "0.2.1"

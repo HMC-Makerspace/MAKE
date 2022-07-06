@@ -1,10 +1,12 @@
 use std::collections::HashMap;
+use std::time::SystemTime;
 
 use serde::{Deserialize, Serialize};
 
-use crate::quizzes::*;
-use crate::inventory::*;
 use crate::checkout::*;
+use crate::inventory::*;
+use crate::printers::PrintQueueEntry;
+use crate::quizzes::*;
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum AuthLevel {
@@ -54,13 +56,13 @@ impl Users {
                 self.users.insert(*id_number, user.clone());
             } else {
                 // If the user exists, update passed quizzes, but don't delete any quizzes
-                        
+
                 let mut current_user = self.users.get(id_number).unwrap().clone();
 
                 current_user.update_soft_from(user);
 
                 self.users.insert(*id_number, current_user.clone());
-            }            
+            }
         }
     }
 
@@ -90,7 +92,9 @@ impl User {
     }
 
     pub fn log_quiz(&mut self, quiz_name: QuizName, passed: bool) {
-        if passed { self.passed_quizzes.push(quiz_name) };
+        if passed {
+            self.passed_quizzes.push(quiz_name)
+        };
     }
 
     pub fn get_id(&self) -> u64 {
@@ -109,15 +113,22 @@ impl User {
         self.passed_quizzes.clone()
     }
 
-    pub fn get_pending_checked_out_items(&self, checkout_log: &CheckoutLog) -> Vec<CheckoutLogEntry> {
-        checkout_log.log.iter()
+    pub fn get_pending_checked_out_items(
+        &self,
+        checkout_log: &CheckoutLog,
+    ) -> Vec<CheckoutLogEntry> {
+        checkout_log
+            .log
+            .iter()
             .filter(|x| x.college_id == self.get_id() && x.checked_in == false)
             .cloned()
             .collect()
     }
 
     pub fn get_all_checked_out_items(&self, checkout_log: &CheckoutLog) -> Vec<CheckoutLogEntry> {
-        checkout_log.log.iter()
+        checkout_log
+            .log
+            .iter()
             .filter(|x| x.college_id == self.get_id())
             .cloned()
             .collect()
@@ -125,7 +136,8 @@ impl User {
 
     pub fn update_soft_from(&mut self, other: &User) {
         // Take union of passed quizzes
-        self.passed_quizzes = self.passed_quizzes
+        self.passed_quizzes = self
+            .passed_quizzes
             .iter()
             .chain(other.passed_quizzes.iter())
             .cloned()
@@ -154,6 +166,20 @@ impl User {
             self.passed_quizzes.push(quiz_name.clone());
         } else {
             self.passed_quizzes.retain(|x| x != quiz_name);
+        }
+    }
+
+    pub fn create_print_queue_entry(&self) -> PrintQueueEntry {
+        PrintQueueEntry {
+            uuid: uuid::Uuid::new_v4().to_string(),
+            college_id: self.college_id,
+            email: self.college_email.clone(),
+            timestamp_submitted: SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .expect("Time went backwards")
+                .as_secs(),
+            timestamp_notified: None,
+            timestamp_accepted: None,
         }
     }
 }

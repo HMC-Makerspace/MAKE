@@ -1,51 +1,60 @@
+use std::cmp::min;
+use std::fs::OpenOptions;
 use std::io::Read;
 use std::io::Write;
 use std::process::exit;
 use std::thread;
-use std::fs::OpenOptions;
+use std::time::SystemTime;
 
 use actix_cors::*;
-use actix_web::*;
 use actix_web::rt::spawn;
+use actix_web::*;
 use actix_web_static_files::ResourceFiles;
 
 use env_logger::Logger;
 use lazy_static::__Deref;
 use log::*;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
-use tokio::time;
-use std::time::Duration;
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
+use tokio::time;
 
-mod routes;
+mod checkout;
 mod inventory;
 mod laser_cutter;
 mod permissions;
 mod printers;
 mod quizzes;
-mod users;
-mod checkout;
+mod routes;
 mod student_storage;
+mod users;
 
-use crate::routes::*;
+use crate::checkout::*;
 use crate::inventory::*;
 use crate::laser_cutter::*;
 use crate::permissions::*;
 use crate::printers::*;
 use crate::quizzes::*;
-use crate::users::*;
-use crate::checkout::*;
+use crate::routes::*;
 use crate::student_storage::*;
+use crate::users::*;
 
 use lazy_static::lazy_static;
+use std::sync::Arc;
 use tokio::sync::Mutex;
-use std::{sync::Arc};
 
 // Debug vs release address
 #[cfg(debug_assertions)]
 const ADDRESS: &str = "127.0.0.1:8080";
 #[cfg(not(debug_assertions))]
 const ADDRESS: &str = "0.0.0.0:443";
+
+#[cfg(debug_assertions)]
+const URL: &str = "127.0.0.1:8080";
+#[cfg(not(debug_assertions))]
+const URL: &str = "https://make.hmc.edu";
+
+const SMTP_URL: &str = "smtp.gmail.com";
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
@@ -70,15 +79,19 @@ pub struct ApiKeys {
     checkout: String,
     student_storage: String,
     printers: String,
+    gmail_email: String,
+    gmail_password: String,
 }
 
 impl ApiKeys {
     // Print the keys to the console, only showing the first few characters of each key
     pub fn peek_print(&self) {
-        info!("Admin key:             {}...", &self.admin[..10]);
-        info!("Checkout key:          {}...", &self.checkout[..10]);
-        info!("Student storage key:   {}...", &self.student_storage[..10]);
-        info!("Printers key:          {}...", &self.printers[..10]);
+        info!("Admin key:             {}...", &self.admin[..5]);
+        info!("Checkout key:          {}...", &self.checkout[..5]);
+        info!("Student storage key:   {}...", &self.student_storage[..5]);
+        info!("Printers key:          {}...", &self.printers[..5]);
+        info!("Gmail email:           {}...", &self.gmail_email[..5]);
+        info!("Gmail password:        {}...", &self.gmail_password[..5]);
     }
 
     pub fn validate_admin(&self, key: &str) -> bool {
@@ -96,14 +109,15 @@ impl ApiKeys {
     pub fn validate_printers(&self, key: &str) -> bool {
         self.printers == key
     }
+
+    pub fn get_gmail_tuple(&self) -> (String, String) {
+        (self.gmail_email.clone(), self.gmail_password.clone())
+    }
 }
 
 lazy_static! {
-    pub static ref MEMORY_DATABASE: Arc<Mutex<Data>> =
-        Arc::new(Mutex::new(Data::default()));
-    
-    pub static ref API_KEYS: Arc<Mutex<ApiKeys>> =
-        Arc::new(Mutex::new(ApiKeys::default()));
+    pub static ref MEMORY_DATABASE: Arc<Mutex<Data>> = Arc::new(Mutex::new(Data::default()));
+    pub static ref API_KEYS: Arc<Mutex<ApiKeys>> = Arc::new(Mutex::new(ApiKeys::default()));
 }
 
 const DB_NAME: &str = "db.json";
@@ -135,7 +149,7 @@ pub fn load_database() -> Result<Data, Error> {
 pub async fn save_database() -> Result<(), Error> {
     let mut file = OpenOptions::new().write(true).create(true).open(DB_NAME)?;
     let data = MEMORY_DATABASE.lock().await;
-    
+
     // Get data struct from mutex guard
     let data = data.deref();
 
@@ -147,7 +161,10 @@ pub async fn save_database() -> Result<(), Error> {
 pub async fn load_api_keys() -> Result<(), Error> {
     info!("Loading API keys...");
 
-    let mut file = OpenOptions::new().read(true).open("api_keys.toml").expect("Failed to open api_keys.toml");
+    let mut file = OpenOptions::new()
+        .read(true)
+        .open("api_keys.toml")
+        .expect("Failed to open api_keys.toml");
     let mut data = String::new();
     file.read_to_string(&mut data)?;
 
@@ -203,7 +220,6 @@ async fn async_main() -> std::io::Result<()> {
         .set_certificate_chain_file("/etc/letsencrypt/live/grocerylist.works/fullchain.pem")
         .unwrap();
 
-    
     #[cfg(not(debug_assertions))]
     // Create builder without ssl
     return HttpServer::new(move || {
@@ -240,10 +256,9 @@ async fn async_main() -> std::io::Result<()> {
     })
     .bind(ADDRESS, builder)?
     .run()
-    .await;    
-    
-    
-    #[cfg(debug_assertions)]    
+    .await;
+
+    #[cfg(debug_assertions)]
     // Create builder without ssl
     return HttpServer::new(move || {
         let cors = Cors::default()
@@ -306,11 +321,14 @@ fn main() {
 async fn update_loop() {
     // Update inventory
     let mut inventory = Inventory::new();
-    
+
     let update_result = inventory.update().await;
 
     if update_result.is_err() {
-        info!("Failed to update inventory: {}", update_result.err().unwrap());
+        info!(
+            "Failed to update inventory: {}",
+            update_result.err().unwrap()
+        );
     } else {
         MEMORY_DATABASE.lock().await.inventory = inventory;
         info!("Inventory updated!");
@@ -339,5 +357,30 @@ async fn update_loop() {
     info!("Updated {} users!", users.len());
 
     MEMORY_DATABASE.lock().await.users.update_from(&users);
+
+    // Update and check print queue
+    // First, get num of available printers
+    let mut printers = MEMORY_DATABASE.lock().await.printers.clone();
+
+    let printers_avail = printers.get_available_printers();
+
+    info!("{} printers currently available", printers_avail.len());
+
+    printers.cleanup_print_queue();
+
+    MEMORY_DATABASE.lock().await.printers = printers.clone();
+
+    // Then, get first x people in queue, where x is the number of available printers
+    for i in 0..min(printers_avail.len(), printers.get_print_queue_length()) {
+        let mut entry = MEMORY_DATABASE.lock().await.printers.get_queue_at(i).unwrap();
+
+        if entry.was_notified() {
+            continue;
+        } else {
+            entry.notify().await;
+        }
+
+        MEMORY_DATABASE.lock().await.printers.update_queue_at(i, entry);
+    }
 
 }

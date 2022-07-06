@@ -19,3 +19,6 @@ checkout = "YOUR_API_KEY"
 student_storage = "YOUR_API_KEY"
 
 printers = "YOUR_API_KEY"
+
+gmail_email = "EMAIL"
+gmail_password = "PASSWORD"
