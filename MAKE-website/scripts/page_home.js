@@ -6,10 +6,26 @@ async function login() {
     if (collegeID !== null) {
         state.college_id = collegeID;
 
-        await updateUserInfo();
+        const result = await updateUserInfo();
 
-        displayLoggedIn();
+        if (result) {
+            displayLoggedIn();
+        } else {
+            displayLoginError();
+        }
     }
+}
+
+function displayLoginError() {
+    const login_error = document.getElementById('login-error');
+
+    login_error.classList.remove('hidden');
+}
+
+function hideLoginError() {
+    const login_error = document.getElementById('login-error');
+
+    login_error.classList.add('hidden');    
 }
 
 function logout() {

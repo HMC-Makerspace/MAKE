@@ -20,6 +20,7 @@
 
 
     <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../kiosks.css">
 </head>
 
 <body>
@@ -29,15 +30,22 @@
     <div id="student-storage-container">
         <div id="student-storage-header">
             <h1>Student Storage Kiosk</h1>
-            <p2>
-                Tap on an empty storage slot, then tap/swipe your student ID to reserve it for two weeks.
+            <p3>
+                Tap on an empty storage slot, then tap/swipe your student ID to reserve it for one month.
                 <br>
                 You can renew your reservation online at <b>make.hmc.edu</b>.
-            </p2>
+            </p3>
         </div>
 
         <div id="overall-student-storage">
 
+        </div>
+
+        <div id="checkout-popup" class="hidden">
+            <h2>Tap or Swipe your ID card</h2>
+            <p3>To checkout <span id="slot-selected"></span> for one month</p3>
+            <input id="checkout-id-input" onchange="checkoutSlot()">
+            <h2 id="checkout-error"></h2>
         </div>
     </div>
 

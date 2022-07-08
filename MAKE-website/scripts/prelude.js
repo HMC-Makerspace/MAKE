@@ -98,10 +98,15 @@ async function updateUserInfo() {
         saveState();
 
         // Fetch/render appropriate data
+        hideLoginError();
         fetchStudentStorage();
         renderQuizInfo();
         renderCheckouts();
         // End fetches
+
+        return true;
+    } else {
+        return false;
     }
 }
 

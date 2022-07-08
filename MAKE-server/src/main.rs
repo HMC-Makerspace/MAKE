@@ -13,6 +13,10 @@ use actix_web_static_files::ResourceFiles;
 
 use env_logger::Logger;
 use lazy_static::__Deref;
+use lettre::SmtpClient;
+use lettre::Transport;
+use lettre::smtp::authentication::Credentials;
+use lettre_email::EmailBuilder;
 use log::*;
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use serde::{Deserialize, Serialize};

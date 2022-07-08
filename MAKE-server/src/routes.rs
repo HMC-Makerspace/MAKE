@@ -263,6 +263,7 @@ pub async fn set_auth_level(
     }
 }
 
+
 #[post("/api/v1/auth/set_quiz/{id_number}/{quiz_name}/{passed}/{api_key}")]
 pub async fn set_quiz_passed(
     path: web::Path<(u64, QuizName, bool, String)>,
@@ -315,6 +316,7 @@ pub async fn update_printer_status(
         .status(http::StatusCode::CREATED)
         .finish())
 }
+
 
 #[post("/api/v1/student_storage/add_entry/{id_number}/{slot_id}/{api_key}")]
 pub async fn checkout_student_storage(

@@ -1,16 +1,15 @@
 :root {
     --main-font: "Inter";
     --title-font: "Righteous";
-    --theme-color-1: #ee930b;
+    --theme-color-1: #ee9d22;
     --theme-color-2: #242424;
     --theme-color-3: #eeeeee;
-    --theme-color-4: #3d73c5;
+    --theme-color-4: #4d6488;
     --theme-color-5: #444444;
     --theme-color-6: #e0cf34;
     --theme-color-7: #a05fcc;
     --theme-color-8: #dbdbdb;
     
-    --page-header-color: #ee930b;
     --low-color: #9c5151;
     --medium-color: #afad59;
     --high-color: #4e9e4e;
@@ -104,7 +103,9 @@ p3 {
 }
 
 #main-logo {
-    font-size: 60px;
+    font-size: 40px;
+    letter-spacing: 10px;
+    text-align: center;
     font-weight: bold;
     margin-top: 30px;
     margin-bottom: 50px;
@@ -178,7 +179,7 @@ input.focus {
 }
 
 #header {
-    background-color: var(--page-header-color );
+    background-color: var(--theme-color-1);
     color: white;
     border-radius: var(--roundness);
     display: flex;
@@ -313,7 +314,7 @@ INVENTORY
     align-items: center;
     justify-content: space-evenly;
     gap: 10px;
-    padding: 20px;
+    padding: 10px;
 }
 
 .inventory-result-show-lower-div {
@@ -444,9 +445,18 @@ Student Storage
     padding: 20px;
 }
 
+
+.student-storage-group-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
 .student-storage-group {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(8, 120px);
+    grid-template-rows: auto;
     background-color: var(--theme-color-2);
     border-radius: var(--roundness);
     gap: 20px;
@@ -462,14 +472,14 @@ Student Storage
     background-color: var(--theme-color-3);
     border-radius: var(--roundness);
     gap: 5px;
-    height: 100px;
-    width: 100%;
+    height: 120px;
+    width: 120px;
     margin: auto 0;
 }
 
 .student-storage-slot.occupied {
     color: var(--text-color-main);
-    background-color: var(--theme-color-2);
+    background-color: var(--theme-color-5);
 }
 
 .student-storage-slot.user {
@@ -483,6 +493,10 @@ Student Storage
 }
 .student-storage-slot-expire, .student-storage-slot-status {
     font-size: 12px;
+}
+
+.student-storage-slot button {
+    width: 70px;
 }
 
 /*

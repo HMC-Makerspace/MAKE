@@ -66,8 +66,12 @@
             </div>
 
             <div id="college-id-container" class="id-n">
-                <input type="text" id="college-id-input" placeholder="Enter your college ID number">
+                <input type="text" id="college-id-input" placeholder="Enter your college ID number" onchange="login()">
                 <button id="college-id-button" class="big" onclick="login()">Log In</button>
+                
+                <h2 id="login-error" class="hidden">
+                    Invalid college ID number. Please take the General Safety Quiz, and try again in 3-5 minutes.
+                </h2>
 
                 <p3>
                     If you haven't taken the General Safety Quiz, navigate to <b>Quizzes & Information</b> and take the
