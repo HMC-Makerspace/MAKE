@@ -3,8 +3,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::users::User;
 
+
+// Initial checkout period of 1 month
+const INITIAL_CHECKOUT_PERIOD: u64 = 30 * 24 * 60 * 60;
 // Renew period of 2 weeks
 const RENEW_LENGTH: u64 = 2 * 7 * 24 * 60 * 60;
+// Number of renewals allowed
+const RENEWALS_ALLOWED: u64 = 2;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct StudentStorage {
@@ -112,7 +117,7 @@ impl Slot {
 
     pub fn checkout(&mut self, college_id: u64) {
         self.occupied = true;
-        self.occupied_details = Some(OccupiedDetails::new(college_id, RENEW_LENGTH));
+        self.occupied_details = Some(OccupiedDetails::new(college_id, INITIAL_CHECKOUT_PERIOD));
     }
 
     pub fn censor(&self) -> Self {
@@ -178,6 +183,7 @@ pub struct OccupiedDetails {
     pub college_id: u64,
     pub timestamp_start: u64,
     pub timestamp_end: u64,
+    pub renewals_left: u64,
 }
 
 impl OccupiedDetails {
@@ -193,6 +199,7 @@ impl OccupiedDetails {
             college_id,
             timestamp_start,
             timestamp_end,
+            renewals_left: RENEWALS_ALLOWED,
         }
     }
 
@@ -222,6 +229,7 @@ impl OccupiedDetails {
             college_id: 0,
             timestamp_start: self.timestamp_start,
             timestamp_end: self.timestamp_end,
+            renewals_left: 0,
         }
     }
 

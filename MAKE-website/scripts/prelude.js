@@ -24,6 +24,7 @@ var state = {
     settings: null,
     inventory: null,
     student_storage: null,
+    printers: null,
 }
 
 

@@ -34,6 +34,23 @@ impl UserInfo {
     }
 }
 
+#[derive(Deserialize, Serialize, Clone)]
+struct PrinterStatuses {
+    printers: Vec<Printer>,
+    pos_in_queue: Option<usize>,
+    total_in_queue: usize,
+}
+
+impl PrinterStatuses {
+    fn from_printers(printers: Vec<Printer>, pos_in_queue: Option<usize>, total_in_queue: usize) -> Self {
+        PrinterStatuses {
+            printers,
+            pos_in_queue,
+            total_in_queue,
+        }
+    }
+}
+
 /*
 
 HELP
@@ -158,6 +175,22 @@ pub async fn get_student_storage_for_all(path: web::Path<(String)>) -> Result<Ht
     } else {
         Ok(HttpResponse::Unauthorized().finish())
     }
+}
+
+#[get("/api/v1/printers/{id_number}")]
+pub async fn get_printers(path: web::Path<(u64)>) -> Result<HttpResponse, Error> {
+    let id = path.into_inner();
+    let data = MEMORY_DATABASE.lock().await;
+    let printers = data.printers.get_printer_statuses().clone();
+    let pos_in_queue = data.printers.get_queue_pos_for(id);
+    let total_in_queue = data.printers.get_print_queue_length();
+    
+    let printers = PrinterStatuses::from_printers(
+        printers,
+        pos_in_queue,
+        total_in_queue,
+    );
+    Ok(HttpResponse::Ok().json(printers))
 }
 
 /*
@@ -317,6 +350,56 @@ pub async fn update_printer_status(
         .finish())
 }
 
+#[post("/api/v1/printers/join_queue/{id_number}")]
+pub async fn join_printer_queue(path: web::Path<(u64)>) -> Result<HttpResponse, Error> {
+    let id_number = path.into_inner();
+
+    let mut data = MEMORY_DATABASE.lock().await;
+
+    let user = data.users.get_user_by_id(&id_number);
+
+    if user.is_none() {
+        return Err(ErrorBadRequest("User not found".to_string()));
+    }
+
+    let user = user.unwrap();
+
+    let result = data.printers.add_user_to_queue(&user);
+
+    if result.is_err() {
+        return Err(ErrorBadRequest(result.unwrap_err()));
+    }
+
+    Ok(HttpResponse::Ok()
+        .status(http::StatusCode::CREATED)
+        .finish())
+
+}
+
+#[post("/api/v1/printers/leave_queue/{id_number}")]
+pub async fn leave_printer_queue(path: web::Path<(u64)>) -> Result<HttpResponse, Error> {
+    let id_number = path.into_inner();
+
+    let mut data = MEMORY_DATABASE.lock().await;
+
+    let user = data.users.get_user_by_id(&id_number);
+
+    if user.is_none() {
+        return Err(ErrorBadRequest("User not found".to_string()));
+    }
+
+    let user = user.unwrap();
+
+    let result = data.printers.remove_user_from_queue(&user);
+
+    if result.is_err() {
+        return Err(ErrorBadRequest(result.unwrap_err()));
+    }
+
+    Ok(HttpResponse::Ok()
+        .status(http::StatusCode::CREATED)
+        .finish())
+}
 
 #[post("/api/v1/student_storage/add_entry/{id_number}/{slot_id}/{api_key}")]
 pub async fn checkout_student_storage(

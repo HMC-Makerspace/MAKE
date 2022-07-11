@@ -25,7 +25,6 @@
 
 
     /* Icons */
-    --inventory-page-icon: url(..img/inventory-icon.svg);
     --tool-icon: url(../img/tool-icon.svg);
     --material-icon: url(../img/material-icon.svg);
 }
@@ -654,6 +653,72 @@ Checkouts
     min-height: 50px;
 }
 
+/* 
+
+3D Printers
+
+*/
+
+#printers-help {
+    background-color: var(--theme-color-2);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--roundness) var(--roundness) 0 0;
+    padding: 10px;
+}
+
+#printers-statuses {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--theme-color-5);
+    border-radius: 0 0 var(--roundness) var(--roundness);
+    margin-bottom: 10px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+#printers-current {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+#printers-queue {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--theme-color-2);
+    border-radius: var(--roundness);
+    gap: 20px;
+    padding: 40px;
+}
+
+.printer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--theme-color-2);
+    border-radius: var(--roundness);
+    text-align: center;
+    font-weight: bolder;
+    width: 200px;
+    height: 300px;
+    gap: 20px;
+}
+
+.printer-icon {
+    width: 100px;
+    height: 100px;
+}
 
 
 /*

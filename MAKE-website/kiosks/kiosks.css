@@ -13,6 +13,7 @@ p3 {
 #student-storage-container {
     width: 100vw;
     background-color: var(--theme-color-5);
+    overflow-y: scroll;
 }
 
 #overall-student-storage {

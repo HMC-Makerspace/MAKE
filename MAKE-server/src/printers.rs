@@ -1,13 +1,12 @@
-use lettre::smtp::authentication::Credentials;
-use lettre::stub::StubTransport;
-use lettre::{SmtpClient, Transport};
-use lettre_email::*;
 use log::*;
 use serde::{Deserialize, Serialize};
+use std::io::Read;
 use std::{collections::HashMap, time::SystemTime};
+use toml::Value;
 
-use crate::{SMTP_URL, URL};
+use crate::emails::send_individual_email;
 use crate::{users::User, API_KEYS};
+use crate::{EMAIL_TEMPLATES, SMTP_URL, URL};
 
 const PRINT_QUEUE_ENTRY_EXPIRATION_TIME: u64 = 60 * 15; // 15 minutes
 
@@ -122,6 +121,37 @@ impl Printers {
         }
     }
 
+    pub fn load_printers(&mut self) {
+        // Open printers.toml
+        let mut file = std::fs::File::open("printers.toml").unwrap();
+        let mut contents = String::new();
+        file.read_to_string(&mut contents).unwrap();
+        let printer_ids: Value = toml::from_str(&contents).unwrap();
+        let printer_ids: Vec<String> = printer_ids
+            .get("ids")
+            .unwrap()
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|x| x.as_str().unwrap().to_string())
+            .collect();
+        
+        for printer_id in printer_ids {
+            self.printers.insert(printer_id.clone(), Printer::new(&printer_id));
+        }
+    }
+
+    pub fn get_printer_statuses(&self) -> Vec<Printer> {
+        let mut printers: Vec<Printer> = self.printers
+            .values()
+            .map(|p| p.clone())
+            .collect();
+        
+        printers.sort_by(|a, b| a.id.cmp(&b.id));
+
+        printers
+    }
+
     pub fn get_printer_by_id(&self, id: &str) -> Option<Printer> {
         self.printers.get(id).cloned()
     }
@@ -213,14 +243,14 @@ impl Printers {
         }
     }
 
-    pub fn process_next_queue_entry(&mut self) {
+    pub async fn process_next_queue_entry(&mut self) {
         if self.queue.is_empty() {
             return;
         }
 
         let mut queue_entry = self.queue.remove(0);
 
-        queue_entry.notify();
+        queue_entry.notify().await;
 
         self.queue_log.push(queue_entry);
     }
@@ -239,12 +269,12 @@ impl Printers {
     /// - has been notified
     /// - has had 15 minutes since last notification
     /// - has NOT accepted
-    /// 
-    /// OR 
+    ///
+    /// OR
     ///
     /// - has accepted
     /// - has had 15 minutes since acceptance
-    /// 
+    ///
     /// To the print log, removing them from the queue.
     pub fn cleanup_print_queue(&mut self) {
         self.queue = self
@@ -253,7 +283,8 @@ impl Printers {
             .filter(|queue_entry| {
                 if (queue_entry.was_notified()
                     && !queue_entry.was_accepted()
-                    && queue_entry.has_expired()) || (queue_entry.was_accepted() && queue_entry.has_expired())
+                    && queue_entry.has_expired())
+                    || (queue_entry.was_accepted() && queue_entry.has_expired())
                 {
                     self.queue_log.push(queue_entry.clone().clone());
                     false
@@ -277,12 +308,15 @@ impl Printers {
         self.queue[index] = queue_entry;
     }
 
+    pub fn get_queue_pos_for(&self, college_id: u64) -> Option<usize> {
+        self.queue.iter().position(|entry| entry.college_id == college_id)
+    }
+
     // tee hee
     pub fn move_queue_index(&mut self, from: usize, to: usize) {
         let queue_entry = self.queue.remove(from);
         self.queue.insert(to, queue_entry);
     }
-
 }
 
 #[derive(Default, Deserialize, Serialize, Clone)]
@@ -300,45 +334,15 @@ impl PrintQueueEntry {
     /// Email credentials should be stored in the api_keys.toml file
     /// Follow this link to get the credentials: https://support.google.com/accounts/answer/185833
     pub async fn notify(&mut self) {
-        let lock = API_KEYS.lock().await;
-        let (email, password) = lock.get_gmail_tuple();
-
-        let content = EmailBuilder::new()
-            .to(self.email.clone())
-            .from(email.clone())
-            .subject("MAKE Print Queue Notification")
-            .html(format!("
-                <h1>Print Notification</h1>
-                <p>
-                A 3D printer is available for you to use! 
-                Please click the link below to accept. 
-                After accepting, you will have 15 minutes before the next person in queue will be notified.
-                </p>
-
-                <p>
-                <a href=\"{}/?accept_queue={}\">Accept</a>
-            ", URL, self.uuid))
-            .build()
-            .unwrap();
-
-        let mut mailer = SmtpClient::new_simple(SMTP_URL)
-            .unwrap()
-            .credentials(Credentials::new(email, password))
-            .transport();
-
-        let result = mailer.send(content.into());
-
-        if result.is_ok() {
-            self.timestamp_notified = Some(
-                SystemTime::now()
-                    .duration_since(SystemTime::UNIX_EPOCH)
-                    .expect("Time went backwards")
-                    .as_secs(),
-            );
-            info!("Notified user {}", &self.email);
-        } else {
-            error!("Error sending email: {:?}", result);
-        }
+        send_individual_email(
+            self.email.clone(),
+            "MAKE Print Notification".to_string(),
+            EMAIL_TEMPLATES
+                .lock()
+                .await
+                .get_print_queue(&self.uuid.clone()),
+        )
+        .await;
 
         self.timestamp_notified = Some(
             SystemTime::now()
@@ -367,19 +371,18 @@ impl PrintQueueEntry {
 
     pub fn has_expired(&self) -> bool {
         if self.timestamp_accepted.is_some() {
-            self.timestamp_accepted.unwrap()
-                + PRINT_QUEUE_ENTRY_EXPIRATION_TIME
+            self.timestamp_accepted.unwrap() + PRINT_QUEUE_ENTRY_EXPIRATION_TIME
                 < SystemTime::now()
                     .duration_since(SystemTime::UNIX_EPOCH)
                     .expect("Time went backwards")
                     .as_secs()
         } else {
             self.timestamp_notified.is_some()
-            && self.timestamp_notified.unwrap() + PRINT_QUEUE_ENTRY_EXPIRATION_TIME
-                < SystemTime::now()
-                    .duration_since(SystemTime::UNIX_EPOCH)
-                    .expect("Time went backwards")
-                    .as_secs()
+                && self.timestamp_notified.unwrap() + PRINT_QUEUE_ENTRY_EXPIRATION_TIME
+                    < SystemTime::now()
+                        .duration_since(SystemTime::UNIX_EPOCH)
+                        .expect("Time went backwards")
+                        .as_secs()
         }
     }
 }
@@ -393,7 +396,6 @@ pub struct PrintLogEntry {
 
 #[derive(Default, Deserialize, Serialize, Clone)]
 pub struct Printer {
-    name: String,
     id: String,
     status: PrinterStatus,
     last_updated: u64,
@@ -401,18 +403,13 @@ pub struct Printer {
 }
 
 impl Printer {
-    pub fn new(name: &str, id: &str) -> Self {
+    pub fn new(id: &str) -> Self {
         Printer {
-            name: name.to_string(),
             id: id.to_string(),
             status: PrinterStatus::default(),
             last_updated: 0,
             current_time_left: 0,
         }
-    }
-
-    pub fn get_name(&self) -> &str {
-        &self.name
     }
 
     pub fn set_status(&mut self, status: PrinterStatus) {

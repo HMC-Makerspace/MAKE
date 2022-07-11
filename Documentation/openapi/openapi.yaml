@@ -45,6 +45,17 @@ components:
           type: string
         checked_in:
           type: boolean
+      
+    PrinterObject:
+      properties:
+        id: 
+          type: string
+        status: 
+          type: string
+        last_updated: 
+          type: integer
+        current_time_left: 
+          type: integer
 paths:
   /inventory:
     get:
@@ -332,6 +343,28 @@ paths:
                 type: string
         401:
           description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: string
+  /printers:
+    get:
+      summary: "Gets a list of all printers"
+      operationId: "getPrinters"
+      tags:
+        - Printers
+      responses:
+        200:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PrinterObject"
+
+        500:
+          description: "Internal server error"
           content:
             application/json:
               schema:

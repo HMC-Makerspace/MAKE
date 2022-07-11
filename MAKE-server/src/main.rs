@@ -32,6 +32,7 @@ mod quizzes;
 mod routes;
 mod student_storage;
 mod users;
+mod emails;
 
 use crate::checkout::*;
 use crate::inventory::*;
@@ -42,6 +43,7 @@ use crate::quizzes::*;
 use crate::routes::*;
 use crate::student_storage::*;
 use crate::users::*;
+use crate::emails::*;
 
 use lazy_static::lazy_static;
 use std::sync::Arc;
@@ -119,9 +121,43 @@ impl ApiKeys {
     }
 }
 
+#[derive(Default, Deserialize, Serialize)]
+pub struct EmailTemplates {
+    pub print_queue: String,
+    pub expired_student_storage: String,
+}
+
+impl EmailTemplates {
+    pub fn load_templates(&mut self) {
+        self.print_queue = self.html_file_to_string("email_templates/print_queue.html");
+        self.expired_student_storage = self.html_file_to_string("email_templates/expired_student_storage.html");
+    }
+
+    pub fn html_file_to_string(&self, filename: &str) -> String {
+        let mut file = OpenOptions::new()
+            .read(true)
+            .open(filename)
+            .unwrap();
+        let mut contents = String::new();
+        file.read_to_string(&mut contents).unwrap();
+        contents
+    }
+
+    pub fn get_print_queue(&self, acceptance_uuid: &str) -> String {
+        let mut html = self.print_queue.clone();
+        html.replace("{acceptance_uuid}", acceptance_uuid)
+    }
+
+    pub fn get_expired_student_storage(&self, slot_id: &str) -> String {
+        let mut html = self.expired_student_storage.clone();
+        html.replace("{slot_id}", slot_id)
+    }
+}
+
 lazy_static! {
     pub static ref MEMORY_DATABASE: Arc<Mutex<Data>> = Arc::new(Mutex::new(Data::default()));
     pub static ref API_KEYS: Arc<Mutex<ApiKeys>> = Arc::new(Mutex::new(ApiKeys::default()));
+    pub static ref EMAIL_TEMPLATES: Arc<Mutex<EmailTemplates>> = Arc::new(Mutex::new(EmailTemplates::default()));
 }
 
 const DB_NAME: &str = "db.json";
@@ -201,6 +237,14 @@ async fn async_main() -> std::io::Result<()> {
 
     info!("Database(s) loaded!");
 
+    info!("Loading 3D printers...");
+    MEMORY_DATABASE.lock().await.printers.load_printers();
+    info!("3D printers loaded!");
+
+    info!("Loading email templates...");
+    EMAIL_TEMPLATES.lock().await.load_templates();
+    info!("Email templates loaded!");
+
     spawn(async move {
         let mut interval = time::interval(Duration::from_secs(60));
         loop {
@@ -254,6 +298,9 @@ async fn async_main() -> std::io::Result<()> {
             .service(renew_student_storage_slot)
             .service(release_student_storage_slot)
             .service(get_student_storage_for_all)
+            .service(get_printers)
+            .service(join_printer_queue)
+            .service(leave_printer_queue)
             .service(help)
             .service(openapi)
             .service(ResourceFiles::new("/", generate()))
@@ -292,6 +339,9 @@ async fn async_main() -> std::io::Result<()> {
             .service(renew_student_storage_slot)
             .service(release_student_storage_slot)
             .service(get_student_storage_for_all)
+            .service(get_printers)
+            .service(join_printer_queue)
+            .service(leave_printer_queue)
             .service(help)
             .service(openapi)
             .service(ResourceFiles::new("/", generate()))
