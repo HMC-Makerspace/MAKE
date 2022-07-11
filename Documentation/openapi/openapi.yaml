@@ -111,7 +111,7 @@ paths:
             application/json:
               schema:
                 type: string
-  /quizzes{api_key}:
+  /quizzes/{api_key}:
     get:
       summary: "Gets a list of all quizzes, with a list of responses for each quiz"
       operationId: "getQuizzes"
@@ -258,6 +258,102 @@ paths:
             application/json:
               schema:
                 type: string
+  /student_storage/user/{id_number}:
+    get:
+      summary: "returns the student storage object for the user"
+      operationId: "getStudentStorage"
+      tags:
+        - studentStorage
+      parameters:
+        - name: id_number
+          in: path
+          description: "Student ID Number"
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentStorageObject"
+        404:
+          description: "User not found"
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: string
+  /student_storage/all/{api_key}:
+    get:
+      summary: "returns all student storage objects using an API key"
+      operationId: "getAllStudentStorage"
+      tags:
+        - studentStorage
+      parameters:
+        - name: api_key
+          in: path
+          description: "API Key for all Student Storage"
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AllStudentStorageObjects"
+        404:
+          description: "Objects not found"
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: string
+  /printers/{id_number}:
+    get:
+      summary: "returns printers based on ID number"
+      operationId: "getPrinters"
+      tags:
+        - Printers
+      parameters:
+        - name: id_number
+          in: path
+          description: "Student ID Number"
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Printers"
+        404:
+          description: "Printers not found"
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: string
 
   /checkouts/add_entry/{id_number}/{item_name}/{api_key}:
     post:
@@ -365,6 +461,233 @@ paths:
 
         500:
           description: "Internal server error"
+          content:
+            application/json:
+              schema:
+                type: string
+  /auth/set_level/{id_number}/{auth_level}/{api_key}:
+    post:
+      summary: "Sets the level of authentication by ID, using an API Key"
+      operationId: "setAuthLevel"
+      tags:
+        - Auth
+      parameters:
+        - name: id_number
+          in: path
+          description: "College ID Number"
+          required: true
+          schema:
+            type: integer
+        - name: auth_level
+          in: path
+          description: "Authentication Level"
+          required: true
+          schema:
+            type: string
+        - name: api_key
+          in: path
+          description: "Checkout or Admin API Key"
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                type: string
+        404:
+          description: "Item not found"
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: string
+  /auth/set_quiz/{id_number}/{quiz_name}/{passed}/{api_key}:
+    post:
+      summary: "Posts whether a user passed a given quiz based on ID, using an API Key"
+      operationId: "setAuthQuiz"
+      tags:
+        - Auth
+      parameters:
+        - name: id_number
+          in: path
+          description: "College ID Number"
+          required: true
+          schema:
+            type: integer
+        - name: quiz_name
+          in: path
+          description: "Name of Quiz Taken"
+          required: true
+          schema:
+            type: string
+        - name: passed
+          in: path
+          description: "Pass/Failed a Quiz"
+          required: true
+          schema:
+            type: boolean
+        - name: api_key
+          in: path
+          description: "Checkout or Admin API Key"
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                type: string
+        404:
+          description: "Item not found"
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: string
+  /printers/update_status:
+    post:
+      summary: "Sets status of the printer"
+      operationId: "updatePrinterStatus"
+      tags:
+        - Printers
+      responses:
+        201:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                type: string
+        404:
+          description: "Printer not found"
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: string
+  /printers/join_queue/{id_number}:
+    post:
+      summary: "joins printer queue based on ID number"
+      operationId: "joinPrinterQueue"
+      tags:
+        - Printers
+      parameters:
+        - name: id_number
+          in: path
+          description: "Student ID Number"
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Printers"
+        404:
+          description: "Printer Queue not found"
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: string
+  /printers/leave_queue/{id_number}:
+    post:
+      summary: "leave printer queue based on ID number"
+      operationId: "leavePrinterQueue"
+      tags:
+        - Printers
+      parameters:
+        - name: id_number
+          in: path
+          description: "Student ID Number"
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Printers"
+        404:
+          description: "Printer Queue not found"
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                type: string
+  /student_storage/add_entry/{id_number}/{slot_id}/{api_key}:
+    post:
+      summary: "adds a student storage object entry"
+      operationId: "addStudentStorageEntry"
+      tags:
+        - studentStorage
+      parameters:
+        - name: id_number
+          in: path
+          description: "Student ID Number"
+          required: true
+          schema:
+            type: integer
+        - name: slot_id
+          in: path
+          description: "Slot ID"
+          required: true
+          schema:
+            type: integer
+        - name: api_key
+          in: path
+          description: "API Key"
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentStorageObject"
+        404:
+          description: "User not found"
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          description: "Unauthorized"
           content:
             application/json:
               schema:
