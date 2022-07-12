@@ -4,7 +4,7 @@ use std::time::SystemTime;
 use serde::{Deserialize, Serialize};
 
 use crate::checkout::*;
-use crate::inventory::*;
+
 use crate::printers::PrintQueueEntry;
 use crate::quizzes::*;
 

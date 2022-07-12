@@ -1,5 +1,5 @@
 use lettre::smtp::authentication::Credentials;
-use lettre::stub::StubTransport;
+
 use lettre::{SmtpClient, Transport};
 use lettre_email::*;
 
@@ -45,7 +45,7 @@ pub async fn send_individual_email(recipient: String, subject: String, body: Str
 
     let content = EmailBuilder::new()
         .to(recipient.clone())
-        .from(email.clone())
+        .from(email)
         .subject(subject.clone())
         .html(body.clone())
         .build()

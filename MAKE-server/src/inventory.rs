@@ -1,6 +1,6 @@
 use std::time::SystemTime;
 use serde::{Deserialize, Serialize};
-use csv;
+
 
 const INVENTORY_URL: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTzvLVGN2H5mFpQLpstQyT5kgEu1CI8qlhY60j78mO0LQgDnTHs_ZKx39xiIO1h-w09ZXyOZ5GqOf5q/pub?gid=0&single=true&output=csv";
 
@@ -28,7 +28,7 @@ impl Inventory {
         let response = reqwest::get(INVENTORY_URL)
             .await;
 
-        if let Ok(mut response) = response {
+        if let Ok(response) = response {
             
             let data = response.text().await.expect("Failed to read inventory");
 

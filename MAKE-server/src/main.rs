@@ -4,21 +4,21 @@ use std::io::Read;
 use std::io::Write;
 use std::process::exit;
 use std::thread;
-use std::time::SystemTime;
+
 
 use actix_cors::*;
 use actix_web::rt::spawn;
 use actix_web::*;
 use actix_web_static_files::ResourceFiles;
 
-use env_logger::Logger;
+
 use lazy_static::__Deref;
-use lettre::SmtpClient;
-use lettre::Transport;
-use lettre::smtp::authentication::Credentials;
-use lettre_email::EmailBuilder;
+
+
+
+
 use log::*;
-use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
+
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use tokio::time;
@@ -36,14 +36,14 @@ mod emails;
 
 use crate::checkout::*;
 use crate::inventory::*;
-use crate::laser_cutter::*;
-use crate::permissions::*;
+
+
 use crate::printers::*;
 use crate::quizzes::*;
 use crate::routes::*;
 use crate::student_storage::*;
 use crate::users::*;
-use crate::emails::*;
+
 
 use lazy_static::lazy_static;
 use std::sync::Arc;
@@ -157,12 +157,12 @@ impl EmailTemplates {
     }
 
     pub fn get_print_queue(&self, acceptance_uuid: &str) -> String {
-        let mut html = self.print_queue.clone();
+        let html = self.print_queue.clone();
         html.replace("{acceptance_uuid}", acceptance_uuid)
     }
 
     pub fn get_expired_student_storage(&self, slot_id: &str) -> String {
-        let mut html = self.expired_student_storage.clone();
+        let html = self.expired_student_storage.clone();
         html.replace("{slot_id}", slot_id)
     }
 }
@@ -188,13 +188,13 @@ pub fn load_database() -> Result<Data, Error> {
     let file = OpenOptions::new().read(true).open(DB_NAME);
 
     if file.is_err() {
-        return Ok(Data::default());
+        Ok(Data::default())
     } else {
         let mut file = file.unwrap();
 
         let mut data = String::new();
         file.read_to_string(&mut data)?;
-        let data: Data = from_slice_lenient(&data.as_bytes()).unwrap();
+        let data: Data = from_slice_lenient(data.as_bytes()).unwrap();
         Ok(data)
     }
 }
@@ -242,10 +242,10 @@ async fn async_main() -> std::io::Result<()> {
     
     // Print startup text
     info!("Starting up...");
-    println!("{}", "██████████████████████████████████████████████████████████████");
+    println!("██████████████████████████████████████████████████████████████");
     println!("{}", STARTUP_TITLE);
     println!("Version {}", VERSION_STRING);
-    println!("{}", "██████████████████████████████████████████████████████████████");
+    println!("██████████████████████████████████████████████████████████████");
 
     // Load api keys
     load_api_keys().await.expect("Could not load API keys!");
@@ -458,6 +458,6 @@ async fn update_loop() {
     }
 
     // Check each checkout log entry for expiration
-    let mut checkout_log = MEMORY_DATABASE.lock().await.checkout_log.clone();
+    let _checkout_log = MEMORY_DATABASE.lock().await.checkout_log.clone();
 
 }

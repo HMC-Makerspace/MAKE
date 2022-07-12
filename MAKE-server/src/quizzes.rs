@@ -57,7 +57,7 @@ impl Quiz {
         let response = reqwest::get(format!("{}{}{}", base_quiz_url, self.id, post_quiz_url))
             .await;
 
-        if let Ok(mut response) = response {
+        if let Ok(response) = response {
             let data = response.text().await.expect("Failed to read quiz");
 
             // Fetch csv file
@@ -121,7 +121,7 @@ impl Response {
 
     pub fn parse_college_id(id_str: String) -> u64 {
         // First, if it has a '-', remove everything after it
-        let mut id_str = id_str.clone();
+        let mut id_str = id_str;
 
         if let Some(index) = id_str.find('-') {
             id_str.truncate(index);
@@ -131,13 +131,13 @@ impl Response {
         id_str.retain(|c| c.is_numeric());
 
         // Parse to u64
-        let id = id_str.parse::<u64>().unwrap_or(0);
+        
 
-        id
+        id_str.parse::<u64>().unwrap_or(0)
     }
 
     pub fn determine_if_passed(score_str: String) -> bool {
-        let score = score_str.split("/").collect::<Vec<&str>>();
+        let score = score_str.split('/').collect::<Vec<&str>>();
 
         // Check if both sides equal each other, eg '100 / 100'
         score[0].trim() == score[1].trim()

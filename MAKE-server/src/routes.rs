@@ -2,8 +2,8 @@
 
 use crate::*;
 use ::serde::{Deserialize, Serialize};
-use actix_web::{error::*, *};
-use openssl::stack::Stack;
+use actix_web::{error::*};
+
 
 #[derive(Deserialize, Serialize, Clone)]
 struct UserInfo {
@@ -60,7 +60,7 @@ HELP
 /// Returns help page in ../Documentation/openapi/help.html
 #[get("/api/v1/help")]
 pub async fn help() -> Result<HttpResponse, Error> {
-    let mut resp = HttpResponse::Ok()
+    let resp = HttpResponse::Ok()
         .content_type("text/html")
         .body(include_str!("../../Documentation/openapi/help.html"));
 
@@ -69,7 +69,7 @@ pub async fn help() -> Result<HttpResponse, Error> {
 
 #[get("/api/v1/openapi.yaml")]
 pub async fn openapi() -> Result<HttpResponse, Error> {
-    let mut resp = HttpResponse::Ok()
+    let resp = HttpResponse::Ok()
         .content_type("text/html")
         .body(include_str!("../../Documentation/openapi/openapi.yaml"));
 
@@ -83,16 +83,16 @@ pub async fn openapi() -> Result<HttpResponse, Error> {
 */
 
 #[get("/api/v1/inventory")]
-pub async fn get_inventory(path: web::Path<()>) -> Result<HttpResponse, Error> {
-    let mut data = MEMORY_DATABASE.lock().await;
+pub async fn get_inventory(_path: web::Path<()>) -> Result<HttpResponse, Error> {
+    let data = MEMORY_DATABASE.lock().await;
     let inventory = data.inventory.clone();
     Ok(HttpResponse::Ok().json(inventory))
 }
 
 #[get("/api/v1/quizzes/{api_key}")]
-pub async fn get_quizzes(path: web::Path<(String)>) -> Result<HttpResponse, Error> {
+pub async fn get_quizzes(path: web::Path<String>) -> Result<HttpResponse, Error> {
     if API_KEYS.lock().await.validate_admin(&path.into_inner()) {
-        let mut data = MEMORY_DATABASE.lock().await;
+        let data = MEMORY_DATABASE.lock().await;
         let quizzes = data.quizzes.clone();
         Ok(HttpResponse::Ok().json(quizzes))
     } else {
@@ -101,9 +101,9 @@ pub async fn get_quizzes(path: web::Path<(String)>) -> Result<HttpResponse, Erro
 }
 
 #[get("/api/v1/users/all/{api_key}")]
-pub async fn get_users(path: web::Path<(String)>) -> Result<HttpResponse, Error> {
+pub async fn get_users(path: web::Path<String>) -> Result<HttpResponse, Error> {
     if API_KEYS.lock().await.validate_admin(&path.into_inner()) {
-        let mut data = MEMORY_DATABASE.lock().await;
+        let data = MEMORY_DATABASE.lock().await;
         let users = data.users.clone();
         Ok(HttpResponse::Ok().json(users))
     } else {
@@ -112,8 +112,8 @@ pub async fn get_users(path: web::Path<(String)>) -> Result<HttpResponse, Error>
 }
 
 #[get("/api/v1/checkouts/log/{api_key}")]
-pub async fn get_checkout_log(path: web::Path<(String)>) -> Result<HttpResponse, Error> {
-    let (api_key) = path.into_inner();
+pub async fn get_checkout_log(path: web::Path<String>) -> Result<HttpResponse, Error> {
+    let api_key = path.into_inner();
     if API_KEYS.lock().await.validate_admin(&api_key)
         || API_KEYS.lock().await.validate_checkout(&api_key)
     {
@@ -164,7 +164,7 @@ pub async fn get_student_storage_for_user(path: web::Path<u64>) -> Result<HttpRe
 }
 
 #[get("/api/v1/student_storage/all/{api_key}")]
-pub async fn get_student_storage_for_all(path: web::Path<(String)>) -> Result<HttpResponse, Error> {
+pub async fn get_student_storage_for_all(path: web::Path<String>) -> Result<HttpResponse, Error> {
     let api_key = path.into_inner();
     if API_KEYS.lock().await.validate_student_storage(&api_key)
         || API_KEYS.lock().await.validate_admin(&api_key)
@@ -178,10 +178,10 @@ pub async fn get_student_storage_for_all(path: web::Path<(String)>) -> Result<Ht
 }
 
 #[get("/api/v1/printers/{id_number}")]
-pub async fn get_printers(path: web::Path<(u64)>) -> Result<HttpResponse, Error> {
+pub async fn get_printers(path: web::Path<u64>) -> Result<HttpResponse, Error> {
     let id = path.into_inner();
     let data = MEMORY_DATABASE.lock().await;
-    let printers = data.printers.get_printer_statuses().clone();
+    let printers = data.printers.get_printer_statuses();
     let pos_in_queue = data.printers.get_queue_pos_for(id);
     let total_in_queue = data.printers.get_print_queue_length();
     
@@ -296,7 +296,7 @@ pub async fn set_quiz_passed(
 
 #[post("/api/v1/printers/update_status")]
 pub async fn update_printer_status(
-    path: web::Path<()>,
+    _path: web::Path<()>,
     body: web::Json<PrinterWebhookUpdate>,
 ) -> Result<HttpResponse, Error> {
     let mut data = MEMORY_DATABASE.lock().await;
@@ -319,7 +319,7 @@ pub async fn update_printer_status(
 }
 
 #[post("/api/v1/printers/join_queue/{id_number}")]
-pub async fn join_printer_queue(path: web::Path<(u64)>) -> Result<HttpResponse, Error> {
+pub async fn join_printer_queue(path: web::Path<u64>) -> Result<HttpResponse, Error> {
     let id_number = path.into_inner();
 
     let mut data = MEMORY_DATABASE.lock().await;
@@ -345,7 +345,7 @@ pub async fn join_printer_queue(path: web::Path<(u64)>) -> Result<HttpResponse, 
 }
 
 #[post("/api/v1/printers/leave_queue/{id_number}")]
-pub async fn leave_printer_queue(path: web::Path<(u64)>) -> Result<HttpResponse, Error> {
+pub async fn leave_printer_queue(path: web::Path<u64>) -> Result<HttpResponse, Error> {
     let id_number = path.into_inner();
 
     let mut data = MEMORY_DATABASE.lock().await;
@@ -398,7 +398,7 @@ pub async fn checkout_student_storage(
             .status(http::StatusCode::CREATED)
             .finish())
     } else {
-        return Ok(HttpResponse::Unauthorized().finish());
+        Ok(HttpResponse::Unauthorized().finish())
     }
 }
 

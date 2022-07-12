@@ -6,7 +6,7 @@ use toml::Value;
 
 use crate::emails::send_individual_email;
 use crate::{users::User, API_KEYS};
-use crate::{EMAIL_TEMPLATES, SMTP_URL, URL};
+use crate::{EMAIL_TEMPLATES};
 
 const PRINT_QUEUE_ENTRY_EXPIRATION_TIME: u64 = 60 * 15; // 15 minutes
 
@@ -143,8 +143,7 @@ impl Printers {
 
     pub fn get_printer_statuses(&self) -> Vec<Printer> {
         let mut printers: Vec<Printer> = self.printers
-            .values()
-            .map(|p| p.clone())
+            .values().cloned()
             .collect();
         
         printers.sort_by(|a, b| a.id.cmp(&b.id));
@@ -234,7 +233,7 @@ impl Printers {
             .position(|entry| entry.college_id == user.get_id());
 
         if queue_entry.is_none() {
-            return Err("User is not in queue".to_string());
+            Err("User is not in queue".to_string())
         } else {
             let queue_entry = queue_entry.unwrap();
             self.queue.remove(queue_entry);
@@ -291,8 +290,7 @@ impl Printers {
                 } else {
                     true
                 }
-            })
-            .map(|queue_entry| queue_entry.clone())
+            }).cloned()
             .collect();
     }
 

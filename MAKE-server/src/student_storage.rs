@@ -1,4 +1,4 @@
-use std::{time::SystemTime, io::ErrorKind};
+use std::{time::SystemTime};
 use serde::{Deserialize, Serialize};
 
 use crate::users::User;
@@ -77,7 +77,7 @@ impl StudentStorage {
     pub fn checkout_slot_by_id(&mut self, college_id: &u64, slot_id: &String) -> bool {
         for slot in self.slots.iter_mut() {
             if slot.get_id() == slot_id {
-                slot.checkout(college_id.clone());
+                slot.checkout(*college_id);
                 return true;
             }
         }
@@ -87,7 +87,7 @@ impl StudentStorage {
     pub fn release_by_id(&mut self, college_id: &u64, slot_id: &String) {
         for slot in self.slots.iter_mut() {
             if slot.get_id() == slot_id {
-                slot.release(college_id.clone());
+                slot.release(*college_id);
             }
         }
     }
@@ -143,7 +143,7 @@ impl Slot {
     }
 
     pub fn get_details(&self) -> Option<OccupiedDetails> {
-        return self.occupied_details.clone();
+        self.occupied_details.clone()
     }
 
     pub fn is_owner(&self, id: &u64) -> bool {
