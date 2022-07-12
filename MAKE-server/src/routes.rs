@@ -199,11 +199,11 @@ pub async fn get_printers(path: web::Path<(u64)>) -> Result<HttpResponse, Error>
 =================
 */
 
-#[post("/api/v1/checkouts/add_entry/{id_number}/{item_name}/{api_key}")]
+#[post("/api/v1/checkouts/add_entry/{id_number}/{item_name}/{sec_length}/{api_key}")]
 pub async fn checkout_item_by_name(
-    path: web::Path<(u64, String, String)>,
+    path: web::Path<(u64, String, u64, String)>,
 ) -> Result<HttpResponse, Error> {
-    let (id_number, item_name, api_key) = path.into_inner();
+    let (id_number, item_name, sec_length, api_key) = path.into_inner();
 
     if API_KEYS.lock().await.validate_admin(&api_key)
         || API_KEYS.lock().await.validate_checkout(&api_key)
@@ -223,7 +223,7 @@ pub async fn checkout_item_by_name(
         }
 
         data.checkout_log
-            .add_checkout(CheckoutLogEntry::new(&user.unwrap(), &item.unwrap(), None));
+            .add_checkout(CheckoutLogEntry::new(&user.unwrap(), &item.unwrap(), None, sec_length));
 
         Ok(HttpResponse::Ok()
             .status(http::StatusCode::CREATED)
@@ -233,11 +233,11 @@ pub async fn checkout_item_by_name(
     }
 }
 
-#[post("/api/v1/checkouts/add_entry_uuid/{id_number}/{item_uuid}/{api_key}")]
+#[post("/api/v1/checkouts/add_entry_uuid/{id_number}/{item_uuid}/{sec_length}/{api_key}")]
 pub async fn checkout_item_by_uuid(
-    path: web::Path<(u64, String, String)>,
+    path: web::Path<(u64, String, u64, String)>,
 ) -> Result<HttpResponse, Error> {
-    let (id_number, item_uuid, api_key) = path.into_inner();
+    let (id_number, item_uuid, sec_length, api_key) = path.into_inner();
 
     if API_KEYS.lock().await.validate_admin(&api_key)
         || API_KEYS.lock().await.validate_checkout(&api_key)
@@ -257,7 +257,7 @@ pub async fn checkout_item_by_uuid(
         }
 
         data.checkout_log
-            .add_checkout(CheckoutLogEntry::new(&user.unwrap(), &item.unwrap(), Some(item_uuid)));
+            .add_checkout(CheckoutLogEntry::new(&user.unwrap(), &item.unwrap(), Some(item_uuid), sec_length));
 
         Ok(HttpResponse::Ok()
             .status(http::StatusCode::CREATED)

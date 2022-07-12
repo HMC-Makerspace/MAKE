@@ -36,6 +36,7 @@ pub async fn send_bulk_emails(recipients: Vec<String>, subject: String, body: St
 pub async fn send_individual_email(recipient: String, subject: String, body: String) {
     let lock = API_KEYS.lock().await;
     let (email, password) = lock.get_gmail_tuple();
+    drop(lock);
 
     let mut mailer = SmtpClient::new_simple(SMTP_URL)
         .unwrap()
@@ -46,7 +47,7 @@ pub async fn send_individual_email(recipient: String, subject: String, body: Str
         .to(recipient.clone())
         .from(email.clone())
         .subject(subject.clone())
-        .text(body.clone())
+        .html(body.clone())
         .build()
         .unwrap();
 

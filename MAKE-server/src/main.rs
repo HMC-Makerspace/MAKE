@@ -61,6 +61,19 @@ const URL: &str = "127.0.0.1:8080";
 const URL: &str = "https://make.hmc.edu";
 
 const SMTP_URL: &str = "smtp.gmail.com";
+const UPDATE_INTERVAL: u64 = 60;
+
+const VERSION_STRING: &str = env!("CARGO_PKG_VERSION");
+const STARTUP_TITLE: &str = "
+██████   ██████   █████████   █████   ████ ██████████
+░░██████ ██████   ███░░░░░███ ░░███   ███░ ░░███░░░░░█
+ ░███░█████░███  ░███    ░███  ░███  ███    ░███  █ ░ 
+ ░███░░███ ░███  ░███████████  ░███████     ░██████   
+ ░███ ░░░  ░███  ░███░░░░░███  ░███░░███    ░███░░█   
+ ░███      ░███  ░███    ░███  ░███ ░░███   ░███ ░   █
+ █████     █████ █████   █████ █████ ░░████ ██████████
+░░░░░     ░░░░░ ░░░░░   ░░░░░ ░░░░░   ░░░░ ░░░░░░░░░░ ";
+
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
@@ -226,6 +239,14 @@ pub async fn load_api_keys() -> Result<(), Error> {
 /// API update loops lives inside a tokio thread while the actix_web
 /// server is run in the main thread and blocks until done.
 async fn async_main() -> std::io::Result<()> {
+    
+    // Print startup text
+    info!("Starting up...");
+    println!("{}", "██████████████████████████████████████████████████████████████");
+    println!("{}", STARTUP_TITLE);
+    println!("Version {}", VERSION_STRING);
+    println!("{}", "██████████████████████████████████████████████████████████████");
+
     // Load api keys
     load_api_keys().await.expect("Could not load API keys!");
 
@@ -246,13 +267,14 @@ async fn async_main() -> std::io::Result<()> {
     info!("Email templates loaded!");
 
     spawn(async move {
-        let mut interval = time::interval(Duration::from_secs(60));
+        let mut interval = time::interval(Duration::from_secs(UPDATE_INTERVAL));
         loop {
             interval.tick().await;
             update_loop().await;
             save_database().await;
         }
     });
+
 
     #[cfg(not(debug_assertions))]
     let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
@@ -436,5 +458,8 @@ async fn update_loop() {
 
         MEMORY_DATABASE.lock().await.printers.update_queue_at(i, entry);
     }
+
+    // Check each checkout log entry for expiration
+    let mut checkout_log = MEMORY_DATABASE.lock().await.checkout_log.clone();
 
 }

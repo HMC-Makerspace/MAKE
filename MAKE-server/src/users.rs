@@ -118,17 +118,18 @@ impl User {
         checkout_log: &CheckoutLog,
     ) -> Vec<CheckoutLogEntry> {
         checkout_log
-            .log
+            .currently_checked_out
             .iter()
-            .filter(|x| x.college_id == self.get_id() && x.checked_in == false)
+            .filter(|x| x.college_id == self.get_id())
             .cloned()
             .collect()
     }
 
     pub fn get_all_checked_out_items(&self, checkout_log: &CheckoutLog) -> Vec<CheckoutLogEntry> {
         checkout_log
-            .log
+            .currently_checked_out
             .iter()
+            .chain(checkout_log.checkout_history.iter())
             .filter(|x| x.college_id == self.get_id())
             .cloned()
             .collect()

@@ -101,10 +101,4 @@ document.getElementById("checkout-popup").addEventListener("click", function (ev
     }
 });
 
-document.addEventListener("click", function (event) {
-    // Play tap sound
-    const tap_sound = new Audio("/../kiosks/assets/tap.mp3");
-    tap_sound.play();
-});
-
 authenticate();

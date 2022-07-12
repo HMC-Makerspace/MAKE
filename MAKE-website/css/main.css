@@ -14,6 +14,9 @@
     --medium-color: #afad59;
     --high-color: #4e9e4e;
     --link-color: #00bcd4;
+
+    --low-color-dark: #723a3a;
+    --medium-color-dark: #7e7d41;
     --high-color-dark: #3d773d;
 
     --text-color-main: #ffffff;
@@ -699,6 +702,7 @@ Checkouts
     border-radius: var(--roundness);
     gap: 20px;
     padding: 40px;
+    width: 400px;
 }
 
 .printer {
@@ -720,6 +724,23 @@ Checkouts
     height: 100px;
 }
 
+#queue-button {
+    width: 100px;
+    height: 50px;
+    background-color: var(--high-color);
+}
+
+#queue-button:hover {
+    background-color: var(--high-color-dark);
+}
+
+#queue-button.joined {
+    background-color: var(--low-color);
+}
+
+#queue-button.joined:hover {
+    background-color: var(--low-color-dark);
+}
 
 /*
 

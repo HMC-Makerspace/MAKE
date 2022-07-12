@@ -29,13 +29,15 @@ function renderPrinters() {
     const queue_el = document.getElementById("queue-info");
     const queue_button = document.getElementById("queue-button");
     if (state.printers.pos_in_queue !== null) {
-        queue_el.innerHTML = `You are <b>${state.printers.pos_in_queue}/${state.printers.total_in_queue}</b> in queue`;
+        queue_el.innerHTML = `You are <b>${state.printers.pos_in_queue + 1}/${state.printers.total_in_queue}</b> in queue`;
         queue_button.innerHTML = "Leave queue";
         queue_button.onclick = leaveQueue;
+        queue_button.classList.add("joined");
     } else {
         queue_el.innerHTML = `There are <b>${state.printers.total_in_queue}</b> people in queue`;
         queue_button.innerHTML = "Join queue";
         queue_button.onclick = joinQueue;
+        queue_button.classList.remove("joined");
     }
 }
 
