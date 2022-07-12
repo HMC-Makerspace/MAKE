@@ -199,45 +199,16 @@ pub async fn get_printers(path: web::Path<(u64)>) -> Result<HttpResponse, Error>
 =================
 */
 
-#[post("/api/v1/checkouts/add_entry/{id_number}/{item_name}/{sec_length}/{api_key}")]
-pub async fn checkout_item_by_name(
-    path: web::Path<(u64, String, u64, String)>,
-) -> Result<HttpResponse, Error> {
-    let (id_number, item_name, sec_length, api_key) = path.into_inner();
-
-    if API_KEYS.lock().await.validate_admin(&api_key)
-        || API_KEYS.lock().await.validate_checkout(&api_key)
-    {
-        let mut data = MEMORY_DATABASE.lock().await;
-
-        let user = data.users.get_user_by_id(&id_number);
-
-        if user.is_none() {
-            return Err(ErrorBadRequest("User not found".to_string()));
-        }
-
-        let item = data.inventory.get_item_by_name(&item_name);
-
-        if item.is_none() {
-            return Err(ErrorBadRequest("Item not found".to_string()));
-        }
-
-        data.checkout_log
-            .add_checkout(CheckoutLogEntry::new(&user.unwrap(), &item.unwrap(), None, sec_length));
-
-        Ok(HttpResponse::Ok()
-            .status(http::StatusCode::CREATED)
-            .finish())
-    } else {
-        Ok(HttpResponse::Unauthorized().finish())
-    }
+#[derive(Deserialize)]
+pub struct CheckoutItems {
+    items: Vec<String>
 }
-
-#[post("/api/v1/checkouts/add_entry_uuid/{id_number}/{item_uuid}/{sec_length}/{api_key}")]
-pub async fn checkout_item_by_uuid(
-    path: web::Path<(u64, String, u64, String)>,
+#[post("/api/v1/checkouts/add_entry/{id_number}/{sec_length}/{api_key}")]
+pub async fn checkout_items(
+    path: web::Path<(u64, u64, String)>,
+    body: web::Json<CheckoutItems>,
 ) -> Result<HttpResponse, Error> {
-    let (id_number, item_uuid, sec_length, api_key) = path.into_inner();
+    let (id_number, sec_length, api_key) = path.into_inner();
 
     if API_KEYS.lock().await.validate_admin(&api_key)
         || API_KEYS.lock().await.validate_checkout(&api_key)
@@ -250,14 +221,11 @@ pub async fn checkout_item_by_uuid(
             return Err(ErrorBadRequest("User not found".to_string()));
         }
 
-        let item = data.inventory.get_item_by_uuid(&item_uuid);
-
-        if item.is_none() {
-            return Err(ErrorBadRequest("Item not found".to_string()));
-        }
-
-        data.checkout_log
-            .add_checkout(CheckoutLogEntry::new(&user.unwrap(), &item.unwrap(), Some(item_uuid), sec_length));
+        data.checkout_log.add_checkout(CheckoutLogEntry::new(
+            user.unwrap().get_id(),
+            sec_length,
+            body.items.clone(),
+        ));
 
         Ok(HttpResponse::Ok()
             .status(http::StatusCode::CREATED)
