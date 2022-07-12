@@ -49,6 +49,11 @@ impl CheckoutLog {
             error!("Could not find checkout entry with UUID: {:?}", checkout_uuid);
         }
     }
+
+    /// Gets the currently checked out items.
+    pub fn get_current_checkouts(&self) -> Vec<CheckoutLogEntry> {
+        self.currently_checked_out.clone()
+    }
 }
 
 /// Struct that contains information about a single checkout transaction
@@ -89,5 +94,31 @@ impl CheckoutLogEntry {
             timestamp_checked_in: None,
             num_time_notified: 0,
         }
+    }
+
+    pub fn is_expired(&self) -> bool {
+        let now = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
+        now > self.timestamp_expires
+    }
+
+    pub fn get_emails_sent(&self) -> u64 {
+        self.num_time_notified
+    }
+
+    pub fn get_college_id(&self) -> u64 {
+        self.college_id
+    }
+
+    pub fn get_items_as_string(&self) -> String {
+        let mut items_str = String::new();
+        for item in self.items.iter() {
+            items_str.push_str(format!("- {}\n", item).as_str());
+        }
+        items_str
+    }
+
+    pub fn num_24_hours_passed(&self) -> u64 {
+        let now = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
+        (now - self.timestamp_expires) / (60 * 60 * 24)
     }
 }

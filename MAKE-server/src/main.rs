@@ -5,17 +5,12 @@ use std::io::Write;
 use std::process::exit;
 use std::thread;
 
-
 use actix_cors::*;
 use actix_web::rt::spawn;
 use actix_web::*;
 use actix_web_static_files::ResourceFiles;
 
-
 use lazy_static::__Deref;
-
-
-
 
 use log::*;
 
@@ -24,6 +19,7 @@ use std::time::Duration;
 use tokio::time;
 
 mod checkout;
+mod emails;
 mod inventory;
 mod laser_cutter;
 mod permissions;
@@ -32,18 +28,17 @@ mod quizzes;
 mod routes;
 mod student_storage;
 mod users;
-mod emails;
 
 use crate::checkout::*;
+use crate::emails::*;
 use crate::inventory::*;
-
-
+use crate::laser_cutter::*;
+use crate::permissions::*;
 use crate::printers::*;
 use crate::quizzes::*;
 use crate::routes::*;
 use crate::student_storage::*;
 use crate::users::*;
-
 
 use lazy_static::lazy_static;
 use std::sync::Arc;
@@ -73,7 +68,6 @@ const STARTUP_TITLE: &str = "
  ░███      ░███  ░███    ░███  ░███ ░░███   ░███ ░   █
  █████     █████ █████   █████ █████ ░░████ ██████████
 ░░░░░     ░░░░░ ░░░░░   ░░░░░ ░░░░░   ░░░░ ░░░░░░░░░░ ";
-
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
@@ -138,19 +132,18 @@ impl ApiKeys {
 pub struct EmailTemplates {
     pub print_queue: String,
     pub expired_student_storage: String,
+    pub expired_checkout: String,
 }
 
 impl EmailTemplates {
     pub fn load_templates(&mut self) {
         self.print_queue = self.html_file_to_string("email_templates/print_queue.html");
-        self.expired_student_storage = self.html_file_to_string("email_templates/expired_student_storage.html");
+        self.expired_student_storage =
+            self.html_file_to_string("email_templates/expired_student_storage.html");
     }
 
     pub fn html_file_to_string(&self, filename: &str) -> String {
-        let mut file = OpenOptions::new()
-            .read(true)
-            .open(filename)
-            .unwrap();
+        let mut file = OpenOptions::new().read(true).open(filename).unwrap();
         let mut contents = String::new();
         file.read_to_string(&mut contents).unwrap();
         contents
@@ -165,12 +158,18 @@ impl EmailTemplates {
         let html = self.expired_student_storage.clone();
         html.replace("{slot_id}", slot_id)
     }
+
+    pub fn get_expired_checkout(&self, tool_list: &str) -> String {
+        let html = self.expired_checkout.clone();
+        html.replace("{tool_list}", tool_list)
+    }
 }
 
 lazy_static! {
     pub static ref MEMORY_DATABASE: Arc<Mutex<Data>> = Arc::new(Mutex::new(Data::default()));
     pub static ref API_KEYS: Arc<Mutex<ApiKeys>> = Arc::new(Mutex::new(ApiKeys::default()));
-    pub static ref EMAIL_TEMPLATES: Arc<Mutex<EmailTemplates>> = Arc::new(Mutex::new(EmailTemplates::default()));
+    pub static ref EMAIL_TEMPLATES: Arc<Mutex<EmailTemplates>> =
+        Arc::new(Mutex::new(EmailTemplates::default()));
 }
 
 const DB_NAME: &str = "db.json";
@@ -239,7 +238,6 @@ pub async fn load_api_keys() -> Result<(), Error> {
 /// API update loops lives inside a tokio thread while the actix_web
 /// server is run in the main thread and blocks until done.
 async fn async_main() -> std::io::Result<()> {
-    
     // Print startup text
     info!("Starting up...");
     println!("██████████████████████████████████████████████████████████████");
@@ -274,7 +272,6 @@ async fn async_main() -> std::io::Result<()> {
             save_database().await;
         }
     });
-
 
     #[cfg(not(debug_assertions))]
     let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
@@ -446,7 +443,12 @@ async fn update_loop() {
 
     // Then, get first x people in queue, where x is the number of available printers
     for i in 0..min(printers_avail.len(), printers.get_print_queue_length()) {
-        let mut entry = MEMORY_DATABASE.lock().await.printers.get_queue_at(i).unwrap();
+        let mut entry = MEMORY_DATABASE
+            .lock()
+            .await
+            .printers
+            .get_queue_at(i)
+            .unwrap();
 
         if entry.was_notified() {
             continue;
@@ -454,10 +456,50 @@ async fn update_loop() {
             entry.notify().await;
         }
 
-        MEMORY_DATABASE.lock().await.printers.update_queue_at(i, entry);
+        MEMORY_DATABASE
+            .lock()
+            .await
+            .printers
+            .update_queue_at(i, entry);
     }
 
     // Check each checkout log entry for expiration
-    let _checkout_log = MEMORY_DATABASE.lock().await.checkout_log.clone();
+    let checkout_log = MEMORY_DATABASE.lock().await.checkout_log.clone();
 
+    for entry in checkout_log.get_current_checkouts().iter_mut() {
+        if entry.is_expired() {
+            let user = MEMORY_DATABASE
+                    .lock()
+                    .await
+                    .users
+                    .get_user_by_id(&entry.get_college_id());
+
+            // If user is not found, just continue to next item
+            if user.is_none() {
+                warn!("User {} not found in database", entry.get_college_id());
+                continue;
+            }
+
+            let user = user.unwrap();
+
+            // Case one: item just expired, no emails have been sent
+            if entry.get_emails_sent() == 0 {
+                // Send email to user
+                let email_result = send_individual_email(
+                    user.get_email(),
+                    "MAKE Tool Checkout Notification #1".to_string(),
+                    EMAIL_TEMPLATES.lock().await.get_expired_checkout(&entry.get_items_as_string()),
+                ).await;
+            } else if entry.get_emails_sent() == entry.num_24_hours_passed() {
+                // Case two: item is expired, and the number of emails sent is equal to the number of 24 hours since the item was checked out
+                // Send email to user
+
+                let email_result = send_individual_email(
+                    user.get_email(),
+                    format!("MAKE Tool Checkout Notification #{}", entry.get_emails_sent() + 1),
+                    EMAIL_TEMPLATES.lock().await.get_expired_checkout(&entry.get_items_as_string()),
+                ).await;
+            }
+        }
+    }
 }
