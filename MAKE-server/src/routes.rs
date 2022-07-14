@@ -193,6 +193,22 @@ pub async fn get_printers(path: web::Path<u64>) -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok().json(printers))
 }
 
+#[get("/api/v1/printers/for_api/{api_key}")]
+pub async fn get_printers_api_key(path: web::Path<String>) -> Result<HttpResponse, Error> {
+    let api_key = path.into_inner();
+    if API_KEYS.lock().await.validate_admin(&api_key)
+        || API_KEYS.lock().await.validate_printers(&api_key)
+        || API_KEYS.lock().await.validate_checkout(&api_key)
+    {
+        let data = MEMORY_DATABASE.lock().await;
+        let printers = data.printers.get_printer_statuses();
+
+        Ok(HttpResponse::Ok().json(printers))
+    } else {
+        Ok(HttpResponse::Unauthorized().finish())
+    }
+}
+
 /*
 =================
     POST REQUESTS
@@ -331,6 +347,10 @@ pub async fn join_printer_queue(path: web::Path<u64>) -> Result<HttpResponse, Er
     }
 
     let user = user.unwrap();
+    
+    if user.get_auth_level() == AuthLevel::Banned {
+        return Err(ErrorBadRequest("User is banned".to_string()));
+    }
 
     let result = data.printers.add_user_to_queue(&user);
 
@@ -386,6 +406,10 @@ pub async fn checkout_student_storage(
 
         let user = user.unwrap();
 
+        if user.get_auth_level() == AuthLevel::Banned {
+            return Err(ErrorBadRequest("User is banned".to_string()));
+        }
+
         let finished = data
             .student_storage
             .checkout_slot_by_id(&user.get_id(), &slot_id);
@@ -417,6 +441,10 @@ pub async fn renew_student_storage_slot(
     }
 
     let user = user.unwrap();
+
+    if user.get_auth_level() == AuthLevel::Banned {
+        return Err(ErrorBadRequest("User is banned".to_string()));
+    }
 
     data.student_storage.renew_by_id(&user.get_id(), &slot_id);
 

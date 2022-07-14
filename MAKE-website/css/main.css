@@ -3,12 +3,12 @@
     --title-font: "Righteous";
     --theme-color-1: #ee9d22;
     --theme-color-2: #242424;
-    --theme-color-3: #eeeeee;
-    --theme-color-4: #4d6488;
+    --theme-color-3: #EBEBEB;
+    --theme-color-4: #004E89;
     --theme-color-5: #444444;
     --theme-color-6: #e0cf34;
-    --theme-color-7: #a05fcc;
-    --theme-color-8: #dbdbdb;
+    --theme-color-7: #a530db;
+    --theme-color-8: #1B9AAA;
     
     --low-color: #9c5151;
     --medium-color: #afad59;
@@ -23,9 +23,14 @@
     --text-color-alt: #000000;
     --text-color-light: #b4b3b3;
 
+    --printer-idle: #058ED9;
+    --printer-printing: #78BC61;
+    --printer-paused: #af6900;
+    --printer-offline: #0C090D;
+    --printer-error: #AF3800;
+
     --roundness: 5px;
     --button-outline-color: #ffffff;
-
 
     /* Icons */
     --tool-icon: url(../img/tool-icon.svg);
@@ -77,18 +82,25 @@ p3 {
     display: grid;
     grid-template-areas: 
     "sidebar main";
-    grid-template-columns: 200px auto;
+    grid-template-columns: 220px auto;
+    grid-template-rows: minmax(0, 1fr);
     margin: 0;
-    height: 98vh;
-    width: 98vw;
-    gap: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+#main-grid >* {
+    border-radius: var(--roundness);
+    margin: 10px;
 }
 
 #left-bar {
     grid-area: sidebar;
     background-color: var(--theme-color-1);
     color: white;
-    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -98,9 +110,8 @@ p3 {
 .main-content {
     grid-area: main;
     color: white;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 80px minmax(0, 1fr);
     gap: 10px;
 }
 
@@ -188,7 +199,6 @@ input.focus {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 80px;
     align-content: center;
 }
 
@@ -249,6 +259,23 @@ a:visited {
     color: var(--link-color);
 }
 
+.content-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.content-header {
+    border-radius: var(--roundness) var(--roundness) 0 0;
+    background-color: var(--theme-color-2);
+}
+
+.content-body {
+    border-radius: 0 0 var(--roundness) var(--roundness);
+    background-color: var(--theme-color-5);
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
 /*
 
 HOME
@@ -278,26 +305,21 @@ INVENTORY
 */
 
 #inventory-search {
-    background-color: var(--theme-color-2);
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    height: 80px;
     gap: 40px;
-    border-radius: var(--roundness) var(--roundness) 0 0;
+    padding: 20px;
 }
 
 #inventory-results {
-    background-color: var(--theme-color-5);
     display: flex;
     flex-direction: column;
     align-items: left;
     gap: 10px;
     overflow-y: scroll;
-    height: 80vh;
     padding-top: 10px;
-    border-radius: 0 0 var(--roundness) var(--roundness);
 }
 
 .inventory-result {
@@ -307,6 +329,10 @@ INVENTORY
     max-width: 1200px;
     margin: 0 auto;
     color: var(--text-color-alt);
+}
+
+.inventory-result.kiosk-mode .inventory-result-main {
+    grid-template-columns: 2fr .5fr 2fr .5fr .5fr 1fr;
 }
 
 .inventory-result-main {
@@ -443,8 +469,8 @@ Student Storage
     justify-content: center;
     background-color: var(--theme-color-5);
     border-radius: 0 0 var(--roundness) var(--roundness);
-    margin-bottom: 10px;
     padding: 20px;
+    overflow: scroll;
 }
 
 
@@ -524,7 +550,6 @@ Quizzes & Information
     justify-content: center;
     background-color: var(--theme-color-5);
     border-radius: 0 0 var(--roundness) var(--roundness);
-    margin-bottom: 10px;
     padding-top: 20px;
     padding-bottom: 20px;
 }
@@ -617,12 +642,10 @@ Checkouts
 */
 
 #checkouts-help {
-    background-color: var(--theme-color-2);
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    border-radius: var(--roundness) var(--roundness) 0 0;
     padding: 10px;
 }
 
@@ -635,9 +658,6 @@ Checkouts
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: var(--theme-color-5);
-    border-radius: 0 0 var(--roundness) var(--roundness);
-    margin-bottom: 10px;
     padding-top: 20px;
     padding-bottom: 20px;
 }
@@ -663,12 +683,10 @@ Checkouts
 */
 
 #printers-help {
-    background-color: var(--theme-color-2);
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    border-radius: var(--roundness) var(--roundness) 0 0;
     padding: 10px;
 }
 
@@ -677,9 +695,6 @@ Checkouts
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: var(--theme-color-5);
-    border-radius: 0 0 var(--roundness) var(--roundness);
-    margin-bottom: 10px;
     padding-top: 20px;
     padding-bottom: 20px;
 }
@@ -714,14 +729,74 @@ Checkouts
     border-radius: var(--roundness);
     text-align: center;
     font-weight: bolder;
-    width: 200px;
-    height: 300px;
+    width: 300px;
+    height: 400px;
     gap: 20px;
 }
 
 .printer-icon {
     width: 100px;
     height: 100px;
+}
+
+.printer-id {
+    font-weight: bold;
+    background-color: var(--theme-color-3);
+    color: var(--theme-color-2);
+    border-radius: var(--roundness);
+    padding: 10px;
+    width: 200px;
+}
+
+.printer-status {
+    font-weight: bold;
+    border-radius: 20px;
+    padding: 10px;
+    color: var(--theme-color-3);
+    width: 100px;
+}
+
+.printer-status.Idle {
+    background-color: var(--printer-idle);
+}
+
+.printer-status.Printing {
+    background-color: var(--printer-printing);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        filter: brightness(0.8);
+    }
+    50% {
+        filter: brightness(1.2);
+    }
+    100% {
+        filter: brightness(0.8);
+    }
+}
+
+.printer-status.Error {
+    background-color: var(--printer-error);
+    animation: pulse .5s infinite;
+}
+
+
+.printer-status.Paused {
+    background-color: var(--printer-paused);
+}
+
+.printer-status.Offline {
+    background-color: var(--printer-offline);
+}
+
+.printer-current-time-left {
+    background-color: var(--theme-color-3);
+    color: var(--theme-color-2);
+    border-radius: var(--roundness);
+    padding: 10px;
+    width: 200px;
 }
 
 #queue-button {

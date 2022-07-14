@@ -68,7 +68,7 @@
             <div id="college-id-container" class="id-n">
                 <input type="text" id="college-id-input" placeholder="Enter your college ID number" onchange="login()">
                 <button id="college-id-button" class="big" onclick="login()">Log In</button>
-                
+
                 <h2 id="login-error" class="hidden">
                     Invalid college ID number. Please take the General Safety Quiz, and try again in 3-5 minutes.
                 </h2>
@@ -91,7 +91,7 @@
                 <p2>
                     Currently logged in as <span id="logged-in-name"></span>
                 </p2>
-                <button id="logout-button" onclick="logout()">Log Out</button>
+                <button id="logout-button" class="big" onclick="logout()">Log Out</button>
             </div>
         </div>
 
@@ -105,8 +105,8 @@
                 <span class="title">Inventory</span>
             </div>
 
-            <div id="inventory-container">
-                <div id="inventory-search">
+            <div class="content-container">
+                <div id="inventory-search" class="content-header">
                     <input type="text" id="inventory-search-input" placeholder="Search for item...">
 
                     <span>
@@ -139,7 +139,7 @@
 
                 </div>
 
-                <div id="inventory-results">
+                <div id="inventory-results" class="content-body">
 
                 </div>
             </div>
@@ -160,8 +160,8 @@
                 Please enter your college ID number on the home page to view student storage status
             </div>
 
-            <div id="student-storage-container" class="id-r">
-                <div id="student-storage-help">
+            <div class="content-container id-r">
+                <div id="student-storage-help" class="content-header">
                     <p3>
                         Here you can view the status of student storage, renew your storage space (for two
                         weeks from today), and release your storage space.
@@ -174,7 +174,7 @@
                     </p3>
                 </div>
 
-                <div id="overall-student-storage">
+                <div id="overall-student-storage" class="content-body">
 
                 </div>
             </div>
@@ -191,8 +191,8 @@
                 <span class="title">Quizzes & Information</span>
             </div>
 
-            <div id="quiz-info-container">
-                <div id="quiz-info-storage-help">
+            <div class="content-container">
+                <div id="quiz-info-storage-help" class="content-header">
                     <p3>
                         <b>General Usage Policies & Manuals</b>
                         <br>
@@ -210,69 +210,67 @@
                     </p3>
                 </div>
 
-                <div id="quiz-info-auth-statuses">
-                    <div id="quiz-status">
-                        <div class="quiz-status-container">
-                            <div class="quiz-status-item" id="quiz-General">
-                                <p3>
-                                    General Safety Quiz
-                                </p3>
-                                <button class="quiz-take" onclick="openQuiz('general')">Take</button>
-                                <div class="quiz-status"></div>
-                            </div>
-                            <div class="quiz-status-item" id="quiz-Laser3D">
-                                <p3>
-                                    3D Printer & Laser Cutter Quiz
-                                </p3>
-                                <button class="quiz-take" onclick="openQuiz('laser3d')">Take</button>
-                                <div class="quiz-status"></div>
-                            </div>
-                            <div class="quiz-status-item" id="quiz-SprayPaint">
-                                <p3>
-                                    Spray Paint Quiz
-                                </p3>
-                                <button class="quiz-take" onclick="openQuiz('spraypaint')">Take</button>
-                                <div class="quiz-status"></div>
-                            </div>
-                            <div class="quiz-status-item" id="quiz-Composite">
-                                <p3>
-                                    Composite Quiz
-                                </p3>
-                                <button class="quiz-take" onclick="openQuiz('composite')">Take</button>
-                                <div class="quiz-status"></div>
-                            </div>
-                            <div class="quiz-status-item" id="quiz-Welding">
-                                <p3>
-                                    Welding Quiz
-                                </p3>
-                                <button class="quiz-take" onclick="openQuiz('welding')">Take</button>
-                                <div class="quiz-status"></div>
-                            </div>
-                            <div class="quiz-status-item" id="quiz-Studio">
-                                <p3>
-                                    Studio Quiz
-                                </p3>
-                                <button class="quiz-take" onclick="openQuiz('studio')">Take</button>
-                                <div class="quiz-status"></div>
-                            </div>
-                            <div class="quiz-status-item" id="quiz-Waterjet">
-                                <p3>
-                                    Waterjet Quiz
-                                </p3>
-                                <button class="quiz-take" onclick="openQuiz('waterjet')">Take</button>
-                                <div class="quiz-status"></div>
-                            </div>
+                <div id="quiz-status" class="content-body">
+                    <div class="quiz-status-container">
+                        <div class="quiz-status-item" id="quiz-General">
+                            <p3>
+                                General Safety Quiz
+                            </p3>
+                            <button class="quiz-take" onclick="openQuiz('general')">Take</button>
+                            <div class="quiz-status"></div>
                         </div>
-
-                        <p3 class="honor-code-warning">
-                            Completion of each quiz with a 100% will automatically grant swipe access to the relevent
-                            room and/or
-                            permission to operate the machine. Please allow 5-10 minutes for swipe access to be granted.
-                            <br><br>
-                            Failing to successfully complete the quiz prior to use is an honor code violation, and may
-                            result in a suspension or ban from the Makerspace.
-                        </p3>
+                        <div class="quiz-status-item" id="quiz-Laser3D">
+                            <p3>
+                                3D Printer & Laser Cutter Quiz
+                            </p3>
+                            <button class="quiz-take" onclick="openQuiz('laser3d')">Take</button>
+                            <div class="quiz-status"></div>
+                        </div>
+                        <div class="quiz-status-item" id="quiz-SprayPaint">
+                            <p3>
+                                Spray Paint Quiz
+                            </p3>
+                            <button class="quiz-take" onclick="openQuiz('spraypaint')">Take</button>
+                            <div class="quiz-status"></div>
+                        </div>
+                        <div class="quiz-status-item" id="quiz-Composite">
+                            <p3>
+                                Composite Quiz
+                            </p3>
+                            <button class="quiz-take" onclick="openQuiz('composite')">Take</button>
+                            <div class="quiz-status"></div>
+                        </div>
+                        <div class="quiz-status-item" id="quiz-Welding">
+                            <p3>
+                                Welding Quiz
+                            </p3>
+                            <button class="quiz-take" onclick="openQuiz('welding')">Take</button>
+                            <div class="quiz-status"></div>
+                        </div>
+                        <div class="quiz-status-item" id="quiz-Studio">
+                            <p3>
+                                Studio Quiz
+                            </p3>
+                            <button class="quiz-take" onclick="openQuiz('studio')">Take</button>
+                            <div class="quiz-status"></div>
+                        </div>
+                        <div class="quiz-status-item" id="quiz-Waterjet">
+                            <p3>
+                                Waterjet Quiz
+                            </p3>
+                            <button class="quiz-take" onclick="openQuiz('waterjet')">Take</button>
+                            <div class="quiz-status"></div>
+                        </div>
                     </div>
+
+                    <p3 class="honor-code-warning">
+                        Completion of each quiz with a 100% will automatically grant swipe access to the relevent
+                        room and/or
+                        permission to operate the machine. Please allow 5-10 minutes for swipe access to be granted.
+                        <br><br>
+                        Failing to successfully complete the quiz prior to use is an honor code violation, and may
+                        result in a suspension or ban from the Makerspace.
+                    </p3>
                 </div>
             </div>
         </div>
@@ -291,14 +289,14 @@
                 Please enter your college ID number on the home page to view checkouts
             </div>
 
-            <div id="checkouts-container" class="id-r">
-                <div id="checkouts-help">
+            <div class="content-container id-r">
+                <div id="checkouts-help" class="content-header">
                     <p3>
                         Here you can view the status of your current checkouts, as well as view your checkout history.
                     </p3>
                 </div>
 
-                <div id="checkouts">
+                <div id="checkouts" class="content-body">
                     <h2>
                         Pending Checkouts
                     </h2>
@@ -331,15 +329,15 @@
                 Please enter your college ID number on the home page to view 3D printers
             </div>
 
-            <div id="printers-container" class="id-r">
-                <div id="printers-help">
+            <div class="content-container id-r">
+                <div id="printers-help" class="content-header">
                     <p3>
                         Here you can view the status of your current 3D printers, as well as view your 3D printer
                         history.
                     </p3>
                 </div>
 
-                <div id="printers-statuses">
+                <div id="printers-statuses" class="content-body">
                     <h2>
                         Queue
                     </h2>
@@ -354,15 +352,8 @@
                     <div id="printers-current">
 
                     </div>
-
-                    <h2>
-                        Log
-                    </h2>
-                    <div id="printers-history">
-
-                    </div>
                 </div>
-            </div>  
+            </div>
         </div>
 
 

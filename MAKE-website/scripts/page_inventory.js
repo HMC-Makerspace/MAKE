@@ -6,7 +6,7 @@ const search_options = {
     all: true,
 }
 
-async function fetchInventory() {
+async function fetchInventory(kiosk_mode = false) {
     const response = await fetch(`${API}/inventory`);
 
     if (response.status == 200) {
@@ -18,17 +18,19 @@ async function fetchInventory() {
             element.uuids_joined = element.uuids.join(" ");
         });
 
-        saveState();
+        if (!kiosk_mode) {
+            saveState();
+        }
     }
 }
 
-function submitSearch() {
+function submitSearch(kiosk_mode=false) {
     const search = document.getElementById("inventory-search-input").value;
 
     const filters = getInventoryFilters();
 
     const search_results = searchInventory(search, filters);
-    const search_divs = generateInventoryDivs(search_results);
+    const search_divs = generateInventoryDivs(search_results, kiosk_mode);
 
     const results = document.getElementById("inventory-results");
 
@@ -77,19 +79,22 @@ function searchInventory(search, filters = null) {
     return results_norm;
 }
 
-function generateInventoryDivs(results) {
+function generateInventoryDivs(results, kiosk_mode=false) {
     const divs = [];
 
     for (let i = 0; i < results.length; i++) {
-        divs.push(generateInventoryDiv(results[i], i));
+        divs.push(generateInventoryDiv(results[i], i, kiosk_mode));
     }
 
     return divs;
 }
 
-function generateInventoryDiv(result, index) {
+function generateInventoryDiv(result, index, kiosk_mode=false) {
     let div = document.createElement("div");
     div.classList.add("inventory-result");
+    if (kiosk_mode) {
+        div.classList.add("kiosk-mode");
+    }
     div.id = `inventory-result-${index}`;
 
     const item = result.obj;
@@ -190,6 +195,17 @@ function generateInventoryDiv(result, index) {
     }
 
     main_div.appendChild(show_lower_div_button);
+
+    if (kiosk_mode) {
+        // Add checkout button
+        const checkout_button = document.createElement("button");
+        checkout_button.classList.add("inventory-result-checkout");
+        checkout_button.innerText = "Checkout";
+        checkout_button.addEventListener("click", () => {
+            addToCart(item.name);
+        });
+        main_div.appendChild(checkout_button);
+    }
 
     div.appendChild(main_div);
     div.appendChild(lower_div);

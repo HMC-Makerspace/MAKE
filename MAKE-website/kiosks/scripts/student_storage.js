@@ -1,4 +1,4 @@
-var student_storage_key = null;
+var api_key = null;
 var student_storage_state = null;
 var first_render = true;
 var slot_selected = null;
@@ -9,13 +9,13 @@ async function authenticate() {
     // Get api keys from url params
     const params = new URLSearchParams(window.location.search);
 
-    student_storage_key = params.get('api_key');
+    api_key = params.get('api_key');
 
-    if (student_storage_key === null) {
+    if (api_key === null) {
         return;
     }
 
-    console.log(`Authenticating with student storage key ${student_storage_key}`);
+    console.log(`Authenticating with student storage key ${api_key}`);
 
     setInterval(fetchStudentStorage, 5000, kiosk_mode = true);
 
@@ -50,7 +50,14 @@ function hideCheckout() {
 }
 
 async function checkoutSlot() {
-    const id_number = document.getElementById("checkout-id-input").value;
+    let id_number = document.getElementById("checkout-id-input").value;
+
+    // Remove all non-numeric characters
+    id_number = id_number.replace(/[^0-9]/g, '');
+    // Remove last char, as it is the card replacement number
+    id_number = id_number.substring(0, id_number.length - 1);
+
+    document.getElementById("checkout-id-input").value = id_number;
 
     if (id_number === "") {
         return;
@@ -72,7 +79,7 @@ async function checkoutSlot() {
     }
 
     // Now, we can check out the slot
-    const check_response = await fetch(`${API}/student_storage/add_entry/${id_number}/${slot_selected}/${student_storage_key}`,
+    const check_response = await fetch(`${API}/student_storage/add_entry/${id_number}/${slot_selected}/${api_key}`,
         {
             method: "POST"
         });

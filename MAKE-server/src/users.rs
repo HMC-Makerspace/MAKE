@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::time::SystemTime;
 
+use log::info;
 use serde::{Deserialize, Serialize};
 
 use crate::checkout::*;
@@ -147,11 +148,6 @@ impl User {
         // Remove duplicates
         self.passed_quizzes.sort();
         self.passed_quizzes.dedup();
-
-        // Then, update auth level
-        if other.auth_level > self.auth_level {
-            self.auth_level = other.auth_level.clone();
-        }
     }
 
     pub fn get_auth_level(&self) -> AuthLevel {
@@ -193,6 +189,7 @@ pub fn create_users_from_quizzes(quizzes: &Vec<Quiz>) -> Users {
             let mut user = User::from_response(response);
 
             if users.has_user(&user) {
+                info!("User already exists: {}", user.college_id);
                 user = users.get_user(&user).unwrap().clone();
             }
 

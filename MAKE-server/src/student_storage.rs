@@ -240,6 +240,9 @@ impl OccupiedDetails {
             .expect("Time went backwards")
             .as_secs();
 
-        self.timestamp_end = now + RENEW_LENGTH;
+        if self.timestamp_end < now {
+            self.timestamp_end = now + RENEW_LENGTH;
+            self.renewals_left -= 1;
+        }
     }
 }

@@ -1,6 +1,6 @@
 async function fetchStudentStorage(kiosk_mode=false) {
     if (kiosk_mode) {
-        const response = await fetch(`${API}/student_storage/all/${student_storage_key}`);
+        const response = await fetch(`${API}/student_storage/all/${api_key}`);
 
         if (response.status == 200) {
             const student_storage = await response.json();

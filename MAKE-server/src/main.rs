@@ -319,6 +319,7 @@ async fn async_main() -> std::io::Result<()> {
             .service(get_printers)
             .service(join_printer_queue)
             .service(leave_printer_queue)
+            .service(get_printers_api_key)
             .service(help)
             .service(openapi)
             .service(ResourceFiles::new("/", generate()))
@@ -359,6 +360,7 @@ async fn async_main() -> std::io::Result<()> {
             .service(get_printers)
             .service(join_printer_queue)
             .service(leave_printer_queue)
+            .service(get_printers_api_key)
             .service(help)
             .service(openapi)
             .service(ResourceFiles::new("/", generate()))
@@ -466,8 +468,11 @@ async fn update_loop() {
     // Check each checkout log entry for expiration
     let checkout_log = MEMORY_DATABASE.lock().await.checkout_log.clone();
 
+    let mut expired_items = 0;
+
     for entry in checkout_log.get_current_checkouts().iter_mut() {
         if entry.is_expired() {
+            expired_items += 1;
             let user = MEMORY_DATABASE
                     .lock()
                     .await
@@ -501,5 +506,11 @@ async fn update_loop() {
                 ).await;
             }
         }
+    }
+
+    if expired_items > 0 {
+        info!("{} checkouts expired!", expired_items);
+    } else {
+        info!("No checkouts expired!");
     }
 }

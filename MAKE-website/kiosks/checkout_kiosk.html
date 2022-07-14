@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Checkout Kiosk</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Righteous&display=swap"
+        rel="stylesheet">
+
+
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../kiosks.css">
+</head>
+
+<body>
+    <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+    <div id="main-grid-checkout">
+
+
+        <div id="left">
+            <div id="user-info">
+                <input id="id-input" type="text" placeholder="Swipe or enter ID...">
+
+                <div id="id-error" class="hidden">
+                    <p>Invalid ID/User not yet in system. They might have not taken the General Safety Quiz</p>
+                </div>
+
+                <div id="user-info-content">
+
+                </div>
+            </div>
+            <div id="heartbeat">
+                <h1>Heartbeat</h1>
+                <div id="heartbeat-general">
+                    Visits Total (24HR): <span id="vists-total">---</span>
+                    <br>
+                    Visits Unique (24HR): <span id="vists-unique">---</span>
+                </div>
+                <div id="heartbeat-printers">
+                    Queue Length: <span id="queue-length">---</span>
+                    <br>
+                    Printers:
+                    <br>
+                    <div id="printers-current" class="small"></div>
+                </div>
+                <div id="heartbeat-quizzes">
+                    General: <span id="quiz-general">---</span>
+                    <br>
+                    Laser3D: <span id="quiz-laser3d">---</span>
+                    <br>
+                    SprayPaint: <span id="quiz-spraypaint">---</span>
+                    <br>
+                    Composite: <span id="quiz-composite">---</span>
+                    <br>
+                    Welding: <span id="quiz-welding">---</span>
+                    <br>
+                    Studio: <span id="quiz-studio">---</span>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="pages">
+            <div id="pages-select">
+                <button id="select-inventory-button" class="selected" onclick="setPage('inventory')">Inventory</button>
+                <button id="select-checkout-button" onclick="setPage('checkout')">Checkouts</button>
+                <button id="select-users-button" onclick="setPage('users')">Users</button>
+            </div>
+
+            <div id="pages-content">
+                <div id="inventory-page" class="content-container">
+                    <div id="inventory-search" class="content-header">
+                        <input type="text" id="inventory-search-input" placeholder="Search for item...">
+    
+                        <span>
+                            <input type="checkbox" id="inventory-in-stock">
+                            <label for="inventory-in-stock">In Stock</label>
+                        </span>
+    
+                        <span>
+                            <select id="room-select">
+                                <option value="">----</option>
+                                <option value="Main">Main Makerspace</option>
+                                <option value="Laser3D">3D Printer & Laser Cutter Room</option>
+                                <option value="Studio">Studio</option>
+                                <option value="Cage">The Cage</option>
+                                <option value="Welding">Welding Area</option>
+                                <option value="Electronics">Electronics Benches</option>
+                                <option value="Composite">Composite Room</option>
+                            </select>
+                            <label for="room-select">Room/Area</label>
+                        </span>
+    
+                        <span>
+                            <select id="tool-material-select">
+                                <option value="">----</option>
+                                <option value="T">Tool</option>
+                                <option value="M">Material</option>
+                            </select>
+                            <label for="tool-material-select">Tool/Material</label>
+                        </span>
+                    </div>
+    
+                    <div id="inventory-results" class="content-body">
+    
+                    </div>
+                </div>
+
+                <div id="checkouts-page" class="hidden">
+
+                </div>
+
+                <div id="users-page" class="hidden">
+
+                </div>
+            </div>
+        </div>
+
+        
+    </div>
+
+    <script src="../../scripts/libs/fuzzysort.min.js"></script>
+
+    <script src="../../scripts/page_inventory.js"></script>
+    <script src="../../scripts/page_quiz_info.js"></script>
+    <script src="../../scripts/page_printers.js"></script>
+    <script src="../../scripts/utils.js"></script>
+
+    <script src="../scripts/checkout.js"></script>
+</body>
+
+</html>
