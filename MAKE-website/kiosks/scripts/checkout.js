@@ -1,7 +1,7 @@
 var state = {
     page: "inventory",
     inventory: null,
-    printers: null,
+    checkouts: null,
     cart: [],
     current_id_number: 0,
 }
@@ -21,7 +21,8 @@ async function authenticate() {
     console.log(`Authenticating with checkout key ${api_key}`);
 
     setInterval(fetchInventory, 100000, kiosk_mode=true);
-    
+    setInterval(fetchCheckouts, 100000);
+
     fetchInventory(true).then(() => {
         submitSearch(kiosk_mode=true);
         document.getElementById("inventory-search-input").addEventListener("keyup", submitSearch, kiosk_mode=true);
@@ -29,6 +30,8 @@ async function authenticate() {
         document.getElementById("room-select").addEventListener("change", submitSearch, kiosk_mode=true);
         document.getElementById("tool-material-select").addEventListener("change", submitSearch, kiosk_mode=true);
     });
+
+    fetchCheckouts();
 
     document.addEventListener("keyup", (e) => {
         // If the key is is ';', focus the input on id-input and switch to
@@ -54,6 +57,44 @@ async function authenticate() {
             createUserInfo(user_info)
         });
     });
+}
+
+async function fetchCheckouts() {
+    const response = await fetch(`${API}/checkouts/log/${api_key}`);
+    const checkouts = await response.json();
+
+    if (checkouts === null) {
+        return null;
+    }
+
+    state.checkouts = checkouts;
+    updateCheckoutsHTML();
+}
+
+function updateCheckoutsHTML() {
+    if (state.checkouts === null) {
+        return;
+    }
+
+    const current = document.getElementById("checkouts-current");
+    const history = document.getElementById("checkouts-history");
+
+    let current_divs = [];
+    for (let checkout of state.checkouts.currently_checked_out) {
+        current_divs.push(createCheckoutDiv(checkout, kiosk_mode=true));
+    }
+
+    let history_divs = [];
+    for (let checkout of state.checkouts.checkout_history) {
+        history_divs.push(createCheckoutDiv(checkout, kiosk_mode=true));
+    }
+    
+    removeAllChildren(current);
+    removeAllChildren(history);
+    
+    appendChildren(current, current_divs);
+    appendChildren(history, history_divs);
+
 }
 
 async function fetchUserInfo(id_number) {
@@ -181,10 +222,14 @@ function updateSelectedItems() {
     const selected_els = document.getElementsByClassName("inventory-result");
     for (let i = 0; i < selected_els.length; i++) {
         const el = selected_els[i];
+        const btn = el.getElementsByClassName("inventory-result-checkout")[0];
+
         if (state.cart.filter(item => item.index == el.id.split("-")[2]).length > 0) {
             el.classList.add("selected");
+            btn.innerHTML = "-";
         } else {
             el.classList.remove("selected");
+            btn.innerHTML = "+";
         }
     }
 }

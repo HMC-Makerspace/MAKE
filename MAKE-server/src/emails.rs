@@ -33,7 +33,11 @@ pub async fn send_bulk_emails(recipients: Vec<String>, subject: String, body: St
     }
 }
 
-pub async fn send_individual_email(recipient: String, subject: String, body: String) {
+pub async fn send_individual_email(
+    recipient: String,
+    subject: String,
+    body: String,
+) -> std::result::Result<lettre::smtp::response::Response, lettre::smtp::error::Error> {
     let lock = API_KEYS.lock().await;
     let (email, password) = lock.get_gmail_tuple();
     drop(lock);
@@ -53,9 +57,11 @@ pub async fn send_individual_email(recipient: String, subject: String, body: Str
 
     let result = mailer.send(content.into());
 
-    if result.is_ok() {
+    if &result.is_ok() == &true {
         info!("Emailed user {}", recipient.clone());
     } else {
         error!("Error sending email: {:?}", result);
     }
+
+    result
 }

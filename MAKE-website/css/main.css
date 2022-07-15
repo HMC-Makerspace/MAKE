@@ -7,7 +7,7 @@
     --theme-color-4: #004E89;
     --theme-color-5: #444444;
     --theme-color-6: #e0cf34;
-    --theme-color-7: #a530db;
+    --theme-color-7: #a918ec;
     --theme-color-8: #1B9AAA;
     
     --low-color: #9c5151;
@@ -358,7 +358,6 @@ INVENTORY
 
 .inventory-result-show-lower-div {
     height: 40px;
-    width: 80%;
 }
 
 .inventory-result-show-lower-div.grayed-out {
@@ -433,11 +432,11 @@ INVENTORY
     background-color: var(--theme-color-2);
     color: var(--text-color-main);
     border-radius: var(--roundness);
-    padding: 10px;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    height: 40px;
 }
 
 .inventory-result-quantity.low {
@@ -682,22 +681,23 @@ Checkouts
     min-width: 80%;
     margin-top: 20px;
     gap: 10px;
-    padding-bottom: 20px;
+    padding: 20px;
 }
 
 .checkout-entry {
     display: grid;
-    grid-template-areas: "checked-out checked-out-info"
-                         "checked-in checked-in-info"
-                         "items items";
-
-    width: 400px;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 20px 20px auto;
+    grid-template-columns: 1fr 1fr 1fr 1fr 500px 1fr;
+    grid-template-rows: auto;
     background-color: var(--theme-color-5);
     border-radius: var(--roundness);
     padding: 10px;
     gap: 10px;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.checkout-entry.kiosk-mode {
+    grid-template-columns: 1fr 1fr 1fr 1fr 500px 1fr 1fr 1fr;
 }
 
 .checkout-entry >* {
@@ -708,28 +708,14 @@ Checkouts
 }
 
 
-.t-out {
-    grid-area: checked-out;
-}
-
-.t-out-info {
-    grid-area: checked-out-info;
-}
-
-.t-in {
-    grid-area: checked-in;
-}
-
-.t-in-info {
-    grid-area: checked-in-info;
-}
-
 .checkout-entry-items {
-    grid-area: items;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 5px
+    justify-content: flex-start;
+    width: 500px;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .checkout-entry-item {
@@ -740,8 +726,9 @@ Checkouts
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    height: 20px;
-    width: 80%;
+    height: 40px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 /* 
 

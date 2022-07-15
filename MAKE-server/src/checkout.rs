@@ -105,6 +105,10 @@ impl CheckoutLogEntry {
         self.num_time_notified
     }
 
+    pub fn add_email_sent(&mut self) {
+        self.num_time_notified += 1;
+    }
+
     pub fn get_college_id(&self) -> u64 {
         self.college_id
     }
@@ -112,7 +116,7 @@ impl CheckoutLogEntry {
     pub fn get_items_as_string(&self) -> String {
         let mut items_str = String::new();
         for item in self.items.iter() {
-            items_str.push_str(format!("- {}\n", item).as_str());
+            items_str.push_str(format!("- {}<br>", item).as_str());
         }
         items_str
     }

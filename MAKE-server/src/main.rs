@@ -112,15 +112,15 @@ impl ApiKeys {
     }
 
     pub fn validate_checkout(&self, key: &str) -> bool {
-        self.checkout == key
+        self.checkout == key || self.admin == key
     }
 
     pub fn validate_student_storage(&self, key: &str) -> bool {
-        self.student_storage == key
+        self.student_storage == key || self.admin == key
     }
 
     pub fn validate_printers(&self, key: &str) -> bool {
-        self.printers == key
+        self.printers == key || self.admin == key
     }
 
     pub fn get_gmail_tuple(&self) -> (String, String) {
@@ -140,6 +140,7 @@ impl EmailTemplates {
         self.print_queue = self.html_file_to_string("email_templates/print_queue.html");
         self.expired_student_storage =
             self.html_file_to_string("email_templates/expired_student_storage.html");
+        self.expired_checkout = self.html_file_to_string("email_templates/expired_checkout.html");
     }
 
     pub fn html_file_to_string(&self, filename: &str) -> String {
@@ -495,6 +496,10 @@ async fn update_loop() {
                     "MAKE Tool Checkout Notification #1".to_string(),
                     EMAIL_TEMPLATES.lock().await.get_expired_checkout(&entry.get_items_as_string()),
                 ).await;
+
+                if email_result.is_ok() {
+                    entry.add_email_sent();
+                }
             } else if entry.get_emails_sent() == entry.num_24_hours_passed() {
                 // Case two: item is expired, and the number of emails sent is equal to the number of 24 hours since the item was checked out
                 // Send email to user
@@ -504,6 +509,10 @@ async fn update_loop() {
                     format!("MAKE Tool Checkout Notification #{}", entry.get_emails_sent() + 1),
                     EMAIL_TEMPLATES.lock().await.get_expired_checkout(&entry.get_items_as_string()),
                 ).await;
+
+                if email_result.is_ok() {
+                    entry.add_email_sent();
+                }
             }
         }
     }

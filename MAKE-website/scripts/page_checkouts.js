@@ -17,14 +17,14 @@ function renderCheckouts() {
 
     for (let checkout of l) {
         if (!checkout.checked_in) {
-            current.appendChild(createCheckDiv(checkout));
+            current.appendChild(createCheckoutDiv(checkout));
         } else {
-            history.appendChild(createCheckDiv(checkout));
+            history.appendChild(createCheckoutDiv(checkout));
         }
     }
 }
 
-function createCheckDiv(checkout) {
+function createCheckoutDiv(checkout, kiosk_mode=false) {
     let div = document.createElement("div");
     div.classList.add("checkout-entry");
 
@@ -34,7 +34,7 @@ function createCheckDiv(checkout) {
     div.appendChild(t_out);
     let t_out_info = document.createElement("div");
     t_out_info.classList.add("t-out-info");
-    t_out_info.innerHTML = ` ${new Date(checkout.timestamp_checked_out * 1000).toLocaleString()}`;
+    t_out_info.innerHTML = ` ${(new Date(checkout.timestamp_checked_out * 1000).toLocaleString()).replace(", ", "<br>")}`;
     div.appendChild(t_out_info);
 
     let t_in = document.createElement("div");
@@ -48,9 +48,9 @@ function createCheckDiv(checkout) {
     let t_in_info = document.createElement("div");
     t_in_info.classList.add("t-in-info");
     if (checkout.checked_in) {
-        t_in_info.innerHTML = ` ${new Date(checkout.timestamp_checked_in * 1000).toLocaleString()}`;
+        t_in_info.innerHTML = ` ${(new Date(checkout.timestamp_checked_in * 1000).toLocaleString()).replace(", ", "<br>")}`;
     } else {
-        t_in_info.innerHTML = ` ${new Date(checkout.timestamp_expires * 1000).toLocaleString()}`;
+        t_in_info.innerHTML = ` ${(new Date(checkout.timestamp_expires * 1000).toLocaleString()).replace(", ", "<br>")}`;
     }
     div.appendChild(t_in_info);
 
@@ -64,8 +64,29 @@ function createCheckDiv(checkout) {
         item_div.innerHTML = `${item}`;
         item_name.appendChild(item_div);
     }
-    
     div.appendChild(item_name);
+
+    let times_notified = document.createElement("div");
+    times_notified.classList.add("checkout-entry-times-notified");
+    times_notified.innerHTML = `# Notified: ${checkout.num_time_notified}`;
+    div.appendChild(times_notified);
+
+
+    if (kiosk_mode) {
+        div.classList.add("kiosk-mode");
+
+        let college_id = document.createElement("div");
+        college_id.classList.add("checkout-entry-college-id");
+        college_id.innerHTML = `College ID: ${checkout.college_id}`;
+        div.appendChild(college_id);
+
+        let check_in_button = document.createElement("button");
+        check_in_button.classList.add("check-in-button");
+        check_in_button.innerHTML = "Check In";
+        check_in_button.onclick = () => {
+            checkIn(checkout.checkout_uuid);
+        }
+    }
 
     return div;
 }

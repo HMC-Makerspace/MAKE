@@ -37,6 +37,9 @@ function submitSearch(kiosk_mode=false) {
 
     removeAllChildren(results);
     appendChildren(results, search_divs);
+    if (kiosk_mode) {
+        updateSelectedItems();
+    }
 }
 
 function getInventoryFilters() {

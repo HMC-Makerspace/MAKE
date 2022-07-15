@@ -120,6 +120,10 @@ CHECKOUT
     background-color: var(--printer-error);
 }
 
+#checkouts-page {
+    overflow-y: scroll;
+}
+
 #pages {
     background-color: var(--theme-color-5);
     grid-area: inventory;
@@ -143,7 +147,7 @@ CHECKOUT
     border-radius: 10px;
     font-weight: bold;
     font-size: 1.2em;
-    transition: all .05s ease-in-out;
+    transition: all .1s ease-in-out;
 }
 
 #pages-select button.selected {
@@ -291,8 +295,8 @@ label {
 
 #cart-content {
     display: grid;
-    grid-template-columns: repeat(3, 140px);
-    grid-template-rows: repeat(6, 30px);
+    grid-template-columns: repeat(3, 130px);
+    grid-template-rows: repeat(6, 60px);
     gap: 5px;
     padding: 5px;
 }
@@ -316,11 +320,11 @@ label {
     display: block;
     position: unset;
     overflow: hidden;
-    line-break: anywhere;
+    line-break: auto;
     text-overflow: ellipsis;
     display: -webkit-box;
-    -webkit-line-clamp: 1; /* number of lines to show */
-            line-clamp: 1;
+    -webkit-line-clamp: 2; /* number of lines to show */
+            line-clamp: 2;
     -webkit-box-orient: vertical;
 }
 
