@@ -4,13 +4,19 @@ function renderCheckouts() {
 
     removeAllChildren(current);
     removeAllChildren(history);
+    current.innerHTML = "<h2>Current Checkouts</h2>";
+    history.innerHTML = "<h2>Previous Checkouts</h2>";
 
     if (state.user_object === null) {
         return;
     }
 
-    for (let checkout of state.user_object.all_checkouts) {
-        if (checkout.checked_in) {
+    let l = JSON.parse(JSON.stringify(state.user_object.all_checkouts));
+
+    l.reverse();
+
+    for (let checkout of l) {
+        if (!checkout.checked_in) {
             current.appendChild(createCheckDiv(checkout));
         } else {
             history.appendChild(createCheckDiv(checkout));
@@ -20,28 +26,46 @@ function renderCheckouts() {
 
 function createCheckDiv(checkout) {
     let div = document.createElement("div");
-        div.classList.add("checkout-entry");
+    div.classList.add("checkout-entry");
 
-        let timestamp = document.createElement("div");
-        timestamp.classList.add("checkout-entry-timestamp");
-        timestamp.innerText = new Date(checkout.timestamp_start).toLocaleString();
+    let t_out = document.createElement("div");
+    t_out.classList.add("t-out");
+    t_out.innerHTML = `Checked out`;
+    div.appendChild(t_out);
+    let t_out_info = document.createElement("div");
+    t_out_info.classList.add("t-out-info");
+    t_out_info.innerHTML = ` ${new Date(checkout.timestamp_checked_out * 1000).toLocaleString()}`;
+    div.appendChild(t_out_info);
 
-        let item_name = document.createElement("div");
-        item_name.classList.add("checkout-entry-item-name");
-        item_name.innerText = checkout.item_name;
+    let t_in = document.createElement("div");
+    t_in.classList.add("t-in");
+    if (checkout.checked_in) {
+        t_in.innerHTML = `Checked in`;
+    } else {
+        t_in.innerHTML = `Expires`;
+    }
+    div.appendChild(t_in);
+    let t_in_info = document.createElement("div");
+    t_in_info.classList.add("t-in-info");
+    if (checkout.checked_in) {
+        t_in_info.innerHTML = ` ${new Date(checkout.timestamp_checked_in * 1000).toLocaleString()}`;
+    } else {
+        t_in_info.innerHTML = ` ${new Date(checkout.timestamp_expires * 1000).toLocaleString()}`;
+    }
+    div.appendChild(t_in_info);
 
-        let item_uuid = document.createElement("div");
-        item_uuid.classList.add("checkout-entry-item-uuid");
-        item_uuid.innerText = checkout.item_uuid ?? "";
 
-        let checked_in = document.createElement("div");
-        checked_in.classList.add("checkout-entry-checked");
-        checked_in.classList.add("checked-" + (checkout.checked_in ? "in" : "out"));
-        checked_in.innerText = checkout.checked_in ? "Checked In" : "Checked Out";
-        
+    let item_name = document.createElement("div");
+    item_name.classList.add("checkout-entry-items");
 
-        div.appendChild(timestamp);
-        div.appendChild(item_name);
-        div.appendChild(item_uuid);
-        div.appendChild(checked_in);
+    for (let item of checkout.items) {
+        let item_div = document.createElement("div");
+        item_div.classList.add("checkout-entry-item");
+        item_div.innerHTML = `${item}`;
+        item_name.appendChild(item_div);
+    }
+    
+    div.appendChild(item_name);
+
+    return div;
 }

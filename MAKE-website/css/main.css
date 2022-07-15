@@ -329,10 +329,21 @@ INVENTORY
     max-width: 1200px;
     margin: 0 auto;
     color: var(--text-color-alt);
+    transition: all 0.1s ease-in-out;
 }
 
 .inventory-result.kiosk-mode .inventory-result-main {
-    grid-template-columns: 2fr .5fr 2fr .5fr .5fr 1fr;
+    grid-template-columns: 2fr .5fr 2fr .5fr .5fr .3fr;
+}
+
+.inventory-result.selected {
+    background-color: var(--theme-color-7);
+    color: var(--text-color-main);
+}
+
+.inventory-result.selected .inventory-result-checkout {
+    color: var(--printer-error);
+    background-color: var(--theme-color-3);
 }
 
 .inventory-result-main {
@@ -657,7 +668,6 @@ Checkouts
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     padding-top: 20px;
     padding-bottom: 20px;
 }
@@ -669,13 +679,70 @@ Checkouts
     justify-content: center;
     background-color: var(--theme-color-2);
     border-radius: var(--roundness);
-    margin-bottom: 10px;
-    padding-top: 20px;
-    padding-bottom: 20px;
     min-width: 80%;
-    min-height: 50px;
+    margin-top: 20px;
+    gap: 10px;
+    padding-bottom: 20px;
 }
 
+.checkout-entry {
+    display: grid;
+    grid-template-areas: "checked-out checked-out-info"
+                         "checked-in checked-in-info"
+                         "items items";
+
+    width: 400px;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 20px 20px auto;
+    background-color: var(--theme-color-5);
+    border-radius: var(--roundness);
+    padding: 10px;
+    gap: 10px;
+}
+
+.checkout-entry >* {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.t-out {
+    grid-area: checked-out;
+}
+
+.t-out-info {
+    grid-area: checked-out-info;
+}
+
+.t-in {
+    grid-area: checked-in;
+}
+
+.t-in-info {
+    grid-area: checked-in-info;
+}
+
+.checkout-entry-items {
+    grid-area: items;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px
+}
+
+.checkout-entry-item {
+    background-color: var(--theme-color-3);
+    border-radius: var(--roundness);
+    color: var(--text-color-alt);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    width: 80%;
+}
 /* 
 
 3D Printers

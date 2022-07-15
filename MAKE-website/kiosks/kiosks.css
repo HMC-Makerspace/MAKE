@@ -10,6 +10,10 @@ p3 {
     margin-bottom: 10px;
 }
 
+p {
+    margin: unset;
+}
+
 
 /*
 
@@ -90,23 +94,30 @@ CHECKOUT
     color: var(--text-color-main);
 }
 
-#left {
-    grid-area: left;
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-}
-
-#left >* {
+#user-info {
+    position: left;
     border-radius: var(--roundness);
-    padding: 10px;
+    background-color: var(--theme-color-5);
+    display: grid;
+    grid-template-rows: 50px auto;
+    gap: 20px;
+    padding: 20px;
     margin: 10px;
 }
-#user-info {
-    background-color: var(--theme-color-5);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
+
+#user-info-header {
+    display: grid;
+    grid-template-columns: 2fr 5fr 1fr 1fr;
+    gap: 10px;
+}
+
+#id-input {
+    grid-column: 2/3;
+}
+
+#clear-user {
+    grid-column: 3/4;
+    background-color: var(--printer-error);
 }
 
 #pages {
@@ -157,11 +168,9 @@ CHECKOUT
 }
 
 .inventory-result-checkout {
-    height: 40px;
     background-color: var(--theme-color-7);
-}
-
-#heartbeat-printers {
+    font-size: 1.2em;
+    font-weight: bold;
 }
 
 #printers-current.small >* {
@@ -193,6 +202,7 @@ CHECKOUT
                          "cart cart cart"
                          "cart cart cart"
                          "cart cart cart"
+                         "time time time"
                          "commit commit commit";
     gap: 10px;
     height: 100%;
@@ -203,7 +213,6 @@ CHECKOUT
     background-color: var(--theme-color-2);
     border-radius: var(--roundness);
     color: var(--text-color-main);
-    font-size: .8em;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -244,9 +253,23 @@ CHECKOUT
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    padding: 5px;
     font-size: 1.2em;
     justify-content: unset;
+}
+
+#user-info-cart b {
+    margin-top: 20px;
+}
+
+#time-length-radio {
+    grid-area: time;
+    gap: 10px;
+    padding: 5px;
+    font-weight: bold;
+}
+
+label {
+    margin-left: 0;
 }
 
 .User {
@@ -268,8 +291,8 @@ CHECKOUT
 
 #cart-content {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: repeat(3, 30px);
+    grid-template-columns: repeat(3, 140px);
+    grid-template-rows: repeat(6, 30px);
     gap: 5px;
     padding: 5px;
 }
@@ -290,9 +313,15 @@ CHECKOUT
 }
 
 .cart-item-name {
-    text-overflow: ellipsis;
+    display: block;
+    position: unset;
     overflow: hidden;
-    line-clamp: 1;
+    line-break: anywhere;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1; /* number of lines to show */
+            line-clamp: 1;
+    -webkit-box-orient: vertical;
 }
 
 .cart-item:hover .cart-item-remove {
@@ -315,6 +344,11 @@ CHECKOUT
     align-items: center;
 }
 
+.cart-item.success {
+    background-color: var(--high-color);
+    animation: pulse .2s infinite;
+}
+
 #commit-checkout {
     grid-area: commit;
     background-color: var(--theme-color-1);
@@ -322,4 +356,9 @@ CHECKOUT
     flex-direction: column;
     align-items: center;
     gap: 20px;
+}
+
+#id-error {
+    background-color: var(--printer-error);
+    padding: 5px;
 }

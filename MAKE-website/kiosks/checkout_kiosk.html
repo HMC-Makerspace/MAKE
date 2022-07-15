@@ -30,45 +30,18 @@
     <div id="main-grid-checkout">
 
 
-        <div id="left">
-            <div id="user-info">
+        <div id="user-info">
+            <div id="user-info-header">
                 <input id="id-input" type="text" placeholder="Swipe or enter ID...">
 
-                <div id="id-error" class="hidden">
-                    <p>Invalid ID/User not yet in system. They might have not taken the General Safety Quiz</p>
-                </div>
-
-                <div id="user-info-content">
-
-                </div>
+                <button id="clear-user" onclick="clearUser()">Clear</button>
             </div>
-            <div id="heartbeat">
-                <h1>Heartbeat</h1>
-                <div id="heartbeat-general">
-                    Visits Total (24HR): <span id="vists-total">---</span>
-                    <br>
-                    Visits Unique (24HR): <span id="vists-unique">---</span>
-                </div>
-                <div id="heartbeat-printers">
-                    Queue Length: <span id="queue-length">---</span>
-                    <br>
-                    Printers:
-                    <br>
-                    <div id="printers-current" class="small"></div>
-                </div>
-                <div id="heartbeat-quizzes">
-                    General: <span id="quiz-general">---</span>
-                    <br>
-                    Laser3D: <span id="quiz-laser3d">---</span>
-                    <br>
-                    SprayPaint: <span id="quiz-spraypaint">---</span>
-                    <br>
-                    Composite: <span id="quiz-composite">---</span>
-                    <br>
-                    Welding: <span id="quiz-welding">---</span>
-                    <br>
-                    Studio: <span id="quiz-studio">---</span>
-                </div>
+
+            <div id="id-error" class="hidden">
+            </div>
+
+            <div id="user-info-content">
+
             </div>
         </div>
 
@@ -84,12 +57,12 @@
                 <div id="inventory-page" class="content-container">
                     <div id="inventory-search" class="content-header">
                         <input type="text" id="inventory-search-input" placeholder="Search for item...">
-    
+
                         <span>
                             <input type="checkbox" id="inventory-in-stock">
                             <label for="inventory-in-stock">In Stock</label>
                         </span>
-    
+
                         <span>
                             <select id="room-select">
                                 <option value="">----</option>
@@ -103,7 +76,7 @@
                             </select>
                             <label for="room-select">Room/Area</label>
                         </span>
-    
+
                         <span>
                             <select id="tool-material-select">
                                 <option value="">----</option>
@@ -113,9 +86,9 @@
                             <label for="tool-material-select">Tool/Material</label>
                         </span>
                     </div>
-    
+
                     <div id="inventory-results" class="content-body">
-    
+
                     </div>
                 </div>
 
@@ -129,7 +102,7 @@
             </div>
         </div>
 
-        
+
     </div>
 
     <script src="../../scripts/libs/fuzzysort.min.js"></script>

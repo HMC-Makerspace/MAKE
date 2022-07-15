@@ -14,8 +14,9 @@ async function fetchInventory(kiosk_mode = false) {
 
         state.inventory = inventory;
 
-        inventory.items.forEach(element => {
+        inventory.items.forEach((element, index) => {
             element.uuids_joined = element.uuids.join(" ");
+            element.index = index;
         });
 
         if (!kiosk_mode) {
@@ -83,21 +84,22 @@ function generateInventoryDivs(results, kiosk_mode=false) {
     const divs = [];
 
     for (let i = 0; i < results.length; i++) {
-        divs.push(generateInventoryDiv(results[i], i, kiosk_mode));
+        divs.push(generateInventoryDiv(results[i], kiosk_mode));
     }
 
     return divs;
 }
 
-function generateInventoryDiv(result, index, kiosk_mode=false) {
+function generateInventoryDiv(result, kiosk_mode=false) {
     let div = document.createElement("div");
     div.classList.add("inventory-result");
     if (kiosk_mode) {
         div.classList.add("kiosk-mode");
     }
-    div.id = `inventory-result-${index}`;
 
     const item = result.obj;
+
+    div.id = `inventory-result-${item.index}`;
 
     const main_div = document.createElement("div");
     main_div.classList.add("inventory-result-main");
@@ -142,7 +144,7 @@ function generateInventoryDiv(result, index, kiosk_mode=false) {
     main_div.appendChild(quantity);
 
     const lower_div = document.createElement("div");
-    lower_div.id = `inventory-result-${index}-lower-div`;
+    lower_div.id = `inventory-result-${item.index}-lower-div`;
     lower_div.classList.add("inventory-result-lower");
     lower_div.classList.add("hidden");
 
@@ -189,7 +191,7 @@ function generateInventoryDiv(result, index, kiosk_mode=false) {
     if (lower_div.childNodes.length > 0) {
         show_lower_div_button.classList.remove("grayed-out");
         show_lower_div_button.addEventListener("click", () => {
-            const lower_div = document.getElementById(`inventory-result-${index}-lower-div`);
+            const lower_div = document.getElementById(`inventory-result-${item.index}-lower-div`);
             lower_div.classList.toggle("hidden");
         });
     }
@@ -200,9 +202,9 @@ function generateInventoryDiv(result, index, kiosk_mode=false) {
         // Add checkout button
         const checkout_button = document.createElement("button");
         checkout_button.classList.add("inventory-result-checkout");
-        checkout_button.innerText = "Checkout";
+        checkout_button.innerText = "+";
         checkout_button.addEventListener("click", () => {
-            addToCart(item.name);
+            addToCart(item.name, item.index);
         });
         main_div.appendChild(checkout_button);
     }

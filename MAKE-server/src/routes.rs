@@ -2,8 +2,7 @@
 
 use crate::*;
 use ::serde::{Deserialize, Serialize};
-use actix_web::{error::*};
-
+use actix_web::error::*;
 
 #[derive(Deserialize, Serialize, Clone)]
 struct UserInfo {
@@ -42,7 +41,11 @@ struct PrinterStatuses {
 }
 
 impl PrinterStatuses {
-    fn from_printers(printers: Vec<Printer>, pos_in_queue: Option<usize>, total_in_queue: usize) -> Self {
+    fn from_printers(
+        printers: Vec<Printer>,
+        pos_in_queue: Option<usize>,
+        total_in_queue: usize,
+    ) -> Self {
         PrinterStatuses {
             printers,
             pos_in_queue,
@@ -114,9 +117,7 @@ pub async fn get_users(path: web::Path<String>) -> Result<HttpResponse, Error> {
 #[get("/api/v1/checkouts/log/{api_key}")]
 pub async fn get_checkout_log(path: web::Path<String>) -> Result<HttpResponse, Error> {
     let api_key = path.into_inner();
-    if API_KEYS.lock().await.validate_admin(&api_key)
-        || API_KEYS.lock().await.validate_checkout(&api_key)
-    {
+    if API_KEYS.lock().await.validate_checkout(&api_key) {
         let data = MEMORY_DATABASE.lock().await;
         let checkout_log = data.checkout_log.clone();
         Ok(HttpResponse::Ok().json(checkout_log))
@@ -166,9 +167,7 @@ pub async fn get_student_storage_for_user(path: web::Path<u64>) -> Result<HttpRe
 #[get("/api/v1/student_storage/all/{api_key}")]
 pub async fn get_student_storage_for_all(path: web::Path<String>) -> Result<HttpResponse, Error> {
     let api_key = path.into_inner();
-    if API_KEYS.lock().await.validate_student_storage(&api_key)
-        || API_KEYS.lock().await.validate_admin(&api_key)
-    {
+    if API_KEYS.lock().await.validate_student_storage(&api_key) {
         let data = MEMORY_DATABASE.lock().await;
         let student_storage = data.student_storage.clone();
         Ok(HttpResponse::Ok().json(student_storage))
@@ -184,21 +183,20 @@ pub async fn get_printers(path: web::Path<u64>) -> Result<HttpResponse, Error> {
     let printers = data.printers.get_printer_statuses();
     let pos_in_queue = data.printers.get_queue_pos_for(id);
     let total_in_queue = data.printers.get_print_queue_length();
-    
-    let printers = PrinterStatuses::from_printers(
-        printers,
-        pos_in_queue,
-        total_in_queue,
-    );
+
+    let printers = PrinterStatuses::from_printers(printers, pos_in_queue, total_in_queue);
     Ok(HttpResponse::Ok().json(printers))
 }
 
 #[get("/api/v1/printers/for_api/{api_key}")]
 pub async fn get_printers_api_key(path: web::Path<String>) -> Result<HttpResponse, Error> {
     let api_key = path.into_inner();
-    if API_KEYS.lock().await.validate_admin(&api_key)
-        || API_KEYS.lock().await.validate_printers(&api_key)
-        || API_KEYS.lock().await.validate_checkout(&api_key)
+
+    let api_keys = API_KEYS.lock().await;
+
+    if api_keys.validate_printers(&api_key)
+        || api_keys.validate_checkout(&api_key)
+        || api_keys.validate_admin(&api_key)
     {
         let data = MEMORY_DATABASE.lock().await;
         let printers = data.printers.get_printer_statuses();
@@ -217,7 +215,7 @@ pub async fn get_printers_api_key(path: web::Path<String>) -> Result<HttpRespons
 
 #[derive(Deserialize)]
 pub struct CheckoutItems {
-    items: Vec<String>
+    items: Vec<String>,
 }
 #[post("/api/v1/checkouts/add_entry/{id_number}/{sec_length}/{api_key}")]
 pub async fn checkout_items(
@@ -226,9 +224,7 @@ pub async fn checkout_items(
 ) -> Result<HttpResponse, Error> {
     let (id_number, sec_length, api_key) = path.into_inner();
 
-    if API_KEYS.lock().await.validate_admin(&api_key)
-        || API_KEYS.lock().await.validate_checkout(&api_key)
-    {
+    if API_KEYS.lock().await.validate_checkout(&api_key) {
         let mut data = MEMORY_DATABASE.lock().await;
 
         let user = data.users.get_user_by_id(&id_number);
@@ -237,8 +233,14 @@ pub async fn checkout_items(
             return Err(ErrorBadRequest("User not found".to_string()));
         }
 
+        let user = user.unwrap();
+
+        if user.get_auth_level() == AuthLevel::Banned {
+            return Err(ErrorUnauthorized("User is banned".to_string()));
+        }
+
         data.checkout_log.add_checkout(CheckoutLogEntry::new(
-            user.unwrap().get_id(),
+            user.get_id(),
             sec_length,
             body.items.clone(),
         ));
@@ -279,7 +281,6 @@ pub async fn set_auth_level(
         Ok(HttpResponse::Unauthorized().finish())
     }
 }
-
 
 #[post("/api/v1/auth/set_quiz/{id_number}/{quiz_name}/{passed}/{api_key}")]
 pub async fn set_quiz_passed(
@@ -347,9 +348,9 @@ pub async fn join_printer_queue(path: web::Path<u64>) -> Result<HttpResponse, Er
     }
 
     let user = user.unwrap();
-    
+
     if user.get_auth_level() == AuthLevel::Banned {
-        return Err(ErrorBadRequest("User is banned".to_string()));
+        return Err(ErrorUnauthorized("User is banned".to_string()));
     }
 
     let result = data.printers.add_user_to_queue(&user);
@@ -361,7 +362,6 @@ pub async fn join_printer_queue(path: web::Path<u64>) -> Result<HttpResponse, Er
     Ok(HttpResponse::Ok()
         .status(http::StatusCode::CREATED)
         .finish())
-
 }
 
 #[post("/api/v1/printers/leave_queue/{id_number}")]
@@ -407,7 +407,7 @@ pub async fn checkout_student_storage(
         let user = user.unwrap();
 
         if user.get_auth_level() == AuthLevel::Banned {
-            return Err(ErrorBadRequest("User is banned".to_string()));
+            return Err(ErrorUnauthorized("User is banned".to_string()));
         }
 
         let finished = data
@@ -443,7 +443,7 @@ pub async fn renew_student_storage_slot(
     let user = user.unwrap();
 
     if user.get_auth_level() == AuthLevel::Banned {
-        return Err(ErrorBadRequest("User is banned".to_string()));
+        return Err(ErrorUnauthorized("User is banned".to_string()));
     }
 
     data.student_storage.renew_by_id(&user.get_id(), &slot_id);

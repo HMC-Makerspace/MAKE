@@ -189,7 +189,6 @@ pub fn create_users_from_quizzes(quizzes: &Vec<Quiz>) -> Users {
             let mut user = User::from_response(response);
 
             if users.has_user(&user) {
-                info!("User already exists: {}", user.college_id);
                 user = users.get_user(&user).unwrap().clone();
             }
 
