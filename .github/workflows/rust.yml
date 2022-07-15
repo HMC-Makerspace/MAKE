@@ -18,5 +18,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build
       run: cargo build --verbose
+      working-directory: MAKE-server
     - name: Run tests
       run: cargo test --verbose
+      working-directory: MAKE-server
