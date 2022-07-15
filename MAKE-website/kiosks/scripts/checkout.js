@@ -2,6 +2,7 @@ var state = {
     page: "inventory",
     inventory: null,
     checkouts: null,
+    users: null,
     cart: [],
     current_id_number: 0,
 }
@@ -22,6 +23,7 @@ async function authenticate() {
 
     setInterval(fetchInventory, 100000, kiosk_mode=true);
     setInterval(fetchCheckouts, 100000);
+    setInterval(fetchUsers, 100000);
 
     fetchInventory(true).then(() => {
         submitSearch(kiosk_mode=true);
@@ -32,12 +34,17 @@ async function authenticate() {
     });
 
     fetchCheckouts();
+    fetchUsers().then(() => {
+        submitUserSearch();
+        document.getElementById("users-search-input").addEventListener("keyup", submitUserSearch);
+    });
 
     document.addEventListener("keyup", (e) => {
         // If the key is is ';', focus the input on id-input and switch to
         // the inventory page
-
+        
         if (e.key === ";") {
+            e.preventDefault();
             setPage("inventory");
             state.cart = [];
             document.getElementById("id-input").value = "";
@@ -69,6 +76,94 @@ async function fetchCheckouts() {
 
     state.checkouts = checkouts;
     updateCheckoutsHTML();
+}
+
+async function fetchUsers() {
+    const response = await fetch(`${API}/users/all/${api_key}`);
+    const users = await response.json();
+
+    if (users === null) {
+        return null;
+    }
+
+    state.users = users.users;
+}
+
+const user_search_options = {
+    limit: 1000, // don't return more results than you need!
+    allowTypo: true, // if you don't care about allowing typos
+    threshold: -10000, // don't return bad results
+    keys: ['name', 'college_id', 'college_email', 'auth_level'], // keys to search
+    all: true,
+}
+
+function submitUserSearch() {
+    if (state.users === null) {
+        return;
+    }
+
+    const search = document.getElementById("users-search-input").value;
+
+    const search_results = searchUsers(search);
+
+    const users = document.getElementById("users-results");
+
+    let divs = [];
+    for (let user of search_results) {
+        divs.push(createUserDiv(user.obj));
+    }
+
+    removeAllChildren(users);
+    appendChildren(users, divs);
+}
+
+function searchUsers(search) {
+    if (state.users === null) {
+        return [];
+    }
+
+    const results = fuzzysort.go(search, Object.values(state.users), user_search_options);
+
+    const results_norm = results.sort((a, b) => b.score - a.score);
+
+    return results_norm;
+}
+
+function createUserDiv(user) {
+    let div = document.createElement("div");
+    div.classList.add("user-result");
+
+    let name = document.createElement("div");
+    name.classList.add("user-result-name");
+    name.innerHTML = user.name;
+
+    let id = document.createElement("div");
+    id.classList.add("user-result-id");
+    id.innerHTML = user.college_id;
+
+    let email = document.createElement("div");
+    email.classList.add("user-result-email");
+    email.innerHTML = user.college_email;
+
+    let auth = document.createElement("div");
+    auth.classList.add("user-result-auth");
+    auth.innerHTML = user.auth_level;
+
+    let passed_quizzes = document.createElement("div");
+    passed_quizzes.classList.add("user-result-passed-quizzes");
+    for (let quiz of user.passed_quizzes) {
+        let quiz_div = document.createElement("div");
+        quiz_div.innerHTML = quiz;
+        passed_quizzes.appendChild(quiz_div);
+    }
+
+    div.appendChild(name);
+    div.appendChild(id);
+    div.appendChild(email);
+    div.appendChild(auth);
+    div.appendChild(passed_quizzes);
+
+    return div;
 }
 
 function updateCheckoutsHTML() {
@@ -122,7 +217,7 @@ function createUserInfo(user_info) {
             <div id="user-info-auth" class="${user_info.auth_level}">Auth: ${user_info.auth_level}</div>
             <div id="user-info-pending-checkouts">Pending Checkouts: ${user_info.pending_checkouts.length}</div>
             <div id="user-info-all-checkouts">All Checkouts: ${user_info.all_checkouts.length}</div>
-            <div id="user-info-passed-quizzes">Passed Quizzes:<br>${user_info.passed_quizzes}</div>
+            <div id="user-info-passed-quizzes">${createListDivs(user_info.passed_quizzes)}</div>
             <div id="user-info-cart"><b>Cart</b><div id="cart-content"></div></div>
             <div id="time-length-radio">
                 <div>
@@ -141,6 +236,15 @@ function createUserInfo(user_info) {
             <button id="commit-checkout" onclick="commitCheckout()">Commit Checkout</button>
         `;
     }
+}
+
+function createListDivs(list) {
+    let div = "";
+    for (let item of list) {
+        div += `<div>${item}</div>`;
+    }
+
+    return div;
 }
 
 function clearUser() {
@@ -189,12 +293,15 @@ function updatePage() {
         i_button.classList.add("selected");
         i_page.classList.remove("hidden");
         document.getElementById("inventory-search-input").focus();
+        document.getElementById("inventory-search-input").select();
     } else if (state.page === "checkout") {
         c_button.classList.add("selected");
         c_page.classList.remove("hidden");
     } else if (state.page === "users") {
         u_button.classList.add("selected");
         u_page.classList.remove("hidden");
+        document.getElementById("users-search-input").focus();
+        document.getElementById("users-search-input").select();
     }
 }
 
@@ -297,7 +404,7 @@ async function commitCheckout() {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            items: state.cart
+            items: state.cart.map(item => item.name)
         })
     });
 
@@ -307,10 +414,14 @@ async function commitCheckout() {
         // Clear the cart
         setTimeout(() => {
             clearUser();
+            updateSelectedItems();
         }, 500);
     } else {
         displayErrorInCart(response);
     }
+
+
+    await fetchCheckouts();
 }
 
 function displaySuccessInCart() {
@@ -328,6 +439,38 @@ function displayErrorInCart(err) {
 
     document.getElementById("id-error").innerHTML = `Error: ${err.statusText}`;
     document.getElementById("id-error").classList.remove("hidden");
+}
+
+async function checkIn(uuid) {
+    const response = await fetch(`${API}/checkouts/check_in_entry/${uuid}/${api_key}`,
+        { method: "POST" }
+    );
+
+    if (response.status === 200) {
+        displaySuccessInCheckout(uuid);
+    } else {
+        displayErrorInCheckout(uuid);
+    }
+
+    setTimeout(() => {
+        const el = document.getElementById(`checkout-${uuid}`);
+
+        if (el.classList.contains("success")) {
+            fetchCheckouts();
+        } else {
+            el.classList.remove("error");
+        }
+    }, 500);
+}
+
+function displaySuccessInCheckout(uuid) {
+    const el = document.getElementById(`checkout-${uuid}`);
+    el.classList.add("success");
+}
+
+function displayErrorInCheckout(uuid) {
+    const el = document.getElementById(`checkout-${uuid}`);
+    el.classList.add("error");
 }
 
 authenticate();

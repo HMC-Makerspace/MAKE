@@ -253,6 +253,29 @@ pub async fn checkout_items(
     }
 }
 
+#[post("/api/v1/checkouts/check_in_entry/{uuid}/{api_key}")]
+pub async fn checkin_items(
+    path: web::Path<(String, String)>,
+) -> Result<HttpResponse, Error> {
+    let (uuid, api_key) = path.into_inner();
+
+    if API_KEYS.lock().await.validate_checkout(&api_key) {
+        let mut data = MEMORY_DATABASE.lock().await;
+    
+        let result = data.checkout_log.check_in(uuid);
+    
+        drop(data);
+    
+        if result.is_err() {
+            return Err(ErrorBadRequest("Checkout not found".to_string()));
+        }
+    
+        Ok(HttpResponse::Ok().finish())
+    } else {
+        Ok(HttpResponse::Unauthorized().finish())
+    }
+}
+
 #[post("/api/v1/auth/set_level/{id_number}/{auth_level}/{api_key}")]
 pub async fn set_auth_level(
     path: web::Path<(u64, AuthLevel, String)>,

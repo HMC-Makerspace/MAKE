@@ -200,6 +200,7 @@ pub fn load_database() -> Result<Data, Error> {
 }
 
 pub async fn save_database() -> Result<(), Error> {
+    info!("Saving database...");
     let mut file = OpenOptions::new().write(true).create(true).open(DB_NAME)?;
     let data = MEMORY_DATABASE.lock().await;
 
@@ -208,6 +209,7 @@ pub async fn save_database() -> Result<(), Error> {
 
     let data = serde_json::to_string_pretty(&data)?;
     file.write_all(data.as_bytes())?;
+    info!("Database saved.");
     Ok(())
 }
 
@@ -307,6 +309,7 @@ async fn async_main() -> std::io::Result<()> {
             .service(get_quizzes)
             .service(get_users)
             .service(checkout_items)
+            .service(checkin_items)
             .service(get_checkout_log)
             .service(get_user_info)
             .service(set_auth_level)
@@ -348,6 +351,7 @@ async fn async_main() -> std::io::Result<()> {
             .service(get_quizzes)
             .service(get_users)
             .service(checkout_items)
+            .service(checkin_items)
             .service(get_checkout_log)
             .service(get_user_info)
             .service(set_auth_level)
@@ -471,7 +475,9 @@ async fn update_loop() {
 
     let mut expired_items = 0;
 
-    for entry in checkout_log.get_current_checkouts().iter_mut() {
+    let mut current_checkouts = checkout_log.get_current_checkouts();
+
+    for entry in current_checkouts.iter_mut() {
         if entry.is_expired() {
             expired_items += 1;
             let user = MEMORY_DATABASE
@@ -500,6 +506,7 @@ async fn update_loop() {
                 if email_result.is_ok() {
                     entry.add_email_sent();
                 }
+
             } else if entry.get_emails_sent() == entry.num_24_hours_passed() {
                 // Case two: item is expired, and the number of emails sent is equal to the number of 24 hours since the item was checked out
                 // Send email to user
@@ -519,6 +526,7 @@ async fn update_loop() {
 
     if expired_items > 0 {
         info!("{} checkouts expired!", expired_items);
+        MEMORY_DATABASE.lock().await.checkout_log.currently_checked_out = current_checkouts;
     } else {
         info!("No checkouts expired!");
     }

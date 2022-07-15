@@ -24,14 +24,15 @@ function renderCheckouts() {
     }
 }
 
-function createCheckoutDiv(checkout, kiosk_mode=false) {
+function createCheckoutDiv(checkout, kiosk_mode = false) {
     let div = document.createElement("div");
+    div.id = "checkout-" + checkout.checkout_uuid;
     div.classList.add("checkout-entry");
 
     let t_out = document.createElement("div");
     t_out.classList.add("t-out");
-    t_out.innerHTML = `Checked out`;
     div.appendChild(t_out);
+
     let t_out_info = document.createElement("div");
     t_out_info.classList.add("t-out-info");
     t_out_info.innerHTML = ` ${(new Date(checkout.timestamp_checked_out * 1000).toLocaleString()).replace(", ", "<br>")}`;
@@ -40,9 +41,9 @@ function createCheckoutDiv(checkout, kiosk_mode=false) {
     let t_in = document.createElement("div");
     t_in.classList.add("t-in");
     if (checkout.checked_in) {
-        t_in.innerHTML = `Checked in`;
+        t_in.classList.add("checked-in");
     } else {
-        t_in.innerHTML = `Expires`;
+        t_in.classList.add("checked-out");
     }
     div.appendChild(t_in);
     let t_in_info = document.createElement("div");
@@ -68,7 +69,7 @@ function createCheckoutDiv(checkout, kiosk_mode=false) {
 
     let times_notified = document.createElement("div");
     times_notified.classList.add("checkout-entry-times-notified");
-    times_notified.innerHTML = `# Notified: ${checkout.num_time_notified}`;
+    times_notified.innerHTML = `Emails sent: <b>${checkout.num_time_notified}</b>`;
     div.appendChild(times_notified);
 
 
@@ -77,15 +78,23 @@ function createCheckoutDiv(checkout, kiosk_mode=false) {
 
         let college_id = document.createElement("div");
         college_id.classList.add("checkout-entry-college-id");
-        college_id.innerHTML = `College ID: ${checkout.college_id}`;
-        div.appendChild(college_id);
+        college_id.innerHTML = `${checkout.college_id}`;
 
-        let check_in_button = document.createElement("button");
-        check_in_button.classList.add("check-in-button");
-        check_in_button.innerHTML = "Check In";
-        check_in_button.onclick = () => {
-            checkIn(checkout.checkout_uuid);
+        div.appendChild(college_id);
+        if (checkout.checked_in) {
+            div.classList.add("checked-in");
+        } else {
+            let check_in_button = document.createElement("button");
+            check_in_button.classList.add("check-in-button");
+            check_in_button.innerHTML = "Check In";
+            check_in_button.onclick = () => {
+                checkIn(checkout.checkout_uuid);
+            }
+
+            div.appendChild(check_in_button);
+
         }
+
     }
 
     return div;

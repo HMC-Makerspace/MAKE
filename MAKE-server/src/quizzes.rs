@@ -3,16 +3,16 @@ use std::time::SystemTime;
 use log::info;
 use serde::{Deserialize, Serialize};
 
-const base_quiz_url: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyOdR5ZzocTVLi02rPVQPVwoGyuPrGmULHznFB66pDnqsWrCWVTi5JM5KCbBn8oMVLa-vwIS3RvK6z/pub?gid=";
-const post_quiz_url: &str = "&single=true&output=csv";
+const BASE_QUIZ_URL: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyOdR5ZzocTVLi02rPVQPVwoGyuPrGmULHznFB66pDnqsWrCWVTi5JM5KCbBn8oMVLa-vwIS3RvK6z/pub?gid=";
+const POST_QUIZ_URL: &str = "&single=true&output=csv";
 
-const general: &str = "66546920";
-const laser3d: &str = "1524924728";
-const spray_paint: &str = "1841312496";
-const composite: &str = "913890505";
-const welding: &str = "482685426";
-const studio: &str = "2079405017";
-const waterjet: &str = "2100779718";
+const GENERAL: &str = "66546920";
+const LASER3D: &str = "1524924728";
+const SPRAY_PAINT: &str = "1841312496";
+const COMPOSITE: &str = "913890505";
+const WELDING: &str = "482685426";
+const STUDIO: &str = "2079405017";
+const WATERJET: &str = "2100779718";
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd, Eq, Ord)]
 pub enum QuizName {
@@ -54,7 +54,7 @@ impl Quiz {
             .expect("Time went backwards")
             .as_secs();
 
-        let response = reqwest::get(format!("{}{}{}", base_quiz_url, self.id, post_quiz_url))
+        let response = reqwest::get(format!("{}{}{}", BASE_QUIZ_URL, self.id, POST_QUIZ_URL))
             .await;
 
         if let Ok(response) = response {
@@ -145,17 +145,17 @@ impl Response {
 }
 
 pub fn get_quiz_url(quiz_id: &str) -> String {
-    format!("{}{}{}", base_quiz_url, quiz_id, post_quiz_url)
+    format!("{}{}{}", BASE_QUIZ_URL, quiz_id, POST_QUIZ_URL)
 }
 
 pub fn get_all_quizzes() -> Vec<Quiz> {
     vec![
-        Quiz::new(general, QuizName::General),
-        Quiz::new(laser3d, QuizName::Laser3D),
-        Quiz::new(spray_paint, QuizName::SprayPaint),
-        Quiz::new(composite, QuizName::Composite),
-        Quiz::new(welding, QuizName::Welding),
-        Quiz::new(studio, QuizName::Studio),
-        Quiz::new(waterjet, QuizName::Waterjet),
+        Quiz::new(GENERAL, QuizName::General),
+        Quiz::new(LASER3D, QuizName::Laser3D),
+        Quiz::new(SPRAY_PAINT, QuizName::SprayPaint),
+        Quiz::new(COMPOSITE, QuizName::Composite),
+        Quiz::new(WELDING, QuizName::Welding),
+        Quiz::new(STUDIO, QuizName::Studio),
+        Quiz::new(WATERJET, QuizName::Waterjet),
     ]
 }

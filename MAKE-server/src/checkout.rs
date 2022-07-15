@@ -33,21 +33,22 @@ impl CheckoutLog {
     /// Given the UUID of the checkout entry, check back in the item(s).
     /// 
     /// Should only be called by the checkout kiosk
-    pub fn check_in(&mut self, checkout_uuid: String) {
+    pub fn check_in(&mut self, checkout_uuid: String) -> Result<(), String> {
         info!("Checking in checkout entry: {:?}", checkout_uuid);
         let mut index = 0;
         for entry in self.currently_checked_out.iter() {
             if entry.checkout_uuid == checkout_uuid {
-                self.checkout_history.push(entry.clone());
+                let mut new_entry = entry.clone();
+                new_entry.check_in();
+                self.checkout_history.push(new_entry);
                 self.currently_checked_out.remove(index);
-                break;
+                return Ok(());
             }
             index += 1;
         }
 
-        if index == self.currently_checked_out.len() {
-            error!("Could not find checkout entry with UUID: {:?}", checkout_uuid);
-        }
+        error!("Could not find checkout entry with UUID: {:?}", checkout_uuid);
+        return Err("Could not find checkout entry with UUID".to_string());
     }
 
     /// Gets the currently checked out items.
@@ -124,5 +125,10 @@ impl CheckoutLogEntry {
     pub fn num_24_hours_passed(&self) -> u64 {
         let now = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
         (now - self.timestamp_expires) / (60 * 60 * 24)
+    }
+
+    pub fn check_in(&mut self) {
+        self.checked_in = true;
+        self.timestamp_checked_in = Some(SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs());
     }
 }

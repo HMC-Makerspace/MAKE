@@ -249,6 +249,24 @@ CHECKOUT
 
 #user-info-passed-quizzes {
     grid-area: passed-quizzes;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    gap: 10px;
+}
+
+#user-info-passed-quizzes >* {
+    background-color: var(--theme-color-3);
+    border-radius: var(--roundness);
+    color: var(--text-color-alt);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
 }
 
 #user-info-cart {
@@ -365,4 +383,51 @@ label {
 #id-error {
     background-color: var(--printer-error);
     padding: 5px;
+}
+
+#users-search {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 20px;
+}
+
+#users-search-input {
+    width: 500px;
+}
+
+#users-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 20px;
+    padding: 20px;
+}
+
+.user-result {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr .5fr 5fr;
+    background-color: var(--theme-color-3);
+    border-radius: var(--roundness);
+    color: var(--text-color-alt);
+    padding: 10px;
+    width: 90%;
+}
+
+.user-result-passed-quizzes {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.user-result-passed-quizzes >* {
+    background-color: var(--theme-color-2);
+    border-radius: var(--roundness);
+    color: var(--text-color-main);
+    padding: 5px;
+    font-size: .8em;
 }

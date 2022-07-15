@@ -35,6 +35,9 @@
     /* Icons */
     --tool-icon: url(../img/tool-icon.svg);
     --material-icon: url(../img/material-icon.svg);
+    --checkout-icon: url(../img/checkout-icon.svg);
+    --checkin-icon: url(../img/checkin-icon.svg);
+    --expired-icon: url(../img/expire.svg);
 }
 
 
@@ -686,18 +689,25 @@ Checkouts
 
 .checkout-entry {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 500px 1fr;
+    grid-template-columns: .4fr 1fr .4fr 1fr 400px 1fr;
     grid-template-rows: auto;
-    background-color: var(--theme-color-5);
+    background-color: var(--theme-color-3);
     border-radius: var(--roundness);
-    padding: 10px;
+    padding: 20px;
     gap: 10px;
     margin-right: 10px;
     margin-left: 10px;
+    width: 90%;
+    align-content: center;
+    justify-content: center;
 }
 
 .checkout-entry.kiosk-mode {
-    grid-template-columns: 1fr 1fr 1fr 1fr 500px 1fr 1fr 1fr;
+    grid-template-columns: .4fr 1fr .4fr 1fr 400px 1fr 1fr 1fr;
+}
+
+.checkout-entry.kiosk-mode.checked-in {
+    grid-template-columns: .4fr 1fr .4fr 1fr 400px 1fr 1fr;
 }
 
 .checkout-entry >* {
@@ -705,6 +715,9 @@ Checkouts
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    background-color: var(--theme-color-5);
+    border-radius: var(--roundness);
+    height: 40px;
 }
 
 
@@ -713,23 +726,76 @@ Checkouts
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
-    width: 500px;
+    width: 400px;
     gap: 10px;
     flex-wrap: wrap;
+    background-color: unset;
+    height: unset;
 }
 
 .checkout-entry-item {
-    background-color: var(--theme-color-3);
+    background-color: var(--theme-color-2);
     border-radius: var(--roundness);
-    color: var(--text-color-alt);
+    color: var(--text-color-main);
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    height: 40px;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: 5px;
+    font-size: .8em;
 }
+
+.t-out-info, .t-in-info {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 200;
+    font-size: .8em;
+}
+
+.t-out, .t-in {
+    background-size: 40px 40px;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 100%;
+    min-height: 40px;
+    min-width: 40px;
+    background-color: unset;
+}
+
+.t-out {
+    background-image: var(--checkout-icon);
+}
+
+.t-in.checked-in {
+    background-image: var(--checkin-icon);
+}
+
+.t-in.checked-out {
+    background-image: var(--expired-icon);
+}
+
+.checkout-entry-times-notified {
+    flex-direction: row;
+    gap: 10px;
+}
+
+.check-in-button {
+    background-color: var(--theme-color-7);
+    border-radius: var(--roundness);
+    margin-left: 5px;
+    width: 100px;
+    height: 40px;
+}
+
+.checkout-entry.success .check-in-button {
+    background-color: var(--high-color);
+    animation: pulse .2s infinite;
+}
+
+.checkout-entry.error .check-in-button {
+    background-color: var(--printer-error);
+    animation: pulse .2s infinite;
+}
+
 /* 
 
 3D Printers
