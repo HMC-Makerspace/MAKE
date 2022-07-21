@@ -84,6 +84,7 @@ function showRestock() {
     for (let el of els) {
         el.value = "";
         el.classList.remove("error");
+        el.classList.remove("success");
     }
 
     document.getElementById("restock-dialog").classList.remove("hidden");
@@ -92,25 +93,31 @@ function showRestock() {
 async function submitRestockNotice() {
     const inputs = document.getElementById("restock-inputs").getElementsByTagName("input");
 
-    const name = inputs[0].value;
-    const current_quantity = inputs[1].value;
-    const requested_quantity = inputs[2].value;
-    const notes = inputs[3].value;
+    const steward_email = inputs[0].value;
+    const name = inputs[1].value;
+    const current_quantity = inputs[2].value;
+    const requested_quantity = inputs[3].value;
+    const notes = inputs[4].value;
 
     let is_error = false;
 
-    if (name.trim() === "") {
+    if (steward_email === "") {
         inputs[0].classList.add("error");
         is_error = true;
     }
 
-    if (current_quantity.trim() === "") {
+    if (name.trim() === "") {
         inputs[1].classList.add("error");
         is_error = true;
     }
 
-    if (requested_quantity.trim() === "") {
+    if (current_quantity.trim() === "") {
         inputs[2].classList.add("error");
+        is_error = true;
+    }
+
+    if (requested_quantity.trim() === "") {
+        inputs[3].classList.add("error");
         is_error = true;
     }
 
@@ -123,7 +130,7 @@ async function submitRestockNotice() {
         return;
     }
 
-    const response = await fetch(`${API}/inventory/add_reorder_notice/${api_key}`, {
+    const response = await fetch(`${API}/inventory/add_restock_notice/${api_key}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -134,6 +141,7 @@ async function submitRestockNotice() {
             requested_quantity: requested_quantity,
             notes: notes,
             notified: false,
+            steward_email: steward_email,
         })
     });
 

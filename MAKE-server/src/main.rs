@@ -546,6 +546,7 @@ async fn update_loop() {
                 // Send email to user
                 let email_result = send_individual_email(
                     user.get_email(),
+                    None,
                     "MAKE Tool Checkout Notification #1".to_string(),
                     EMAIL_TEMPLATES.lock().await.get_expired_checkout(&entry.get_items_as_string()),
                 ).await;
@@ -560,6 +561,7 @@ async fn update_loop() {
 
                 let email_result = send_individual_email(
                     user.get_email(),
+                    None,
                     format!("MAKE Tool Checkout Notification #{}", entry.get_emails_sent() + 1),
                     EMAIL_TEMPLATES.lock().await.get_expired_checkout(&entry.get_items_as_string()),
                 ).await;

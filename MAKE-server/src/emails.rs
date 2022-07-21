@@ -35,6 +35,7 @@ pub async fn send_bulk_emails(recipients: Vec<String>, subject: String, body: St
 
 pub async fn send_individual_email(
     recipient: String,
+    cc_recipients: Option<Vec<String>>,
     subject: String,
     body: String,
 ) -> std::result::Result<lettre::smtp::response::Response, lettre::smtp::error::Error> {
@@ -47,15 +48,23 @@ pub async fn send_individual_email(
         .credentials(Credentials::new(email.clone(), password))
         .transport();
 
-    let content = EmailBuilder::new()
+    let mut content = EmailBuilder::new()
         .to(recipient.clone())
         .from(email)
         .subject(subject.clone())
-        .html(body.clone())
-        .build()
-        .unwrap();
+        .html(body.clone());
 
-    let result = mailer.send(content.into());
+    let finished_content = match cc_recipients {
+        Some(cc_recipients) => {
+            for cc_recipient in cc_recipients {
+                content = content.cc(cc_recipient);
+            }
+            content.build().unwrap()
+        },
+        None => content.build().unwrap(),
+    };
+
+    let result = mailer.send(finished_content.into());
 
     if &result.is_ok() == &true {
         info!("Emailed user {}", recipient.clone());

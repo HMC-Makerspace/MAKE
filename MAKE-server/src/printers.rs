@@ -334,6 +334,7 @@ impl PrintQueueEntry {
     pub async fn notify(&mut self) {
         send_individual_email(
             self.email.clone(),
+            None,
             "MAKE Print Notification".to_string(),
             EMAIL_TEMPLATES
                 .lock()

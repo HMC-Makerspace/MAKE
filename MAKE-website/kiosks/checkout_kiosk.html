@@ -116,9 +116,15 @@
 
         <div id="restock-dialog" class="hidden">
             <h1>Restock Request</h1>
-            <p3>Restock notice emails are sent to the Makerspace Manager daily at 2pm PDT.</p3>
+            <p3>
+                Restock notice emails are sent to the Makerspace Manager daily at 2pm PDT.
+                <br>
+                Your email address will be cc'd in case of any issues.
+            </p3>
 
             <div id="restock-inputs">
+                <label for="restock-email-name">Your Email</label>
+                <input type="text" id="restock-email-name" placeholder="Your Email">
                 <label for="restock-item-input">Item Name</label>
                 <input type="text" id="restock-item-input" placeholder="Item Name">
                 <label for="restock-quantity-input">Current Quantity</label>
