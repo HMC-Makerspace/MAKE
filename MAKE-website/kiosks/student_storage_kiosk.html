@@ -40,9 +40,14 @@
 
         </div>
 
+        <div id="checkout-buttons">
+            <button id="checkout-button" onclick="prevPage()">Prev. Page</button>
+            <button id="checkin-button" onclick="nextPage()">Next Page</button>
+        </div>
+
         <div id="checkout-popup" class="hidden">
-            <h2>Tap or Swipe your ID card</h2>
-            <p3>To checkout <span id="slot-selected"></span> for one month</p3>
+            <h1>Tap or Swipe your ID card</h1>
+            <h3>To checkout <span id="slot-selected"></span> for one month</h3>
             <input id="checkout-id-input" onchange="checkoutSlot()">
             <h2 id="checkout-error"></h2>
         </div>

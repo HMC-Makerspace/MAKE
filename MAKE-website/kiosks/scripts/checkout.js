@@ -64,6 +64,91 @@ async function authenticate() {
             createUserInfo(user_info)
         });
     });
+
+    
+    document.getElementById("restock-dialog").addEventListener("click", function (event) {
+        if (event.target.id === "restock-dialog") {
+            hideRestock()
+        }
+    });
+
+}
+
+function hideRestock() {
+    document.getElementById("restock-dialog").classList.add("hidden");
+}
+
+function showRestock() {
+    const els = document.getElementById("restock-inputs").getElementsByTagName("input");
+
+    for (let el of els) {
+        el.value = "";
+        el.classList.remove("error");
+    }
+
+    document.getElementById("restock-dialog").classList.remove("hidden");
+}
+
+async function submitRestockNotice() {
+    const inputs = document.getElementById("restock-inputs").getElementsByTagName("input");
+
+    const name = inputs[0].value;
+    const current_quantity = inputs[1].value;
+    const requested_quantity = inputs[2].value;
+    const notes = inputs[3].value;
+
+    let is_error = false;
+
+    if (name.trim() === "") {
+        inputs[0].classList.add("error");
+        is_error = true;
+    }
+
+    if (current_quantity.trim() === "") {
+        inputs[1].classList.add("error");
+        is_error = true;
+    }
+
+    if (requested_quantity.trim() === "") {
+        inputs[2].classList.add("error");
+        is_error = true;
+    }
+
+    if (is_error === true) {
+        setTimeout(() => {
+            for (let el of inputs) {
+                el.classList.remove("error");
+            }
+        }, 400);
+        return;
+    }
+
+    const response = await fetch(`${API}/inventory/add_reorder_notice/${api_key}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: name,
+            current_quantity: current_quantity,
+            requested_quantity: requested_quantity,
+            notes: notes,
+            notified: false,
+        })
+    });
+
+    if (response.status === 201) {
+        for (let input of inputs) {
+            input.classList.add("success")
+        }
+
+        setTimeout(() => {
+            hideRestock();
+            fetchInventory(kiosk_mode=true);
+        }, 400);
+    } else {
+        alert(result.message);
+    }
 }
 
 async function fetchCheckouts() {

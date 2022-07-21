@@ -2,6 +2,7 @@ var api_key = null;
 var student_storage_state = null;
 var first_render = true;
 var slot_selected = null;
+var current_page = 0;
 
 const API = '/../api/v1';
 
@@ -107,5 +108,32 @@ document.getElementById("checkout-popup").addEventListener("click", function (ev
         hideCheckout()
     }
 });
+
+
+function setPageShown() {
+    const els = document.getElementsByClassName("student-storage-group-container");
+
+    for (const el of els) {
+        el.classList.add("hidden");
+    }
+
+    els[current_page].classList.remove("hidden");
+}
+
+function nextPage() {
+    const els = document.getElementsByClassName("student-storage-group-container");
+
+    if (current_page < (els.length - 1)) {
+        current_page++;
+        setPageShown();
+    }
+}
+
+function prevPage() {
+    if (current_page > 0) {
+        current_page--;
+        setPageShown();
+    }
+}
 
 authenticate();

@@ -8,7 +8,8 @@ async function fetchStudentStorage(kiosk_mode=false) {
             student_storage_state = student_storage;
             
             renderStudentStorage(kiosk_mode);
-
+            
+            setPageShown();
         }
 
         return;

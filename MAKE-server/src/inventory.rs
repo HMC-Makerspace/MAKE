@@ -1,13 +1,19 @@
-use std::time::SystemTime;
+use log::info;
 use serde::{Deserialize, Serialize};
+use std::time::SystemTime;
 
+use crate::{checkout::CheckoutLogEntry, emails::send_individual_email, EMAIL_TEMPLATES, MAKERSPACE_MANAGER_EMAIL};
 
 const INVENTORY_URL: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTzvLVGN2H5mFpQLpstQyT5kgEu1CI8qlhY60j78mO0LQgDnTHs_ZKx39xiIO1h-w09ZXyOZ5GqOf5q/pub?gid=0&single=true&output=csv";
 
+/// The state of the inventory.
+/// Contains the timestamp of the last update and the inventory.
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
 pub struct Inventory {
     pub last_updated: u64,
     pub items: Vec<InventoryItem>,
+    pub needs_reorder: Vec<ReorderNotice>,
+    pub sent_reorder_notice: bool,
 }
 
 impl Inventory {
@@ -15,6 +21,8 @@ impl Inventory {
         Inventory {
             last_updated: 0,
             items: Vec::new(),
+            needs_reorder: Vec::new(),
+            sent_reorder_notice: false,
         }
     }
 
@@ -25,11 +33,9 @@ impl Inventory {
             .expect("Time went backwards")
             .as_secs();
 
-        let response = reqwest::get(INVENTORY_URL)
-            .await;
+        let response = reqwest::get(INVENTORY_URL).await;
 
         if let Ok(response) = response {
-            
             let data = response.text().await.expect("Failed to read inventory");
 
             // Fetch csv file
@@ -41,8 +47,9 @@ impl Inventory {
             for result in rdr.into_records() {
                 if let Ok(result) = result {
                     // Create new item
-                    let item =
-                        InventoryItem::new_from_line(result.iter().map(|x| x.to_string()).collect());
+                    let item = InventoryItem::new_from_line(
+                        result.iter().map(|x| x.to_string()).collect(),
+                    );
 
                     items.push(item);
                 }
@@ -63,7 +70,78 @@ impl Inventory {
     }
 
     pub fn get_item_by_uuid(&self, uuid: &str) -> Option<InventoryItem> {
-        self.items.iter().find(|item| item.uuids.contains(&uuid.to_string())).cloned()
+        self.items
+            .iter()
+            .find(|item| item.uuids.contains(&uuid.to_string()))
+            .cloned()
+    }
+
+    pub fn update_item(&mut self, item: InventoryItem) {
+        let pos = self.items.iter().position(|x| x.name == item.name);
+        if let Some(pos) = pos {
+            self.items[pos] = item;
+        } else {
+            self.items.push(item);
+        }
+    }
+
+    pub fn update_from_checkouts(&mut self, checkouts: &Vec<CheckoutLogEntry>) {
+        self.items = self
+            .items
+            .iter_mut()
+            .map(|item| {
+                let mut item = item.clone();
+                item.checked_quantity = checkouts
+                    .iter()
+                    .filter(|x| x.items.contains(&item.name))
+                    .count() as u64;
+                item
+            })
+            .collect();
+    }
+
+    pub fn add_reorder_notice(&mut self, notice: ReorderNotice) {
+        self.needs_reorder.push(notice);
+    }
+
+    pub async fn send_reorder_notice(&mut self) {
+        self.sent_reorder_notice = true;
+
+        let items: Vec<String> = self
+            .needs_reorder
+            .iter_mut()
+            .filter(|x| x.notified == false)
+            .map(|x| {
+                x.notified = true;
+                format!(
+                    "<tr style=\"border: 1px solid black; border-collapse: collapse;\">
+                        <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td>
+                        <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td>
+                        <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td>
+                        <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td> 
+                    </tr>",
+                    x.name, x.current_quantity, x.requested_quantity, x.notes
+                )
+            })
+            .collect();
+
+        if items.is_empty() {
+            return;
+        } else {
+            info!("Sending reorder notice email");
+
+            let _ = send_individual_email(
+                MAKERSPACE_MANAGER_EMAIL.to_string(),
+                "Reorder Notice".to_string(),
+                EMAIL_TEMPLATES
+                    .lock()
+                    .await
+                    .get_reorder_notice(&items.join("\n")),
+            )
+            .await;
+
+            info!("Sent!");
+        }
     }
 }
 
@@ -72,6 +150,7 @@ pub struct InventoryItem {
     pub name: String,
     pub is_material: bool,
     pub is_tool: bool,
+    pub checked_quantity: u64,
     pub quantity: i64, // -1 is low, -2 is medium, -3 is high
     pub location_room: String,
     pub location_area: String,
@@ -89,6 +168,7 @@ impl InventoryItem {
             name: line[0].clone(),
             is_material: line[1] == "M",
             is_tool: line[1] == "T",
+            checked_quantity: 0,
             quantity: {
                 if line[2] == "Low" {
                     -1
@@ -107,7 +187,19 @@ impl InventoryItem {
             serial_number: line[7].clone(),
             brand: line[8].clone(),
             model_number: line[9].clone(),
-            uuids: line[10].split(&[',', '\n'][..]).map(|x| x.to_string()).collect::<Vec<String>>(),
+            uuids: line[10]
+                .split(&[',', '\n'][..])
+                .map(|x| x.to_string())
+                .collect::<Vec<String>>(),
         }
     }
+}
+
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
+pub struct ReorderNotice {
+    pub name: String,
+    pub current_quantity: String,
+    pub requested_quantity: String,
+    pub notes: String,
+    pub notified: bool,
 }

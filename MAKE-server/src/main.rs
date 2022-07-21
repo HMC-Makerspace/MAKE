@@ -4,12 +4,16 @@ use std::io::Read;
 use std::io::Write;
 use std::process::exit;
 use std::thread;
+use std::time::SystemTime;
 
 use actix_cors::*;
+use actix_web::rt::System;
 use actix_web::rt::spawn;
 use actix_web::*;
 use actix_web_static_files::ResourceFiles;
 
+use chrono::Timelike;
+use chrono::Utc;
 use lazy_static::__Deref;
 
 use log::*;
@@ -56,7 +60,16 @@ const URL: &str = "127.0.0.1:8080";
 const URL: &str = "https://make.hmc.edu";
 
 const SMTP_URL: &str = "smtp.gmail.com";
+const MAKERSPACE_MANAGER_EMAIL: &str = "kneal@g.hmc.edu";
 const UPDATE_INTERVAL: u64 = 60;
+const TIME_SEND_EMAIL_HOUR: u32 = 21; // 9pm UTC, eg 2pm PDT
+// Initial checkout period of 1 month
+const INITIAL_CHECKOUT_PERIOD: u64 = 30 * 24 * 60 * 60;
+// Renew period of 2 weeks
+const RENEW_LENGTH: u64 = 2 * 7 * 24 * 60 * 60;
+// Number of renewals allowed
+const RENEWALS_ALLOWED: u64 = 2;
+
 
 const VERSION_STRING: &str = env!("CARGO_PKG_VERSION");
 const STARTUP_TITLE: &str = "
@@ -133,6 +146,7 @@ pub struct EmailTemplates {
     pub print_queue: String,
     pub expired_student_storage: String,
     pub expired_checkout: String,
+    pub reorder_notice: String,
 }
 
 impl EmailTemplates {
@@ -141,6 +155,7 @@ impl EmailTemplates {
         self.expired_student_storage =
             self.html_file_to_string("email_templates/expired_student_storage.html");
         self.expired_checkout = self.html_file_to_string("email_templates/expired_checkout.html");
+        self.reorder_notice = self.html_file_to_string("email_templates/reorder_notice.html");
     }
 
     pub fn html_file_to_string(&self, filename: &str) -> String {
@@ -163,6 +178,11 @@ impl EmailTemplates {
     pub fn get_expired_checkout(&self, tool_list: &str) -> String {
         let html = self.expired_checkout.clone();
         html.replace("{tool_list}", tool_list)
+    }
+
+    pub fn get_reorder_notice(&self, list: &str) -> String {
+        let html = self.reorder_notice.clone();
+        html.replace("{list}", list)
     }
 }
 
@@ -267,6 +287,17 @@ async fn async_main() -> std::io::Result<()> {
     EMAIL_TEMPLATES.lock().await.load_templates();
     info!("Email templates loaded!");
 
+    info!("Checking student storage validity...");
+    let needs_update = MEMORY_DATABASE.lock().await.student_storage.needs_update();
+
+    if needs_update {
+        info!("Student storage validity check failed. Updating...");
+        MEMORY_DATABASE.lock().await.student_storage = StudentStorage::default();
+        info!("Student storage updated!");
+    } else {
+        info!("Student storage validity check passed.");
+    }
+
     spawn(async move {
         let mut interval = time::interval(Duration::from_secs(UPDATE_INTERVAL));
         loop {
@@ -324,6 +355,7 @@ async fn async_main() -> std::io::Result<()> {
             .service(join_printer_queue)
             .service(leave_printer_queue)
             .service(get_printers_api_key)
+            .service(add_reorder_notice)
             .service(help)
             .service(openapi)
             .service(ResourceFiles::new("/", generate()))
@@ -366,6 +398,7 @@ async fn async_main() -> std::io::Result<()> {
             .service(join_printer_queue)
             .service(leave_printer_queue)
             .service(get_printers_api_key)
+            .service(add_reorder_notice)
             .service(help)
             .service(openapi)
             .service(ResourceFiles::new("/", generate()))
@@ -398,7 +431,7 @@ fn main() {
 
 async fn update_loop() {
     // Update inventory
-    let mut inventory = Inventory::new();
+    let mut inventory = MEMORY_DATABASE.lock().await.inventory.clone();
 
     let update_result = inventory.update().await;
 
@@ -408,6 +441,20 @@ async fn update_loop() {
             update_result.err().unwrap()
         );
     } else {
+        let current_checkouts = MEMORY_DATABASE.lock().await.checkout_log.get_current_checkouts();
+
+        inventory.update_from_checkouts(&current_checkouts);
+        
+        // Get current time of day
+        let now = Utc::now();
+        let now_time = now.time();
+
+        if now_time.hour() < TIME_SEND_EMAIL_HOUR {
+            inventory.sent_reorder_notice = false;
+        } else if inventory.sent_reorder_notice == false && now_time.hour() >= TIME_SEND_EMAIL_HOUR {
+            inventory.send_reorder_notice().await;
+        }
+
         MEMORY_DATABASE.lock().await.inventory = inventory;
         info!("Inventory updated!");
     }
@@ -530,4 +577,6 @@ async fn update_loop() {
     } else {
         info!("No checkouts expired!");
     }
+
+
 }

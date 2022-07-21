@@ -23,13 +23,17 @@ STUDENT STORAGE
 
 #student-storage-container {
     width: 100vw;
+    height: 100vh;
     background-color: var(--theme-color-5);
+    display: grid;
+    grid-template-rows: 1fr 3fr 1fr;
 }
 
 #overall-student-storage {
     margin-bottom: 0 !important;
     border-radius: 0 !important;
     padding: 0 !important;
+    gap: 0 !important;
 }
 
 #student-storage-header {
@@ -72,6 +76,20 @@ STUDENT STORAGE
     background-color: var(--theme-color-3);
     border-radius: var(--roundness);
     padding: 5px;
+}
+
+#checkout-buttons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: row;
+    color: var(--text-color-main);
+}
+
+#checkout-buttons button {
+    color: var(--text-color-main);
+    width: 200px;
+    height: 90px;
 }
 
 /*
@@ -306,7 +324,7 @@ label {
     background-color: var(--theme-color-7) !important;
 }
 
-.Banned {
+.Banned, .error{
     background-color: var(--printer-error) !important;
     animation: pulse .5s infinite;
 }
@@ -366,7 +384,7 @@ label {
     align-items: center;
 }
 
-.cart-item.success {
+.success {
     background-color: var(--high-color);
     animation: pulse .2s infinite;
 }
@@ -409,7 +427,7 @@ label {
 
 .user-result {
     display: grid;
-    grid-template-columns: 1fr 1fr 2fr .5fr 5fr;
+    grid-template-columns: 2fr 1fr 3fr .5fr 5fr;
     background-color: var(--theme-color-3);
     border-radius: var(--roundness);
     color: var(--text-color-alt);
@@ -430,4 +448,38 @@ label {
     color: var(--text-color-main);
     padding: 5px;
     font-size: .8em;
+}
+
+#restock-dialog {
+    color: var(--text-color-main);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: unset;
+}
+
+#restock-dialog::after {
+	content: ''; 
+	width: 100%; 
+	height: 100%;
+	background-color: var(--theme-color-5); 
+	opacity: 0.95; 
+	position: absolute; 
+	top: 0; 
+	left: 0;
+	z-index: -1;
+}
+
+#restock-inputs {
+    display: grid;
+    grid-template-rows: .5fr 1fr .5fr 1fr .5fr 1fr .5fr 1fr;
+    gap: 10px;
+    padding: 10px;
 }

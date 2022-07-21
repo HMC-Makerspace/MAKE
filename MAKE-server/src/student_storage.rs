@@ -1,15 +1,10 @@
+use std::iter::Map;
 use std::{time::SystemTime};
 use serde::{Deserialize, Serialize};
+use toml::Value;
 
 use crate::users::User;
-
-
-// Initial checkout period of 1 month
-const INITIAL_CHECKOUT_PERIOD: u64 = 30 * 24 * 60 * 60;
-// Renew period of 2 weeks
-const RENEW_LENGTH: u64 = 2 * 7 * 24 * 60 * 60;
-// Number of renewals allowed
-const RENEWALS_ALLOWED: u64 = 2;
+use crate::*;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct StudentStorage {
@@ -24,26 +19,36 @@ impl StudentStorage {
     }
 
     pub fn new_defined() -> Self {
-        let levels_16 = ['A', 'B', 'C', 'D'];
-        let levels_4 = ['E', 'F', 'G', 'H'];
-
+        let mut file = std::fs::File::open("student_storage.toml").unwrap();
+        let mut contents = String::new();
+        file.read_to_string(&mut contents).unwrap();
+        let storage_rows: Value = toml::from_str(&contents).unwrap();
+        let storage_rows: Vec<(String, i64)> = storage_rows
+            .get("sizings")
+            .unwrap()
+            .as_table()
+            .unwrap()
+            .iter()
+            .map(|(k, v)| (k.to_string(), v.as_integer().unwrap()))
+            .collect();
+        
         let mut slots = Vec::new();
-
-        for level in levels_16 {
-            for i in 1..17 {
-                slots.push(Slot::new(format!("{}{}", level, i)));
-            }
-        }
-
-        for level in levels_4 {
-            for i in 1..5 {
-                slots.push(Slot::new(format!("{level}{i}")));
+        for (name, size) in storage_rows {
+            for i in 0..size {
+                slots.push(Slot::new(format!("{}{}", name, i+1)));
             }
         }
 
         StudentStorage {
             slots,
         }
+    }
+
+    pub fn needs_update(&self) -> bool {
+        let new = StudentStorage::new_defined();
+
+        new.slots.len() != self.slots.len() ||
+            new.slots.iter().enumerate().any(|(i, s)| s.id != self.slots[i].id)
     }
 
     pub fn view_for_id(&self, college_id: &u64) -> Self {

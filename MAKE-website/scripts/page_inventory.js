@@ -37,7 +37,7 @@ function submitSearch(kiosk_mode=false) {
 
     removeAllChildren(results);
     appendChildren(results, search_divs);
-    if (kiosk_mode) {
+    if (kiosk_mode === true) {
         updateSelectedItems();
     }
 }
@@ -96,7 +96,7 @@ function generateInventoryDivs(results, kiosk_mode=false) {
 function generateInventoryDiv(result, kiosk_mode=false) {
     let div = document.createElement("div");
     div.classList.add("inventory-result");
-    if (kiosk_mode) {
+    if (kiosk_mode === true) {
         div.classList.add("kiosk-mode");
     }
 
@@ -127,7 +127,11 @@ function generateInventoryDiv(result, kiosk_mode=false) {
     quantity.classList.add("inventory-result-quantity");
     if (item.quantity >= 0) {
         quantity.classList.add("number");
-        quantity.innerText = `${item.quantity}`;
+        if (item.checked_quantity > 0) {
+            quantity.innerText = `${item.quantity - item.checked_quantity}/${item.quantity}`;
+        } else {
+            quantity.innerText = `${item.quantity}`;
+        }
     } else {
         switch (item.quantity) {
             case -1:
@@ -201,7 +205,7 @@ function generateInventoryDiv(result, kiosk_mode=false) {
 
     main_div.appendChild(show_lower_div_button);
 
-    if (kiosk_mode) {
+    if (kiosk_mode === true) {
         // Add checkout button
         const checkout_button = document.createElement("button");
         checkout_button.classList.add("inventory-result-checkout");

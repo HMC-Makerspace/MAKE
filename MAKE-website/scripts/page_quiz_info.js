@@ -7,11 +7,12 @@ const general_manual_policy = {
     "Lost & Found Policy": "https://docs.google.com/document/d/1abznvqZAuiiUMQWZY2wXyiTc17sGK2Lkww3c1VEKFps/edit",
     "Overnight Locker Manual": "https://docs.google.com/document/d/1GWrlFWOObZJy3haqlFzlr3gR2CCAU9opjqsJb66xxew/edit",
     "Tool Checkout Policy": "https://docs.google.com/document/d/1wp-baSy2ixf-ST2luNtjVMYcxE5_iDHC-R0nUmALyzc/edit",
+    "Studio Policy": "https://docs.google.com/document/d/1pqknkaGRO2VQL6vkdeRkVYewqo_WKNh6-tpEloCPW5c/edit"
 
 };
 
 const machine_manual_policy = {
-    "3D Printer Manual": "https://docs.google.com/document/d/1JNqDC9X5x_eaMU51Pfan4zC-YUiqhW1XqpONjFzrzyM/edit",
+    "3D Printer Manual": "https://docs.google.com/document/d/1gDvmQBr8GSX1x4c6m6gHaMW2nl4jzUDritskwbLwQwI/edit",
     "Laser Cutter Manual": "https://docs.google.com/document/d/1JNqDC9X5x_eaMU51Pfan4zC-YUiqhW1XqpONjFzrzyM/edit",
     "OMAX Waterjet Cutter Manual": "https://docs.google.com/document/d/1a-hPM5qB79ONJ-7k06pvIZVxz1_ONLAD/edit",
     "Sewing Machine Manual": "https://docs.google.com/document/d/1G9GU8GuiwsSYijOM1ZvY0uHSs9XidLDGd6vxzkiocqI/edit",
