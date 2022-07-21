@@ -22,8 +22,8 @@ const machine_manual_policy = {
 };
 
 const additional_informational_links = {
-    "Printing Press Glossary": "",
-    "3D Printer Repair Manual": "",
+    "Printing Press Glossary": "https://docs.google.com/document/d/1JiHqYf_kEaK3hFZ4yS2bjCtTyL6PKsosZmPeGssmNCo/edit",
+    "3D Printer Repair Manual": "https://docs.google.com/document/d/1a2Q-BonjK_kNOBoaQjxGVQgLC9nilP-8HGqSBOf4ynU/edit",
 }
 
 function renderQuizInfo() {

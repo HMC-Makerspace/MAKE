@@ -499,9 +499,9 @@ pub async fn release_student_storage_slot(
         .finish())
 }
 
-#[post("/api/v1/inventory/add_reorder_notice/{api_key}")]
-pub async fn add_reorder_notice(
-    body: web::Json<ReorderNotice>,
+#[post("/api/v1/inventory/add_restock_notice/{api_key}")]
+pub async fn add_restock_notice(
+    body: web::Json<RestockNotice>,
     path: web::Path<String>,
 ) -> Result<HttpResponse, Error> {
     if API_KEYS.lock().await.validate_checkout(&path.into_inner()) {
@@ -509,7 +509,7 @@ pub async fn add_reorder_notice(
 
         let notice = body.into_inner();
 
-        data.inventory.add_reorder_notice(notice);
+        data.inventory.add_restock_notice(notice);
 
         Ok(HttpResponse::Ok()
             .status(http::StatusCode::CREATED)

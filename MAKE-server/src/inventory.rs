@@ -12,8 +12,8 @@ const INVENTORY_URL: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTz
 pub struct Inventory {
     pub last_updated: u64,
     pub items: Vec<InventoryItem>,
-    pub needs_reorder: Vec<ReorderNotice>,
-    pub sent_reorder_notice: bool,
+    pub needs_restock: Vec<RestockNotice>,
+    pub sent_restock_notice: bool,
 }
 
 impl Inventory {
@@ -21,8 +21,8 @@ impl Inventory {
         Inventory {
             last_updated: 0,
             items: Vec::new(),
-            needs_reorder: Vec::new(),
-            sent_reorder_notice: false,
+            needs_restock: Vec::new(),
+            sent_restock_notice: false,
         }
     }
 
@@ -100,15 +100,15 @@ impl Inventory {
             .collect();
     }
 
-    pub fn add_reorder_notice(&mut self, notice: ReorderNotice) {
-        self.needs_reorder.push(notice);
+    pub fn add_restock_notice(&mut self, notice: RestockNotice) {
+        self.needs_restock.push(notice);
     }
 
-    pub async fn send_reorder_notice(&mut self) {
-        self.sent_reorder_notice = true;
+    pub async fn send_restock_notice(&mut self) {
+        self.sent_restock_notice = true;
 
         let items: Vec<String> = self
-            .needs_reorder
+            .needs_restock
             .iter_mut()
             .filter(|x| x.notified == false)
             .map(|x| {
@@ -128,15 +128,15 @@ impl Inventory {
         if items.is_empty() {
             return;
         } else {
-            info!("Sending reorder notice email");
+            info!("Sending restock notice email");
 
             let _ = send_individual_email(
                 MAKERSPACE_MANAGER_EMAIL.to_string(),
-                "Reorder Notice".to_string(),
+                "Restock Notice".to_string(),
                 EMAIL_TEMPLATES
                     .lock()
                     .await
-                    .get_reorder_notice(&items.join("\n")),
+                    .get_restock_notice(&items.join("\n")),
             )
             .await;
 
@@ -196,7 +196,7 @@ impl InventoryItem {
 }
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
-pub struct ReorderNotice {
+pub struct RestockNotice {
     pub name: String,
     pub current_quantity: String,
     pub requested_quantity: String,

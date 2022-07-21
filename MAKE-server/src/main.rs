@@ -146,7 +146,7 @@ pub struct EmailTemplates {
     pub print_queue: String,
     pub expired_student_storage: String,
     pub expired_checkout: String,
-    pub reorder_notice: String,
+    pub restock_notice: String,
 }
 
 impl EmailTemplates {
@@ -155,7 +155,7 @@ impl EmailTemplates {
         self.expired_student_storage =
             self.html_file_to_string("email_templates/expired_student_storage.html");
         self.expired_checkout = self.html_file_to_string("email_templates/expired_checkout.html");
-        self.reorder_notice = self.html_file_to_string("email_templates/reorder_notice.html");
+        self.restock_notice = self.html_file_to_string("email_templates/restock_notice.html");
     }
 
     pub fn html_file_to_string(&self, filename: &str) -> String {
@@ -180,8 +180,8 @@ impl EmailTemplates {
         html.replace("{tool_list}", tool_list)
     }
 
-    pub fn get_reorder_notice(&self, list: &str) -> String {
-        let html = self.reorder_notice.clone();
+    pub fn get_restock_notice(&self, list: &str) -> String {
+        let html = self.restock_notice.clone();
         html.replace("{list}", list)
     }
 }
@@ -355,7 +355,7 @@ async fn async_main() -> std::io::Result<()> {
             .service(join_printer_queue)
             .service(leave_printer_queue)
             .service(get_printers_api_key)
-            .service(add_reorder_notice)
+            .service(add_restock_notice)
             .service(help)
             .service(openapi)
             .service(ResourceFiles::new("/", generate()))
@@ -398,7 +398,7 @@ async fn async_main() -> std::io::Result<()> {
             .service(join_printer_queue)
             .service(leave_printer_queue)
             .service(get_printers_api_key)
-            .service(add_reorder_notice)
+            .service(add_restock_notice)
             .service(help)
             .service(openapi)
             .service(ResourceFiles::new("/", generate()))
@@ -450,9 +450,9 @@ async fn update_loop() {
         let now_time = now.time();
 
         if now_time.hour() < TIME_SEND_EMAIL_HOUR {
-            inventory.sent_reorder_notice = false;
-        } else if inventory.sent_reorder_notice == false && now_time.hour() >= TIME_SEND_EMAIL_HOUR {
-            inventory.send_reorder_notice().await;
+            inventory.sent_restock_notice = false;
+        } else if inventory.sent_restock_notice == false && now_time.hour() >= TIME_SEND_EMAIL_HOUR {
+            inventory.send_restock_notice().await;
         }
 
         MEMORY_DATABASE.lock().await.inventory = inventory;

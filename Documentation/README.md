@@ -5,8 +5,9 @@
 Hello! This is a guide on how to keep the MAKE server running (hopefully) forever (or as long as needed).
 This project was originally created by [Ethan Vazquez](https://github.com/IonImpulse) during the summer of 2022.
 
-The base server URL is `https://make.hmc.edu/`. The IP address is `134.173.47.116`.
+The base server URL is `https://make.hmc.edu/`. The IP address is `134.173.47.116`. The SSH login is in the Head Stewards Google Drive.
 
+In order to maintain the server, you'll need to know a little Rust, JS, HTML, and CSS.
 ### 2. If nothing changes...
 If nothing changes, the server will keep running forever. This is a good thing.
 However, there still are a few things that need to be done.
@@ -15,10 +16,20 @@ However, there still are a few things that need to be done.
 SSL certificates are automatically renewed every year by the CertBot installation, 
 but the server needs to be stopped and started to reload the certificates.
 
+- The server `db.json` should be renamed to `db.json.20xx.old` when the spring semester ends.
+
+    **Make sure to download the renamed file over SSH to your computer and upload it to the Head Stewards Google Drive. [You can follow this guide](https://www.namecheap.com/support/knowledgebase/article.aspx/9571/89/how-to-download-a-file-via-ssh/)**.
+
+    Summer stewards should be added as admins using the website's admin panel. This should give them swipe access to all rooms.
+    Before the semster starts, hired stewards should be added as stewards, again using the admin panel.
+
 - The gmail account used to send emails is in Google's low-security mode. 
 If Google detects inactivity, or if Google ever stops allowing this mode, you wil need to change the account.
 This can be done by editing the `api_keys.json` file to a new email and password. 
 Any email service with SMTP support is fine, not just gmail.
+
+- The JS file `page_quiz_info.js` needs to be updated with any new manuals/policies that are added. 
+Old policies/manuals will need to be removed.
 
 ### 3. If something changes IRL...
 - If the Makerspace Manager changes, the string `MAKERSPACE_MANAGER_EMAIL` needs to be updated in `main.rs`.
