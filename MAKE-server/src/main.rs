@@ -7,8 +7,8 @@ use std::thread;
 use std::time::SystemTime;
 
 use actix_cors::*;
-use actix_web::rt::System;
 use actix_web::rt::spawn;
+use actix_web::rt::System;
 use actix_web::*;
 use actix_web_static_files::ResourceFiles;
 
@@ -18,6 +18,9 @@ use lazy_static::__Deref;
 
 use log::*;
 
+use openssl::ssl::SslAcceptor;
+use openssl::ssl::SslFiletype;
+use openssl::ssl::SslMethod;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use tokio::time;
@@ -63,13 +66,12 @@ const SMTP_URL: &str = "smtp.gmail.com";
 const MAKERSPACE_MANAGER_EMAIL: &str = "kneal@g.hmc.edu";
 const UPDATE_INTERVAL: u64 = 60;
 const TIME_SEND_EMAIL_HOUR: u32 = 6; // 6am UTC, eg 11pm PDT
-// Initial checkout period of 1 month
+                                     // Initial checkout period of 1 month
 const INITIAL_CHECKOUT_PERIOD: u64 = 30 * 24 * 60 * 60;
 // Renew period of 2 weeks
 const RENEW_LENGTH: u64 = 2 * 7 * 24 * 60 * 60;
 // Number of renewals allowed
 const RENEWALS_ALLOWED: u64 = 2;
-
 
 const VERSION_STRING: &str = env!("CARGO_PKG_VERSION");
 const STARTUP_TITLE: &str = "
@@ -307,105 +309,102 @@ async fn async_main() -> std::io::Result<()> {
         }
     });
 
-    #[cfg(not(debug_assertions))]
-    let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
-    #[cfg(not(debug_assertions))]
-    builder
-        .set_private_key_file(
-            "/etc/letsencrypt/live/grocerylist.works/privkey.pem",
-            SslFiletype::PEM,
-        )
-        .unwrap();
-    #[cfg(not(debug_assertions))]
-    builder
-        .set_certificate_chain_file("/etc/letsencrypt/live/grocerylist.works/fullchain.pem")
-        .unwrap();
+    if cfg!(debug_assertions) {
+        // Create builder without ssl
+        return HttpServer::new(move || {
+            let cors = Cors::default()
+                .allow_any_origin()
+                .allow_any_header()
+                .allow_any_method()
+                .send_wildcard()
+                .max_age(3600);
 
-    #[cfg(not(debug_assertions))]
-    // Create builder without ssl
-    return HttpServer::new(move || {
-        let cors = Cors::default()
-            .allowed_origin("https://make.hmc.edu")
-            .allow_any_header()
-            .allow_any_method()
-            .send_wildcard()
-            .max_age(3600);
+            App::new()
+                .wrap(actix_web::middleware::Logger::default())
+                .wrap(actix_web::middleware::Compress::default())
+                .wrap(cors)
+                // Static files for frontend website
+                .service(get_inventory)
+                .service(get_quizzes)
+                .service(get_users)
+                .service(checkout_items)
+                .service(checkin_items)
+                .service(get_checkout_log)
+                .service(get_user_info)
+                .service(set_auth_level)
+                .service(set_quiz_passed)
+                .service(update_printer_status)
+                .service(get_student_storage_for_user)
+                .service(checkout_student_storage)
+                .service(renew_student_storage_slot)
+                .service(release_student_storage_slot)
+                .service(get_student_storage_for_all)
+                .service(get_printers)
+                .service(join_printer_queue)
+                .service(leave_printer_queue)
+                .service(get_printers_api_key)
+                .service(add_restock_notice)
+                .service(help)
+                .service(openapi)
+                .service(ResourceFiles::new("/", generate()))
+        })
+        .bind(ADDRESS)?
+        .run()
+        .await;
+    } else {
+        let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
+        builder
+            .set_private_key_file(
+                "/etc/letsencrypt/live/grocerylist.works/privkey.pem",
+                SslFiletype::PEM,
+            )
+            .unwrap();
+        builder
+            .set_certificate_chain_file("/etc/letsencrypt/live/grocerylist.works/fullchain.pem")
+            .unwrap();
 
-        App::new()
-            .wrap(actix_web::middleware::Logger::default())
-            .wrap(actix_web::middleware::Compress::default())
-            .wrap(cors)
-            // Static files for frontend website
-            .service(get_inventory)
-            .service(get_quizzes)
-            .service(get_users)
-            .service(checkout_items)
-            .service(checkin_items)
-            .service(get_checkout_log)
-            .service(get_user_info)
-            .service(set_auth_level)
-            .service(set_quiz_passed)
-            .service(update_printer_status)
-            .service(get_student_storage_for_user)
-            .service(checkout_student_storage)
-            .service(renew_student_storage_slot)
-            .service(release_student_storage_slot)
-            .service(get_student_storage_for_all)
-            .service(get_printers)
-            .service(join_printer_queue)
-            .service(leave_printer_queue)
-            .service(get_printers_api_key)
-            .service(add_restock_notice)
-            .service(help)
-            .service(openapi)
-            .service(ResourceFiles::new("/", generate()))
-    })
-    .bind_openssl(ADDRESS, builder)?
-    .run()
-    .await;
+        // Create builder without ssl
+        return HttpServer::new(move || {
+            let cors = Cors::default()
+                .allowed_origin("https://make.hmc.edu")
+                .allow_any_header()
+                .allow_any_method()
+                .send_wildcard()
+                .max_age(3600);
 
-    #[cfg(debug_assertions)]
-    // Create builder without ssl
-    return HttpServer::new(move || {
-        let cors = Cors::default()
-            .allow_any_origin()
-            .allow_any_header()
-            .allow_any_method()
-            .send_wildcard()
-            .max_age(3600);
-
-        App::new()
-            .wrap(actix_web::middleware::Logger::default())
-            .wrap(actix_web::middleware::Compress::default())
-            .wrap(cors)
-            // Static files for frontend website
-            .service(get_inventory)
-            .service(get_quizzes)
-            .service(get_users)
-            .service(checkout_items)
-            .service(checkin_items)
-            .service(get_checkout_log)
-            .service(get_user_info)
-            .service(set_auth_level)
-            .service(set_quiz_passed)
-            .service(update_printer_status)
-            .service(get_student_storage_for_user)
-            .service(checkout_student_storage)
-            .service(renew_student_storage_slot)
-            .service(release_student_storage_slot)
-            .service(get_student_storage_for_all)
-            .service(get_printers)
-            .service(join_printer_queue)
-            .service(leave_printer_queue)
-            .service(get_printers_api_key)
-            .service(add_restock_notice)
-            .service(help)
-            .service(openapi)
-            .service(ResourceFiles::new("/", generate()))
-    })
-    .bind(ADDRESS)?
-    .run()
-    .await;
+            App::new()
+                .wrap(actix_web::middleware::Logger::default())
+                .wrap(actix_web::middleware::Compress::default())
+                .wrap(cors)
+                // Static files for frontend website
+                .service(get_inventory)
+                .service(get_quizzes)
+                .service(get_users)
+                .service(checkout_items)
+                .service(checkin_items)
+                .service(get_checkout_log)
+                .service(get_user_info)
+                .service(set_auth_level)
+                .service(set_quiz_passed)
+                .service(update_printer_status)
+                .service(get_student_storage_for_user)
+                .service(checkout_student_storage)
+                .service(renew_student_storage_slot)
+                .service(release_student_storage_slot)
+                .service(get_student_storage_for_all)
+                .service(get_printers)
+                .service(join_printer_queue)
+                .service(leave_printer_queue)
+                .service(get_printers_api_key)
+                .service(add_restock_notice)
+                .service(help)
+                .service(openapi)
+                .service(ResourceFiles::new("/", generate()))
+        })
+        .bind_openssl(ADDRESS, builder)?
+        .run()
+        .await;
+    }
 }
 fn main() {
     std::env::set_var("RUST_LOG", "info, actix_web=trace");
@@ -441,17 +440,22 @@ async fn update_loop() {
             update_result.err().unwrap()
         );
     } else {
-        let current_checkouts = MEMORY_DATABASE.lock().await.checkout_log.get_current_checkouts();
+        let current_checkouts = MEMORY_DATABASE
+            .lock()
+            .await
+            .checkout_log
+            .get_current_checkouts();
 
         inventory.update_from_checkouts(&current_checkouts);
-        
+
         // Get current time of day
         let now = Utc::now();
         let now_time = now.time();
 
         if now_time.hour() < TIME_SEND_EMAIL_HOUR {
             inventory.sent_restock_notice = false;
-        } else if inventory.sent_restock_notice == false && now_time.hour() >= TIME_SEND_EMAIL_HOUR {
+        } else if inventory.sent_restock_notice == false && now_time.hour() >= TIME_SEND_EMAIL_HOUR
+        {
             inventory.send_restock_notice().await;
         }
 
@@ -528,10 +532,10 @@ async fn update_loop() {
         if entry.is_expired() {
             expired_items += 1;
             let user = MEMORY_DATABASE
-                    .lock()
-                    .await
-                    .users
-                    .get_user_by_id(&entry.get_college_id());
+                .lock()
+                .await
+                .users
+                .get_user_by_id(&entry.get_college_id());
 
             // If user is not found, just continue to next item
             if user.is_none() {
@@ -548,13 +552,16 @@ async fn update_loop() {
                     user.get_email(),
                     None,
                     "MAKE Tool Checkout Notification #1".to_string(),
-                    EMAIL_TEMPLATES.lock().await.get_expired_checkout(&entry.get_items_as_string()),
-                ).await;
+                    EMAIL_TEMPLATES
+                        .lock()
+                        .await
+                        .get_expired_checkout(&entry.get_items_as_string()),
+                )
+                .await;
 
                 if email_result.is_ok() {
                     entry.add_email_sent();
                 }
-
             } else if entry.get_emails_sent() == entry.num_24_hours_passed() {
                 // Case two: item is expired, and the number of emails sent is equal to the number of 24 hours since the item was checked out
                 // Send email to user
@@ -562,9 +569,16 @@ async fn update_loop() {
                 let email_result = send_individual_email(
                     user.get_email(),
                     None,
-                    format!("MAKE Tool Checkout Notification #{}", entry.get_emails_sent() + 1),
-                    EMAIL_TEMPLATES.lock().await.get_expired_checkout(&entry.get_items_as_string()),
-                ).await;
+                    format!(
+                        "MAKE Tool Checkout Notification #{}",
+                        entry.get_emails_sent() + 1
+                    ),
+                    EMAIL_TEMPLATES
+                        .lock()
+                        .await
+                        .get_expired_checkout(&entry.get_items_as_string()),
+                )
+                .await;
 
                 if email_result.is_ok() {
                     entry.add_email_sent();
@@ -575,10 +589,12 @@ async fn update_loop() {
 
     if expired_items > 0 {
         info!("{} checkouts expired!", expired_items);
-        MEMORY_DATABASE.lock().await.checkout_log.currently_checked_out = current_checkouts;
+        MEMORY_DATABASE
+            .lock()
+            .await
+            .checkout_log
+            .currently_checked_out = current_checkouts;
     } else {
         info!("No checkouts expired!");
     }
-
-
 }
