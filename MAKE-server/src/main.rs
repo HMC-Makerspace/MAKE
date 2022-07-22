@@ -62,7 +62,7 @@ const URL: &str = "https://make.hmc.edu";
 const SMTP_URL: &str = "smtp.gmail.com";
 const MAKERSPACE_MANAGER_EMAIL: &str = "kneal@g.hmc.edu";
 const UPDATE_INTERVAL: u64 = 60;
-const TIME_SEND_EMAIL_HOUR: u32 = 21; // 9pm UTC, eg 2pm PDT
+const TIME_SEND_EMAIL_HOUR: u32 = 6; // 6am UTC, eg 11pm PDT
 // Initial checkout period of 1 month
 const INITIAL_CHECKOUT_PERIOD: u64 = 30 * 24 * 60 * 60;
 // Renew period of 2 weeks
