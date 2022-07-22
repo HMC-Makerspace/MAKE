@@ -360,7 +360,7 @@ async fn async_main() -> std::io::Result<()> {
             .service(openapi)
             .service(ResourceFiles::new("/", generate()))
     })
-    .bind(ADDRESS, builder)?
+    .bind_openssl(ADDRESS, builder)?
     .run()
     .await;
 
