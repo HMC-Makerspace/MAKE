@@ -11,6 +11,7 @@ serde_json = "*"
 reqwest = { version = "0.11.4", features = ["cookies", "json"] }
 actix-web = { version = "4.0.1", features = ["openssl"] }
 actix-cors = "0.6.0-beta.2"
+actix-web-httpauth = "*"
 chrono = { version = "*", features = ["serde"] }
 futures = "*"
 env_logger = "*"

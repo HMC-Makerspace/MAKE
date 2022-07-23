@@ -46,8 +46,6 @@ pub struct PrinterWebhookStateFlags {
 pub struct PrinterWebhookJob {
     file: PrinterWebhookJobFile,
     estimatedPrintTime: f64,
-    averagePrintTime: f64,
-    lastPrintTime: f64,
     user: String,
 }
 

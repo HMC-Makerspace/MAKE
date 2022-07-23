@@ -58,4 +58,17 @@ The basic steps to adding a 3D printer to the server are:
  
 3) Install the webhook plugin. This is a plugin that allows Octoprint to send a POST request to a URL when events happen.
 
-4) Configure the webhook with the following settings: //TODO: ADD WEBHOOK SETTINGS
+4) Configure the webhook with the following settings:
+The JSON data should be configured as such:
+
+    ```json
+    {
+        "id": "@deviceIdentifier",
+        "api_key": "@apiSecret",
+        "topic": "@topic",
+        "message": "@message",
+        "state": "@state",
+        "job": "@job",
+        "progress": "@progress"
+    }
+    ```
