@@ -182,11 +182,11 @@ impl Printers {
         printer_webhook_update: PrinterWebhookUpdate,
     ) -> Result<(), String> {
         // Validate api key
-        if printer_webhook_update.api_key != API_KEYS.lock().await.printers {
+        if API_KEYS.lock().await.validate_printers(&printer_webhook_update.apiSecret) {
             return Err("Invalid API key".to_string());
         }
 
-        let mut printer = self.get_printer_by_id(&printer_webhook_update.id).unwrap();
+        let mut printer = self.get_printer_by_id(&&printer_webhook_update.deviceIdentifier).unwrap();
 
         info!(
             "Updating printer {} status: {:?}",
