@@ -3,6 +3,7 @@
 use crate::*;
 use ::serde::{Deserialize, Serialize};
 use actix_web::error::*;
+use serde_json::Value;
 
 #[derive(Deserialize, Serialize, Clone)]
 struct UserInfo {
@@ -337,11 +338,13 @@ pub async fn set_quiz_passed(
 #[post("/api/v1/printers/update_status")]
 pub async fn update_printer_status(
     _path: web::Path<()>,
-    body: web::Json<PrinterWebhookUpdate>,
+    body: web::Json<Value>,
 ) -> Result<HttpResponse, Error> {
     let mut data = MEMORY_DATABASE.lock().await;
 
-    let result = data.printers.add_printer_status(body.into_inner()).await;
+    println!("{}", body);
+    
+    /*let result = data.printers.add_printer_status(body.into_inner()).await;
 
     if result.is_err() {
         let error = result.unwrap_err();
@@ -352,7 +355,7 @@ pub async fn update_printer_status(
             warn!("Error adding printer status: {}", error);
         }
     }
-
+    */
     Ok(HttpResponse::Ok()
         .status(http::StatusCode::CREATED)
         .finish())
