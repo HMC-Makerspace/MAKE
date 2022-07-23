@@ -342,8 +342,6 @@ pub async fn update_printer_status(
 ) -> Result<HttpResponse, Error> {
     let mut data = MEMORY_DATABASE.lock().await;
 
-    println!("{}", body);
-
     let result = data.printers.add_printer_status(body.into_inner()).await;
 
     if result.is_err() {
