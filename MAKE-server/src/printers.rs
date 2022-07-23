@@ -62,7 +62,6 @@ pub struct PrinterWebhookJobFile {
 #[derive(Deserialize, Serialize, Clone)]
 pub struct PrinterWebhookProgress {
     completion: f64,
-    filepos: u64,
     printTime: u64,
     printTimeLeft: u64,
     printTimeLeftOrigin: String,
