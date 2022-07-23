@@ -182,7 +182,7 @@ impl Printers {
         printer_webhook_update: PrinterWebhookUpdate,
     ) -> Result<(), String> {
         // Validate api key
-        if API_KEYS.lock().await.validate_printers(&printer_webhook_update.apiSecret) {
+        if !API_KEYS.lock().await.validate_printers(&printer_webhook_update.apiSecret) {
             return Err("Invalid API key".to_string());
         }
 
