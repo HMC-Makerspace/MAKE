@@ -12,8 +12,8 @@ const PRINT_QUEUE_ENTRY_EXPIRATION_TIME: u64 = 60 * 15; // 15 minutes
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct PrinterWebhookUpdate {
-    id: String,
-    api_key: String,
+    deviceIdentifier: String,
+    apiSecret: String,
     topic: String,
     message: String,
     state: PrinterWebhookState,

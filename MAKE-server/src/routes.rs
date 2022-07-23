@@ -343,8 +343,8 @@ pub async fn update_printer_status(
     let mut data = MEMORY_DATABASE.lock().await;
 
     println!("{}", body);
-    
-    /*let result = data.printers.add_printer_status(body.into_inner()).await;
+
+    let result = data.printers.add_printer_status(body.into_inner()).await;
 
     if result.is_err() {
         let error = result.unwrap_err();
@@ -355,7 +355,7 @@ pub async fn update_printer_status(
             warn!("Error adding printer status: {}", error);
         }
     }
-    */
+
     Ok(HttpResponse::Ok()
         .status(http::StatusCode::CREATED)
         .finish())
