@@ -105,7 +105,7 @@ pub async fn get_quizzes(path: web::Path<String>) -> Result<HttpResponse, Error>
 
 #[get("/api/v1/users/all/{api_key}")]
 pub async fn get_users(path: web::Path<String>) -> Result<HttpResponse, Error> {
-    if API_KEYS.lock().await.validate_admin(&path.into_inner()) {
+    if API_KEYS.lock().await.validate_checkout(&path.into_inner()) {
         let data = MEMORY_DATABASE.lock().await;
         let users = data.users.clone();
         Ok(HttpResponse::Ok().json(users))
