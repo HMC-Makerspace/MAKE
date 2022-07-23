@@ -338,7 +338,7 @@ pub async fn set_quiz_passed(
 #[post("/api/v1/printers/update_status")]
 pub async fn update_printer_status(
     _path: web::Path<()>,
-    body: web::Json<Value>,
+    body: web::Json<PrinterWebhookUpdate>,
 ) -> Result<HttpResponse, Error> {
     let mut data = MEMORY_DATABASE.lock().await;
 
