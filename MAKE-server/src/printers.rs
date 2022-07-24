@@ -44,26 +44,14 @@ pub struct PrinterWebhookStateFlags {
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct PrinterWebhookJob {
-    file: PrinterWebhookJobFile,
-    estimatedPrintTime: f64,
-    user: String,
-}
-
-#[derive(Deserialize, Serialize, Clone)]
-pub struct PrinterWebhookJobFile {
-    name: String,
-    path: String,
-    display: String,
-    origin: String,
-    size: u64,
-    date: u64,
+    estimatedPrintTime: Option<f64>,
 }
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct PrinterWebhookProgress {
-    completion: f64,
-    printTime: u64,
-    printTimeLeft: u64,
+    completion: Option<f64>,
+    printTime: Option<u64>,
+    printTimeLeft: Option<u64>,
     printTimeLeftOrigin: String,
 }
 
@@ -199,7 +187,7 @@ impl Printers {
             .expect("Time went backwards")
             .as_secs();
 
-        printer.current_time_left = printer_webhook_update.progress.printTimeLeft;
+        printer.current_time_left = printer_webhook_update.progress.printTimeLeft.unwrap_or(0);
 
         self.add_set_printer(printer);
 

@@ -887,13 +887,13 @@ Checkouts
 
 @keyframes pulse {
     0% {
-        filter: brightness(0.8);
+        filter: brightness(0.9);
     }
     50% {
-        filter: brightness(1.2);
+        filter: brightness(1.1);
     }
     100% {
-        filter: brightness(0.8);
+        filter: brightness(0.9);
     }
 }
 
