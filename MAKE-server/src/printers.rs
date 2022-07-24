@@ -52,7 +52,6 @@ pub struct PrinterWebhookProgress {
     completion: Option<f64>,
     printTime: Option<u64>,
     printTimeLeft: Option<u64>,
-    printTimeLeftOrigin: String,
 }
 
 #[derive(Deserialize, Serialize, Clone, PartialEq)]
