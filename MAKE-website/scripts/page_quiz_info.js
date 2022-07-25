@@ -93,6 +93,7 @@ function openQuiz(quiz_name) {
             break;
         case "laser3d":
             quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLSfAZHwVpaI91oPq2PcDnUJt4yjPbwLznU41mMfjJJzyyZ9T7A/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${college_id}&entry.1482318217=${email}`;
+            break;
         case "spraypaint":
             quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLScjlDfT9sXZzq_IbqKTrjn3H2H81B5c7uL9aucRB_rEOLbGMg/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${college_id}&entry.1482318217=${email}`;
             break;
