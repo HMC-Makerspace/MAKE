@@ -27,10 +27,10 @@ async function authenticate() {
 
     fetchInventory(true).then(() => {
         submitSearch(kiosk_mode=true);
-        document.getElementById("inventory-search-input").addEventListener("keyup", submitSearch, kiosk_mode=true);
-        document.getElementById("inventory-in-stock").addEventListener("change", submitSearch, kiosk_mode=true);
-        document.getElementById("room-select").addEventListener("change", submitSearch, kiosk_mode=true);
-        document.getElementById("tool-material-select").addEventListener("change", submitSearch, kiosk_mode=true);
+        document.getElementById("inventory-search-input").addEventListener("keyup", () => {submitSearch(kiosk_mode=true)});
+        document.getElementById("inventory-in-stock").addEventListener("change", () => {submitSearch(kiosk_mode=true)});
+        document.getElementById("room-select").addEventListener("change", () => {submitSearch(kiosk_mode=true)});
+        document.getElementById("tool-material-select").addEventListener("change", () => {submitSearch(kiosk_mode=true)});
     });
 
     fetchCheckouts();

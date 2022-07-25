@@ -316,6 +316,10 @@ INVENTORY
     padding: 20px;
 }
 
+#inventory-search label {
+    font-size: .8em;
+}
+
 #inventory-results {
     display: flex;
     flex-direction: column;

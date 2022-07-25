@@ -72,3 +72,14 @@ The JSON data should be configured as such:
         "progress": "@progress"
     }
     ```
+
+## General Info
+### 1. 3D Printer IP Addresses
+The IP addresses of the 3D printers are:
+```
+FLSUN-SR-1: 172.28.84.11
+FLSUN-SR-2: 172.28.126.126
+FLSUN-SR-3: 172.28.75.155
+FLSUN-SR-4: 172.28.89.241
+```
+Octoprint is running on port 5001, webcams are on 8001.
