@@ -110,5 +110,4 @@ async function updateUserInfo() {
         return false;
     }
 }
-
 loadState();

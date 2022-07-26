@@ -1,6 +1,9 @@
 :root {
     --main-font: "Inter";
     --title-font: "Righteous";
+
+    --background-color: #fafafa;
+    
     --theme-color-1: #ee9d22;
     --theme-color-2: #242424;
     --theme-color-3: #EBEBEB;
@@ -32,6 +35,8 @@
     --roundness: 5px;
     --button-outline-color: #ffffff;
 
+    --invert: 0%;
+
     /* Icons */
     --tool-icon: url(../img/tool-icon.svg);
     --material-icon: url(../img/material-icon.svg);
@@ -42,7 +47,19 @@
 
 
 [data-theme="dark"] {
+    --background-color: #161616;
 
+    --theme-color-1: #ee9d22;
+    --theme-color-2: #272727;
+    --theme-color-3: #505050;
+    --theme-color-4: #00345c;
+    --theme-color-5: #333333;
+    --theme-color-6: #bdae2e;
+    --theme-color-7: #781fa1;
+    --theme-color-8: #1b7885;
+    --text-color-alt: var(--text-color-main);
+
+    --invert: 100%;
 }
 
 .hidden {
@@ -77,7 +94,6 @@ p3 {
 }
 
 .title-font {
-    font-size: 1.2em;
     font-family: var(--title-font);
 }
 
@@ -93,11 +109,14 @@ p3 {
     left: 0;
     width: 100vw;
     height: 100vh;
+    background-color: var(--background-color);
+    transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 #main-grid >* {
     border-radius: var(--roundness);
     margin: 10px;
+    transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 #left-bar {
@@ -194,7 +213,7 @@ input.focus {
     outline: unset;
 }
 
-#header {
+.header {
     background-color: var(--theme-color-1);
     color: white;
     border-radius: var(--roundness);
@@ -221,6 +240,7 @@ select {
     color: var(--text-color-alt);
     font-family: var(--main-font);
     border:unset;
+    background-color: var(--theme-color-3);
 }
 
 label {
@@ -299,6 +319,18 @@ HOME
 
 #welcome-message {
     background-color: var(--theme-color-4);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    text-align: right;
+}
+
+#main-title-ani {
+    font-size: 8em;
+    text-align: left !important;
+    cursor: pointer;
 }
 
 /*
@@ -402,6 +434,7 @@ INVENTORY
     height: 40px;
     background-repeat: no-repeat;
     background-position: center;
+    filter: invert(var(--invert));
 }
 
 .inventory-result-tool-material.material {
@@ -752,7 +785,7 @@ Checkouts
 .t-out-info, .t-in-info {
     font-family: "JetBrains Mono", monospace;
     font-weight: 200;
-    font-size: .8em;
+    font-size: .7em;
 }
 
 .t-out, .t-in {
@@ -779,6 +812,7 @@ Checkouts
 
 .checkout-entry-times-notified {
     flex-direction: row;
+    font-size: .8em;
     gap: 10px;
 }
 
@@ -825,10 +859,9 @@ Checkouts
 
 #printers-current {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
+    justify-content: flex-start;
     gap: 20px;
 }
 
@@ -839,45 +872,43 @@ Checkouts
     justify-content: center;
     background-color: var(--theme-color-2);
     border-radius: var(--roundness);
-    gap: 20px;
-    padding: 40px;
+    gap: 10px;
+    padding: 20px;
     width: 400px;
 }
 
 .printer {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    background-color: var(--theme-color-2);
+    border-radius: var(--roundness);
+    font-weight: bolder;
+    padding: 5px;
+    gap: 20px;
+}
+
+.printer * {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: var(--theme-color-2);
-    border-radius: var(--roundness);
-    text-align: center;
-    font-weight: bolder;
-    width: 300px;
-    height: 400px;
-    gap: 20px;
 }
 
 .printer-icon {
-    width: 100px;
-    height: 100px;
+    height: 50px;
 }
 
 .printer-id {
     font-weight: bold;
-    background-color: var(--theme-color-3);
+    background-color: var(--text-color-main);
     color: var(--theme-color-2);
     border-radius: var(--roundness);
-    padding: 10px;
-    width: 200px;
 }
 
 .printer-status {
     font-weight: bold;
     border-radius: 20px;
-    padding: 10px;
-    color: var(--theme-color-3);
-    width: 100px;
+    color: var(--text-color-main);
 }
 
 .printer-status.Idle {
@@ -917,9 +948,8 @@ Checkouts
 
 .printer-current-time-left {
     background-color: var(--theme-color-3);
-    color: var(--theme-color-2);
+    color: var(--text-color-alt);
     border-radius: var(--roundness);
-    padding: 10px;
     width: 200px;
 }
 

@@ -6,6 +6,8 @@ async function start() {
         displayLoggedOut();
     }
 
+    //animateChangeFonts();
+
     renderQuizInfo();
     renderCheckouts();
 

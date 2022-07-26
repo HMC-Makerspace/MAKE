@@ -55,7 +55,7 @@ use tokio::sync::Mutex;
 #[cfg(debug_assertions)]
 const ADDRESS: &str = "127.0.0.1:8080";
 #[cfg(not(debug_assertions))]
-const ADDRESS: &str = "0.0.0.0:443";
+const ADDRESS: &str = "0.0.0.0:8080";
 
 #[cfg(debug_assertions)]
 const URL: &str = "127.0.0.1:8080";
@@ -367,6 +367,7 @@ async fn async_main() -> std::io::Result<()> {
         return HttpServer::new(move || {
             let cors = Cors::default()
                 .allowed_origin("https://make.hmc.edu")
+                .allowed_origin("http://make.hmc.edu")
                 .allow_any_header()
                 .allow_any_method()
                 .send_wildcard()
