@@ -15,6 +15,7 @@ pub enum AuthLevel {
     User,
     Steward,
     Admin,
+    Faculty,
     System,
 }
 

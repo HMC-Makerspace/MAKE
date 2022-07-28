@@ -115,6 +115,17 @@ pub async fn get_users(path: web::Path<String>) -> Result<HttpResponse, Error> {
     }
 }
 
+#[get("/api/v1/users/for_cis/{api_key}")]
+pub async fn get_swipe_access(path: web::Path<String>) -> Result<HttpResponse, Error> {
+    if API_KEYS.lock().await.validate_checkout(&path.into_inner()) {
+        let data = MEMORY_DATABASE.lock().await;
+        let users = data.users.clone();
+        Ok(HttpResponse::Ok().json(users))
+    } else {
+        Ok(HttpResponse::Unauthorized().finish())
+    }
+}
+
 #[get("/api/v1/checkouts/log/{api_key}")]
 pub async fn get_checkout_log(path: web::Path<String>) -> Result<HttpResponse, Error> {
     let api_key = path.into_inner();
