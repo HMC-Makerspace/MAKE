@@ -400,7 +400,12 @@ label {
 
 #id-error {
     background-color: var(--printer-error);
-    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    text-align: center;
 }
 
 #users-search {

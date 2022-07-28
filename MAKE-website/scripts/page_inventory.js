@@ -2,7 +2,7 @@ const search_options = {
     limit: 1000, // don't return more results than you need!
     allowTypo: true, // if you don't care about allowing typos
     threshold: -10000, // don't return bad results
-    keys: ['name', 'specific_name', 'serial_number', 'model_number', 'brand', 'uuids_joined'], // keys to search
+    keys: ['name', 'specific_name', 'serial_number', 'model_number', 'brand', 'uuids_joined', 'kit'], // keys to search
     all: true,
 }
 
@@ -96,6 +96,7 @@ function generateInventoryDivs(results, kiosk_mode=false) {
 function generateInventoryDiv(result, kiosk_mode=false) {
     let div = document.createElement("div");
     div.classList.add("inventory-result");
+
     if (kiosk_mode === true) {
         div.classList.add("kiosk-mode");
     }
@@ -103,6 +104,16 @@ function generateInventoryDiv(result, kiosk_mode=false) {
     const item = result.obj;
 
     div.id = `inventory-result-${item.index}`;
+
+    
+    if (item.is_kit === true) {
+        div.classList.add("kit");
+
+        const kit_div = document.createElement("div");
+        kit_div.classList.add("kit-div");
+        kit_div.innerHTML = "Kit";
+        div.appendChild(kit_div);
+    }
 
     const main_div = document.createElement("div");
     main_div.classList.add("inventory-result-main");
@@ -112,43 +123,58 @@ function generateInventoryDiv(result, kiosk_mode=false) {
     name.innerText = item.name;
     main_div.appendChild(name);
 
-    const tool_material = document.createElement("div");
-    tool_material.classList.add("inventory-result-tool-material");
-    tool_material.classList.add(item.is_material ? "material" : "tool");
-    tool_material.title = item.is_material ? "Material" : "Tool";
-    main_div.appendChild(tool_material);
+    if (item.is_kit === true) {
+        const kit_items = document.createElement("div");
+        kit_items.classList.add("kit-items");
+        for (let kit_item of item.kit_items) {
+            const kit_item_div = document.createElement("div");
+            kit_item_div.classList.add("kit-item");
+            kit_item_div.innerText = kit_item;
+            kit_items.appendChild(kit_item_div);
+        }
+        main_div.appendChild(kit_items);
+    } else {
+        const tool_material = document.createElement("div");
+        tool_material.classList.add("inventory-result-tool-material");
+        tool_material.classList.add(item.is_material ? "material" : "tool");
+        tool_material.title = item.is_material ? "Material" : "Tool";
+        main_div.appendChild(tool_material);
+    }
+
 
     const location = document.createElement("div");
     location.classList.add("inventory-result-location");
     location.innerHTML = `<span class="room">${item.location_room}</span> <span class="area">${item.location_area}</span>`;
     main_div.appendChild(location);
 
-    const quantity = document.createElement("div");
-    quantity.classList.add("inventory-result-quantity");
-    if (item.quantity >= 0) {
-        quantity.classList.add("number");
-        if (item.checked_quantity > 0) {
-            quantity.innerText = `${item.quantity - item.checked_quantity}/${item.quantity}`;
+    if (item.is_kit === false) {
+        const quantity = document.createElement("div");
+        quantity.classList.add("inventory-result-quantity");
+        if (item.quantity >= 0) {
+            quantity.classList.add("number");
+            if (item.checked_quantity > 0) {
+                quantity.innerText = `${item.quantity - item.checked_quantity}/${item.quantity}`;
+            } else {
+                quantity.innerText = `${item.quantity}`;
+            }
         } else {
-            quantity.innerText = `${item.quantity}`;
+            switch (item.quantity) {
+                case -1:
+                    quantity.classList.add("low");
+                    quantity.innerText += "Low";
+                    break;
+                case -2:
+                    quantity.classList.add("medium");
+                    quantity.innerText += "Medium";
+                    break;
+                case -3:
+                    quantity.classList.add("high");
+                    quantity.innerText += "High";
+                    break;
+            }
         }
-    } else {
-        switch (item.quantity) {
-            case -1:
-                quantity.classList.add("low");
-                quantity.innerText += "Low";
-                break;
-            case -2:
-                quantity.classList.add("medium");
-                quantity.innerText += "Medium";
-                break;
-            case -3:
-                quantity.classList.add("high");
-                quantity.innerText += "High";
-                break;
-        }
+        main_div.appendChild(quantity);
     }
-    main_div.appendChild(quantity);
 
     const lower_div = document.createElement("div");
     lower_div.id = `inventory-result-${item.index}-lower-div`;

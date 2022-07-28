@@ -287,18 +287,25 @@ function updateCheckoutsHTML() {
 
 async function fetchUserInfo(id_number) {
     const response = await fetch(`${API}/users/info/${id_number}`);
-    const user_info = await response.json();
 
-    if (user_info === null) {
+    if (response.status === 200) {
+
+
+        const user_info = await response.json();
+
+        if (user_info === null) {
+            return null;
+        }
+
+        return user_info;
+    } else {
         return null;
     }
-
-    return user_info;
 }
 
 function createUserInfo(user_info) {
     if (user_info === null) {            
-        document.getElementById("id-error").innerHTML = "Invalid ID/User not yet in system. They might have not taken the General Safety Quiz";
+        document.getElementById("id-error").innerHTML = "Invalid ID/User not yet in system.<br>They might have not taken the General Safety Quiz";
         document.getElementById("id-error").classList.remove("hidden");
         document.getElementById("id-input").focus();
     } else {
@@ -347,6 +354,7 @@ function clearUser() {
     document.getElementById("id-error").classList.add("hidden");
     state.current_id_number = 0;
     state.cart = [];
+    updateSelectedItems();
 }
 
 function setPage(page) {

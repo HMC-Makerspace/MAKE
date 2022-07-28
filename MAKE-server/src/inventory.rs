@@ -1,4 +1,4 @@
-use log::info;
+use log::{info, warn};
 use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
 
@@ -44,6 +44,8 @@ impl Inventory {
             // Parse csv file
             let mut items = Vec::new();
 
+            let mut kits: Vec<String> = Vec::new();
+
             for result in rdr.into_records() {
                 if let Ok(result) = result {
                     // Create new item
@@ -51,7 +53,31 @@ impl Inventory {
                         result.iter().map(|x| x.to_string()).collect(),
                     );
 
+                    if item.kit.is_some() {
+                        kits.push(item.clone().kit.unwrap());
+                    }
+
                     items.push(item);
+                }
+            }
+
+            // Add is_kit to kits
+            for kit_name in kits {
+                let pos = items
+                    .iter()
+                    .position(|x| x.name == kit_name);
+
+                let kit_items = items
+                    .iter()
+                    .filter(|x| x.kit == Some(kit_name.clone()) && x.name != kit_name)
+                    .map(|x| x.name.clone())
+                    .collect::<Vec<String>>();
+
+                if let Some(pos) = pos {
+                    items[pos].is_kit = true;
+                    items[pos].kit_items = kit_items;
+                } else {
+                    warn!("Kit \"{}\" not found in inventory", kit_name);
                 }
             }
 
@@ -166,6 +192,9 @@ pub struct InventoryItem {
     pub brand: String,
     pub model_number: String,
     pub uuids: Vec<String>,
+    pub is_kit: bool,
+    pub kit: Option<String>,
+    pub kit_items: Vec<String>,
 }
 
 impl InventoryItem {
@@ -197,6 +226,16 @@ impl InventoryItem {
                 .split(&[',', '\n'][..])
                 .map(|x| x.to_string())
                 .collect::<Vec<String>>(),
+            kit: {
+                let trimmed = line[11].trim();
+                if trimmed.len() > 0 {
+                    Some(trimmed.to_string())
+                } else {
+                    None
+                }
+            },
+            is_kit: false,
+            kit_items: Vec::new(),
         }
     }
 }
