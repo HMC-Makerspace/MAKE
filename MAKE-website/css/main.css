@@ -102,7 +102,7 @@ p3 {
     display: grid;
     grid-template-areas: 
     "sidebar main";
-    grid-template-columns: 220px auto;
+    grid-template-columns: 210px auto;
     grid-template-rows: minmax(0, 1fr);
     margin: 0;
     position: fixed;
@@ -128,6 +128,7 @@ p3 {
     flex-direction: column;
     align-items: center;
     border-radius: var(--roundness);
+    margin-right: 0px !important;
 }
 
 .main-content {
@@ -141,19 +142,27 @@ p3 {
 #main-logo {
     font-size: 40px;
     letter-spacing: 10px;
-    text-align: center;
+    text-align: justify;
     font-weight: bold;
-    margin-top: 30px;
-    margin-bottom: 50px;
     font-family: var(--title-font);
-    transition: color 0.5s cubic-bezier(0, 1.5, 1, 1.5);
     user-select: none; /* Standard */
     color: var(--text-color-main);
+    transition: letter-spacing 0.5s cubic-bezier(0, 1.5, 1, 1.5), color 0.5s ease-in-out;
 }
 
-#main-logo:hover {
+#logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 30px;
+    margin-bottom: 50px;
+}
+
+#logo-container:hover >* {
     cursor: pointer;
     color: var(--text-color-alt);
+    letter-spacing: 2px;
 }
 
 #left-bar button {
@@ -170,8 +179,7 @@ p3 {
 }
 
 #left-bar button img {
-    transition: transform .5s ease-in-out;
-    transition: filter .1s ease-in-out;
+    transition: filter .1s ease-in-out, transform .4s cubic-bezier(0, 1.4, 1, 1.4);
 }
 
 #left-bar button:hover img {
@@ -398,6 +406,7 @@ INVENTORY
     font-weight: bold;
     z-index: 10000;
     background-color: var(--theme-color-1);
+    box-shadow: 0 0 15px var(--theme-color-2);
 }
 
 .inventory-result.header .inventory-result-main {
@@ -430,7 +439,10 @@ INVENTORY
     background-position: center;
     filter: invert(var(--invert));
     background-image: var(--details-icon);
-    transition: transform 0.2s cubic-bezier(0, 1.2, 1, 1.2);;
+    transition: transform 0.3s cubic-bezier(0, 1.1, 1, 1.1);
+    --r: 0deg;
+    --s: 1;
+    transform: rotate(var(--r)) scale(var(--s));
 }
 
 .inventory-result-show-lower-div.grayed-out {
@@ -438,15 +450,15 @@ INVENTORY
 }
 
 .inventory-result-show-lower-div:hover:not(.grayed-out) {
-    transform: scale(1.1);
+    --s: 1.1;
 }
 
 .inventory-result-show-lower-div.flipped {
-    transform: rotate(180deg);
+    --r: 180deg;
 }
 
 .inventory-result-show-lower-div:hover:not(.grayed-out).flipped {
-    transform: rotate(180deg) scale(1.1);
+
 }
 
 .kit-div {

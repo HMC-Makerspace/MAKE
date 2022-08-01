@@ -428,7 +428,7 @@ function addToCart(name, index) {
 
 function updateSelectedItems() {
     const selected_els = document.getElementsByClassName("inventory-result");
-    for (let i = 0; i < selected_els.length; i++) {
+    for (let i = 1; i < selected_els.length; i++) {
         const el = selected_els[i];
         const btn = el.getElementsByClassName("inventory-result-checkout")[0];
 
