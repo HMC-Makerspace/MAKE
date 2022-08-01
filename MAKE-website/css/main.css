@@ -43,6 +43,7 @@
     --checkout-icon: url(../img/checkout-icon.svg);
     --checkin-icon: url(../img/checkin-icon.svg);
     --expired-icon: url(../img/expire.svg);
+    --details-icon: url(../img/details.svg);
 }
 
 
@@ -52,7 +53,7 @@
     --theme-color-1: #ee9d22;
     --theme-color-2: #272727;
     --theme-color-3: #505050;
-    --theme-color-4: #00345c;
+    --theme-color-4: #004174;
     --theme-color-5: #333333;
     --theme-color-6: #bdae2e;
     --theme-color-7: #781fa1;
@@ -391,6 +392,19 @@ INVENTORY
     padding: 10px;
 }
 
+.inventory-result.header {
+    position: sticky;
+    top: 0;
+    font-weight: bold;
+    z-index: 10000;
+    background-color: var(--theme-color-1);
+}
+
+.inventory-result.header .inventory-result-main {
+    width: 98%; 
+    text-align: center;
+}
+
 .inventory-result.kit {
     margin-bottom: 10px;
     margin-top: 10px;
@@ -410,6 +424,29 @@ INVENTORY
 
 .inventory-result-show-lower-div {
     height: 40px;
+    background-size: 30px 30px;
+    background-color: unset !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: invert(var(--invert));
+    background-image: var(--details-icon);
+    transition: transform 0.2s cubic-bezier(0, 1.2, 1, 1.2);;
+}
+
+.inventory-result-show-lower-div.grayed-out {
+    filter: invert(50%);
+}
+
+.inventory-result-show-lower-div:hover:not(.grayed-out) {
+    transform: scale(1.1);
+}
+
+.inventory-result-show-lower-div.flipped {
+    transform: rotate(180deg);
+}
+
+.inventory-result-show-lower-div:hover:not(.grayed-out).flipped {
+    transform: rotate(180deg) scale(1.1);
 }
 
 .kit-div {
@@ -437,15 +474,6 @@ INVENTORY
     color: var(--text-color-main);
     border-radius: var(--roundness);
     padding: 5px;
-}
-
-.inventory-result-show-lower-div.grayed-out {
-    background-color: var(--theme-color-5);
-    color: var(--text-color-light) !important;
-}
-
-.inventory-result-show-lower-div.grayed-out:hover {
-    background-color: var(--theme-color-5);
 }
 
 .inventory-result-lower {
@@ -690,6 +718,8 @@ Quizzes & Information
     background-color: var(--high-color-dark);
     border-radius: var(--roundness);
     padding: 10px;
+    cursor: pointer;
+    pointer-events: none;
 }
 
 .quiz-take {

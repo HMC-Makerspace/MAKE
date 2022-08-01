@@ -9,20 +9,14 @@ use crate::checkout::*;
 use crate::printers::PrintQueueEntry;
 use crate::quizzes::*;
 
-#[derive(Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Default, Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum AuthLevel {
     Banned,
-    User,
+    #[default] User,
     Steward,
     Admin,
     Faculty,
     System,
-}
-
-impl Default for AuthLevel {
-    fn default() -> Self {
-        AuthLevel::User
-    }
 }
 
 #[derive(Default, Deserialize, Serialize, Clone)]

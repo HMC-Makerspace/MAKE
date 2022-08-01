@@ -516,7 +516,7 @@ async function commitCheckout() {
         setTimeout(() => {
             clearUser();
             updateSelectedItems();
-        }, 500);
+        }, 100);
     } else {
         displayErrorInCart(response);
     }

@@ -86,11 +86,59 @@ function searchInventory(search, filters = null) {
 function generateInventoryDivs(results, kiosk_mode=false) {
     const divs = [];
 
+    divs.push(generateInventoryHeader(kiosk_mode));
+
     for (let i = 0; i < results.length; i++) {
         divs.push(generateInventoryDiv(results[i], kiosk_mode));
     }
 
     return divs;
+}
+
+function generateInventoryHeader(kiosk_mode=false) {
+    const div = document.createElement("div");
+    div.classList.add("inventory-result");
+    div.classList.add("header");
+    if (kiosk_mode === true) {
+        div.classList.add("kiosk-mode");
+    }
+
+    const header = document.createElement("div");
+    header.classList.add("inventory-result-main");
+    header.classList.add("inventory-header");
+
+    if (kiosk_mode === true) {
+        header.classList.add("kiosk-mode");
+    }
+
+    const name = document.createElement("div");
+    name.classList.add("inventory-header-name");
+    name.innerHTML = "Name";
+
+    const tool_material = document.createElement("div");
+    tool_material.classList.add("inventory-header-tool-material");
+    tool_material.innerHTML = "Tool/Material";
+
+    const location = document.createElement("div");
+    location.classList.add("inventory-header-location");
+    location.innerHTML = "Location";
+    
+    const quantity = document.createElement("div");
+    quantity.classList.add("inventory-header-quantity");
+    quantity.innerHTML = "Quantity";
+
+    const more_details = document.createElement("div");
+    more_details.classList.add("inventory-header-more-details");
+    more_details.innerHTML = "Details";
+
+    header.appendChild(name);
+    header.appendChild(tool_material);
+    header.appendChild(location);
+    header.appendChild(quantity);
+    header.appendChild(more_details);
+
+    div.appendChild(header);
+    return div;
 }
 
 function generateInventoryDiv(result, kiosk_mode=false) {
@@ -219,13 +267,13 @@ function generateInventoryDiv(result, kiosk_mode=false) {
     const show_lower_div_button = document.createElement("button");
     show_lower_div_button.classList.add("inventory-result-show-lower-div");
     show_lower_div_button.classList.add("grayed-out");
-    show_lower_div_button.innerText = "Details";
 
     if (lower_div.childNodes.length > 0) {
         show_lower_div_button.classList.remove("grayed-out");
         show_lower_div_button.addEventListener("click", () => {
             const lower_div = document.getElementById(`inventory-result-${item.index}-lower-div`);
             lower_div.classList.toggle("hidden");
+            show_lower_div_button.classList.toggle("flipped");
         });
     }
 

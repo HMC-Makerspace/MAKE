@@ -35,6 +35,7 @@ mod quizzes;
 mod routes;
 mod student_storage;
 mod users;
+mod usage;
 
 use crate::checkout::*;
 use crate::emails::*;
@@ -46,6 +47,7 @@ use crate::quizzes::*;
 use crate::routes::*;
 use crate::student_storage::*;
 use crate::users::*;
+use crate::usage::*;
 
 use lazy_static::lazy_static;
 use std::sync::Arc;
@@ -407,6 +409,7 @@ async fn async_main() -> std::io::Result<()> {
         .bind_openssl(ADDRESS, builder)?
         .run()
         .await;
+
     }
 }
 fn main() {
