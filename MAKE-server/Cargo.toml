@@ -28,7 +28,6 @@ static-files = "0.2.1"
 lettre = "*"
 lettre_email = "*"
 uuid = "*"
-plotters = "*"
 
 [build-dependencies]
 static-files = "0.2.1"
