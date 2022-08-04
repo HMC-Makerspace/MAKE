@@ -2,7 +2,7 @@
 
 // Enter your WiFi SSID and password
 char ssid[] = "Claremont-ETC";             // your network SSID (name)
-char pass[] = "cityoftrees";    // your network password (use for WPA, or use as key for WEP)
+char pass[] = "cityoftrees87";    // your network password (use for WPA, or use as key for WEP)
 int keyIndex = 0;                      // your network key Index number (needed only for WEP)
 
 int status = WL_IDLE_STATUS;
@@ -46,7 +46,7 @@ void setup() {
   if (client.connect(SERVER, 443)) {
     Serial.println("connected to server");
     // Make a HTTP request:
-    client.println("GET " PATH " HTTP/1.1");
+    client.println("POST " PATH " HTTP/1.1");
     client.println("Host: " SERVER);
     client.println("Connection: close");
     client.println();
