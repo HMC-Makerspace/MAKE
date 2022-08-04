@@ -138,10 +138,6 @@ CHECKOUT
     background-color: var(--printer-error);
 }
 
-#checkouts-page {
-    overflow-y: scroll;
-}
-
 #pages {
     background-color: var(--theme-color-5);
     grid-area: inventory;

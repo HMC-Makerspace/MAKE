@@ -530,3 +530,25 @@ pub async fn add_restock_notice(
         Ok(HttpResponse::Unauthorized().finish())
     }
 }
+
+#[post("/api/v1/usage/add_button_log/{api_key}")]
+pub async fn add_button_log(
+    path: web::Path<String>,
+    button_record: web::Json<ButtonRecord>,
+) -> Result<HttpResponse, Error> {
+    let api_key = path.into_inner();
+
+    if API_KEYS.lock().await.validate_admin(&api_key) {
+        let mut data = MEMORY_DATABASE.lock().await;
+
+        let button_record = button_record.into_inner();
+
+        data.button_log.add(button_record);
+
+        Ok(HttpResponse::Ok()
+            .status(http::StatusCode::CREATED)
+            .finish())
+    } else {
+        Ok(HttpResponse::Unauthorized().finish())
+    }
+}

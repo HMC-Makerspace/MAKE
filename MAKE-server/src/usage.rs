@@ -13,6 +13,7 @@ pub enum College {
     ClaremontGraduateUniversity,
 }
 
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
 pub struct ButtonRecordLog {
     pub log: Vec<ButtonRecord>,
     pub last_update: u64,
@@ -69,4 +70,5 @@ pub struct ButtonRecord {
     pub college: College,
     pub timestamp: u64,
     pub station_id: String,
+    pub length_milliseconds: u64,
 }

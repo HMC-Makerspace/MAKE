@@ -96,6 +96,7 @@ pub struct Data {
     pub quizzes: Vec<Quiz>,
     pub checkout_log: CheckoutLog,
     pub student_storage: StudentStorage,
+    pub button_log: ButtonRecordLog,
 }
 
 #[derive(Default, Deserialize, Serialize)]
