@@ -59,20 +59,20 @@
             <div id="logo-container">
                 <div id="main-logo" onclick="setPage('home')">MAKE</div>
             </div>
-            <button onclick="setPage('home')"><img class="page-icon" src="../img/home-icon.svg">Home</button>
-            <button onclick="setPage('quiz-info')"><img class="page-icon" src="../img/quiz-icon.svg">Quizzes<br>&
+            <button id = "home-button" onclick="setPage('home')"><img class="page-icon" src="../img/home-icon.svg">Home</button>
+            <button id = "quiz-info-button" onclick="setPage('quiz-info')"><img class="page-icon" src="../img/quiz-icon.svg">Quizzes<br>&
                 Information</button>
-            <button onclick="setPage('inventory')"><img class="page-icon"
+            <button id = "inventory-button" onclick="setPage('inventory')"><img class="page-icon"
                     src="../img/inventory-icon.svg">Inventory</button>
-            <button onclick="setPage('student-storage')"><img class="page-icon"
+            <button id = "student-storage-button" onclick="setPage('student-storage')"><img class="page-icon"
                     src="../img/student-storage-icon.svg">Student<br>Storage</button>
 
-            <button onclick="setPage('checkouts')"><img class="page-icon"
+            <button id = "checkouts-button" onclick="setPage('checkouts')"><img class="page-icon"
                     src="../img/checkout-icon.svg">Checkouts</button>
-            <button onclick="setPage('3d-printers')"><img class="page-icon" src="../img/printer-icon.svg">3D
+            <button id = "3d-printers-button" onclick="setPage('3d-printers')"><img class="page-icon" src="../img/printer-icon.svg">3D
                 Printers</button>
-            <button onclick="setPage('faq')"><img class="page-icon" src="../img/faq.svg">FAQ</button>
-            <button onclick="setPage('settings')"><img class="page-icon"
+            <button id = "faq-button" onclick="setPage('faq')"><img class="page-icon" src="../img/faq.svg">FAQ</button>
+            <button id = "settings-button" onclick="setPage('settings')"><img class="page-icon"
                     src="../img/settings-icon.svg">Settings</button>
         </div>
 
@@ -82,10 +82,6 @@
         
         -->
         <div id="page-home" class="main-content">
-            <div class="header">
-                <span class="title">Home</span>
-            </div>
-
             <div id="welcome-message">
                 <p1>Welcome to </p1>
                 <p1 class="title-font" id="main-title-ani">MAKE</p1>
@@ -127,9 +123,6 @@
 
         -->
         <div id="page-inventory" class="main-content hidden">
-            <div class="header">
-                <span class="title">Inventory</span>
-            </div>
 
             <div class="content-container">
                 <div id="inventory-search" class="content-header">
@@ -179,9 +172,6 @@
 
         -->
         <div id="page-student-storage" class="main-content hidden">
-            <div class="header">
-                <span class="title">Student Storage</span>
-            </div>
 
             <div class="no-id-message id-n">
                 Please enter your college ID number on the home page to view student storage status
@@ -214,9 +204,6 @@
         -->
 
         <div id="page-quiz-info" class="main-content hidden">
-            <div class="header">
-                <span class="title">Quizzes & Information</span>
-            </div>
 
             <div class="content-container">
                 <div id="quiz-info-storage-help" class="content-header">
@@ -308,9 +295,6 @@
 
         -->
         <div id="page-checkouts" class="main-content hidden">
-            <div class="header">
-                <span class="title">Checkouts</span>
-            </div>
 
             <div class="no-id-message id-n">
                 Please enter your college ID number on the home page to view checkouts
@@ -343,9 +327,6 @@
 
         -->
         <div id="page-3d-printers" class="main-content hidden">
-            <div class="header">
-                <span class="title">3D Printers</span>
-            </div>
 
             <div class="no-id-message id-n">
                 Please enter your college ID number on the home page to view 3D printers
@@ -385,9 +366,6 @@
 
         -->
         <div id="page-faq" class="main-content hidden">
-            <div class="header">
-                <span class="title">Info & FAQ</span>
-            </div>
 
             <div class="faq-container">
                 <h2>
@@ -433,9 +411,6 @@
 
         -->
         <div id="page-settings" class="main-content hidden">
-            <div class="header">
-                <span class="title">Settings</span>
-            </div>
 
             <div class="content-container">
                 <button id="toggle-theme" onclick="toggle_theme()">

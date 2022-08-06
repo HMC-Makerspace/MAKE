@@ -29,6 +29,15 @@ function setPage(page) {
             document.getElementById("inventory-search-input").focus();
         }
     }
+    for (let b of document.getElementsByClassName("active-button")) {
+        b.classList.remove("active-button");
+    }
+    const button = document.getElementById(`${page}-button`);
+    if (button) {
+        button.classList.add("active-button");
+    }
+
+
 }
 
 function removeAllChildren(element, keep_first_n = 0) {
