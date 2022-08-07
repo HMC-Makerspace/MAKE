@@ -75,6 +75,8 @@ const RENEW_LENGTH: u64 = 2 * 7 * 24 * 60 * 60;
 // Number of renewals allowed
 const RENEWALS_ALLOWED: u64 = 2;
 
+const LOGGER_STR: &str = "\nMAKE Log @ %t\nIP: %a (%{r}a)\nRequest: \"%r\"\nAgent: \"%{Referer}i\" \"%{User-Agent}i\"\nResponse: STATUS %s for %b bytes in %D ms";
+
 const VERSION_STRING: &str = env!("CARGO_PKG_VERSION");
 const STARTUP_TITLE: &str = "
 ██████   ██████   █████████   █████   ████ ██████████
@@ -323,7 +325,7 @@ async fn async_main() -> std::io::Result<()> {
                 .max_age(3600);
 
             App::new()
-                .wrap(actix_web::middleware::Logger::default())
+                .wrap(actix_web::middleware::Logger::new(LOGGER_STR))
                 .wrap(actix_web::middleware::Compress::default())
                 .wrap(cors)
                 // Static files for frontend website
@@ -379,7 +381,7 @@ async fn async_main() -> std::io::Result<()> {
                 .max_age(3600);
 
             App::new()
-                .wrap(actix_web::middleware::Logger::default())
+                .wrap(actix_web::middleware::Logger::new(LOGGER_STR))
                 .wrap(actix_web::middleware::Compress::default())
                 .wrap(cors)
                 // Static files for frontend website

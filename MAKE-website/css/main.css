@@ -535,6 +535,7 @@ INVENTORY
     background-repeat: no-repeat;
     background-position: center;
     filter: invert(var(--invert));
+    background-size: 30px 30px;
 }
 
 .inventory-result-tool-material.material {
@@ -543,7 +544,6 @@ INVENTORY
 
 .inventory-result-tool-material.tool {
     background-image: var(--tool-icon);
-    background-size: 30px 30px;
 }
 
 .inventory-result-location {
@@ -1184,5 +1184,41 @@ Mobile Styles
 
     .manual-policy-list * {
         margin-bottom: 8px;
+    }
+
+    #inventory-results {
+        font-size: .6em;
+    }
+
+    #inventory-search span {
+        display: none;
+    }
+
+    .inventory-result-show-lower-div, .inventory-result-tool-material {
+        background-size: 20px 20px;
+    }
+
+    .inventory-result {
+        width: 95%;
+    }
+
+    .inventory-result.header {
+        width: 98%;
+        font-size: 1.2em;
+    }
+
+    .inventory-result-main {
+        padding: 4px;
+        gap: 3px;
+    }
+
+    .inventory-result-location {
+        flex-direction: column;
+        align-items: unset;
+        gap: 0px;
+    }
+
+    .inventory-result.location {
+        padding: 2px;
     }
 }
