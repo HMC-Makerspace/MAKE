@@ -136,7 +136,7 @@ p3 {
     color: white;
     display: grid;
     grid-template-rows: minmax(0, 1fr);
-    gap: 10px;
+    gap: 0px;
 }
 
 #main-logo {
