@@ -32,7 +32,7 @@
     --printer-offline: #0C090D;
     --printer-error: #AF3800;
 
-    --roundness: 5px;
+    --roundness: 0px;
     --button-outline-color: #ffffff;
 
     --invert: 0%;
@@ -116,7 +116,7 @@ p3 {
 
 #main-grid >* {
     border-radius: var(--roundness);
-    margin: 10px;
+    margin: 0px;
     transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
@@ -135,14 +135,14 @@ p3 {
     grid-area: main;
     color: white;
     display: grid;
-    grid-template-rows: 80px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     gap: 10px;
 }
 
 #main-logo {
     font-size: 40px;
     letter-spacing: 10px;
-    text-align: justify;
+    text-align: center;
     font-weight: bold;
     font-family: var(--title-font);
     user-select: none; /* Standard */
@@ -187,6 +187,11 @@ p3 {
     filter: invert(100%);
 }
 
+#left-bar button.active-button img {
+    transform: scale(1.1);
+    filter: invert(100%);
+}
+
 button {
     background-color: var(--theme-color-1);
     color: white;
@@ -204,6 +209,10 @@ button.big {
 }
 
 button:hover {
+    background-color: var(--theme-color-2);
+}
+
+button.active-button {
     background-color: var(--theme-color-2);
 }
 
