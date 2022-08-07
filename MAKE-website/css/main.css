@@ -150,6 +150,10 @@ p3 {
     transition: letter-spacing 0.5s cubic-bezier(0, 1.5, 1, 1.5), color 0.5s ease-in-out;
 }
 
+#mobile-logo {
+    display: none;
+}
+
 #logo-container {
     display: flex;
     flex-direction: column;
@@ -200,6 +204,11 @@ button {
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
     border-radius: var(--roundness);
+    outline: none;
+}
+
+button:hover {
+    outline: none !important;
 }
 
 button.big {
@@ -416,6 +425,8 @@ INVENTORY
     z-index: 10000;
     background-color: var(--theme-color-1);
     box-shadow: 0 0 15px var(--theme-color-2);
+    width: 93%;
+    max-width: 1300px;
 }
 
 .inventory-result.header .inventory-result-main {
@@ -714,6 +725,8 @@ Quizzes & Information
     border-radius: var(--roundness);
     padding: 20px;
     gap: 20px;
+    flex-wrap: wrap;
+    margin: 12px;
 }
 
 .quiz-status-item {
@@ -1082,4 +1095,94 @@ FAQ
 
 .faq-container * {
     max-width: 80%;
+}
+
+/*
+
+Mobile Styles
+
+*/
+
+@media only screen and (max-width: 760px) {
+    #main-grid {
+        grid-template-columns: 60px auto;
+
+    }
+
+    #left-bar button span {
+        display: none;
+    }
+
+    .page-icon {
+        margin-right: 0px;
+    }
+
+    #left-bar button {
+        justify-content: center;
+        padding: 0px;
+    }
+
+    #logo-container {
+        margin-bottom: 10px;
+        margin-top: 10px;
+    }
+
+    #main-logo {
+        display: none;
+    }
+
+    #mobile-logo {
+        display: block;
+        text-align: center;
+        font-weight: bold;
+        font-family: var(--title-font);
+        user-select: none; /* Standard */
+        font-size: 40px;
+    }
+
+    p1 {
+        padding: 40px;
+        font-size: 3em;
+        font-weight: bold;
+    }
+    
+    p2 {
+        padding: 20px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    
+    p3 {
+        padding: 10px;  
+        font-size: 12px;
+    }
+
+    .content-container {
+        overflow-y: scroll;
+    }
+
+    .content-header {
+
+    }
+
+    .content-body {
+        overflow-y: unset;
+    }
+
+    .quiz-info-storage-help {
+
+    }
+
+    .quiz-status-item {
+        height: 110px;
+        width: 100px;
+    }
+
+    .manual-policy-list {
+        columns: 1;
+    }
+
+    .manual-policy-list * {
+        margin-bottom: 8px;
+    }
 }
