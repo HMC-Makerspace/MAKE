@@ -1194,6 +1194,10 @@ Mobile Styles
         display: none;
     }
 
+    .inventory-result:nth-child(n+20) {
+        display: none;
+    }
+
     .inventory-result-show-lower-div, .inventory-result-tool-material {
         background-size: 20px 20px;
     }
@@ -1201,6 +1205,7 @@ Mobile Styles
     .inventory-result {
         width: 95%;
     }
+
 
     .inventory-result.header {
         width: 98%;
@@ -1220,5 +1225,9 @@ Mobile Styles
 
     .inventory-result.location {
         padding: 2px;
+    }
+
+    .student-storage-slot {
+
     }
 }

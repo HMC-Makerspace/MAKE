@@ -11,7 +11,7 @@ int status = WL_IDLE_STATUS;
 //IPAddress server(74,125,232,128);  // numeric IP for Google (no DNS)
 
 #define SERVER "make.hmc.edu"
-#define PATH   "/api/v1/usage/add_button_log/UXZyi0UjdKeSWTC7kOMYNgZK8ehY0heynAhbnAeVkoZcYiec9LaHIKpVjcx8XgKl"
+#define PATH   "/api/v1/usage/add_button_log/{admin_key}"
 
 // Initialize the SSL client library
 // with the IP address and port of the server
