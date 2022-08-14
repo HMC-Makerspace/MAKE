@@ -459,7 +459,7 @@ INVENTORY
     background-position: center;
     filter: invert(var(--invert));
     background-image: var(--details-icon);
-    transition: transform 0.3s cubic-bezier(0, 1.1, 1, 1.1);
+    transition: transform 0.2s cubic-bezier(0, 1.1, 1, 1.1);
     --r: 0deg;
     --s: 1;
     transform: rotate(var(--r)) scale(var(--s));
@@ -513,8 +513,15 @@ INVENTORY
     flex-direction: row;
     flex-wrap: wrap;
     align-items: left;
-    gap: 10px;
     margin-bottom: 20px;
+    max-height: 200px;
+    transition: max-height 0.1s ease-in-out, margin-bottom 0.1s ease-in-out;
+    overflow-y: hidden;
+}
+
+.inventory-result-lower.not-shown {
+    max-height: 0px;
+    margin-bottom: 0px;
 }
 
 .inventory-result-lower-detail {
@@ -1206,7 +1213,6 @@ Mobile Styles
         width: 95%;
     }
 
-
     .inventory-result.header {
         width: 98%;
         font-size: 1.2em;
@@ -1227,7 +1233,21 @@ Mobile Styles
         padding: 2px;
     }
 
-    .student-storage-slot {
+    .inventory-result-lower {
+        margin-bottom: 10px;
+    }
 
+    .inventory-result-lower-detail {
+        padding: 6px;
+    }
+
+    .student-storage-group {
+        grid-template-columns: repeat(2, 100px);
+        gap: 5px;
+    }
+
+    .student-storage-slot {
+        height: 100px;
+        width: 100px;
     }
 }

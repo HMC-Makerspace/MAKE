@@ -227,7 +227,7 @@ function generateInventoryDiv(result, kiosk_mode=false) {
     const lower_div = document.createElement("div");
     lower_div.id = `inventory-result-${item.index}-lower-div`;
     lower_div.classList.add("inventory-result-lower");
-    lower_div.classList.add("hidden");
+    lower_div.classList.add("not-shown");
 
     if (item.serial_number !== "") {
         const serial_number = document.createElement("div");
@@ -272,7 +272,7 @@ function generateInventoryDiv(result, kiosk_mode=false) {
         show_lower_div_button.classList.remove("grayed-out");
         show_lower_div_button.addEventListener("click", () => {
             const lower_div = document.getElementById(`inventory-result-${item.index}-lower-div`);
-            lower_div.classList.toggle("hidden");
+            lower_div.classList.toggle("not-shown");
             show_lower_div_button.classList.toggle("flipped");
         });
     }
