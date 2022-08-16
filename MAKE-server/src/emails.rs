@@ -43,6 +43,7 @@ pub async fn send_individual_email(
     let (email, password) = lock.get_gmail_tuple();
     drop(lock);
 
+    
     let mut mailer = SmtpClient::new_simple(SMTP_URL)
         .unwrap()
         .credentials(Credentials::new(email.clone(), password))

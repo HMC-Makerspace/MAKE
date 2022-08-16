@@ -15,7 +15,9 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alfa+Slab+One&family=Bree+Serif&family=Dancing+Script:wght@700&family=Edu+VIC+WA+NT+Beginner&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@200;400&family=Libre+Baskerville:wght@700&family=Pacifico&family=Permanent+Marker&family=Righteous&family=Varela+Round&display=swap" rel="stylesheet"> 
+    <link
+        href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alfa+Slab+One&family=Bree+Serif&family=Dancing+Script:wght@700&family=Edu+VIC+WA+NT+Beginner&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@200;400&family=Libre+Baskerville:wght@700&family=Pacifico&family=Permanent+Marker&family=Righteous&family=Varela+Round&display=swap"
+        rel="stylesheet">
 
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -38,15 +40,9 @@
     <meta property="og:title" content=MAKE>
     <meta property="og:site_name" content=MAKE>
     <meta property="og:url" content=https://make.hmc.edu>
-    <meta property="og:description" content=MAKE - Unified managment application for HMC's Makerspace. 
-
-    What does MAKE handle?
-
-        Inventory management and discovery
-        Student storage reservation and renewal system
-        Tool checkout system
-        3D printer status & livestreaming system
-    >
+    <meta property="og:description" content=MAKE - website for HMC's Makerspace. What does MAKE
+        handle? Inventory management and discovery Student storage reservation and renewal system Tool checkout system
+        3D printer status & livestreaming system>
     <meta property="og:type" content=website>
     <meta property="og:image" content=https://make.hmc.edu/apple-touch-icon.png>
 
@@ -86,19 +82,24 @@
                 <div id="main-logo" onclick="setPage('home')">MAKE</div>
                 <div id="mobile-logo" onclick="setPage('home')">M</div>
             </div>
-            <button id = "home-button" onclick="setPage('home')"><img class="page-icon" src="../img/home-icon.svg"> <span>Home</span></button>
-            <button id = "quiz-info-button" onclick="setPage('quiz-info')"><img class="page-icon" src="../img/quiz-icon.svg"> <span>Quizzes<br>&
-                Information</span></button>
-            <button id = "inventory-button" onclick="setPage('inventory')"><img class="page-icon"
+            <button id="home-button" onclick="setPage('home')"><img class="page-icon" src="../img/home-icon.svg">
+                <span>Home</span></button>
+            <button id="quiz-info-button" onclick="setPage('quiz-info')"><img class="page-icon"
+                    src="../img/quiz-icon.svg"> <span>Quizzes<br>&
+                    Information</span></button>
+            <button id="inventory-button" onclick="setPage('inventory')"><img class="page-icon"
                     src="../img/inventory-icon.svg"> <span>Inventory</span></button>
-            <button id = "student-storage-button" onclick="setPage('student-storage')"><img class="page-icon"
+            <button id="equipment-button" onclick="setPage('equipment')"><img class="page-icon"
+                    src="../img/tool-icon.svg"> <span>Equipment</span></button>
+            <button id="student-storage-button" onclick="setPage('student-storage')"><img class="page-icon"
                     src="../img/student-storage-icon.svg"> <span>Student<br>Storage</span></button>
-
-            <button id = "checkouts-button" onclick="setPage('checkouts')"><img class="page-icon"
+            <button id="checkouts-button" onclick="setPage('checkouts')"><img class="page-icon"
                     src="../img/checkout-icon.svg"> <span>Checkouts</span></button>
-            <button id = "3d-printers-button" onclick="setPage('3d-printers')"><img class="page-icon" src="../img/printer-icon.svg"> <span>3D Printers</span></button>
-            <button id = "faq-button" onclick="setPage('faq')"><img class="page-icon" src="../img/faq.svg"> <span>FAQ</span></button>
-            <button id = "settings-button" onclick="setPage('settings')"><img class="page-icon"
+            <button id="3d-printers-button" onclick="setPage('3d-printers')"><img class="page-icon"
+                    src="../img/printer-icon.svg"> <span>3D Printers</span></button>
+            <button id="faq-button" onclick="setPage('faq')"><img class="page-icon" src="../img/faq.svg">
+                <span>FAQ</span></button>
+            <button id="settings-button" onclick="setPage('settings')"><img class="page-icon"
                     src="../img/settings-icon.svg"><span>Settings</span></button>
         </div>
 
@@ -191,6 +192,19 @@
             </div>
         </div>
 
+        <!--
+
+        EQUIPMENT PAGE
+
+        -->
+
+        <div id="page-equipment" class="main-content hidden">
+            <div class="content-container">
+                <div id="equipment-list" class="content-body">
+
+                </div>
+            </div>
+        </div>  
 
         <!--
 
@@ -392,42 +406,12 @@
 
         -->
         <div id="page-faq" class="main-content hidden">
-
-            <div class="faq-container">
-                <h2>
-                    Why do I need to provide my college ID number?
-                </h2>
-
-                <p3>
-                    Your college ID number is used to verify your identity, retrieve the status of your stutent storage
-                    reservations and tool checkouts, and view the status of your 3D prints.
-                    If you don't have a college ID number, please email us at <span
-                        class="email-link">makerspace-management-l@hmc.edu</span>
-                </p3>
+            <div class="content-container">
+                <div id="faq-content" class="content-body">
+                </div>
+                
             </div>
 
-            <div class="faq-container">
-                <h2>
-                    Contacts
-                </h2>
-
-                <p3>
-                    Current site admin: Ethan Vazquez (evazquez@g.hmc.edu)
-                    <br>
-                    Makerspace Management: Head Stewards & Kim Neal (makerspace-management-l@hmc.edu)
-                </p3>
-            </div>
-
-            <div class="faq-container">
-                <h2>
-                    API Help
-                </h2>
-
-                <p3>
-                    The MAKE API provides an easily accessible endpoint to access the data of the Makerspace.
-                    You can view the full OpenAPI documentation at <a href="./api/v1/help">this link</a>.
-                </p3>
-            </div>
         </div>
 
 
@@ -460,6 +444,7 @@
 <script src="scripts/page_quiz_info.js"></script>
 <script src="scripts/page_checkouts.js"></script>
 <script src="scripts/page_printers.js"></script>
+<script src="scripts/page_faq.js"></script>
 
 <script src="scripts/start.js"></script>
 
