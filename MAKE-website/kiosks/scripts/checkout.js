@@ -463,6 +463,9 @@ function updateCartHTML() {
     }
 }
 
+// Sun, Mon, Tue, Wed, Thu, Fri, Sat
+const close_key = [21, 22, 22, 22, 22, 19, 19];
+
 function getCheckoutLength() {
     const radio = document.getElementsByName("time-length");
     let selection = 0;
@@ -476,12 +479,22 @@ function getCheckoutLength() {
     switch (selection) {
         case "1":
             // Find number of seconds between now and 11pm
+            const day_of_week = new Date().getDay();
             const now = new Date();
             const hours = now.getHours();
             const minutes = now.getMinutes();
             const seconds = now.getSeconds();
-            const seconds_until_11pm = (23 - hours) * 3600 + (0 - minutes) * 60 + (0 - seconds);
-            return seconds_until_11pm;
+
+            const close_hour = close_key[day_of_week];
+
+            const seconds_until_close = (close_hour - hours) * 3600 + (0 - minutes) * 60 + (0 - seconds);
+
+            if (seconds_until_close < 0) {
+                // If it's past the closing time, add 24 hours
+                return seconds_until_close + 3600 * 24;
+            } else {
+                return seconds_until_close;
+            }
         case "2":
             return 24 * 3600;
         case "3":
