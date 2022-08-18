@@ -251,6 +251,7 @@ pub async fn checkout_items(
             return Err(ErrorUnauthorized("User is banned".to_string()));
         }
 
+        
         data.checkout_log.add_checkout(CheckoutLogEntry::new(
             user.get_id(),
             sec_length,

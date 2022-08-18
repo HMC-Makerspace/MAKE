@@ -10,13 +10,6 @@ List of commonly used equipment that we have available for use in the Makerspace
 
 ## 3D Printer & Laser Cutter Room
 
-### Terms
-FDM: Fused Deposition Modeling
-
-SLA: Stereolithography
-
-SLS: Selective Laser Sintering
-
 ### Full Spectrum PS48 Laser Cutter
 - Massive CO2 laser cutter that can cut & engrave on a variety of materials, such as wood, acrylic, and cardboard.
 
@@ -69,10 +62,22 @@ SLS: Selective Laser Sintering
 
 ![Soldering Iron](img/equipment/solderingiron.webp)
 
+###     
+- 
+
+### Power Supplies
+
+
+### Waveform Generators
+
+
+### Multimeters
+
+
 ## Main Area & Cage
 
 ### Large Format Printer (Epson P8000)
-- Large format printer that can print on matte and glossy paper. Is loaded with roll paper up to 44 inches wide and 100 feet long. Ink and paper charged at-cost to the user.
+- Large format printer that can print on matte and glossy paper. Loaded with roll paper up to 44 inches wide and 100 feet long. Ink and paper charged at-cost to the user.
 
 ![Large Format Printer Epson P8000](img/equipment/epsonp8000.webp)
 
@@ -88,8 +93,13 @@ SLS: Selective Laser Sintering
 ## Studio (Video)
 
 ### Canon EOS C200 Cinema Camera
-- Canon EOS C200 is a 4K cinema camera that can be used for video production. It has a 8.85 Megapixel Super 35mm CMOS Sensor, and can be used with the included zoom lens or any of our prime lenses. Records to dual SD cards, and can be powered by battery or DC power.
+- The Canon EOS C200 is a 4K cinema camera that can be used for video production. It has a 8.85 Megapixel Super 35mm CMOS Sensor, and can be used with the included zoom lens or any of our prime lenses. Records to dual SD cards, and can be powered by battery or DC power.
 
 ![Canon EOS C200](img/equipment/canoneosc200.webp)
+
+### Nikon Z7II
+- The Nikon Z7II is a full frame mirrorless camera that can be used for photography or videography. It has a 45.7 megapixel sensor, allowing for incredibly detailed photos, or 4K 60fps video recording.
+
+![Nikon Z711](img/equipment/nikon.webp)
 
 ## Welding Area

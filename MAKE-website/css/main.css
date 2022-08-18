@@ -110,7 +110,7 @@ p3 {
 .md h2 {
   border-bottom: solid 2px var(--theme-color-3);
   margin-top: 3em;
-  padding-bottom: 5px;
+  padding-bottom: 10px;
 }
 
 .md h3 {
@@ -852,7 +852,7 @@ Quizzes & Information
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 /*
