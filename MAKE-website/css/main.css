@@ -232,7 +232,7 @@ p3 {
 
 #left-bar button img {
   transition: filter 0.1s ease-in-out,
-    transform 0.4s cubic-bezier(0, 1.4, 1, 1.4);
+    transform 0.4s ease-in-out;
 }
 
 #left-bar button:hover img {
@@ -1196,6 +1196,23 @@ Mobile Styles
     font-family: var(--title-font);
     user-select: none; /* Standard */
     font-size: 40px;
+  }
+
+  #welcome-message {
+    grid-template-columns: unset;
+    grid-template-rows: 1fr 1fr;
+    text-align: center;
+    padding: 0px;
+    gap: 0px;
+    min-height: unset;
+  }
+
+  #welcome-message p1 {
+    font-size: 2em;
+  }
+
+  #main-title-ani {
+    font-size: 5em !important;
   }
 
   p1 {

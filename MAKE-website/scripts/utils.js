@@ -23,11 +23,6 @@ function setPage(page) {
     const page_element = document.getElementById(`page-${page}`);
     if (page_element) {
         page_element.classList.remove("hidden");
-
-        // Focus for certain pages
-        if (page === "inventory") {
-            document.getElementById("inventory-search-input").focus();
-        }
     }
     for (let b of document.getElementsByClassName("active-button")) {
         b.classList.remove("active-button");
