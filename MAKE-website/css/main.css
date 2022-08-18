@@ -458,6 +458,10 @@ INVENTORY
   background-color: var(--theme-color-3);
 }
 
+.inventory-result:nth-child(n + 200) {
+  display: none;
+}
+
 .inventory-result-main {
   display: grid;
   grid-template-columns: 2fr 0.5fr 2fr 0.5fr 0.5fr;

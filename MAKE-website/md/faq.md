@@ -8,7 +8,7 @@ The Makerspace is open to students 24/7, but we have stewards on shift from:
 - 1-7PM Friday and Saturday
 - 1-9PM Sunday
 
-This means that during these hours you can check out tools and ask stewards for assistance.
+While stewards are on duty, you can check out tools/equipment and ask them for assistance.
 
 ## What does it mean that the makerspace is open 24/7?
 
@@ -64,7 +64,7 @@ All FDM (filament) printing is free for personal use. If you are printing items 
 
 ## How can I hear about workshops?
 
-You can hear about workshops and sign up for them through the Makerspace Google Site. We will post updates whenever one is scheduled. You can also hear about them through our instagram, @hmcmakerspace
+You can hear about workshops and sign up for them through the Makerspace Google Site. We will post updates whenever one is scheduled. You can also hear about them through our instagram, [@hmcmakerspace](https://www.instagram.com/hmcmakerspace/)
 
 ## What does it mean that the Makerspace is student-run?
 
