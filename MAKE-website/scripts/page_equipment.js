@@ -1,0 +1,1 @@
+renderMD("md/equipment.md", "equipment");

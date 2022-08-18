@@ -74,3 +74,37 @@ function toggle_theme() {
 		localStorage.setItem("theme", "light");
 	}
 }
+
+async function renderMD(file_path, title) {
+    const equipmentDiv = document.getElementById(`${title}-content`);
+
+    const el = document.createElement("div");
+
+    el.id = `${title}-text`;
+    el.classList.add("md");
+
+    let req = await fetch(file_path);
+
+    let text = await req.text();
+
+    let converter = new showdown.Converter();
+
+    let html = converter.makeHtml(text);
+
+    el.innerHTML = html;
+
+    equipmentDiv.appendChild(el);
+
+    // Check each child to see if it has a img, if so, add md-img-container class
+    let text_div = document.getElementById(`${title}-text`);
+
+    for (let i = 0; i < text_div.childNodes.length; i++) {
+        let child = text_div.childNodes[i];
+
+        if (child.firstChild) {
+            if (child.firstChild.tagName === "IMG") {
+                child.classList.add("md-img-container");
+            }
+        }
+    }
+}

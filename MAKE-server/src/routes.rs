@@ -250,7 +250,6 @@ pub async fn checkout_items(
         if user.get_auth_level() == AuthLevel::Banned {
             return Err(ErrorUnauthorized("User is banned".to_string()));
         }
-
         data.checkout_log.add_checkout(CheckoutLogEntry::new(
             user.get_id(),
             sec_length,

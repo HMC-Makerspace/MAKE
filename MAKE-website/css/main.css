@@ -53,7 +53,7 @@
   --theme-color-2: #28272b;
   --theme-color-3: #424555;
   --theme-color-4: #004174;
-  --theme-color-5: #1f1e27;
+  --theme-color-5: #17151b;
   --theme-color-6: #bdae2e;
   --theme-color-7: #781fa1;
   --theme-color-8: #1b7885;
@@ -96,6 +96,49 @@ p3 {
 .title-font {
   font-family: var(--title-font);
 }
+
+.md {
+  padding: 20px;
+  max-width: 70%;
+  background-color: var(--theme-color-2);
+}
+
+.md h1 {
+  font-size: 4em;
+}
+
+.md h2 {
+  border-bottom: solid 2px var(--theme-color-3);
+  margin-top: 3em;
+  padding-bottom: 5px;
+}
+
+.md h3 {
+  padding: 10px;
+  background-color: var(--theme-color-5);
+}
+
+.md b {
+  font-size: 1.4em;
+}
+
+.md img {
+    width: 70%;
+    height: auto;
+    background-color: var(--theme-color-5);
+    margin: 0 auto;
+    border-radius: 15px;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.md-img-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
 
 #main-grid {
   display: grid;
@@ -1096,26 +1139,12 @@ FAQ
 
 */
 
-#faq-content {
+#faq-content, #equipment-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   border-radius: var(--roundness);
-}
-
-#faq-text {
-  padding: 20px;
-  max-width: 60%;
-  background-color: var(--theme-color-2);
-}
-
-#faq-text h1 {
-  font-size: 3em;
-}
-
-#faq-text b {
-  font-size: 1.4em;
 }
 
 /*
@@ -1266,7 +1295,24 @@ Mobile Styles
     width: 120px;
   }
 
-  #faq-text {
+  .md {
     max-width: 100%;
+  }
+
+  .md h1 {
+    font-size: 2em;
+  }
+
+  .md h2 {
+    font-size: 1em;
+  }
+
+  .md h3 {
+    font-size: 1em;
+  }
+
+  .md img {
+    max-width: 100%;
+    height: auto;
   }
 }
