@@ -87,5 +87,9 @@ SLS: Selective Laser Sintering
 
 ## Studio (Video)
 
+### Canon EOS C200 Cinema Camera
+- Canon EOS C200 is a 4K cinema camera that can be used for video production. It has a 8.85 Megapixel Super 35mm CMOS Sensor, and can be used with the included zoom lens or any of our prime lenses. Records to dual SD cards, and can be powered by battery or DC power.
+
+![Canon EOS C200](img/equipment/canoneosc200.webp)
 
 ## Welding Area

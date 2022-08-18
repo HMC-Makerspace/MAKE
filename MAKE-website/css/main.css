@@ -123,13 +123,18 @@ p3 {
 }
 
 .md img {
-    width: 70%;
+    width: 60%;
     height: auto;
     background-color: var(--theme-color-5);
     margin: 0 auto;
     border-radius: 15px;
     display: table-cell;
     vertical-align: middle;
+    transition: filter 0.3s cubic-bezier(0, 1.2, 1, 1.2);
+}
+
+.md img:hover {
+    filter: brightness(1.2);
 }
 
 .md-img-container {
