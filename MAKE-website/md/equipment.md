@@ -6,7 +6,7 @@ List of commonly used equipment that we have available for use in the Makerspace
 
 **[Wazer Waterjet](#wazerwaterjet)**
 
-**[Leather Sewing Machine](#leathersewingmachine)**
+**[Juki Leather Sewing Machine](#jukileathersewingmachine)**
 
 ## 3D Printer & Laser Cutter Room
 
@@ -62,17 +62,31 @@ List of commonly used equipment that we have available for use in the Makerspace
 
 ![Soldering Iron](img/equipment/solderingiron.webp)
 
-###     
-- 
+### Handheld Multimeters
+- We have a variety of handheld multimeters available for use, along with a variety of cables and connectors.
 
-### Power Supplies
+![Handheld Multimeters](img/equipment/handheldmultimeter.webp)
+
+### Keysight Oscilloscopes
+- Oscilloscopes are used to plot the frequency of various electrical signals.
+
+![Oscilloscope](img/equipment/oscilloscope.webp)
+
+### Keysight DC Power Supplies
+- DC power supplies are used to supply specific, controllable amounts of power to DC circuits.
+
+![DC Power Supply](img/equipment/powersupply.webp)
+
+### Keysight Waveform Generators
+- Waveform generators are used to generate a specific frequency or pattern of electrical signals.
+
+![Waveform Generator](img/equipment/waveformgenerator.webp)
+
+### Keysight Bench Multimeters
+- Multimeters are used to measure the voltage and amperage in a circuit. This bench multimeter can't be moved around, but has more options and features than a traditional handheld multimeter
 
 
-### Waveform Generators
-
-
-### Multimeters
-
+![Bench Multimeter](img/equipment/benchmultimeter.webp)
 
 ## Main Area & Cage
 
@@ -81,8 +95,10 @@ List of commonly used equipment that we have available for use in the Makerspace
 
 ![Large Format Printer Epson P8000](img/equipment/epsonp8000.webp)
 
-### Leather Sewing Machine
+### Juki Leather Sewing Machine
+- Our leather sewing machine is a Juki DNU-1541 Industrial Walking Foot Leather Sewing Machine. It can be used to sew through almost any thick material, such as leather or several layers of fabric.
 
+![Leather Sewing Machine](img/equipment/jukileather.webp)
 
 ## Spray Paint Booth
 
