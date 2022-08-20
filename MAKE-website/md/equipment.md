@@ -100,10 +100,27 @@ List of commonly used equipment that we have available for use in the Makerspace
 
 ![Leather Sewing Machine](img/equipment/jukileather.webp)
 
+### Sewing Machines
+
+
+### Embroidery Machines
+
+
+### Surgers
+
+
+
 ## Spray Paint Booth
+
+### Spray Paint
+
+
+### Spray Paint Gun
 
 
 ## Studio (Audio)
+
+### Microphone Kits
 
 
 ## Studio (Video)

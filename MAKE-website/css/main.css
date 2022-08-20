@@ -5,10 +5,10 @@
   --background-color: #fafafa;
 
   --theme-color-1: #ee9d22;
-  --theme-color-2: #242424;
+  --theme-color-2: #202024;
   --theme-color-3: #ebebeb;
   --theme-color-4: #004e89;
-  --theme-color-5: #444444;
+  --theme-color-5: #373d47;
   --theme-color-6: #e0cf34;
   --theme-color-7: #a918ec;
   --theme-color-8: #1b9aaa;
@@ -116,6 +116,7 @@ p3 {
 .md h3 {
   padding: 10px;
   background-color: var(--theme-color-5);
+  margin-top: 30px;
 }
 
 .md b {
@@ -127,7 +128,7 @@ p3 {
     height: auto;
     background-color: var(--theme-color-5);
     margin: 0 auto;
-    border-radius: 15px;
+    border-radius: 4px;
     display: table-cell;
     vertical-align: middle;
     transition: filter 0.3s cubic-bezier(0, 1.2, 1, 1.2);
@@ -193,7 +194,7 @@ p3 {
   font-family: var(--title-font);
   user-select: none; /* Standard */
   color: var(--text-color-main);
-  transition: letter-spacing 0.5s cubic-bezier(0, 1.5, 1, 1.5),
+  transition: letter-spacing 0.5s ease-in-out,
     color 0.5s ease-in-out;
 }
 
@@ -389,7 +390,7 @@ HOME
 #welcome-message,
 #logged-in-message {
   border-radius: var(--roundness);
-  background-color: var(--theme-color-5);
+  background-color: var(--theme-color-2);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -518,7 +519,7 @@ INVENTORY
   background-position: center;
   filter: invert(var(--invert));
   background-image: var(--details-icon);
-  transition: transform 0.2s cubic-bezier(0, 1.1, 1, 1.1);
+  transition: transform 0.2s ease-in-out;
   --r: 0deg;
   --s: 1;
   transform: rotate(var(--r)) scale(var(--s));
