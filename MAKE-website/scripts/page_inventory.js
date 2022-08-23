@@ -117,7 +117,7 @@ function generateInventoryHeader(kiosk_mode=false) {
 
     const tool_material = document.createElement("div");
     tool_material.classList.add("inventory-header-tool-material");
-    tool_material.innerHTML = "Tool/Material";
+    tool_material.innerHTML = "Type";
 
     const location = document.createElement("div");
     location.classList.add("inventory-header-location");

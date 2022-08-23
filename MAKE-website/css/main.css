@@ -6,9 +6,9 @@
 
   --theme-color-1: #ee9d22;
   --theme-color-2: #ffffff;
-  --theme-color-3: #ebebeb;
+  --theme-color-3: #f1f0f0;
   --theme-color-4: #72b2e4;
-  --theme-color-5: #dadada;
+  --theme-color-5: #ececec;
   --theme-color-6: #e0cf34;
   --theme-color-7: #a918ec;
   --theme-color-8: #1b9aaa;
@@ -58,7 +58,7 @@
   --theme-color-6: #bdae2e;
   --theme-color-7: #781fa1;
   --theme-color-8: #1b7885;
-  --theme-color-9: #36343b;
+  --theme-color-9: #504d57;
 
   --link-color: #0ad3ee;
 
@@ -123,7 +123,7 @@ p3 {
 }
 
 .md h2 {
-  border-bottom: solid 2px var(--theme-color-3);
+  border-bottom: solid 2px var(--theme-color-9);
   margin-top: 3em;
   padding-bottom: 10px;
 }
@@ -459,7 +459,7 @@ INVENTORY
   align-items: left;
   gap: 10px;
   overflow-y: scroll;
-  padding-top: 10px;
+  margin-top: 10px;
 }
 
 .inventory-result {
@@ -504,8 +504,6 @@ INVENTORY
   z-index: 10000;
   background-color: var(--theme-color-1);
   box-shadow: 0 0 15px var(--theme-color-2);
-  width: 93%;
-  max-width: 1300px;
 }
 
 .inventory-result.header .inventory-result-main {
@@ -530,6 +528,16 @@ INVENTORY
   grid-template-columns: 1fr 2fr 2fr 0.5fr 0.3fr;
 }
 
+.inventory-result-main.inventory-header {
+  padding: 10px;
+  padding-bottom: 8px;
+}
+
+.inventory-result-main.inventory-header * {
+  border-bottom: 3px solid var(--text-color-main);
+  padding: 5px
+}
+
 .inventory-result-show-lower-div {
   height: 40px;
   background-size: 30px 30px;
@@ -546,6 +554,7 @@ INVENTORY
 
 .inventory-result-show-lower-div.grayed-out {
   filter: invert(50%);
+  cursor: not-allowed;
 }
 
 .inventory-result-show-lower-div:hover:not(.grayed-out) {
