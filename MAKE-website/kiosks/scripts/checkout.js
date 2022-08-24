@@ -7,6 +7,9 @@ var state = {
     current_id_number: 0,
 }
 
+document.documentElement.setAttribute('data-theme', 'dark');
+localStorage.setItem("theme", "dark");
+
 const API = '/../api/v1';
 
 async function authenticate() {

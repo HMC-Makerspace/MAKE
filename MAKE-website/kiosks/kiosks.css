@@ -174,10 +174,6 @@ CHECKOUT
     grid-template-rows: minmax(0, 1fr);
 }
 
-.content-body {
-    background-color: var(--theme-color-2) !important;
-}
-
 #heartbeat {
     background-color: var(--theme-color-5);
     display: flex;
@@ -424,6 +420,7 @@ label {
     justify-content: flex-start;
     gap: 20px;
     padding: 20px;
+    overflow-y: scroll;
 }
 
 .user-result {
@@ -431,9 +428,17 @@ label {
     grid-template-columns: 2fr 1fr 3fr .5fr 5fr;
     background-color: var(--theme-color-3);
     border-radius: var(--roundness);
-    color: var(--text-color-alt);
-    padding: 10px;
+    color: var(--text-color-main);
+    padding: 5px;
     width: 90%;
+    font-size: .9em;
+}
+
+.user-result * {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .user-result-passed-quizzes {

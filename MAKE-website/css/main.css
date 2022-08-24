@@ -384,6 +384,7 @@ a:visited {
 .content-container {
   display: flex;
   flex-direction: column;
+  background-color: var(--theme-color-5);
 }
 
 .content-header {
@@ -534,7 +535,8 @@ INVENTORY
 }
 
 .inventory-result-main.inventory-header * {
-  border-bottom: 3px solid var(--text-color-main);
+  border-bottom: 3px solid white;
+  color: white;
   padding: 5px
 }
 
