@@ -57,6 +57,19 @@ impl PrinterStatuses {
 
 /*
 
+Redirect from http to https
+
+*/
+#[get("/")]
+async fn handler(req: HttpRequest) -> HttpResponse {
+    match req.app_config().local_addr().port() {
+        443 => HttpResponse::Ok().body("Hello World from 443"),
+        _ =>  HttpResponse::PermanentRedirect().append_header(("location", "https://make.hmc.edu")).finish(),
+    }
+}
+
+/*
+
 HELP
 
 */

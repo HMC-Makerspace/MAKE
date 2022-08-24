@@ -6,7 +6,7 @@
 
   --theme-color-1: #ee9d22;
   --theme-color-2: #ffffff;
-  --theme-color-3: #f1f0f0;
+  --theme-color-3: #e6e6e6;
   --theme-color-4: #72b2e4;
   --theme-color-5: #ececec;
   --theme-color-6: #e0cf34;
@@ -36,6 +36,7 @@
   --roundness: 0px;
   --button-outline-color: #ffffff;
 
+  --brightness: .9;
   --invert: 0%;
 
   /* Icons */
@@ -73,6 +74,7 @@
   --medium-color-dark: #7e7d41;
   --high-color-dark: #3d773d;
   
+  --brightness: 1.2;
   --invert: 100%;
 }
 
@@ -146,7 +148,7 @@ p3 {
 .md img {
     width: 40%;
     height: auto;
-    background-color: var(--theme-color-9);
+    background-color: var(--theme-color-5);
     margin: 0 auto;
     border-radius: 4px;
     display: table-cell;
@@ -155,7 +157,7 @@ p3 {
 }
 
 .md img:hover {
-    filter: brightness(1.2);
+    filter: brightness(var(--brightness));
 }
 
 .md-img-container {
@@ -494,7 +496,8 @@ INVENTORY
   align-items: center;
   justify-content: space-evenly;
   gap: 10px;
-  padding: 10px;
+  padding: 5px;
+  padding-left: 10px;
   color: var(--text-color-main)
 }
 
@@ -535,8 +538,8 @@ INVENTORY
 }
 
 .inventory-result-main.inventory-header * {
-  border-bottom: 3px solid white;
-  color: white;
+  border-bottom: 3px solid var(--theme-color-5);
+  color: var(--theme-color-5  );
   padding: 5px
 }
 

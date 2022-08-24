@@ -57,7 +57,7 @@ use tokio::sync::Mutex;
 #[cfg(debug_assertions)]
 const ADDRESS: &str = "127.0.0.1:8080";
 #[cfg(not(debug_assertions))]
-const ADDRESS: &str = "0.0.0.0:8080";
+const ADDRESS: &str = "0.0.0.0:443";
 
 #[cfg(debug_assertions)]
 const URL: &str = "127.0.0.1:8080";
@@ -328,7 +328,6 @@ async fn async_main() -> std::io::Result<()> {
                 .wrap(actix_web::middleware::Logger::new(LOGGER_STR))
                 .wrap(actix_web::middleware::Compress::default())
                 .wrap(cors)
-                // Static files for frontend website
                 .service(get_inventory)
                 .service(get_quizzes)
                 .service(get_users)
@@ -384,7 +383,7 @@ async fn async_main() -> std::io::Result<()> {
                 .wrap(actix_web::middleware::Logger::new(LOGGER_STR))
                 .wrap(actix_web::middleware::Compress::default())
                 .wrap(cors)
-                // Static files for frontend website
+                .service(handler)
                 .service(get_inventory)
                 .service(get_quizzes)
                 .service(get_users)
