@@ -55,10 +55,9 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 
 // Debug vs release address
-#[cfg(debug_assertions)]
 const ADDRESS: &str = "127.0.0.1:8080";
-#[cfg(not(debug_assertions))]
-const ADDRESS: &str = "0.0.0.0:8080";
+const ADDRESS_HTTP: &str = "0.0.0.0:8080";
+const ADDRESS_HTTPS: &str = "0.0.0.0:8443";
 
 #[cfg(debug_assertions)]
 const URL: &str = "127.0.0.1:8080";
@@ -381,7 +380,7 @@ async fn async_main() -> std::io::Result<()> {
                 .max_age(3600);
 
             App::new()
-                .wrap(RedirectSchemeBuilder::new().replacements(&[(":8080", ":8080")]).build())
+                .wrap(RedirectSchemeBuilder::new().replacements(&[(":8080", ":8443")]).build())
                 .wrap(actix_web::middleware::Logger::new(LOGGER_STR))
                 .wrap(actix_web::middleware::Compress::default())
                 .wrap(cors)
@@ -411,7 +410,8 @@ async fn async_main() -> std::io::Result<()> {
                 .service(openapi)
                 .service(ResourceFiles::new("/", generate()))
         })
-        .bind_openssl(ADDRESS, builder)?
+        .bind(ADDRESS_HTTP)?
+        .bind_openssl(ADDRESS_HTTPS, builder)?
         .run()
         .await;
 
