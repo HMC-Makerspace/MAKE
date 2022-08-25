@@ -11,6 +11,7 @@ use actix_web::rt::spawn;
 use actix_web::rt::System;
 use actix_web::*;
 use actix_web_static_files::ResourceFiles;
+use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
 
 use chrono::Timelike;
 use chrono::Utc;
@@ -380,6 +381,7 @@ async fn async_main() -> std::io::Result<()> {
                 .max_age(3600);
 
             App::new()
+                .wrap(RedirectSchemeBuilder::new().build())
                 .wrap(actix_web::middleware::Logger::new(LOGGER_STR))
                 .wrap(actix_web::middleware::Compress::default())
                 .wrap(cors)

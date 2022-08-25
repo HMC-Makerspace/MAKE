@@ -9,6 +9,7 @@ dependencies = [
  "actix-cors",
  "actix-web",
  "actix-web-httpauth",
+ "actix-web-middleware-redirect-scheme",
  "actix-web-static-files",
  "chrono",
  "csv",
@@ -257,6 +258,16 @@ dependencies = [
  "futures-core",
  "futures-util",
  "pin-project-lite",
+]
+
+[[package]]
+name = "actix-web-middleware-redirect-scheme"
+version = "4.0.0"
+source = "git+https://github.com/AOx0/actix-web-middleware-redirect-scheme#e4f40c34e506dde4f6731807d7f67748fddcd5fe"
+dependencies = [
+ "actix-service",
+ "actix-web",
+ "futures",
 ]
 
 [[package]]
