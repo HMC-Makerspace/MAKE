@@ -381,7 +381,7 @@ async fn async_main() -> std::io::Result<()> {
                 .max_age(3600);
 
             App::new()
-                .wrap(RedirectSchemeBuilder::new().build())
+                .wrap(RedirectSchemeBuilder::new().replacements(&[(":8080", ":8080")]).build())
                 .wrap(actix_web::middleware::Logger::new(LOGGER_STR))
                 .wrap(actix_web::middleware::Compress::default())
                 .wrap(cors)
