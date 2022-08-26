@@ -419,6 +419,7 @@ HOME
   gap: 10px;
   min-height: 200px;
   padding: 30px;
+  padding-bottom: 20vh;
 }
 
 #welcome-message {
@@ -462,6 +463,7 @@ INVENTORY
   align-items: left;
   gap: 10px;
   overflow-y: scroll;
+  overflow-x: hidden;
   margin-top: 10px;
 }
 
@@ -1211,6 +1213,12 @@ Mobile Styles
   #left-bar button {
     justify-content: center;
     padding: 0px;
+    height: 7vh;
+  }
+
+  #left-bar button img {
+    width: auto;
+    padding: 25%;
   }
 
   #logo-container {
@@ -1274,6 +1282,7 @@ Mobile Styles
 
   .content-body {
     overflow-y: unset;
+    padding-bottom: 20vh !important;
   }
 
   .quiz-info-storage-help {
