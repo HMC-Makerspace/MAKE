@@ -1,5 +1,3 @@
-#![feature(is_some_with)]
-
 use uuid::Uuid;
 
 use crate::*;

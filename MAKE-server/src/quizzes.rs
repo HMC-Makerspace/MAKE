@@ -144,7 +144,7 @@ impl Response {
     }
 }
 
-pub fn get_quiz_url(quiz_id: &str) -> String {
+pub fn _get_quiz_url(quiz_id: &str) -> String {
     format!("{}{}{}", BASE_QUIZ_URL, quiz_id, POST_QUIZ_URL)
 }
 

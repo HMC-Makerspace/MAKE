@@ -316,7 +316,7 @@ impl PrintQueueEntry {
     /// Email credentials should be stored in the api_keys.toml file
     /// Follow this link to get the credentials: https://support.google.com/accounts/answer/185833
     pub async fn notify(&mut self) {
-        send_individual_email(
+        let _ =     send_individual_email(
             self.email.clone(),
             None,
             "MAKE Print Notification".to_string(),

@@ -5,7 +5,7 @@ use lettre_email::*;
 
 use crate::*;
 
-pub async fn send_bulk_emails(recipients: Vec<String>, subject: String, body: String) {
+pub async fn _send_bulk_emails(recipients: Vec<String>, subject: String, body: String) {
     let lock = API_KEYS.lock().await;
     let (email, password) = lock.get_gmail_tuple();
 

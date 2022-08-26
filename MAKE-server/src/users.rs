@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 use std::time::SystemTime;
-
-use log::info;
 use serde::{Deserialize, Serialize};
 
 use crate::checkout::*;

@@ -1,14 +1,13 @@
+#![allow(non_snake_case)]
 use std::cmp::min;
 use std::fs::OpenOptions;
 use std::io::Read;
 use std::io::Write;
 use std::process::exit;
 use std::thread;
-use std::time::SystemTime;
 
 use actix_cors::*;
 use actix_web::rt::spawn;
-use actix_web::rt::System;
 use actix_web::*;
 use actix_web_static_files::ResourceFiles;
 use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
@@ -41,8 +40,6 @@ mod usage;
 use crate::checkout::*;
 use crate::emails::*;
 use crate::inventory::*;
-use crate::laser_cutter::*;
-use crate::permissions::*;
 use crate::printers::*;
 use crate::quizzes::*;
 use crate::routes::*;
@@ -59,11 +56,6 @@ const ADDRESS: &str = "127.0.0.1:8080";
 const ADDRESS_HTTP: &str = "0.0.0.0:8080";
 const ADDRESS_HTTPS: &str = "0.0.0.0:8443";
 
-#[cfg(debug_assertions)]
-const URL: &str = "127.0.0.1:8080";
-#[cfg(not(debug_assertions))]
-const URL: &str = "https://make.hmc.edu";
-
 const SMTP_URL: &str = "smtp.gmail.com";
 const MAKERSPACE_MANAGER_EMAIL: &str = "kneal@g.hmc.edu";
 const UPDATE_INTERVAL: u64 = 60;
@@ -76,7 +68,6 @@ const RENEW_LENGTH: u64 = 2 * 7 * 24 * 60 * 60;
 const RENEWALS_ALLOWED: u64 = 2;
 
 const LOGGER_STR: &str = "\nMAKE Log @ %t\nIP: %a (%{r}a)\nRequest: \"%r\"\nAgent: \"%{Referer}i\" \"%{User-Agent}i\"\nResponse: STATUS %s for %b bytes in %D ms";
-
 const VERSION_STRING: &str = env!("CARGO_PKG_VERSION");
 const STARTUP_TITLE: &str = "
 ██████   ██████   █████████   █████   ████ ██████████
@@ -310,7 +301,7 @@ async fn async_main() -> std::io::Result<()> {
         loop {
             interval.tick().await;
             update_loop().await;
-            save_database().await;
+            let _ = save_database().await;
         }
     });
 
