@@ -728,14 +728,24 @@ Student Storage
 
 .student-storage-group-container {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
+.student-storage-group-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  font-size: 2em;
+  font-weight: bold;
+}
+
 .student-storage-group {
   display: grid;
-  grid-template-columns: repeat(8, 120px);
+  grid-template-columns: repeat(6 , 120px);
   grid-template-rows: auto;
   background-color: var(--theme-color-2);
   border-radius: var(--roundness);

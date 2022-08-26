@@ -81,6 +81,12 @@ function generateStudentStorageDivs(slots, kiosk_mode=false) {
         if (!slot.id.startsWith(last_group)) {
             let container = document.createElement("div");
             container.classList.add("student-storage-group-container");
+            
+            let header = document.createElement("div");
+            header.classList.add("student-storage-group-header");
+            header.innerText = `Section ${last_group}`;
+            container.appendChild(header);
+
             container.appendChild(current_group);
             divs.push(container);
             
