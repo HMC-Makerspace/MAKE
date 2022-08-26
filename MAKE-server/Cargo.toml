@@ -28,6 +28,7 @@ static-files = "0.2.1"
 lettre = "*"
 lettre_email = "*"
 uuid = "*"
+actix-web-middleware-redirect-scheme = { version = "4.0.0", git = "https://github.com/AOx0/actix-web-middleware-redirect-scheme" }
 
 [build-dependencies]
 static-files = "0.2.1"
