@@ -271,7 +271,7 @@ CHECKOUT
 #user-info-passed-quizzes >* {
     background-color: var(--theme-color-3);
     border-radius: var(--roundness);
-    color: var(--text-color-alt);
+    color: var(--text-color-main);
     display: flex;
     flex-direction: row;
     align-items: center;

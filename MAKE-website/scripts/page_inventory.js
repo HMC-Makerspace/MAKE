@@ -33,13 +33,25 @@ function submitSearch(kiosk_mode=false) {
     const search_results = searchInventory(search, filters);
     const search_divs = generateInventoryDivs(search_results, kiosk_mode);
 
+    state.current_search_results = search_divs;
+
     const results = document.getElementById("inventory-results");
 
     removeAllChildren(results);
-    appendChildren(results, search_divs);
+    appendChildren(results, state.current_search_results.slice(0, 20));
     if (kiosk_mode === true) {
         updateSelectedItems();
     }
+
+    results.addEventListener("scroll", () => {
+        if (results.scrollTop + results.clientHeight >= results.scrollHeight - 5) {
+            // 20 more results
+            console.log(results.childElementCount);
+            const new_divs = state.current_search_results.slice(results.childElementCount, results.childElementCount + 20);
+            console.log(new_divs);
+            appendChildren(results, new_divs);
+        }
+    })
 }
 
 function getInventoryFilters() {

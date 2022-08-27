@@ -487,10 +487,6 @@ INVENTORY
   background-color: var(--theme-color-3);
 }
 
-.inventory-result:nth-child(n + 200) {
-  display: none;
-}
-
 .inventory-result-main {
   display: grid;
   grid-template-columns: 2fr 0.5fr 2fr 0.5fr 0.5fr;
@@ -935,8 +931,8 @@ Checkouts
   border-radius: var(--roundness);
   min-width: 80%;
   margin-top: 20px;
-  gap: 10px;
-  padding: 20px;
+  gap: 5px;
+  padding: 10px;
 }
 
 .checkout-entry {
@@ -945,11 +941,11 @@ Checkouts
   grid-template-rows: auto;
   background-color: var(--theme-color-3);
   border-radius: var(--roundness);
-  padding: 20px;
-  gap: 10px;
+  padding: 5px;
+  gap: 5px;
   margin-right: 10px;
   margin-left: 10px;
-  width: 90%;
+  width: 100%;
   align-content: center;
   justify-content: center;
 }
@@ -969,7 +965,6 @@ Checkouts
   justify-content: center;
   background-color: var(--theme-color-5);
   border-radius: var(--roundness);
-  height: 40px;
 }
 
 .checkout-entry-items {
@@ -1005,12 +1000,12 @@ Checkouts
 
 .t-out,
 .t-in {
-  background-size: 40px 40px;
+  background-size: 30px 30px;
   background-repeat: no-repeat;
   background-position: center;
   width: 100%;
-  min-height: 40px;
-  min-width: 40px;
+  min-height: 30px;
+  min-width: 30px;
   background-color: unset;
 }
 
@@ -1315,10 +1310,6 @@ Mobile Styles
   }
 
   #inventory-search span {
-    display: none;
-  }
-
-  .inventory-result:nth-child(n + 20) {
     display: none;
   }
 
