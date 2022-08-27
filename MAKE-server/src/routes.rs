@@ -327,6 +327,7 @@ pub async fn set_auth_level(
     }
 }
 
+
 #[post("/api/v1/auth/set_quiz/{id_number}/{quiz_name}/{passed}/{api_key}")]
 pub async fn set_quiz_passed(
     path: web::Path<(u64, QuizName, bool, String)>,
@@ -491,7 +492,11 @@ pub async fn renew_student_storage_slot(
         return Err(ErrorUnauthorized("User is banned".to_string()));
     }
 
-    data.student_storage.renew_by_id(&user.get_id(), &slot_id);
+    let result = data.student_storage.renew_by_id(&user.get_id(), &slot_id);
+
+    if result.is_err() {
+        return Err(ErrorBadRequest(result.unwrap_err()));
+    }
 
     Ok(HttpResponse::Ok()
         .status(http::StatusCode::CREATED)

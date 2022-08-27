@@ -174,17 +174,6 @@ async function fetchCheckouts() {
     updateCheckoutsHTML();
 }
 
-async function fetchUsers() {
-    const response = await fetch(`${API}/users/all/${api_key}`);
-    const users = await response.json();
-
-    if (users === null) {
-        return null;
-    }
-
-    state.users = users.users;
-}
-
 const user_search_options = {
     limit: 1000, // don't return more results than you need!
     allowTypo: true, // if you don't care about allowing typos

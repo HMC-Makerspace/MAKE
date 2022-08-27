@@ -70,12 +70,14 @@ impl StudentStorage {
         self.view_for_id(&user.get_id())
     }
 
-    pub fn renew_by_id(&mut self, college_id: &u64, slot_id: &String) {
+    pub fn renew_by_id(&mut self, college_id: &u64, slot_id: &String) -> Result<(), String>  {
         for slot in self.slots.iter_mut() {
             if slot.is_owner(college_id) && slot.get_id() == slot_id {
-                slot.renew();
+                return slot.renew();
             }
         }
+
+        Err(format!("No slot found with id {}", slot_id))
     }
 
     pub fn checkout_slot_by_id(&mut self, college_id: &u64, slot_id: &String) -> bool {
@@ -162,13 +164,17 @@ impl Slot {
         &self.id
     }
 
-    pub fn renew(&mut self) {
+    pub fn renew(&mut self) -> Result<(), String> {
         if let Some(details) = &self.occupied_details {
             let mut details = details.clone();
 
-            details.renew();
+            let r = details.renew();
 
             self.occupied_details = Some(details);
+
+            r
+        } else {
+            Err(format!("No slot found with id {}", self.id))
         }
     }
 
@@ -237,16 +243,24 @@ impl OccupiedDetails {
         }
     }
 
-    pub fn renew(&mut self) {
+    pub fn renew(&mut self) -> Result<(), String> {
         // Extend checkout length by RENEW_LENGTH from now
         let now = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
             .expect("Time went backwards")
             .as_secs();
 
-        if self.timestamp_end < now {
+        if self.renewals_left <= 0 {
+            return Err(format!("No renewals left"));
+        }
+
+        // Allow a 24 hour renewal period
+        if self.timestamp_end < now + 24 * 60 * 60 {
             self.timestamp_end = now + RENEW_LENGTH;
             self.renewals_left -= 1;
+            Ok(())
+        } else {
+            Err(format!("Cannot renew slot until expiry date"))
         }
     }
 }

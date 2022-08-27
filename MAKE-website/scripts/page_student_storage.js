@@ -68,6 +68,17 @@ async function renewStudentStorage(slot_id) {
         await fetchStudentStorage();
 
         renderStudentStorage();
+
+        Toast.fire({
+            title: 'Renewed storage slot',
+            icon: 'success'
+        });
+    } else {
+        const reason = await response.text();
+        Toast.fire({
+            title: 'Failed to renew: ' + reason,
+            icon: 'error'
+        });
     }
 }
 
@@ -112,7 +123,7 @@ function generateStudentStorageDivs(slots, kiosk_mode=false) {
                 if (slot.occupied_details.college_id === state.college_id) {
                     div.classList.add("user");
                     expire_div += `<button onclick="releaseStudentStorage('${slot.id}')">Release</button>
-                    <button onclick="renewStudentStorage('${slot.id}')">Renew</button>`;
+                    <button onclick="renewStudentStorage('${slot.id}')">Renew (${slot.occupied_details.renewals_left})</button>`;
                     slot_text = "";
                 }
             }

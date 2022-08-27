@@ -1,3 +1,15 @@
+const Toast = Swal.mixin({
+	toast: true,
+	position: 'bottom',
+	showConfirmButton: false,
+	timer: 3000,
+	timerProgressBar: true,
+	didOpen: (toast) => {
+		toast.addEventListener('mouseenter', Swal.stopTimer)
+		toast.addEventListener('mouseleave', Swal.resumeTimer)
+	}
+})
+
 function parseCollegeID(collegeID) {
     collegeID = collegeID.trim();
 
@@ -102,4 +114,15 @@ async function renderMD(file_path, title) {
             }
         }
     }
+}
+
+async function fetchUsers() {
+    const response = await fetch(`${API}/users/all/${api_key}`);
+    const users = await response.json();
+
+    if (users === null) {
+        return null;
+    }
+
+    state.users = users.users;
 }

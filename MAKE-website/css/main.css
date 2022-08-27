@@ -771,7 +771,6 @@ Student Storage
 }
 
 .student-storage-slot.user {
-  color: var(--text-color-alt);
   background-color: var(--theme-color-4);
 }
 
@@ -785,7 +784,7 @@ Student Storage
 }
 
 .student-storage-slot button {
-  width: 70px;
+  width: 100px;
 }
 
 /*
