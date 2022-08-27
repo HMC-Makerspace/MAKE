@@ -5,7 +5,7 @@
 Hello! This is a guide on how to keep the MAKE server running (hopefully) forever (or as long as needed).
 This project was originally created by [Ethan Vazquez](https://github.com/IonImpulse) during the summer of 2022.
 
-The base server URL is `https://make.hmc.edu/`. The IP address is `134.173.47.116`. The SSH login is in the Head Stewards Google Drive.
+The base server URL is `https://make.hmc.edu/`. The IP address is `20.25.159.202`. The SSH login is in the Head Stewards Google Drive.
 
 In order to maintain the server, you'll need to know a little Rust, JS, HTML, and CSS.
 ### 2. If nothing changes...
