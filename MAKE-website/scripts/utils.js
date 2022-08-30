@@ -10,6 +10,22 @@ const Toast = Swal.mixin({
 	}
 })
 
+const school_names = {
+    1: "Pomona",
+    2: "Scripps",
+    3: "CMC",
+    4: "HMC",
+    5: "Pitzer"
+};
+
+const school_pops = {
+    1: 1747,
+    2: 958,
+    3: 1262,
+    4: 905,
+    5: 922,
+}
+
 function parseCollegeID(collegeID) {
     collegeID = collegeID.trim();
 
