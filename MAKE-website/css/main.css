@@ -932,7 +932,8 @@ Checkouts
   min-width: 80%;
   margin-top: 20px;
   gap: 5px;
-  padding: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .checkout-entry {
@@ -941,10 +942,9 @@ Checkouts
   grid-template-rows: auto;
   background-color: var(--theme-color-3);
   border-radius: var(--roundness);
-  padding: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
   gap: 5px;
-  margin-right: 10px;
-  margin-left: 10px;
   width: 100%;
   align-content: center;
   justify-content: center;
@@ -1031,7 +1031,6 @@ Checkouts
   background-color: var(--theme-color-7);
   border-radius: var(--roundness);
   margin-left: 5px;
-  width: 100px;
   height: 40px;
 }
 

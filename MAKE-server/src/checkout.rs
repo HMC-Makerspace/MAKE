@@ -53,6 +53,11 @@ impl CheckoutLog {
     pub fn get_current_checkouts(&self) -> Vec<CheckoutLogEntry> {
         self.currently_checked_out.clone()
     }
+
+    pub fn add_reservation(&mut self, entry: CheckoutLogEntry) {
+        info!("Adding reservation entry: {:?}", entry);
+        self.currently_checked_out.push(entry);
+    }
 }
 
 /// Struct that contains information about a single checkout transaction
@@ -89,6 +94,21 @@ impl CheckoutLogEntry {
             items,
             checked_in: false,
             timestamp_checked_out: now,
+            timestamp_expires: expires,
+            timestamp_checked_in: None,
+            num_time_notified: 0,
+        }
+    }
+
+    pub fn new_reservation(college_id: u64, start_time: u64, length: u64, items: Vec<String>) -> Self {
+        let expires = start_time + length;
+        let checkout_uuid = Uuid::new_v4().to_string();
+        CheckoutLogEntry {
+            college_id,
+            checkout_uuid,
+            items,
+            checked_in: false,
+            timestamp_checked_out: start_time,
             timestamp_expires: expires,
             timestamp_checked_in: None,
             num_time_notified: 0,

@@ -275,6 +275,42 @@ pub async fn checkout_items(
     }
 }
 
+#[post("/api/v1/checkouts/add_reservation/{id_number}/{start_time}/{sec_length}/{api_key}")]
+pub async fn reserve_items(
+    path: web::Path<(u64, u64, u64, String)>,
+    body: web::Json<CheckoutItems>,
+) -> Result<HttpResponse, Error> {
+    let (id_number, start_time, sec_length, api_key) = path.into_inner();
+
+    if API_KEYS.lock().await.validate_checkout(&api_key) {
+        let mut data = MEMORY_DATABASE.lock().await;
+
+        let user = data.users.get_user_by_id(&id_number);
+
+        if user.is_none() {
+            return Err(ErrorBadRequest("User not found".to_string()));
+        }
+
+        let user = user.unwrap();
+
+        if user.get_auth_level() == AuthLevel::Banned {
+            return Err(ErrorUnauthorized("User is banned".to_string()));
+        }
+        data.checkout_log.add_reservation(CheckoutLogEntry::new_reservation(
+            user.get_id(),
+            start_time,
+            sec_length,
+            body.items.clone(),
+        ));
+
+        Ok(HttpResponse::Ok()
+            .status(http::StatusCode::CREATED)
+            .finish())
+    } else {
+        Ok(HttpResponse::Unauthorized().finish())
+    }
+}
+
 #[post("/api/v1/checkouts/check_in_entry/{uuid}/{api_key}")]
 pub async fn checkin_items(
     path: web::Path<(String, String)>,

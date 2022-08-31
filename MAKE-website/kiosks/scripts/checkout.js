@@ -36,10 +36,10 @@ async function authenticate() {
         document.getElementById("tool-material-select").addEventListener("change", () => {submitSearch(kiosk_mode=true)});
     });
 
-    fetchCheckouts();
     fetchUsers().then(() => {
         submitUserSearch();
         document.getElementById("users-search-input").addEventListener("keyup", submitUserSearch);
+        fetchCheckouts();
     });
 
     document.addEventListener("keyup", (e) => {
@@ -325,7 +325,12 @@ function createUserInfo(user_info) {
                     <input id="time-1-week" type="radio" name="time-length" value="3"><label for="time-1-week">1 Week</label>
                 </div>
             </div>
-            <button id="commit-checkout" onclick="commitCheckout()">Commit Checkout</button>
+
+            <div id="bottom-buttons">
+                <button id="commit-checkout" onclick="commitCheckout()">Add Checkout</button>
+                <button id="commit-reserve" onclick="commitReservation()">Add Reservation</button>
+                <input id="reserve-date" type="date">
+            </div>
         `;
     }
 }
@@ -526,6 +531,58 @@ async function commitCheckout() {
         displayErrorInCart(response);
     }
 
+
+    await fetchCheckouts();
+}
+
+async function commitReservation() {
+    if (state.cart.length === 0) {
+        return;
+    }
+
+    // Get the length
+    let sec_length = getCheckoutLength();
+
+    // Get the date to start from
+    const date_el = document.getElementById("reserve-date");
+    const date = date_el.value;
+
+    console.log(date);
+
+    if (date === "") {
+        date_el.classList.add("error");
+        return;
+    }
+
+    const date_parts = date.split("-");
+    const year = date_parts[0];
+    const month = date_parts[1];
+    const day = date_parts[2];
+    const start_date = new Date(year, month - 1, day);
+
+    const start_date_unix = start_date.getTime() / 1000;
+
+    const response = await fetch(`${API}/checkouts/add_reservation/${state.current_id_number}/${start_date_unix}/${sec_length}/${api_key}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            items: state.cart.map(item => item.name)
+        })
+    });
+
+    if (response.status === 201) {
+        displaySuccessInCart();
+
+        // Clear the cart
+        setTimeout(() => {
+            clearUser();
+            updateSelectedItems();
+        }, 100);
+    } else {
+        displayErrorInCart(response);
+    }
 
     await fetchCheckouts();
 }

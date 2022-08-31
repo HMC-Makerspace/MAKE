@@ -76,11 +76,18 @@ function createCheckoutDiv(checkout, kiosk_mode = false) {
     if (kiosk_mode) {
         div.classList.add("kiosk-mode");
 
-        let college_id = document.createElement("div");
-        college_id.classList.add("checkout-entry-college-id");
-        college_id.innerHTML = `${checkout.college_id}`;
+        let name = document.createElement("div");
+        name.classList.add("checkout-entry-name");
 
-        div.appendChild(college_id);
+        console.log(state.users);
+
+        if (state.users !== null) {
+            name.innerHTML = `${state.users[checkout.college_id].name ?? checkout.college_id}`;
+        } else {
+            name.innerHTML = `${checkout.college_id}`;
+        }
+
+        div.appendChild(name);
         if (checkout.checked_in) {
             div.classList.add("checked-in");
         } else {
