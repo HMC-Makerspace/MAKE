@@ -11,6 +11,13 @@ async function start() {
     renderQuizInfo();
     renderCheckouts();
 
+    // Url param, get page
+    const url_params = new URLSearchParams(window.location.search);
+    const page = url_params.get("p");
+    if (page !== null) {
+        setPage(page);
+    }
+    
     setInterval(fetchInventory, 100000);
     setInterval(fetchStudentStorage, 10000);
     setInterval(fetchPrinters, 10000);

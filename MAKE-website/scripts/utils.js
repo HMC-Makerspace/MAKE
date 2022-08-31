@@ -60,6 +60,10 @@ function setPage(page) {
         button.classList.add("active-button");
     }
 
+    // Add to url params
+    const url = new URL(window.location.href);
+    url.searchParams.set("p", page);
+    window.history.pushState({}, "", url.href);
 
 }
 
