@@ -106,7 +106,7 @@ Various models of sewing machines are available for use, alongside a wide select
 ![Sewing Machine](img/equipment/sewingmachine.webp)
 
 ### CNC Embroidery Machines
-Brother PE800 that can automatically embroider designs onto fabric. Embroidery designs can be designed on the machine for simple text and symbols, with more complex designs able to be created on a computer and transferred to the machine. 
+The Brother PE800 can automatically embroider designs onto fabric. Embroidery designs can be designed on the machine for simple text and symbols, with more complex designs able to be created on a computer and transferred to the machine. 
 
 ![CNC Embroidery Machine](img/equipment/embroiderymachine.webp)
 
