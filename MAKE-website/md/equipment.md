@@ -101,10 +101,14 @@ Our leather sewing machine is a Juki DNU-1541 Industrial Walking Foot Leather Se
 ![Leather Sewing Machine](img/equipment/jukileather.webp)
 
 ### Sewing Machines
+Various models of sewing machines are available for use, alongside a wide selection of thread colors, needles, and other sewing supplies.
 
+![Sewing Machine](img/equipment/sewingmachine.webp)
 
-### Embroidery Machines
+### CNC Embroidery Machines
+Brother PE800 that can automatically embroider designs onto fabric. Embroidery designs can be designed on the machine for simple text and symbols, with more complex designs able to be created on a computer and transferred to the machine. 
 
+![CNC Embroidery Machine](img/equipment/embroiderymachine.webp)
 
 ### Surgers
 
@@ -136,3 +140,5 @@ The Nikon Z7II is a full frame mirrorless camera that can be used for photograph
 ![Nikon Z711](img/equipment/nikon.webp)
 
 ## Welding Area
+
+### MIT/TIG Welder

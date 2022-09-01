@@ -271,8 +271,10 @@ pub async fn checkout_items(
             .status(http::StatusCode::CREATED)
             .finish())
     } else {
+        
         Ok(HttpResponse::Unauthorized().finish())
     }
+
 }
 
 #[post("/api/v1/checkouts/add_reservation/{id_number}/{start_time}/{sec_length}/{api_key}")]
