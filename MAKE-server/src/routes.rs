@@ -1,6 +1,7 @@
 use crate::*;
 use ::serde::{Deserialize, Serialize};
 use actix_web::error::*;
+use serde_json::json;
 
 #[derive(Deserialize, Serialize, Clone)]
 struct UserInfo {
@@ -95,6 +96,37 @@ pub async fn openapi() -> Result<HttpResponse, Error> {
     GET REQUESTS
 ================
 */
+
+/// Returns a simple JSON object with:
+/// - status: alive
+/// - version: the version of the server
+/// - time: the current time
+/// - total_items: the number of items in the inventory
+/// - total_checkouts: the number of checkouts in the database
+/// - total_users: the number of users in the database
+/// - last_update: last quiz update
+#[get("/api/v1/status")]
+pub async fn status() -> Result<HttpResponse, Error> {
+    let time = Utc::now();
+    let data = MEMORY_DATABASE.lock().await;
+
+    let resp = HttpResponse::Ok()
+        .content_type("application/json")
+        .body(
+            json!({
+                "status": "alive",
+                "version": env!("CARGO_PKG_VERSION"),
+                "time": time.timestamp(),
+                "total_items": data.inventory.items.len(),
+                "total_checkouts": data.checkout_log.len(),
+                "total_users": data.users.len(),
+                "last_update": data.inventory.last_updated,
+            })
+            .to_string(),
+        );
+
+    Ok(resp)
+}
 
 #[get("/api/v1/inventory")]
 pub async fn get_inventory(_path: web::Path<()>) -> Result<HttpResponse, Error> {

@@ -46,9 +46,7 @@ function submitSearch(kiosk_mode=false) {
     results.addEventListener("scroll", () => {
         if (results.scrollTop + results.clientHeight >= results.scrollHeight - 5) {
             // 20 more results
-            console.log(results.childElementCount);
             const new_divs = state.current_search_results.slice(results.childElementCount, results.childElementCount + 20);
-            console.log(new_divs);
             appendChildren(results, new_divs);
         }
     })

@@ -264,6 +264,7 @@ p3 {
 
 #left-bar button.active-button, #left-bar button:hover {
   color: var(--text-color-main);
+  background-color: var(--theme-color-2);
 }
 
 button {
@@ -287,12 +288,8 @@ button.big {
   padding: 10px;
 }
 
-button:hover {
-  background-color: var(--theme-color-2);
-}
-
-button.active-button {
-  background-color: var(--theme-color-2);
+button:hover, button.active-button {
+  background-color: var(--theme-color-4);
 }
 
 button:active {
@@ -503,7 +500,7 @@ INVENTORY
   position: sticky;
   top: 0;
   font-weight: bold;
-  z-index: 10000;
+  z-index: 500;
   background-color: var(--theme-color-1);
   box-shadow: 0 0 15px var(--theme-color-2);
 }
@@ -1186,12 +1183,24 @@ FAQ
 
 */
 
-#faq-content, #equipment-content {
+#faq-content, #equipment-content, #settings-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   border-radius: var(--roundness);
+}
+
+/* 
+
+Settings
+
+*/
+
+#statuses {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
 }
 
 /*

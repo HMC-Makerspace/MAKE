@@ -58,6 +58,10 @@ impl CheckoutLog {
         info!("Adding reservation entry: {:?}", entry);
         self.currently_checked_out.push(entry);
     }
+
+    pub fn len(&self) -> usize {
+        self.currently_checked_out.len() + self.checkout_history.len()
+    }
 }
 
 /// Struct that contains information about a single checkout transaction
