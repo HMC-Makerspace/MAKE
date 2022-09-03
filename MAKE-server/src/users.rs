@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::time::SystemTime;
+use log::warn;
 use serde::{Deserialize, Serialize};
 
 use crate::checkout::*;
@@ -237,6 +238,10 @@ pub fn create_users_from_quizzes(quizzes: &Vec<Quiz>) -> Users {
 
                 user.update_soft_from(&other_user);
             }
+        }
+
+        if most_common_id_number >= 100_000_000 || most_common_id_number <= 10_000_000 {
+            warn!("ID number {} for {} is not 8 digits", most_common_id_number, user.get_name());
         }
 
         final_users.add_set_user(user);
