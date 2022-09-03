@@ -1,0 +1,1 @@
+renderMD("md/settings.md", "settings");

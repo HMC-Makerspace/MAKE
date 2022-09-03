@@ -96,8 +96,12 @@
                     src="../img/student-storage-icon.svg"> <span>Student<br>Storage</span></button>
             <button id="checkouts-button" onclick="setPage('checkouts')"><img class="page-icon"
                     src="../img/checkout-icon.svg"> <span>Checkouts</span></button>
-            <button id="3d-printers-button" onclick="setPage('3d-printers')"><img class="page-icon"
+            <!--
+
+                            <button id="3d-printers-button" onclick="setPage('3d-printers')"><img class="page-icon"
                     src="../img/printer-icon.svg"> <span>3D Printers</span></button>
+                    
+            -->
             <button id="faq-button" onclick="setPage('faq')"><img class="page-icon" src="../img/faq.svg">
                 <span>FAQ</span></button>
             <button id="settings-button" onclick="setPage('settings')"><img class="page-icon"
@@ -408,13 +412,10 @@
 
         -->
         <div id="page-settings" class="main-content hidden">
-
             <div class="content-container">
-                <button id="toggle-theme" onclick="toggle_theme()">
-                    <h1>Toggle Theme (Light/Dark Mode)</h1>
-                </button>
+                <div id="settings-content" class="content-body">
+                </div>
             </div>
-
         </div>
 
 
@@ -432,9 +433,12 @@
 <script src="scripts/page_student_storage.js"></script>
 <script src="scripts/page_quiz_info.js"></script>
 <script src="scripts/page_checkouts.js"></script>
+<!--
 <script src="scripts/page_printers.js"></script>
+-->
 <script src="scripts/page_faq.js"></script>
 <script src="scripts/page_equipment.js"></script>
+<script src="scripts/page_settings.js"></script>
 
 <script src="scripts/start.js"></script>
 
