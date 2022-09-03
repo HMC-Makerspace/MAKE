@@ -113,9 +113,9 @@ impl Response {
         Response {
             timestamp: line[0].clone(),
             passed: Response::determine_if_passed(line[1].clone()),
-            name: line[2].clone(),
+            name: line[2].trim().to_string(),
             college_id: Response::parse_college_id(line[3].clone()),
-            college_email: line[4].clone(),
+            college_email: line[4].trim().to_string(),
         }
     }
 
@@ -131,8 +131,6 @@ impl Response {
         id_str.retain(|c| c.is_numeric());
 
         // Parse to u64
-        
-
         id_str.parse::<u64>().unwrap_or(0)
     }
 

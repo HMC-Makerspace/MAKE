@@ -138,6 +138,11 @@ impl User {
             .cloned()
             .collect();
 
+        // Use longest name
+        if self.name.len() < other.name.len() {
+            self.name = other.name.clone();
+        }
+
         // Remove duplicates
         self.passed_quizzes.sort();
         self.passed_quizzes.dedup();
@@ -177,8 +182,23 @@ impl User {
 pub fn create_users_from_quizzes(quizzes: &Vec<Quiz>) -> Users {
     let mut users = Users::default();
 
+    // Keep track of emails and the relevent ID numbers
+    // The problem is that ID numbers are often typed out wrong,
+    // and sometimes the incorrect ID is the still a valid one
+    // so we need to match the correct ID number to the correct email
+    // and combine duplicates
+    let mut email_key: HashMap<String, Vec<u64>> = HashMap::new();
+
     for quiz in quizzes {
         for response in quiz.get_responses() {
+            let email = response.college_email.to_lowercase();
+
+            if !email_key.contains_key(&email) {
+                email_key.insert(email.clone(), vec![response.college_id]);
+            } else {
+                email_key.get_mut(&email).unwrap().push(response.college_id);
+            }
+
             let mut user = User::from_response(response);
 
             if users.has_user(&user) {
@@ -191,5 +211,37 @@ pub fn create_users_from_quizzes(quizzes: &Vec<Quiz>) -> Users {
         }
     }
 
-    users
+    let mut final_users = Users::default();
+
+    // After, get users with the same email
+    for (_, id_numbers) in email_key.iter() {
+        // Get most common ID number
+        let most_common_id_number = id_numbers
+            .iter()
+            .cloned()
+            .fold(HashMap::new(), |mut acc, x| {
+                *acc.entry(x).or_insert(0) += 1;
+                acc
+            })
+            .into_iter()
+            .max_by_key(|x| x.1)
+            .unwrap()
+            .0;
+
+        
+        let mut user = users.get_user_by_id(&most_common_id_number).unwrap().clone();
+
+        for id_number in id_numbers.iter() {
+            if id_number != &most_common_id_number {
+                let other_user = users.get_user_by_id(id_number).unwrap().clone();
+
+                user.update_soft_from(&other_user);
+            }
+        }
+
+        final_users.add_set_user(user);
+    }
+
+
+    final_users
 }
