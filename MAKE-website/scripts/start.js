@@ -20,6 +20,7 @@ async function start() {
     
     setInterval(fetchInventory, 100000);
     setInterval(fetchStudentStorage, 10000);
+    setInterval(fetchSchedule, 10000);
     //setInterval(fetchPrinters, 10000);
 
     fetchInventory().then(() => {
@@ -30,6 +31,7 @@ async function start() {
         document.getElementById("tool-material-select").addEventListener("change", submitSearch);
     });
     fetchStudentStorage();
+    fetchSchedule();
     //fetchPrinters();
 }
 

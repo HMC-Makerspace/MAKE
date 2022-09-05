@@ -65,6 +65,7 @@ impl ButtonRecordLog {
     }
 }
 
+
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
 pub struct ButtonRecord {
     pub college: College,

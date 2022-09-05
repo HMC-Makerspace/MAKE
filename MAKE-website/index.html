@@ -88,6 +88,8 @@
             <button id="quiz-info-button" onclick="setPage('quiz-info')"><img class="page-icon"
                     src="../img/quiz-icon.svg"> <span>Quizzes<br>&
                     Information</span></button>
+            <button id="schedule-button" onclick="setPage('schedule')"><img class="page-icon"
+                    src="../img/schedule-icon.svg"> <span>Schedule</span></button>
             <button id="inventory-button" onclick="setPage('inventory')"><img class="page-icon"
                     src="../img/inventory-icon.svg"> <span>Inventory</span></button>
             <button id="equipment-button" onclick="setPage('equipment')"><img class="page-icon"
@@ -324,9 +326,24 @@
                         room and/or
                         permission to operate the machine. Please allow 5-10 minutes for swipe access to be granted.
                         <br><br>
+                        <b>NOTE: automatic swipe access is currently DOWN. Please allow 24-48 hours for swipe access to be granted.</b>
+                        <br><br>
                         Failing to successfully complete the quiz prior to use is an honor code violation, and may
                         result in a suspension or ban from the Makerspace.
                     </p3>
+                </div>
+            </div>
+        </div>
+
+        <!--
+
+        SCHEDULE PAGE
+
+        -->
+        <div id="page-schedule" class="main-content hidden">
+            <div class="content-container">
+                <div id="schedule-content" class="content-body">
+
                 </div>
             </div>
         </div>
@@ -432,6 +449,7 @@
 <script src="scripts/page_inventory.js"></script>
 <script src="scripts/page_student_storage.js"></script>
 <script src="scripts/page_quiz_info.js"></script>
+<script src="scripts/page_schedule.js"></script>
 <script src="scripts/page_checkouts.js"></script>
 <!--
 <script src="scripts/page_printers.js"></script>

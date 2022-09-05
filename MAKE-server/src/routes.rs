@@ -261,6 +261,31 @@ pub async fn get_printers_api_key(path: web::Path<String>) -> Result<HttpRespons
     }
 }
 
+#[get("/api/v1/schedule")]
+pub async fn get_schedule() -> Result<HttpResponse, Error> {
+    let data = MEMORY_DATABASE.lock().await;
+    let mut schedule = data.schedule.clone();
+    drop(data);
+
+    // Censor all names
+    schedule.censor_names();
+
+    Ok(HttpResponse::Ok().json(schedule))
+}
+
+#[get("/api/v1/schedule/{api_key}")]
+pub async fn get_schedule_api_key(path: web::Path<String>) -> Result<HttpResponse, Error> {
+    let api_key = path.into_inner();
+    if API_KEYS.lock().await.validate_admin(&api_key)
+    {
+        let data = MEMORY_DATABASE.lock().await;
+        let schedule = data.schedule.clone();
+        Ok(HttpResponse::Ok().json(schedule))
+    } else {
+        Ok(HttpResponse::Unauthorized().finish())
+    }
+}
+
 /*
 =================
     POST REQUESTS

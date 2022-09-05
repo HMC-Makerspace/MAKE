@@ -36,6 +36,7 @@ mod routes;
 mod student_storage;
 mod users;
 mod usage;
+mod schedule;
 
 use crate::checkout::*;
 use crate::emails::*;
@@ -46,6 +47,7 @@ use crate::routes::*;
 use crate::student_storage::*;
 use crate::users::*;
 use crate::usage::*;
+use crate::schedule::*;
 
 use lazy_static::lazy_static;
 use std::sync::Arc;
@@ -90,6 +92,7 @@ pub struct Data {
     pub checkout_log: CheckoutLog,
     pub student_storage: StudentStorage,
     pub button_log: ButtonRecordLog,
+    pub schedule: Schedule,
 }
 
 
@@ -344,6 +347,8 @@ async fn async_main() -> std::io::Result<()> {
                 .service(get_swipe_access)
                 .service(add_button_log)
                 .service(reserve_items)
+                .service(get_schedule)
+                .service(get_schedule_api_key)
                 .service(help)
                 .service(openapi)
                 .service(ResourceFiles::new("/", generate()))
@@ -402,6 +407,8 @@ async fn async_main() -> std::io::Result<()> {
                 .service(get_swipe_access)
                 .service(add_button_log)
                 .service(reserve_items)
+                .service(get_schedule)
+                .service(get_schedule_api_key)
                 .service(help)
                 .service(openapi)
                 .service(ResourceFiles::new("/", generate()))
@@ -603,5 +610,16 @@ async fn update_loop() {
             .currently_checked_out = current_checkouts;
     } else {
         info!("No checkouts expired!");
+    }
+
+    // Update schedule
+    let mut schedule = MEMORY_DATABASE.lock().await.schedule.clone();
+    let result = schedule.update().await;
+
+    if result.is_err() {
+        info!("Failed to update schedule: {}", result.err().unwrap());
+    } else {
+        MEMORY_DATABASE.lock().await.schedule = schedule.clone();
+        info!("Schedule updated!");
     }
 }
