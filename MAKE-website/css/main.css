@@ -33,6 +33,9 @@
   --printer-offline: #0c090d;
   --printer-error: #af3800;
 
+  --shift-1: #d9ead3;
+  --shift-2: #b6d7a8;
+
   --roundness: 0px;
   --button-outline-color: #ffffff;
 
@@ -74,6 +77,9 @@
   --medium-color-dark: #7e7d41;
   --high-color-dark: #3d773d;
   
+  --shift-1: #3d6454;
+  --shift-2: #598f7a;
+
   --brightness: 1.2;
   --invert: 100%;
 }
@@ -1039,6 +1045,68 @@ Checkouts
 .checkout-entry.error .check-in-button {
   background-color: var(--printer-error);
   animation: pulse 0.2s infinite;
+}
+
+/*
+
+Schedule
+
+*/
+
+#schedule-help {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+#schedule-table {
+  width: 90%;
+  margin: 0 auto;
+  margin-top: 20px;
+}
+
+#schedule-table th {
+  line-break: strict;
+  text-align: center;
+  width: 60px;
+  font-size: .8em;
+}
+
+#schedule-table tr {
+  background-color: var(--theme-color-3);
+}
+
+#schedule-table tr:nth-child(odd) {
+  background-color: var(--theme-color-2);
+}
+
+#schedule-table .schedule-shift {
+  height: 80px;
+}
+
+.stewards-1 {
+  background-color: var(--shift-1);
+}
+
+.stewards-2 {
+  background-color: var(--shift-2);
+}
+
+.stewards-1.info, .stewards-2.info {
+  font-weight: bold;
+  padding: 10px;
+  font-size: 1.4em;
+  text-align: center;
+}
+
+#schedule-table .stewards {
+  
+}
+
+#schedule-table .proficiencies {
+  font-size: .7em;
 }
 
 /* 

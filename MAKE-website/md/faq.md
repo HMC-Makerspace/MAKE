@@ -56,7 +56,7 @@ Yes! It is open to all 7C students.
 
 ## How can I apply to be a steward?
 
-We hire stewards every semester! If you want to apply to be a steward next semester, fill out an interest form here and we will contact you when the application opens. Otherwise, keep an eye out for signs around the Makerspace for when we start accepting applications!  
+We hire stewards every semester! If you want to apply to be a steward next semester, fill out an [interest form here](https://forms.gle/oHJYNJTKgpLXUS7Q9) and we will contact you when the application opens. Otherwise, keep an eye out for signs around the Makerspace for when we start accepting applications!  
 
 ## What kinds of 3D printing are free?
 

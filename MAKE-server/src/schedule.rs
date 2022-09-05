@@ -39,19 +39,22 @@ impl Schedule {
             // Read until row's first cell is empty
             for result in rdr.records() {
                 if let Ok(result) = result {
+
+                    if result.get(0).unwrap().is_empty() {
+                        break;
+                    }
+
                     let shift = Shift::new(result[0].to_string());
 
                     for (i, cell) in result.iter().enumerate().skip(1) {
-                        if cell.is_empty() {
-                            break;
-                        }
-
                         let mut current_shift = shift.clone();
-
-                        current_shift.stewards = cell.split(",").map(|x| x.trim().to_string()).collect();
-                        current_shift.num_stewards = current_shift.stewards.len() as u32;
-
-                        days[i - 1].add_shift(current_shift);
+                        
+                        if cell.trim().len() > 0 {
+                            current_shift.stewards = cell.split(",").map(|x| x.trim().to_string()).collect();
+                            current_shift.num_stewards = current_shift.stewards.len() as u32;
+    
+                            days[i - 1].add_shift(current_shift);
+                        }
                     }
                 }
             }
