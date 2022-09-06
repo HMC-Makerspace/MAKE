@@ -95,7 +95,6 @@ pub struct Data {
     pub schedule: Schedule,
 }
 
-
 #[derive(Default, Deserialize, Serialize)]
 pub struct ApiKeysToml {
     pub api_keys: ApiKeys,
@@ -371,8 +370,7 @@ async fn async_main() -> std::io::Result<()> {
         // Create builder without ssl
         return HttpServer::new(move || {
             let cors = Cors::default()
-                .allowed_origin("https://make.hmc.edu")
-                .allowed_origin("http://make.hmc.edu")
+                .allow_any_origin()
                 .allow_any_header()
                 .allow_any_method()
                 .send_wildcard()

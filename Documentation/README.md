@@ -16,6 +16,10 @@ However, there still are a few things that need to be done.
 SSL certificates are automatically renewed every year by the CertBot installation, 
 but the server needs to be stopped and started to reload the certificates.
 
+- Currently, `schedule.rs` pulls the schedule and proficiencies from two google sheets.
+Make new ones every year to archive the old ones, and publish the new ones to web as CSV.
+Copy the new links, and as long as the formatting was the same, everything should work.
+
 - The server `db.json` should be renamed to `db.json.20xx.old` when the spring semester ends.
 
     **Make sure to download the renamed file over SSH to your computer and upload it to the Head Stewards Google Drive. [You can follow this guide](https://www.namecheap.com/support/knowledgebase/article.aspx/9571/89/how-to-download-a-file-via-ssh/)**.
