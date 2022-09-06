@@ -20,7 +20,7 @@ async function authenticate() {
     await fetchUsers();
     setInterval(renderAll(), 5000);
     renderAll();
-    console.log(`System has ${state.users} users`);
+    console.log(state.users);
 }
 
 authenticate();
@@ -71,4 +71,58 @@ function generateStatsDivs(users) {
     divs.push(total_count);
 
     return divs;
+}
+
+async function updateStatus() {
+    const status = document.getElementById("auth-type").value;
+
+    const el = document.getElementById("auth-input");
+
+    const text = el.value;
+
+    let seperator = "\n";
+    if (text.includes(",")) {
+        seperator = ",";
+    }
+
+    const users = text.split(seperator);
+    const results = [];
+
+    for (let user of users) {
+        const id = findID(user);
+
+        if (id === null) {
+            results.push(`${user} not found`);
+            continue;
+        } else {
+
+            const response = await fetch(`${API}/auth/set_level/${id}/${status}/${api_key}`, {
+                method: "POST",
+            });
+
+            if (response.status !== 201) {
+                results.push(`${user} failed to set to ${status}`);
+            }
+        }
+    }
+
+    el.value += "\n\n";
+    el.value += results.join("\n");
+}
+
+function findID(user) {
+    user = user.trim().toLowerCase();
+
+    for (let id of Object.keys(state.users)) {
+        const name = state.users[id].name.toLowerCase();
+        const name_parts = name.split(" ");
+        const user_parts = user.split(" ");
+        if (name === user || state.users[id].email === user || state.users[id].id == user) {
+            return id;
+        } else if (name_parts[0] === user_parts[0] && name_parts[name_parts.length - 1] === user_parts[user_parts.length - 1]) {
+            return id;
+        }
+    }
+
+    return null;
 }
