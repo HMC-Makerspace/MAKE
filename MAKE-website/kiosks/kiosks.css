@@ -381,6 +381,10 @@ label {
     animation: pulse .2s infinite;
 }
 
+#checkouts-page {
+    overflow-y: scroll;
+}
+
 #bottom-buttons {
     display: flex;
     flex-direction: row;
