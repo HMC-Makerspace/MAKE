@@ -10,6 +10,8 @@ The Makerspace is open to students 24/7, but we have stewards on shift from:
 
 While stewards are on duty, you can check out tools/equipment and ask them for assistance.
 
+You can also ask questions on the [Makerspace Discord](https://discord.gg/uveewgBmME)!
+
 ## What does it mean that the makerspace is open 24/7?
 
 It means that the general space is open to use whenever you need it. If you have passed the safety quizzes to certain rooms, your swipe will work at all times and you can work in there as well. If you want to use any machinery, follow the buddy rule to make sure you are being safe.
