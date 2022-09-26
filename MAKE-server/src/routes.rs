@@ -334,6 +334,27 @@ pub async fn checkout_items(
 
 }
 
+#[post("/api/v1/checkouts/extend/{uuid}/{sec_length}/{api_key}")]
+pub async fn extend_checkout_by_uuid(path: web::Path<(String, u64, String)>) -> Result<HttpResponse, Error> {
+    let (uuid, sec_length, api_key) = path.into_inner();
+
+    if API_KEYS.lock().await.validate_checkout(&api_key) {
+        let mut data = MEMORY_DATABASE.lock().await;
+
+        let checkout = data.checkout_log.extend_checkout(uuid, sec_length);
+
+        if checkout.is_err() {
+            return Err(ErrorBadRequest(checkout.err().unwrap().to_string()));
+        }
+
+        Ok(HttpResponse::Ok()
+            .status(http::StatusCode::CREATED)
+            .finish())
+    } else {
+        Ok(HttpResponse::Unauthorized().finish())
+    }
+}
+    
 #[post("/api/v1/checkouts/add_reservation/{id_number}/{start_time}/{sec_length}/{api_key}")]
 pub async fn reserve_items(
     path: web::Path<(u64, u64, u64, String)>,

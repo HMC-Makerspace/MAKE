@@ -62,6 +62,19 @@ impl CheckoutLog {
     pub fn len(&self) -> usize {
         self.currently_checked_out.len() + self.checkout_history.len()
     }
+
+    pub fn extend_checkout(&mut self, checkout_uuid: String, length: u64) -> Result<(), String> {
+        info!("Extending checkout entry: {:?}", checkout_uuid);
+        for entry in self.currently_checked_out.iter_mut() {
+            if entry.checkout_uuid == checkout_uuid {
+                entry.extend_checkout(length);
+                return Ok(());
+            }
+        }
+
+        error!("Could not find checkout entry with UUID: {:?}", checkout_uuid);
+        return Err("Could not find checkout entry with UUID".to_string());
+    }
 }
 
 /// Struct that contains information about a single checkout transaction
@@ -152,5 +165,10 @@ impl CheckoutLogEntry {
     pub fn check_in(&mut self) {
         self.checked_in = true;
         self.timestamp_checked_in = Some(SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs());
+    }
+
+    pub fn extend_checkout(&mut self, length: u64) {
+        let now = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
+        self.timestamp_expires = now + length;
     }
 }
