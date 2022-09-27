@@ -6,8 +6,10 @@ const SHIFT_SCHEDULES: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1v
 
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd, Eq, Ord)]
+#[serde(default)]
 pub struct Schedule {
     pub days: Vec<ScheduleDay>,
+    pub all_proficiencies: Vec<String>,
 }
 
 impl Schedule {
@@ -72,6 +74,8 @@ impl Schedule {
                         let steward_name = result[1].to_string();
                         
                         let mut profs: Vec<String> = result.iter().skip(3).map(|x| x.to_string()).collect();
+                        self.all_proficiencies.append(&mut profs.clone());
+
                         // Delete empty cells
                         profs = profs.into_iter().filter(|x| !x.is_empty()).collect();
 
@@ -92,6 +96,10 @@ impl Schedule {
                 self.days = days;
             }
         }
+
+        self.all_proficiencies.sort();
+        self.all_proficiencies.dedup();
+        self.all_proficiencies.retain(|x| !x.is_empty() || x.len() > 0);
         
         Ok(())
     }

@@ -84,6 +84,7 @@ const STARTUP_TITLE: &str = "
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
 #[derive(Default, Deserialize, Serialize)]
+#[serde(default)]
 pub struct Data {
     pub inventory: Inventory,
     pub users: Users,

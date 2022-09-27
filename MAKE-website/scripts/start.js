@@ -20,7 +20,7 @@ async function start() {
     
     setInterval(fetchInventory, 100000);
     setInterval(fetchStudentStorage, 10000);
-    setInterval(fetchSchedule, 10000);
+    setInterval(fetchSchedule, 100000);
     //setInterval(fetchPrinters, 10000);
 
     fetchInventory().then(() => {

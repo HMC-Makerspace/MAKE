@@ -18,6 +18,12 @@ function renderSchedule(schedule) {
 }
 
 function generateScheduleDivs(schedule) {
+    const info = document.getElementById("schedule-info");
+
+    if (info.children.length < 3) {
+        generateAllProfs(schedule);
+    }
+
     const days = schedule.days;
 
     const divs = [];
@@ -68,19 +74,87 @@ function generateScheduleDivs(schedule) {
     return divs;
 }
 
+function generateAllProfs(schedule) {
+    const info = document.getElementById("schedule-info");
+
+    const profs = schedule.all_proficiencies;
+
+    const profs_to_append = generateProficiencyDivs(profs);
+
+    appendChildren(info, profs_to_append);
+}
+
 function generateScheduleShiftDiv(shift) {
     const shift_div = document.createElement("div");
     shift_div.classList.add("schedule-shift");
+    shift_div.classList.add("proficiency");
 
     if (shift.num_stewards > 0) {
         shift_div.classList.add(`stewards-${shift.num_stewards}`);
 
-        const proficiencies = document.createElement("div");
-        proficiencies.classList.add("proficiencies");
-        proficiencies.innerText = shift.proficiencies.join(", ");
-        
-        shift_div.appendChild(proficiencies);
+        for (let proficiency of shift.proficiencies) {
+            shift_div.classList.add(toCSSSafeString(proficiency));
+        }
     }  
 
     return shift_div;
+}
+
+function toCSSSafeString(str) {
+    return str.toLowerCase().replace(/\s/g, "").replace(/\d/g, "");
+}
+
+function generateProficiencyDivs(proficiencies) {
+    let profs = [];
+
+    let proficiencies_sorted = proficiencies.sort((a, b) => {
+        return a.localeCompare(b);
+    });
+
+    for (let proficiency of proficiencies_sorted) {
+        let el = document.createElement("span");
+        el.classList.add("proficiency");
+        el.classList.add("trigger");
+
+        // to lowercase, remove spaces, remove numbers
+        const css_safe_prof = toCSSSafeString(proficiency);
+        el.classList.add(css_safe_prof);
+        el.innerText = proficiency;
+
+        el.addEventListener("mouseover", () => {
+            removeHighlightProficiency();
+            highlightProficiency(proficiency);
+        });
+
+        el.addEventListener("click", () => {
+            removeHighlightProficiency();
+            highlightProficiency(proficiency);
+        })
+
+        el.addEventListener("mouseleave", () => {
+            removeHighlightProficiency();
+        });
+
+        profs.push(el);
+    }
+
+    return profs;
+}
+
+function highlightProficiency(proficiency) {
+    const css_safe_prof = toCSSSafeString(proficiency);
+
+    const profs = document.getElementsByClassName(css_safe_prof);
+
+    for (let prof of profs) {
+        prof.classList.add("highlight");
+    }
+}
+
+function removeHighlightProficiency() {
+    const profs = document.getElementsByClassName("proficiency");
+
+    for (let prof of profs) {
+        prof.classList.remove("highlight");
+    }
 }

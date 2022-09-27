@@ -9,6 +9,7 @@ const INVENTORY_URL: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTz
 /// The state of the inventory.
 /// Contains the timestamp of the last update and the inventory.
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[serde(default)]
 pub struct Inventory {
     pub last_updated: u64,
     pub items: Vec<InventoryItem>,

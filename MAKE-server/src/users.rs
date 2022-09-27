@@ -19,6 +19,7 @@ pub enum AuthLevel {
 }
 
 #[derive(Default, Deserialize, Serialize, Clone)]
+#[serde(default)]
 pub struct Users {
     users: HashMap<u64, User>,
 }

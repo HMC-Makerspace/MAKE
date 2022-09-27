@@ -49,6 +49,24 @@
   --checkin-icon: url(../img/checkin-icon.svg);
   --expired-icon: url(../img/expire.svg);
   --details-icon: url(../img/details.svg);
+
+  /* Proficiencies */
+  --sewing: #5271ff;
+  --dprinting: #ff5757;
+  --lasercutter:#ff914d;
+  --soldering: #cbcbc9;
+  --waterjet: #004aad;
+  --welding: #7ed957;
+  --advanceddprinting: #ff5757;
+  --studiovideo: #737373;
+  --studioaudio: #737373;
+  --sergers: #5271ff;
+  --loom: #ff66c4;
+  --leathersewingmachine: #5271ff;
+  --printingpress: #00c2cb;
+  --spraypaint: #fd3c65;
+  --oscilloscopes: #cbcbc9;
+  --largeformatprinter: #cb6ce6;
 }
 
 [data-theme="dark"] {
@@ -61,7 +79,7 @@
   --theme-color-5: #17151b;
   --theme-color-6: #bdae2e;
   --theme-color-7: #781fa1;
-  --theme-color-8: #1b7885;
+  --theme-color-8: #1ec2d8;
   --theme-color-9: #504d57;
 
   --link-color: #0ad3ee;
@@ -1083,7 +1101,8 @@ Schedule
 }
 
 #schedule-table .schedule-shift {
-  height: 80px;
+  height: 50px;
+  min-width: 80px;
 }
 
 .stewards-1 {
@@ -1099,6 +1118,9 @@ Schedule
   padding: 10px;
   font-size: 1.4em;
   text-align: center;
+  width: 50%;
+  margin: 0 auto;
+  margin-top: 10px;
 }
 
 #schedule-table .stewards {
@@ -1109,6 +1131,27 @@ Schedule
   font-size: .7em;
 }
 
+.proficiency {
+}
+
+.proficiency.trigger {
+  cursor: pointer;
+  padding: 4px;
+  background-color: var(--theme-color-4);
+}
+
+.highlight {
+  background-color: var(--theme-color-8) !important;
+}
+
+.grayscale {
+  filter: grayscale(100%);
+}
+
+#schedule-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
 /* 
 
 3D Printers

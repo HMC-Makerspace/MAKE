@@ -269,6 +269,9 @@ pub async fn get_schedule() -> Result<HttpResponse, Error> {
 
     // Censor all names
     schedule.censor_names();
+    // Return the schedule and all the proficiencies  
+
+    
 
     Ok(HttpResponse::Ok().json(schedule))
 }
