@@ -24,7 +24,9 @@ function generateScheduleDivs(schedule) {
         generateAllProfs(schedule);
     }
 
-    const days = schedule.days;
+    // Put last day first, Sunday
+    let days = schedule.days;
+    days.unshift(days.pop());
 
     const divs = [];
 
@@ -92,16 +94,35 @@ function generateScheduleShiftDiv(shift) {
     if (shift.num_stewards > 0) {
         shift_div.classList.add(`stewards-${shift.num_stewards}`);
 
+        for (let steward of shift.stewards) {
+            if (steward != "Steward") {
+                shift_div.innerHTML += `<span class="steward">${steward}</span>`;
+            }
+        }
+
         for (let proficiency of shift.proficiencies) {
             shift_div.classList.add(toCSSSafeString(proficiency));
         }
+
+        shift_div.addEventListener("mouseover", () => {
+            highlightSourceProfs(shift.proficiencies);
+        });
+
+        shift_div.addEventListener("mouseleave", () => {
+            removeHighlightProficiency();
+        });
+
+        shift_div.addEventListener("click", () => {
+            highlightSourceProfs(shift.proficiencies);
+        });
     }  
 
     return shift_div;
 }
 
 function toCSSSafeString(str) {
-    return str.toLowerCase().replace(/\s/g, "").replace(/\d/g, "");
+    // to lowercase, remove spaces, remove numbers, remove parentheses
+    return str.toLowerCase().replace(/\s/g, "").replace(/\d/g, "").replace(/\(/g, "").replace(/\)/g, "");
 }
 
 function generateProficiencyDivs(proficiencies) {
@@ -148,6 +169,16 @@ function highlightProficiency(proficiency) {
 
     for (let prof of profs) {
         prof.classList.add("highlight");
+    }
+}
+
+function highlightSourceProfs(proficiencies) {
+    for (let proficiency of proficiencies) {
+        const els = document.querySelectorAll(`.trigger.${toCSSSafeString(proficiency)}`);
+
+        for (let el of els) {
+            el.classList.add("highlight");
+        }
     }
 }
 

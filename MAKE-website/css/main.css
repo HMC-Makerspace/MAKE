@@ -1131,6 +1131,12 @@ Schedule
   font-size: .7em;
 }
 
+.schedule-shift.proficiency.stewards-1:hover,
+.schedule-shift.proficiency.stewards-2:hover {
+  background-color: var(--theme-color-8);
+  cursor: pointer;
+}
+
 .proficiency {
 }
 
