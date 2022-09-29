@@ -268,7 +268,11 @@ function updateCheckoutsHTML() {
     for (let checkout of state.checkouts.checkout_history) {
         history_divs.push(createCheckoutDiv(checkout, kiosk_mode=true));
     }
-    
+
+    // Reverse order of both lists
+    current_divs.reverse();
+    history_divs.reverse();
+
     removeAllChildren(current);
     removeAllChildren(history);
     
