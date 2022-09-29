@@ -113,6 +113,7 @@ function generateScheduleShiftDiv(shift) {
         });
 
         shift_div.addEventListener("click", () => {
+            removeHighlightProficiency();
             highlightSourceProfs(shift.proficiencies);
         });
     }  
