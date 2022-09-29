@@ -269,7 +269,7 @@ pub async fn get_schedule() -> Result<HttpResponse, Error> {
 
     // Censor all names
     schedule.censor_names();
-
+    
     Ok(HttpResponse::Ok().json(schedule))
 }
 

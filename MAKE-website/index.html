@@ -104,6 +104,8 @@
                     src="../img/printer-icon.svg"> <span>3D Printers</span></button>
                     
             -->
+            <button id="values-button" onclick="setPage('values')"><img class="page-icon" src="../img/values-icon.svg">
+                <span>Values</span></button>
             <button id="faq-button" onclick="setPage('faq')"><img class="page-icon" src="../img/faq.svg">
                 <span>FAQ</span></button>
             <button id="settings-button" onclick="setPage('settings')"><img class="page-icon"
@@ -119,6 +121,9 @@
             <div id="welcome-message">
                 <p1>Welcome to </p1>
                 <p1 class="title-font" id="main-title-ani">MAKE</p1>
+                <div id="top-right-logo">
+                    <img src="../img/Makerspace Logo V1.svg">
+                </div>
             </div>
 
             <div id="college-id-container" class="id-n content-body">
@@ -437,6 +442,18 @@
             </div>
         </div>
 
+        <!--
+        
+        VALUES PAGE
+
+        -->
+        <div id="page-values" class="main-content hidden">
+            <div class="content-container">
+                <div id="values-content" class="content-body">
+                </div>
+            </div>
+        </div>
+
 
         <!--
 
@@ -471,6 +488,7 @@
 -->
 <script src="scripts/page_faq.js"></script>
 <script src="scripts/page_equipment.js"></script>
+<script src="scripts/page_values.js"></script>
 <script src="scripts/page_settings.js"></script>
 
 <script src="scripts/start.js"></script>

@@ -278,7 +278,7 @@ p3 {
 
 #left-bar button img {
   transition: filter 0.1s ease-in-out,
-    transform 0.4s ease-in-out;
+    transform 0.2s ease-in-out;
 }
 
 #left-bar button.active-button img, #left-bar button:hover img {
@@ -457,6 +457,14 @@ HOME
   font-size: 8em;
   text-align: left !important;
   cursor: pointer;
+}
+
+#top-right-logo {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 140px;
+  height: 140px;
 }
 
 /*
@@ -1129,6 +1137,7 @@ Schedule
 
 #schedule-table .proficiencies {
   font-size: .7em;
+
 }
 
 .schedule-shift.proficiency.stewards-1:hover,
@@ -1141,8 +1150,9 @@ Schedule
 }
 
 .proficiency.trigger {
+  user-select: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 8px;
   background-color: var(--theme-color-4);
 }
 
@@ -1156,7 +1166,9 @@ Schedule
 
 #schedule-info {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  row-gap: 10px;
+  column-gap: 10px;
 }
 /* 
 
@@ -1300,7 +1312,7 @@ FAQ
 
 */
 
-#faq-content, #equipment-content, #settings-content {
+#faq-content, #equipment-content, #settings-content, #values-content {
   display: flex;
   flex-direction: column;
   align-items: center;
