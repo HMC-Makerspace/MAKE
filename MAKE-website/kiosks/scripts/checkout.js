@@ -307,9 +307,9 @@ function createUserInfo(user_info) {
     } else {
         document.getElementById("id-error").classList.add("hidden");
         document.getElementById("user-info-content").innerHTML = `
-            <div id="user-info-name">Name: ${user_info.name}</div>
-            <div id="user-info-id">College ID: ${user_info.college_id}</div>
-            <div id="user-info-email">Email: ${user_info.college_email}</div>
+            <div id="user-info-name">${user_info.name}</div>
+            <div id="user-info-id">${user_info.college_id}</div>
+            <div id="user-info-email">${user_info.college_email}</div>
             <div id="user-info-auth" class="${user_info.auth_level}">Auth: ${user_info.auth_level}</div>
             <div id="user-info-pending-checkouts">Pending Checkouts: ${user_info.pending_checkouts.length}</div>
             <div id="user-info-all-checkouts">All Checkouts: ${user_info.all_checkouts.length}</div>
