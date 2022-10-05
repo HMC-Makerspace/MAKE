@@ -267,9 +267,6 @@ pub async fn get_schedule() -> Result<HttpResponse, Error> {
     let mut schedule = data.schedule.clone();
     drop(data);
 
-    // Censor all names
-    schedule.censor_names();
-    
     Ok(HttpResponse::Ok().json(schedule))
 }
 
