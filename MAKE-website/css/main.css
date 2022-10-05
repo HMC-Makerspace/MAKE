@@ -7,7 +7,7 @@
   --theme-color-1: #ee9d22;
   --theme-color-2: #ffffff;
   --theme-color-3: #e6e6e6;
-  --theme-color-4: #72b2e4;
+  --theme-color-4: #80b8e2;
   --theme-color-5: #ececec;
   --theme-color-6: #e0cf34;
   --theme-color-7: #a918ec;
@@ -21,7 +21,7 @@
 
   --low-color-dark: #af5a5a;
   --medium-color-dark: #cac96a;
-  --high-color-dark: #579957;
+  --high-color-dark: #61ac61;
 
   --text-color-main: #000000;
   --text-color-alt: #ffffff;
@@ -33,8 +33,8 @@
   --printer-offline: #0c090d;
   --printer-error: #af3800;
 
-  --shift-1: #d9ead3;
-  --shift-2: #b6d7a8;
+  --shift-1: #b7e6a6;
+  --shift-2: #94c97e;
 
   --roundness: 0px;
   --button-outline-color: #ffffff;
@@ -1111,6 +1111,11 @@ Schedule
 #schedule-table .schedule-shift {
   height: 50px;
   min-width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: .7em;
 }
 
 .stewards-1 {
