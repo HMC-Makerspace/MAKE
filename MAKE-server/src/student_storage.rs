@@ -97,6 +97,14 @@ impl StudentStorage {
             }
         }
     }
+
+    pub fn release(&mut self, slot_id: &String) {
+        for slot in self.slots.iter_mut() {
+            if slot.get_id() == slot_id {
+                slot.server_release();
+            }
+        }
+    }
 }
 
 impl Default for StudentStorage {
@@ -185,6 +193,11 @@ impl Slot {
                 self.occupied_details = None;
             }
         }
+    }
+
+    pub fn server_release(&mut self) {
+        self.occupied = false;
+        self.occupied_details = None;
     }
 }
 

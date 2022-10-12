@@ -623,4 +623,18 @@ async fn update_loop() {
         MEMORY_DATABASE.lock().await.schedule = schedule.clone();
         info!("Schedule updated!");
     }
+
+    // Return expired student storage slots
+    let mut student_storage = MEMORY_DATABASE.lock().await.student_storage.clone();
+
+    for slot in student_storage.slots.iter_mut() {
+        if let Some(details) = slot.get_details() {
+            if details.is_overdue() {
+                slot.server_release();
+            }
+        }
+    }
+
+    MEMORY_DATABASE.lock().await.student_storage = student_storage;
+
 }
