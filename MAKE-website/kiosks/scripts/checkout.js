@@ -326,7 +326,7 @@ function createUserInfo(user_info) {
                     <input id="time-3-days" type="radio" name="time-length" value="3"><label for="time-3-days">3 Days</label>
                 </div>
                 <div>
-                    <input id="time-1-week" type="radio" name="time-length" value="3"><label for="time-1-week">1 Week</label>
+                    <input id="time-1-week" type="radio" name="time-length" value="4"><label for="time-1-week">1 Week</label>
                 </div>
             </div>
 
