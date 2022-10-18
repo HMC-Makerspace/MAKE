@@ -636,5 +636,4 @@ async fn update_loop() {
     }
 
     MEMORY_DATABASE.lock().await.student_storage = student_storage;
-
 }

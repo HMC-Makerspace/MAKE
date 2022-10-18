@@ -83,19 +83,20 @@
                 <div id="main-logo" onclick="setPage('home')">MAKE</div>
                 <div id="mobile-logo" onclick="setPage('home')">M</div>
             </div>
-            <button id="home-button" class="active-button" onclick="setPage('home')"><img class="page-icon" src="../img/home-icon.svg">
+            <button id="home-button" class="active-button" onclick="setPage('home')"><img class="page-icon"
+                    src="../img/home-icon.svg">
                 <span>Home</span></button>
             <button id="quiz-info-button" onclick="setPage('quiz-info')"><img class="page-icon"
                     src="../img/quiz-icon.svg"> <span>Quizzes<br>&
                     Information</span></button>
+            <button id="equipment-button" onclick="setPage('equipment')"><img class="page-icon"
+                    src="../img/tool-icon.svg"> <span>Equipment<br>& Manuals</span></button>
             <button id="schedule-button" onclick="setPage('schedule')"><img class="page-icon"
                     src="../img/schedule-icon.svg"> <span>Schedule</span></button>
             <button id="workshops-button" onclick="setPage('workshops')"><img class="page-icon"
                     src="../img/workshops-icon.svg"> <span>Workshops</span></button>
             <button id="inventory-button" onclick="setPage('inventory')"><img class="page-icon"
                     src="../img/inventory-icon.svg"> <span>Inventory</span></button>
-            <button id="equipment-button" onclick="setPage('equipment')"><img class="page-icon"
-                    src="../img/tool-icon.svg"> <span>Equipment</span></button>
             <button id="student-storage-button" onclick="setPage('student-storage')"><img class="page-icon"
                     src="../img/student-storage-icon.svg"> <span>Student<br>Storage</span></button>
             <button id="checkouts-button" onclick="setPage('checkouts')"><img class="page-icon"
@@ -214,11 +215,17 @@
 
         <div id="page-equipment" class="main-content hidden">
             <div class="content-container">
+                <div id="equipment-header" class="content-header">
+                    <p3>
+
+                    </p3>
+                </div>
+
                 <div id="equipment-content" class="content-body">
 
                 </div>
             </div>
-        </div>  
+        </div>
 
         <!--
 
@@ -349,7 +356,7 @@
             <div class="content-container">
                 <div id="schedule-help" class="content-header">
                     <p3>
-                        <div id="schedule-info">                            
+                        <div id="schedule-info">
                         </div>
 
                         <br>
@@ -358,10 +365,10 @@
                         Hover over a shift to see what skill proficiencies the stewards on duty have.
                     </p3>
                 </div>
-                
+
                 <div id="schedule-content" class="content-body">
                     <table id="schedule-table"></table>
-                    
+
                     <div class="stewards-1 info">One Steward on duty</div>
                     <div class="stewards-2 info">Two Stewards on duty</div>
                 </div>
