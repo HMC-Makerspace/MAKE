@@ -37,6 +37,7 @@ mod student_storage;
 mod users;
 mod usage;
 mod schedule;
+mod workshops;
 
 use crate::checkout::*;
 use crate::emails::*;
@@ -48,6 +49,7 @@ use crate::student_storage::*;
 use crate::users::*;
 use crate::usage::*;
 use crate::schedule::*;
+use crate::workshops::*;
 
 use lazy_static::lazy_static;
 use std::sync::Arc;
@@ -94,6 +96,7 @@ pub struct Data {
     pub student_storage: StudentStorage,
     pub button_log: ButtonRecordLog,
     pub schedule: Schedule,
+    pub workshops: Workshops,
 }
 
 #[derive(Default, Deserialize, Serialize)]
@@ -350,8 +353,7 @@ async fn async_main() -> std::io::Result<()> {
                 .service(get_schedule)
                 .service(get_schedule_api_key)
                 .service(extend_checkout_by_uuid)
-                .service(help)
-                .service(openapi)
+                .service(get_workshops)
                 .service(ResourceFiles::new("/", generate()))
         })
         .bind(ADDRESS)?
@@ -410,15 +412,14 @@ async fn async_main() -> std::io::Result<()> {
                 .service(get_schedule)
                 .service(get_schedule_api_key)
                 .service(extend_checkout_by_uuid)
-                .service(help)
-                .service(openapi)
+                .service(get_workshops)
                 .service(ResourceFiles::new("/", generate()))
         })
         .bind(ADDRESS_HTTP)?
         .bind_openssl(ADDRESS_HTTPS, builder)?
         .run()
         .await;
-
+        
     }
 }
 fn main() {
@@ -636,4 +637,11 @@ async fn update_loop() {
     }
 
     MEMORY_DATABASE.lock().await.student_storage = student_storage;
+
+    // Update workshops
+    let mut workshops = MEMORY_DATABASE.lock().await.workshops.clone();
+    
+    workshops.update().await;
+
+    MEMORY_DATABASE.lock().await.workshops = workshops;
 }

@@ -57,7 +57,7 @@ impl Inventory {
                     if item.kit.is_some() {
                         kits.push(item.clone().kit.unwrap());
                     }
-
+                    
                     items.push(item);
                 }
             }

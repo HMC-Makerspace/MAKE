@@ -283,6 +283,15 @@ pub async fn get_schedule_api_key(path: web::Path<String>) -> Result<HttpRespons
     }
 }
 
+#[get("/api/v1/workshops")]
+pub async fn get_workshops() -> Result<HttpResponse, Error> {
+    let data = MEMORY_DATABASE.lock().await;
+    let workshops = data.workshops.clone();
+    drop(data);
+
+    Ok(HttpResponse::Ok().json(workshops))
+}
+
 /*
 =================
     POST REQUESTS
