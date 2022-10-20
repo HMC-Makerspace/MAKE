@@ -57,10 +57,11 @@ impl Inventory {
                     if item.kit.is_some() {
                         kits.push(item.clone().kit.unwrap());
                     }
-                    
+
                     items.push(item);
                 }
             }
+            
 
             // Add is_kit to kits
             for kit_name in kits {
