@@ -11,7 +11,7 @@ async function start() {
     renderQuizInfo();
     renderCheckouts();
     renderEquipment();
-    
+
     // Url param, get page
     const url_params = new URLSearchParams(window.location.search);
     const page = url_params.get("p");
@@ -33,6 +33,7 @@ async function start() {
     });
     fetchStudentStorage();
     fetchSchedule();
+    fetchWorkshops();
     //fetchPrinters();
 }
 

@@ -146,3 +146,9 @@ async function fetchUsers() {
 
     state.users = users.users;
 }
+
+function openInNewTab(url) {
+    const encoded = encodeURI(url);
+    var win = window.open(encoded, '_blank');
+    win.focus();
+}

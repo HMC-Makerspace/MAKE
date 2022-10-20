@@ -86,7 +86,7 @@
 
   --text-color-main: #ffffff;
   --text-color-alt: #000000;
-  --text-color-light: #dfdfdf;
+  --text-color-light: #cecece;
 
   --low-color: #9c5151;
   --medium-color: #afad59;
@@ -1377,6 +1377,7 @@ Equipment
   background-repeat: no-repeat;
   background-position: center;
   border-radius: 4px;
+  margin: 0 auto;
 }
 
 .machine-name {
@@ -1403,6 +1404,111 @@ Equipment
 .machine-manual button {
   width: 50%;
   height: 30px;
+}
+
+/*
+
+Workshops
+
+*/
+
+#workshops-header * {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.workshop-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 80%;
+  margin: 0 auto;
+  gap: 20px;
+}
+
+.workshop {
+  background-color: var(--theme-color-2);
+  display: grid;
+  grid-template-areas: "title title instructor" "date date capacity" "desc desc desc" "link link link";
+  grid-template-columns: 1fr 1fr 2fr;
+  width: 100%;
+}
+
+.workshop .title {
+  grid-area: title;
+  font-weight: bold;
+  font-size: 1.5em;
+  margin: 20px;
+}
+
+.workshop .instructor {
+  grid-area: instructor;
+  font-size: 1em;
+  color: var(--text-color-light);
+  padding: 10px;
+}
+
+.workshop .date {
+  color: var(--text-color-main);
+  background-color: var(--theme-color-4);
+  grid-area: date;
+  font-weight: bolder;
+  padding: 10px;
+  padding-left: 20px;
+  width: 250px;
+}
+
+.workshop .description {
+  grid-area: desc;
+  font-size: 1em;
+  background-color: var(--theme-color-3);
+  padding: 10px;
+}
+
+.workshop .capacity {
+  grid-area: capacity ;
+  font-size: 1em;
+  background-color: var(--theme-color-3);
+  padding: 10px;
+}
+
+.workshop .signup {
+  font-size: 1.2em;
+  font-weight: bolder;
+  grid-area: link;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30%;
+  height: 40px;
+  margin: 0 auto;
+  margin-bottom: 20px;
+}
+
+.calendar-buttons {
+  grid-area: link;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px;
+}
+
+.calendar-button {
+  height: 40px;
+  width: 150px;
+  text-align: left;
+}
+
+.google {
+  background-image: url(../img/gcal.webp);
+  background-size: 40px;
+  background-repeat: no-repeat;
+  background-position: right;
 }
 
 /* 
@@ -1609,5 +1715,20 @@ Mobile Styles
   .md img {
     max-width: 100%;
     height: auto;
+  }
+  
+  .equipment-name {
+    font-size: 1.5em;
+    margin-left: 20px;
+
+  }
+
+  .machine {
+    width: 100%;
+    grid-template-areas: "name name" "icon icon" "desc desc" "link link";
+  }
+  
+  .machine-manual button {
+    width: 100%;
   }
 }

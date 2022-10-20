@@ -43,7 +43,7 @@ const laser3d_equipment = [
     },
     {
         name: "Protomax Waterjet",
-        description: "Waterjet cutter that can cut virtually any material. Uses a high-presure stream of water to propel abrasive through the material.",
+        description: "Waterjet cutter that can cut virtually any material. Uses a high-pressure stream of water to propel abrasive through the material.",
         image: "img/equipment/protomax.webp",
         manual: "https://docs.google.com/document/d/1a-hPM5qB79ONJ-7k06pvIZVxz1_ONLAD/edit#heading=h.q03evgbefekk"
     },
@@ -99,7 +99,7 @@ const main_area_equipment = [
         name: "Large Format Printer (Epson P8000)",
         description: "Large format printer that can print on matte and glossy paper. Loaded with roll paper up to 44 inches wide and 100 feet long. Ink and paper charged at-cost to the user.",
         image: "img/equipment/epsonp8000.webp",
-        manual: ""
+        manual: "https://docs.google.com/document/d/140CBEPn0G9BJOiClJX6WaqFBji2eywQsaJNLDx3WKzw/edit"
     },
     {
         name: "Juki Leather Sewing Machine",
@@ -111,13 +111,13 @@ const main_area_equipment = [
         name: "Sewing Machines",
         description: "Various models of sewing machines are available for use, alongside a wide selection of thread colors, needles, and other sewing supplies.",
         image: "img/equipment/sewingmachine.webp",
-        manual: ""
+        manual: "https://docs.google.com/document/d/1G9GU8GuiwsSYijOM1ZvY0uHSs9XidLDGd6vxzkiocqI/edit#heading=h.2oq61rhnhhsl"
     },
     {
-        name: "CNC Embroidery Machines",
+        name: "Embroidery Machines",
         description: "The Brother PE800 can automatically embroider designs onto fabric. Embroidery designs can be designed on the machine for simple text and symbols, with more complex designs able to be created on a computer and transferred to the machine.",
         image: "img/equipment/embroiderymachine.webp",
-        manual: ""
+        manual: "https://docs.google.com/document/d/1G9GU8GuiwsSYijOM1ZvY0uHSs9XidLDGd6vxzkiocqI/edit#heading=h.rf31xvk93cuq"
     },
 ];
 
@@ -149,16 +149,16 @@ const welding_area_equipment = [
 
 const all_equipment = [
     {
+        name: "Main Area & Cage",
+        obj: main_area_equipment,
+    },
+    {
         name: "3D Printer & Laser Cutter Room",
         obj: laser3d_equipment,
     },
     {
         name: "Electronic Benches",
         obj: electronic_benches_equipment,
-    },
-    {
-        name: "Main Area & Cage",
-        obj: main_area_equipment,
     },
     {
         name: "Studio (Video)",
