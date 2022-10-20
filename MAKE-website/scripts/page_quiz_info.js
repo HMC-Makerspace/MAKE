@@ -11,16 +11,6 @@ const general_manual_policy = {
 
 };
 
-const machine_manual_policy = {
-    "3D Printer Manual": "https://docs.google.com/document/d/1gDvmQBr8GSX1x4c6m6gHaMW2nl4jzUDritskwbLwQwI/edit",
-    "Laser Cutter Manual": "https://docs.google.com/document/d/1JNqDC9X5x_eaMU51Pfan4zC-YUiqhW1XqpONjFzrzyM/edit",
-    "OMAX Waterjet Cutter Manual": "https://docs.google.com/document/d/1a-hPM5qB79ONJ-7k06pvIZVxz1_ONLAD/edit",
-    "Sewing Machine Manual": "https://docs.google.com/document/d/1G9GU8GuiwsSYijOM1ZvY0uHSs9XidLDGd6vxzkiocqI/edit",
-    "Embroidery Machine Manual": "https://docs.google.com/document/d/1RGBB-tNxGND6lvvPCOvMJdfj9nkImjONyd1lpZ9r9iU/edit",
-    "Large Format Printer Manual": "https://docs.google.com/document/d/140CBEPn0G9BJOiClJX6WaqFBji2eywQsaJNLDx3WKzw/edit",
-    "MIG Welder Manual": "https://docs.google.com/document/d/13k30JUPOOKK707lYuoaa8Pd3ICvUOBFMly4v8zQqU-Y/edit",
-};
-
 const additional_informational_links = {
     "Printing Press Glossary": "https://docs.google.com/document/d/1JiHqYf_kEaK3hFZ4yS2bjCtTyL6PKsosZmPeGssmNCo/edit",
     "3D Printer Repair Manual": "https://docs.google.com/document/d/1a2Q-BonjK_kNOBoaQjxGVQgLC9nilP-8HGqSBOf4ynU/edit",
@@ -31,12 +21,6 @@ function renderQuizInfo() {
     removeAllChildren(manual_policy_list_el);
     for (const [key, value] of Object.entries(general_manual_policy)) {
         manual_policy_list_el.appendChild(createLink(value, key));
-    }
-
-    const machine_policy_list_el = document.getElementById("machine-manual-policy-list");
-    removeAllChildren(machine_policy_list_el);
-    for (const [key, value] of Object.entries(machine_manual_policy)) {
-        machine_policy_list_el.appendChild(createLink(value, key));
     }
 
     const additional_info_el = document.getElementById("additional-info-list");
