@@ -371,7 +371,6 @@ async fn async_main() -> std::io::Result<()> {
             .set_certificate_chain_file("/etc/letsencrypt/live/make.hmc.edu/fullchain.pem")
             .unwrap();
 
-            
         // Create builder without ssl
         return HttpServer::new(move || {
             let cors = Cors::default()
