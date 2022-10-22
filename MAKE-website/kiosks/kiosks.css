@@ -181,6 +181,28 @@ CHECKOUT
     align-items: center;
 }
 
+.inventory-result-checkout-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 5px;
+    margin: 10px;
+    border-radius: var(--roundness);
+    background-color: var(--theme-color-5);
+}
+
+.inventory-result-checkout-container * {
+    width: 100%;
+}
+
+.inventory-result-checkout-less {
+    background-color: var(--low-color);
+}
+
+.inventory-result-checkout-more {
+    background-color: var(--high-color);
+}
+
 .inventory-result-checkout {
     background-color: var(--theme-color-7);
     font-size: 1.2em;

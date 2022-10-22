@@ -554,7 +554,7 @@ INVENTORY
 }
 
 .inventory-result.kiosk-mode .inventory-result-main {
-  grid-template-columns: 2fr 0.5fr 2fr 0.5fr 0.5fr 0.3fr;
+  grid-template-columns: 2fr 0.5fr 2fr 0.5fr 0.5fr .6fr;
 }
 
 .inventory-result.kiosk-mode.kit .inventory-result-main {

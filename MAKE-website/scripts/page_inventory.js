@@ -291,13 +291,27 @@ function generateInventoryDiv(result, kiosk_mode=false) {
 
     if (kiosk_mode === true) {
         // Add checkout button
-        const checkout_button = document.createElement("button");
-        checkout_button.classList.add("inventory-result-checkout");
-        checkout_button.innerText = "+";
-        checkout_button.addEventListener("click", () => {
+        const checkout_buttons = document.createElement("div");
+        checkout_buttons.classList.add("inventory-result-checkout-container");
+
+        const checkout_button_more = document.createElement("button");
+        checkout_button_more.classList.add("inventory-result-checkout-more");
+        checkout_button_more.innerText = "+";
+        checkout_button_more.addEventListener("click", () => {
             addToCart(item.name, item.index);
         });
-        main_div.appendChild(checkout_button);
+
+        const checkout_button_less = document.createElement("button");
+        checkout_button_less.classList.add("inventory-result-checkout-less");
+        checkout_button_less.innerText = "-";
+        checkout_button_less.addEventListener("click", () => {
+            removeFromCart(item.name);
+        });
+
+        checkout_buttons.appendChild(checkout_button_less);
+        checkout_buttons.appendChild(checkout_button_more);
+
+        main_div.appendChild(checkout_buttons);
     }
 
     div.appendChild(main_div);

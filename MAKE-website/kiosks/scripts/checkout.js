@@ -417,11 +417,6 @@ function addToCart(name, index) {
         index: index
     }
 
-    if (state.cart.filter(i => i.name === item.name).length !== 0) {
-        removeFromCart(item);
-        return;
-    }
-
     state.cart = [...state.cart, item];
     updateSelectedItems();
     updateCartHTML();
@@ -431,20 +426,26 @@ function updateSelectedItems() {
     const selected_els = document.getElementsByClassName("inventory-result");
     for (let i = 1; i < selected_els.length; i++) {
         const el = selected_els[i];
-        const btn = el.getElementsByClassName("inventory-result-checkout")[0];
 
         if (state.cart.filter(item => item.index == el.id.split("-")[2]).length > 0) {
             el.classList.add("selected");
-            btn.innerHTML = "-";
         } else {
             el.classList.remove("selected");
-            btn.innerHTML = "+";
         }
     }
 }
 
-function removeFromCart(item) {
-    state.cart = state.cart.filter(i => i.name !== item.name);
+function removeFromCart(name) {
+    // Remove the first instance of the item from the cart
+    // leave the rest though
+    
+    // Reverse the cart so that the first instance of the item is the last one
+    // in the array
+    state.cart.reverse();
+    const index = state.cart.findIndex(item => item.name === name);
+    state.cart.splice(index, 1);
+    state.cart.reverse();
+
     updateSelectedItems();
     updateCartHTML();
 }
