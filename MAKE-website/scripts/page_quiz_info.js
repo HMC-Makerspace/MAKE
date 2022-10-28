@@ -7,8 +7,8 @@ const general_manual_policy = {
     "Lost & Found Policy": "https://docs.google.com/document/d/1abznvqZAuiiUMQWZY2wXyiTc17sGK2Lkww3c1VEKFps/edit",
     "Overnight Locker Manual": "https://docs.google.com/document/d/1GWrlFWOObZJy3haqlFzlr3gR2CCAU9opjqsJb66xxew/edit",
     "Tool Checkout Policy": "https://docs.google.com/document/d/1wp-baSy2ixf-ST2luNtjVMYcxE5_iDHC-R0nUmALyzc/edit",
-    "Studio Policy": "https://docs.google.com/document/d/1pqknkaGRO2VQL6vkdeRkVYewqo_WKNh6-tpEloCPW5c/edit"
-
+    "Studio Policy": "https://docs.google.com/document/d/1pqknkaGRO2VQL6vkdeRkVYewqo_WKNh6-tpEloCPW5c/edit",
+    "Waterjet Manual": "https://docs.google.com/document/d/1a-hPM5qB79ONJ-7k06pvIZVxz1_ONLAD/"
 };
 
 const additional_informational_links = {
