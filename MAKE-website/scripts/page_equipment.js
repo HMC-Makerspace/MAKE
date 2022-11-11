@@ -119,6 +119,12 @@ const main_area_equipment = [
         image: "img/equipment/embroiderymachine.webp",
         manual: "https://docs.google.com/document/d/1G9GU8GuiwsSYijOM1ZvY0uHSs9XidLDGd6vxzkiocqI/edit#heading=h.rf31xvk93cuq"
     },
+    {
+        name: "Digital Jacquard Loom",
+        description: "The TC2 Digital Jacquard Loom can weave custom designs into fabric. Lots of different fibers can be used with the loom. The digital part means that a computer can control the heddles to create intricate patterns.",
+        image: "img/equipment/loom.webp",
+        manual: ""
+    },
 ];
 
 const studio_video_equipment = [

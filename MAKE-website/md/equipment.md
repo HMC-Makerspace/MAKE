@@ -110,6 +110,11 @@ The Brother PE800 can automatically embroider designs onto fabric. Embroidery de
 
 ![CNC Embroidery Machine](img/equipment/embroiderymachine.webp)
 
+### Digital Jacquard Loom
+The TC2 Digital Jacquard Loom can weave custom designs into fabric. Lots of different fibers can be used with the loom. The "digital" part means that a computer can control the heddles to create intricate patterns. 
+
+![Digital Jacquard Loom](img/equipment/loom.webp)
+
 ### Surgers
 
 
