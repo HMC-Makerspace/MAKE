@@ -125,6 +125,12 @@ const main_area_equipment = [
         image: "img/equipment/loom.webp",
         manual: ""
     },
+    {
+        name: "Printing Press",
+        description: "The Makerspace printing press (c. 1950) can print linoleum designs and type -- a great way to produce a vintage custom effect.",
+        image: "img/equipment/printingpress.webp",
+        manual: "https://docs.google.com/document/d/1qXLxTUifwV6mHEi45AyhBj6PTZoxPnDWk8Sk9bhQ9p4/edit#heading=h.c4g0pi9dhov7"
+    },
 ];
 
 const studio_video_equipment = [
