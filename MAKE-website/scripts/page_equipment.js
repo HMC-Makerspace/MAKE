@@ -123,7 +123,7 @@ const main_area_equipment = [
         name: "Digital Jacquard Loom",
         description: "The TC2 Digital Jacquard Loom can weave custom designs into fabric. Lots of different fibers can be used with the loom. The digital part means that a computer can control the heddles to create intricate patterns.",
         image: "img/equipment/loom.webp",
-        manual: ""
+        manual: "https://docs.google.com/document/d/1T7UWdbl9iEGJ31fNZpCOMRPS3_PBd1ioztRqxQduCKY/edit"
     },
     {
         name: "Printing Press",
