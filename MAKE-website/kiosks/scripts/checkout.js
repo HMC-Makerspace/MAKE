@@ -336,6 +336,14 @@ function createUserInfo(user_info) {
                 <input id="reserve-date" type="date">
             </div>
         `;
+
+        // Look at all checkouts for overdue checkouts
+        let checkouts = user_info.pending_checkouts;
+        let oldest_checkout_expired_time = new Date();
+
+        for (let checkout of checkouts) {
+            let checkout_time = new Date(checkout.timestamp_expires);
+        }
     }
 }
 

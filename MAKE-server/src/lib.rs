@@ -38,18 +38,20 @@ mod users;
 mod usage;
 mod schedule;
 mod workshops;
+mod loom;
 
-use crate::checkout::*;
-use crate::emails::*;
-use crate::inventory::*;
-use crate::printers::*;
-use crate::quizzes::*;
-use crate::routes::*;
-use crate::student_storage::*;
-use crate::users::*;
-use crate::usage::*;
-use crate::schedule::*;
-use crate::workshops::*;
+pub use crate::checkout::*;
+pub use crate::emails::*;
+pub use crate::inventory::*;
+pub use crate::printers::*;
+pub use crate::quizzes::*;
+pub use crate::routes::*;
+pub use crate::student_storage::*;
+pub use crate::users::*;
+pub use crate::usage::*;
+pub use crate::schedule::*;
+pub use crate::workshops::*;
+pub use crate::loom::*;
 
 use lazy_static::lazy_static;
 use std::sync::Arc;
@@ -422,7 +424,7 @@ async fn async_main() -> std::io::Result<()> {
         
     }
 }
-fn main() {
+pub fn main() {
     std::env::set_var("RUST_LOG", "info, actix_web=trace");
     env_logger::init();
 
