@@ -1,7 +1,6 @@
 use image::{self, GenericImageView, Pixel};
 
 const LOOM_WIDTH: u32 = 1320;
-const TABBY_DEFAULT_WIDTH: usize = 6;
 
 pub fn create_loom_tif(file_path: &str, inner_tabby_width: usize, outer_tabby_width: usize) {
     // Open image file
@@ -55,6 +54,7 @@ pub fn create_loom_tif(file_path: &str, inner_tabby_width: usize, outer_tabby_wi
     let duration = start.elapsed();
     println!("Loom tabby took: {:?}", duration);
 
+    
     // Write to file
     let mut file = std::fs::File::create("loom.tif").unwrap();
     let mut encoder = tiff::encoder::TiffEncoder::new(&mut file).unwrap();

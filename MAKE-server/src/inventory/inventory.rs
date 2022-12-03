@@ -2,7 +2,7 @@ use log::{info, warn};
 use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
 
-use crate::{checkout::CheckoutLogEntry, emails::send_individual_email, EMAIL_TEMPLATES, MAKERSPACE_MANAGER_EMAIL};
+use crate::{inventory::checkout::CheckoutLogEntry, management::emails::send_individual_email, EMAIL_TEMPLATES, MAKERSPACE_MANAGER_EMAIL};
 
 const INVENTORY_URL: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTzvLVGN2H5mFpQLpstQyT5kgEu1CI8qlhY60j78mO0LQgDnTHs_ZKx39xiIO1h-w09ZXyOZ5GqOf5q/pub?gid=0&single=true&output=csv";
 

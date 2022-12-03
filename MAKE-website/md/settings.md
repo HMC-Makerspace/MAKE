@@ -15,7 +15,7 @@
 </div>
 
 ## Credits
-Email Ethan Vazquez (<a href="mailto:evazquez@g.hmc.edu">evazquez@g.hmc.edu</a>) for any questions or conerns about this website. 
+Email Ethan Vazquez (<a href="mailto:evazquez@g.hmc.edu">evazquez@g.hmc.edu</a>) for any questions or concerns about this website. 
 If you find a bug, please include a screenshot and/or a brief description on how to reproduce the bug.
 
 

@@ -25,40 +25,40 @@ use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use tokio::time;
 
-mod checkout;
-mod emails;
 mod inventory;
-mod laser_cutter;
-mod permissions;
-mod printers;
-mod quizzes;
-mod routes;
-mod student_storage;
-mod users;
-mod usage;
-mod schedule;
-mod workshops;
-mod loom;
+mod machines;
+mod management;
+mod people;
 
-pub use crate::checkout::*;
-pub use crate::emails::*;
-pub use crate::inventory::*;
-pub use crate::printers::*;
-pub use crate::quizzes::*;
-pub use crate::routes::*;
-pub use crate::student_storage::*;
-pub use crate::users::*;
-pub use crate::usage::*;
-pub use crate::schedule::*;
-pub use crate::workshops::*;
-pub use crate::loom::*;
+mod get_routes;
+mod post_routes;
+
+pub use get_routes::*;
+pub use post_routes::*;
+
+pub use crate::inventory::checkout::*;
+pub use crate::inventory::inventory::*;
+
+pub use crate::machines::laser_cutter::*;
+pub use crate::machines::loom::*;
+pub use crate::machines::printers::*;
+
+pub use crate::management::emails::*;
+pub use crate::management::student_storage::*;
+pub use crate::management::workshops::*;
+
+pub use crate::people::users::*;
+pub use crate::people::usage::*;
+pub use crate::people::permissions::*;
+pub use crate::people::quizzes::*;
+pub use crate::people::schedule::*;
 
 use lazy_static::lazy_static;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
-// Debug vs release address
-const ADDRESS: &str = "127.0.0.1:8080";
+// Debug vs release addresses
+const ADDRESS_LOCAL: &str = "127.0.0.1:8080";
 const ADDRESS_HTTP: &str = "0.0.0.0:8080";
 const ADDRESS_HTTPS: &str = "0.0.0.0:8443";
 
@@ -314,114 +314,73 @@ async fn async_main() -> std::io::Result<()> {
         }
     });
 
-    if cfg!(debug_assertions) {
-        // Create builder without ssl
-        return HttpServer::new(move || {
-            let cors = Cors::default()
-                .allow_any_origin()
-                .allow_any_header()
-                .allow_any_method()
-                .send_wildcard()
-                .max_age(3600);
+    let builder;
 
-            App::new()
-                .wrap(actix_web::middleware::Logger::new(LOGGER_STR))
-                .wrap(actix_web::middleware::Compress::default())
-                .wrap(cors)
-                .service(status)
-                .service(get_inventory)
-                .service(get_quizzes)
-                .service(get_users)
-                .service(checkout_items)
-                .service(checkin_items)
-                .service(get_checkout_log)
-                .service(get_user_info)
-                .service(set_auth_level)
-                .service(set_quiz_passed)
-                .service(update_printer_status)
-                .service(get_student_storage_for_user)
-                .service(checkout_student_storage)
-                .service(renew_student_storage_slot)
-                .service(release_student_storage_slot)
-                .service(get_student_storage_for_all)
-                .service(get_printers)
-                .service(join_printer_queue)
-                .service(leave_printer_queue)
-                .service(get_printers_api_key)
-                .service(add_restock_notice)
-                .service(get_swipe_access)
-                .service(add_button_log)
-                .service(reserve_items)
-                .service(get_schedule)
-                .service(get_schedule_api_key)
-                .service(extend_checkout_by_uuid)
-                .service(get_workshops)
-                .service(ResourceFiles::new("/", generate()))
-        })
-        .bind(ADDRESS)?
-        .run()
-        .await;
-    } else {
-        let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
-        builder
+    if cfg!(debug_assertions) {
+        let mut temp_builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
+        temp_builder
             .set_private_key_file(
                 "/etc/letsencrypt/live/make.hmc.edu/privkey.pem",
                 SslFiletype::PEM,
             )
             .unwrap();
-        builder
+            temp_builder
             .set_certificate_chain_file("/etc/letsencrypt/live/make.hmc.edu/fullchain.pem")
             .unwrap();
 
-        // Create builder without ssl
-        return HttpServer::new(move || {
-            let cors = Cors::default()
-                .allow_any_origin()
-                .allow_any_header()
-                .allow_any_method()
-                .send_wildcard()
-                .max_age(3600);
+        builder = Some(temp_builder);
+    } else {
+        builder = None;
+    }
+    // Create builder without ssl
+    let server = HttpServer::new(move || {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allow_any_header()
+            .allow_any_method()
+            .send_wildcard()
+            .max_age(3600);
 
-            App::new()
-                .wrap(RedirectSchemeBuilder::new().replacements(&[(":8080", ":8443")]).build())
-                .wrap(actix_web::middleware::Logger::new(LOGGER_STR))
-                .wrap(actix_web::middleware::Compress::default())
-                .wrap(cors)
-                .service(status)
-                .service(get_inventory)
-                .service(get_quizzes)
-                .service(get_users)
-                .service(checkout_items)
-                .service(checkin_items)
-                .service(get_checkout_log)
-                .service(get_user_info)
-                .service(set_auth_level)
-                .service(set_quiz_passed)
-                .service(update_printer_status)
-                .service(get_student_storage_for_user)
-                .service(checkout_student_storage)
-                .service(renew_student_storage_slot)
-                .service(release_student_storage_slot)
-                .service(get_student_storage_for_all)
-                .service(get_printers)
-                .service(join_printer_queue)
-                .service(leave_printer_queue)
-                .service(get_printers_api_key)
-                .service(add_restock_notice)
-                .service(get_swipe_access)
-                .service(add_button_log)
-                .service(reserve_items)
-                .service(get_schedule)
-                .service(get_schedule_api_key)
-                .service(extend_checkout_by_uuid)
-                .service(get_workshops)
-                .service(ResourceFiles::new("/", generate()))
-        })
-        .bind(ADDRESS_HTTP)?
-        .bind_openssl(ADDRESS_HTTPS, builder)?
-        .run()
-        .await;
-        
+        App::new()
+            .wrap(RedirectSchemeBuilder::new().replacements(&[(":8080", ":8443")]).build())
+            .wrap(actix_web::middleware::Logger::new(LOGGER_STR))
+            .wrap(actix_web::middleware::Compress::default())
+            .wrap(cors)
+            .service(status)
+            .service(get_inventory)
+            .service(get_quizzes)
+            .service(get_users)
+            .service(checkout_items)
+            .service(checkin_items)
+            .service(get_checkout_log)
+            .service(get_user_info)
+            .service(set_auth_level)
+            .service(set_quiz_passed)
+            .service(update_printer_status)
+            .service(get_student_storage_for_user)
+            .service(checkout_student_storage)
+            .service(renew_student_storage_slot)
+            .service(release_student_storage_slot)
+            .service(get_student_storage_for_all)
+            .service(get_printers)
+            .service(join_printer_queue)
+            .service(leave_printer_queue)
+            .service(get_printers_api_key)
+            .service(add_restock_notice)
+            .service(get_swipe_access)
+            .service(add_button_log)
+            .service(reserve_items)
+            .service(get_schedule)
+            .service(get_schedule_api_key)
+            .service(extend_checkout_by_uuid)
+            .service(get_workshops)
+            .service(ResourceFiles::new("/", generate()))
+    });
+
+    if builder.is_some() {
+        return server.bind(ADDRESS_HTTP)?.bind_openssl(ADDRESS_HTTPS, builder.unwrap())?.run().await
+    } else {
+        return server.bind(ADDRESS_LOCAL)?.run().await
     }
 }
 pub fn main() {

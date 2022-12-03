@@ -4,8 +4,8 @@ use std::io::Read;
 use std::{collections::HashMap, time::SystemTime};
 use toml::Value;
 
-use crate::emails::send_individual_email;
-use crate::{users::User, API_KEYS};
+use crate::management::emails::send_individual_email;
+use crate::{people::users::User, API_KEYS};
 use crate::{EMAIL_TEMPLATES};
 
 const PRINT_QUEUE_ENTRY_EXPIRATION_TIME: u64 = 60 * 15; // 15 minutes

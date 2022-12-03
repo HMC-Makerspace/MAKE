@@ -7,11 +7,11 @@ edition = "2021"
 
 [[bin]]
 name = "make_server"
-path = "src/start_server.rs"
+path = "src/bin/start_server.rs"
 
 [[bin]]
 name = "loom"
-path = "src/start_loom.rs"
+path = "src/bin/start_loom.rs"
 
 [lib]
 name = "make"

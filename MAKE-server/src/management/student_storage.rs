@@ -2,7 +2,7 @@ use std::{time::SystemTime};
 use serde::{Deserialize, Serialize};
 use toml::Value;
 
-use crate::users::User;
+use crate::people::users::User;
 use crate::*;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

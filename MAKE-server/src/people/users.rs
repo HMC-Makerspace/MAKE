@@ -3,10 +3,10 @@ use std::time::SystemTime;
 use log::warn;
 use serde::{Deserialize, Serialize};
 
-use crate::checkout::*;
+use crate::inventory::checkout::*;
 
-use crate::printers::PrintQueueEntry;
-use crate::quizzes::*;
+use crate::machines::printers::PrintQueueEntry;
+use crate::people::quizzes::*;
 
 #[derive(Default, Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum AuthLevel {
