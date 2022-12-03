@@ -39,7 +39,7 @@
   --roundness: 0px;
   --button-outline-color: #ffffff;
 
-  --brightness: .9;
+  --brightness: 0.9;
   --invert: 0%;
 
   /* Icons */
@@ -53,7 +53,7 @@
   /* Proficiencies */
   --sewing: #5271ff;
   --dprinting: #ff5757;
-  --lasercutter:#ff914d;
+  --lasercutter: #ff914d;
   --soldering: #cbcbc9;
   --waterjet: #004aad;
   --welding: #7ed957;
@@ -96,7 +96,7 @@
   --low-color-dark: #723a3a;
   --medium-color-dark: #7e7d41;
   --high-color-dark: #3d773d;
-  
+
   --shift-1: #3d6454;
   --shift-2: #598f7a;
 
@@ -172,18 +172,18 @@ p3 {
 }
 
 .md img {
-    width: 40%;
-    height: auto;
-    background-color: var(--theme-color-5);
-    margin: 0 auto;
-    border-radius: 4px;
-    display: table-cell;
-    vertical-align: middle;
-    transition: filter 0.3s cubic-bezier(0, 1.2, 1, 1.2);
+  width: 40%;
+  height: auto;
+  background-color: var(--theme-color-5);
+  margin: 0 auto;
+  border-radius: 4px;
+  display: table-cell;
+  vertical-align: middle;
+  transition: filter 0.3s cubic-bezier(0, 1.2, 1, 1.2);
 }
 
 .md img:hover {
-    filter: brightness(var(--brightness));
+  filter: brightness(var(--brightness));
 }
 
 .md-img-container {
@@ -192,7 +192,6 @@ p3 {
   align-items: flex-start;
   justify-content: center;
 }
-
 
 #main-grid {
   display: grid;
@@ -210,7 +209,6 @@ p3 {
 }
 
 #main-grid > * {
-  border-radius: var(--roundness);
   margin: 0px;
   transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
@@ -222,7 +220,6 @@ p3 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  border-radius: var(--roundness);
   margin-right: 0px !important;
 }
 
@@ -241,8 +238,7 @@ p3 {
   font-family: var(--title-font);
   user-select: none; /* Standard */
   color: var(--text-color-alt);
-  transition: letter-spacing 0.5s ease-in-out,
-    color 0.5s ease-in-out;
+  transition: letter-spacing 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 #mobile-logo {
@@ -279,16 +275,17 @@ p3 {
 }
 
 #left-bar button img {
-  transition: filter 0.1s ease-in-out,
-    transform 0.2s ease-in-out;
+  transition: filter 0.1s ease-in-out, transform 0.2s ease-in-out;
 }
 
-#left-bar button.active-button img, #left-bar button:hover img {
+#left-bar button.active-button img,
+#left-bar button:hover img {
   transform: scale(1.1);
   filter: invert(var(--invert));
 }
 
-#left-bar button.active-button, #left-bar button:hover {
+#left-bar button.active-button,
+#left-bar button:hover {
   color: var(--text-color-main);
   background-color: var(--theme-color-2);
 }
@@ -300,7 +297,6 @@ button {
   border: unset;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out, opacity 0.2 ease-in-out;
-  border-radius: var(--roundness);
   outline: none;
 }
 
@@ -314,7 +310,8 @@ button.big {
   padding: 10px;
 }
 
-button:hover, button.active-button {
+button:hover,
+button.active-button {
   background-color: var(--theme-color-4);
 }
 
@@ -330,7 +327,6 @@ input {
   border: unset;
   cursor: pointer;
   transition: background-color 0.3s ease-in-out;
-  border-radius: var(--roundness);
 }
 
 input.focus {
@@ -339,7 +335,6 @@ input.focus {
 
 .header {
   background-color: var(--theme-color-1);
-  border-radius: var(--roundness);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -357,14 +352,13 @@ select *.option-class {
 }
 
 select {
-  border-radius: var(--roundness);
   padding: 10px;
   font-size: 14px;
   color: var(--text-color-alt);
   font-family: var(--main-font);
   border: unset;
   background-color: var(--theme-color-3);
-  color: var(--text-color-main)
+  color: var(--text-color-main);
 }
 
 label {
@@ -430,10 +424,41 @@ HOME
     
 */
 
+#page-home {
+  grid-template-rows: 100px minmax(0, 1fr);
+  background-color: var(--theme-color-2);
+}
+
+#current-announcement {
+  width: 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1em;
+  background-color: var(--low-color);
+  color: var(--text-color-main);
+  font-weight: normal;
+  margin: 0 auto;
+  padding: 20px;
+  animation: slide-down 2s ease-in-out;
+}
+
+@keyframes slide-down {
+  0% {
+    transform: translateY(-100%);
+  }
+  25% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+
 #college-id-container,
 #welcome-message,
 #logged-in-message {
-  border-radius: var(--roundness);
   background-color: var(--theme-color-5);
   display: flex;
   flex-direction: column;
@@ -500,7 +525,6 @@ INVENTORY
 
 .inventory-result {
   background-color: var(--theme-color-2);
-  border-radius: var(--roundness);
   width: 90%;
   max-width: 1200px;
   margin: 0 auto;
@@ -527,7 +551,7 @@ INVENTORY
   gap: 10px;
   padding: 5px;
   padding-left: 10px;
-  color: var(--text-color-main)
+  color: var(--text-color-main);
 }
 
 .inventory-result.header {
@@ -554,7 +578,7 @@ INVENTORY
 }
 
 .inventory-result.kiosk-mode .inventory-result-main {
-  grid-template-columns: 2fr 0.5fr 2fr 0.5fr 0.5fr .6fr;
+  grid-template-columns: 2fr 0.5fr 2fr 0.5fr 0.5fr 0.6fr;
 }
 
 .inventory-result.kiosk-mode.kit .inventory-result-main {
@@ -568,8 +592,8 @@ INVENTORY
 
 .inventory-result-main.inventory-header * {
   border-bottom: 3px solid var(--theme-color-5);
-  color: var(--theme-color-5  );
-  padding: 5px
+  color: var(--theme-color-5);
+  padding: 5px;
 }
 
 .inventory-result-show-lower-div {
@@ -625,7 +649,6 @@ INVENTORY
 .kit-item {
   background-color: var(--theme-color-4);
   color: var(--text-color-main);
-  border-radius: var(--roundness);
   padding: 5px;
 }
 
@@ -652,7 +675,6 @@ INVENTORY
   align-items: center;
   justify-content: center;
   background-color: var(--theme-color-4);
-  border-radius: var(--roundness);
   padding: 10px;
   color: var(--text-color-main);
   width: auto;
@@ -685,7 +707,6 @@ INVENTORY
 }
 .inventory-result-location * {
   color: var(--text-color-main);
-  border-radius: var(--roundness);
   padding: 5px;
 }
 
@@ -700,7 +721,6 @@ INVENTORY
 .inventory-result-quantity {
   background-color: var(--theme-color-3);
   color: var(--text-color-main);
-  border-radius: var(--roundness);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -772,10 +792,9 @@ Student Storage
 
 .student-storage-group {
   display: grid;
-  grid-template-columns: repeat(6 , 120px);
+  grid-template-columns: repeat(6, 120px);
   grid-template-rows: auto;
   background-color: var(--theme-color-2);
-  border-radius: var(--roundness);
   gap: 20px;
   padding: 20px;
 }
@@ -786,7 +805,6 @@ Student Storage
   align-items: center;
   justify-content: center;
   background-color: var(--theme-color-3);
-  border-radius: var(--roundness);
   gap: 5px;
   height: 120px;
   width: 120px;
@@ -849,7 +867,6 @@ Quizzes & Information
   font-size: 1.2em;
   font-weight: bold;
   background-color: var(--theme-color-2);
-  border-radius: var(--roundness);
   padding: 10px;
 }
 
@@ -859,7 +876,6 @@ Quizzes & Information
   align-items: center;
   justify-content: center;
   background-color: var(--theme-color-2);
-  border-radius: var(--roundness);
   padding: 20px;
   gap: 20px;
   flex-wrap: wrap;
@@ -872,7 +888,6 @@ Quizzes & Information
   flex-direction: column;
   align-items: center;
   background-color: var(--theme-color-5);
-  border-radius: var(--roundness);
   text-align: center;
   font-weight: bolder;
   width: 120px;
@@ -887,7 +902,6 @@ Quizzes & Information
   position: absolute;
   bottom: 10px;
   background-color: var(--high-color-dark);
-  border-radius: var(--roundness);
   padding: 10px;
   cursor: pointer;
   pointer-events: none;
@@ -896,7 +910,6 @@ Quizzes & Information
 .quiz-take {
   position: absolute;
   bottom: 10px;
-  border-radius: var(--roundness);
   padding: 10px;
 }
 
@@ -914,7 +927,6 @@ Quizzes & Information
   margin-top: 20px;
   display: inline-block;
   width: 60%;
-  border-radius: var(--roundness);
   line-height: 1.4em;
   padding: 20px;
 }
@@ -959,7 +971,6 @@ Checkouts
   align-items: center;
   justify-content: center;
   background-color: var(--theme-color-2);
-  border-radius: var(--roundness);
   min-width: 80%;
   margin-top: 20px;
   gap: 5px;
@@ -972,7 +983,6 @@ Checkouts
   grid-template-columns: 0.4fr 1fr 0.4fr 1fr 400px 1fr;
   grid-template-rows: auto;
   background-color: var(--theme-color-3);
-  border-radius: var(--roundness);
   padding-top: 5px;
   padding-bottom: 5px;
   gap: 5px;
@@ -995,7 +1005,6 @@ Checkouts
   align-items: center;
   justify-content: center;
   background-color: var(--theme-color-5);
-  border-radius: var(--roundness);
 }
 
 .checkout-entry-items {
@@ -1012,7 +1021,6 @@ Checkouts
 
 .checkout-entry-item {
   background-color: var(--theme-color-2);
-  border-radius: var(--roundness);
   color: var(--text-color-main);
   display: flex;
   flex-direction: row;
@@ -1060,7 +1068,6 @@ Checkouts
 
 .check-in-button {
   background-color: var(--theme-color-7);
-  border-radius: var(--roundness);
   margin-left: 5px;
   height: 40px;
 }
@@ -1099,7 +1106,7 @@ Schedule
   line-break: strict;
   text-align: center;
   width: 60px;
-  font-size: .8em;
+  font-size: 0.8em;
 }
 
 #schedule-table tr {
@@ -1117,7 +1124,7 @@ Schedule
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: .7em;
+  font-size: 0.7em;
 }
 
 .stewards-1 {
@@ -1128,7 +1135,8 @@ Schedule
   background-color: var(--shift-2);
 }
 
-.stewards-1.info, .stewards-2.info {
+.stewards-1.info,
+.stewards-2.info {
   font-weight: bold;
   padding: 10px;
   font-size: 1.4em;
@@ -1139,12 +1147,10 @@ Schedule
 }
 
 #schedule-table .stewards {
-  
 }
 
 #schedule-table .proficiencies {
-  font-size: .7em;
-
+  font-size: 0.7em;
 }
 
 .schedule-shift.proficiency.stewards-1:hover,
@@ -1214,7 +1220,6 @@ Schedule
   align-items: center;
   justify-content: center;
   background-color: var(--theme-color-2);
-  border-radius: var(--roundness);
   gap: 10px;
   padding: 20px;
   width: 400px;
@@ -1224,7 +1229,6 @@ Schedule
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   background-color: var(--theme-color-2);
-  border-radius: var(--roundness);
   font-weight: bolder;
   padding: 5px;
   gap: 20px;
@@ -1245,7 +1249,6 @@ Schedule
   font-weight: bold;
   background-color: var(--text-color-main);
   color: var(--theme-color-2);
-  border-radius: var(--roundness);
 }
 
 .printer-status {
@@ -1291,7 +1294,6 @@ Schedule
 .printer-current-time-left {
   background-color: var(--theme-color-3);
   color: var(--text-color-alt);
-  border-radius: var(--roundness);
   width: 200px;
 }
 
@@ -1319,12 +1321,13 @@ FAQ
 
 */
 
-#faq-content, #settings-content, #values-content {
+#faq-content,
+#settings-content,
+#values-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  border-radius: var(--roundness);
 }
 
 /*
@@ -1388,14 +1391,14 @@ Equipment
 
 .machine-description {
   grid-area: desc;
-  font-size: .9em;
+  font-size: 0.9em;
   color: var(--text-color-light);
   line-height: 1.4em;
 }
 
 .machine-manual {
   grid-area: link;
-  font-size: .8em;
+  font-size: 0.8em;
   display: flex;
   align-items: flex-end;
   justify-content: flex-start;
@@ -1469,7 +1472,7 @@ Workshops
 }
 
 .workshop .capacity {
-  grid-area: capacity ;
+  grid-area: capacity;
   font-size: 1em;
   background-color: var(--theme-color-3);
   padding: 10px;
@@ -1533,7 +1536,7 @@ Mobile Styles
   #main-grid {
     grid-template-columns: 60px auto;
   }
-
+  
   #left-bar button span {
     display: none;
   }
@@ -1545,7 +1548,7 @@ Mobile Styles
   #left-bar button {
     justify-content: center;
     padding: 0px;
-    height: 13vw
+    height: 13vw;
   }
 
   #left-bar button img {
@@ -1556,6 +1559,11 @@ Mobile Styles
   #logo-container {
     margin-bottom: 10px;
     margin-top: 10px;
+  }
+
+  #current-announcement {
+    width: 90%;
+    font-size: .8em;
   }
 
   #main-logo {
@@ -1589,8 +1597,7 @@ Mobile Styles
   }
 
   #top-right-logo {
-    width: 80px;
-    height: 80px;
+    display: none;
   }
 
   p1 {
@@ -1716,18 +1723,17 @@ Mobile Styles
     max-width: 100%;
     height: auto;
   }
-  
+
   .equipment-name {
     font-size: 1.5em;
     margin-left: 20px;
-
   }
 
   .machine {
     width: 100%;
     grid-template-areas: "name name" "icon icon" "desc desc" "link link";
   }
-  
+
   .machine-manual button {
     width: 100%;
   }

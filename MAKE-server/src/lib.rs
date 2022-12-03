@@ -315,8 +315,15 @@ async fn async_main() -> std::io::Result<()> {
     });
 
     let builder;
+    let redirect_scheme;
 
     if cfg!(debug_assertions) {
+        info!("Starting DEBUG server on {}", ADDRESS_LOCAL);
+        builder = None;
+        redirect_scheme = RedirectSchemeBuilder::new().enable(false).build();
+    } else {
+        info!("Starting PROD server on {} and {}", ADDRESS_HTTP, ADDRESS_HTTPS);
+
         let mut temp_builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
         temp_builder
             .set_private_key_file(
@@ -329,8 +336,7 @@ async fn async_main() -> std::io::Result<()> {
             .unwrap();
 
         builder = Some(temp_builder);
-    } else {
-        builder = None;
+        redirect_scheme = RedirectSchemeBuilder::new().enable(true).replacements(&[(":8080", ":8443")]).build();
     }
     // Create builder without ssl
     let server = HttpServer::new(move || {
@@ -342,7 +348,7 @@ async fn async_main() -> std::io::Result<()> {
             .max_age(3600);
 
         App::new()
-            .wrap(RedirectSchemeBuilder::new().replacements(&[(":8080", ":8443")]).build())
+            .wrap(redirect_scheme.clone())
             .wrap(actix_web::middleware::Logger::new(LOGGER_STR))
             .wrap(actix_web::middleware::Compress::default())
             .wrap(cors)
