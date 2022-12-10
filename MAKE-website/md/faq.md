@@ -52,9 +52,9 @@ Yes! If your club plans on meeting in the makerspace, we ask that you email make
 
 Stewards are available to answer any questions you have and assist you with projects, safety quizzes, and checking out tools. They will also run workshops and be able to teach you how to use different tools and machines during their shift hours. 
 
-## Is the Makerspace open to all 7C students?
+## Is the Makerspace open to all 7C students, faculty, and staff?
 
-Yes! It is open to all 7C students.
+Yes, the Makerspace is open to all 7C students, faculty, and staff!
 
 ## How can I apply to be a steward?
 
