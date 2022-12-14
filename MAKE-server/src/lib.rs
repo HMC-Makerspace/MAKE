@@ -25,16 +25,17 @@ use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use tokio::time;
 
+mod discord;
 mod inventory;
 mod machines;
 mod management;
 mod people;
 
-mod get_routes;
-mod post_routes;
+mod routes_get;
+mod routes_post;
 
-pub use get_routes::*;
-pub use post_routes::*;
+pub use routes_get::*;
+pub use routes_post::*;
 
 pub use crate::inventory::checkout::*;
 pub use crate::inventory::inventory::*;
