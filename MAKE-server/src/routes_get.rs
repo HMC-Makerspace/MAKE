@@ -77,16 +77,7 @@ HELP
 pub async fn help() -> Result<HttpResponse, Error> {
     let resp = HttpResponse::Ok()
         .content_type("text/html")
-        .body(include_str!("../../Documentation/openapi/help.html"));
-
-    Ok(resp)
-}
-
-#[get("/api/v1/openapi.yaml")]
-pub async fn openapi() -> Result<HttpResponse, Error> {
-    let resp = HttpResponse::Ok()
-        .content_type("text/html")
-        .body(include_str!("../../Documentation/openapi/openapi.yaml"));
+        .body(include_str!("../../Documentation/api.md"));
 
     Ok(resp)
 }
@@ -264,7 +255,8 @@ pub async fn get_printers_api_key(path: web::Path<String>) -> Result<HttpRespons
 #[get("/api/v1/schedule")]
 pub async fn get_schedule() -> Result<HttpResponse, Error> {
     let data = MEMORY_DATABASE.lock().await;
-    let schedule = data.schedule.clone();
+    let schedule = data.schedule.clone().censor_names();
+
     drop(data);
 
     Ok(HttpResponse::Ok().json(schedule))
