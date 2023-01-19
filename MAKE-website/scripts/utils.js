@@ -65,6 +65,10 @@ function setPage(page) {
     url.searchParams.set("p", page);
     window.history.pushState({}, "", url.href);
 
+    const menu = document.getElementById('left-bar');
+
+    menu.classList.remove('show');
+
 }
 
 function removeAllChildren(element, keep_first_n = 0) {

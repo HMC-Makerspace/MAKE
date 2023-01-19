@@ -60,6 +60,12 @@ function animateChangeFonts() {
     }
 }
 
+function toggleMobileMenu() {
+    const menu = document.getElementById('left-bar');
+
+    menu.classList.toggle('show');
+}
+
 //document.getElementById('main-title-ani').addEventListener('mouseover', hoverOnRandomFont);
 //document.getElementById('main-title-ani').addEventListener('mouseout', hoverOffRandomFont);
 

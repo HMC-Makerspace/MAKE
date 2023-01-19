@@ -53,44 +53,45 @@
             </div>
 
             <div id="pages-content">
-                <div id="inventory-page" class="content-container">
-                    <div id="inventory-search" class="content-header">
-                        <input type="text" id="inventory-search-input" placeholder="Search for item...">
+                <div id="page-inventory" class="main-content hidden">
 
-                        <span>
-                            <input type="checkbox" id="inventory-in-stock">
-                            <label for="inventory-in-stock">In Stock</label>
-                        </span>
-
-                        <span>
-                            <select id="room-select">
-                                <option value="">----</option>
-                                <option value="Main">Main Makerspace</option>
-                                <option value="Laser3D">3D Printer & Laser Cutter Room</option>
-                                <option value="Studio">Studio</option>
-                                <option value="Cage">The Cage</option>
-                                <option value="Welding">Welding Area</option>
-                                <option value="Electronics">Electronics Benches</option>
-                                <option value="Composite">Composite Room</option>
-                                <option value="Outdoor Storage">Outdoor Storage</option>
-                            </select>
-                            <label for="room-select">Room/Area</label>
-                        </span>
-
-                        <span>
-                            <select id="tool-material-select">
-                                <option value="">----</option>
-                                <option value="T">Tool</option>
-                                <option value="M">Material</option>
-                            </select>
-                            <label for="tool-material-select">Tool/Material</label>
-                        </span>
-
-                        <button id="restock-button" onclick="showRestock()">Restock/Request Form</button>
-                    </div>
-
-                    <div id="inventory-results" class="content-body">
-
+                    <div class="content-container">
+                        <div id="inventory-search" class="content-header">
+                            <input type="text" id="inventory-search-input" placeholder="Search for item...">
+        
+                            <span>
+                                <input type="checkbox" id="inventory-in-stock">
+                                <label for="inventory-in-stock">In Stock</label>
+                            </span>
+        
+                            <span>
+                                <select id="room-select">
+                                    <option value="">-- Select Room/Area --</option>
+                                    <option value="Main">Main Makerspace</option>
+                                    <option value="Laser3D">3D Printer & Laser Cutter Room</option>
+                                    <option value="Studio">Studio</option>
+                                    <option value="Cage">The Cage</option>
+                                    <option value="Welding">Welding Area</option>
+                                    <option value="Electronics">Electronics Benches</option>
+                                    <option value="Composite">Composite Room</option>
+                                    <option value="Outdoor Storage">Outdoor Storage</option>
+                                </select>
+                            </span>
+        
+                            <span>
+                                <select id="tool-material-select">
+                                    <option value="">-- Select Tool/Material --</option>
+                                    <option value="T">Tool</option>
+                                    <option value="M">Material</option>
+                                </select>
+                            </span>
+        
+                            <button id="restock-button" onclick="showRestock()">Restock/Request Form</button>
+                        </div>
+        
+                        <div id="inventory-results" class="content-body">
+        
+                        </div>
                     </div>
                 </div>
 
@@ -120,8 +121,6 @@
                 <h1>Restock Request</h1>
                 <p3>
                     Restock notice emails are sent to the Makerspace Manager daily at 11pm PDT.
-                    <br>
-                    Your email address will be cc'd in case of any issues.
                 </p3>
     
                 <div id="restock-inputs">

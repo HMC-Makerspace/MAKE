@@ -1612,31 +1612,44 @@ Mobile Styles
 
 @media only screen and (max-width: 760px) {
   #main-grid {
-    grid-template-columns: 60px auto;
+    grid-template-areas: "sidebar" "main";
+    grid-template-columns: unset;
+    grid-template-rows: 60px auto;
   }
   
-  #left-bar button span {
-    display: none;
+  #left-bar {
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    overflow: hidden;
   }
 
-  .page-icon {
-    margin-right: 0px;
+  #left-bar.show {
+    height: 80%;
   }
 
-  #left-bar button {
-    justify-content: center;
-    padding: 0px;
-    height: 13vw;
+  #logo-container:hover > * {
+    letter-spacing: unset;
   }
 
-  #left-bar button img {
-    width: auto;
-    padding: 25%;
+  .hmc-content {
+    margin-bottom: 20px;
   }
 
   #logo-container {
     margin-bottom: 10px;
     margin-top: 10px;
+  }
+
+  #left-bar.show #logo-container {
+    color: var(--text-color-alt);
+  }
+
+  #left-bar.show #logo-container:hover {
+    color: var(--text-color-alt);
   }
 
   #current-announcement {
@@ -1654,7 +1667,9 @@ Mobile Styles
     font-weight: bold;
     font-family: var(--title-font);
     user-select: none; /* Standard */
-    font-size: 40px;
+    font-size: 60px;
+    line-height: 30px;
+    margin-bottom: 20px;
   }
 
   #welcome-message {
