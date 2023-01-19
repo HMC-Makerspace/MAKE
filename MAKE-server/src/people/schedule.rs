@@ -107,7 +107,13 @@ impl Schedule {
     pub fn censor_names(&mut self) {
         for day in &mut self.days {
             for shift in &mut day.shifts {
-                shift.stewards = vec!["Steward".to_string(); shift.stewards.len()];
+                // Only keep first name
+                shift.stewards = shift.stewards.iter().map(|x| {
+                    let mut split = x.split(" ");
+                    let first_name = split.next().unwrap();
+
+                    format!("{}", first_name)
+                }).collect();
             }
         }
     }

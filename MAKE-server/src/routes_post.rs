@@ -1,5 +1,4 @@
 use crate::*;
-use ::serde::{Deserialize};
 use actix_web::error::*;
 
 
@@ -9,14 +8,10 @@ use actix_web::error::*;
 =================
 */
 
-#[derive(Deserialize)]
-pub struct CheckoutItems {
-    items: Vec<String>,
-}
 #[post("/api/v1/checkouts/add_entry/{id_number}/{sec_length}/{api_key}")]
 pub async fn checkout_items(
     path: web::Path<(u64, u64, String)>,
-    body: web::Json<CheckoutItems>,
+    body: web::Json<Vec<CheckedOutItem>>,
 ) -> Result<HttpResponse, Error> {
     let (id_number, sec_length, api_key) = path.into_inner();
 
@@ -38,7 +33,7 @@ pub async fn checkout_items(
         data.checkout_log.add_checkout(CheckoutLogEntry::new(
             user.get_id(),
             sec_length,
-            body.items.clone(),
+            body.clone(),
         ));
 
         let _ = save_database().await;
@@ -77,7 +72,7 @@ pub async fn extend_checkout_by_uuid(path: web::Path<(String, u64, String)>) -> 
 #[post("/api/v1/checkouts/add_reservation/{id_number}/{start_time}/{sec_length}/{api_key}")]
 pub async fn reserve_items(
     path: web::Path<(u64, u64, u64, String)>,
-    body: web::Json<CheckoutItems>,
+    body: web::Json<Vec<CheckedOutItem>>,
 ) -> Result<HttpResponse, Error> {
     let (id_number, start_time, sec_length, api_key) = path.into_inner();
 
@@ -99,7 +94,7 @@ pub async fn reserve_items(
             user.get_id(),
             start_time,
             sec_length,
-            body.items.clone(),
+            body.clone(),
         ));
 
         Ok(HttpResponse::Ok()
@@ -394,6 +389,47 @@ pub async fn add_button_log(
         let button_record = button_record.into_inner();
 
         data.button_log.add(button_record);
+
+        Ok(HttpResponse::Ok()
+            .status(http::StatusCode::CREATED)
+            .finish())
+    } else {
+        Ok(HttpResponse::Unauthorized().finish())
+    }
+}
+
+#[post("/api/v1/inventory/edit_item/{api_key}")]
+pub async fn edit_inventory_item(
+    path: web::Path<String>,
+    item: web::Json<InventoryItem>,
+) -> Result<HttpResponse, Error> {
+    let api_key = path.into_inner();
+
+    if API_KEYS.lock().await.validate_checkout(&api_key) {
+        let mut data = MEMORY_DATABASE.lock().await;
+
+        let item = item.into_inner();
+
+        data.inventory.edit_create_item(item);
+
+        Ok(HttpResponse::Ok()
+            .status(http::StatusCode::CREATED)
+            .finish())
+    } else {
+        Ok(HttpResponse::Unauthorized().finish())
+    }
+}
+
+#[post("/api/v1/inventory/delete_item/{api_key}/{item_uuid}")]
+pub async fn delete_inventory_item(
+    path: web::Path<(String, String)>,
+) -> Result<HttpResponse, Error> {
+    let (api_key, item_uuid) = path.into_inner();
+
+    if API_KEYS.lock().await.validate_checkout(&api_key) {
+        let mut data = MEMORY_DATABASE.lock().await;
+
+        data.inventory.delete_item(&item_uuid);
 
         Ok(HttpResponse::Ok()
             .status(http::StatusCode::CREATED)

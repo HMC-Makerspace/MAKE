@@ -668,11 +668,20 @@ INVENTORY
   flex-direction: row;
   flex-wrap: wrap;
   align-items: left;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   max-height: 200px;
   transition: max-height 0.1s ease-in-out, margin-bottom 0.1s ease-in-out;
   overflow-y: hidden;
   row-gap: 10px;
+  position: relative;
+}
+
+.inventory-edit-button {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  width: 100%;
+  height: 30px;
 }
 
 .inventory-result-lower.not-shown {

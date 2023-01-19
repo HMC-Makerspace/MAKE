@@ -649,4 +649,8 @@ function displayErrorInCheckout(uuid) {
     el.classList.add("error");
 }
 
+function editItem(item) {
+    
+}
+
 authenticate();

@@ -2,7 +2,7 @@ const search_options = {
     limit: 1000, // don't return more results than you need!
     allowTypo: true, // if you don't care about allowing typos
     threshold: -10000, // don't return bad results
-    keys: ['name', 'specific_name', 'serial_number', 'model_number', 'brand', 'uuids_joined', 'kit'], // keys to search
+    keys: ['name', 'specific_name', 'serial_number', 'model_number', 'brand', 'barcodes_joined', 'kit'], // keys to search
     all: true,
 }
 
@@ -15,7 +15,7 @@ async function fetchInventory(kiosk_mode = false) {
         state.inventory = inventory;
 
         inventory.items.forEach((element, index) => {
-            element.uuids_joined = element.uuids.join(" ");
+            element.barcodes_joined = element.barcodes.join(" ");
             element.index = index;
         });
 
@@ -267,10 +267,10 @@ function generateInventoryDiv(result, kiosk_mode=false) {
         lower_div.appendChild(brand);
     }
 
-    if (item.uuids_joined !== "") {
+    if (item.barcodes_joined !== "") {
         const uuid = document.createElement("div");
         uuid.classList.add("inventory-result-lower-detail");
-        uuid.innerText = `UUID(s): ${item.uuids_joined}`;
+        uuid.innerText = `UUID(s): ${item.barcodes_joined}`;
         lower_div.appendChild(uuid);
     }
 
@@ -312,6 +312,16 @@ function generateInventoryDiv(result, kiosk_mode=false) {
         checkout_buttons.appendChild(checkout_button_more);
 
         main_div.appendChild(checkout_buttons);
+
+        // Add edit button
+        const edit_button = document.createElement("button");
+        edit_button.classList.add("inventory-edit-button");
+        edit_button.innerText = "Edit";
+        edit_button.addEventListener("click", () => {
+            editItem(item);
+        });
+
+        lower_div.appendChild(edit_button);
     }
 
     div.appendChild(main_div);

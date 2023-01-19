@@ -1,8 +1,12 @@
 use log::{info, warn};
 use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
+use uuid::Uuid;
 
-use crate::{inventory::checkout::CheckoutLogEntry, management::emails::send_individual_email, EMAIL_TEMPLATES, MAKERSPACE_MANAGER_EMAIL};
+use crate::{
+    inventory::checkout::CheckoutLogEntry, management::emails::send_individual_email,
+    EMAIL_TEMPLATES, MAKERSPACE_MANAGER_EMAIL,
+};
 
 const INVENTORY_URL: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTzvLVGN2H5mFpQLpstQyT5kgEu1CI8qlhY60j78mO0LQgDnTHs_ZKx39xiIO1h-w09ZXyOZ5GqOf5q/pub?gid=0&single=true&output=csv";
 
@@ -61,13 +65,10 @@ impl Inventory {
                     items.push(item);
                 }
             }
-            
 
             // Add is_kit to kits
             for kit_name in kits {
-                let pos = items
-                    .iter()
-                    .position(|x| x.name == kit_name);
+                let pos = items.iter().position(|x| x.name == kit_name);
 
                 let kit_items = items
                     .iter()
@@ -93,14 +94,23 @@ impl Inventory {
         }
     }
 
-    pub fn get_item_by_name(&self, name: &str) -> Option<InventoryItem> {
-        self.items.iter().find(|item| item.name == name).cloned()
-    }
-
     pub fn get_item_by_uuid(&self, uuid: &str) -> Option<InventoryItem> {
         self.items
             .iter()
-            .find(|item| item.uuids.contains(&uuid.to_string()))
+            .find(|item| item.uuid == uuid.to_string())
+            .cloned()
+    }
+
+    pub fn get_item_by_uuid_mut(&mut self, uuid: &str) -> Option<&mut InventoryItem> {
+        self.items
+            .iter_mut()
+            .find(|item| item.uuid == uuid.to_string())
+    }
+
+    pub fn get_item_by_barcodes(&self, barcode: &str) -> Option<InventoryItem> {
+        self.items
+            .iter()
+            .find(|item| item.barcodes.contains(&barcode.to_string()))
             .cloned()
     }
 
@@ -114,18 +124,34 @@ impl Inventory {
     }
 
     pub fn update_from_checkouts(&mut self, checkouts: &Vec<CheckoutLogEntry>) {
-        self.items = self
-            .items
-            .iter_mut()
-            .map(|item| {
-                let mut item = item.clone();
-                item.checked_quantity = checkouts
-                    .iter()
-                    .filter(|x| x.items.contains(&item.name))
-                    .count() as u64;
-                item
-            })
-            .collect();
+        for checkout in checkouts {
+            for item in &checkout.items {
+                // Get item by uuid
+                let inventory_item = self.get_item_by_uuid_mut(&item.uuid);
+
+                if let Some(inventory_item) = inventory_item {
+                    inventory_item.quantity -= 1;
+                }
+            }
+        }
+    }
+
+    pub fn edit_create_item(&mut self, item: InventoryItem) {
+        let pos = self.items.iter().position(|x| x.uuid == item.uuid);
+
+        if let Some(pos) = pos {
+            self.items[pos] = item;
+        } else {
+            self.items.push(item);
+        }
+    }
+
+    pub fn delete_item(&mut self, uuid: &str) {
+        let pos = self.items.iter().position(|x| x.uuid == uuid);
+
+        if let Some(pos) = pos {
+            self.items.remove(pos);
+        }
     }
 
     pub fn add_restock_notice(&mut self, notice: RestockNotice) {
@@ -180,7 +206,9 @@ impl Inventory {
 }
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[serde(default)]
 pub struct InventoryItem {
+    pub uuid: String,
     pub name: String,
     pub is_material: bool,
     pub is_tool: bool,
@@ -193,15 +221,19 @@ pub struct InventoryItem {
     pub serial_number: String,
     pub brand: String,
     pub model_number: String,
-    pub uuids: Vec<String>,
+    pub barcodes: Vec<String>,
     pub is_kit: bool,
     pub kit: Option<String>,
     pub kit_items: Vec<String>,
+    pub is_unique: bool,
+    pub unique_items: Vec<String>,
 }
 
 impl InventoryItem {
     pub fn new_from_line(line: Vec<String>) -> Self {
         InventoryItem {
+            // Generate UUID
+            uuid: Uuid::new_v4().to_string(),
             name: line[0].clone(),
             is_material: line[1] == "M",
             is_tool: line[1] == "T",
@@ -224,7 +256,7 @@ impl InventoryItem {
             serial_number: line[7].clone(),
             brand: line[8].clone(),
             model_number: line[9].clone(),
-            uuids: line[10]
+            barcodes: line[10]
                 .split(&[',', '\n'][..])
                 .map(|x| x.to_string())
                 .collect::<Vec<String>>(),
@@ -238,6 +270,8 @@ impl InventoryItem {
             },
             is_kit: false,
             kit_items: Vec::new(),
+            is_unique: false,
+            unique_items: Vec::new(),
         }
     }
 }

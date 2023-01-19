@@ -158,15 +158,13 @@ CHECKOUT
 
 #pages-select button {
     background-color: var(--theme-color-1);
-    border-radius: 10px;
     font-weight: bold;
     font-size: 1.2em;
-    transition: all .1s ease-in-out;
 }
 
 #pages-select button.selected {
     background-color: var(--theme-color-8);
-    border-radius: 30px;
+    transition: background-color .05 ease-in-out;
 }
 
 #pages-content {
@@ -184,7 +182,7 @@ CHECKOUT
 .inventory-result-checkout-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 5px;
     padding: 5px;
     margin: 10px;
     border-radius: var(--roundness);
