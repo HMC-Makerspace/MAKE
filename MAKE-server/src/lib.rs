@@ -64,7 +64,11 @@ const ADDRESS_HTTP: &str = "0.0.0.0:8080";
 const ADDRESS_HTTPS: &str = "0.0.0.0:8443";
 
 const SMTP_URL: &str = "smtp.gmail.com";
+#[cfg(debug_assertions)]
+const MAKERSPACE_MANAGER_EMAIL: &str = "evazquez@g.hmc.edu";
+#[cfg(not(debug_assertions))]
 const MAKERSPACE_MANAGER_EMAIL: &str = "kneal@g.hmc.edu";
+
 const UPDATE_INTERVAL: u64 = 60;
 const TIME_SEND_EMAIL_HOUR: u32 = 6; // 6am UTC, eg 11pm PDT
                                      // Initial checkout period of 1 month
@@ -381,6 +385,7 @@ async fn async_main() -> std::io::Result<()> {
             .service(get_schedule_api_key)
             .service(extend_checkout_by_uuid)
             .service(get_workshops)
+            .service(add_user_restock_notice)
             .service(ResourceFiles::new("/", generate()))
     });
 
@@ -438,7 +443,7 @@ async fn update_loop() {
 
         if now_time.hour() < TIME_SEND_EMAIL_HOUR {
             inventory.sent_restock_notice = false;
-        } else if inventory.sent_restock_notice == false && now_time.hour() >= TIME_SEND_EMAIL_HOUR
+        } else if (inventory.sent_restock_notice == false && now_time.hour() >= TIME_SEND_EMAIL_HOUR) || cfg!(debug_assertions)
         {
             inventory.send_restock_notice().await;
         }

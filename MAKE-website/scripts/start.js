@@ -35,6 +35,12 @@ async function start() {
     fetchSchedule();
     fetchWorkshops();
     //fetchPrinters();
+
+    document.getElementById("restock-dialog").addEventListener("click", function (event) {
+        if (event.target.id === "restock-dialog") {
+            hideRestock()
+        }
+    });
 }
 
 start();

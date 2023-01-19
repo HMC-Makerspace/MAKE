@@ -760,6 +760,59 @@ INVENTORY
   background-color: var(--high-color);
 }
 
+#restock-button {
+  color: var(--text-color-alt);
+}
+
+#restock-dialog {
+  color: var(--text-color-main);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: unset;
+}
+
+#restock-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--theme-color-2);
+  color: var(--text-color-main);
+  padding-bottom: 20px;
+}
+
+#restock-dialog::after {
+content: ''; 
+width: 100%; 
+height: 100%;
+background-color: var(--theme-color-5); 
+opacity: 0.95; 
+position: absolute; 
+top: 0; 
+left: 0;
+z-index: -1;
+}
+
+#restock-inputs {
+  display: grid;
+  grid-template-rows: .5fr 1fr .5fr 1fr .5fr 1fr .5fr 1fr;
+  gap: 10px;
+  padding: 10px;
+}
+
+.error{
+  background-color: var(--printer-error) !important;
+  animation: pulse .5s infinite;
+}
+
 /*
 
 Student Storage
@@ -1100,6 +1153,11 @@ Checkouts
 .checkout-entry.error .check-in-button {
   background-color: var(--printer-error);
   animation: pulse 0.2s infinite;
+}
+
+.success {
+  background-color: var(--high-color);
+  animation: pulse .2s infinite;
 }
 
 /*

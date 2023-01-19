@@ -161,15 +161,11 @@ impl Inventory {
     pub async fn send_restock_notice(&mut self) {
         self.sent_restock_notice = true;
 
-        let mut emails: Vec<String> = Vec::new();
-        let items: Vec<String> = self
-            .needs_restock
+        let mut steward_items: Vec<String> = self.needs_restock
             .iter_mut()
-            .filter(|x| x.notified == false)
+            .filter(|x| x.notified == false && x.authorized == true)
             .map(|x| {
                 x.notified = true;
-
-                emails.push(x.steward_email.clone());
 
                 format!(
                     "<tr style=\"border: 1px solid black; border-collapse: collapse;\">
@@ -179,10 +175,37 @@ impl Inventory {
                         <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td> 
                         <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td>
                     </tr>",
-                    x.name, x.current_quantity, x.requested_quantity, x.notes, x.steward_email
+                    x.name, x.current_quantity, x.requested_quantity, x.notes, x.email
                 )
             })
             .collect();
+            
+        steward_items.push("<h3>Users Request</h3>".to_string());
+        
+        let user_items: Vec<String> = self.needs_restock
+            .iter_mut()
+            .filter(|x| x.notified == false && x.authorized == false)
+            .map(|x| {
+                x.notified = true;
+
+                format!(
+                    "<tr style=\"border: 1px solid black; border-collapse: collapse;\">
+                        <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td>
+                        <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td>
+                        <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td>
+                        <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td> 
+                        <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td>
+                    </tr>",
+                    x.name, x.current_quantity, x.requested_quantity, x.notes, x.email
+                )
+            })
+            .collect();
+
+        let items = steward_items
+            .iter()
+            .map(|x| x.clone())
+            .chain(user_items.iter().map(|x| x.clone()))
+            .collect::<Vec<String>>();
 
         if items.is_empty() {
             return;
@@ -191,7 +214,7 @@ impl Inventory {
 
             let _ = send_individual_email(
                 MAKERSPACE_MANAGER_EMAIL.to_string(),
-                Some(emails),
+                None,
                 "Restock Notice".to_string(),
                 EMAIL_TEMPLATES
                     .lock()
@@ -283,5 +306,6 @@ pub struct RestockNotice {
     pub requested_quantity: String,
     pub notes: String,
     pub notified: bool,
-    pub steward_email: String,
+    pub email: String,
+    pub authorized: bool,
 }

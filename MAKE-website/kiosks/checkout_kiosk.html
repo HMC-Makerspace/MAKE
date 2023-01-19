@@ -86,7 +86,7 @@
                             <label for="tool-material-select">Tool/Material</label>
                         </span>
 
-                        <button onclick="showRestock()">Restock</button>
+                        <button id="restock-button" onclick="showRestock()">Restock/Request Form</button>
                     </div>
 
                     <div id="inventory-results" class="content-body">
@@ -116,27 +116,29 @@
         </div>
 
         <div id="restock-dialog" class="hidden">
-            <h1>Restock Request</h1>
-            <p3>
-                Restock notice emails are sent to the Makerspace Manager daily at 11pm PDT.
-                <br>
-                Your email address will be cc'd in case of any issues.
-            </p3>
-
-            <div id="restock-inputs">
-                <label for="restock-email-name">Your Email</label>
-                <input type="text" id="restock-email-name" placeholder="Your Email">
-                <label for="restock-item-input">Item Name</label>
-                <input type="text" id="restock-item-input" placeholder="Item Name">
-                <label for="restock-quantity-input">Current Quantity</label>
-                <input type="text" id="restock-current-quantity-input" placeholder="Current Quantity">
-                <label for="restock-quantity-input">Requested Quantity</label>
-                <input type="text" id="restock-new-quantity-input" placeholder="New Quantity">
-                <label for="restock-reason-input">Additional Notes</label>
-                <input type="text" id="restock-notes-input" placeholder="Additional Notes">
+            <div id="restock-box">
+                <h1>Restock Request</h1>
+                <p3>
+                    Restock notice emails are sent to the Makerspace Manager daily at 11pm PDT.
+                    <br>
+                    Your email address will be cc'd in case of any issues.
+                </p3>
+    
+                <div id="restock-inputs">
+                    <label for="restock-email-name">Your Email</label>
+                    <input type="text" id="restock-email-name" placeholder="Your Email">
+                    <label for="restock-item-input">Item Name</label>
+                    <input type="text" id="restock-item-input" placeholder="Item Name">
+                    <label for="restock-quantity-input">Current Quantity</label>
+                    <input type="text" id="restock-current-quantity-input" placeholder="Current Quantity">
+                    <label for="restock-quantity-input">Requested Quantity</label>
+                    <input type="text" id="restock-new-quantity-input" placeholder="New Quantity">
+                    <label for="restock-reason-input">Additional Notes</label>
+                    <input type="text" id="restock-notes-input" placeholder="Additional Notes">
+                </div>
+    
+                <button onclick="submitRestockNotice()">Submit</button>
             </div>
-
-            <button onclick="submitRestockNotice()">Submit</button>
         </div>
 
     </div>

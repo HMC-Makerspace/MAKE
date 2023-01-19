@@ -376,6 +376,24 @@ pub async fn add_restock_notice(
     }
 }
 
+#[post("/api/v1/inventory/add_restock_notice_user")]
+pub async fn add_user_restock_notice(
+    body: web::Json<RestockNotice>,
+) -> Result<HttpResponse, Error> {
+    let mut data = MEMORY_DATABASE.lock().await;
+
+    let mut notice = body.into_inner();
+
+    notice.authorized = false;
+
+    data.inventory.add_restock_notice(notice);
+
+    Ok(HttpResponse::Ok()
+        .status(http::StatusCode::CREATED)
+        .finish())
+}
+
+
 #[post("/api/v1/usage/add_button_log/{api_key}")]
 pub async fn add_button_log(
     path: web::Path<String>,

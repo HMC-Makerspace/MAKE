@@ -25,7 +25,7 @@ async function fetchInventory(kiosk_mode = false) {
     }
 }
 
-function submitSearch(kiosk_mode=false) {
+function submitSearch(kiosk_mode = false) {
     const search = document.getElementById("inventory-search-input").value;
 
     const filters = getInventoryFilters();
@@ -93,7 +93,7 @@ function searchInventory(search, filters = null) {
     return results_norm;
 }
 
-function generateInventoryDivs(results, kiosk_mode=false) {
+function generateInventoryDivs(results, kiosk_mode = false) {
     const divs = [];
 
     divs.push(generateInventoryHeader(kiosk_mode));
@@ -105,7 +105,7 @@ function generateInventoryDivs(results, kiosk_mode=false) {
     return divs;
 }
 
-function generateInventoryHeader(kiosk_mode=false) {
+function generateInventoryHeader(kiosk_mode = false) {
     const div = document.createElement("div");
     div.classList.add("inventory-result");
     div.classList.add("header");
@@ -132,7 +132,7 @@ function generateInventoryHeader(kiosk_mode=false) {
     const location = document.createElement("div");
     location.classList.add("inventory-header-location");
     location.innerHTML = "Location";
-    
+
     const quantity = document.createElement("div");
     quantity.classList.add("inventory-header-quantity");
     quantity.innerHTML = "Quantity";
@@ -151,7 +151,7 @@ function generateInventoryHeader(kiosk_mode=false) {
     return div;
 }
 
-function generateInventoryDiv(result, kiosk_mode=false) {
+function generateInventoryDiv(result, kiosk_mode = false) {
     let div = document.createElement("div");
     div.classList.add("inventory-result");
 
@@ -163,7 +163,7 @@ function generateInventoryDiv(result, kiosk_mode=false) {
 
     div.id = `inventory-result-${item.index}`;
 
-    
+
     if (item.is_kit === true) {
         div.classList.add("kit");
 
@@ -328,4 +328,109 @@ function generateInventoryDiv(result, kiosk_mode=false) {
     div.appendChild(lower_div);
 
     return div;
-}  
+}
+
+
+function hideRestock() {
+    document.getElementById("restock-dialog").classList.add("hidden");
+}
+
+function showRestock() {
+    const els = document.getElementById("restock-inputs").getElementsByTagName("input");
+
+    for (let el of els) {
+        el.value = "";
+        el.classList.remove("error");
+        el.classList.remove("success");
+    }
+
+    document.getElementById("restock-dialog").classList.remove("hidden");
+}
+
+async function submitRestockNotice() {
+    const inputs = document.getElementById("restock-inputs").getElementsByTagName("input");
+
+    const email = inputs[0].value;
+    const name = inputs[1].value;
+    const current_quantity = inputs[2].value;
+    const requested_quantity = inputs[3].value;
+    const notes = inputs[4].value;
+
+    let is_error = false;
+
+    if (email === "") {
+        inputs[0].classList.add("error");
+        is_error = true;
+    }
+
+    if (name.trim() === "") {
+        inputs[1].classList.add("error");
+        is_error = true;
+    }
+
+    if (current_quantity.trim() === "") {
+        inputs[2].classList.add("error");
+        is_error = true;
+    }
+
+    if (requested_quantity.trim() === "") {
+        inputs[3].classList.add("error");
+        is_error = true;
+    }
+
+    if (is_error === true) {
+        setTimeout(() => {
+            for (let el of inputs) {
+                el.classList.remove("error");
+            }
+        }, 400);
+        return;
+    }
+
+    let response;
+
+    let api_key_exists = typeof api_key !== "undefined";
+
+    const body = JSON.stringify({
+        name: name,
+        current_quantity: current_quantity,
+        requested_quantity: requested_quantity,
+        notes: notes,
+        notified: false,
+        email: email,
+        authorized: api_key_exists,
+    });
+
+    if (api_key_exists) {
+        response = await fetch(`${API}/inventory/add_restock_notice/${api_key}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: body,
+        });
+    } else {
+        response = await fetch(`${API}/inventory/add_restock_notice_user`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: body,
+        });
+    }
+
+    
+
+    if (response.status === 201) {
+        for (let input of inputs) {
+            input.classList.add("success")
+        }
+
+        setTimeout(() => {
+            hideRestock();
+            fetchInventory(kiosk_mode = true);
+        }, 400);
+    } else {
+        alert(result.message);
+    }
+}
