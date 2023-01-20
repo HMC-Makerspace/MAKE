@@ -42,7 +42,7 @@ pub async fn checkout_items(
         ));
 
         drop(data);
-        
+
         let _ = save_database().await;
 
         Ok(HttpResponse::Ok()
@@ -124,7 +124,9 @@ pub async fn checkin_items(
         let result = data.checkout_log.check_in(uuid);
     
         drop(data);
-    
+        
+        let _ = save_database().await;
+
         if result.is_err() {
             return Err(ErrorBadRequest("Checkout not found".to_string()));
         }
