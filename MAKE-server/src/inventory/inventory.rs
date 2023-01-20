@@ -266,6 +266,7 @@ impl InventoryItem {
 }
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[serde(default)]
 pub struct RestockNotice {
     pub name: String,
     pub current_quantity: String,
