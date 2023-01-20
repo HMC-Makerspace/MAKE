@@ -42,7 +42,7 @@ function parseCollegeID(collegeID) {
     }
 }
 
-function setPage(page) {
+function setPage(page, create_history = true) {
     const all_pages = document.getElementsByClassName("main-content");
     for (let i = 0; i < all_pages.length; i++) {
         all_pages[i].classList.add("hidden");
@@ -60,15 +60,28 @@ function setPage(page) {
         button.classList.add("active-button");
     }
 
-    // Add to url params
-    const url = new URL(window.location.href);
-    url.searchParams.set("p", page);
-    window.history.pushState({}, "", url.href);
+    if (create_history) {
+        // Add to url params
+        const url = new URL(window.location.href);
+        url.searchParams.set("p", page);
+        window.history.pushState({}, "", url.href);
+    }
 
     const menu = document.getElementById('left-bar');
 
     menu.classList.remove('show');
 
+}
+
+function onHashChange() {
+    const url = new URL(window.location.href);
+    const page = url.searchParams.get("p");
+
+    if (page) {
+        setPage(page, false);
+    } else {
+        setPage("home", false);
+    }
 }
 
 function removeAllChildren(element, keep_first_n = 0) {

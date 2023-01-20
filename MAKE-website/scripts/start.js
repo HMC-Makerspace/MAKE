@@ -18,7 +18,7 @@ async function start() {
     if (page !== null) {
         setPage(page);
     }
-    
+
     setInterval(fetchInventory, 100000);
     setInterval(fetchStudentStorage, 10000);
     setInterval(fetchSchedule, 100000);
@@ -41,6 +41,9 @@ async function start() {
             hideRestock()
         }
     });
-}
+
+}   
+
+window.onpopstate = onHashChange;
 
 start();

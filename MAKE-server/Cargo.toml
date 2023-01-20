@@ -2,7 +2,7 @@
 name = "MAKE-server"
 version = "1.0.0"
 edition = "2021"
-
+default-run = "server"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bin]]
