@@ -79,8 +79,6 @@ function createCheckoutDiv(checkout, kiosk_mode = false) {
         let name = document.createElement("div");
         name.classList.add("checkout-entry-name");
 
-        console.log(state.users);
-
         if (state.users !== null) {
             name.innerHTML = `${state.users[checkout.college_id].name ?? checkout.college_id}`;
         } else {

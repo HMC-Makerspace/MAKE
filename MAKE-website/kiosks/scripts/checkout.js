@@ -37,10 +37,12 @@ async function authenticate() {
     });
 
     fetchUsers().then(() => {
-        for (let i = 0; i < state.users.length; i++) {
-            state.users.college_id_str = state.users[i].college_id.toString();
+        for (let key of Object.keys(state.users)) {
+            state.users[key].college_id_str = state.users[key].college_id.toString();
         }
         
+        console.log(state.users);
+
         submitUserSearch();
         document.getElementById("users-search-input").addEventListener("keyup", submitUserSearch);
         fetchCheckouts();
@@ -477,8 +479,6 @@ async function commitReservation() {
     // Get the date to start from
     const date_el = document.getElementById("reserve-date");
     const date = date_el.value;
-
-    console.log(date);
 
     if (date === "") {
         date_el.classList.add("error");
