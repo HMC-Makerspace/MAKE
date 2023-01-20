@@ -1603,6 +1603,10 @@ Mobile Styles
 */
 
 @media only screen and (max-width: 760px) {
+  .main-content {
+    height: calc(100vh - 60px);
+  }
+
   #main-grid {
     grid-template-areas: "sidebar" "main";
     grid-template-columns: unset;

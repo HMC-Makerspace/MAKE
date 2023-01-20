@@ -1,7 +1,7 @@
 use uuid::Uuid;
 
 use crate::*;
-use std::{time::SystemTime, fmt::{Display, Formatter}};
+use std::time::SystemTime;
 
 /// Struct that handles the checkout process.
 /// 
@@ -82,7 +82,7 @@ impl CheckoutLog {
 /// Contains the following fields:
 /// - `college_id`: the ID of the user
 /// - `checkout_uuid`: A UUID that identifies the transaction.
-/// - `items`: A list of the items that were checked out
+/// - `items`: A list of the items that were checked out.
 /// - `checked_in`: Whether or not the items have been checked in.
 /// - `timestamp_checked_out`: The time the items were checked out.
 /// - `timestamp_checked_in`: The time the items were checked in.
@@ -92,7 +92,7 @@ impl CheckoutLog {
 pub struct CheckoutLogEntry {
     pub college_id: u64,
     pub checkout_uuid: String,
-    pub items: Vec<CheckedOutItem>,
+    pub items: Vec<String>,
     pub checked_in: bool,
     pub timestamp_checked_out: u64,
     pub timestamp_expires: u64,
@@ -100,24 +100,8 @@ pub struct CheckoutLogEntry {
     pub num_time_notified: u64,
 }
 
-#[derive(Default, Deserialize, Serialize, Clone, Debug)]
-pub struct CheckedOutItem {
-    pub uuid: String,
-    pub unique_name: Option<String>,
-}
-
-impl Display for CheckedOutItem {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if let Some(name) = &self.unique_name {
-            write!(f, "{}", name)
-        } else {
-            write!(f, "{}", self.uuid)
-        }
-    }
-}
-
 impl CheckoutLogEntry {
-    pub fn new(college_id: u64, length: u64, items: Vec<CheckedOutItem>) -> Self {
+    pub fn new(college_id: u64, length: u64, items: Vec<String>) -> Self {
         let now = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
         let expires = now + length;
         let checkout_uuid = Uuid::new_v4().to_string();
@@ -133,7 +117,7 @@ impl CheckoutLogEntry {
         }
     }
 
-    pub fn new_reservation(college_id: u64, start_time: u64, length: u64, items: Vec<CheckedOutItem>) -> Self {
+    pub fn new_reservation(college_id: u64, start_time: u64, length: u64, items: Vec<String>) -> Self {
         let expires = start_time + length;
         let checkout_uuid = Uuid::new_v4().to_string();
         CheckoutLogEntry {

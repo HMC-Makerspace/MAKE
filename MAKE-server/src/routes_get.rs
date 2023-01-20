@@ -67,22 +67,6 @@ async fn handler(req: HttpRequest) -> HttpResponse {
 }
 
 /*
-
-HELP
-
-*/
-
-/// Returns help page in ../Documentation/openapi/help.html
-#[get("/api/v1/help")]
-pub async fn help() -> Result<HttpResponse, Error> {
-    let resp = HttpResponse::Ok()
-        .content_type("text/html")
-        .body(include_str!("../../Documentation/api.md"));
-
-    Ok(resp)
-}
-
-/*
 ================
     GET REQUESTS
 ================
@@ -255,10 +239,8 @@ pub async fn get_printers_api_key(path: web::Path<String>) -> Result<HttpRespons
 #[get("/api/v1/schedule")]
 pub async fn get_schedule() -> Result<HttpResponse, Error> {
     let data = MEMORY_DATABASE.lock().await;
-    let mut schedule = data.schedule.clone();
+    let schedule = data.schedule.clone();
     drop(data);
-
-    schedule.censor_names();
 
     Ok(HttpResponse::Ok().json(schedule))
 }
@@ -270,7 +252,6 @@ pub async fn get_schedule_api_key(path: web::Path<String>) -> Result<HttpRespons
     {
         let data = MEMORY_DATABASE.lock().await;
         let schedule = data.schedule.clone();
-        drop(data);
         Ok(HttpResponse::Ok().json(schedule))
     } else {
         Ok(HttpResponse::Unauthorized().finish())
