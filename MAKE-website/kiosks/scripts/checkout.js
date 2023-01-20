@@ -41,8 +41,6 @@ async function authenticate() {
             state.users[key].college_id_str = state.users[key].college_id.toString();
         }
         
-        console.log(state.users);
-
         submitUserSearch();
         document.getElementById("users-search-input").addEventListener("keyup", submitUserSearch);
         fetchCheckouts();
