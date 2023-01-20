@@ -41,6 +41,10 @@ pub async fn checkout_items(
             body.items.clone(),
         ));
 
+        drop(data);
+        
+        let _ = save_database().await;
+
         Ok(HttpResponse::Ok()
             .status(http::StatusCode::CREATED)
             .finish())
