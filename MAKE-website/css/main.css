@@ -516,7 +516,7 @@ INVENTORY
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 40px;
+  gap: 20px;
   padding: 20px;
 }
 
@@ -615,7 +615,7 @@ INVENTORY
   background-position: center;
   filter: invert(var(--invert));
   background-image: var(--details-icon);
-  transition: transform 0.2s ease-in-out;
+  transition: transform 0.1s ease-in-out;
   --r: 0deg;
   --s: 1;
   transform: rotate(var(--r)) scale(var(--s));
@@ -674,14 +674,6 @@ INVENTORY
   overflow-y: hidden;
   row-gap: 10px;
   position: relative;
-}
-
-.inventory-edit-button {
-  position: absolute;
-  bottom: 5px;
-  left: 5px;
-  width: 100%;
-  height: 30px;
 }
 
 .inventory-result-lower.not-shown {

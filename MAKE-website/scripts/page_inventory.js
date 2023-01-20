@@ -312,16 +312,6 @@ function generateInventoryDiv(result, kiosk_mode = false) {
         checkout_buttons.appendChild(checkout_button_more);
 
         main_div.appendChild(checkout_buttons);
-
-        // Add edit button
-        const edit_button = document.createElement("button");
-        edit_button.classList.add("inventory-edit-button");
-        edit_button.innerText = "Edit";
-        edit_button.addEventListener("click", () => {
-            editItem(item);
-        });
-
-        lower_div.appendChild(edit_button);
     }
 
     div.appendChild(main_div);

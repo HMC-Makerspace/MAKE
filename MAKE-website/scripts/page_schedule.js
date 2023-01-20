@@ -104,14 +104,6 @@ function generateScheduleShiftDiv(shift) {
             shift_div.classList.add(toCSSSafeString(proficiency));
         }
 
-        shift_div.addEventListener("mouseover", () => {
-            highlightSourceProfs(shift.proficiencies);
-        });
-
-        shift_div.addEventListener("mouseleave", () => {
-            removeHighlightProficiency();
-        });
-
         shift_div.addEventListener("click", () => {
             removeHighlightProficiency();
             highlightSourceProfs(shift.proficiencies);
@@ -143,19 +135,10 @@ function generateProficiencyDivs(proficiencies) {
         el.classList.add(css_safe_prof);
         el.innerText = proficiency;
 
-        el.addEventListener("mouseover", () => {
-            removeHighlightProficiency();
-            highlightProficiency(proficiency);
-        });
-
         el.addEventListener("click", () => {
             removeHighlightProficiency();
             highlightProficiency(proficiency);
         })
-
-        el.addEventListener("mouseleave", () => {
-            removeHighlightProficiency();
-        });
 
         profs.push(el);
     }
