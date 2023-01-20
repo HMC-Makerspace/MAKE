@@ -37,6 +37,10 @@ async function authenticate() {
     });
 
     fetchUsers().then(() => {
+        for (let i = 0; i < state.users.length; i++) {
+            state.users.college_id_str = state.users[i].college_id.toString();
+        }
+        
         submitUserSearch();
         document.getElementById("users-search-input").addEventListener("keyup", submitUserSearch);
         fetchCheckouts();
@@ -92,7 +96,7 @@ const user_search_options = {
     limit: 1000, // don't return more results than you need!
     allowTypo: true, // if you don't care about allowing typos
     threshold: -10000, // don't return bad results
-    keys: ['name', 'college_id', 'college_email', 'auth_level'], // keys to search
+    keys: ['name', 'college_id_str', 'college_email', 'auth_level'], // keys to search
     all: true,
 }
 
