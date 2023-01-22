@@ -51,7 +51,7 @@ impl Schedule {
                     for (i, cell) in result.iter().enumerate().skip(1) {
                         let mut current_shift = shift.clone();
                         
-                        if cell.trim().len() > 0 {
+                        if cell.trim().len() > 0 && i - 1 < days.len() {
                             current_shift.stewards = cell.split(",").map(|x| x.trim().to_string()).collect();
                             current_shift.num_stewards = current_shift.stewards.len() as u32;
     

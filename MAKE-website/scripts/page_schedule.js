@@ -106,6 +106,7 @@ function generateScheduleShiftDiv(shift) {
 
         shift_div.addEventListener("click", () => {
             removeHighlightProficiency();
+            shift_div.classList.add("highlight");
             highlightSourceProfs(shift.proficiencies);
         });
     }  

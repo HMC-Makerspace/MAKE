@@ -10,7 +10,6 @@ use actix_cors::*;
 use actix_web::rt::spawn;
 use actix_web::*;
 use actix_web_static_files::ResourceFiles;
-use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
 
 use chrono::Timelike;
 use chrono::Utc;
@@ -60,8 +59,8 @@ use tokio::sync::Mutex;
 
 // Debug vs release addresses
 const ADDRESS_LOCAL: &str = "127.0.0.1:8080";
-const ADDRESS_HTTP: &str = "0.0.0.0:8080";
-const ADDRESS_HTTPS: &str = "0.0.0.0:8443";
+const ADDRESS_HTTP: &str = "0.0.0.0:80";
+const ADDRESS_HTTPS: &str = "0.0.0.0:443";
 
 const SMTP_URL: &str = "smtp.gmail.com";
 #[cfg(debug_assertions)]
@@ -272,7 +271,7 @@ pub async fn load_api_keys() -> Result<(), Error> {
 /// Main function to run both actix_web server and API update loop
 /// API update loops lives inside a tokio thread while the actix_web
 /// server is run in the main thread and blocks until done.
-async fn async_main() -> std::io::Result<()> {
+async fn async_main(args: Vec<String>) -> std::io::Result<()> {
     // Print startup text
     info!("Starting up...");
     println!("██████████████████████████████████████████████████████████████");
@@ -280,6 +279,7 @@ async fn async_main() -> std::io::Result<()> {
     println!("Version {}", VERSION_STRING);
     println!("██████████████████████████████████████████████████████████████");
 
+    println!("Webhost: {}", args[1]);
     // Load api keys
     load_api_keys().await.expect("Could not load API keys!");
 
@@ -320,28 +320,25 @@ async fn async_main() -> std::io::Result<()> {
     });
 
     let builder;
-    let redirect_scheme;
 
     if cfg!(debug_assertions) {
         info!("Starting DEBUG server on {}", ADDRESS_LOCAL);
         builder = None;
-        redirect_scheme = RedirectSchemeBuilder::new().enable(false).build();
     } else {
         info!("Starting PROD server on {} and {}", ADDRESS_HTTP, ADDRESS_HTTPS);
 
         let mut temp_builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
         temp_builder
             .set_private_key_file(
-                "/etc/letsencrypt/live/make.hmc.edu/privkey.pem",
+                format!("/etc/letsencrypt/live/{}/privkey.pem", args[1]),
                 SslFiletype::PEM,
             )
             .unwrap();
             temp_builder
-            .set_certificate_chain_file("/etc/letsencrypt/live/make.hmc.edu/fullchain.pem")
+            .set_certificate_chain_file(format!("/etc/letsencrypt/live/{}/fullchain.pem", args[1]))
             .unwrap();
 
         builder = Some(temp_builder);
-        redirect_scheme = RedirectSchemeBuilder::new().enable(true).replacements(&[(":8080", ":8443")]).build();
     }
     // Create builder without ssl
     let server = HttpServer::new(move || {
@@ -353,7 +350,6 @@ async fn async_main() -> std::io::Result<()> {
             .max_age(3600);
 
         App::new()
-            .wrap(redirect_scheme.clone())
             .wrap(actix_web::middleware::Logger::new(LOGGER_STR))
             .wrap(actix_web::middleware::Compress::default())
             .wrap(cors)
@@ -396,6 +392,8 @@ async fn async_main() -> std::io::Result<()> {
     }
 }
 pub fn main() {
+    let args = std::env::args().collect::<Vec<String>>();
+
     std::env::set_var("RUST_LOG", "info, actix_web=trace");
     env_logger::init();
 
@@ -414,7 +412,7 @@ pub fn main() {
             .build()
             .unwrap()
     })
-    .block_on(async_main());
+    .block_on(async_main(args));
 }
 
 async fn update_loop() {
