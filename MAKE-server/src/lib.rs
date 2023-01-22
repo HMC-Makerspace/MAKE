@@ -386,7 +386,7 @@ async fn async_main(args: Vec<String>) -> std::io::Result<()> {
     });
 
     if builder.is_some() {
-        return server.bind(ADDRESS_HTTP)?.bind_openssl(ADDRESS_HTTPS, builder.unwrap())?.run().await
+        return server.bind_openssl(ADDRESS_HTTPS, builder.unwrap())?.bind(ADDRESS_HTTP)?.run().await
     } else {
         return server.bind(ADDRESS_LOCAL)?.run().await
     }
