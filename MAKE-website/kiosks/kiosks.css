@@ -73,7 +73,7 @@ STUDENT STORAGE
 
 #slot-selected {
     color: var(--text-color-alt);
-    background-color: var(--theme-color-3);
+    background-color: var(--theme-color-1);
     border-radius: var(--roundness);
     padding: 5px;
 }
