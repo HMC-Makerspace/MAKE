@@ -404,6 +404,7 @@ a:visited {
   display: flex;
   flex-direction: column;
   background-color: var(--theme-color-5);
+  height: 100%;
 }
 
 .content-header {

@@ -10,6 +10,7 @@ use actix_cors::*;
 use actix_web::rt::spawn;
 use actix_web::*;
 use actix_web_static_files::ResourceFiles;
+use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
 
 use chrono::Timelike;
 use chrono::Utc;
@@ -59,8 +60,8 @@ use tokio::sync::Mutex;
 
 // Debug vs release addresses
 const ADDRESS_LOCAL: &str = "127.0.0.1:8080";
-const ADDRESS_HTTP: &str = "0.0.0.0:80";
-const ADDRESS_HTTPS: &str = "0.0.0.0:443";
+const ADDRESS_HTTP: &str = "0.0.0.0:8080";
+const ADDRESS_HTTPS: &str = "0.0.0.0:8443";
 
 const SMTP_URL: &str = "smtp.gmail.com";
 #[cfg(debug_assertions)]
@@ -320,10 +321,12 @@ async fn async_main(args: Vec<String>) -> std::io::Result<()> {
     });
 
     let builder;
+    let redirect_scheme;
 
     if cfg!(debug_assertions) {
         info!("Starting DEBUG server on {}", ADDRESS_LOCAL);
         builder = None;
+        redirect_scheme = RedirectSchemeBuilder::new().enable(false).build();
     } else {
         info!("Starting PROD server on {} and {}", ADDRESS_HTTP, ADDRESS_HTTPS);
 
@@ -339,6 +342,7 @@ async fn async_main(args: Vec<String>) -> std::io::Result<()> {
             .unwrap();
 
         builder = Some(temp_builder);
+        redirect_scheme = RedirectSchemeBuilder::new().enable(true).replacements(&[(":8080", ":8443")]).build();
     }
     // Create builder without ssl
     let server = HttpServer::new(move || {
@@ -351,6 +355,7 @@ async fn async_main(args: Vec<String>) -> std::io::Result<()> {
 
         App::new()
             .wrap(actix_web::middleware::Logger::new(LOGGER_STR))
+            .wrap(redirect_scheme)
             .wrap(actix_web::middleware::Compress::default())
             .wrap(cors)
             .service(status)
