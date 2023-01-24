@@ -354,8 +354,8 @@ async fn async_main(args: Vec<String>) -> std::io::Result<()> {
             .max_age(3600);
 
         App::new()
+            .wrap(redirect_scheme.clone())
             .wrap(actix_web::middleware::Logger::new(LOGGER_STR))
-            .wrap(redirect_scheme)
             .wrap(actix_web::middleware::Compress::default())
             .wrap(cors)
             .service(status)
