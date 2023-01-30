@@ -156,6 +156,7 @@ const welding_area_equipment = [
         name: "Miller Multimatic 215 Multiprocess Welder",
         description: "The Miller Multimatic 215 is a multiprocess welder that can be used to weld steel, aluminum, and stainless steel. It can be used to weld with MIG, Flux-Cored, Stick, and TIG processes. It can also be used to cut steel with an oxy-fuel torch.",
         image: "img/equipment/multimatic215.webp",
+        manual: "https://docs.google.com/document/d/13k30JUPOOKK707lYuoaa8Pd3ICvUOBFMly4v8zQqU-Y/edit"
     }
 ];
 
