@@ -105,7 +105,7 @@ const main_area_equipment = [
         name: "Juki Leather Sewing Machine",
         description: "Our leather sewing machine is a Juki DNU-1541 Industrial Walking Foot Leather Sewing Machine. It can be used to sew through almost any thick material, such as leather or several layers of fabric.",
         image: "img/equipment/jukileather.webp",
-        manual: ""
+        manual: "https://docs.google.com/document/d/1yd2rw5y6qqGc4TxY96SvBxB6GHxCRw89vDVzAFOLSls/edit"
     },
     {
         name: "Sewing Machines",
