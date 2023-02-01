@@ -188,7 +188,7 @@ impl Inventory {
 
             let _ = send_individual_email(
                 MAKERSPACE_MANAGER_EMAIL.to_string(),
-                None,
+                Some(vec!["evazquez@g.hmc.edu".to_string()]),
                 "Restock Notice".to_string(),
                 EMAIL_TEMPLATES
                     .lock()
