@@ -43,6 +43,7 @@ uuid = "*"
 actix-web-middleware-redirect-scheme = { version = "4.0.0", git = "https://github.com/AOx0/actix-web-middleware-redirect-scheme" }
 tiff = "0.8.0"
 image = "*"
+base64 = "*"
 
 [build-dependencies]
 static-files = "0.2.1"

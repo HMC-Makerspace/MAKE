@@ -9,8 +9,8 @@ use std::thread;
 use actix_cors::*;
 use actix_web::rt::spawn;
 use actix_web::*;
-use actix_web_static_files::ResourceFiles;
 use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
+use actix_web_static_files::ResourceFiles;
 
 use chrono::Timelike;
 use chrono::Utc;
@@ -48,11 +48,11 @@ pub use crate::management::emails::*;
 pub use crate::management::student_storage::*;
 pub use crate::management::workshops::*;
 
-pub use crate::people::users::*;
-pub use crate::people::usage::*;
 pub use crate::people::permissions::*;
 pub use crate::people::quizzes::*;
 pub use crate::people::schedule::*;
+pub use crate::people::usage::*;
+pub use crate::people::users::*;
 
 use lazy_static::lazy_static;
 use std::sync::Arc;
@@ -328,7 +328,10 @@ async fn async_main(args: Vec<String>) -> std::io::Result<()> {
         builder = None;
         redirect_scheme = RedirectSchemeBuilder::new().enable(false).build();
     } else {
-        info!("Starting PROD server on {} and {}", ADDRESS_HTTP, ADDRESS_HTTPS);
+        info!(
+            "Starting PROD server on {} and {}",
+            ADDRESS_HTTP, ADDRESS_HTTPS
+        );
 
         let mut temp_builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
         temp_builder
@@ -337,13 +340,17 @@ async fn async_main(args: Vec<String>) -> std::io::Result<()> {
                 SslFiletype::PEM,
             )
             .unwrap();
-            temp_builder
+        temp_builder
             .set_certificate_chain_file(format!("/etc/letsencrypt/live/{}/fullchain.pem", args[1]))
             .unwrap();
 
         builder = Some(temp_builder);
-        redirect_scheme = RedirectSchemeBuilder::new().enable(true).replacements(&[(":8080", ":8443")]).build();
+        redirect_scheme = RedirectSchemeBuilder::new()
+            .enable(true)
+            .replacements(&[(":8080", ":8443")])
+            .build();
     }
+
     // Create builder without ssl
     let server = HttpServer::new(move || {
         let cors = Cors::default()
@@ -352,12 +359,22 @@ async fn async_main(args: Vec<String>) -> std::io::Result<()> {
             .allow_any_method()
             .send_wildcard()
             .max_age(3600);
+        let json_cfg = web::JsonConfig::default()
+            // limit request payload size to 100mb
+            .limit(100000000)
+            // accept any content type
+            .content_type(|_mime| true)
+            // use custom error handler
+            .error_handler(|err, _req| {
+                error::InternalError::from_response(err, HttpResponse::Conflict().into()).into()
+            });
 
         App::new()
             .wrap(redirect_scheme.clone())
             .wrap(actix_web::middleware::Logger::new(LOGGER_STR))
             .wrap(actix_web::middleware::Compress::default())
             .wrap(cors)
+            .app_data(json_cfg)
             .service(status)
             .service(get_inventory)
             .service(get_quizzes)
@@ -387,13 +404,18 @@ async fn async_main(args: Vec<String>) -> std::io::Result<()> {
             .service(extend_checkout_by_uuid)
             .service(get_workshops)
             .service(add_user_restock_notice)
+            .service(render_loom)
             .service(ResourceFiles::new("/", generate()))
     });
 
     if builder.is_some() {
-        return server.bind_openssl(ADDRESS_HTTPS, builder.unwrap())?.bind(ADDRESS_HTTP)?.run().await
+        return server
+            .bind_openssl(ADDRESS_HTTPS, builder.unwrap())?
+            .bind(ADDRESS_HTTP)?
+            .run()
+            .await;
     } else {
-        return server.bind(ADDRESS_LOCAL)?.run().await
+        return server.bind(ADDRESS_LOCAL)?.run().await;
     }
 }
 pub fn main() {
@@ -446,7 +468,9 @@ async fn update_loop() {
 
         if now_time.hour() < TIME_SEND_EMAIL_HOUR {
             inventory.sent_restock_notice = false;
-        } else if (inventory.sent_restock_notice == false && now_time.hour() >= TIME_SEND_EMAIL_HOUR) || cfg!(debug_assertions)
+        } else if (inventory.sent_restock_notice == false
+            && now_time.hour() >= TIME_SEND_EMAIL_HOUR)
+            || cfg!(debug_assertions)
         {
             inventory.send_restock_notice().await;
         }
@@ -616,7 +640,7 @@ async fn update_loop() {
 
     // Update workshops
     let mut workshops = MEMORY_DATABASE.lock().await.workshops.clone();
-    
+
     workshops.update().await;
 
     MEMORY_DATABASE.lock().await.workshops = workshops;

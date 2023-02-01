@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Loom Kiosk</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@200;400&family=Righteous&display=swap" rel="stylesheet"> 
+    
+    
+        <link rel="stylesheet" href="../../css/main.css">
+        <link rel="stylesheet" href="../kiosks.css">
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        
+        <div id="loom-grid">
+            <div id="options">
+                <h1>Loom Creation Utility</h1>
+                <p>Drag & drop a file or click on the area below to render out a file to a loom bitmap</p>
+                <p>Click <b>Download</b> to download the rendered file</p>
+                <button id="download" onclick="downloadCurrentRender()">Download</button>
+            </div>
+
+            <div id="display" class="nofile" onclick="openFile();" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);" ondragleave="dragLeaveHandler(event);">
+                <div id="drag-and-drop">
+                    <div id="drag-and-drop-text">
+                        <p>Drag and drop your file here, or click to open a file.</p>
+                        <p>Supported filetypes: .JPG, .JPEG, .PNG, .BMP, .TIFF, .TIF, .WEBP, .GIF</p>
+                    </div>
+    
+                    <input type="file" id="file-input" accept="image/*,application/pdf" onchange="loadFile(event);" class="hidden"/>
+                </div>
+    
+                <div id="preview"></div>
+            </div>
+        </div>
+
+        <script src="../scripts/loom.js"></script>
+    </body>
+</html>

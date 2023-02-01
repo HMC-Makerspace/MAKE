@@ -1,20 +1,35 @@
+use std::{path::Path, fs::File, io::Write, cmp::{max, min}};
+
 use image::{self, GenericImageView, Pixel};
+use log::info;
 
 const LOOM_WIDTH: u32 = 1320;
 
-pub fn create_loom_tif(file_path: &str, inner_tabby_width: usize, outer_tabby_width: usize) {
+pub fn render_loom_request(b64_file: &str, file_extension: &str, inner_tabby_width: usize, outer_tabby_width: usize) -> String {
+    let start = std::time::Instant::now();
+    // Open file from base64
+    let file_path = format!("temp.{}", file_extension);
+    let file_path = Path::new(&file_path);
+    let mut file = File::create(file_path).unwrap();
+    file.write_all(&base64::decode(b64_file).unwrap()).unwrap();
+
     // Open image file
     let img = image::io::Reader::open(file_path).unwrap();
     let img = img.with_guessed_format().unwrap().decode().unwrap();
+    let duration = start.elapsed();
+    info!("Opening image took: {:?}", duration);
 
+    let start = std::time::Instant::now();
     let new_height = (img.height() as f32 / img.width() as f32 * LOOM_WIDTH as f32) as u32;
     // Resize to loom width, keeping aspect ratio
-    let img = img.resize(LOOM_WIDTH, new_height, image::imageops::FilterType::Lanczos3);
+    let img = img.resize(LOOM_WIDTH, new_height, image::imageops::FilterType::Nearest);
 
     // Get image pixels grayscale
     let height = img.height();
     let width = img.width();
     let mut img_pixels = img.pixels().map(|p| p.2.to_luma().channels()[0]).collect::<Vec<u8>>();
+    let duration = start.elapsed();
+    info!("Resizing image took: {:?}", duration);
 
     let start = std::time::Instant::now();
     // Normalize image pixels
@@ -22,7 +37,7 @@ pub fn create_loom_tif(file_path: &str, inner_tabby_width: usize, outer_tabby_wi
     let min = &img_pixels.iter().min().unwrap().clone();
     let range = max - min;
     let duration = start.elapsed();
-    println!("Normalizing took: {:?}", duration);
+    info!("Normalizing took: {:?}", duration);
 
     for i in 0..img_pixels.len() {
         img_pixels[i] = (((img_pixels[i] - min) as u32 * 255) / range as u32) as u8;
@@ -33,32 +48,52 @@ pub fn create_loom_tif(file_path: &str, inner_tabby_width: usize, outer_tabby_wi
     let start = std::time::Instant::now();
     let (start_column, end_column) = find_start_end_column(&img_pixels, width, height);
     let duration = start.elapsed();
-    println!("Finding start and end column took: {:?}", duration);
+    info!("Finding start and end column took: {:?}", duration);
 
     // Dither
     let start = std::time::Instant::now();
     atkinson_dither(&mut img_pixels, width, height);
     let duration = start.elapsed();
-    println!("Dithering took: {:?}", duration);
+    info!("Dithering took: {:?}", duration);
     
     // Apply loom "filter"
     let start = std::time::Instant::now();
     loom_filter(&mut img_pixels, width, height);
     let duration = start.elapsed();
-    println!("Loom filter took: {:?}", duration);
+    info!("Loom filter took: {:?}", duration);
+
+    // output as debug.png
+    let img = image::ImageBuffer::from_vec(width, height, img_pixels.clone()).unwrap();
+    let img = image::DynamicImage::ImageLuma8(img);
+    img.save("debug.png").unwrap();
+
 
     // Apply loom tabby
     let start = std::time::Instant::now();
     loom_tabby(&mut img_pixels, width, height, start_column, end_column, inner_tabby_width);
     loom_tabby(&mut img_pixels, width, height, outer_tabby_width as u32, width - outer_tabby_width as u32, outer_tabby_width);
     let duration = start.elapsed();
-    println!("Loom tabby took: {:?}", duration);
+    info!("Loom tabby took: {:?}", duration);
 
     
-    // Write to file
-    let mut file = std::fs::File::create("loom.tif").unwrap();
-    let mut encoder = tiff::encoder::TiffEncoder::new(&mut file).unwrap();
-    encoder.write_image::<tiff::encoder::colortype::Gray8>(width, height, &img_pixels).unwrap();
+    // Convert image to b64 string
+    let start = std::time::Instant::now();
+    // Encode as tiff
+    let img = image::ImageBuffer::from_vec(width, height, img_pixels).unwrap();
+    let img = image::DynamicImage::ImageLuma8(img);
+
+    // Temp file path of out.tiff
+    let file_path = Path::new("out.png");
+    let mut file = File::create(file_path).unwrap();
+
+    img.write_to(&mut file, image::ImageOutputFormat::Png).unwrap();
+
+    // Encode as base64
+    let img_b64 = base64::encode(&std::fs::read(file_path).unwrap());
+    let duration = start.elapsed();
+    info!("Converting to b64 took: {:?}", duration);
+
+    img_b64
 }
 
 
@@ -79,12 +114,12 @@ pub fn find_start_end_column(img_pixels: &Vec<u8>, width: u32, height: u32) -> (
             }
         }
 
+        column += 1;
+        
         if column_white == 0 {
             start_column = Some(column - 1);
             break;
         }
-
-        column += 1;
     }
 
     column = width - 1;
@@ -168,8 +203,12 @@ pub fn loom_tabby(img: &mut Vec<u8>, width: u32, height: u32, start_column: u32,
     // eg if start_column is 100, add 5 pixels to the left of it
     // eg if end_column is 100, add 5 pixels to the right of it
 
-    println!("start_column: {}", start_column);
-    println!("end_column: {}", end_column);
+    // If start_column is < tabby_width, add to the beginning of the image
+    // If end_column is > width - tabby_width, add to the end of the image
+
+    let start_column = max(start_column, tabby_width as u32);
+    let end_column = min(end_column, width - tabby_width as u32);
+
     let mut top_tabby = Vec::new();
     let mut bottom_tabby = Vec::new();
 
