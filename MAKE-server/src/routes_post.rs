@@ -1,6 +1,6 @@
 use crate::*;
 use ::serde::{Deserialize};
-use actix_web::error::*;
+use actix_web::{error::*};
 
 
 /*
@@ -425,4 +425,26 @@ pub async fn add_button_log(
     } else {
         Ok(HttpResponse::Unauthorized().finish())
     }
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct LoomRenderRequest {
+    pub file: String,
+    pub extension: String,
+}
+
+#[post("/api/v1/loom/render")]
+pub async fn render_loom(
+    body: web::Json<LoomRenderRequest>,
+) -> Result<HttpResponse, Error> {
+    let request = body.into_inner();
+
+    info!("Received request to render file of {} size", request.file.len());
+
+    let result = render_loom_request(&request.file, &request.extension, 5, 5);
+
+    // Return result
+    Ok(HttpResponse::Ok()
+        .status(http::StatusCode::CREATED)
+        .json(result))
 }
