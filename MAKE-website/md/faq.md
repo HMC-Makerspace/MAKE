@@ -34,7 +34,7 @@ Yes! Everything out on the floor is available to use. We only ask that if you ar
 
 ## How can I get funding for a project?
 
-All 5C students have access to up to $50 worth of funding per semester. Separately, Harvey Mudd students have access to up to $200 worth of funding through the Brawn Grant. To apply, fill out [Student Project Application Form](https://docs.google.com/document/d/1kx6-SK9kjsYsJHwgEySk4QmM7U9FWOxUmHo8a2_U0RQ) and email a PDF to makerspace-management-l@hmc.edu.
+All 5C students have access to up to $50 worth of funding per semester. Separately, Harvey Mudd students have access to up to $200 worth of funding through the Brawn Grant. To apply, click on the Student Project Application tab and fill out the form.
 
 ## Where is the Makerspace?
 

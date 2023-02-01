@@ -264,7 +264,7 @@ p3 {
   font-size: 14px;
   font-weight: bold;
   width: 100%;
-  height: 7vh;
+  height: 6.5vh;
   padding-left: 30px;
   border-radius: unset;
   text-align: left;
@@ -1584,6 +1584,42 @@ Workshops
   background-repeat: no-repeat;
   background-position: right;
 }
+
+/*
+
+Student Project Application
+
+*/
+
+.fullscreen-embed {
+  width: 60vw;
+  height: 96%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+
+#student-projects-help {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+#student-projects-help * {
+  width: 60%;
+}
+
+#application-button {
+  width: 60%;
+  height: 40px;
+  margin: 0 auto;
+  margin-top: 20px;
+}
+
 
 /* 
 

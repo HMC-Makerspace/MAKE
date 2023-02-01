@@ -181,6 +181,7 @@ impl Inventory {
             .chain(user_items.iter().map(|x| x.clone()))
             .collect::<Vec<String>>();
 
+            
         if items.len() == 1 {
             return;
         } else {
