@@ -98,12 +98,16 @@ async function getNowPlaying() {
         const data = await result.json();
 
         console.log(data);
-
         let album_art = document.getElementById('music-art');
         let album_title = document.getElementById('music-title');
 
+        if (data === null) {
+            album_title.innerText = "Nothing playing";
+            return null;
+        }
+
         album_art.src = data.album.images[0].url;
-        album_title.innerText = data.name;
+        album_title.innerText = `${data.name} - ${data.artists[0].name}`;
     } else {
         return null;
     }

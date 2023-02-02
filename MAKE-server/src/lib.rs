@@ -124,7 +124,9 @@ pub struct ApiKeys {
     printers: String,
     gmail_email: String,
     gmail_password: String,
+    spotify_id: String,
     spotify_secret: String,
+    spotify_refresh: String,
 }
 
 impl ApiKeys {
@@ -136,7 +138,9 @@ impl ApiKeys {
         info!("Printers key:          {}...", &self.printers[..5]);
         info!("Gmail email:           {}...", &self.gmail_email[..5]);
         info!("Gmail password:        {}...", &self.gmail_password[..5]);
+        info!("Spotify ID:            {}...", &self.spotify_id[..5]);
         info!("Spotify Secret:        {}...", &self.spotify_secret[..5]);
+        info!("Spotify Refresh Token: {}...", &self.spotify_refresh[..5]);
     }
 
     pub fn validate_admin(&self, key: &str) -> bool {
@@ -159,8 +163,8 @@ impl ApiKeys {
         (self.gmail_email.clone(), self.gmail_password.clone())
     }
 
-    pub fn get_spotify_tuple(&self) -> String {
-        self.spotify_secret.clone()
+    pub fn get_spotify_tuple(&self) -> (String, String, String) {
+        (self.spotify_id.clone(), self.spotify_secret.clone(), self.spotify_refresh.clone())
     }
 }
 
@@ -280,6 +284,15 @@ pub async fn load_api_keys() -> Result<(), Error> {
 
     Ok(())
 }
+
+pub fn between(source: &str, start: &str, end: &str) -> String {
+    let start_pos = &source[source.find(start).unwrap() + start.len()..];
+
+    start_pos[..start_pos.find(end).unwrap_or(start_pos.len())]
+        .trim()
+        .to_string()
+}
+
 /// Main function to run both actix_web server and API update loop
 /// API update loops lives inside a tokio thread while the actix_web
 /// server is run in the main thread and blocks until done.
@@ -659,53 +672,85 @@ async fn update_loop() {
 
     // Get currently playing music from spotify
     // GET request to https://api.spotify.com/v1/me/player/currently-playing
-    let oauth = API_KEYS.lock().await.get_spotify_tuple();
+    let (id, secret, token) = API_KEYS.lock().await.get_spotify_tuple();
 
+    // First, refresh token
+    // JS:
+    let client = Client::new();
+
+    let base64 = base64::encode(format!("{}:{}", id, secret));
+     
     let mut headers = HeaderMap::new();
-
-    // Add accept application/json header
-    headers.insert(
-        "Accept",
-        HeaderValue::from_static("application/json"),
-    );
 
     // Add bearer auth authorization header
     headers.insert(
         "Authorization",
-        HeaderValue::from_str(&format!("Bearer {}", oauth)).unwrap(),
+        HeaderValue::from_str(&format!("Basic {}", base64)).unwrap(),
     );
 
-    let client = Client::new();
+    headers.insert(
+        "Content-Type",
+        HeaderValue::from_str("application/x-www-form-urlencoded").unwrap(),
+    );
 
     let response = client
-        .get("https://api.spotify.com/v1/me/player/currently-playing")
+        .post("https://accounts.spotify.com/api/token")
         .headers(headers)
+        .body(format!("grant_type=refresh_token&refresh_token={}", token))
         .send()
         .await;
 
     if response.is_err() {
-        error!("Failed to get currently playing song from spotify: {}", response.err().unwrap());
+        error!("Failed to refresh spotify token: {}", response.err().unwrap());
     } else {
-        let response = response.unwrap();
 
-        if response.status() == 200 {
-            let body = response.text().await;
+        // Get json "access_token"
+        let access_token = response.unwrap().text().await.unwrap();
 
-            if body.is_err() {
-                error!("Failed to get body of spotify response: {}", body.err().unwrap());
-            } else {
-                let body = body.unwrap();
+        let access_token = between(&access_token, "access_token\":\"", "\"");
 
-                let json: Value = serde_json::from_str(&body).unwrap();
+        info!("Refreshed spotify token {}", access_token);
 
-                let item = json.get("item").unwrap();
+        let mut headers = HeaderMap::new();
 
-                info!("Got currently playing song from spotify: {}", item.get("name").unwrap());    
+        headers.insert(
+            "Authorization",
+            HeaderValue::from_str(&format!("Bearer {}", access_token)).unwrap(),
+        );
 
-                MEMORY_DATABASE.lock().await.spotify = Some(item.clone());
-            }
+        let response = client
+            .get("https://api.spotify.com/v1/me/player/currently-playing")
+            .headers(headers)
+            .send()
+            .await;
+
+        if response.is_err() {
+            error!("Failed to get currently playing song from spotify: {}", response.err().unwrap());
         } else {
-            error!("Failed to get currently playing song from spotify: {}", response.status());
-        }
-    }    
+            let response = response.unwrap();
+
+            if response.status() == 200 {
+                let body = response.text().await;
+
+                if body.is_err() {
+                    error!("Failed to get body of spotify response: {}", body.err().unwrap());
+                } else {
+                    let body = body.unwrap();
+
+                    let json: Value = serde_json::from_str(&body).unwrap();
+
+                    let item = json.get("item").unwrap();
+
+                    info!("Got currently playing song from spotify: {}", item.get("name").unwrap());    
+
+                    MEMORY_DATABASE.lock().await.spotify = Some(item.clone());
+                }
+            } else if response.status() == 204 {
+                info!("No song is currently playing on spotify");
+                MEMORY_DATABASE.lock().await.spotify = None;
+            } else {
+                error!("Failed to get currently playing song from spotify: {}", response.status());
+            }
+        }    
+    }
 }

@@ -7,7 +7,7 @@
   --theme-color-1: #ee9d22;
   --theme-color-2: #ffffff;
   --theme-color-3: #e6e6e6;
-  --theme-color-4: #80b8e2;
+  --theme-color-4: #80b8e2; 
   --theme-color-5: #ececec;
   --theme-color-6: #e0cf34;
   --theme-color-7: #a918ec;
@@ -121,7 +121,7 @@ body * {
 
 p1 {
   padding: 40px;
-  font-size: 5em;
+  font-size: 2em;
   font-weight: bold;
 }
 
@@ -437,22 +437,38 @@ HOME
 */
 
 #page-home {
-  grid-template-rows: 100px minmax(0, 1fr);
+  grid-template-rows: 120px minmax(0, 1fr);
   background-color: var(--theme-color-2);
 }
 
 #current-announcement {
-  width: 60%;
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   font-size: 1em;
-  background-color: var(--low-color);
+  background-color: var(--theme-color-4);
   color: var(--text-color-main);
   font-weight: normal;
   margin: 0 auto;
-  padding: 20px;
-  animation: slide-down 2s ease-in-out;
+  height: 120px;
+}
+
+#announcement-text {
+  margin-left: 60px;
+  width: 75%;
+}
+
+#status {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 20px;
+  padding: 30px;
+  font-weight: bold;
+  background-color: var(--shift-2);
 }
 
 @keyframes slide-down {
@@ -475,7 +491,7 @@ HOME
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-around;
+  justify-content: center;
   gap: 10px;
   min-height: 200px;
   padding: 30px;
@@ -483,49 +499,55 @@ HOME
 
 #welcome-message {
   background-color: var(--theme-color-2);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  text-align: right;
+  text-align: center;
 }
 
 #main-title-ani {
-  font-size: 8em;
+  font-size: 10em;
   text-align: left !important;
   cursor: pointer;
 }
 
-#top-right-logo {
+#top-right-music {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 140px;
-  height: 140px;
-}
-
-#bottom-right-music {
-  position: absolute;
-  bottom: 200px;
+  top: 0;
   right: 50px;
   width: 140px;
   height: 140px;
-  transition: transform 0.1s ease-in-out;
+  text-align: right;
 }
 
-#bottom-right-music:hover {
-  transform: scale(1.1);
+#top-right-music:before {
+  content: ' ';
+  border-top: 236px solid #1DB954;
+  border-right: 236px solid transparent;
+  transform: rotate(90deg) translateY(186px);
+  width: 0;
+  position: absolute;
 }
 
-#bottom-right-music:active {
-  transform: scale(1.05);
+#top-right-music>* {
+  position: relative;
+  z-index: 300;
 }
 
-#bottom-right-music img {
+#music-title {
+  font-size: 0.8em;
+  font-weight: bold;
+  margin-bottom: 0;
+  text-align: right;
+  padding: 5px;
+}
+
+#music-art {
   width: 128px;
   height: 128px;
   border-radius: 5px;
+  background-color: white;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  left: 15px;
 }
 
 /*
