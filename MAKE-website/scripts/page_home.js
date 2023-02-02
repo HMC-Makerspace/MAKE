@@ -97,7 +97,6 @@ async function getNowPlaying() {
     if (result.ok) {
         const data = await result.json();
 
-        console.log(data);
         let album_art = document.getElementById('music-art');
         let album_title = document.getElementById('music-title');
 
@@ -106,7 +105,8 @@ async function getNowPlaying() {
             return null;
         }
 
-        album_art.backgroundImage = `url(${data.album.images[0].url})`;
+        // Album art is div, not img
+        album_art.style.backgroundImage = `url(${data.album.images[0].url})`;
         album_title.innerText = `${data.name} - ${data.artists[0].name}`;
     } else {
         return null;
