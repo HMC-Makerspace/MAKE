@@ -106,7 +106,7 @@ async function getNowPlaying() {
             return null;
         }
 
-        album_art.src = data.album.images[0].url;
+        album_art.backgroundImage = `url(${data.album.images[0].url})`;
         album_title.innerText = `${data.name} - ${data.artists[0].name}`;
     } else {
         return null;
