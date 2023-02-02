@@ -181,6 +181,7 @@ impl Inventory {
             .chain(user_items.iter().map(|x| x.clone()))
             .collect::<Vec<String>>();
 
+            
         if items.len() == 1 {
             return;
         } else {
@@ -188,7 +189,7 @@ impl Inventory {
 
             let _ = send_individual_email(
                 MAKERSPACE_MANAGER_EMAIL.to_string(),
-                None,
+                Some(vec!["evazquez@g.hmc.edu".to_string()]),
                 "Restock Notice".to_string(),
                 EMAIL_TEMPLATES
                     .lock()
