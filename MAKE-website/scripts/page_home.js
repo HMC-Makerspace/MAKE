@@ -90,3 +90,21 @@ function hoverOffRandomFont() {
         clearTimeout(el.hoverTimeout);
     }
 }
+
+async function getNowPlaying() {
+    const result = await fetch(API + "/now_playing");
+
+    if (result.ok) {
+        const data = await result.json();
+
+        console.log(data);
+
+        let album_art = document.getElementById('music-art');
+        let album_title = document.getElementById('music-title');
+
+        album_art.src = data.album.images[0].url;
+        album_title.innerText = data.name;
+    } else {
+        return null;
+    }
+}

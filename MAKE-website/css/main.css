@@ -479,7 +479,6 @@ HOME
   gap: 10px;
   min-height: 200px;
   padding: 30px;
-  padding-bottom: 10vh;
 }
 
 #welcome-message {
@@ -504,6 +503,29 @@ HOME
   right: 10px;
   width: 140px;
   height: 140px;
+}
+
+#bottom-right-music {
+  position: absolute;
+  bottom: 200px;
+  right: 50px;
+  width: 140px;
+  height: 140px;
+  transition: transform 0.1s ease-in-out;
+}
+
+#bottom-right-music:hover {
+  transform: scale(1.1);
+}
+
+#bottom-right-music:active {
+  transform: scale(1.05);
+}
+
+#bottom-right-music img {
+  width: 128px;
+  height: 128px;
+  border-radius: 5px;
 }
 
 /*

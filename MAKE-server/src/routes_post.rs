@@ -1,7 +1,6 @@
 use crate::*;
-use ::serde::{Deserialize};
-use actix_web::{error::*};
-
+use ::serde::Deserialize;
+use actix_web::error::*;
 
 /*
 =================
@@ -49,14 +48,14 @@ pub async fn checkout_items(
             .status(http::StatusCode::CREATED)
             .finish())
     } else {
-        
         Ok(HttpResponse::Unauthorized().finish())
     }
-
 }
 
 #[post("/api/v1/checkouts/extend/{uuid}/{sec_length}/{api_key}")]
-pub async fn extend_checkout_by_uuid(path: web::Path<(String, u64, String)>) -> Result<HttpResponse, Error> {
+pub async fn extend_checkout_by_uuid(
+    path: web::Path<(String, u64, String)>,
+) -> Result<HttpResponse, Error> {
     let (uuid, sec_length, api_key) = path.into_inner();
 
     if API_KEYS.lock().await.validate_checkout(&api_key) {
@@ -75,7 +74,7 @@ pub async fn extend_checkout_by_uuid(path: web::Path<(String, u64, String)>) -> 
         Ok(HttpResponse::Unauthorized().finish())
     }
 }
-    
+
 #[post("/api/v1/checkouts/add_reservation/{id_number}/{start_time}/{sec_length}/{api_key}")]
 pub async fn reserve_items(
     path: web::Path<(u64, u64, u64, String)>,
@@ -97,12 +96,13 @@ pub async fn reserve_items(
         if user.get_auth_level() == AuthLevel::Banned {
             return Err(ErrorUnauthorized("User is banned".to_string()));
         }
-        data.checkout_log.add_reservation(CheckoutLogEntry::new_reservation(
-            user.get_id(),
-            start_time,
-            sec_length,
-            body.items.clone(),
-        ));
+        data.checkout_log
+            .add_reservation(CheckoutLogEntry::new_reservation(
+                user.get_id(),
+                start_time,
+                sec_length,
+                body.items.clone(),
+            ));
 
         Ok(HttpResponse::Ok()
             .status(http::StatusCode::CREATED)
@@ -113,24 +113,22 @@ pub async fn reserve_items(
 }
 
 #[post("/api/v1/checkouts/check_in_entry/{uuid}/{api_key}")]
-pub async fn checkin_items(
-    path: web::Path<(String, String)>,
-) -> Result<HttpResponse, Error> {
+pub async fn checkin_items(path: web::Path<(String, String)>) -> Result<HttpResponse, Error> {
     let (uuid, api_key) = path.into_inner();
 
     if API_KEYS.lock().await.validate_checkout(&api_key) {
         let mut data = MEMORY_DATABASE.lock().await;
-    
+
         let result = data.checkout_log.check_in(uuid);
-    
+
         drop(data);
-        
+
         let _ = save_database().await;
 
         if result.is_err() {
             return Err(ErrorBadRequest("Checkout not found".to_string()));
         }
-    
+
         Ok(HttpResponse::Ok().finish())
     } else {
         Ok(HttpResponse::Unauthorized().finish())
@@ -165,7 +163,6 @@ pub async fn set_auth_level(
         Ok(HttpResponse::Unauthorized().finish())
     }
 }
-
 
 #[post("/api/v1/auth/set_quiz/{id_number}/{quiz_name}/{passed}/{api_key}")]
 pub async fn set_quiz_passed(
@@ -404,7 +401,6 @@ pub async fn add_user_restock_notice(
         .finish())
 }
 
-
 #[post("/api/v1/usage/add_button_log/{api_key}")]
 pub async fn add_button_log(
     path: web::Path<String>,
@@ -431,17 +427,31 @@ pub async fn add_button_log(
 pub struct LoomRenderRequest {
     pub file: String,
     pub extension: String,
+    pub output_format: String,
+    pub desired_width: u32,
+    pub loom_width: u32,
+    pub tabby_start_width: usize,
+    pub tabby_end_width: usize,
 }
 
 #[post("/api/v1/loom/render")]
-pub async fn render_loom(
-    body: web::Json<LoomRenderRequest>,
-) -> Result<HttpResponse, Error> {
+pub async fn render_loom(body: web::Json<LoomRenderRequest>) -> Result<HttpResponse, Error> {
     let request = body.into_inner();
 
-    info!("Received request to render file of {} size", request.file.len());
+    info!(
+        "Received request to render file of {} size",
+        request.file.len()
+    );
 
-    let result = render_loom_request(&request.file, &request.extension, 5, 5);
+    let result = render_loom_request(
+        &request.file,
+        &request.extension,
+        &request.loom_width,
+        &request.desired_width,
+        &request.tabby_start_width,
+        &request.tabby_end_width,
+        &request.output_format,
+    );
 
     // Return result
     Ok(HttpResponse::Ok()

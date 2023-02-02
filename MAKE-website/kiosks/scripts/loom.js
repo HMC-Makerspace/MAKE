@@ -57,12 +57,21 @@ function renderPreview() {
             // Success!
             let data = JSON.parse(request.responseText);
 
-            const img = document.getElementById("preview");
+            const img_el = document.getElementById("preview");
 
-            state.render = `data:image/png;base64,${data}`;
+            state.render = `data:image/tiff;base64,${data}`;
 
-            img.style.backgroundImage = `url(${state.render})`;
+            img_el.style.backgroundImage = `url(${state.render})`;
 
+            let img = new Image();
+
+            img.src = state.render;
+
+            img.onload = function () {
+                let ratio = img.height / img.width;
+
+                img_el.style.height = `${1320 * ratio}px`;
+            }
             document.getElementById("display").classList.remove("loading");
             document.getElementById("display").classList.add("preview");
         } else {
@@ -86,6 +95,11 @@ function renderPreview() {
         let data = {
             file: file_data_base64,
             extension: state.file.name.split('.').pop(),
+            output_format: "png",
+            desired_width: Number(document.getElementById("desired-width").value),
+            loom_width: Number(document.getElementById("loom-width").value),
+            tabby_start_width: Number(document.getElementById("tabby-start").value),
+            tabby_end_width: Number(document.getElementById("tabby-end").value),
         }
 
         request.send(JSON.stringify(data));
@@ -96,7 +110,8 @@ function renderPreview() {
 function downloadCurrentRender() {
     // Download current render
     const link = document.createElement("a");
-    link.download = "loom.png";
+    let timestamp = new Date().getTime();
+    link.download = `loom-${timestamp}.tiff`;
     link.href = state.render;
     document.body.appendChild(link);
     link.click();

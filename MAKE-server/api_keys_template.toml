@@ -22,3 +22,5 @@ printers = "YOUR_API_KEY"
 
 gmail_email = "EMAIL"
 gmail_password = "PASSWORD"
+
+spotify_secret = "SECRET"

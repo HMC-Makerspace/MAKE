@@ -268,3 +268,12 @@ pub async fn get_workshops() -> Result<HttpResponse, Error> {
 
     Ok(HttpResponse::Ok().json(workshops))
 }
+
+#[get("/api/v1/now_playing")]
+pub async fn get_now_playing() -> Result<HttpResponse, Error> {
+    let data = MEMORY_DATABASE.lock().await;
+    let now_playing = data.spotify.clone();
+    drop(data);
+
+    Ok(HttpResponse::Ok().json(now_playing))
+}

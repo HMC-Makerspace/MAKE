@@ -29,6 +29,14 @@
                 <p>Drag & drop a file or click on the area below to render out a file to a loom bitmap</p>
                 <p>Click <b>Download</b> to download the rendered file</p>
                 <button id="download" onclick="downloadCurrentRender()">Download</button>
+                <div id="input-array">
+                    <input type="number" id="loom-width" placeholder="Loom Width" value="1320" min="1" max="1000000" step="1"/>
+                    <input type="number" id="desired-width" placeholder="Desired Width" value="1320" min="1" max="1000000" step="1"/>
+                    <input type="number" id="tabby-start" placeholder="Tabby Start Width" value="5" min="0" max="1000000" step="1"/>
+                    <input type="number" id="tabby-end" placeholder="Tabby End Width" value="5" min="0" max="1000000" step="1"/>
+                </div>
+
+                <button id="render" onclick="renderPreview()">Update Design</button>
             </div>
 
             <div id="display" class="nofile" onclick="openFile();" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);" ondragleave="dragLeaveHandler(event);">
@@ -41,7 +49,7 @@
                     <input type="file" id="file-input" accept="image/*,application/pdf" onchange="loadFile(event);" class="hidden"/>
                 </div>
     
-                <div id="preview"></div>
+                <img id="preview"></img>
             </div>
         </div>
 
