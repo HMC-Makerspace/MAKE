@@ -21,7 +21,11 @@ use log::*;
 use openssl::ssl::SslAcceptor;
 use openssl::ssl::SslFiletype;
 use openssl::ssl::SslMethod;
+use reqwest::Client;
+use reqwest::header::HeaderMap;
+use reqwest::header::HeaderValue;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::time::Duration;
 use tokio::time;
 
@@ -104,6 +108,7 @@ pub struct Data {
     pub button_log: ButtonRecordLog,
     pub schedule: Schedule,
     pub workshops: Workshops,
+    pub spotify: Option<serde_json::Value>,
 }
 
 #[derive(Default, Deserialize, Serialize)]
@@ -119,6 +124,7 @@ pub struct ApiKeys {
     printers: String,
     gmail_email: String,
     gmail_password: String,
+    spotify_secret: String,
 }
 
 impl ApiKeys {
@@ -130,6 +136,7 @@ impl ApiKeys {
         info!("Printers key:          {}...", &self.printers[..5]);
         info!("Gmail email:           {}...", &self.gmail_email[..5]);
         info!("Gmail password:        {}...", &self.gmail_password[..5]);
+        info!("Spotify Secret:        {}...", &self.spotify_secret[..5]);
     }
 
     pub fn validate_admin(&self, key: &str) -> bool {
@@ -150,6 +157,10 @@ impl ApiKeys {
 
     pub fn get_gmail_tuple(&self) -> (String, String) {
         (self.gmail_email.clone(), self.gmail_password.clone())
+    }
+
+    pub fn get_spotify_tuple(&self) -> String {
+        self.spotify_secret.clone()
     }
 }
 
@@ -405,6 +416,7 @@ async fn async_main(args: Vec<String>) -> std::io::Result<()> {
             .service(get_workshops)
             .service(add_user_restock_notice)
             .service(render_loom)
+            .service(get_now_playing)
             .service(ResourceFiles::new("/", generate()))
     });
 
@@ -644,4 +656,56 @@ async fn update_loop() {
     workshops.update().await;
 
     MEMORY_DATABASE.lock().await.workshops = workshops;
+
+    // Get currently playing music from spotify
+    // GET request to https://api.spotify.com/v1/me/player/currently-playing
+    let oauth = API_KEYS.lock().await.get_spotify_tuple();
+
+    let mut headers = HeaderMap::new();
+
+    // Add accept application/json header
+    headers.insert(
+        "Accept",
+        HeaderValue::from_static("application/json"),
+    );
+
+    // Add bearer auth authorization header
+    headers.insert(
+        "Authorization",
+        HeaderValue::from_str(&format!("Bearer {}", oauth)).unwrap(),
+    );
+
+    let client = Client::new();
+
+    let response = client
+        .get("https://api.spotify.com/v1/me/player/currently-playing")
+        .headers(headers)
+        .send()
+        .await;
+
+    if response.is_err() {
+        error!("Failed to get currently playing song from spotify: {}", response.err().unwrap());
+    } else {
+        let response = response.unwrap();
+
+        if response.status() == 200 {
+            let body = response.text().await;
+
+            if body.is_err() {
+                error!("Failed to get body of spotify response: {}", body.err().unwrap());
+            } else {
+                let body = body.unwrap();
+
+                let json: Value = serde_json::from_str(&body).unwrap();
+
+                let item = json.get("item").unwrap();
+
+                info!("Got currently playing song from spotify: {}", item.get("name").unwrap());    
+
+                MEMORY_DATABASE.lock().await.spotify = Some(item.clone());
+            }
+        } else {
+            error!("Failed to get currently playing song from spotify: {}", response.status());
+        }
+    }    
 }
