@@ -1907,4 +1907,13 @@ Mobile Styles
   .machine-manual button {
     width: 100%;
   }
+
+  #top-right-music {
+    display: none;
+  }
+
+  #status {
+    font-size: 12px;
+    padding: 12px;
+  }
 }
