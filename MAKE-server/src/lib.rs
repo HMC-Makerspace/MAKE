@@ -678,7 +678,7 @@ async fn update_loop() {
     // JS:
     let client = Client::new();
 
-    let base64 = base64::encode(format!("{}:{}", id, secret));
+    let base64 = base64::encode(&format!("{}:{}", id, secret));
      
     let mut headers = HeaderMap::new();
 
