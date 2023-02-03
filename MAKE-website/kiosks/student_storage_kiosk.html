@@ -48,7 +48,7 @@
         <div id="checkout-popup" class="hidden">
             <h1>Enter your ID number on the keypad</h1>
             <h3>To checkout <span id="slot-selected"></span> for one month</h3>
-            <input id="checkout-id-input" onchange="checkoutSlot()">
+            <input id="checkout-id-input" onkeyup="checkoutSlot(event)">
             <h2 id="checkout-error"></h2>
         </div>
     </div>

@@ -50,7 +50,15 @@ function hideCheckout() {
     window.scrollTo(0, parseInt(scrollY || '0') * -1);
 }
 
-async function checkoutSlot() {
+async function checkoutSlot(e) {
+    // Prevent form from submitting
+    e.preventDefault();
+
+    // If event equals numpadenter or enter, check it out
+    if (!(e.key === "Enter" || e.key === "NumpadEnter")) {
+        return;
+    }
+
     let id_number = document.getElementById("checkout-id-input").value;
 
     // Remove all non-numeric characters
