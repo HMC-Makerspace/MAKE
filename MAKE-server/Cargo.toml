@@ -1,6 +1,6 @@
 [package]
 name = "MAKE-server"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2021"
 default-run = "server"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -12,6 +12,10 @@ path = "src/bin/start_server.rs"
 [[bin]]
 name = "loom"
 path = "src/bin/start_loom.rs"
+
+[[bin]]
+name = "stats"
+path = "src/bin/start_stats.rs"
 
 [lib]
 name = "make"

@@ -15,6 +15,9 @@ pub fn render_loom_request(b64_file: &str, file_extension: &str, loom_width: &u3
     let pic_img = image::io::Reader::open(file_path).unwrap();
     let pic_img = pic_img.with_guessed_format().unwrap().decode().unwrap();
     let duration = start.elapsed();
+
+    // Delete temp file
+    std::fs::remove_file(file_path).unwrap();
     info!("Opening image took: {:?}", duration);
 
     let start = std::time::Instant::now();
@@ -72,12 +75,6 @@ pub fn render_loom_request(b64_file: &str, file_extension: &str, loom_width: &u3
     loom_filter(&mut img_pixels, width, height);
     let duration = start.elapsed();
     info!("Loom filter took: {:?}", duration);
-
-    // output as debug.png
-    let img = image::ImageBuffer::from_vec(width, height, img_pixels.clone()).unwrap();
-    let img = image::DynamicImage::ImageLuma8(img);
-    img.save("debug.png").unwrap();
-
 
     // Apply loom tabby
     let start = std::time::Instant::now();

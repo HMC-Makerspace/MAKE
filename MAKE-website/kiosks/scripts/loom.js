@@ -63,15 +63,6 @@ function renderPreview() {
 
             img_el.style.backgroundImage = `url(${state.render})`;
 
-            let img = new Image();
-
-            img.src = state.render;
-
-            img.onload = function () {
-                let ratio = img.height / img.width;
-
-                img_el.style.height = `${1320 * ratio}px`;
-            }
             document.getElementById("display").classList.remove("loading");
             document.getElementById("display").classList.add("preview");
         } else {

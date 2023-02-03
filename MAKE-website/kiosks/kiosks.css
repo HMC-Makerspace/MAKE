@@ -559,7 +559,7 @@ LOOM
   height: 100vh;
   display: grid;
   grid-template-areas: "options" "display";
-  grid-template-rows: 150px 1320px;
+  grid-template-rows: 250px 1fr;
 }
 
 #display {
@@ -615,7 +615,9 @@ LOOM
 
 #preview {
   z-index: 10000;
-  width: 1320px;
+  width: 100%;
+  height: 100%;
+  overflow: scroll;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -627,7 +629,7 @@ LOOM
 }
 
 #options {
-  width: 50%;
+  width: 80%;
   margin: 0 auto;
 }
 

@@ -54,15 +54,13 @@ async function checkoutSlot() {
     let id_number = document.getElementById("checkout-id-input").value;
 
     // Remove all non-numeric characters
-    id_number = id_number.replace(/[^0-9]/g, '');
-    // Remove last char, as it is the card replacement number
-    id_number = id_number.substring(0, id_number.length - 1);
+    id_number = parseCollegeID(id_number);
 
-    document.getElementById("checkout-id-input").value = id_number;
-
-    if (id_number === "") {
+    if (id_number == null) {
         return;
     }
+
+    document.getElementById("checkout-id-input").value = id_number;
 
     // Get user info
     const response = await fetch(`${API}/users/info/${id_number}`);
