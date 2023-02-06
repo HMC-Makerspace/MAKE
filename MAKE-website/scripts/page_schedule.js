@@ -1,12 +1,3 @@
-const HEAD_STEWARDS = [
-    "Ethan",
-    "Charlie",
-    "Cristian",
-    "Jordan",
-    "Ashley",
-    "Emma",
-]
-
 async function fetchSchedule() {
     const response = await fetch(`${API}/schedule`);
     if (response.status == 200) {
@@ -133,7 +124,7 @@ function generateScheduleShiftDiv(shift) {
                 shift_div.innerHTML += `<span class="steward">${steward}</span>`;
             }
 
-            if (HEAD_STEWARDS.includes(steward)) {
+            if (shift.head_steward) {
                 shift_div.classList.add("head-steward");
             }
         }
@@ -212,3 +203,10 @@ function removeHighlightProficiency() {
         prof.classList.remove("highlight");
     }
 }
+
+document.getElementById("page-schedule").addEventListener("click", (e) => {
+    // If the target is the schedule page, remove the highlight
+    if (e.target.id == "schedule-help" || e.target.id == "schedule-content")  {
+        removeHighlightProficiency();
+    }
+});

@@ -4,6 +4,14 @@ use serde::{Deserialize, Serialize};
 const PROFICIENCIES: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRYlLMDI2Sv1e8MDpCmtshaFu8MnS5g0xPkmf3ZFEntx8j1kJbfup6uqFPGh2bpxt_IwY9qyEZk4hDS/pub?gid=954325037&single=true&output=csv";
 const SHIFT_SCHEDULES: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRE5Daf9Y_ydDpyAvxickgTRJcTNpE4V-Vj0W4VxkGgXHmIwq4EtVeyeSRJDzEotfSVDK82H8aetzK5/pub?gid=0&single=true&output=csv";
 
+const HEAD_STEWARDS: [&str; 6] = [
+    "Ethan Vazquez",
+    "Charlie Weismann",
+    "Cristian Gonzalez",
+    "Emma Sar",
+    "Ashley Cheung",
+    "Jordan Stone",
+];
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd, Eq, Ord)]
 #[serde(default)]
@@ -54,7 +62,12 @@ impl Schedule {
                         if cell.trim().len() > 0 && i - 1 < days.len() {
                             current_shift.stewards = cell.split(",").map(|x| x.trim().to_string()).collect();
                             current_shift.num_stewards = current_shift.stewards.len() as u32;
-    
+
+                            // If any of the stewards are head stewards, set head_steward to true
+                            if current_shift.stewards.iter().any(|x| HEAD_STEWARDS.contains(&x.as_str())) {
+                                current_shift.head_steward = true;
+                            }
+
                             days[i - 1].add_shift(current_shift);
                         }
                     }
@@ -120,6 +133,7 @@ impl Schedule {
 }
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd, Eq, Ord)]
+#[serde(default)]
 pub struct ScheduleDay {
     pub day: String,
     pub shifts: Vec<Shift>,
@@ -139,11 +153,13 @@ impl ScheduleDay {
 }
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd, Eq, Ord)]
+#[serde(default)]
 pub struct Shift {
     pub time_string: String,
     pub stewards: Vec<String>,
     pub num_stewards: u32,
     pub proficiencies: Vec<String>,
+    pub head_steward: bool,
 }
 
 impl Shift {
@@ -153,6 +169,7 @@ impl Shift {
             stewards: Vec::new(),
             num_stewards: 0,
             proficiencies: Vec::new(),
+            head_steward: false,
         }
     }
 }
