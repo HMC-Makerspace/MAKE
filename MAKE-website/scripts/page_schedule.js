@@ -1,3 +1,12 @@
+const HEAD_STEWARDS = [
+    "Ethan",
+    "Charlie",
+    "Cristian",
+    "Jordan",
+    "Ashley",
+    "Emma",
+]
+
 async function fetchSchedule() {
     const response = await fetch(`${API}/schedule`);
     if (response.status == 200) {
@@ -122,6 +131,10 @@ function generateScheduleShiftDiv(shift) {
         for (let steward of shift.stewards) {
             if (steward != "Steward") {
                 shift_div.innerHTML += `<span class="steward">${steward}</span>`;
+            }
+
+            if (HEAD_STEWARDS.includes(steward)) {
+                shift_div.classList.add("head-steward");
             }
         }
 

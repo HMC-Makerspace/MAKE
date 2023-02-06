@@ -12,6 +12,14 @@ While stewards are on duty, you can check out tools/equipment and ask them for a
 
 You can also ask questions on the [Makerspace Discord](https://discord.gg/uveewgBmME)!
 
+## How is the Makerspace run?
+
+The Makerspace is run by a management team of six student head stewards & the Makerspace Manager, Kim Neal. In addition, we also employ ~40 student stewards who are responsible for helping users and managing the Makerspace during their [shift hours](/?p=schedule).
+
+## What is the difference between the Machine Shop and the Makerspace?
+
+The HMC Machine Shop is a facility with equipment and supplies for heavy-duty machining. It has a separate safety quiz and is only open during proctor hours. The Makerspace is open 24/7 to all students who have passed the Makerspace’s safety quiz, and has a variety of different machines and supplies.
+
 ## What does it mean that the makerspace is open 24/7?
 
 It means that the general space is open to use whenever you need it. If you have passed the safety quizzes to certain rooms, your swipe will work at all times and you can work in there as well. If you want to use any machinery, follow the buddy rule to make sure you are being safe.
@@ -40,10 +48,6 @@ All 5C students have access to up to $50 worth of funding per semester. Separate
 
 It is the ground floor of the McGregor Computer Science Center, which is on the corner of Platt and Dartmouth. Look for a large yellow sign that says Makerspace!
 
-## What is the difference between the Machine Shop and the Makerspace?
-
-The HMC Machine Shop is a facility with equipment and supplies for heavy-duty machining. It has a separate safety quiz and is only open during proctor hours. The Makerspace is open 24/7 to all students who have passed the Makerspace’s safety quiz, and has a variety of different machines and supplies.
-
 ## Can my club meet here?
 
 Yes! If your club plans on meeting in the makerspace, we ask that you email makerspace-management-l@hmc.edu to make sure that the time does not conflict with other clubs. 
@@ -67,7 +71,3 @@ All FDM (filament) printing is free for personal use. If you are printing items 
 ## How can I hear about workshops?
 
 You can hear about workshops and sign up for them through the Makerspace Google Site. We will post updates whenever one is scheduled. You can also hear about them through our instagram, [@hmcmakerspace](https://www.instagram.com/hmcmakerspace/)
-
-## What does it mean that the Makerspace is student-run?
-
-Student-run means that students are heavily involved in the leadership of the space. We have 6 head stewards who write the policies and make decisions about what materials and machines are available for use. The head stewards lead the steward team and run trainings.

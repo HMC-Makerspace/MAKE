@@ -7,11 +7,11 @@
   --theme-color-1: #ee9d22;
   --theme-color-2: #ffffff;
   --theme-color-3: #e6e6e6;
-  --theme-color-4: #80b8e2; 
+  --theme-color-4: #26a2ff; 
   --theme-color-5: #ececec;
   --theme-color-6: #e0cf34;
   --theme-color-7: #a918ec;
-  --theme-color-8: #1b9aaa;
+  --theme-color-8: #00444d;
   --theme-color-9: #5a5a5a;
 
   --low-color: #e07575;
@@ -1255,13 +1255,27 @@ Schedule
   background-color: var(--shift-2);
 }
 
+.head-steward {
+  background-color: var(--theme-color-1);
+}
+
+.stewards-legend {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
 .stewards-1.info,
-.stewards-2.info {
+.stewards-2.info,
+.head-steward.info {
   font-weight: bold;
   padding: 10px;
-  font-size: 1.4em;
+  font-size: 1em;
   text-align: center;
-  width: 50%;
+  width: 20%;
   margin: 0 auto;
   margin-top: 10px;
 }
