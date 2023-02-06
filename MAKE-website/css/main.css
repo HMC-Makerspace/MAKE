@@ -120,7 +120,6 @@ body * {
 }
 
 p1 {
-  padding: 40px;
   font-size: 2em;
   font-weight: bold;
 }
@@ -261,10 +260,10 @@ p3 {
 }
 
 #left-bar button {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
   width: 100%;
-  height: 6.5vh;
+  height: 6vh;
   padding-left: 30px;
   border-radius: unset;
   text-align: left;
@@ -382,8 +381,8 @@ label {
 }
 
 .page-icon {
-  width: 30px;
-  height: 30px;
+  width: 3vh;
+  height: 3vh ;
   margin-right: 15px;
 }
 
@@ -437,7 +436,7 @@ HOME
 */
 
 #page-home {
-  grid-template-rows: 120px minmax(0, 1fr);
+  grid-template-rows: 80px minmax(0, 1fr);
   background-color: var(--theme-color-2);
 }
 
@@ -451,13 +450,18 @@ HOME
   color: var(--text-color-main);
   font-weight: normal;
   margin: 0 auto;
-  height: 120px;
-}
+  }
 
 #announcement-text {
+  margin: 20px;
+}
+
+#announcement-text.music {
   margin-left: 60px;
   width: 75%;
 }
+
+
 
 #status {
   display: flex;
@@ -509,6 +513,7 @@ HOME
 }
 
 #top-right-music {
+  display: none;
   position: absolute;
   top: 0;
   right: 50px;
@@ -1771,7 +1776,6 @@ Mobile Styles
   }
 
   p1 {
-    padding: 40px;
     font-size: 3em;
     font-weight: bold;
   }

@@ -108,6 +108,9 @@ async function getNowPlaying() {
         // Album art is div, not img
         album_art.style.backgroundImage = `url(${data.album.images[0].url})`;
         album_title.innerText = `${data.name} - ${data.artists[0].name}`;
+
+        document.getElementById("top-right-music").style.display = "block";
+        document.getElementById("announcement-text").classList.add("music");
     } else {
         return null;
     }
