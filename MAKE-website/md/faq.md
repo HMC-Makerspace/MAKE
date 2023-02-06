@@ -50,7 +50,7 @@ It is the ground floor of the McGregor Computer Science Center, which is on the 
 
 ## Can my club meet here?
 
-Yes! If your club plans on meeting in the makerspace, we ask that you email makerspace-management-l@hmc.edu to make sure that the time does not conflict with other clubs. 
+Yes! If your club plans on meeting in the makerspace, we ask that you email makerspace-management-l@g.hmc.edu to make sure that the time does not conflict with other clubs. 
 
 ## What can a steward help me with?
 
