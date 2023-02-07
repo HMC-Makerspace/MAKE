@@ -8,12 +8,12 @@ use std::thread;
 
 use actix_cors::*;
 use actix_web::dev::ServiceRequest;
-use actix::fut::ok;
 use actix_web::rt::spawn;
 use actix_web::*;
 use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
 use actix_web_static_files::ResourceFiles;
 
+use base64::prelude::{Engine as _, BASE64_STANDARD_NO_PAD};
 use chrono::Timelike;
 use chrono::Utc;
 use lazy_static::__Deref;
@@ -680,7 +680,7 @@ async fn update_loop() {
     // JS:
     let client = Client::new();
 
-    let base64 = base64::encode(&format!("{}:{}", id, secret));
+    let base64 = &BASE64_STANDARD_NO_PAD.encode(&format!("{}:{}", id, secret));
      
     let mut headers = HeaderMap::new();
 

@@ -10,10 +10,6 @@ name = "server"
 path = "src/bin/start_server.rs"
 
 [[bin]]
-name = "loom"
-path = "src/bin/start_loom.rs"
-
-[[bin]]
 name = "stats"
 path = "src/bin/start_stats.rs"
 
@@ -24,9 +20,9 @@ path = "src/lib.rs"
 [dependencies]
 serde = "*"
 serde_json = "*"
-reqwest = { version = "0.11.4", features = ["cookies", "json"] }
+reqwest = { version = "0.11.14", features = ["cookies", "json"] }
 actix = { version = "0.13.0" }
-actix-web = { version = "4.2.1", features = ["openssl"] }
+actix-web = { version = "4.3.0", features = ["openssl"] }
 actix-cors = "0.6.0-beta.2"
 actix-web-httpauth = "*"
 chrono = { version = "*", features = ["serde"] }
@@ -46,7 +42,6 @@ lettre = "*"
 lettre_email = "*"
 uuid = "*"
 actix-web-middleware-redirect-scheme = { version = "4.0.0", git = "https://github.com/AOx0/actix-web-middleware-redirect-scheme" }
-tiff = "0.8.0"
 image = "*"
 base64 = "*"
 

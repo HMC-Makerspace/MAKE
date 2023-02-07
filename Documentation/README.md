@@ -12,13 +12,13 @@ In order to maintain the server, you'll need to know a little Rust, JS, HTML, an
 If nothing changes, the server will keep running forever. This is a good thing.
 However, there still are a few things that need to be done.
 
-- Every year before the semester starts, the server will need to be restarted.
-SSL certificates are automatically renewed every year by the CertBot installation, 
-but the server needs to be stopped and started to reload the certificates.
+- Every three months, the SSL certificate expires. You'll need to renew it by running
+certbot from the command line of the server. MAKE needs to be down for this, as you'll
+need to redirect port 80 back from 8080 to 80 again, as 80 -> 8080 and 443 -> 8443.
 
 - Currently, `schedule.rs` pulls the schedule and proficiencies from two google sheets.
-Make new ones every year to archive the old ones, and publish the new ones to web as CSV.
-Copy the new links, and as long as the formatting was the same, everything should work.
+Make sure to update these sheets with the new semester's schedules, stewards, and proficiencies.
+Feel free to keep old stewards on the proficiency sheet.
 
 - The server `db.json` should be renamed to `db.json.20xx.old` when the spring semester ends.
 
@@ -27,13 +27,20 @@ Copy the new links, and as long as the formatting was the same, everything shoul
     Summer stewards should be added as admins using the website's admin panel. This should give them swipe access to all rooms.
     Before the semster starts, hired stewards should be added as stewards, again using the admin panel.
 
-- The gmail account used to send emails is in Google's low-security mode. 
-If Google detects inactivity, or if Google ever stops allowing this mode, you wil need to change the account.
+- The gmail account used to send emails is in Google's low-security mode. Currently, this is
+my personal school email account. You can not send automate emails from makerspace-management-l@g.hmc.edu
+unfortunately. If Google detects inactivity (no emails sent in low-security mode for a month), simply reenable low-security mode.
+If Google ever stops allowing this mode, you wil need to change the account to any other email provider that supports SMTP.
 This can be done by editing the `api_keys.json` file to a new email and password. 
 Any email service with SMTP support is fine, not just gmail.
 
-- The JS file `page_quiz_info.js` needs to be updated with any new manuals/policies that are added. 
+- The spotify now_playing API is using the Makerspace spotify account. If this account is ever changed, you'll need to create a new one and update the `api_keys.json` file.
+
+- The file `page_quiz_info.js` needs to be updated with any new manuals/policies that are added. 
 Old policies/manuals will need to be removed.
+
+- The file `page_equipment.js` needs to be updated with any new equipment that is added, and as manuals are added/removed.
+Images should be in the .webp format, and ideally should be <100kb in size. The images should be in the `MAKE-website/img/equipment` folder.
 
 ### 3. If something changes IRL...
 - If the Makerspace Manager changes, the string `MAKERSPACE_MANAGER_EMAIL` needs to be updated in `main.rs`.
@@ -46,6 +53,9 @@ Each key is the row letter, and the value assigned is the number of slots in tha
 EX: `A = 2` means there are 2 slots in row A.
 
 ### 4. If you want to change something...
+- Learn Rust, JS, HTML, and CSS. This is a good thing to know, and will help you in the future.
+Mostly, JS and HTML/CSS are used for the website, and Rust is used for the API. Almost all user-facing
+changes will be made in the website files, so Rust isn't as important.
 
 ### 5. If you want to change the API...
 Please use the standard API version practices of supporting multiple versions of the API.

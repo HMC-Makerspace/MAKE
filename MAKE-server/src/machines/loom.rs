@@ -2,6 +2,7 @@ use std::{path::Path, fs::File, io::Write, cmp::{max, min}};
 
 use image::{self, Pixel};
 use log::info;
+use base64::{Engine as _, prelude::BASE64_STANDARD_NO_PAD};
 
 pub fn render_loom_request(b64_file: &str, file_extension: &str, loom_width: &u32, width: &u32, inner_tabby_width: &usize, outer_tabby_width: &usize, format: &str) -> String {
     let start = std::time::Instant::now();
@@ -9,7 +10,7 @@ pub fn render_loom_request(b64_file: &str, file_extension: &str, loom_width: &u3
     let file_path = format!("temp.{}", file_extension);
     let file_path = Path::new(&file_path);
     let mut file = File::create(file_path).unwrap();
-    file.write_all(&base64::decode(b64_file).unwrap()).unwrap();
+    file.write_all(&BASE64_STANDARD_NO_PAD.decode(b64_file).unwrap()).unwrap();
 
     // Open image file
     let pic_img = image::io::Reader::open(file_path).unwrap();
@@ -108,11 +109,11 @@ pub fn render_loom_request(b64_file: &str, file_extension: &str, loom_width: &u3
     img.write_to(&mut file, image_format).unwrap();
 
     // Encode as base64
-    let img_b64 = base64::encode(&std::fs::read(file_path).unwrap());
+    let img_b64 = &BASE64_STANDARD_NO_PAD.encode(&std::fs::read(file_path).unwrap());
     let duration = start.elapsed();
     info!("Converting to b64 took: {:?}", duration);
 
-    img_b64
+    img_b64.to_owned()
 }
 
 

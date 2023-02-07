@@ -1,0 +1,29 @@
+[printers]
+ids = [
+    "FLSUN-SR-1",
+    "FLSUN-SR-2",
+    "FLSUN-SR-3",
+    "FLSUN-SR-4",
+    "PRUSA-1",
+    "PRUSA-2",
+]
+
+[student_storage]
+A = 16
+B = 16
+C = 16
+D = 16
+E = 4
+F = 4
+G = 4
+H = 4
+
+[head_stewards]
+names = [
+    "Ethan Vazquez",
+    "Charlie Weismann",
+    "Cristian Gonzalez",
+    "Emma Sar",
+    "Ashley Cheung",
+    "Jordan Stone",
+]
