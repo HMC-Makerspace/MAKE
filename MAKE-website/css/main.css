@@ -1927,7 +1927,7 @@ Mobile Styles
   }
 
   #top-right-music {
-    display: none;
+    display: none !important;
   }
 
   #status {

@@ -1,6 +1,6 @@
 use crate::*;
 use ::serde::{Deserialize, Serialize};
-use actix_web::error::*;
+use actix_web::{error::*, dev::{ServiceResponse}};
 use serde_json::json;
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -55,15 +55,23 @@ impl PrinterStatuses {
 
 /*
 
-Redirect from http to https
+Redirect to make.hmc.edu/?error=404 if the page is not found
 
 */
-#[get("/")]
-async fn handler(req: HttpRequest) -> HttpResponse {
-    match req.app_config().local_addr().port() {
-        443 => HttpResponse::Ok().body("Hello World from 443"),
-        _ =>  HttpResponse::PermanentRedirect().append_header(("location", "https://make.hmc.edu")).finish(),
-    }
+pub fn page_404(service_req: ServiceRequest) -> ServiceResponse {
+    // Return a redirect to make.hmc.edu/?e=404
+    let http_req = service_req.request();
+
+    warn!("404: {}", http_req.uri().path());
+
+    let mut res = ServiceResponse::new(http_req.clone(), HttpResponse::NotFound().finish());
+    
+    res.headers_mut().insert(
+        http::header::HeaderName::from_static("location"),
+        HeaderValue::from_static("/?error=404"),
+    );
+
+    res
 }
 
 /*

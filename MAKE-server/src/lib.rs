@@ -7,6 +7,8 @@ use std::process::exit;
 use std::thread;
 
 use actix_cors::*;
+use actix_web::dev::ServiceRequest;
+use actix::fut::ok;
 use actix_web::rt::spawn;
 use actix_web::*;
 use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
@@ -384,8 +386,8 @@ async fn async_main(args: Vec<String>) -> std::io::Result<()> {
             .send_wildcard()
             .max_age(3600);
         let json_cfg = web::JsonConfig::default()
-            // limit request payload size to 100mb
-            .limit(100000000)
+            // limit request payload size to 1000mb
+            .limit(1000000000)
             // accept any content type
             .content_type(|_mime| true)
             // use custom error handler
