@@ -8,7 +8,8 @@ const general_manual_policy = {
     "Overnight Locker Manual": "https://docs.google.com/document/d/1GWrlFWOObZJy3haqlFzlr3gR2CCAU9opjqsJb66xxew/edit",
     "Tool Checkout Policy": "https://docs.google.com/document/d/1wp-baSy2ixf-ST2luNtjVMYcxE5_iDHC-R0nUmALyzc/edit",
     "Studio Policy": "https://docs.google.com/document/d/1pqknkaGRO2VQL6vkdeRkVYewqo_WKNh6-tpEloCPW5c/edit",
-    "Waterjet Manual": "https://docs.google.com/document/d/1a-hPM5qB79ONJ-7k06pvIZVxz1_ONLAD/"
+    "Waterjet Manual": "https://docs.google.com/document/d/1a-hPM5qB79ONJ-7k06pvIZVxz1_ONLAD/",
+    "Welding Manual": "https://docs.google.com/document/d/13k30JUPOOKK707lYuoaa8Pd3ICvUOBFMly4v8zQqU-Y/edit"
 };
 
 const additional_informational_links = {
