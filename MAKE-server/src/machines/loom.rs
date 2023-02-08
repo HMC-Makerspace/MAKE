@@ -4,7 +4,7 @@ use std::{
 };
 
 use base64::{prelude::BASE64_STANDARD, Engine as _};
-use image::{self, Pixel};
+use image::{self, io::Reader, ImageFormat, Pixel};
 use log::info;
 
 pub fn render_loom_request(
@@ -16,12 +16,15 @@ pub fn render_loom_request(
     format: &str,
 ) -> String {
     let start = std::time::Instant::now();
-    // Open file from base64
-    let pic_img = image::load_from_memory_with_format(
-        &BASE64_STANDARD.decode(b64_file).unwrap(),
-        image::ImageFormat::from_extension(file_extension).unwrap(),
-    )
-    .unwrap();
+    let decoded = BASE64_STANDARD.decode(b64_file).unwrap();
+
+    let mut pic_img = Reader::new(Cursor::new(decoded));
+
+    pic_img.no_limits();
+    pic_img.set_format(ImageFormat::from_extension(file_extension).unwrap());
+
+    let pic_img = pic_img.decode().unwrap();
+
     let duration = start.elapsed();
 
     // Delete temp file
@@ -111,8 +114,9 @@ pub fn render_loom_request(
     }
 
     let mut buffer: Vec<u8> = Vec::new();
-    img.write_to(&mut Cursor::new(&mut buffer), image_format).unwrap();
-    
+    img.write_to(&mut Cursor::new(&mut buffer), image_format)
+        .unwrap();
+
     // Encode as base64
     let img_b64 = &BASE64_STANDARD.encode(&buffer);
     let duration = start.elapsed();
