@@ -26,7 +26,7 @@ impl Schedule {
         let shift_response = reqwest::get(SHIFT_SCHEDULES).await;
 
         if let Ok(shift_response) = shift_response {
-            let shift_csv = shift_response.text().await.unwrap();
+            let shift_csv = shift_response.text().await?;
             let mut rdr = csv::Reader::from_reader(shift_csv.as_bytes());
             
             let days = vec![
@@ -75,7 +75,7 @@ impl Schedule {
             }
 
             if let Ok(prof_response) = prof_response {
-                let prof_csv = prof_response.text().await.unwrap();
+                let prof_csv = prof_response.text().await?;
                 let mut rdr = csv::Reader::from_reader(prof_csv.as_bytes());
 
                 // discard first two rows

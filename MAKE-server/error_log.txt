@@ -1,0 +1,8 @@
+-----------------------
+MAKE Error Report - 2023-02-08 15:26:18
+panicked at 'source slice length (761600) does not match destination slice length (997920)', C:\Users\Ethan Vazquez\.cargo\registry\src\github.com-1ecc6299db9ec823\image-0.24.5\./src\codecs\webp\extended.rs:459:21C:\Users\Ethan Vazquez\.cargo\registry\src\github.com-1ecc6299db9ec823\image-0.24.5\./src\codecs\webp\extended.rs:459:21
+-----------------------
+
+MAKE Error Report - 2023-02-08 15:28:48
+
+panicked at 'source slice length (761600) does not match destination slice length (997920)', C:\Users\Ethan Vazquez\.cargo\registry\src\github.com-1ecc6299db9ec823\image-0.24.5\./src\codecs\webp\extended.rs:459:21C:\Users\Ethan Vazquez\.cargo\registry\src\github.com-1ecc6299db9ec823\image-0.24.5\./src\codecs\webp\extended.rs:459:21

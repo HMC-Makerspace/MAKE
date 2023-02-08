@@ -58,7 +58,7 @@ impl Quiz {
             .await;
 
         if let Ok(response) = response {
-            let data = response.text().await.expect("Failed to read quiz");
+            let data = response.text().await?;
 
             // Fetch csv file
             let rdr = csv::Reader::from_reader(data.as_bytes());

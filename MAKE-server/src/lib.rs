@@ -3,6 +3,7 @@ use std::cmp::min;
 use std::fs::OpenOptions;
 use std::io::Read;
 use std::io::Write;
+use std::panic::PanicInfo;
 use std::process::exit;
 use std::thread;
 
@@ -14,6 +15,7 @@ use actix_web_middleware_redirect_scheme::RedirectSchemeBuilder;
 use actix_web_static_files::ResourceFiles;
 
 use base64::prelude::{Engine as _, BASE64_STANDARD_NO_PAD};
+use chrono::Local;
 use chrono::Timelike;
 use chrono::Utc;
 use lazy_static::__Deref;
@@ -74,6 +76,8 @@ const SMTP_URL: &str = "smtp.gmail.com";
 const MAKERSPACE_MANAGER_EMAIL: &str = "evazquez@g.hmc.edu";
 #[cfg(not(debug_assertions))]
 const MAKERSPACE_MANAGER_EMAIL: &str = "kneal@g.hmc.edu";
+
+const WEBMASTER_EMAIL: &str = "evazquez@g.hmc.edu";
 
 const UPDATE_INTERVAL: u64 = 60;
 const TIME_SEND_EMAIL_HOUR: u32 = 6; // 6am UTC, eg 11pm PDT
@@ -337,7 +341,7 @@ async fn async_main(args: Vec<String>) -> std::io::Result<()> {
         info!("Student storage validity check passed.");
     }
 
-    spawn(async move {
+    let _ = spawn(async move {
         let mut interval = time::interval(Duration::from_secs(UPDATE_INTERVAL));
         loop {
             interval.tick().await;
@@ -345,6 +349,11 @@ async fn async_main(args: Vec<String>) -> std::io::Result<()> {
             let _ = save_database().await;
         }
     });
+
+    // Call error_report function when the program panics
+    std::panic::set_hook(Box::new(|panic_info| {
+        futures::executor::block_on(error_report(panic_info));
+    }));
 
     let builder;
     let redirect_scheme;
@@ -386,7 +395,7 @@ async fn async_main(args: Vec<String>) -> std::io::Result<()> {
             .send_wildcard()
             .max_age(3600);
         let json_cfg = web::JsonConfig::default()
-            // limit request payload size to 1000mb
+            // limit request payload size to BIGG
             .limit(1000000000)
             // accept any content type
             .content_type(|_mime| true)
@@ -668,7 +677,13 @@ async fn update_loop() {
     // Update workshops
     let mut workshops = MEMORY_DATABASE.lock().await.workshops.clone();
 
-    workshops.update().await;
+    let workshop_update = workshops.update().await;
+
+    if workshop_update.is_err() {
+        info!("Failed to update workshops: {}", workshop_update.err().unwrap());
+    } else {
+        info!("Workshops updated!");
+    }
 
     MEMORY_DATABASE.lock().await.workshops = workshops;
 
@@ -707,52 +722,99 @@ async fn update_loop() {
     } else {
 
         // Get json "access_token"
-        let access_token = response.unwrap().text().await.unwrap();
+        let access_token = response.unwrap().text().await;
 
-        let access_token = between(&access_token, "access_token\":\"", "\"");
-
-        info!("Refreshed spotify token {}", access_token);
-
-        let mut headers = HeaderMap::new();
-
-        headers.insert(
-            "Authorization",
-            HeaderValue::from_str(&format!("Bearer {}", access_token)).unwrap(),
-        );
-
-        let response = client
-            .get("https://api.spotify.com/v1/me/player/currently-playing")
-            .headers(headers)
-            .send()
-            .await;
-
-        if response.is_err() {
-            error!("Failed to get currently playing song from spotify: {}", response.err().unwrap());
+        if access_token.is_err() {
+            error!("Failed to get access token from spotify: {}", access_token.err().unwrap());
         } else {
-            let response = response.unwrap();
+            let access_token = access_token.unwrap();
 
-            if response.status() == 200 {
-                let body = response.text().await;
+            let access_token = between(&access_token, "access_token\":\"", "\"");
 
-                if body.is_err() {
-                    error!("Failed to get body of spotify response: {}", body.err().unwrap());
-                } else {
-                    let body = body.unwrap();
+            info!("Refreshed spotify token {}", access_token);
 
-                    let json: Value = serde_json::from_str(&body).unwrap();
+            let mut headers = HeaderMap::new();
 
-                    let item = json.get("item").unwrap();
+            headers.insert(
+                "Authorization",
+                HeaderValue::from_str(&format!("Bearer {}", access_token)).unwrap(),
+            );
 
-                    info!("Got currently playing song from spotify: {}", item.get("name").unwrap());    
+            let response = client
+                .get("https://api.spotify.com/v1/me/player/currently-playing")
+                .headers(headers)
+                .send()
+                .await;
 
-                    MEMORY_DATABASE.lock().await.spotify = Some(item.clone());
-                }
-            } else if response.status() == 204 {
-                info!("No song is currently playing on spotify");
-                MEMORY_DATABASE.lock().await.spotify = None;
+            if response.is_err() {
+                error!("Failed to get currently playing song from spotify: {}", response.err().unwrap());
             } else {
-                error!("Failed to get currently playing song from spotify: {}", response.status());
-            }
-        }    
+                let response = response.unwrap();
+
+                if response.status() == 200 {
+                    let body = response.text().await;
+
+                    if body.is_err() {
+                        error!("Failed to get body of spotify response: {}", body.err().unwrap());
+                    } else {
+                        let body = body.unwrap();
+
+                        let json: Value = serde_json::from_str(&body).unwrap();
+
+                        let item = json.get("item").unwrap();
+
+                        info!("Got currently playing song from spotify: {}", item.get("name").unwrap());    
+
+                        MEMORY_DATABASE.lock().await.spotify = Some(item.clone());
+                    }
+                } else if response.status() == 204 {
+                    info!("No song is currently playing on spotify");
+                    MEMORY_DATABASE.lock().await.spotify = None;
+                } else {
+                    error!("Failed to get currently playing song from spotify: {}", response.status());
+                }
+            }   
+        } 
+    }
+}
+
+pub async fn error_report(err: &PanicInfo<'_>) {
+    let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
+    let mut message = format!("-----------------------\nMAKE Error Report - {}\n{}\n", timestamp, err);
+
+    if let Some(location) = err.location() {
+        message = format!("{}{}\n", message, location);
+    }
+
+    if let Some(payload) = err.payload().downcast_ref::<&str>() {
+        message = format!("{}{}\n", message, payload);
+    }
+
+    error!("{}", message);
+
+    // Write to log file
+    let mut file = OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open("error_log.txt")
+        .unwrap();
+
+    if let Err(e) = writeln!(file, "{}", message) {
+        eprintln!("Couldn't write to file: {}", e);
+    }
+    
+    // Email webmaster
+    let result = send_individual_email(
+        WEBMASTER_EMAIL.to_string(),
+        None,
+        "MAKE Error Report".to_string(),
+        message.replace("\n", "<br>"),
+    ).await;
+
+    if result.is_err() {
+        // Write to log file
+        if let Err(e) = writeln!(file, "Failed to send error report email: {}", result.err().unwrap()) {
+            eprintln!("Couldn't write to file: {}", e);
+        }
     }
 }

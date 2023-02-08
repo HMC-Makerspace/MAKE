@@ -16,11 +16,11 @@ impl Workshops {
         }
     }
 
-    pub async fn update(&mut self) {
+    pub async fn update(&mut self) -> Result<(), reqwest::Error> {
         let workshops_response = reqwest::get(WORKSHOPS_URL).await;
 
         if let Ok(workshops_response) = workshops_response {
-            let workshops_csv = workshops_response.text().await.unwrap();
+            let workshops_csv = workshops_response.text().await?;
             let mut rdr = csv::Reader::from_reader(workshops_csv.as_bytes());
 
             self.workshops = Vec::new();
@@ -39,6 +39,8 @@ impl Workshops {
                 }
             }
         }
+
+        Ok(())
     }
 }
 
