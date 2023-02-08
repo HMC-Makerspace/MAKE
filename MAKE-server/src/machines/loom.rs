@@ -1,7 +1,6 @@
 use std::{
     cmp::{max, min},
-    fs::File,
-    path::Path, io::Cursor,
+    io::Cursor,
 };
 
 use base64::{prelude::BASE64_STANDARD, Engine as _};
