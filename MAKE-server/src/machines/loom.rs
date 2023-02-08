@@ -1,7 +1,7 @@
 use std::{
     cmp::{max, min},
     fs::File,
-    path::Path,
+    path::Path, io::Cursor,
 };
 
 use base64::{prelude::BASE64_STANDARD, Engine as _};
@@ -103,24 +103,19 @@ pub fn render_loom_request(
     let img = image::DynamicImage::ImageLuma8(img);
 
     // Temp file path of out.tiff
-    let file_path = format!("out.{}", &format);
-    let file_path = Path::new(&file_path);
-    let mut file = File::create(file_path).unwrap();
-
     let image_format;
 
     if format == "tiff" {
         image_format = image::ImageOutputFormat::Tiff;
-    } else if format == "png" {
-        image_format = image::ImageOutputFormat::Png;
     } else {
-        image_format = image::ImageOutputFormat::Jpeg(100);
+        image_format = image::ImageOutputFormat::Png;
     }
 
-    img.write_to(&mut file, image_format).unwrap();
-
+    let mut buffer: Vec<u8> = Vec::new();
+    img.write_to(&mut Cursor::new(&mut buffer), image_format).unwrap();
+    
     // Encode as base64
-    let img_b64 = &BASE64_STANDARD.encode(&std::fs::read(file_path).unwrap());
+    let img_b64 = &BASE64_STANDARD.encode(&buffer);
     let duration = start.elapsed();
     info!("Converting to b64 took: {:?}", duration);
 
