@@ -46,6 +46,8 @@ function dropHandler(event) {
 }
 
 function renderPreview() {
+    document.getElementById("display").classList.add("loading");
+
     // Send image file to server to generate preview with options
     // Encode image as base64 string
     let request = new XMLHttpRequest();
@@ -89,8 +91,7 @@ function renderPreview() {
             output_format: "png",
             desired_width: Number(document.getElementById("desired-width").value),
             loom_width: Number(document.getElementById("loom-width").value),
-            tabby_start_width: Number(document.getElementById("tabby-start").value),
-            tabby_end_width: Number(document.getElementById("tabby-end").value),
+            tabby_width: Number(document.getElementById("tabby-width").value),
         }
 
         request.send(JSON.stringify(data));

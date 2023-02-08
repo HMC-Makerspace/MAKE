@@ -430,8 +430,7 @@ pub struct LoomRenderRequest {
     pub output_format: String,
     pub desired_width: u32,
     pub loom_width: u32,
-    pub tabby_start_width: usize,
-    pub tabby_end_width: usize,
+    pub tabby_width: usize,
 }
 
 #[post("/api/v1/loom/render")]
@@ -448,8 +447,7 @@ pub async fn render_loom(body: web::Json<LoomRenderRequest>) -> Result<HttpRespo
         &request.extension,
         &request.loom_width,
         &request.desired_width,
-        &request.tabby_start_width,
-        &request.tabby_end_width,
+        &request.tabby_width,
         &request.output_format,
     );
 

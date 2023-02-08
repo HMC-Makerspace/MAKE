@@ -556,14 +556,13 @@ LOOM
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
-  display: grid;
-  grid-template-areas: "options" "display";
-  grid-template-rows: 250px 1fr;
+  height: 200vh;
+  display: flex;
+  flex-direction: column;
 }
 
 #display {
-  grid-area: display;
+  height: 100%;
   position: relative;
   margin: 20px;
   transition: border 0.2s;
@@ -622,8 +621,8 @@ LOOM
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  background-size: cover;
-  background-position: center;
+  background-size: contain;
+  background-position: top;
   background-repeat: no-repeat;
   image-rendering: pixelated !important;
 }
@@ -635,4 +634,24 @@ LOOM
 
 button#download {
   margin-top: 10px;
+}
+
+#input-array {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+#input-array input {
+  width: 100px;
+}
+
+#render, #download {
+  width: 150px;
+  height: 30px;
+  margin-top: 20px;
+  margin-bottom: 10px;
 }

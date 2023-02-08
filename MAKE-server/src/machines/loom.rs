@@ -1,24 +1,31 @@
-use std::{path::Path, fs::File, io::Write, cmp::{max, min}};
+use std::{
+    cmp::{max, min},
+    fs::File,
+    path::Path,
+};
 
+use base64::{prelude::BASE64_STANDARD, Engine as _};
 use image::{self, Pixel};
 use log::info;
-use base64::{Engine as _, prelude::BASE64_STANDARD_NO_PAD};
 
-pub fn render_loom_request(b64_file: &str, file_extension: &str, loom_width: &u32, width: &u32, inner_tabby_width: &usize, outer_tabby_width: &usize, format: &str) -> String {
+pub fn render_loom_request(
+    b64_file: &str,
+    file_extension: &str,
+    loom_width: &u32,
+    width: &u32,
+    tabby_width: &usize,
+    format: &str,
+) -> String {
     let start = std::time::Instant::now();
     // Open file from base64
-    let file_path = format!("temp.{}", file_extension);
-    let file_path = Path::new(&file_path);
-    let mut file = File::create(file_path).unwrap();
-    file.write_all(&BASE64_STANDARD_NO_PAD.decode(b64_file).unwrap()).unwrap();
-
-    // Open image file
-    let pic_img = image::io::Reader::open(file_path).unwrap();
-    let pic_img = pic_img.with_guessed_format().unwrap().decode().unwrap();
+    let pic_img = image::load_from_memory_with_format(
+        &BASE64_STANDARD.decode(b64_file).unwrap(),
+        image::ImageFormat::from_extension(file_extension).unwrap(),
+    )
+    .unwrap();
     let duration = start.elapsed();
 
     // Delete temp file
-    std::fs::remove_file(file_path).unwrap();
     info!("Opening image took: {:?}", duration);
 
     let start = std::time::Instant::now();
@@ -27,7 +34,7 @@ pub fn render_loom_request(b64_file: &str, file_extension: &str, loom_width: &u3
     let new_height = (pic_img.height() as f32 / pic_img.width() as f32 * new_width as f32) as u32;
 
     let mut img = image::RgbaImage::new(loom_width.clone(), new_height);
-    
+
     // Resize to loom width, keeping aspect ratio
     let pic_img = pic_img.resize(new_width, new_height, image::imageops::FilterType::Nearest);
 
@@ -37,7 +44,10 @@ pub fn render_loom_request(b64_file: &str, file_extension: &str, loom_width: &u3
     // Get image pixels grayscale
     let height = img.height();
     let width = img.width();
-    let mut img_pixels = img.pixels().map(|p| p.to_luma().channels()[0]).collect::<Vec<u8>>();
+    let mut img_pixels = img
+        .pixels()
+        .map(|p| p.to_luma().channels()[0])
+        .collect::<Vec<u8>>();
     let duration = start.elapsed();
     info!("Resizing image took: {:?}", duration);
 
@@ -58,33 +68,34 @@ pub fn render_loom_request(b64_file: &str, file_extension: &str, loom_width: &u3
         img_pixels[i] = (((img_pixels[i] - min) as u32 * 255) / range as u32) as u8;
     }
 
-    // Find start and end column of image
-    // eg columns where all pixels are white
-    let start = std::time::Instant::now();
-    let (start_column, end_column) = find_start_end_column(&img_pixels, width, height);
-    let duration = start.elapsed();
-    info!("Finding start and end column took: {:?}", duration);
-
     // Dither
     let start = std::time::Instant::now();
     atkinson_dither(&mut img_pixels, width, height);
     let duration = start.elapsed();
     info!("Dithering took: {:?}", duration);
-    
+
     // Apply loom "filter"
     let start = std::time::Instant::now();
+    loom_filter(&mut img_pixels, width, height);
+    loom_filter(&mut img_pixels, width, height);
     loom_filter(&mut img_pixels, width, height);
     let duration = start.elapsed();
     info!("Loom filter took: {:?}", duration);
 
     // Apply loom tabby
     let start = std::time::Instant::now();
-    loom_tabby(&mut img_pixels, width, height, start_column, end_column, *inner_tabby_width);
-    loom_tabby(&mut img_pixels, width, height, *outer_tabby_width as u32, width - *outer_tabby_width as u32, *outer_tabby_width);
+
+    loom_tabby(
+        &mut img_pixels,
+        width,
+        height,
+        *tabby_width as u32,
+        width - *tabby_width as u32,
+        *tabby_width,
+    );
     let duration = start.elapsed();
     info!("Loom tabby took: {:?}", duration);
 
-    
     // Convert image to b64 string
     let start = std::time::Instant::now();
     // Encode as tiff
@@ -109,67 +120,16 @@ pub fn render_loom_request(b64_file: &str, file_extension: &str, loom_width: &u3
     img.write_to(&mut file, image_format).unwrap();
 
     // Encode as base64
-    let img_b64 = &BASE64_STANDARD_NO_PAD.encode(&std::fs::read(file_path).unwrap());
+    let img_b64 = &BASE64_STANDARD.encode(&std::fs::read(file_path).unwrap());
     let duration = start.elapsed();
     info!("Converting to b64 took: {:?}", duration);
 
     img_b64.to_owned()
 }
 
-
-pub fn find_start_end_column(img_pixels: &Vec<u8>, width: u32, height: u32) -> (u32, u32) {
-    let mut start_column: Option<u32> = None;
-    let mut end_column: Option<u32> = None;
-    let mut column = 0;
-
-    while column < width {
-        let mut column_white = 10;
-
-        for row in 0..height {
-            if img_pixels[(row * width + column) as usize] != 255 {
-                column_white -= 1;
-                if column_white == 0 {
-                    break;
-                }
-            }
-        }
-
-        column += 1;
-        
-        if column_white == 0 {
-            start_column = Some(column - 1);
-            break;
-        }
-    }
-
-    column = width - 1;
-
-    while column > 0 {
-        let mut column_white = 10;
-
-        for row in 0..height {
-            if img_pixels[(row * width + column) as usize] != 255 {
-                column_white -= 1;
-                if column_white == 0 {
-                    break;
-                }
-            }
-        }
-
-        if column_white == 0 {
-            end_column = Some(column + 1);
-            break;
-        }
-
-        column -= 1;
-    }
-
-    (start_column.unwrap_or(0), end_column.unwrap_or(width - 1))
-}
-
 pub fn loom_filter(img: &mut Vec<u8>, width: u32, height: u32) {
-    // Can't have more then 3 black pixels in a row without a white pixel
-    // Can't have more then 3 white pixels in a column without a black pixel
+    // Can't have more then 5 black pixels in a row without a white pixel
+    // Can't have more then 5 white pixels in a column without a black pixel
     // Iterate and fix pixels
 
     // Horizontal
@@ -185,7 +145,7 @@ pub fn loom_filter(img: &mut Vec<u8>, width: u32, height: u32) {
                 black_count = 0;
             }
 
-            if black_count == 5 {
+            if (black_count == 5 && y % 2 == 0) || (black_count == 4 && y % 2 != 0) {
                 img[index] = 255;
                 black_count = 0;
             }
@@ -213,9 +173,16 @@ pub fn loom_filter(img: &mut Vec<u8>, width: u32, height: u32) {
     }
 }
 
-pub fn loom_tabby(img: &mut Vec<u8>, width: u32, height: u32, start_column: u32, end_column: u32, tabby_width: usize) {
+pub fn loom_tabby(
+    img: &mut Vec<u8>,
+    width: u32,
+    height: u32,
+    start_column: u32,
+    end_column: u32,
+    tabby_width: usize,
+) {
     // Add tabby pattern to image
-    // for width 5, it's 
+    // for width 5, it's
     //  bwbwb
     //  wbwbw
 
@@ -289,7 +256,6 @@ pub fn ordered_4x4_dither(img: &mut Vec<u8>, width: u32, height: u32) {
             img[i] = 0;
         }
     }
-    
 }
 
 pub fn atkinson_dither(img: &mut Vec<u8>, width: u32, height: u32) {
