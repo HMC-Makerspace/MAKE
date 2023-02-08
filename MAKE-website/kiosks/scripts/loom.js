@@ -69,12 +69,14 @@ function renderPreview() {
             document.getElementById("display").classList.add("preview");
         } else {
             // We reached our target server, but it returned an error
+            uploadError(request);
             console.log("Error");
         }
     }
 
     request.onerror = function () {
         // There was a connection error of some sort
+        uploadError({responseText: "Internal Server Error"});
         console.log("Error");
     }
 
@@ -97,6 +99,11 @@ function renderPreview() {
         request.send(JSON.stringify(data));
         console.log("Sent");
     };
+}
+
+function uploadError(request) {
+    document.getElementById("display").classList.remove("loading");
+    alert("Error uploading file: " + request.responseText);
 }
 
 function downloadCurrentRender() {
