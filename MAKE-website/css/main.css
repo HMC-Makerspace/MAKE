@@ -43,12 +43,12 @@
   --invert: 0%;
 
   /* Icons */
-  --tool-icon: url(../img/tool-icon.svg);
-  --material-icon: url(../img/material-icon.svg);
-  --checkout-icon: url(../img/checkout-icon.svg);
-  --checkin-icon: url(../img/checkin-icon.svg);
-  --expired-icon: url(../img/expire.svg);
-  --details-icon: url(../img/details.svg);
+  --tool-icon: url(/img/tool-icon.svg);
+  --material-icon: url(/img/material-icon.svg);
+  --checkout-icon: url(/img/checkout-icon.svg);
+  --checkin-icon: url(/img/checkin-icon.svg);
+  --expired-icon: url(/img/expire.svg);
+  --details-icon: url(/img/details.svg);
 
   /* Proficiencies */
   --sewing: #5271ff;
@@ -1642,7 +1642,7 @@ Workshops
 }
 
 .google {
-  background-image: url(../img/gcal.webp);
+  background-image: url(/img/gcal.webp);
   background-size: 40px;
   background-repeat: no-repeat;
   background-position: right;

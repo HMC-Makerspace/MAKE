@@ -68,7 +68,7 @@ function createPrinterDiv(printer, kiosk_mode=false) {
     const icon = document.createElement("img");
     icon.classList.add("printer-icon");
     if (!kiosk_mode) {
-        icon.src = "../img/printer-icon.svg";
+        icon.src = "/img/printer-icon.svg";
     }
 
     const status = document.createElement("div");

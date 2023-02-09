@@ -2,7 +2,7 @@ var state = {
     users: null,
 };
 
-const API = '/../api/v1';
+const API = '/api/v1';
 
 async function authenticate() {
     // Get api keys from url params

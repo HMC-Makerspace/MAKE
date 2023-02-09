@@ -1,4 +1,4 @@
-const API = '/../api/v1';
+const API = '/api/v1';
 
 var state = {
     file: null,

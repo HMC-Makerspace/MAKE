@@ -4,7 +4,7 @@ var first_render = true;
 var slot_selected = null;
 var current_page = 0;
 
-const API = '/../api/v1';
+const API = '/api/v1';
 
 async function authenticate() {
     // Get api keys from url params

@@ -10,7 +10,7 @@ var state = {
 document.documentElement.setAttribute('data-theme', 'dark');
 localStorage.setItem("theme", "dark");
 
-const API = '/../api/v1';
+const API = '/api/v1';
 
 async function authenticate() {
     // Get api keys from url params
