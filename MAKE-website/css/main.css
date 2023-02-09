@@ -1817,7 +1817,6 @@ Mobile Styles
 
   .content-body {
     overflow-y: unset;
-    padding-bottom: 20vh !important;
   }
 
   .quiz-info-storage-help {
@@ -1936,5 +1935,9 @@ Mobile Styles
   #status {
     font-size: 12px;
     padding: 12px;
+  }
+
+  #college-id-container, #welcome-message, #logged-in-message {
+    min-height: unset;
   }
 }
