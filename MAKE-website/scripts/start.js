@@ -44,6 +44,14 @@ async function start() {
         }
     });
 
+    document.addEventListener("keydown", function (event) {
+        console.log(event.key);
+        // If user is not focused on an input, and the user presses the k key, show quick-nav
+        if (event.key === "k" && document.activeElement.tagName !== "INPUT") {
+            toggleQuickNav();
+        }
+    })
+
 }   
 
 window.onpopstate = onHashChange;

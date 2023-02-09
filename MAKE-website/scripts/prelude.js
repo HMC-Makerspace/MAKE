@@ -112,4 +112,28 @@ async function updateUserInfo() {
         return false;
     }
 }
+
+function toggleQuickNav() {
+    const quick_nav = document.getElementById('quick-nav');
+    quick_nav.classList.toggle('hidden');
+}
+
+function openKiosk(element, url, with_api_key = true) {
+    // If with_api_key, get next element
+    let api_key = "";
+
+    if (with_api_key) {
+        api_key = `?api_key=${element.nextElementSibling.value.trim()}`;
+
+        if (api_key === "?api_key=") {
+            api_key = "";
+        }
+    }
+
+    // Open in current tab
+    window.open(url + api_key, '_self');
+}
+
+
+
 loadState();

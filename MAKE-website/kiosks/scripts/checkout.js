@@ -16,11 +16,17 @@ async function authenticate() {
     // Get api keys from url params
     const params = new URLSearchParams(window.location.search);
 
-    api_key = params.get('api_key');
+    api_key = params.get('api_key') ?? localStorage.getItem('checkout_api_key');
 
     if (api_key === null) {
-        return;
+        alert("No API key provided.");
     }
+    
+    // Remove api key from url, but keep the rest of the url
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+    // Save api key to local storage
+    localStorage.setItem('checkout_api_key', api_key);
 
     console.log(`Authenticating with checkout key ${api_key}`);
 
