@@ -470,9 +470,11 @@ HOME
   justify-content: center;
   gap: 10px;
   height: 20px;
-  padding: 30px;
+  padding: 20px;
   font-weight: bold;
   background-color: var(--shift-2);
+  margin: unset;
+  font-size: 16px;
 }
 
 @keyframes slide-down {
@@ -510,6 +512,7 @@ HOME
   font-size: 10em;
   text-align: left !important;
   cursor: pointer;
+  margin: unset;
 }
 
 #top-right-music {

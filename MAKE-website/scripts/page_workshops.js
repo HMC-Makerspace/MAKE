@@ -94,7 +94,7 @@ function generateWorkshopDiv(workshop, is_past=false) {
 
         div.appendChild(calendar_buttons);
     } else {
-        const signup = document.createElement("p");
+        const signup = document.createElement("h3");
         signup.classList.add("signup");
         signup.innerText = "This workshop has passed.";
         div.appendChild(signup);

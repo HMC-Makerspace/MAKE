@@ -181,6 +181,9 @@ function generateInventoryDiv(result, kiosk_mode = false) {
     name.innerText = item.name;
     main_div.appendChild(name);
 
+    // Add aria label for name
+    div.setAttribute("aria-label", item.name);
+
     if (item.is_kit === true) {
         const kit_items = document.createElement("div");
         kit_items.classList.add("kit-items");
