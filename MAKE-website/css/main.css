@@ -370,8 +370,8 @@ label {
   align-items: center;
   padding: 100px;
   color: var(--text-color-alt);
-  font-size: 32px;
-  line-height: 60px;
+  font-size: 22px;
+  line-height: 30px;
   text-align: center;
   font-weight: bold;
   border-style: dashed;
