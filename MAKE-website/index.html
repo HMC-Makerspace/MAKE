@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<!--[if lt IE 7]>      <html lang="en" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html lang="en" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html lang="en" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html lang="en" class="no-js"> <!--<![endif]-->
 <html lang="en">
 
 <head>
@@ -77,58 +77,56 @@
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
-    <div id="main-grid">
-        <div id="left-bar">
+    <main id="main-grid">
+        <nav id="left-bar">
             <div id="logo-container">
                 <div id="main-logo" onclick="setPage('home')">MAKE</div>
                 <div id="mobile-logo" onclick="toggleMobileMenu()">≡</div>
             </div>
             <button id="home-button" class="active-button" onclick="setPage('home')"><img class="page-icon"
-                    src="/img/home-icon.svg">
+                    src="/img/home-icon.svg" alt="">
                 <span>Home</span></button>
             <button id="quiz-info-button" onclick="setPage('quiz-info')"><img class="page-icon"
-                    src="/img/quiz-icon.svg"> <span>Quizzes<br>&
+                    src="/img/quiz-icon.svg" alt=""> <span>Quizzes<br>&
                     Information</span></button>
             <button id="equipment-button" onclick="setPage('equipment')"><img class="page-icon"
-                    src="/img/tool-icon.svg"> <span>Equipment<br>& Manuals</span></button>
+                    src="/img/tool-icon.svg" alt=""> <span>Equipment<br>& Manuals</span></button>
             <button id="schedule-button" onclick="setPage('schedule')"><img class="page-icon"
-                    src="/img/schedule-icon.svg"> <span>Schedule</span></button>
+                    src="/img/schedule-icon.svg" alt=""> <span>Schedule</span></button>
             <button id="workshops-button" onclick="setPage('workshops')"><img class="page-icon"
-                    src="/img/workshops-icon.svg"> <span>Workshops</span></button>
+                    src="/img/workshops-icon.svg" alt=""> <span>Workshops</span></button>
             <button id="inventory-button" onclick="setPage('inventory')"><img class="page-icon"
-                    src="/img/inventory-icon.svg"> <span>Inventory</span></button>
+                    src="/img/inventory-icon.svg" alt=""> <span>Inventory</span></button>
             <button id="student-storage-button" onclick="setPage('student-storage')"><img class="page-icon"
-                    src="/img/student-storage-icon.svg"> <span>Student<br>Storage</span></button>
+                    src="/img/student-storage-icon.svg" alt=""> <span>Student<br>Storage</span></button>
             <button id="checkouts-button" onclick="setPage('checkouts')"><img class="page-icon"
-                    src="/img/checkout-icon.svg"> <span>Checkouts</span></button>
+                    src="/img/checkout-icon.svg" alt=""> <span>Checkouts</span></button>
             <!--
-
                             <button id="3d-printers-button" onclick="setPage('3d-printers')"><img class="page-icon"
-                    src="/img/printer-icon.svg"> <span>3D Printers</span></button>
-                    
+                    src="/img/printer-icon.svg" alt=""> <span>3D Printers</span></button>
             -->
             <button id="student-projects-button" onclick="setPage('student-projects')"><img class="page-icon"
-                    src="/img/student-projects-icon.svg"> <span>Student Project<br>Application</span></button>
-            <button id="values-button" onclick="setPage('values')"><img class="page-icon" src="/img/values-icon.svg">
+                    src="/img/student-projects-icon.svg" alt=""> <span>Student Project<br>Application</span></button>
+            <button id="values-button" onclick="setPage('values')"><img class="page-icon" src="/img/values-icon.svg" alt="">
                 <span>Values</span></button>
-            <button id="faq-button" onclick="setPage('faq')"><img class="page-icon" src="/img/faq.svg">
+            <button id="faq-button" onclick="setPage('faq')"><img class="page-icon" src="/img/faq.svg"  alt="">
                 <span>FAQ</span></button>
             <button id="settings-button" onclick="setPage('settings')"><img class="page-icon"
-                    src="/img/settings-icon.svg"><span>Settings</span></button>
+                    src="/img/settings-icon.svg" alt=""><span>Settings</span></button>
 
             <div class="hmc-content">
                 A Resource of
                 <br>
                 Harvey Mudd College
             </div>
-        </div>
+        </nav>
 
         <!-- 
         
         HOME PAGE
         
         -->
-        <div id="page-home" class="main-content">
+        <section id="page-home" class="main-content">
             <div id="current-announcement">
                 <div id="announcement-text">
                     Welcome Back! We're open 24/7, with Stewards scheduled 1-10PM on Monday-Thursday, 1-7PM on Friday and Saturday, and 1-9PM on Sunday. Check the schedule tab for more details.
@@ -151,7 +149,7 @@
             </div>
 
             <div id="college-id-container" class="id-n content-body">
-                <input type="tel" id="college-id-input" placeholder="Enter your college ID number" onchange="login()">
+                <input aria-label="College ID number login" type="tel" id="college-id-input" placeholder="Enter your college ID number" onchange="login()">
                 <button id="college-id-button" class="big" onclick="login()">Log In</button>
 
                 <h2 id="login-error" class="hidden">
@@ -178,18 +176,18 @@
                 </p2>
                 <button id="logout-button" class="big" onclick="logout()">Log Out</button>
             </div>
-        </div>
+        </section>
 
         <!--
 
         INVENTORY PAGE
 
         -->
-        <div id="page-inventory" class="main-content hidden">
+        <section id="page-inventory" class="main-content hidden">
 
             <div class="content-container">
                 <div id="inventory-search" class="content-header">
-                    <input type="text" id="inventory-search-input" placeholder="Search for item...">
+                    <input aria-label="Search through inventory" type="text" id="inventory-search-input" placeholder="Search for item...">
 
                     <span>
                         <input type="checkbox" id="inventory-in-stock">
@@ -225,7 +223,7 @@
 
                 </div>
             </div>
-        </div>
+        </section>
 
         <div id="restock-dialog" class="hidden">
             <div id="restock-box">
@@ -239,11 +237,11 @@
                     <input type="text" id="restock-email-name" placeholder="Your Email">
                     <label for="restock-item-input">Item Name</label>
                     <input type="text" id="restock-item-input" placeholder="Item Name">
-                    <label for="restock-quantity-input">Current Quantity</label>
+                    <label for="restock-current-quantity-input">Current Quantity</label>
                     <input type="text" id="restock-current-quantity-input" placeholder="Current Quantity">
-                    <label for="restock-quantity-input">Requested Quantity</label>
+                    <label for="restock-new-quantity-input">Requested Quantity</label>
                     <input type="text" id="restock-new-quantity-input" placeholder="New Quantity">
-                    <label for="restock-reason-input">Additional Notes</label>
+                    <label for="restock-notes-input">Additional Notes</label>
                     <input type="text" id="restock-notes-input" placeholder="Additional Notes">
                 </div>
     
@@ -257,13 +255,13 @@
 
         -->
 
-        <div id="page-equipment" class="main-content hidden">
+        <section id="page-equipment" class="main-content hidden">
             <div class="content-container">
                 <div id="equipment-content" class="content-body">
 
                 </div>
             </div>
-        </div>
+        </section>
 
         <!--
 
@@ -271,7 +269,7 @@
 
         -->
 
-        <div id="page-workshops" class="main-content hidden">
+        <section id="page-workshops" class="main-content hidden">
             <div class="content-container">
                 <div id="workshops-header" class="content-header">
                     <p3>
@@ -291,7 +289,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
 
         <!--
@@ -299,7 +297,7 @@
         STUDENT STORAGE PAGE
 
         -->
-        <div id="page-student-storage" class="main-content hidden">
+        <section id="page-student-storage" class="main-content hidden">
 
             <div class="no-id-message id-n">
                 Please enter your college ID number on the home page to view student storage status
@@ -320,7 +318,7 @@
 
                 </div>
             </div>
-        </div>
+        </section>
 
         <!--
         
@@ -328,7 +326,7 @@
 
         -->
 
-        <div id="page-quiz-info" class="main-content hidden">
+        <section id="page-quiz-info" class="main-content hidden">
 
             <div class="content-container">
                 <div id="quiz-info-storage-help" class="content-header">
@@ -407,14 +405,14 @@
                     </p3>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!--
 
         SCHEDULE PAGE
 
         -->
-        <div id="page-schedule" class="main-content hidden">
+        <section id="page-schedule" class="main-content hidden">
             <div class="content-container">
                 <div id="schedule-help" class="content-header">
                     <p3>
@@ -438,14 +436,14 @@
                     <table id="schedule-table"></table>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!--
 
         CHECKOUTS PAGE
 
         -->
-        <div id="page-checkouts" class="main-content hidden">
+        <section id="page-checkouts" class="main-content hidden">
 
             <div class="no-id-message id-n">
                 Please enter your college ID number on the home page to view checkouts
@@ -469,7 +467,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
 
         <!--
@@ -477,7 +475,7 @@
         3D PRINTERS PAGE
 
         -->
-        <div id="page-3d-printers" class="main-content hidden">
+        <section id="page-3d-printers" class="main-content hidden">
 
             <div class="no-id-message id-n">
                 Please enter your college ID number on the home page to view 3D printers
@@ -499,7 +497,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
 
         <!--
@@ -508,7 +506,7 @@
 
         -->
 
-        <div id="page-student-projects" class="main-content hidden">
+        <section id="page-student-projects" class="main-content hidden">
             <div class="content-container">
                 <div id="student-projects-help" class="content-header">
                     <p3>
@@ -519,35 +517,35 @@
                     <button id="application-button" onclick="openInNewTab('https://docs.google.com/document/d/1kx6-SK9kjsYsJHwgEySk4QmM7U9FWOxUmHo8a2_U0RQ/copy')">Start Application</button>
                 </div>
                 <div class="content-body">
-                    <iframe class="fullscreen-embed" src="https://docs.google.com/document/d/e/2PACX-1vRXu82vE8nFaQcbqbix9zuU-DuA3mt43xFMoyiIpFhKp8_byjzkZtN9XSk6Pn8uSzkENSVR-ED0w363/pub?embedded=true"></iframe>            
+                    <iframe title="Student Project Application" class="fullscreen-embed" src="https://docs.google.com/document/d/e/2PACX-1vRXu82vE8nFaQcbqbix9zuU-DuA3mt43xFMoyiIpFhKp8_byjzkZtN9XSk6Pn8uSzkENSVR-ED0w363/pub?embedded=true"></iframe>            
                 </div>
             </div>
 
-        </div>
+        </section>
 
         <!--
 
         INFO & FAQ PAGE
 
         -->
-        <div id="page-faq" class="main-content hidden">
+        <section id="page-faq" class="main-content hidden">
             <div class="content-container">
                 <div id="faq-content" class="content-body">
                 </div>
             </div>
-        </div>
+        </section>
 
         <!--
         
         VALUES PAGE
 
         -->
-        <div id="page-values" class="main-content hidden">
+        <section id="page-values" class="main-content hidden">
             <div class="content-container">
                 <div id="values-content" class="content-body">
                 </div>
             </div>
-        </div>
+        </section>
 
 
         <!--
@@ -555,15 +553,13 @@
         SETTINGS PAGE
 
         -->
-        <div id="page-settings" class="main-content hidden">
+        <section id="page-settings" class="main-content hidden">
             <div class="content-container">
                 <div id="settings-content" class="content-body">
                 </div>
             </div>
-        </div>
-
-
-    </div>
+        </section>
+    </main>
 </body>
 <script src="scripts/prelude.js"></script>
 

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
-<html>
+<!--[if lt IE 7]>      <html lang="en" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html lang="en" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html lang="en" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html lang="en" class="no-js"> <!--<![endif]-->
+<html lang="en">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -30,7 +30,7 @@
                 <div id="input-array">
                     <label for="loom-width">Loom Width</label>
                     <input type="number" id="loom-width" placeholder="Loom Width" value="1320" min="1" max="1000000" step="1"/>
-                    <label for="loom-height">Desired Width</label>
+                    <label for="desired-width">Desired Width</label>
                     <input type="number" id="desired-width" placeholder="Desired Width" value="1320" min="1" max="1000000" step="1"/>
                     <label for="tabby-width">Tabby Width</label>
                     <input type="number" id="tabby-width" placeholder="Tabby Width" value="5" min="0" max="1000000" step="1"/>
@@ -49,10 +49,10 @@
                         <p>Supported filetypes: .JPG, .JPEG, .PNG, .BMP, .TIFF, .TIF, .WEBP, .GIF</p>
                     </div>
     
-                    <input type="file" id="file-input" accept="image/*" onchange="loadFile(event);" class="hidden"/>
+                    <input aria-label="File input" type="file" id="file-input" accept="image/*" onchange="loadFile(event);" class="hidden"/>
                 </div>
     
-                <img id="preview"></img>
+                <img id="preview" alt="Preview of render"></img>
             </div>
         </div>
 

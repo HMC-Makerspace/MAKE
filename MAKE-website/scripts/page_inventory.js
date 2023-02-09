@@ -277,6 +277,8 @@ function generateInventoryDiv(result, kiosk_mode = false) {
     const show_lower_div_button = document.createElement("button");
     show_lower_div_button.classList.add("inventory-result-show-lower-div");
     show_lower_div_button.classList.add("grayed-out");
+    // Add aria label to button
+    show_lower_div_button.setAttribute("aria-label", "Show more information about this item");
 
     if (lower_div.childNodes.length > 0) {
         show_lower_div_button.classList.remove("grayed-out");

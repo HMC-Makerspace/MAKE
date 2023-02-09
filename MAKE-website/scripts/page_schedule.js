@@ -68,7 +68,7 @@ function generateScheduleDivs(schedule) {
     const header = document.createElement("tr");
 
     const day_header = document.createElement("th");
-    day_header.innerText = "";
+    day_header.innerText = "Time";
     header.appendChild(day_header);
 
     for (let day of days) {
