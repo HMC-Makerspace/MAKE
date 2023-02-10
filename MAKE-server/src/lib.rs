@@ -292,7 +292,13 @@ pub async fn load_api_keys() -> Result<(), Error> {
 }
 
 pub fn between(source: &str, start: &str, end: &str) -> String {
-    let start_pos = &source[source.find(start).unwrap() + start.len()..];
+    let start_offset = source.find(start);
+
+    if start_offset.is_none() {
+        panic!("Between error - source: [{}], start: [{}], end: [{}]", source, start, end);
+    }
+
+    let start_pos = &source[start_offset.unwrap() + start.len()..];
 
     start_pos[..start_pos.find(end).unwrap_or(start_pos.len())]
         .trim()
