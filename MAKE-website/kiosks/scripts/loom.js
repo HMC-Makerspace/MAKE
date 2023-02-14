@@ -93,6 +93,7 @@ function renderPreview() {
             output_format: "png",
             desired_width: Number(document.getElementById("desired-width").value),
             loom_width: Number(document.getElementById("loom-width").value),
+            invert: document.getElementById("invert").checked,
             tabby_width: Number(document.getElementById("tabby-width").value),
         }
 

@@ -430,6 +430,7 @@ pub struct LoomRenderRequest {
     pub output_format: String,
     pub desired_width: u32,
     pub loom_width: u32,
+    pub invert: bool,
     pub tabby_width: usize,
 }
 
@@ -448,6 +449,7 @@ pub async fn render_loom(body: web::Json<LoomRenderRequest>) -> Result<HttpRespo
         &request.loom_width,
         &request.desired_width,
         &request.tabby_width,
+        &request.invert,
         &request.output_format,
     );
 

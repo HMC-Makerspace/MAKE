@@ -646,7 +646,7 @@ button#download {
 }
 
 #input-array input {
-  width: 100px;
+  max-width: 100px;
 }
 
 #render, #download {

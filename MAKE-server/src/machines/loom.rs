@@ -13,6 +13,7 @@ pub fn render_loom_request(
     loom_width: &u32,
     width: &u32,
     tabby_width: &usize,
+    invert: &bool,
     format: &str,
 ) -> String {
     let start = std::time::Instant::now();
@@ -51,6 +52,12 @@ pub fn render_loom_request(
         .map(|p| p.to_luma().channels()[0])
         .collect::<Vec<u8>>();
     let duration = start.elapsed();
+    // If invert is true, invert image
+    if invert == &true {
+        for i in 0..img_pixels.len() {
+            img_pixels[i] = 255 - img_pixels[i];
+        }
+    }
     info!("Resizing image took: {:?}", duration);
 
     let start = std::time::Instant::now();
@@ -132,40 +139,40 @@ pub fn loom_filter(img: &mut Vec<u8>, width: u32, height: u32) {
 
     // Horizontal
     for y in 0..height {
-        let mut black_count = 0;
+        let mut white_count = 0;
 
         for x in 0..width {
             let index = (y * width + x) as usize;
 
-            if img[index] == 0 {
-                black_count += 1;
+            if img[index] == 255 {
+                white_count += 1;
             } else {
-                black_count = 0;
+                white_count = 0;
             }
 
-            if (black_count == 5 && y % 2 == 0) || (black_count == 4 && y % 2 != 0) {
-                img[index] = 255;
-                black_count = 0;
+            if (white_count == 5 && y % 2 == 0) || (white_count == 4 && y % 2 != 0) {
+                img[index] = 0;
+                white_count = 0;
             }
         }
     }
 
     // Vertical
     for x in 0..width {
-        let mut white_count = 0;
+        let mut black_count = 0;
 
         for y in 0..height {
             let index = (y * width + x) as usize;
 
-            if img[index] == 0 {
-                white_count = 0;
+            if img[index] == 255 {
+                black_count = 0;
             } else {
-                white_count += 1;
+                black_count += 1;
             }
 
-            if white_count == 5 {
-                img[index] = 0;
-                white_count = 0;
+            if black_count == 5 {
+                img[index] = 255;
+                black_count = 0;
             }
         }
     }
