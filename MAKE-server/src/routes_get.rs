@@ -118,6 +118,17 @@ pub async fn get_inventory(_path: web::Path<()>) -> Result<HttpResponse, Error> 
     Ok(HttpResponse::Ok().json(inventory))
 }
 
+#[get("/api/v1/inventory/restock_requests/{api_key}")]
+pub async fn get_restock_requests(path: web::Path<String>) -> Result<HttpResponse, Error> {
+    if API_KEYS.lock().await.validate_checkout(&path.into_inner()) {
+        let data = MEMORY_DATABASE.lock().await;
+        let restock_requests = data.inventory.needs_restock.clone();
+        Ok(HttpResponse::Ok().json(restock_requests))
+    } else {
+        Ok(HttpResponse::Unauthorized().finish())
+    }
+}
+
 #[get("/api/v1/quizzes/{api_key}")]
 pub async fn get_quizzes(path: web::Path<String>) -> Result<HttpResponse, Error> {
     if API_KEYS.lock().await.validate_admin(&path.into_inner()) {

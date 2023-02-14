@@ -14,6 +14,9 @@
   --theme-color-8: #00444d;
   --theme-color-9: #5a5a5a;
 
+  --black: #28272b;
+  --white: #ffffff;
+
   --low-color: #e07575;
   --medium-color: #e9e776;
   --high-color: #74c974;
@@ -215,7 +218,7 @@ p3 {
 #left-bar {
   grid-area: sidebar;
   background-color: var(--theme-color-1);
-  color: white;
+  color: var(--white);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -260,7 +263,7 @@ p3 {
 }
 
 #left-bar button {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: bold;
   width: 100%;
   height: 6vh;
@@ -291,7 +294,7 @@ p3 {
 
 button {
   background-color: var(--theme-color-1);
-  color: white;
+  color: var(--white);
   padding: 4px 6px;
   border: unset;
   cursor: pointer;
@@ -425,8 +428,8 @@ a:visited {
   font-size: .8em;
   padding: 10px;
   margin-top: 10px;
-  color: var(--text-color-main);
-  background-color: var(--theme-color-2);
+  color: var(--white);
+  background-color: var(--black);
 }
 
 /*
@@ -447,7 +450,7 @@ HOME
   justify-content: flex-start;
   font-size: 1em;
   background-color: var(--theme-color-4);
-  color: var(--text-color-main);
+  color: var(--white);
   font-weight: normal;
   margin: 0 auto;
   }
@@ -472,7 +475,8 @@ HOME
   height: 20px;
   padding: 20px;
   font-weight: bold;
-  background-color: var(--shift-2);
+  background-color: var(--high-color-dark);
+  color: var(--white);
   margin: unset;
   font-size: 16px;
 }
@@ -551,7 +555,7 @@ HOME
   width: 128px;
   height: 128px;
   border-radius: 5px;
-  background-color: white;
+  background-color: var(--white);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -1287,6 +1291,7 @@ Schedule
 }
 
 #schedule-table .proficiencies {
+  color: var(--white);
   font-size: 0.7em;
 }
 
@@ -1592,7 +1597,7 @@ Workshops
 }
 
 .workshop .date {
-  color: var(--text-color-main);
+  color: var(--white);
   background-color: var(--theme-color-4);
   grid-area: date;
   font-weight: bolder;
