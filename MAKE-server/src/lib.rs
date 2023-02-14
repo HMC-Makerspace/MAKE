@@ -25,9 +25,9 @@ use log::*;
 use openssl::ssl::SslAcceptor;
 use openssl::ssl::SslFiletype;
 use openssl::ssl::SslMethod;
-use reqwest::Client;
 use reqwest::header::HeaderMap;
 use reqwest::header::HeaderValue;
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::time::Duration;
@@ -55,6 +55,7 @@ pub use crate::machines::printers::*;
 pub use crate::management::emails::*;
 pub use crate::management::student_storage::*;
 pub use crate::management::workshops::*;
+pub use crate::management::spotify::*;
 
 pub use crate::people::permissions::*;
 pub use crate::people::quizzes::*;
@@ -170,7 +171,11 @@ impl ApiKeys {
     }
 
     pub fn get_spotify_tuple(&self) -> (String, String, String) {
-        (self.spotify_id.clone(), self.spotify_secret.clone(), self.spotify_refresh.clone())
+        (
+            self.spotify_id.clone(),
+            self.spotify_secret.clone(),
+            self.spotify_refresh.clone(),
+        )
     }
 }
 
@@ -295,7 +300,10 @@ pub fn between(source: &str, start: &str, end: &str) -> String {
     let start_offset = source.find(start);
 
     if start_offset.is_none() {
-        panic!("Between error - source: [{}], start: [{}], end: [{}]", source, start, end);
+        panic!(
+            "Between error - source: [{}], start: [{}], end: [{}]",
+            source, start, end
+        );
     }
 
     let start_pos = &source[start_offset.unwrap() + start.len()..];
@@ -686,107 +694,26 @@ async fn update_loop() {
     let workshop_update = workshops.update().await;
 
     if workshop_update.is_err() {
-        info!("Failed to update workshops: {}", workshop_update.err().unwrap());
+        info!(
+            "Failed to update workshops: {}",
+            workshop_update.err().unwrap()
+        );
     } else {
         info!("Workshops updated!");
     }
 
     MEMORY_DATABASE.lock().await.workshops = workshops;
 
-    // Get currently playing music from spotify
-    // GET request to https://api.spotify.com/v1/me/player/currently-playing
-    let (id, secret, token) = API_KEYS.lock().await.get_spotify_tuple();
-
-    // First, refresh token
-    // JS:
-    let client = Client::new();
-
-    let base64 = &BASE64_STANDARD_NO_PAD.encode(&format!("{}:{}", id, secret));
-     
-    let mut headers = HeaderMap::new();
-
-    // Add bearer auth authorization header
-    headers.insert(
-        "Authorization",
-        HeaderValue::from_str(&format!("Basic {}", base64)).unwrap(),
-    );
-
-    headers.insert(
-        "Content-Type",
-        HeaderValue::from_str("application/x-www-form-urlencoded").unwrap(),
-    );
-
-    let response = client
-        .post("https://accounts.spotify.com/api/token")
-        .headers(headers)
-        .body(format!("grant_type=refresh_token&refresh_token={}", token))
-        .send()
-        .await;
-
-    if response.is_err() {
-        error!("Failed to refresh spotify token: {}", response.err().unwrap());
-    } else {
-
-        // Get json "access_token"
-        let access_token = response.unwrap().text().await;
-
-        if access_token.is_err() {
-            error!("Failed to get access token from spotify: {}", access_token.err().unwrap());
-        } else {
-            let access_token = access_token.unwrap();
-
-            let access_token = between(&access_token, "access_token\":\"", "\"");
-
-            info!("Refreshed spotify token {}", access_token);
-
-            let mut headers = HeaderMap::new();
-
-            headers.insert(
-                "Authorization",
-                HeaderValue::from_str(&format!("Bearer {}", access_token)).unwrap(),
-            );
-
-            let response = client
-                .get("https://api.spotify.com/v1/me/player/currently-playing")
-                .headers(headers)
-                .send()
-                .await;
-
-            if response.is_err() {
-                error!("Failed to get currently playing song from spotify: {}", response.err().unwrap());
-            } else {
-                let response = response.unwrap();
-
-                if response.status() == 200 {
-                    let body = response.text().await;
-
-                    if body.is_err() {
-                        error!("Failed to get body of spotify response: {}", body.err().unwrap());
-                    } else {
-                        let body = body.unwrap();
-
-                        let json: Value = serde_json::from_str(&body).unwrap();
-
-                        let item = json.get("item").unwrap();
-
-                        info!("Got currently playing song from spotify: {}", item.get("name").unwrap());    
-
-                        MEMORY_DATABASE.lock().await.spotify = Some(item.clone());
-                    }
-                } else if response.status() == 204 {
-                    info!("No song is currently playing on spotify");
-                    MEMORY_DATABASE.lock().await.spotify = None;
-                } else {
-                    error!("Failed to get currently playing song from spotify: {}", response.status());
-                }
-            }   
-        } 
-    }
+    // Update spotify
+    update_spotify().await;
 }
 
 pub async fn error_report(err: &PanicInfo<'_>) {
     let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
-    let mut message = format!("-----------------------\nMAKE Error Report - {}\n{}\n", timestamp, err);
+    let mut message = format!(
+        "-----------------------\nMAKE Error Report - {}\n{}\n",
+        timestamp, err
+    );
 
     if let Some(location) = err.location() {
         message = format!("{}{}\n", message, location);
@@ -808,18 +735,23 @@ pub async fn error_report(err: &PanicInfo<'_>) {
     if let Err(e) = writeln!(file, "{}", message) {
         eprintln!("Couldn't write to file: {}", e);
     }
-    
+
     // Email webmaster
     let result = send_individual_email(
         WEBMASTER_EMAIL.to_string(),
         None,
         "MAKE Error Report".to_string(),
         message.replace("\n", "<br>"),
-    ).await;
+    )
+    .await;
 
     if result.is_err() {
         // Write to log file
-        if let Err(e) = writeln!(file, "Failed to send error report email: {}", result.err().unwrap()) {
+        if let Err(e) = writeln!(
+            file,
+            "Failed to send error report email: {}",
+            result.err().unwrap()
+        ) {
             eprintln!("Couldn't write to file: {}", e);
         }
     }
