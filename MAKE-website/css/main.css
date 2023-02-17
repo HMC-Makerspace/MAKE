@@ -7,11 +7,11 @@
   --theme-color-1: #ee9d22;
   --theme-color-2: #ffffff;
   --theme-color-3: #e6e6e6;
-  --theme-color-4: #26a2ff; 
+  --theme-color-4: #2796eb; 
   --theme-color-5: #ececec;
   --theme-color-6: #e0cf34;
   --theme-color-7: #a918ec;
-  --theme-color-8: #00444d;
+  --theme-color-8: #004174;
   --theme-color-9: #5a5a5a;
 
   --black: #28272b;
@@ -20,8 +20,11 @@
   --low-color: #e07575;
   --medium-color: #e9e776;
   --high-color: #74c974;
-  --link-color: #0a7988;
 
+  --link-color: #0a7988;
+  --link-color-light: #0ad3ee;
+  --link-color-dark: #0a7988;
+  
   --low-color-dark: #af5a5a;
   --medium-color-dark: #cac96a;
   --high-color-dark: #61ac61;
@@ -239,7 +242,7 @@ p3 {
   font-weight: bold;
   font-family: var(--title-font);
   user-select: none; /* Standard */
-  color: var(--text-color-alt);
+  color: var(--black);
   transition: letter-spacing 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
@@ -294,7 +297,7 @@ p3 {
 
 button {
   background-color: var(--theme-color-1);
-  color: var(--white);
+  color: var(--black);
   padding: 4px 6px;
   border: unset;
   cursor: pointer;
@@ -315,10 +318,11 @@ button.big {
 button:hover,
 button.active-button {
   background-color: var(--theme-color-4);
+  color: var(--white);
 }
 
 button:active {
-  opacity: 0.9;
+  opacity: 0.7;
 }
 
 input {
@@ -423,6 +427,8 @@ a:visited {
 
 .hmc-content {
   display: flex;
+  flex-direction: column;
+  row-gap: 5px;
   align-items: center;
   justify-content: center;
   font-size: .8em;
@@ -430,6 +436,10 @@ a:visited {
   margin-top: 10px;
   color: var(--white);
   background-color: var(--black);
+}
+
+.hmc-content a {
+  color: var(--link-color-light);
 }
 
 /*
@@ -1298,6 +1308,7 @@ Schedule
 .schedule-shift.proficiency.stewards-1:hover,
 .schedule-shift.proficiency.stewards-2:hover {
   background-color: var(--theme-color-8);
+  color: var(--white);
   cursor: pointer;
 }
 
@@ -1309,10 +1320,13 @@ Schedule
   cursor: pointer;
   padding: 8px;
   background-color: var(--theme-color-4);
+  color: var(--white);
 }
 
 .highlight {
   background-color: var(--theme-color-8) !important;
+  color: var(--white);
+
 }
 
 .grayscale {
