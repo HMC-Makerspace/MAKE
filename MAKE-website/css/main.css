@@ -39,8 +39,8 @@
   --printer-offline: #0c090d;
   --printer-error: #af3800;
 
-  --shift-1: #b7e6a6;
-  --shift-2: #94c97e;
+  --shift-1: #6cd171;
+  --shift-2: #94db98;
 
   --roundness: 0px;
   --button-outline-color: #ffffff;
@@ -103,8 +103,8 @@
   --medium-color-dark: #7e7d41;
   --high-color-dark: #3d773d;
 
-  --shift-1: #3d6454;
-  --shift-2: #598f7a;
+  --shift-1: #26493b;
+  --shift-2: #227051;
 
   --brightness: 1.2;
   --invert: 100%;
@@ -1274,6 +1274,7 @@ Schedule
 
 .head-steward {
   background-color: var(--theme-color-1);
+  color: var(--black);
 }
 
 .stewards-legend {
@@ -1320,12 +1321,12 @@ Schedule
   cursor: pointer;
   padding: 8px;
   background-color: var(--theme-color-4);
-  color: var(--white);
+  color: var(--text-color-main);
 }
 
 .highlight {
   background-color: var(--theme-color-8) !important;
-  color: var(--white);
+  color: var(--text-color-alt) !important;
 
 }
 
