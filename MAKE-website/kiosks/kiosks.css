@@ -192,6 +192,10 @@ CHECKOUT
   width: 100%;
 }
 
+.inventory-result-checkout-container button, #clear-user {
+  color: var(--white);
+}
+
 .inventory-result-checkout-less {
   background-color: var(--low-color);
 }
