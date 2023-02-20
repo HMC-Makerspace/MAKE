@@ -192,7 +192,7 @@ CHECKOUT
   width: 100%;
 }
 
-.inventory-result-checkout-container button, #clear-user {
+.inventory-result-checkout-container button, #clear-user, .check-in-button {
   color: var(--white);
 }
 
