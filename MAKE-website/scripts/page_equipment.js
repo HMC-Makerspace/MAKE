@@ -132,8 +132,8 @@ const main_area_equipment = [
         manual: "https://docs.google.com/document/d/1qXLxTUifwV6mHEi45AyhBj6PTZoxPnDWk8Sk9bhQ9p4/edit#heading=h.c4g0pi9dhov7"
     },
     {
-        name: "Circut Machine",
-        description: "The Circut Explore Air 2 is a machine that can cut out designs from paper, vinyl, and other materials. It can also be used to draw and write on paper.",
+        name: "Cricut Machine",
+        description: "The Cricut Explore Air 2 is a machine that can cut out designs from paper, vinyl, and other materials. It can also be used to draw and write on paper.",
         image: "img/equipment/cricut.webp",
         manual: "https://docs.google.com/document/d/1Wom5XbKVJKwy3peKGTlM5m1HFji67XZr2B0jyBUi5jk/edit"
     }
