@@ -57,45 +57,8 @@
                 </div>
             </div>
 
-            <div id="danger-zone">
-                <h1>Danger Zone</h1>
-                <div id="lock">
-                    <h2>Lock the </h2>
+            <div id="overall-student-storage" style="overflow: unset;">
 
-                    <div id="lock-options">
-                        <input type="checkbox" id="studio" name="studio" value="studio">
-                        <label for="studio">Studio</label>
-                        <input type="checkbox" id="spray-paint-booth" name="spray-paint-booth"
-                            value="spray-paint-booth">
-                        <label for="spray-paint-booth">Spray Paint Booth</label>
-                        <input type="checkbox" id="3d-print-room" name="3d-print-room" value="3d-print-room">
-                        <label for="3d-print-room">3D Print Room</label>
-                        <input type="checkbox" id="composite-room" name="composite-room" value="composite-room">
-                        <label for="composite-room">Composite Room</label>
-                        <input type="checkbox" id="entire-makerspace" name="entire-makerspace"
-                            value="entire-makerspace">
-                        <label for="entire-makerspace">Entire Makerspace</label>
-                    </div>
-
-                    <h2> to </h2>
-                    <select aria-label="Group">
-                        <option value="">Select option</option>
-                        <option value="1">Users</option>
-                        <option value="2">Stewards & below</option>
-                        <option value="3">Head Stewards & below</option>
-                        <option value="4">Faculty & below</option>
-                    </select>
-                    <h2> from </h2>
-                    <input type="datetime-local" name="start-time" id="start-time">
-                    <h2> until </h2>
-                    <input type="datetime-local" name="end-time" id="end-time">
-                    <button>Lock</button>
-                </div>
-
-                <div id="active-rules">
-                    <h2>Active Rules</h2>
-                    <div id="active-rules-list"></div>
-                </div>
             </div>
         </div>
 
@@ -107,6 +70,7 @@
     <script src="/scripts/page_inventory.js"></script>
     <script src="/scripts/page_quiz_info.js"></script>
     <script src="/scripts/page_checkouts.js"></script>
+    <script src="/scripts/page_student_storage.js"></script>
     <script src="/scripts/utils.js"></script>
 
     <script src="/kiosks/scripts/admin.js"></script>
