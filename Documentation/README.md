@@ -8,6 +8,16 @@ This project was originally created by [Ethan Vazquez](https://github.com/IonImp
 The base server URL is `https://make.hmc.edu/`. The IP address is `20.25.159.202`. The SSH login is in the Head Stewards Google Drive.
 
 In order to maintain the server, you'll need to know a little Rust, JS, HTML, and CSS.
+
+To run the server in PROD mode, you'll need a VPS with a static IP address. After pointing it to
+the domain name, you'll need to configure the firewall to allow port 80 and 443 to be forwarded to
+ports 8080 and 8443 respectively. Then, you'll need a SSL certificate from LetsEncrypt. However,
+unless you're changing the domain name, you shouldn't need to do this. Build the server in PROD mode
+by running `cargo build --release` and then `sudo ./target/release/server make.hmc.edu` (or whatever domain name you're using).
+That just lets the server know what domain name to use for the SSL certificate.
+
+To run the server in DEV mode, you'll need to run `cargo run make.hmc.edu` and then navigate to `127.0.0.1:8080`.
+
 ### 2. If nothing changes...
 If nothing changes, the server will keep running forever. This is a good thing.
 However, there still are a few things that need to be done.
