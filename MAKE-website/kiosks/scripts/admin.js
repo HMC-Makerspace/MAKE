@@ -1,5 +1,7 @@
 var state = {
     users: null,
+    student_storage: null,
+    college_id: 0,
 };
 
 const API = '/api/v1';
@@ -23,13 +25,30 @@ async function authenticate() {
     console.log(`Authenticating with admin key ${api_key}`);
 
     setInterval(fetchUsers, 5000);
+    setInterval(fetchStudentStorageAdmin, 5000);
     await fetchUsers();
+    await fetchStudentStorageAdmin();
+
     setInterval(renderAll(), 5000);
     renderAll();
     console.log(state.users);
 }
 
 authenticate();
+
+async function fetchStudentStorageAdmin() {
+    const response = await fetch(`${API}/student_storage/all/${api_key}`);
+
+    if (response.status == 200) {
+        const student_storage = await response.json();
+
+        state.student_storage = student_storage;
+
+        console.log(state.student_storage);
+
+        renderStudentStorage();
+    }
+}
 
 function renderAll() {
     renderStats();

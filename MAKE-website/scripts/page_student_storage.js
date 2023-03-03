@@ -117,9 +117,14 @@ function generateStudentStorageDivs(slots, kiosk_mode=false) {
             div.classList.add("occupied");
 
             expire_div += `<div class="student-storage-slot-expire">Expires ${timestampToDate(slot.occupied_details.timestamp_end)}</div>`;
-            slot_text = `<div class="student-storage-slot-status">Occupied</div>`;
+            
+            let occupied_by = "Occupied";
 
             if (!kiosk_mode) {
+                if (slot.occupied_details.college_id !== 0 && slot.occupied_details.college_id !== state.college_id) {
+                    occupied_by = `${state.users[slot.occupied_details.college_id].name}`;
+                }
+
                 if (slot.occupied_details.college_id === state.college_id) {
                     div.classList.add("user");
                     expire_div += `<button onclick="releaseStudentStorage('${slot.id}')">Release</button>
@@ -127,6 +132,8 @@ function generateStudentStorageDivs(slots, kiosk_mode=false) {
                     slot_text = "";
                 }
             }
+
+            slot_text = `<div class="student-storage-slot-status">${occupied_by}</div>`;
 
         } else if (kiosk_mode) {
             div.addEventListener("click", () => {

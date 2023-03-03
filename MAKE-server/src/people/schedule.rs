@@ -1,7 +1,7 @@
 use crate::*; 
 use serde::{Deserialize, Serialize};
 
-const PROFICIENCIES: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRYlLMDI2Sv1e8MDpCmtshaFu8MnS5g0xPkmf3ZFEntx8j1kJbfup6uqFPGh2bpxt_IwY9qyEZk4hDS/pub?gid=954325037&single=true&output=csv";
+const PROFICIENCIES: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXfKpy0HRazczqb8Zoa7J8TQ6RvIFlhsEnfLK9J1odoRRaXIvp21yzZtntsIzjIdbazXcN9GBzcF1q/pub?gid=954325037&single=true&output=csv";
 const SHIFT_SCHEDULES: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRE5Daf9Y_ydDpyAvxickgTRJcTNpE4V-Vj0W4VxkGgXHmIwq4EtVeyeSRJDzEotfSVDK82H8aetzK5/pub?gid=0&single=true&output=csv";
 
 const HEAD_STEWARDS: [&str; 6] = [
@@ -25,6 +25,8 @@ impl Schedule {
         let prof_response = reqwest::get(PROFICIENCIES).await;
         let shift_response = reqwest::get(SHIFT_SCHEDULES).await;
 
+        self.all_proficiencies = Vec::new();
+        
         if let Ok(shift_response) = shift_response {
             let shift_csv = shift_response.text().await?;
             let mut rdr = csv::Reader::from_reader(shift_csv.as_bytes());
@@ -78,7 +80,8 @@ impl Schedule {
                 let prof_csv = prof_response.text().await?;
                 let mut rdr = csv::Reader::from_reader(prof_csv.as_bytes());
 
-                // discard first two rows
+                // discard first three rows
+                let _ = rdr.records().next();
                 let _ = rdr.records().next();
 
                 // Read until row's first cell is empty
@@ -86,7 +89,7 @@ impl Schedule {
                     if let Ok(result) = result {
                         let steward_name = result[1].to_string();
                         
-                        let mut profs: Vec<String> = result.iter().skip(3).map(|x| x.to_string()).collect();
+                        let mut profs: Vec<String> = result.iter().skip(3).map(|x| x.to_string()).take(16).collect();
                         self.all_proficiencies.append(&mut profs.clone());
 
                         // Delete empty cells
@@ -113,7 +116,9 @@ impl Schedule {
         self.all_proficiencies.sort();
         self.all_proficiencies.dedup();
         self.all_proficiencies.retain(|x| !x.is_empty() || x.len() > 0);
-        
+
+        println!("{}", self.all_proficiencies.join(", "));
+
         Ok(())
     }
 
