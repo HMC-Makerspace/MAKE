@@ -86,8 +86,6 @@ pub fn render_loom_request(
     // Apply loom "filter"
     let start = std::time::Instant::now();
     loom_filter(&mut img_pixels, width, height);
-    loom_filter(&mut img_pixels, width, height);
-    loom_filter(&mut img_pixels, width, height);
     let duration = start.elapsed();
     info!("Loom filter took: {:?}", duration);
 
@@ -150,7 +148,7 @@ pub fn loom_filter(img: &mut Vec<u8>, width: u32, height: u32) {
                 white_count = 0;
             }
 
-            if (white_count == 5 && y % 2 == 0) || (white_count == 4 && y % 2 != 0) {
+            if white_count >= 4 + (y % 4) {
                 img[index] = 0;
                 white_count = 0;
             }
@@ -170,7 +168,7 @@ pub fn loom_filter(img: &mut Vec<u8>, width: u32, height: u32) {
                 black_count += 1;
             }
 
-            if black_count == 5 {
+            if black_count >= 4 + (x % 4) {
                 img[index] = 255;
                 black_count = 0;
             }

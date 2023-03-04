@@ -4,7 +4,7 @@ use std::time::SystemTime;
 
 use crate::{
     inventory::checkout::CheckoutLogEntry, management::emails::send_individual_email,
-    EMAIL_TEMPLATES, MAKERSPACE_MANAGER_EMAIL,
+    EMAIL_TEMPLATES, MAKERSPACE_MANAGER_EMAIL, MEMORY_DATABASE,
 };
 
 const INVENTORY_URL: &str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTzvLVGN2H5mFpQLpstQyT5kgEu1CI8qlhY60j78mO0LQgDnTHs_ZKx39xiIO1h-w09ZXyOZ5GqOf5q/pub?gid=0&single=true&output=csv";
@@ -135,7 +135,9 @@ impl Inventory {
     pub async fn send_restock_notice(&mut self) {
         self.sent_restock_notice = true;
 
-        let mut steward_items: Vec<String> = self.needs_restock
+        let users = MEMORY_DATABASE.lock().await.users.clone();
+
+        let steward_items: Vec<String> = self.needs_restock
             .iter_mut()
             .filter(|x| x.notified == false && x.authorized == true)
             .map(|x| {
@@ -143,7 +145,7 @@ impl Inventory {
 
                 format!(
                     "<tr style=\"border: 1px solid black; border-collapse: collapse;\">
-                        <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td>
+                        <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{} (Steward)</td>
                         <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td>
                         <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td>
                         <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td> 
@@ -154,13 +156,21 @@ impl Inventory {
             })
             .collect();
 
-        steward_items.push("<h3>Users Request</h3>".to_string());
-
         let user_items: Vec<String> = self.needs_restock
             .iter_mut()
             .filter(|x| x.notified == false && x.authorized == false)
             .map(|x| {
                 x.notified = true;
+
+                // Figure out if user email is in database
+                let user = users.get_user_by_email(&x.email);
+
+                let name = if let Some(user) = user {
+                    format!("{} ({:?})", x.name, user.get_auth_level())
+                } else {
+                    format!("{} (User)", x.name)
+                };
+
 
                 format!(
                     "<tr style=\"border: 1px solid black; border-collapse: collapse;\">
@@ -170,7 +180,7 @@ impl Inventory {
                         <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td> 
                         <td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">{}</td>
                     </tr>",
-                    x.name, x.current_quantity, x.requested_quantity, x.notes, x.email
+                    name, x.current_quantity, x.requested_quantity, x.notes, x.email
                 )
             })
             .collect();
@@ -182,7 +192,7 @@ impl Inventory {
             .collect::<Vec<String>>();
 
             
-        if items.len() == 1 {
+        if items.len() == 0 {
             return;
         } else {
             info!("Sending restock notice email");

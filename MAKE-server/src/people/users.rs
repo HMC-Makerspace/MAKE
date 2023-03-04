@@ -65,6 +65,16 @@ impl Users {
     pub fn exists(&self, id_number: &u64) -> bool {
         self.users.contains_key(id_number)
     }
+
+    pub fn get_user_by_email(&self, email: &str) -> Option<User> {
+        for (_, user) in self.users.iter() {
+            if user.college_email == email {
+                return Some(user.clone());
+            }
+        }
+
+        None
+    }
 }
 
 #[derive(Default, Deserialize, Serialize, Clone)]

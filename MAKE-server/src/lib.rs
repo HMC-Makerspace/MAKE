@@ -92,14 +92,14 @@ const RENEWALS_ALLOWED: u64 = 2;
 const LOGGER_STR: &str = "\nMAKE Log @ %t\nIP: %a (%{r}a)\nRequest: \"%r\"\nAgent: \"%{Referer}i\" \"%{User-Agent}i\"\nResponse: STATUS %s for %b bytes in %D ms";
 const VERSION_STRING: &str = env!("CARGO_PKG_VERSION");
 const STARTUP_TITLE: &str = "
-██████   ██████   █████████   █████   ████ ██████████
-░░██████ ██████   ███░░░░░███ ░░███   ███░ ░░███░░░░░█
- ░███░█████░███  ░███    ░███  ░███  ███    ░███  █ ░ 
- ░███░░███ ░███  ░███████████  ░███████     ░██████   
- ░███ ░░░  ░███  ░███░░░░░███  ░███░░███    ░███░░█   
- ░███      ░███  ░███    ░███  ░███ ░░███   ░███ ░   █
- █████     █████ █████   █████ █████ ░░████ ██████████
-░░░░░     ░░░░░ ░░░░░   ░░░░░ ░░░░░   ░░░░ ░░░░░░░░░░ ";
+▀████▄     ▄███▀     ██     ▀████▀ ▀███▀▀███▀▀▀███ 
+  ████    ████      ▄██▄      ██   ▄█▀    ██    ▀█ 
+  █ ██   ▄█ ██     ▄█▀██▄     ██ ▄█▀      ██   █   
+  █  ██  █▀ ██    ▄█  ▀██     █████▄      ██████   
+  █  ██▄█▀  ██    ████████    ██  ███     ██   █  ▄
+  █  ▀██▀   ██   █▀      ██   ██   ▀██▄   ██     ▄█
+▄███▄ ▀▀  ▄████▄███▄   ▄████▄████▄   ███▄██████████
+";
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
@@ -321,10 +321,9 @@ async fn async_main(args: Vec<String>) -> std::io::Result<()> {
     info!("Starting up...");
     println!("██████████████████████████████████████████████████████████████");
     println!("{}", STARTUP_TITLE);
-    println!("Version {}", VERSION_STRING);
     println!("██████████████████████████████████████████████████████████████");
-
-    println!("Webhost: {}", args[1]);
+    println!("\nVersion {}", VERSION_STRING);
+    println!("Webhost: {}\n", args[1]);
     // Load api keys
     load_api_keys().await.expect("Could not load API keys!");
 
