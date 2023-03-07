@@ -89,14 +89,11 @@ pub async fn update_spotify() {
 
                             let json: Value = serde_json::from_str(&body).unwrap();
 
-                            let item = json.get("item").unwrap();
+                            let item = json.get("item").cloned();
 
-                            info!(
-                                "Got currently playing song from spotify: {}",
-                                item.get("name").unwrap()
-                            );
+                            info!("Got currently playing song from spotify");
 
-                            MEMORY_DATABASE.lock().await.spotify = Some(item.clone());
+                            MEMORY_DATABASE.lock().await.spotify = item.clone();
                         }
                     } else if response.status() == 204 {
                         info!("No song is currently playing on spotify");

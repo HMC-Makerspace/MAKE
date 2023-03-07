@@ -2,14 +2,26 @@
 proficiencies = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXfKpy0HRazczqb8Zoa7J8TQ6RvIFlhsEnfLK9J1odoRRaXIvp21yzZtntsIzjIdbazXcN9GBzcF1q/pub?gid=954325037&single=true&output=csv"
 schedule = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRE5Daf9Y_ydDpyAvxickgTRJcTNpE4V-Vj0W4VxkGgXHmIwq4EtVeyeSRJDzEotfSVDK82H8aetzK5/pub?gid=0&single=true&output=csv"
 
-[printers]
-ids = [
+[equipment]
+laser_cutters = [
+    "Full Spectrum",
+    "Glowforge",
+    "Epilog",
+]
+
+printers = [
     "FLSUN-SR-1",
     "FLSUN-SR-2",
     "FLSUN-SR-3",
     "FLSUN-SR-4",
     "PRUSA-1",
     "PRUSA-2",
+]
+
+main_area = [
+    "Large Format Printer",
+    "Digital Loom",
+    "Leather Sewing Machine"
 ]
 
 [student_storage]
