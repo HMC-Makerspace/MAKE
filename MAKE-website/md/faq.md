@@ -2,7 +2,7 @@
 
 ## What are the Makerspace hours?
 
-The Makerspace is open to students 24/7, but we have stewards on shift from:
+The Makerspace is open to 7C students & faculty 24/7, but we have stewards on shift from:
 
 - 1-10PM Monday-Thursday
 - 1-7PM Friday and Saturday
@@ -18,7 +18,7 @@ The Makerspace is run by a management team of six student head stewards & the Ma
 
 ## What is the difference between the Machine Shop and the Makerspace?
 
-The HMC Machine Shop is a facility with equipment and supplies for heavy-duty machining. It has a separate safety quiz and is only open during proctor hours. The Makerspace is open 24/7 to all students who have passed the Makerspace’s safety quiz, and has a variety of different machines and supplies.
+The HMC Machine Shop is a facility with equipment and supplies for heavy-duty machining. It has a separate safety quiz and is only open during proctor hours. The Makerspace is open 24/7 to all 7C students & faculty who have passed the Makerspace’s safety quiz, and has a variety of different machines and supplies.
 
 ## What does it mean that the makerspace is open 24/7?
 
@@ -42,7 +42,7 @@ Yes! Everything out on the floor is available to use. We only ask that if you ar
 
 ## How can I get funding for a project?
 
-All 5C students have access to up to $50 worth of funding per semester. Separately, Harvey Mudd students have access to up to $200 worth of funding through the Brawn Grant. To apply, click on the Student Project Application tab and fill out the form.
+All 7C students have access to up to $50 worth of funding per semester. Separately, Harvey Mudd students have access to up to $200 worth of funding through the Brawn Grant. To apply, click on the Student Project Application tab and fill out the form.
 
 ## Where is the Makerspace?
 
