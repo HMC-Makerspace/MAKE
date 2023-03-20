@@ -17,14 +17,36 @@ function renderWorkshops() {
 
     for (let workshop of state.workshops) {
         // if the workshop has past, append it to another element
+        // However, add a 24 hour buffer to the date, so that workshops that are
+        // scheduled for the same day as the current date will still be shown
+        // as upcoming
         const parsed_date = new Date(workshop.date);
 
+        // Add 24 hours to the date
+        parsed_date.setDate(parsed_date.getDate() + 1);
+
         if (parsed_date < now) {
-            previous_workshops.appendChild(generateWorkshopDiv(workshop, true));
+            previous_workshops.prepend(generateWorkshopDiv(workshop, true));
         } else {
             upcoming_workshops.appendChild(generateWorkshopDiv(workshop));
         }
     }
+
+    // If there are no upcoming workshops, display a message
+    if (upcoming_workshops.children.length == 0) {
+        const no_workshops = document.createElement("p");
+        no_workshops.innerText = "No upcoming workshops!";
+        upcoming_workshops.appendChild(no_workshops);
+    }
+
+    // Add h2 headers to each section
+    const upcoming_header = document.createElement("h2");
+    upcoming_header.innerText = "Upcoming Workshops";
+    upcoming_workshops.prepend(upcoming_header);
+
+    const previous_header = document.createElement("h2");
+    previous_header.innerText = "Previous Workshops";
+    previous_workshops.prepend(previous_header);
 }
 
 function generateWorkshopDiv(workshop, is_past=false) {
