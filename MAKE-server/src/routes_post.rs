@@ -34,6 +34,10 @@ pub async fn checkout_items(
             return Err(ErrorUnauthorized("User is banned".to_string()));
         }
 
+        if user.get_passed_quizzes().contains(&QuizName::General) == false {
+            return Err(ErrorUnauthorized("User has not passed the General Quiz".to_string()));
+        }
+
         data.checkout_log.add_checkout(CheckoutLogEntry::new(
             user.get_id(),
             sec_length,
