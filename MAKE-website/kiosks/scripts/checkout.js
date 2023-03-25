@@ -184,14 +184,20 @@ function updateCheckoutsHTML() {
     const history = document.getElementById("checkouts-history");
 
     let current_divs = [];
+
+
     for (let checkout of state.checkouts.currently_checked_out) {
         current_divs.push(createCheckoutDiv(checkout, kiosk_mode=true));
     }
+
+    current_divs.push(createCheckoutHeader(false, kiosk_mode=true));
 
     let history_divs = [];
     for (let checkout of state.checkouts.checkout_history) {
         history_divs.push(createCheckoutDiv(checkout, kiosk_mode=true));
     }
+
+    history_divs.push(createCheckoutHeader(true, kiosk_mode=true));
 
     // Reverse order of both lists
     current_divs.reverse();
