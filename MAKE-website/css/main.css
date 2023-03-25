@@ -1131,6 +1131,9 @@ Checkouts
 .checkout-header {
   background-color: var(--theme-color-3) !important;
   font-weight: bolder;
+  position: sticky;
+  top: 0;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
 }
 
 .checkout-entry.kiosk-mode {
