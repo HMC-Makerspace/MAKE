@@ -12,6 +12,8 @@ localStorage.setItem("theme", "dark");
 
 const API = '/api/v1';
 
+const correct_sequence = 0;
+
 async function authenticate() {
     // Get api keys from url params
     const params = new URLSearchParams(window.location.search);
@@ -58,10 +60,40 @@ async function authenticate() {
         
         if (e.key === ";") {
             e.preventDefault();
+            correct_sequence = 0;
             setPage("inventory");
             state.cart = [];
             document.getElementById("id-input").value = "";
             document.getElementById("id-input").focus();
+        }
+
+        // Additionally, for tap to checkout, if the sequence starts with
+        // a %E?; then we want to focus the input on id-input and switch
+        // to the inventory page
+        // To do this, increment correct_sequence by 1 for each keypress
+        // If the sequence is correct, then reset correct_sequence to 0
+        // and focus the input on id-input and switch to the inventory page
+        // If the sequence is incorrect, then reset correct_sequence to 0
+        if ((e.key === "%" && correct_sequence === 0)
+            || (e.key === "E" && correct_sequence === 1)
+            || (e.key === "?" && correct_sequence === 2)
+        ) {
+            e.preventDefault();
+            correct_sequence += 1;
+        } else {
+            correct_sequence = 0;
+        }
+
+        // If the tap errors out, it'll start with a newline
+        // We should disable keystrokes for the next 500ms
+        // to prevent the newline from being added to the input
+        if (e.key === "\n") {
+            document.getElementById("id-input").focus();
+            document.getElementById("id-input").disabled = true;
+
+            setTimeout(() => {
+                document.getElementById("id-input").disabled = false;
+            }, 500);
         }
     });
 
