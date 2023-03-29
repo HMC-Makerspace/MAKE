@@ -12,7 +12,7 @@ localStorage.setItem("theme", "dark");
 
 const API = '/api/v1';
 
-const correct_sequence = 0;
+var correct_sequence = 0;
 
 async function authenticate() {
     // Get api keys from url params
