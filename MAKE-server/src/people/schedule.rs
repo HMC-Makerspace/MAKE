@@ -117,8 +117,6 @@ impl Schedule {
         self.all_proficiencies.dedup();
         self.all_proficiencies.retain(|x| !x.is_empty() || x.len() > 0);
 
-        println!("{}", self.all_proficiencies.join(", "));
-
         Ok(())
     }
 

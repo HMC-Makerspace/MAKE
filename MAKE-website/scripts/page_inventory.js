@@ -30,7 +30,7 @@ function submitSearch(kiosk_mode = false) {
 
     const filters = getInventoryFilters();
 
-    const search_results = searchInventory(search, filters);
+    const search_results = searchInventory(search, filters, kiosk_mode);
     const search_divs = generateInventoryDivs(search_results, kiosk_mode);
 
     state.current_search_results = search_divs;
@@ -62,13 +62,18 @@ function getInventoryFilters() {
     return filters;
 }
 
-function searchInventory(search, filters = null) {
-    const results = fuzzysort.go(search, state.inventory.items, search_options);
+function searchInventory(search, filters = null, kiosk_mode = false) {
+    let results = fuzzysort.go(search, state.inventory.items, search_options);
 
-    const results_norm = results.sort((a, b) => b.score - a.score);
+    results.sort((a, b) => b.score - a.score);
+
+    // If in kiosk mode, sort by number of times checked out
+    if (kiosk_mode === true) {
+        results.sort((a, b) =>  b.obj.num_times_checked - a.obj.num_times_checked);
+    }
 
     if (filters !== null) {
-        const results_filtered = results_norm.filter(result => {
+        const results_filtered = results.filter(result => {
             const item = result.obj;
 
             if (filters.stock && item.quantity == 0) {
@@ -90,7 +95,7 @@ function searchInventory(search, filters = null) {
         return results_filtered;
     }
 
-    return results_norm;
+    return results;
 }
 
 function generateInventoryDivs(results, kiosk_mode = false) {

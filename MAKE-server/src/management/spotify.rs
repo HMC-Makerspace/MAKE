@@ -53,7 +53,7 @@ pub async fn update_spotify() {
             } else {
                 let access_token = between(&access_token, "access_token\":\"", "\"");
 
-                info!("Refreshed spotify token {}", access_token);
+                info!("Refreshed spotify token!");
 
                 let mut headers = HeaderMap::new();
 

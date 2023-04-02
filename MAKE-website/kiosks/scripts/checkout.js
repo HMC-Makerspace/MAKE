@@ -54,7 +54,7 @@ async function authenticate() {
         fetchCheckouts();
     });
 
-    document.addEventListener("keyup", (e) => {
+    document.addEventListener("keydown", (e) => {
         // If the key is is ';', focus the input on id-input and switch to
         // the inventory page
         
@@ -267,15 +267,29 @@ function createUserInfo(user_info) {
         document.getElementById("id-error").classList.remove("hidden");
         document.getElementById("id-input").focus();
     } else {
+        // Look at all checkouts for overdue checkouts
+        let checkouts = user_info.pending_checkouts;
+        let now = new Date();
+
+        let total_overdue = 0;
+
+        for (let checkout of checkouts) {
+            let checkout_time = new Date(checkout.timestamp_expires * 1000);
+
+            if (checkout_time < now) {
+                total_overdue += 1;
+            }
+        }
+
         document.getElementById("id-error").classList.add("hidden");
         document.getElementById("user-info-content").innerHTML = `
             <div id="user-info-name">${user_info.name}</div>
             <div id="user-info-id">${user_info.college_id}</div>
             <div id="user-info-email">${user_info.college_email}</div>
             <div id="user-info-auth" class="${user_info.auth_level}">Auth: ${user_info.auth_level}</div>
-            <div id="user-info-pending-checkouts">Pending Checkouts: ${user_info.pending_checkouts.length}</div>
+            <div id="user-info-pending-checkouts">Overdue Checkouts: ${total_overdue}</div>
             <div id="user-info-all-checkouts">All Checkouts: ${user_info.all_checkouts.length}</div>
-            <div id="user-info-passed-quizzes">${createListDivs(user_info.passed_quizzes)}</div>
+            <div id="user-info-passed-quizzes">${createPassedQuizzes(user_info.passed_quizzes)}</div>
             <div id="user-info-cart"><b>Cart</b><div id="cart-content"></div></div>
             <div id="time-length-radio">
                 <div>
@@ -288,7 +302,7 @@ function createUserInfo(user_info) {
                     <input id="time-3-days" type="radio" name="time-length" value="3"><label for="time-3-days">3 Days</label>
                 </div>
                 <div>
-                    <input id="time-1-week" type="radio" name="time-length" value="4"><label for="time-1-week">1 Week</label>
+                    <input id="time-break" type="radio" name="time-length" value="4"><label for="time-break">For Break</label>
                 </div>
             </div>
 
@@ -299,23 +313,22 @@ function createUserInfo(user_info) {
             </div>
         `;
 
-        // Look at all checkouts for overdue checkouts
-        let checkouts = user_info.pending_checkouts;
-        let oldest_checkout_expired_time = new Date();
-
-        for (let checkout of checkouts) {
-            let checkout_time = new Date(checkout.timestamp_expires);
+        if (total_overdue > 0) {
+            document.getElementById("user-info-pending-checkouts").classList.add("error");
         }
     }
 }
 
-function createListDivs(list) {
-    let div = "";
-    for (let item of list) {
-        div += `<div>${item}</div>`;
+function createPassedQuizzes(list) {
+    if (list.length === 0) {
+        return "No Quizzes Passed!";
+    } else {
+        let html = "";
+        for (let quiz of list) {
+            html += `<div>${quiz}</div>`;
+        }
+        return html;
     }
-
-    return div;
 }
 
 function clearUser() {
@@ -329,17 +342,7 @@ function clearUser() {
 }
 
 function setPage(page) {
-    switch (page) {
-        case "checkout":
-            state.page = "checkout";
-            break;
-        case "inventory":
-            state.page = "inventory";
-            break;
-        case "users":
-            state.page = "users";
-            break;
-    }
+    state.page = page;
 
     updatePage();
 }
@@ -472,7 +475,14 @@ function getCheckoutLength() {
         case "3":
             return 3 * 24 * 3600;
         case "4":
-            return 7 * 24 * 3600;
+            // This is a checkout for breaks specifically, so it should 
+            // check out the item until 11:59pm on the next upcoming
+            // monday
+            const day = new Date().getDay();
+
+            const days_until_monday = (day === 0) ? 1 : (day === 6) ? 2 : 8 - day;
+
+            return days_until_monday * 24 * 3600;
     }
 }
 

@@ -83,6 +83,23 @@ impl Inventory {
                 }
             }
 
+            // Iterate through checkouts and increment num_times_checked
+            let checkouts = MEMORY_DATABASE.lock().await.checkout_log.clone();
+
+            for item in items.iter_mut() {
+                item.num_times_checked = checkouts
+                    .checkout_history
+                    .iter()
+                    .filter(|x| x.items.contains(&item.name))
+                    .count() as u64;
+
+                item.num_times_checked += checkouts
+                    .currently_checked_out
+                    .iter()
+                    .filter(|x| x.items.contains(&item.name))
+                    .count() as u64;
+            }
+
             // If everything is ok, update timestamp and items
             self.last_updated = now;
             self.items = items;
@@ -214,6 +231,7 @@ impl Inventory {
 }
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[serde(default)]
 pub struct InventoryItem {
     pub name: String,
     pub is_material: bool,
@@ -231,6 +249,7 @@ pub struct InventoryItem {
     pub is_kit: bool,
     pub kit: Option<String>,
     pub kit_items: Vec<String>,
+    pub num_times_checked: u64,
 }
 
 impl InventoryItem {
@@ -272,6 +291,7 @@ impl InventoryItem {
             },
             is_kit: false,
             kit_items: Vec::new(),
+            num_times_checked: 0,
         }
     }
 }
