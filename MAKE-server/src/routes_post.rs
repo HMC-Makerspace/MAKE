@@ -28,6 +28,7 @@ pub async fn checkout_items(
             return Err(ErrorBadRequest("User not found".to_string()));
         }
 
+
         let user = user.unwrap();
 
         if user.get_auth_level() == AuthLevel::Banned {
