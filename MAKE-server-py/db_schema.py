@@ -74,6 +74,7 @@ class InventoryItem(BaseModel):
     UUID: str
     Name: str
     Type: str
+    # Quantity can be a number or a string
     Quantity: str
     Location_room: str
     Location_specific: str

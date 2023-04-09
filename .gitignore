@@ -2,3 +2,4 @@ MAKE-server/target
 MAKE-server/api_keys.toml
 MAKE-server/db.json
 MAKE-server/gmail_secret.json
+MAKE-server-py/config.py

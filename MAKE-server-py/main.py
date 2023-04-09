@@ -12,6 +12,9 @@ import logging
 # Import the database schema
 from db_schema import *
 
+# Import config file
+from config import *
+
 SSL_CERT_PRIVKEY = "/etc/letsencrypt/live/make.hmc.edu/privkey.pem"
 SSL_CERT_PERMKEY = "/etc/letsencrypt/live/make.hmc.edu/fullchain.pem"
 
@@ -32,7 +35,7 @@ async def validate_database_schema(db):
             logging.info(f"Created collection {name} in database {db.name}")
         
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
     # Log to file in logs folder
     logging.basicConfig(filename='logs/make.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
 
@@ -60,3 +63,22 @@ if __name__ == "__main__":
     else :
         logging.info("Started MAKE in debug mode!")
         uvicorn.run("main:app", host="127.0.0.1", port=5000, log_level="info", reload=True)
+
+
+class BackgroundRunner:
+    def __init__(self):
+        return
+
+    async def run_main(self):
+        while True:
+            # Scrape quiz results every 60 seconds
+            await scrape_quiz_results()
+            await asyncio.sleep(60)
+            
+            
+
+runner = BackgroundRunner()
+
+@app.on_event('startup')
+async def app_startup():
+    asyncio.create_task(runner.run_main())
