@@ -1,5 +1,5 @@
 # Database configuration
-DB_NAME = ""
+DB_NAME = "make"
 DB_USER = ""
 DB_PASSWORD = ""
 

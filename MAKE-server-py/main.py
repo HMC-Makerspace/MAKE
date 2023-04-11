@@ -15,10 +15,39 @@ from db_schema import *
 # Import config file
 from config import *
 
+# Import routes
+import routes
+from routes.routes_inventory import *
+
+# Import all other files
+import users
+from users.quizzes import *
+
+import inventory
+from inventory.inventory import *
+from inventory.checkouts import *
+
 SSL_CERT_PRIVKEY = "/etc/letsencrypt/live/make.hmc.edu/privkey.pem"
 SSL_CERT_PERMKEY = "/etc/letsencrypt/live/make.hmc.edu/fullchain.pem"
 
 app = FastAPI()
+
+class MongoDB():
+    def __init__(self):
+        self.client = motor.motor_asyncio.AsyncIOMotorClient("mongodb://localhost:27017")
+        self.db = self.client[DB_NAME]
+    
+    def __del__(self):
+        self.client.close()
+
+    async def get_collection(self, name: str) -> Union[motor.motor_asyncio.AsyncIOMotorCollection, None]:
+        # Get a collection from the database
+        # Returns None if the collection does not exist
+        collections = await self.db.list_collection_names()
+        if name in collections:
+            return self.db[name]
+        else:
+            return None
 
 async def validate_database_schema(db):
     # Validate the database schema
@@ -43,13 +72,13 @@ if __name__ == "__main__":
 
     logging.info("Connecting to database...")
     # Connect to mongoDB database
-    client = motor.motor_asyncio.AsyncIOMotorClient('mongodb://localhost:27017')
-    db = client['make']
+    db = MongoDB()
+    
     logging.info("Connected to database!")
 
     logging.info("Validating database schema...")
     # Validate the database schema using future
-    asyncio.run(validate_database_schema(db))
+    asyncio.run(validate_database_schema(db.db))
 
     logging.info("Database schema is valid!")
     
@@ -70,13 +99,13 @@ class BackgroundRunner:
         return
 
     async def run_main(self):
+        # Wait 10 seconds before starting the background tasks
+        await asyncio.sleep(1)
         while True:
             # Scrape quiz results every 60 seconds
-            await scrape_quiz_results()
+            await users.quizzes.scrape_quiz_results()
             await asyncio.sleep(60)
             
-            
-
 runner = BackgroundRunner()
 
 @app.on_event('startup')
