@@ -32,11 +32,13 @@ SSL_CERT_PERMKEY = "/etc/letsencrypt/live/make.hmc.edu/fullchain.pem"
 
 app = FastAPI()
 
+
 class MongoDB():
     def __init__(self):
-        self.client = motor.motor_asyncio.AsyncIOMotorClient("mongodb://localhost:27017")
+        self.client = motor.motor_asyncio.AsyncIOMotorClient(
+            "mongodb://localhost:27017")
         self.db = self.client[DB_NAME]
-    
+
     def __del__(self):
         self.client.close()
 
@@ -48,6 +50,7 @@ class MongoDB():
             return self.db[name]
         else:
             return None
+
 
 async def validate_database_schema(db):
     # Validate the database schema
@@ -62,7 +65,7 @@ async def validate_database_schema(db):
             await db.create_collection(name)
             # Print log message
             logging.info(f"Created collection {name} in database {db.name}")
-        
+
 if __name__ == "__main__":
     # Setup logging to display everything to the console
     logging.getLogger().setLevel(logging.INFO)
@@ -72,7 +75,7 @@ if __name__ == "__main__":
     logging.info("Connecting to database...")
     # Connect to mongoDB database
     db = MongoDB()
-    
+
     logging.info("Connected to database!")
 
     logging.info("Validating database schema...")
@@ -80,17 +83,19 @@ if __name__ == "__main__":
     asyncio.run(validate_database_schema(db.db))
 
     logging.info("Database schema is valid!")
-    
+
     # When this python file is run directly, run the uvicorn server
     # in debug mode, and reload the server when the code changes.
     # To determine debug mode, check if the script was run without the --prod flag.
     if "--prod" in sys.argv:
         logging.info("Started MAKE in production mode!")
         # Production mode
-        uvicorn.run("main:app", host="0.0.0.0", port=8433, log_level="info", reload=False, workers=16, ssl_keyfile=SSL_CERT_PRIVKEY, ssl_certfile=SSL_CERT_PERMKEY)
-    else :
+        uvicorn.run("main:app", host="0.0.0.0", port=8433, log_level="info", reload=False,
+                    workers=16, ssl_keyfile=SSL_CERT_PRIVKEY, ssl_certfile=SSL_CERT_PERMKEY)
+    else:
         logging.info("Started MAKE in debug mode!")
-        uvicorn.run("main:app", host="127.0.0.1", port=5000, log_level="info", reload=True)
+        uvicorn.run("main:app", host="127.0.0.1", port=5000,
+                    log_level="info", reload=True)
 
 
 class BackgroundRunner:
@@ -104,8 +109,10 @@ class BackgroundRunner:
             # Scrape quiz results every 60 seconds
             await users.quizzes.scrape_quiz_results()
             await asyncio.sleep(60)
-            
+
+
 runner = BackgroundRunner()
+
 
 @app.on_event('startup')
 async def app_startup():

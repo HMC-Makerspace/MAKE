@@ -17,6 +17,8 @@ schema = [
 ]
 
 # Convert ObjectIds to strings before storing them as the _id.
+
+
 class PyObjectId(ObjectId):
     @classmethod
     def __get_validators__(cls):
@@ -31,6 +33,7 @@ class PyObjectId(ObjectId):
     @classmethod
     def __modify_schema__(cls, field_schema):
         field_schema.update(type="string")
+
 
 '''
 Define the schema for the database.
@@ -69,6 +72,8 @@ If the item is a kit, the following fields are stored:
 - Kit Contents: A list of the items in the kit
 
 '''
+
+
 class InventoryItem(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
     UUID: str
@@ -126,6 +131,8 @@ If the user is a Steward or Head Steward, the following fields are stored:
 - Shifts: A list of the shifts that the user is working
 
 '''
+
+
 class User(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
     UUID: str
@@ -152,6 +159,7 @@ class User(BaseModel):
             }
         }
 
+
 '''
 The restock_requests class is used to store information about the restock requests.
 The following fields are stored:
@@ -162,6 +170,8 @@ The following fields are stored:
 - Sent: Whether the request has been sent to management
 
 '''
+
+
 class RestockRequest(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
     UUID: str
@@ -185,6 +195,7 @@ class RestockRequest(BaseModel):
             }
         }
 
+
 '''
 The quizzes class is used to store information about the quizzes.
 The following fields are stored:
@@ -196,6 +207,8 @@ The following fields are stored:
 - Score: The score of the quiz
 - Passed: Whether the user passed the quiz
 '''
+
+
 class QuizResponse(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
     GID: str
@@ -223,6 +236,7 @@ class QuizResponse(BaseModel):
             }
         }
 
+
 '''
 The shifts class is used to store information about the shifts.
 The following fields are stored:
@@ -231,6 +245,8 @@ The following fields are stored:
 - Day: The day of the shift
 - Stewards: A list of UUIDs of the stewards working the shift
 '''
+
+
 class Shift(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
     Timestart: str
@@ -265,6 +281,8 @@ The following fields are stored:
 - Timestamp Due: The timestamp of when the items are due
 - Timestamp In: The timestamp of when the items were checked in
 '''
+
+
 class Checkout(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
     UUID: str
@@ -291,7 +309,7 @@ class Checkout(BaseModel):
                 "Checked_Out_By": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"
             }
         }
-    
+
 
 '''
 StudentStorage class is used to store information about the student storage reservations
@@ -304,6 +322,8 @@ The following fields are stored:
 - Timestamp In: The timestamp of when the reservation was checked in
 - Renewals Left: The number of times the reservation can be renewed
 '''
+
+
 class StudentStorage(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
     UUID: str
@@ -331,6 +351,7 @@ class StudentStorage(BaseModel):
             }
         }
 
+
 '''
 Workshop class is used to store information about the workshops.
 The following fields are stored:
@@ -342,6 +363,8 @@ The following fields are stored:
 - Length: The length of the workshop in minutes
 - Capacity: The capacity of the workshop
 '''
+
+
 class Workshop(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
     UUID: str
@@ -369,6 +392,7 @@ class Workshop(BaseModel):
             }
         }
 
+
 '''
 Printer log class is used to store information about the printer logs.
 This will serve both 3d printer and large format printer logs.
@@ -380,6 +404,8 @@ The following fields are stored:
 - Timestamp: The timestamp of when the file was printed
 - Printer data: The data that the printer sent to the server, in JSON format
 '''
+
+
 class PrinterLog(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
     UUID: str
@@ -418,6 +444,8 @@ The following fields are stored:
     - steward: Can access steward-level
     - printer: Can access printer endpoints
 '''
+
+
 class APIKeys(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
     UUID: str
