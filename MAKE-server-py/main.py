@@ -64,9 +64,8 @@ async def validate_database_schema(db):
             logging.info(f"Created collection {name} in database {db.name}")
         
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
-    # Log to file in logs folder
-    logging.basicConfig(filename='logs/make.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
+    # Setup logging to display everything to the console
+    logging.getLogger().setLevel(logging.INFO)
 
     logging.info("Starting MAKE server...")
 

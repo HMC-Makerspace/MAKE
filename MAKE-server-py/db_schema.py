@@ -131,7 +131,7 @@ class User(BaseModel):
     UUID: str
     Name: str
     Email: str
-    CX_ID: str
+    cx_id: int
     Role: str
     Shifts: List[str]
     Quizzes: List[str]
@@ -146,7 +146,7 @@ class User(BaseModel):
                 "UUID": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
                 "Name": "John Doe",
                 "Email": "john@g.hmc.edu",
-                "CX_ID": "123456789",
+                "cx_id": "123456789",
                 "Role": "User",
                 "Shifts": []
             }
@@ -202,7 +202,7 @@ class QuizResponse(BaseModel):
     Email: str
     Name: str
     Timestamp: str
-    CX_ID: str
+    cx_id: str
     Score: str
     Passed: bool
 
@@ -217,7 +217,7 @@ class QuizResponse(BaseModel):
                 "Email": "john@g.hmc.edu",
                 "Name": "John Doe",
                 "Timestamp": "2021-01-01 00:00:00",
-                "CX_ID": "123456789",
+                "cx_id": "123456789",
                 "Score": "7/7",
                 "Passed": True
             }
