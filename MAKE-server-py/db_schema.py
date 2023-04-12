@@ -1,7 +1,29 @@
 from typing import List, Optional
 from bson import ObjectId
 from pydantic import BaseModel, Field
+import motor.motor_asyncio
+from typing import Union
 
+from config import DB_NAME
+
+class MongoDB():
+    def __init__(self):
+        self.client = motor.motor_asyncio.AsyncIOMotorClient(
+            "mongodb://localhost:27017")
+        self.db = self.client[DB_NAME]
+
+    def __del__(self):
+        self.client.close()
+
+    async def get_collection(self, name: str) -> Union[motor.motor_asyncio.AsyncIOMotorCollection, None]:
+        # Get a collection from the database
+        # Returns None if the collection does not exist
+        collections = await self.db.list_collection_names()
+        if name in collections:
+            return self.db[name]
+        else:
+            return None
+        
 schema = [
     'quiz_updates',
     'inventory',
@@ -54,7 +76,7 @@ Define the schema for the database.
 '''
 The inventory class is used to store information about the items in the inventory.
 The following fields are stored:
-- UUID: The UUID of the item
+- uuid: The uuid of the item
 - Name: The name of the item
 - Tool / Material / Kit: Whether the item is a tool, material, or kit
 - Quantity (#, Low, Medium, High): The quantity of the item
@@ -75,22 +97,22 @@ If the item is a kit, the following fields are stored:
 
 
 class InventoryItem(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id")
-    UUID: str
-    Name: str
-    Type: str
+    _id: Optional[PyObjectId] = Field(alias="_id")
+    uuid: str
+    name: str
+    role: str
     # Quantity can be a number or a string
-    Quantity: str
-    Location_room: str
-    Location_specific: str
-    Reorder_URL: str
-    Specific_Name: str
-    Serial_Number: str
-    Brand: str
-    Model_Number: str
-    QR_Code: str
-    Kit_Ref: str
-    Kit_Contents: List[str]
+    quantity: str
+    location_room: str
+    location_specific: str
+    reorder_url: str
+    specific_name: str
+    serial_number: str
+    brand: str
+    model_number: str
+    qr_code: str
+    kit_ref: str
+    kit_contents: List[str]
 
     class Config:
         arbitrary_types_allowed = True
@@ -99,20 +121,20 @@ class InventoryItem(BaseModel):
         }
         schema_extra = {
             "example": {
-                "UUID": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                "Name": "Soldering Iron",
-                "Type": "Tool",
-                "Quantity": "Medium",
-                "Location_room": "Cage",
-                "Location_specific": "Shelf 1",
-                "Reorder_URL": "https://www.amazon.com/HiLetgo-Adjustable-Temperature-Soldering-Station/dp/B07B4J2YQY/ref=sr_1_3?dchild=1&keywords=soldering+iron&qid=1610000000&sr=8-3",
-                "Specific_Name": "HiLetGo Adjustable Soldering Iron",
-                "Serial_Number": "123456789",
-                "Brand": "HiLetGo",
-                "Model_Number": "123456789",
-                "QR_Code": "AUTHENTIC/121313",
-                "Kit_Ref": "None",
-                "Kit_Contents": []
+                "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "name": "Soldering Iron",
+                "role": "Tool",
+                "quantity": "Medium",
+                "location_room": "Cage",
+                "location_specific": "Shelf 1",
+                "reorder_url": "https://www.amazon.com/HiLetgo-Adjustable-Temperature-Soldering-Station/dp/B07B4J2YQY/ref=sr_1_3?dchild=1&keywords=soldering+iron&qid=1610000000&sr=8-3",
+                "specific_name": "HiLetGo Adjustable Soldering Iron",
+                "serial_number": "123456789",
+                "brand": "HiLetGo",
+                "model_number": "123456789",
+                "qr_code": "AUTHENTIC/121313",
+                "kit_ref": "None",
+                "kit_contents": []
             }
         }
 
@@ -120,7 +142,7 @@ class InventoryItem(BaseModel):
 '''
 The users class is used to store information about the users of the system.
 The following fields are stored:
-- UUID: The UUID of the user
+- uuid: The uuid of the user
 - Name: The name of the user
 - Email: The email of the user
 - CX ID: The CX ID of the user
@@ -134,14 +156,14 @@ If the user is a Steward or Head Steward, the following fields are stored:
 
 
 class User(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id")
-    UUID: str
-    Name: str
-    Email: str
+    __id: Optional[PyObjectId] = Field(alias="_id")
+    uuid: str
+    name: str
+    email: str
     cx_id: int
-    Role: str
-    Shifts: List[str]
-    Quizzes: List[str]
+    role: str
+    shifts: List[str]
+    quizzes: List[str]
 
     class Config:
         arbitrary_types_allowed = True
@@ -150,12 +172,12 @@ class User(BaseModel):
         }
         schema_extra = {
             "example": {
-                "UUID": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                "Name": "John Doe",
-                "Email": "john@g.hmc.edu",
+                "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "name": "John Doe",
+                "email": "john@g.hmc.edu",
                 "cx_id": "123456789",
-                "Role": "User",
-                "Shifts": []
+                "role": "User",
+                "shifts": []
             }
         }
 
@@ -163,7 +185,7 @@ class User(BaseModel):
 '''
 The restock_requests class is used to store information about the restock requests.
 The following fields are stored:
-- UUID: The UUID of the restock request
+- uuid: The uuid of the restock request
 - Items Requested: A list of the items requested
 - Requested By: The name of the user who requested the restock
 - Requested By Email: The email of the user who requested the restock
@@ -173,8 +195,8 @@ The following fields are stored:
 
 
 class RestockRequest(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id")
-    UUID: str
+    _id: Optional[PyObjectId] = Field(alias="_id")
+    uuid: str
     Items_Requested: List[str]
     Requested_By: str
     Requested_By_Email: str
@@ -187,11 +209,11 @@ class RestockRequest(BaseModel):
         }
         schema_extra = {
             "example": {
-                "UUID": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                "Items_Requested": ["Soldering Iron"],
-                "Requested_By": "John Doe",
-                "Requested_By_Email": "john@g.hmc.edu",
-                "Sent": False
+                "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "items_requested": ["Soldering Iron"],
+                "requested_by": "John Doe",
+                "requested_by_email": "john@g.hmc.edu",
+                "sent": False
             }
         }
 
@@ -210,14 +232,14 @@ The following fields are stored:
 
 
 class QuizResponse(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id")
-    GID: str
-    Email: str
-    Name: str
-    Timestamp: str
-    cx_id: str
-    Score: str
-    Passed: bool
+    _id: Optional[PyObjectId] = Field(alias="_id")
+    gid: str
+    email: str
+    name: str
+    timestamp: int
+    cx_id: int
+    score: str
+    passed: bool
 
     class Config:
         arbitrary_types_allowed = True
@@ -226,13 +248,13 @@ class QuizResponse(BaseModel):
         }
         schema_extra = {
             "example": {
-                "GID": "2100779718",
-                "Email": "john@g.hmc.edu",
-                "Name": "John Doe",
-                "Timestamp": "2021-01-01 00:00:00",
+                "gid": "2100779718",
+                "email": "john@g.hmc.edu",
+                "name": "John Doe",
+                "timestamp": "2021-01-01 00:00:00",
                 "cx_id": "123456789",
-                "Score": "7/7",
-                "Passed": True
+                "score": "7/7",
+                "passed": True
             }
         }
 
@@ -243,16 +265,16 @@ The following fields are stored:
 - Timestart: The start time of the shift
 - Timeend: The end time of the shift
 - Day: The day of the shift
-- Stewards: A list of UUIDs of the stewards working the shift
+- Stewards: A list of uuids of the stewards working the shift
 '''
 
 
 class Shift(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id")
-    Timestart: str
-    Timeend: str
-    Day: str
-    Stewards: List[str]
+    _id: Optional[PyObjectId] = Field(alias="_id")
+    timestamp_start: str
+    timestamp_end: str
+    day: str
+    stewards: List[str]
 
     class Config:
         arbitrary_types_allowed = True
@@ -261,10 +283,10 @@ class Shift(BaseModel):
         }
         schema_extra = {
             "example": {
-                "Timestart": "10:00",
-                "Timeend": "12:00",
-                "Day": "Monday",
-                "Stewards": ["d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"]
+                "timestamp_start": "10:00",
+                "timestamp_end": "12:00",
+                "day": "Monday",
+                "stewards": ["d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"]
             }
         }
 
@@ -272,11 +294,11 @@ class Shift(BaseModel):
 '''
 The checkouts class is used to store information about the checkouts.
 The following fields are stored:
-- UUID: The UUID of the checkout
-- Items: A list of UUIDs of the items checked out. Each item is a dictionary with the following fields:
-    - UUID: The UUID of the item
+- uuid: The uuid of the checkout
+- Items: A list of uuids of the items checked out. Each item is a dictionary with the following fields:
+    - uuid: The uuid of the item
     - Quantity: The quantity of the item
-- Checked Out By: The UUID of the user who checked out the items
+- Checked Out By: The uuid of the user who checked out the items
 - Timestamp Out: The timestamp of when the items were checked out
 - Timestamp Due: The timestamp of when the items are due
 - Timestamp In: The timestamp of when the items were checked in
@@ -284,13 +306,13 @@ The following fields are stored:
 
 
 class Checkout(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id")
-    UUID: str
-    Items: List[dict]
-    Checked_Out_By: str
-    Timestamp_Out: str
-    Timestamp_Due: str
-    Timestamp_In: str
+    _id: Optional[PyObjectId] = Field(alias="_id")
+    uuid: str
+    items: List[dict]
+    checked_out_by: str
+    timestamp_out: str
+    timestamp_due: str
+    timestamp_in: str
 
     class Config:
         arbitrary_types_allowed = True
@@ -299,14 +321,14 @@ class Checkout(BaseModel):
         }
         schema_extra = {
             "example": {
-                "UUID": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                "Items": [
+                "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "items": [
                     {
-                        "UUID": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                        "Quantity": 1
+                        "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                        "quantity": 1
                     }
                 ],
-                "Checked_Out_By": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"
+                "checked_out_by": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"
             }
         }
 
@@ -314,9 +336,9 @@ class Checkout(BaseModel):
 '''
 StudentStorage class is used to store information about the student storage reservations
 The following fields are stored:
-- UUID: The UUID of the reservation
+- uuid: The uuid of the reservation
 - Space: The space that the reservation is for
-- Student: The UUID of the student who made the reservation
+- Student: The uuid of the student who made the reservation
 - Timestamp: The timestamp of when the reservation was made
 - Timestamp Due: The timestamp of when the reservation is due
 - Timestamp In: The timestamp of when the reservation was checked in
@@ -325,14 +347,14 @@ The following fields are stored:
 
 
 class StudentStorage(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id")
-    UUID: str
-    Space: str
-    Student: str
-    Timestamp: str
-    Timestamp_Due: str
-    Timestamp_In: str
-    Renewals_Left: int
+    _id: Optional[PyObjectId] = Field(alias="_id")
+    uuid: str
+    space: str
+    checked_out_by: str
+    timestamp: str
+    timestamp_due: str
+    timestamp_in: str
+    renewals_left: int
 
     class Config:
         arbitrary_types_allowed = True
@@ -341,13 +363,13 @@ class StudentStorage(BaseModel):
         }
         schema_extra = {
             "example": {
-                "UUID": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                "Space": "A1",
-                "Student": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                "Timestamp": "2021-01-01 00:00:00",
-                "Timestamp_Due": "2021-01-01 00:00:00",
-                "Timestamp_In": "2021-01-01 00:00:00",
-                "Renewals_Left": 1
+                "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "space": "A1",
+                "checked_out_by": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "timestamp": "2021-01-01 00:00:00",
+                "timestamp_due": "2021-01-01 00:00:00",
+                "timestamp_in": "2021-01-01 00:00:00",
+                "renewals_left": 1
             }
         }
 
@@ -355,10 +377,10 @@ class StudentStorage(BaseModel):
 '''
 Workshop class is used to store information about the workshops.
 The following fields are stored:
-- UUID: The UUID of the workshop
+- uuid: The uuid of the workshop
 - Name: The name of the workshop
 - Description: The description of the workshop
-- Stewards: A list of UUIDs of the stewards who are leading the workshop
+- Stewards: A list of uuids of the stewards who are leading the workshop
 - Timestamp: The timestamp of when the workshop is scheduled
 - Length: The length of the workshop in minutes
 - Capacity: The capacity of the workshop
@@ -366,14 +388,14 @@ The following fields are stored:
 
 
 class Workshop(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id")
-    UUID: str
-    Name: str
-    Description: str
-    Stewards: List[str]
-    Timestamp: str
-    Length: int
-    Capacity: int
+    _id: Optional[PyObjectId] = Field(alias="_id")
+    uuid: str
+    name: str
+    description: str
+    stewards: List[str]
+    timestamp: str
+    length: int
+    capacity: int
 
     class Config:
         arbitrary_types_allowed = True
@@ -382,13 +404,13 @@ class Workshop(BaseModel):
         }
         schema_extra = {
             "example": {
-                "UUID": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                "Name": "Soldering Workshop",
-                "Description": "Learn how to solder!",
-                "Stewards": ["d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"],
-                "Timestamp": "2021-01-01 00:00:00",
-                "Length": 60,
-                "Capacity": 10
+                "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "name": "Soldering Workshop",
+                "description": "Learn how to solder!",
+                "stewards": ["d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"],
+                "timestamp": "2021-01-01 00:00:00",
+                "length": 60,
+                "capacity": 10
             }
         }
 
@@ -397,9 +419,9 @@ class Workshop(BaseModel):
 Printer log class is used to store information about the printer logs.
 This will serve both 3d printer and large format printer logs.
 The following fields are stored:
-- UUID: The UUID of the printer log
-- Printer: The UUID of the printer that the log is for
-- User: The UUID of the user who printed the file
+- uuid: The uuid of the printer log
+- Printer: The uuid of the printer that the log is for
+- User: The uuid of the user who printed the file
 - File name: The name of the file that was printed
 - Timestamp: The timestamp of when the file was printed
 - Printer data: The data that the printer sent to the server, in JSON format
@@ -407,13 +429,13 @@ The following fields are stored:
 
 
 class PrinterLog(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id")
-    UUID: str
-    Printer: str
-    User: str
-    File_Name: str
-    Timestamp: str
-    Printer_Data: str
+    _id: Optional[PyObjectId] = Field(alias="_id")
+    uuid: str
+    printer: str
+    user: str
+    file_name: str
+    timestamp: str
+    printer_data: str
 
     class Config:
         arbitrary_types_allowed = True
@@ -422,11 +444,11 @@ class PrinterLog(BaseModel):
         }
         schema_extra = {
             "example": {
-                "UUID": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                "Printer": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                "File_Name": "test.gcode",
-                "Timestamp": "2021-01-01 00:00:00",
-                "Printer_Data": "{'test': 'test'}"
+                "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "printer": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "file_name": "test.gcode",
+                "timestamp": "2021-01-01 00:00:00",
+                "printer_Data": "{'test': 'test'}"
             }
         }
 
@@ -434,7 +456,7 @@ class PrinterLog(BaseModel):
 '''
 API Keys class is used to store information about the API keys.
 The following fields are stored:
-- UUID: The UUID of the API key
+- uuid: The uuid of the API key
 - Name: The name of the API key
 - Key: The API key
 - Scope: The scope of the API key. Scopes can be:
@@ -447,11 +469,11 @@ The following fields are stored:
 '''
 
 class APIKeys(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id")
-    UUID: str
-    Name: str
-    Key: str
-    Scope: str
+    _id: Optional[PyObjectId] = Field(alias="_id")
+    uuid: str
+    name: str
+    key: str
+    scope: str
 
     class Config:
         arbitrary_types_allowed = True
@@ -460,9 +482,9 @@ class APIKeys(BaseModel):
         }
         schema_extra = {
             "example": {
-                "UUID": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                "Name": "API Key",
-                "Key": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                "Scope": "admin"
+                "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "name": "API Key",
+                "key": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "scope": "admin"
             }
         }

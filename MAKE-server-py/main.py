@@ -1,37 +1,15 @@
-import sys
-
-from typing import Union
 from fastapi import FastAPI
-from pydantic import BaseModel
 
 import asyncio
-import motor.motor_asyncio
 import uvicorn
 import logging
+import sys
 
 # Import the database schema
 from db_schema import *
 
 # Import config file
 from config import *
-
-class MongoDB():
-    def __init__(self):
-        self.client = motor.motor_asyncio.AsyncIOMotorClient(
-            "mongodb://localhost:27017")
-        self.db = self.client[DB_NAME]
-
-    def __del__(self):
-        self.client.close()
-
-    async def get_collection(self, name: str) -> Union[motor.motor_asyncio.AsyncIOMotorCollection, None]:
-        # Get a collection from the database
-        # Returns None if the collection does not exist
-        collections = await self.db.list_collection_names()
-        if name in collections:
-            return self.db[name]
-        else:
-            return None
 
 # Import routes preventing circular import
 from routes.routes_inventory import inventory_router
@@ -46,10 +24,6 @@ SSL_CERT_PRIVKEY = "/etc/letsencrypt/live/make.hmc.edu/privkey.pem"
 SSL_CERT_PERMKEY = "/etc/letsencrypt/live/make.hmc.edu/fullchain.pem"
 
 app = FastAPI()
-
-# Print total routes in each router
-print(f"Total routes in inventory router: {len(inventory_router.routes)}")
-print(f"Total routes in user router: {len(user_router.routes)}")
 
 app.include_router(inventory_router)
 app.include_router(user_router)
@@ -88,7 +62,6 @@ class BackgroundRunner:
 
 
 runner = BackgroundRunner()
-
 
 @app.on_event('startup')
 async def app_startup():

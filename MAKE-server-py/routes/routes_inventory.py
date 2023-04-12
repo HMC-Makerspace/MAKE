@@ -1,9 +1,8 @@
 import logging
 from routes.utilities import validate_api_key
-from config import *
 from db_schema import *
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 inventory_router = APIRouter(
     prefix="/api/v2/inventory",
@@ -11,7 +10,6 @@ inventory_router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-from main import MongoDB
 
 @inventory_router.get("/get_inventory")
 async def route_get_inventory():
@@ -43,6 +41,11 @@ async def route_get_inventory_item(item_uuid: str):
     # Get the inventory item
     inventory_item = await collection.find_one({"UUID": item_uuid})
 
+    if inventory_item is None:
+        # The inventory item does not exist
+        # Return error
+        raise HTTPException(status_code=404, detail="Inventory item does not exist")
+
     # Return the inventory item
     return inventory_item
 
@@ -63,13 +66,12 @@ async def route_create_inventory_item(item: InventoryItem):
     if check is not None:
         # The inventory item already exists
         # Return error
-        return {"error": "Inventory item already exists"}
+        raise HTTPException(status_code=409, detail="Inventory item already exists")
 
     # Create the inventory item
     await collection.insert_one(item.dict())
 
-    # Return the inventory item
-    return {"success": "Inventory item created"}
+    return
 
 
 @inventory_router.post("/update_inventory_item")
@@ -88,13 +90,13 @@ async def route_update_inventory_item(item: InventoryItem):
     if check is None:
         # The inventory item does not exist
         # Return error
-        return {"error": "Inventory item does not exist"}
+        raise HTTPException(status_code=404, detail="Inventory item does not exist")
 
     # Update the inventory item
     await collection.replace_one({"UUID": item.UUID}, item.dict())
 
     # Return the inventory item
-    return {"success": "Inventory item updated"}
+    return
 
 
 @inventory_router.post("/delete_inventory_item")
@@ -113,13 +115,13 @@ async def route_delete_inventory_item(item_uuid: str):
     if check is None:
         # The inventory item does not exist
         # Return error
-        return {"error": "Inventory item does not exist"}
-
+        raise HTTPException(status_code=404, detail="Inventory item does not exist")
+    
     # Delete the inventory item
     await collection.delete_one({"UUID": item_uuid})
 
     # Return the inventory item
-    return {"success": "Inventory item deleted"}
+    return
 
 
 @inventory_router.get("/search/{search_query}")

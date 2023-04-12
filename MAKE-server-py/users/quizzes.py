@@ -1,8 +1,9 @@
 import csv
 from datetime import datetime
 import logging
+from typing import List
 import aiohttp
-from main import MongoDB
+from db_schema import MongoDB, QuizResponse
 from config import *
 
 BASE_QUIZ_URL: str = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyOdR5ZzocTVLi02rPVQPVwoGyuPrGmULHznFB66pDnqsWrCWVTi5JM5KCbBn8oMVLa-vwIS3RvK6z/pub?gid="
@@ -70,25 +71,23 @@ async def get_quiz_results(quiz_id):
 
             # Convert the timestamp strings into datetime objects
             for quiz_result in quiz_results:
-                quiz_response = {
-                    "GID": quiz_id,
-                }
 
                 cx_id = process_cx_id(quiz_result[3])
                 email = process_email(quiz_result[4], cx_id)
 
-                # Use QuizResponse class as a model
-                quiz_response["Timestamp"] = datetime.strptime(
-                    quiz_result[0], "%m/%d/%Y %H:%M:%S")
-                quiz_response["Score"] = quiz_result[1]
-                quiz_response["Name"] = quiz_result[2]
-                quiz_response["cx_id"] = cx_id
-                quiz_response["Email"] = email
-                quiz_response["Passed"] = determine_if_passed(
-                    quiz_response["Score"])
+                quiz_response = QuizResponse(
+                    gid=quiz_id,
+                    timestamp=datetime.strptime(
+                        quiz_result[0], "%m/%d/%Y %H:%M:%S").timestamp(),
+                    score=quiz_result[1],
+                    name=quiz_result[2],
+                    cx_id=cx_id,
+                    email=email,
+                    passed=determine_if_passed(quiz_result[1])
+                )
 
                 # Add the quiz response to the list of quiz responses
-                quiz_responses.append(quiz_response.copy())
+                quiz_responses.append(quiz_response)
 
     # Return the quiz results
     return quiz_responses
@@ -232,7 +231,7 @@ def determine_if_passed(score):
         return False
 
 
-async def update_quiz_results(quiz_id, quiz_results):
+async def update_quiz_results(quiz_id: str, quiz_results: List[QuizResponse]):
     # Update the quiz results in the database
     # Returns the number of quiz results that were inserted into the database
     db = MongoDB()
@@ -241,24 +240,26 @@ async def update_quiz_results(quiz_id, quiz_results):
     collection = await db.get_collection("quizzes")
 
     # Get most recent timestamp in database
-    most_recent_timestamp = await collection.find_one({"GID": quiz_id}, sort=[("Timestamp", -1)])
+    most_recent_timestamp = await collection.find_one({"gid": quiz_id}, sort=[("timestamp", -1)])
 
     if most_recent_timestamp is None:
         # There are no quiz results in the database
-        most_recent_timestamp = datetime(1970, 1, 1)
+        most_recent_timestamp = 0
     else:
         # Get the most recent timestamp
-        most_recent_timestamp = most_recent_timestamp["Timestamp"]
+        most_recent_timestamp = most_recent_timestamp["timestamp"]
 
     # Remove all quiz results in quiz_results that are older than the most recent timestamp
-    quiz_results = [
-        quiz_result for quiz_result in quiz_results if quiz_result["Timestamp"] > most_recent_timestamp]
+    quiz_results = [quiz_result for quiz_result in quiz_results if quiz_result.timestamp > most_recent_timestamp]
 
     if len(quiz_results) == 0:
         # There are no quiz results to update
         return 0
 
-    # Insert the quiz results into the database
+    # Convert all quiz results to a list of dictionaries
+    quiz_results = [quiz_result.dict() for quiz_result in quiz_results]
+    
+    # Insert all quiz results into the database
     await collection.insert_many(quiz_results)
 
     # Return length of quiz results
@@ -282,17 +283,17 @@ async def fix_broken_cx_ids():
     # and with emails that don't end in cgu.edu or kgi.edu
     # using $lt and $gt to get all quiz results with cx_ids that are not 8 digits
     broken_quiz_results = await collection.find(
-        {"$or": [{"cx_id": {"$lt": 10000000}}, {"cx_id": {"$gt": 100000000}}], "Email": {"$not": {"$regex": ".*cgu.edu|kgi.edu"}}}).to_list(None)
+        {"$or": [{"cx_id": {"$lt": 10000000}}, {"cx_id": {"$gt": 100000000}}], "email": {"$not": {"$regex": ".*cgu.edu|kgi.edu"}}}).to_list(None)
 
     logging.info(f"Found {len(broken_quiz_results)} broken cx_ids")
 
     for quiz_result in broken_quiz_results:
-        logging.info(f"Attemping to fix broken cx_id for {quiz_result['Email']}")
+        logging.info(f"Attemping to fix broken cx_id for {quiz_result['email']}")
         # Get the user's email address
-        email = quiz_result["Email"]
+        email = quiz_result["email"]
 
         # Get the user's cx_id
-        other_quiz_results = await collection.find({"Email": email}).to_list(None)
+        other_quiz_results = await collection.find({"email": email}).to_list(None)
 
         fixed = False
 

@@ -2,7 +2,7 @@ from datetime import datetime
 import uuid
 import logging
 from fuzzywuzzy import fuzz
-from main import MongoDB
+from db_schema import MongoDB, User
 from config import *
 
 
@@ -33,7 +33,7 @@ async def create_update_users_from_quizzes():
 
     for quiz_result in quiz_results:
         email_search = await users_collection.find_one(
-            {"Email": quiz_result["Email"]})
+            {"email": quiz_result["email"]})
         cx_id_search = await users_collection.find_one(
             {"cx_id": quiz_result["cx_id"]})
 
@@ -43,26 +43,25 @@ async def create_update_users_from_quizzes():
         quizzes_to_set = None
 
         # Check if the user passed the quiz
-        if quiz_result["Passed"]:
-            quizzes.append(quiz_result["GID"])
+        if quiz_result["passed"]:
+            quizzes.append(quiz_result["gid"])
 
         if email_search is None and cx_id_search is None:
             # The user does not exist in the database
             # Create the user
 
-            user = {
-                # Generate v4 UUID
-                "UUID": uuid.uuid4().hex,
-                "Email": quiz_result["Email"],
-                "cx_id": quiz_result["cx_id"],
-                "Name": quiz_result["Name"],
-                "Role": "user",
-                "Shifts": [],
-                "Quizzes": quizzes,
-            }
+            user = User(
+                uuid=uuid.uuid4().hex,
+                email=quiz_result["email"],
+                cx_id=quiz_result["cx_id"],
+                name=quiz_result["name"],
+                role="user",
+                quizzes=quizzes,
+                shifts=[],
+            )
 
             # Insert the user into the database
-            await users_collection.insert_one(user)
+            await users_collection.insert_one(user.dict())
 
             # Increment the number of users created
             num_users_created += 1
@@ -71,19 +70,19 @@ async def create_update_users_from_quizzes():
             # Case 1: The user exists in the database, but the cx_id is incorrect
             # We can almost always trust the email, so we just update quizzes from the quiz result
 
-            quizzes_to_set = list(set(email_search["Quizzes"] + quizzes))
+            quizzes_to_set = list(set(email_search["quizzes"] + quizzes))
 
-            user_uuid = email_search["UUID"]
+            user_uuid = email_search["uuid"]
 
         elif email_search is None and cx_id_search is not None:
             # Case 2: we found the user by cx_id, but the email is incorrect
             # Fuzzy match the emails to see if they are close enough to be the same person
 
             # Get the email from the quiz result
-            email = quiz_result["Email"]
+            email = quiz_result["email"]
 
             # Get the email from the cx_id search
-            cx_id_email = cx_id_search["Email"]
+            cx_id_email = cx_id_search["email"]
 
             # Check if the emails are close enough to be the same person
             # by fuzzy matching the emails using fuzzywuzzy
@@ -93,19 +92,19 @@ async def create_update_users_from_quizzes():
 
             # If the ratio is greater than 90, we can assume that the emails are the same person
             if ratio > 90:
-                quizzes_to_set = list(set(cx_id_search["Quizzes"] + quizzes))
+                quizzes_to_set = list(set(cx_id_search["quizzes"] + quizzes))
 
-                user_uuid = cx_id_search["UUID"]
+                user_uuid = cx_id_search["uuid"]
 
         elif email_search is not None and cx_id_search is not None:
             # Case 3: both email and cx_id have returned results
 
-            if email_search["UUID"] == cx_id_search["UUID"]:
+            if email_search["uuid"] == cx_id_search["uuid"]:
                 # Case 3.1: most common case, the email and cx_id are the same person
                 # just update the quizzes
-                quizzes_to_set = list(set(cx_id_search["Quizzes"] + quizzes))
+                quizzes_to_set = list(set(cx_id_search["quizzes"] + quizzes))
 
-                user_uuid = cx_id_search["UUID"]
+                user_uuid = cx_id_search["uuid"]
 
             else:
                 # Case 3.2: the email and cx_id are different people....
@@ -115,7 +114,7 @@ async def create_update_users_from_quizzes():
 
                 # Get all quizzes by email
                 email_quizzes = await collection.find(
-                    {"Email": email_search["Email"]}).to_list(None)
+                    {"email": email_search["email"]}).to_list(None)
                 
                 # Get all quizzes by cx_id
                 cx_id_quizzes = await collection.find(
@@ -126,14 +125,14 @@ async def create_update_users_from_quizzes():
                 # to update the user
                 if len(email_quizzes) > len(cx_id_quizzes):
                     # Update the user with the email
-                    quizzes_to_set = list(set(email_search["Quizzes"] + quizzes))
+                    quizzes_to_set = list(set(email_search["quizzes"] + quizzes))
 
-                    user_uuid = email_search["UUID"]
+                    user_uuid = email_search["uuid"]
                 else:
                     # Update the user with the cx_id
-                    quizzes_to_set = list(set(cx_id_search["Quizzes"] + quizzes))
+                    quizzes_to_set = list(set(cx_id_search["quizzes"] + quizzes))
 
-                    user_uuid = cx_id_search["UUID"]
+                    user_uuid = cx_id_search["uuid"]
                 
                 
 
@@ -143,8 +142,8 @@ async def create_update_users_from_quizzes():
         if user_uuid is not None:
             # Update the user in the database
             await users_collection.update_one(
-                {"UUID": user_uuid},
-                {"$set": {"Quizzes": quizzes_to_set}}
+                {"uuid": user_uuid},
+                {"$set": {"quizzes": quizzes_to_set}}
             )
 
             # Increment the number of users updated

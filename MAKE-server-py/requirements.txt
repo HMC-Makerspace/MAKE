@@ -3,3 +3,4 @@ uvicorn==0.21.
 motor==3.1.2
 aiohttp==3.8.4
 fuzzywuzzy==0.18.0
+levenshtein==0.20.9

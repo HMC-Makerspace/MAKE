@@ -1,2 +1,2 @@
 import logging
-from main import MongoDB
+from db_schema import MongoDB, InventoryItem
