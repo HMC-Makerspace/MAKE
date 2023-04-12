@@ -36,11 +36,11 @@ async def scrape_quiz_results():
         quiz_results = await get_quiz_results(quiz_id)
         # Update the database
         new_responses = await update_quiz_results(quiz_id, quiz_results)
-        
+
         # Print log message
         logging.info(
             f"Scraped {new_responses} quiz results for {quiz_name} quiz for {len(quiz_results)} total responses.")
-    
+
     # Attempt to fix broken cx ids by cross-referencing email addresses
     await fix_broken_cx_ids()
 
@@ -162,7 +162,7 @@ def get_email_domain(cx_id):
             school = UNDERGRAD_SCHOOL_EMAIL_DOMAINS[first_digit]
         else:
             school = None
-        
+
         return school
     except Exception as e:
         logging.warn(f"Error getting email domain for {cx_id}: {e}")
@@ -184,9 +184,12 @@ def process_email(email, cx_id):
     if email is None:
         return ""
 
+    if "@" not in email :
+        return email
+
     # Remove all characters after the "@" symbol
     start = email[:email.find("@")]
-    ending = email[email.find("@"):]
+    ending = email[email.find("@") + 1:]
 
     # If the user used a gmail or other email address, we cannot determine their school
     other_domains = ["gmail", "outlook", "yahoo", "aol", "icloud", "hotmail",
@@ -195,6 +198,10 @@ def process_email(email, cx_id):
     if any(domain in ending for domain in other_domains):
         # We cannot determine the user's school
         # Return the original email address
+        return email
+
+    # If it's in UNDERGRAD_SCHOOL_EMAIL_DOMAINS or GRAD_SCHOOL_EMAIL_DOMAINS, just return the original email address
+    if ending in UNDERGRAD_SCHOOL_EMAIL_DOMAINS.values() or ending in GRAD_SCHOOL_EMAIL_DOMAINS.values():
         return email
 
     # Get the user's school
@@ -250,7 +257,8 @@ async def update_quiz_results(quiz_id: str, quiz_results: List[QuizResponse]):
         most_recent_timestamp = most_recent_timestamp["timestamp"]
 
     # Remove all quiz results in quiz_results that are older than the most recent timestamp
-    quiz_results = [quiz_result for quiz_result in quiz_results if quiz_result.timestamp > most_recent_timestamp]
+    quiz_results = [
+        quiz_result for quiz_result in quiz_results if quiz_result.timestamp > most_recent_timestamp]
 
     if len(quiz_results) == 0:
         # There are no quiz results to update
@@ -258,12 +266,13 @@ async def update_quiz_results(quiz_id: str, quiz_results: List[QuizResponse]):
 
     # Convert all quiz results to a list of dictionaries
     quiz_results = [quiz_result.dict() for quiz_result in quiz_results]
-    
+
     # Insert all quiz results into the database
     await collection.insert_many(quiz_results)
 
     # Return length of quiz results
     return len(quiz_results)
+
 
 async def fix_broken_cx_ids():
     '''
@@ -288,7 +297,8 @@ async def fix_broken_cx_ids():
     logging.info(f"Found {len(broken_quiz_results)} broken cx_ids")
 
     for quiz_result in broken_quiz_results:
-        logging.info(f"Attemping to fix broken cx_id for {quiz_result['email']}")
+        logging.info(
+            f"Attemping to fix broken cx_id for {quiz_result['email']}")
         # Get the user's email address
         email = quiz_result["email"]
 
@@ -309,20 +319,23 @@ async def fix_broken_cx_ids():
                 fixed = True
 
                 # Logging
-                logging.info(f"Updated cx_id for {email} from {quiz_result['cx_id']} to {cx_id}")
+                logging.info(
+                    f"Updated cx_id for {email} from {quiz_result['cx_id']} to {cx_id}")
 
                 break
-        
+
         if not fixed and str(cx_id)[-1] == "1" and len(str(cx_id)) == 9:
             # The user's cx_id is still broken
             # and the user has a cx_id that ends in 1
             # This means they are stupid and put in their card
             # number without a dash.
             # We can fix this by removing the last digit
-            logging.info(f"Fixing cx_id for {email} from {quiz_result['cx_id']} to {str(cx_id)[:-1]}")
+            logging.info(
+                f"Fixing cx_id for {email} from {quiz_result['cx_id']} to {str(cx_id)[:-1]}")
 
             # Update the user's cx_id
             await collection.update_one({"_id": quiz_result["_id"]}, {"$set": {"cx_id": int(str(cx_id)[:-1])}})
+
 
 async def get_quiz_results_for_user(user_uuid):
     # Get the quiz results for a user
