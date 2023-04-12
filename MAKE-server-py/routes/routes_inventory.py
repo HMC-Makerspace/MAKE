@@ -1,5 +1,5 @@
 import logging
-from routes.utilities import validate_api_key
+from utilities import validate_api_key
 from db_schema import *
 
 from fastapi import APIRouter, HTTPException
@@ -51,10 +51,17 @@ async def route_get_inventory_item(item_uuid: str):
 
 
 @inventory_router.post("/create_inventory_item")
-async def route_create_inventory_item(item: InventoryItem):
+async def route_create_inventory_item(item: InventoryItem, api_key: str):
     # Create an inventory item
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Creating inventory item...")
+
+    is_valid = await validate_api_key(api_key, "inventory")
+
+    if not is_valid:
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
 
     # Get the inventory collection
     db = MongoDB()
@@ -75,10 +82,17 @@ async def route_create_inventory_item(item: InventoryItem):
 
 
 @inventory_router.post("/update_inventory_item")
-async def route_update_inventory_item(item: InventoryItem):
+async def route_update_inventory_item(item: InventoryItem, api_key: str):
     # Update an inventory item
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Updating inventory item...")
+
+    is_valid = await validate_api_key(api_key, "inventory")
+
+    if not is_valid:
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
 
     # Get the inventory collection
     db = MongoDB()
@@ -100,10 +114,17 @@ async def route_update_inventory_item(item: InventoryItem):
 
 
 @inventory_router.post("/delete_inventory_item")
-async def route_delete_inventory_item(item_uuid: str):
+async def route_delete_inventory_item(item_uuid: str, api_key: str):
     # Delete an inventory item
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Deleting inventory item...")
+
+    is_valid = await validate_api_key(api_key, "inventory")
+
+    if not is_valid:
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
 
     # Get the inventory collection
     db = MongoDB()

@@ -312,7 +312,7 @@ class Checkout(BaseModel):
     checked_out_by: str
     timestamp_out: str
     timestamp_due: str
-    timestamp_in: str
+    timestamp_in: Union[str, None]
 
     class Config:
         arbitrary_types_allowed = True
@@ -353,7 +353,7 @@ class StudentStorage(BaseModel):
     checked_out_by: str
     timestamp: str
     timestamp_due: str
-    timestamp_in: str
+    timestamp_in: Union[str, None]
     renewals_left: int
 
     class Config:

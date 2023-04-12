@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 import asyncio
 import uvicorn
@@ -9,11 +10,16 @@ import sys
 from db_schema import *
 
 # Import config file
-from config import *
+try: 
+    from config import *
+except ImportError:
+    print("Config file not found. Please copy template_config.py file and rename to config.py.")
+    sys.exit()
 
 # Import routes preventing circular import
 from routes.routes_inventory import inventory_router
 from routes.routes_users import user_router
+from routes.routes_checkouts import checkouts_router
 
 # Import all other files
 from users.quizzes import scrape_quiz_results
@@ -55,7 +61,10 @@ app = FastAPI(
 
 app.include_router(inventory_router)
 app.include_router(user_router)
+app.include_router(checkouts_router)
 
+# Mount the static files in html mode
+app.mount("/", StaticFiles(directory="../MAKE-website", html=True), name="static")
 
 async def validate_database_schema(db):
     # Validate the database schema

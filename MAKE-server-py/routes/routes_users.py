@@ -1,5 +1,5 @@
 import logging
-from routes.utilities import validate_api_key
+from utilities import validate_api_key
 from db_schema import *
 
 from fastapi import APIRouter, HTTPException
