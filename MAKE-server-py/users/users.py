@@ -1,7 +1,7 @@
 from datetime import datetime
-import logging
 import uuid
-import fuzzywuzzy
+import logging
+from fuzzywuzzy import fuzz
 from main import MongoDB
 from config import *
 
@@ -9,6 +9,8 @@ from config import *
 async def create_update_users_from_quizzes():
     # Create or update users from quizzes
     # Users often mistype their email address and cx_id when taking a quiz
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Creating/Updating users from quizzes...")
 
     # Get the quizzes collection
     db = MongoDB()
@@ -27,17 +29,17 @@ async def create_update_users_from_quizzes():
 
     # Keep track of the number of users that were created/updated
     num_users_created = 0
-    num_users_updated = 0
+    num_total_updates = 0
 
     for quiz_result in quiz_results:
-        email_search = users_collection.find_one(
+        email_search = await users_collection.find_one(
             {"Email": quiz_result["Email"]})
-        cx_id_search = users_collection.find_one(
+        cx_id_search = await users_collection.find_one(
             {"cx_id": quiz_result["cx_id"]})
 
         quizzes = []
 
-        uuid = None
+        user_uuid = None
         quizzes_to_set = None
 
         # Check if the user passed the quiz
@@ -54,7 +56,7 @@ async def create_update_users_from_quizzes():
                 "Email": quiz_result["Email"],
                 "cx_id": quiz_result["cx_id"],
                 "Name": quiz_result["Name"],
-                "Role": "User",
+                "Role": "user",
                 "Shifts": [],
                 "Quizzes": quizzes,
             }
@@ -71,7 +73,7 @@ async def create_update_users_from_quizzes():
 
             quizzes_to_set = list(set(email_search["Quizzes"] + quizzes))
 
-            uuid = email_search["UUID"]
+            user_uuid = email_search["UUID"]
 
         elif email_search is None and cx_id_search is not None:
             # Case 2: we found the user by cx_id, but the email is incorrect
@@ -87,13 +89,13 @@ async def create_update_users_from_quizzes():
             # by fuzzy matching the emails using fuzzywuzzy
 
             # Get the ratio of similarity between the two emails
-            ratio = fuzzywuzzy.fuzz.ratio(email, cx_id_email)
+            ratio = fuzz.ratio(email, cx_id_email)
 
             # If the ratio is greater than 90, we can assume that the emails are the same person
             if ratio > 90:
                 quizzes_to_set = list(set(cx_id_search["Quizzes"] + quizzes))
 
-                uuid = cx_id_search["UUID"]
+                user_uuid = cx_id_search["UUID"]
 
         elif email_search is not None and cx_id_search is not None:
             # Case 3: both email and cx_id have returned results
@@ -103,7 +105,7 @@ async def create_update_users_from_quizzes():
                 # just update the quizzes
                 quizzes_to_set = list(set(cx_id_search["Quizzes"] + quizzes))
 
-                uuid = cx_id_search["UUID"]
+                user_uuid = cx_id_search["UUID"]
 
             else:
                 # Case 3.2: the email and cx_id are different people....
@@ -120,13 +122,33 @@ async def create_update_users_from_quizzes():
                     {"cx_id": cx_id_search["cx_id"]}).to_list(None)
                 
                 
+                # Whichever one has more quizzes, we will use that
+                # to update the user
+                if len(email_quizzes) > len(cx_id_quizzes):
+                    # Update the user with the email
+                    quizzes_to_set = list(set(email_search["Quizzes"] + quizzes))
+
+                    user_uuid = email_search["UUID"]
+                else:
+                    # Update the user with the cx_id
+                    quizzes_to_set = list(set(cx_id_search["Quizzes"] + quizzes))
+
+                    user_uuid = cx_id_search["UUID"]
+                
+                
 
 
         # If the uuid is not None, we need to update the user
         # with the new set of quizzes
-        if uuid is not None:
+        if user_uuid is not None:
             # Update the user in the database
-            await users_collection.update_one({"UUID": uuid}, {"$set": quizzes_to_set})
+            await users_collection.update_one(
+                {"UUID": user_uuid},
+                {"$set": {"Quizzes": quizzes_to_set}}
+            )
 
             # Increment the number of users updated
-            num_users_updated += 1
+            num_total_updates += 1
+
+    logging.info(f"Created {num_users_created} users")
+    logging.info(f"Updated {num_total_updates} times")

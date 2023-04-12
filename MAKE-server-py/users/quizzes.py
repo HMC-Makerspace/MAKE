@@ -287,7 +287,7 @@ async def fix_broken_cx_ids():
     logging.info(f"Found {len(broken_quiz_results)} broken cx_ids")
 
     for quiz_result in broken_quiz_results:
-        logging.info(f"Fixing broken cx_id for {quiz_result['Email']}")
+        logging.info(f"Attemping to fix broken cx_id for {quiz_result['Email']}")
         # Get the user's email address
         email = quiz_result["Email"]
 
@@ -298,7 +298,6 @@ async def fix_broken_cx_ids():
 
         # Iterate to find most recent quiz result that has a cx_id that is 8 digits
         for other_quiz_result in other_quiz_results:
-            logging.info(f"Checking {other_quiz_result['Timestamp']} with cx_id {other_quiz_result['cx_id']}")
             cx_id = other_quiz_result["cx_id"]
 
             if len(str(cx_id)) == 8:

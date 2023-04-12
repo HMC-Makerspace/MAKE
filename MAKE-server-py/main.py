@@ -15,24 +15,6 @@ from db_schema import *
 # Import config file
 from config import *
 
-# Import routes
-import routes
-from routes.routes_inventory import *
-
-# Import all other files
-import users
-from users.quizzes import *
-
-import inventory
-from inventory.inventory import *
-from inventory.checkouts import *
-
-SSL_CERT_PRIVKEY = "/etc/letsencrypt/live/make.hmc.edu/privkey.pem"
-SSL_CERT_PERMKEY = "/etc/letsencrypt/live/make.hmc.edu/fullchain.pem"
-
-app = FastAPI()
-
-
 class MongoDB():
     def __init__(self):
         self.client = motor.motor_asyncio.AsyncIOMotorClient(
@@ -51,6 +33,27 @@ class MongoDB():
         else:
             return None
 
+# Import routes preventing circular import
+from routes.routes_inventory import inventory_router
+from routes.routes_users import user_router
+
+# Import all other files
+from users.quizzes import scrape_quiz_results
+from users.users import create_update_users_from_quizzes
+
+
+SSL_CERT_PRIVKEY = "/etc/letsencrypt/live/make.hmc.edu/privkey.pem"
+SSL_CERT_PERMKEY = "/etc/letsencrypt/live/make.hmc.edu/fullchain.pem"
+
+app = FastAPI()
+
+# Print total routes in each router
+print(f"Total routes in inventory router: {len(inventory_router.routes)}")
+print(f"Total routes in user router: {len(user_router.routes)}")
+
+app.include_router(inventory_router)
+app.include_router(user_router)
+
 
 async def validate_database_schema(db):
     # Validate the database schema
@@ -65,6 +68,31 @@ async def validate_database_schema(db):
             await db.create_collection(name)
             # Print log message
             logging.info(f"Created collection {name} in database {db.name}")
+
+
+class BackgroundRunner:
+    def __init__(self):
+        return
+
+    async def run_main(self):
+        # Wait 10 seconds before starting the background tasks
+        await asyncio.sleep(1)
+        while True:
+            # Scrape quiz results
+            await scrape_quiz_results()
+
+            # Create/update users from quizzes
+            await create_update_users_from_quizzes()
+
+            await asyncio.sleep(60)
+
+
+runner = BackgroundRunner()
+
+
+@app.on_event('startup')
+async def app_startup():
+    asyncio.create_task(runner.run_main())
 
 if __name__ == "__main__":
     # Setup logging to display everything to the console
@@ -96,24 +124,3 @@ if __name__ == "__main__":
         logging.info("Started MAKE in debug mode!")
         uvicorn.run("main:app", host="127.0.0.1", port=5000,
                     log_level="info", reload=True)
-
-
-class BackgroundRunner:
-    def __init__(self):
-        return
-
-    async def run_main(self):
-        # Wait 10 seconds before starting the background tasks
-        await asyncio.sleep(1)
-        while True:
-            # Scrape quiz results every 60 seconds
-            await users.quizzes.scrape_quiz_results()
-            await asyncio.sleep(60)
-
-
-runner = BackgroundRunner()
-
-
-@app.on_event('startup')
-async def app_startup():
-    asyncio.create_task(runner.run_main())

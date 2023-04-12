@@ -439,12 +439,12 @@ The following fields are stored:
 - Key: The API key
 - Scope: The scope of the API key. Scopes can be:
     - admin: Can access all endpoints
+    - users: Can access user endpoints
     - checkout: Can access checkout endpoints
     - studentstorage: Can access student storage endpoints
     - steward: Can access steward-level
     - printer: Can access printer endpoints
 '''
-
 
 class APIKeys(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
