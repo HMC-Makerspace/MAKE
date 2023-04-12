@@ -23,7 +23,35 @@ from users.users import create_update_users_from_quizzes
 SSL_CERT_PRIVKEY = "/etc/letsencrypt/live/make.hmc.edu/privkey.pem"
 SSL_CERT_PERMKEY = "/etc/letsencrypt/live/make.hmc.edu/fullchain.pem"
 
-app = FastAPI()
+app = FastAPI(
+    title="MAKE API V2",
+    description="""
+    The API for the MAKE system. 
+    V2 is a complete rewrite of the API in FastAPI (Python), 
+    and is not backwards compatible with V1, 
+    which was written in Rust.
+
+    The API can be accessed at https://make.hmc.edu/api/v2,
+    or 127.0.0.1:5000/api/v2 if running locally.
+
+    The backend database is MongoDB, and the database 
+    schema is defined in db_schema.py.
+    """,
+    version="2.0.0",
+    docs_url="/api/v2/docs",
+    redoc_url="/api/v2/redoc",
+    terms_of_service="https://make.hmc.edu/terms",
+    contact={
+        "name": "HMC Makerspace Management",
+        "email": "makerspace-management-l@g.hmc.edu",
+        "url": "https://make.hmc.edu",
+    },
+    license_info={
+        "name": "GNU General Public License v3.0",
+        "url": "https://www.gnu.org/licenses/gpl-3.0.en.html",
+    },
+
+)
 
 app.include_router(inventory_router)
 app.include_router(user_router)
