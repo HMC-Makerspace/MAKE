@@ -7,7 +7,7 @@ const search_options = {
 }
 
 async function fetchInventory(kiosk_mode = false) {
-    const response = await fetch(`${API}/inventory`);
+    const response = await fetch(`${API}/inventory/get_inventory`);
 
     if (response.status == 200) {
         const inventory = await response.json();
@@ -387,10 +387,6 @@ async function submitRestockNotice() {
         return;
     }
 
-    let response;
-
-    let api_key_exists = typeof api_key !== "undefined";
-
     const body = JSON.stringify({
         name: name,
         current_quantity: current_quantity,
@@ -401,27 +397,16 @@ async function submitRestockNotice() {
         authorized: api_key_exists,
     });
 
-    if (api_key_exists) {
-        response = await fetch(`${API}/inventory/add_restock_notice/${api_key}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: body,
-        });
-    } else {
-        response = await fetch(`${API}/inventory/add_restock_notice_user`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: body,
-        });
-    }
-
+    const response = await fetch(`${API}/inventory/add_restock_notice`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: body,
+    });
     
 
-    if (response.status === 201) {
+    if (response.status >= 200 && response.status < 300) {
         for (let input of inputs) {
             input.classList.add("success")
         }

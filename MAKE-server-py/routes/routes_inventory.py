@@ -2,7 +2,7 @@ import logging
 from utilities import validate_api_key
 from db_schema import *
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 
 inventory_router = APIRouter(
     prefix="/api/v2/inventory",
@@ -24,6 +24,8 @@ async def route_get_inventory():
     # Get all inventory items
     inventory_items = await collection.find().to_list(None)
 
+    inventory_items = [InventoryItem(**item) for item in inventory_items]
+    
     # Return the inventory items
     return inventory_items
 
@@ -44,19 +46,24 @@ async def route_get_inventory_item(item_uuid: str):
     if inventory_item is None:
         # The inventory item does not exist
         # Return error
-        raise HTTPException(status_code=404, detail="Inventory item does not exist")
+        raise HTTPException(
+            status_code=404, detail="Inventory item does not exist")
 
     # Return the inventory item
     return inventory_item
 
 
 @inventory_router.post("/create_inventory_item")
-async def route_create_inventory_item(item: InventoryItem, api_key: str):
+async def route_create_inventory_item(request: Request):
     # Create an inventory item
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Creating inventory item...")
+    item = InventoryItem(**await request.json())
 
-    is_valid = await validate_api_key(api_key, "inventory")
+    api_key = request.headers["api-key"]
+    db = MongoDB()
+
+    is_valid = await validate_api_key(db, api_key, "inventory")
 
     if not is_valid:
         # The API key is invalid
@@ -64,7 +71,6 @@ async def route_create_inventory_item(item: InventoryItem, api_key: str):
         raise HTTPException(status_code=401, detail="Invalid API key")
 
     # Get the inventory collection
-    db = MongoDB()
     collection = await db.get_collection("inventory")
 
     # Check if the inventory item already exists
@@ -73,7 +79,8 @@ async def route_create_inventory_item(item: InventoryItem, api_key: str):
     if check is not None:
         # The inventory item already exists
         # Return error
-        raise HTTPException(status_code=409, detail="Inventory item already exists")
+        raise HTTPException(
+            status_code=409, detail="Inventory item already exists")
 
     # Create the inventory item
     await collection.insert_one(item.dict())
@@ -82,12 +89,16 @@ async def route_create_inventory_item(item: InventoryItem, api_key: str):
 
 
 @inventory_router.post("/update_inventory_item")
-async def route_update_inventory_item(item: InventoryItem, api_key: str):
+async def route_update_inventory_item(request: Request):
     # Update an inventory item
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Updating inventory item...")
+    item = InventoryItem(**await request.json())
 
-    is_valid = await validate_api_key(api_key, "inventory")
+    api_key = request.headers["api-key"]
+    db = MongoDB()
+
+    is_valid = await validate_api_key(db, api_key, "inventory")
 
     if not is_valid:
         # The API key is invalid
@@ -95,7 +106,6 @@ async def route_update_inventory_item(item: InventoryItem, api_key: str):
         raise HTTPException(status_code=401, detail="Invalid API key")
 
     # Get the inventory collection
-    db = MongoDB()
     collection = await db.get_collection("inventory")
 
     # Check if the inventory item already exists
@@ -104,7 +114,8 @@ async def route_update_inventory_item(item: InventoryItem, api_key: str):
     if check is None:
         # The inventory item does not exist
         # Return error
-        raise HTTPException(status_code=404, detail="Inventory item does not exist")
+        raise HTTPException(
+            status_code=404, detail="Inventory item does not exist")
 
     # Update the inventory item
     await collection.replace_one({"UUID": item.UUID}, item.dict())
@@ -114,12 +125,15 @@ async def route_update_inventory_item(item: InventoryItem, api_key: str):
 
 
 @inventory_router.post("/delete_inventory_item")
-async def route_delete_inventory_item(item_uuid: str, api_key: str):
+async def route_delete_inventory_item(request: Request):
     # Delete an inventory item
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Deleting inventory item...")
+    item_uuid = await request.json()
 
-    is_valid = await validate_api_key(api_key, "inventory")
+    db = MongoDB()
+    api_key = request.headers["api-key"]
+    is_valid = await validate_api_key(db, api_key, "inventory")
 
     if not is_valid:
         # The API key is invalid
@@ -127,7 +141,6 @@ async def route_delete_inventory_item(item_uuid: str, api_key: str):
         raise HTTPException(status_code=401, detail="Invalid API key")
 
     # Get the inventory collection
-    db = MongoDB()
     collection = await db.get_collection("inventory")
 
     # Check if the inventory item already exists
@@ -136,8 +149,9 @@ async def route_delete_inventory_item(item_uuid: str, api_key: str):
     if check is None:
         # The inventory item does not exist
         # Return error
-        raise HTTPException(status_code=404, detail="Inventory item does not exist")
-    
+        raise HTTPException(
+            status_code=404, detail="Inventory item does not exist")
+
     # Delete the inventory item
     await collection.delete_one({"UUID": item_uuid})
 
@@ -161,3 +175,19 @@ async def route_search_inventory(search_query: str):
 
     # Return the search results
     return search_results
+
+
+@inventory_router.get("/add_restock_notice")
+async def route_add_restock_notice(request: Request):
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Adding restock notice...")
+    restock = RestockRequest(** await request.json())
+
+    # Get the restock collection
+    db = MongoDB()
+    collection = await db.get_collection("restock_requests")
+
+    # Add to the restock collection
+    await collection.insert_one(restock.dict())
+
+    return

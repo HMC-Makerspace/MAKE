@@ -1,13 +1,13 @@
 const Toast = Swal.mixin({
-	toast: true,
-	position: 'bottom',
-	showConfirmButton: false,
-	timer: 3000,
-	timerProgressBar: true,
-	didOpen: (toast) => {
-		toast.addEventListener('mouseenter', Swal.stopTimer)
-		toast.addEventListener('mouseleave', Swal.resumeTimer)
-	}
+    toast: true,
+    position: 'bottom',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
 })
 
 const school_names = {
@@ -109,14 +109,14 @@ function secondsToHoursMinutes(seconds) {
 }
 
 function toggle_theme() {
-	if (document.documentElement.getAttribute("data-theme") != "dark") {
-		document.documentElement.setAttribute('data-theme', 'dark');
-		localStorage.setItem("theme", "dark");
-	}
-	else {
-		document.documentElement.setAttribute('data-theme', 'light');
-		localStorage.setItem("theme", "light");
-	}
+    if (document.documentElement.getAttribute("data-theme") != "dark") {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem("theme", "dark");
+    }
+    else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem("theme", "light");
+    }
 }
 
 async function renderMD(file_path, title) {
@@ -154,7 +154,13 @@ async function renderMD(file_path, title) {
 }
 
 async function fetchUsers() {
-    const response = await fetch(`${API}/users/all/${api_key}`);
+    const response = await fetch(`${API}/users/get_users`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "api-key": api_key,
+        },
+    });
     const users = await response.json();
 
     if (users === null) {

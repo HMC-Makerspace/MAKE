@@ -100,19 +100,19 @@ class InventoryItem(BaseModel):
     _id: Optional[PyObjectId] = Field(alias="_id")
     uuid: str
     name: str
-    role: str
+    role: Union[str, None]
     # Quantity can be a number or a string
-    quantity: str
-    location_room: str
-    location_specific: str
-    reorder_url: str
-    specific_name: str
-    serial_number: str
-    brand: str
-    model_number: str
-    qr_code: str
-    kit_ref: str
-    kit_contents: List[str]
+    quantity: Union[str, None]
+    location_room: Union[str, None]
+    location_specific: Union[str, None]
+    reorder_url: Union[str, None]
+    specific_name: Union[str, None]
+    serial_number: Union[str, None]
+    brand: Union[str, None]
+    model_number: Union[str, None]
+    qr_code: Union[str, None]
+    kit_ref: Union[str, None]
+    kit_contents: Union[List[str], None]
 
     class Config:
         arbitrary_types_allowed = True
@@ -197,10 +197,11 @@ The following fields are stored:
 class RestockRequest(BaseModel):
     _id: Optional[PyObjectId] = Field(alias="_id")
     uuid: str
-    Items_Requested: List[str]
-    Requested_By: str
-    Requested_By_Email: str
-    Sent: bool
+    items_requested: str
+    requested_by: str
+    requested_by_email: str
+    timestamp_sent: int
+    timestamp_completed: Union[int, None]
 
     class Config:
         arbitrary_types_allowed = True
@@ -213,7 +214,8 @@ class RestockRequest(BaseModel):
                 "items_requested": ["Soldering Iron"],
                 "requested_by": "John Doe",
                 "requested_by_email": "john@g.hmc.edu",
-                "sent": False
+                "timestamp_sent": 1610000000,
+                "timestamp_completed": None
             }
         }
 
@@ -468,7 +470,7 @@ The following fields are stored:
     - printer: Can access printer endpoints
 '''
 
-class APIKeys(BaseModel):
+class APIKey(BaseModel):
     _id: Optional[PyObjectId] = Field(alias="_id")
     uuid: str
     name: str

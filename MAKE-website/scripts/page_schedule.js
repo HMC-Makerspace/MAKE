@@ -1,5 +1,5 @@
 async function fetchSchedule() {
-    const response = await fetch(`${API}/schedule`);
+    const response = await fetch(`${API}/schedule/get_schedule`);
     if (response.status == 200) {
         const schedule = await response.json();
         

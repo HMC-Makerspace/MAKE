@@ -10,7 +10,7 @@ async function fetchStatus() {
     let response;
 
     try {
-        response = await fetch(`${API}/status`);
+        response = await fetch(`${API}/misc/status`);
         let end = new Date().getTime();
         if (response.status == 200) {
             const status = await response.json();

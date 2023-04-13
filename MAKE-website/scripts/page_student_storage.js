@@ -1,6 +1,6 @@
 async function fetchStudentStorage(kiosk_mode=false) {
     if (kiosk_mode) {
-        const response = await fetch(`${API}/student_storage/all/${api_key}`);
+        const response = await fetch(`${API}/student_storage/get_student_storage`);
 
         if (response.status == 200) {
             const student_storage = await response.json();
@@ -16,7 +16,7 @@ async function fetchStudentStorage(kiosk_mode=false) {
     }
 
     if (state.college_id !== null) {
-        const response = await fetch(`${API}/student_storage/user/${state.college_id}`);
+        const response = await fetch(`${API}/student_storage/get_for_user/${state.uuid}`);
 
         if (response.status == 200) {
             const student_storage = await response.json();
@@ -48,8 +48,12 @@ function renderStudentStorage(kiosk_mode=false) {
 }
 
 async function releaseStudentStorage(slot_id) {
-    const response = await fetch(`${API}/student_storage/release/${state.college_id}/${slot_id}`, {
-        method: "POST"
+    const response = await fetch(`${API}/student_storage/release_slot`, {
+        method: "POST",
+        body: JSON.stringify({
+            uuid: state.uuid,
+            slot_id: slot_id
+        })
     });
 
     if (response.status == 201) {
@@ -60,8 +64,12 @@ async function releaseStudentStorage(slot_id) {
 }
 
 async function renewStudentStorage(slot_id) {
-    const response = await fetch(`${API}/student_storage/renew/${state.college_id}/${slot_id}`, {
-        method: "POST"
+    const response = await fetch(`${API}/student_storage/renew_slot`, {
+        method: "POST",
+        body: JSON.stringify({
+            uuid: state.uuid,
+            slot_id: slot_id
+        })
     });
 
     if (response.status == 201) {

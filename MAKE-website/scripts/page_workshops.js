@@ -1,5 +1,5 @@
 async function fetchWorkshops() {
-    const response = await fetch(`${API}/workshops`);
+    const response = await fetch(`${API}/workshops/get_workshops`);
     if (response.status == 200) {
         const workshops = await response.json();
         

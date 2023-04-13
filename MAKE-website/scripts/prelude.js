@@ -4,7 +4,7 @@ Constants
 
 */
 
-const API = '/api/v1';
+const API = '/api/v2';
 
 
 /*
@@ -91,7 +91,7 @@ async function updateUserInfo() {
         return;
     }
 
-    const response = await fetch(`${API}/users/info/${state.college_id}`);
+    const response = await fetch(`${API}/users/get_user_by_cx_id/${state.college_id}`);
 
     if (response.status == 200) {
         const user_object = await response.json();

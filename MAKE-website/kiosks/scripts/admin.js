@@ -4,7 +4,7 @@ var state = {
     college_id: 0,
 };
 
-const API = '/api/v1';
+const API = '/api/v2';
 
 async function authenticate() {
     // Get api keys from url params
@@ -37,7 +37,14 @@ async function authenticate() {
 authenticate();
 
 async function fetchStudentStorageAdmin() {
-    const response = await fetch(`${API}/student_storage/all/${api_key}`);
+    const response = await fetch(`${API}/student_storage/get_student_storage`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+        }
+    );
 
     if (response.status == 200) {
         const student_storage = await response.json();
@@ -121,8 +128,16 @@ async function updateStatus() {
             continue;
         } else {
 
-            const response = await fetch(`${API}/auth/set_level/${id}/${status}/${api_key}`, {
+            const response = await fetch(`${API}/users/update_user_role`, {
                 method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "api-key": api_key,
+                },
+                body: JSON.stringify({
+                    uuid: uuid,
+                    role: status.toLowerCase(),
+                }),
             });
 
             if (response.status !== 201) {

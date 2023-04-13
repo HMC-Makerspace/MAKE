@@ -10,7 +10,7 @@ var state = {
 document.documentElement.setAttribute('data-theme', 'dark');
 localStorage.setItem("theme", "dark");
 
-const API = '/api/v1';
+const API = '/api/v2';
 
 var correct_sequence = 0;
 
@@ -119,7 +119,7 @@ async function authenticate() {
 }
 
 async function fetchCheckouts() {
-    const response = await fetch(`${API}/checkouts/log/${api_key}`);
+    const response = await fetch(`${API}/checkouts/get_all_checkouts`, headers=[['api-key', api_key]]);
     const checkouts = await response.json();
 
     if (checkouts === null) {
@@ -244,11 +244,9 @@ function updateCheckoutsHTML() {
 }
 
 async function fetchUserInfo(id_number) {
-    const response = await fetch(`${API}/users/info/${id_number}`);
+    const response = await fetch(`${API}/users/get_user_by_cx_id/${id_number}`);
 
     if (response.status === 200) {
-
-
         const user_info = await response.json();
 
         if (user_info === null) {
@@ -494,13 +492,22 @@ async function commitCheckout() {
     // Get the length
     let sec_length = getCheckoutLength();
 
-    const response = await fetch(`${API}/checkouts/add_entry/${state.current_id_number}/${sec_length}/${api_key}`, {
+    // Generate new uuid
+    const uuid = uuidv4();
+
+    const response = await fetch(`${API}/checkouts/create_new_checkout`, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "api-key": api_key,
         },
         body: JSON.stringify({
-            items: state.cart.map(item => item.name)
+            uuid: uuid,
+            items: state.cart,
+            timestamp_out: new Date().getTime(),
+            timestamp_in: null,
+            timestamp_due: new Date().getTime() + sec_length * 1000,
+            checked_out_by: state.current_uuid,
         })
     });
 
@@ -545,13 +552,19 @@ async function commitReservation() {
 
     const start_date_unix = start_date.getTime() / 1000;
 
-    const response = await fetch(`${API}/checkouts/add_reservation/${state.current_id_number}/${start_date_unix}/${sec_length}/${api_key}`, {
+    const response = await fetch(`${API}/checkouts/create_new_checkout`, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "api-key": api_key,
         },
         body: JSON.stringify({
-            items: state.cart.map(item => item.name)
+            uuid: uuid,
+            items: state.cart,
+            timestamp_out: start_date_unix,
+            timestamp_in: null,
+            timestamp_due: new Date().getTime() + sec_length * 1000,
+            checked_out_by: state.current_uuid,
         })
     });
 
@@ -588,8 +601,14 @@ function displayErrorInCart(err) {
 }
 
 async function checkIn(uuid) {
-    const response = await fetch(`${API}/checkouts/check_in_entry/${uuid}/${api_key}`,
-        { method: "POST" }
+    const response = await fetch(`${API}/checkouts/check_in_checkout/${uuid}`,
+        { 
+            method: "POST", 
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+        }
     );
 
     if (response.status === 200) {
