@@ -1,4 +1,4 @@
-const API = '/api/v1';
+const API = '/api/v2';
 
 var state = {
     file: null,
@@ -51,7 +51,7 @@ function renderPreview() {
     // Send image file to server to generate preview with options
     // Encode image as base64 string
     let request = new XMLHttpRequest();
-    request.open("POST", API + "/loom/render    ", true);
+    request.open("POST", API + "/misc/render_loom_file    ", true);
     request.setRequestHeader("Content-Type", "application/json");
 
     request.onload = function () {
@@ -59,9 +59,11 @@ function renderPreview() {
             // Success!
             let data = JSON.parse(request.responseText);
 
+            console.log(data);
+
             const img_el = document.getElementById("preview");
 
-            state.render = `data:image/tiff;base64,${data}`;
+            state.render = `data:image/png;base64,${data}`;
 
             img_el.style.backgroundImage = `url(${state.render})`;
 

@@ -49,7 +49,7 @@ async def route_get_checkout_record(checkout_uuid: str, api_key: str):
     collection = await db.get_collection("checkouts")
 
     # Get the checkout
-    checkout = await collection.find_one({"UUID": checkout_uuid})
+    checkout = await collection.find_one({"uuid": checkout_uuid})
 
     if checkout is None:
         # The checkout does not exist
@@ -98,7 +98,7 @@ async def route_update_checkout(checkout_uuid: str, checkout: Checkout, api_key:
     collection = await db.get_collection("checkouts")
 
     # Update the checkout
-    await collection.update_one({"UUID": checkout_uuid}, {"$set": checkout.dict()})
+    await collection.update_one({"uuid": checkout_uuid}, {"$set": checkout.dict()})
 
     # Return the checkout
     return checkout
@@ -120,7 +120,7 @@ async def route_delete_checkout(checkout_uuid: str, api_key: str):
     collection = await db.get_collection("checkouts")
 
     # Delete the checkout
-    await collection.delete_one({"UUID": checkout_uuid})
+    await collection.delete_one({"uuid": checkout_uuid})
 
     # Return success
     return {"success": True}
