@@ -487,15 +487,14 @@ label {
 
 /*
 
-Admin Console
+Management Console
 
 */
 
 #main-admin-grid {
   display: grid;
-  grid-template-areas: "stats main";
-  grid-template-columns: 400px auto;
-  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "header" "main";
+  grid-template-rows: 40px 1fr;
   margin: 0;
   position: fixed;
   top: 0;
@@ -504,6 +503,31 @@ Admin Console
   height: 100vh;
   background-color: var(--background-color);
   transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+}
+
+#admin-header {
+  grid-area: header;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  background-color: var(--theme-color-1);
+  border-radius: var(--roundness);
+  color: var(--text-color-main);
+}
+
+#admin-header button {
+  border: none;
+  cursor: pointer;
+  font-size: 1em;
+  width: 170px;
+  height: 40px;
+  font-weight: bolder;
+}
+
+#admin-header button:hover, #admin-header button.active-button {
+  background-color: var(--theme-color-2) !important;
 }
 
 #stats {

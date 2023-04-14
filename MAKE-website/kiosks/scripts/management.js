@@ -1,10 +1,15 @@
 var state = {
     users: null,
     student_storage: null,
-    cx_id: 0,
+    workshops: null,
+    shifts: null,
+    inventory: null,
 };
 
 const API = '/api/v2';
+
+document.documentElement.setAttribute('data-theme', 'dark');
+localStorage.setItem("theme", "dark");
 
 async function authenticate() {
     // Get api keys from url params

@@ -8,7 +8,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>MAKE Admin Console</title>
+    <title>MAKE Management Console</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,38 +28,46 @@
         <![endif]-->
 
     <div id="main-admin-grid">
-        <div id="stats">
-            <h1>Statistics</h1>
-            <div id="stats-info"></div>
+        <div id="admin-header">
+            <button id="home-button" class="set-page active-button" onclick="setPage('home')">Home</button>
+            <button id="inventory-button" class="set-page" onclick="setPage('inventory')">Inventory</button>
+            <button id="student-storage-button" class="set-page" onclick="setPage('student-storage')">Student Storage</button>
+            <button id="users-button" class="set-page" onclick="setPage('users')">Users</button>
+            <button id="shifts-button" class="set-page" onclick="setPage('shifts')">Shifts</button>
+            <button id="workshops-button" class="set-page" onclick="setPage('workshops')">Workshops</button>
         </div>
 
-        <div id="main-area">
-            <div id="auth-sets">
-                <h1>Auth Settings</h1>
+        <div class="main-content" id="page-home">
+            <h1>MAKE Management Console</h1>
+            <p>Welcome to the MAKE Management Console. 
+                This is where you can manage the inventory, student storage, 
+                steward shifts, workshops, and
+                users of the MAKE Lab.</p>
+            <p>Click on the buttons above to get started.</p>
+        </div>
 
-                <div id="auth-input-container">
-                    <h2>Paste list of identifiers (student IDs, emails, or full names) seperated by commas or newlines
-                    </h2>
+        <div class="main-content hidden" id="page-inventory">
 
-                    <textarea id="auth-input"></textarea>
+        </div>
 
-                    <h2>Auth Level</h2>
+        <div class="main-content hidden" id="page-student-storage">
 
-                    <select id="auth-type">
-                        <option value="Banned">Banned</option>
-                        <option value="User">User</option>
-                        <option value="Steward">Steward</option>
-                        <option value="Admin">Head Steward</option>
-                        <option value="Faculty">Faculty</option>
-                    </select>
+        </div>
 
-                    <button id="auth-submit" onclick="updateStatus()">Submit</button>
-                </div>
-            </div>
+        <div class="main-content hidden" id="page-users">
+        
+        </div>
 
-            <div id="overall-student-storage" style="overflow: unset;">
+        <div class="main-content hidden" id="page-shifts">
 
-            </div>
+        </div>
+
+        <div class="main-content hidden" id="page-checkouts">
+
+        </div>
+
+        <div class="main-content hidden" id="page-workshops">
+
         </div>
 
     </div>
@@ -73,7 +81,7 @@
     <script src="/scripts/page_student_storage.js"></script>
     <script src="/scripts/utils.js"></script>
 
-    <script src="/kiosks/scripts/admin.js"></script>
+    <script src="/kiosks/scripts/management.js"></script>
 </body>
 
 </html>
