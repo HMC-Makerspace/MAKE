@@ -23,7 +23,7 @@ async function authenticate() {
     if (api_key === null) {
         alert("No API key provided.");
     }
-    
+
     // Remove api key from url, but keep the rest of the url
     window.history.replaceState({}, document.title, window.location.pathname);
 
@@ -32,23 +32,23 @@ async function authenticate() {
 
     console.log(`Authenticating with checkout key ${api_key}`);
 
-    setInterval(fetchInventory, 100000, kiosk_mode=true);
+    setInterval(fetchInventory, 100000, kiosk_mode = true);
     setInterval(fetchCheckouts, 100000);
     setInterval(fetchUsers, 100000);
 
     fetchInventory(true).then(() => {
-        submitSearch(kiosk_mode=true);
-        document.getElementById("inventory-search-input").addEventListener("keyup", () => {submitSearch(kiosk_mode=true)});
-        document.getElementById("inventory-in-stock").addEventListener("change", () => {submitSearch(kiosk_mode=true)});
-        document.getElementById("room-select").addEventListener("change", () => {submitSearch(kiosk_mode=true)});
-        document.getElementById("tool-material-select").addEventListener("change", () => {submitSearch(kiosk_mode=true)});
+        submitSearch(kiosk_mode = true);
+        document.getElementById("inventory-search-input").addEventListener("keyup", () => { submitSearch(kiosk_mode = true) });
+        document.getElementById("inventory-in-stock").addEventListener("change", () => { submitSearch(kiosk_mode = true) });
+        document.getElementById("room-select").addEventListener("change", () => { submitSearch(kiosk_mode = true) });
+        document.getElementById("tool-material-select").addEventListener("change", () => { submitSearch(kiosk_mode = true) });
     });
 
     fetchUsers().then(() => {
         for (let key of Object.keys(state.users)) {
-            state.users[key].college_id_str = state.users[key].college_id.toString();
+            state.users[key].cx_id_str = state.users[key].cx_id.toString();
         }
-        
+
         submitUserSearch();
         document.getElementById("users-search-input").addEventListener("keyup", submitUserSearch);
         fetchCheckouts();
@@ -57,7 +57,7 @@ async function authenticate() {
     document.addEventListener("keydown", (e) => {
         // If the key is is ';', focus the input on id-input and switch to
         // the inventory page
-        
+
         if (e.key === ";") {
             e.preventDefault();
             correct_sequence = 0;
@@ -105,12 +105,12 @@ async function authenticate() {
 
         state.current_id_number = e.target.value;
 
-        fetchUserInfo(state.current_id_number.replace(";","")).then((user_info) => {
+        fetchUserInfo(state.current_id_number.replace(";", "")).then((user_info) => {
             createUserInfo(user_info)
         });
     });
 
-    
+
     document.getElementById("restock-dialog").addEventListener("click", function (event) {
         if (event.target.id === "restock-dialog") {
             hideRestock()
@@ -119,7 +119,14 @@ async function authenticate() {
 }
 
 async function fetchCheckouts() {
-    const response = await fetch(`${API}/checkouts/get_all_checkouts`, headers=[['api-key', api_key]]);
+    const response = await fetch(`${API}/checkouts/get_checkouts`,
+        {
+            method: 'GET',
+            headers: {
+                'api-key': api_key
+            }
+        }
+    );
     const checkouts = await response.json();
 
     if (checkouts === null) {
@@ -134,7 +141,7 @@ const user_search_options = {
     limit: 1000, // don't return more results than you need!
     allowTypo: true, // if you don't care about allowing typos
     threshold: -10000, // don't return bad results
-    keys: ['name', 'college_id_str', 'college_email', 'auth_level'], // keys to search
+    keys: ['name', 'cx_id_str', 'email', 'role'], // keys to search
     all: true,
 }
 
@@ -180,22 +187,24 @@ function createUserDiv(user) {
 
     let id = document.createElement("div");
     id.classList.add("user-result-id");
-    id.innerHTML = user.college_id;
+    id.innerHTML = user.cx_id;
 
     let email = document.createElement("div");
     email.classList.add("user-result-email");
-    email.innerHTML = user.college_email;
+    email.innerHTML = user.email;
 
     let auth = document.createElement("div");
     auth.classList.add("user-result-auth");
-    auth.innerHTML = user.auth_level;
+    auth.innerHTML = user.role;
 
     let passed_quizzes = document.createElement("div");
     passed_quizzes.classList.add("user-result-passed-quizzes");
-    for (let quiz of user.passed_quizzes) {
-        let quiz_div = document.createElement("div");
-        quiz_div.innerHTML = quiz;
-        passed_quizzes.appendChild(quiz_div);
+    for (let timestamp of Object.keys(user.passed_quizzes)) {
+        if (determineValidQuizDate(Number(timestamp))) {
+            let quiz_div = document.createElement("div");
+            quiz_div.innerHTML = QUIZ_ID_TO_NAME[user.passed_quizzes[timestamp]];
+            passed_quizzes.appendChild(quiz_div);
+        }
     }
 
     div.appendChild(name);
@@ -217,19 +226,21 @@ function updateCheckoutsHTML() {
 
     let current_divs = [];
 
+    currently_checked_out = state.checkouts.filter((checkout) => checkout.timestamp_in == null);
+    checkout_history = state.checkouts.filter((checkout) => checkout.timestamp_in != null);
 
-    for (let checkout of state.checkouts.currently_checked_out) {
-        current_divs.push(createCheckoutDiv(checkout, kiosk_mode=true));
+    for (let checkout of currently_checked_out) {
+        current_divs.push(createCheckoutDiv(checkout, kiosk_mode = true));
     }
 
-    current_divs.push(createCheckoutHeader(false, kiosk_mode=true));
+    current_divs.push(createCheckoutHeader(false, kiosk_mode = true));
 
     let history_divs = [];
-    for (let checkout of state.checkouts.checkout_history) {
-        history_divs.push(createCheckoutDiv(checkout, kiosk_mode=true));
+    for (let checkout of checkout_history) {
+        history_divs.push(createCheckoutDiv(checkout, kiosk_mode = true));
     }
 
-    history_divs.push(createCheckoutHeader(true, kiosk_mode=true));
+    history_divs.push(createCheckoutHeader(true, kiosk_mode = true));
 
     // Reverse order of both lists
     current_divs.reverse();
@@ -237,7 +248,7 @@ function updateCheckoutsHTML() {
 
     removeAllChildren(current);
     removeAllChildren(history);
-    
+
     appendChildren(current, current_divs);
     appendChildren(history, history_divs);
 
@@ -260,19 +271,19 @@ async function fetchUserInfo(id_number) {
 }
 
 function createUserInfo(user_info) {
-    if (user_info === null) {            
+    if (user_info === null) {
         document.getElementById("id-error").innerHTML = "Invalid ID/User not yet in system.<br>They might have not taken the General Safety Quiz";
         document.getElementById("id-error").classList.remove("hidden");
         document.getElementById("id-input").focus();
     } else {
         // Look at all checkouts for overdue checkouts
-        let checkouts = user_info.pending_checkouts;
+        let checkouts = state.checkouts.filter((checkout) => checkout.uuid === user_info.uuid);
         let now = new Date();
 
         let total_overdue = 0;
 
         for (let checkout of checkouts) {
-            let checkout_time = new Date(checkout.timestamp_expires * 1000);
+            let checkout_time = new Date(checkout.timestamp_due * 1000);
 
             if (checkout_time < now) {
                 total_overdue += 1;
@@ -282,11 +293,11 @@ function createUserInfo(user_info) {
         document.getElementById("id-error").classList.add("hidden");
         document.getElementById("user-info-content").innerHTML = `
             <div id="user-info-name">${user_info.name}</div>
-            <div id="user-info-id">${user_info.college_id}</div>
-            <div id="user-info-email">${user_info.college_email}</div>
-            <div id="user-info-auth" class="${user_info.auth_level}">Auth: ${user_info.auth_level}</div>
+            <div id="user-info-id">${user_info.cx_id}</div>
+            <div id="user-info-email">${user_info.email}</div>
+            <div id="user-info-auth" class="${user_info.role}">${user_info.role}</div>
             <div id="user-info-pending-checkouts">Overdue Checkouts: ${total_overdue}</div>
-            <div id="user-info-all-checkouts">All Checkouts: ${user_info.all_checkouts.length}</div>
+            <div id="user-info-all-checkouts">All Checkouts: ${checkouts.length}</div>
             <div id="user-info-passed-quizzes">${createPassedQuizzes(user_info.passed_quizzes)}</div>
             <div id="user-info-cart"><b>Cart</b><div id="cart-content"></div></div>
             <div id="time-length-radio">
@@ -318,15 +329,21 @@ function createUserInfo(user_info) {
 }
 
 function createPassedQuizzes(list) {
-    if (list.length === 0) {
-        return "No Quizzes Passed!";
-    } else {
-        let html = "";
-        for (let quiz of list) {
+
+    let html = "";
+    for (let timestamp of Object.keys(list)) {
+        if (determineValidQuizDate(timestamp)) {
+            let quiz = QUIZ_ID_TO_NAME[list[timestamp]];
+
             html += `<div>${quiz}</div>`;
         }
-        return html;
     }
+
+    if (html === "") {
+        html = "No quizzes passed";
+    }
+
+    return html;
 }
 
 function clearUser() {
@@ -353,7 +370,7 @@ function updatePage() {
     i_button.classList.remove("selected");
     c_button.classList.remove("selected");
     u_button.classList.remove("selected");
-    
+
     const i_page = document.getElementById("inventory-page");
     const c_page = document.getElementById("checkouts-page");
     const u_page = document.getElementById("users-page");
@@ -409,7 +426,7 @@ function updateSelectedItems() {
 function removeFromCart(name) {
     // Remove the first instance of the item from the cart
     // leave the rest though
-    
+
     // Reverse the cart so that the first instance of the item is the last one
     // in the array
     state.cart.reverse();
@@ -602,8 +619,8 @@ function displayErrorInCart(err) {
 
 async function checkIn(uuid) {
     const response = await fetch(`${API}/checkouts/check_in_checkout/${uuid}`,
-        { 
-            method: "POST", 
+        {
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "api-key": api_key,
@@ -639,7 +656,7 @@ function displayErrorInCheckout(uuid) {
 }
 
 function editItem(item) {
-    
+
 }
 
 authenticate();

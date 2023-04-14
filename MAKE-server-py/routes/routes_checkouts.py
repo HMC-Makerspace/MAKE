@@ -11,7 +11,7 @@ checkouts_router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@checkouts_router.post("/get_all_checkouts")
+@checkouts_router.get("/get_checkouts")
 async def route_get_checkouts(request: Request):
     # Get checkouts
     logging.getLogger().setLevel(logging.INFO)
@@ -27,7 +27,7 @@ async def route_get_checkouts(request: Request):
     if not is_valid:
         # Invalid API key
         # Return error
-        raise HTTPException(status_code=404, detail="Invalid API key")
+        raise HTTPException(status_code=401, detail="Invalid API key")
 
     # Get the checkouts collection
     collection = await db.get_collection("checkouts")
@@ -38,8 +38,8 @@ async def route_get_checkouts(request: Request):
     # Return the checkouts
     return checkouts
 
-@checkouts_router.post("/get_checkout/{checkout_uuid}")
-async def route_get_checkout_record(request: Request,checkout_uuid: str):
+@checkouts_router.get("/get_checkout/{checkout_uuid}")
+async def route_get_checkout_record(request: Request, checkout_uuid: str):
     # Get a checkout
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Getting checkout...")

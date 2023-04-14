@@ -4,7 +4,7 @@ async function login() {
     let collegeID = parseCollegeID(id);
 
     if (collegeID !== null) {
-        state.college_id = collegeID;
+        state.cx_id = collegeID;
 
         const result = await updateUserInfo();
 
@@ -30,7 +30,7 @@ function hideLoginError() {
 
 function logout() {
     state.user_object = null;
-    state.college_id = null;
+    state.cx_id = null;
 
     saveState();
 

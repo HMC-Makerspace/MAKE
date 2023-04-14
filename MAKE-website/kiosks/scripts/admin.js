@@ -1,7 +1,7 @@
 var state = {
     users: null,
     student_storage: null,
-    college_id: 0,
+    cx_id: 0,
 };
 
 const API = '/api/v2';
@@ -92,7 +92,7 @@ function generateStatsDivs(users) {
         
     for (let school_id of Object.keys(school_names)) {
         const count = document.createElement("tr");
-        const school_count = Object.values(state.users).filter(user => `${user.college_id}`.startsWith(school_id)).length;
+        const school_count = Object.values(state.users).filter(user => `${user.cx_id}`.startsWith(school_id)).length;
         const school_perc = Math.round((school_count / school_pops[school_id]) * 100);
 
         count.innerHTML = `<td>${school_names[school_id]}</td><td>${school_count}</td><td>${school_perc}%</td>`;

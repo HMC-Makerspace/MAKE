@@ -26,6 +26,51 @@ const school_pops = {
     5: 922,
 }
 
+const QUIZ_NAME_TO_ID = {
+    "General": "66546920",
+    "Laser3D": "1524924728",
+    "SprayPaint": "1841312496",
+    "Composite": "913890505",
+    "Welding": "482685426",
+    "Studio": "2079405017",
+    "Waterjet": "2100779718",
+    "Loom": "1235553349",
+}
+
+const QUIZ_ID_TO_NAME = {
+    "66546920": "General",
+    "1524924728": "Laser3D",
+    "1841312496": "SprayPaint",
+    "913890505": "Composite",
+    "482685426": "Welding",
+    "2079405017": "Studio",
+    "2100779718": "Waterjet",
+    "1235553349": "Loom",
+}
+
+
+// Cut off date for quizzes is on June 1st yearly
+// If a quiz was taken before this date, it is not counted
+// if there 
+function determineValidQuizDate(quiz_timestamp) {
+    // Get quiz date
+    const quiz_date = new Date(Number(quiz_timestamp) * 1000);
+
+    // Get current year
+    const current_year = new Date().getFullYear();
+
+    // Create cutoff date for quiz
+    const cutoff_date = new Date(current_year, 5, 1);
+
+    if (quiz_date < cutoff_date) {
+        return true;
+    } else if (quiz_date > cutoff_date && quiz_date.getFullYear() == current_year) {
+        return true;
+    }
+
+    return false;
+}
+
 function parseCollegeID(collegeID) {
     collegeID = collegeID.trim();
 
@@ -155,9 +200,8 @@ async function renderMD(file_path, title) {
 
 async function fetchUsers() {
     const response = await fetch(`${API}/users/get_users`, {
-        method: "POST",
+        method: "GET",
         headers: {
-            "Content-Type": "application/json",
             "api-key": api_key,
         },
     });
@@ -167,7 +211,7 @@ async function fetchUsers() {
         return null;
     }
 
-    state.users = users.users;
+    state.users = users;
 }
 
 function openInNewTab(url) {

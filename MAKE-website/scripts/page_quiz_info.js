@@ -40,16 +40,19 @@ function renderQuizInfo() {
         quiz_status.classList.remove("status-passed");
     }
 
-    if (state.college_id === null) {
+    if (state.cx_id === null) {
         return;
     }
 
-    for (let quiz of state.user_object.passed_quizzes) {
-        const el = document.getElementById("quiz-" + quiz);
-        el.classList.add("quiz-passed");
-        const status = el.getElementsByClassName("quiz-status")[0];
-        status.innerText = "Passed";
-        status.classList.add("status-passed");
+    for (let timestamp of Object.keys(state.user_object.passed_quizzes)) {
+        if (determineValidQuizDate(timestamp)) {
+            const quiz = QUIZ_IDS_TO_NAMES[state.user_object.passed_quizzes[timestamp]];
+            const el = document.getElementById("quiz-" + quiz);
+            el.classList.add("quiz-passed");
+            const status = el.getElementsByClassName("quiz-status")[0];
+            status.innerText = "Passed";
+            status.classList.add("status-passed");
+        }
     }
 }
 
@@ -70,30 +73,30 @@ function openQuiz(quiz_name) {
     let quiz_link;
 
     let name = (state.user_object ?? "").name ?? "";
-    let college_id = (state.user_object ?? "").college_id ?? "";
-    let email = (state.user_object ?? "").college_email ?? "";
+    let cx_id = (state.user_object ?? "").cx_id ?? "";
+    let email = (state.user_object ?? "").email ?? "";
 
     switch (quiz_name) {
         case "general":
-            quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLSfW3l2cxem3JwKqX3RJjjhJXKzAdwY9x4dYeXvOATGA-dhWzA/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${college_id}&entry.1482318217=${email}`;
+            quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLSfW3l2cxem3JwKqX3RJjjhJXKzAdwY9x4dYeXvOATGA-dhWzA/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${cx_id}&entry.1482318217=${email}`;
             break;
         case "laser3d":
-            quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLSfAZHwVpaI91oPq2PcDnUJt4yjPbwLznU41mMfjJJzyyZ9T7A/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${college_id}&entry.1482318217=${email}`;
+            quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLSfAZHwVpaI91oPq2PcDnUJt4yjPbwLznU41mMfjJJzyyZ9T7A/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${cx_id}&entry.1482318217=${email}`;
             break;
         case "spraypaint":
-            quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLScjlDfT9sXZzq_IbqKTrjn3H2H81B5c7uL9aucRB_rEOLbGMg/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${college_id}&entry.1482318217=${email}`;
+            quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLScjlDfT9sXZzq_IbqKTrjn3H2H81B5c7uL9aucRB_rEOLbGMg/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${cx_id}&entry.1482318217=${email}`;
             break;
         case "composite":
-            quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLSfJTAr-E4TT-wYCfgvDqTYdssBY7ZfSLGBOv0oTtZBl_H_PJw/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${college_id}&entry.1482318217=${email}`;
+            quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLSfJTAr-E4TT-wYCfgvDqTYdssBY7ZfSLGBOv0oTtZBl_H_PJw/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${cx_id}&entry.1482318217=${email}`;
             break;
         case "welding":
-            quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLSet-S7ZIHVRydmc-J_zXSV4knCr50AryDbq0aUv1s5FB2ZGmg/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${college_id}&entry.1482318217=${email}`;
+            quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLSet-S7ZIHVRydmc-J_zXSV4knCr50AryDbq0aUv1s5FB2ZGmg/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${cx_id}&entry.1482318217=${email}`;
             break;
         case "studio":
-            quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLSdikBUUUXV2RMTD1LGdGHcSzVXgzokmguET0vedSR8JqNGm0Q/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${college_id}&entry.1482318217=${email}`;
+            quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLSdikBUUUXV2RMTD1LGdGHcSzVXgzokmguET0vedSR8JqNGm0Q/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${cx_id}&entry.1482318217=${email}`;
             break;
         case "waterjet":
-            quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLSev6cU296gQyqFxOxi2LFmJPCDthz_QBMYkP52AbKcr-7HFFg/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${college_id}&entry.1482318217=${email}`;
+            quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLSev6cU296gQyqFxOxi2LFmJPCDthz_QBMYkP52AbKcr-7HFFg/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${cx_id}&entry.1482318217=${email}`;
             break;
     }
     

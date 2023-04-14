@@ -15,7 +15,7 @@ async function fetchStudentStorage(kiosk_mode=false) {
         return;
     }
 
-    if (state.college_id !== null) {
+    if (state.cx_id !== null) {
         const response = await fetch(`${API}/student_storage/get_for_user/${state.uuid}`);
 
         if (response.status == 200) {
@@ -38,7 +38,7 @@ function renderStudentStorage(kiosk_mode=false) {
     if (kiosk_mode) {
         appendChildren(storage, generateStudentStorageDivs(student_storage_state.slots, kiosk_mode=true));   
     } else {
-        if (state.student_storage === null || state.college_id === null) {
+        if (state.student_storage === null || state.cx_id === null) {
             return;
         } else {
             appendChildren(storage, generateStudentStorageDivs(state.student_storage.slots));
@@ -129,11 +129,11 @@ function generateStudentStorageDivs(slots, kiosk_mode=false) {
             let occupied_by = "Occupied";
 
             if (!kiosk_mode) {
-                if (slot.occupied_details.college_id !== 0 && slot.occupied_details.college_id !== state.college_id) {
-                    occupied_by = `${state.users[slot.occupied_details.college_id].name}`;
+                if (slot.occupied_details.cx_id !== 0 && slot.occupied_details.cx_id !== state.cx_id) {
+                    occupied_by = `${state.users[slot.occupied_details.cx_id].name}`;
                 }
 
-                if (slot.occupied_details.college_id === state.college_id) {
+                if (slot.occupied_details.cx_id === state.cx_id) {
                     div.classList.add("user");
                     expire_div += `<button onclick="releaseStudentStorage('${slot.id}')">Release</button>
                     <button onclick="renewStudentStorage('${slot.id}')">Renew (${slot.occupied_details.renewals_left})</button>`;

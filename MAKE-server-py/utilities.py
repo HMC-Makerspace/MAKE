@@ -10,12 +10,12 @@ async def validate_api_key(db, api_key_str, scope):
     collection = await db.get_collection("api_keys")
 
     # Get the API key
-    api_key = await collection.find_one({"Key": api_key_str})
+    api_key = await collection.find_one({"key": api_key_str})
 
     if api_key is None:
         return False
     
-    if scope not in api_key["Scope"] and "admin" not in api_key["Scope"]:
+    if scope not in api_key["scope"] and "admin" not in api_key["scope"]:
         return False
     
     return True

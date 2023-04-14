@@ -14,7 +14,7 @@ async function fetchInventory(kiosk_mode = false) {
 
         state.inventory = inventory;
 
-        inventory.items.forEach((element, index) => {
+        inventory.forEach((element, index) => {
             element.uuids_joined = element.uuids.join(" ");
             element.index = index;
         });
@@ -63,7 +63,7 @@ function getInventoryFilters() {
 }
 
 function searchInventory(search, filters = null, kiosk_mode = false) {
-    let results = fuzzysort.go(search, state.inventory.items, search_options);
+    let results = fuzzysort.go(search, state.inventory, search_options);
 
     results.sort((a, b) => b.score - a.score);
 

@@ -1,5 +1,5 @@
 async function start() {
-    if (state.college_id !== null) {
+    if (state.cx_id !== null) {
         displayLoggedIn();
         await updateUserInfo();
     } else {

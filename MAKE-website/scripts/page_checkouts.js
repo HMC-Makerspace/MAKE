@@ -114,7 +114,7 @@ function createCheckoutDiv(checkout, kiosk_mode = false) {
     if (checkout.checked_in) {
         t_in_info.innerHTML = ` ${checkoutFormatDate(new Date(checkout.timestamp_checked_in * 1000).toLocaleString())}`;
     } else {
-        t_in_info.innerHTML = ` ${checkoutFormatDate(new Date(checkout.timestamp_expires * 1000).toLocaleString())}`;
+        t_in_info.innerHTML = ` ${checkoutFormatDate(new Date(checkout.timestamp_due * 1000).toLocaleString())}`;
     }
     div.appendChild(t_in_info);
 
@@ -143,9 +143,9 @@ function createCheckoutDiv(checkout, kiosk_mode = false) {
         name.classList.add("checkout-entry-name");
 
         if (state.users !== null) {
-            name.innerHTML = `${state.users[checkout.college_id].name ?? checkout.college_id}`;
+            name.innerHTML = `${state.users[checkout.cx_id].name ?? checkout.cx_id}`;
         } else {
-            name.innerHTML = `${checkout.college_id}`;
+            name.innerHTML = `${checkout.cx_id}`;
         }
 
         div.appendChild(name);

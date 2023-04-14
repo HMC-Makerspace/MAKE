@@ -14,7 +14,7 @@ Global variables
 */
 
 var state = {
-    college_id: null,
+    cx_id: null,
     auth_keys: {
         checkout: null,
         student_storage: null,
@@ -87,11 +87,11 @@ function displayLoggedOut() {
 }
 
 async function updateUserInfo() {
-    if (state.college_id === null) {
+    if (state.cx_id === null) {
         return;
     }
 
-    const response = await fetch(`${API}/users/get_user_by_cx_id/${state.college_id}`);
+    const response = await fetch(`${API}/users/get_user_by_cx_id/${state.cx_id}`);
 
     if (response.status == 200) {
         const user_object = await response.json();

@@ -10,7 +10,7 @@ user_router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@user_router.post("/get_users")
+@user_router.get("/get_users")
 async def route_get_users(request: Request):
     # Get users
     logging.getLogger().setLevel(logging.INFO)
@@ -25,7 +25,7 @@ async def route_get_users(request: Request):
     if not is_valid:
         # Invalid API key
         # Return error
-        raise HTTPException(status_code=404, detail="Invalid API key")
+        raise HTTPException(status_code=401, detail="Invalid API key")
 
     # Get the users collection
     collection = await db.get_collection("users")
@@ -50,18 +50,20 @@ async def route_get_user(user_uuid: str):
     collection = await db.get_collection("users")
 
     # Get the user
-    user = await collection.find_one({"UUID": user_uuid})
+    user = await collection.find_one({"uuid": user_uuid})
 
     if user is None:
         # The user does not exist
         # Return error
         raise HTTPException(status_code=404, detail="User does not exist")
     
+    user = User(**user)
+
     # Return the user
     return user
 
 @user_router.get("/get_user_by_cx_id/{cx_id}")
-async def route_get_user_by_cx_id(cx_id: str):
+async def route_get_user_by_cx_id(cx_id: int):
     # Get a user
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Getting user by cx_id...")
@@ -72,12 +74,14 @@ async def route_get_user_by_cx_id(cx_id: str):
     collection = await db.get_collection("users")
 
     # Get the user
-    user = await collection.find_one({"CX_ID": cx_id})
+    user = await collection.find_one({"cx_id": cx_id})
 
     if user is None:
         # The user does not exist
         # Return error
         raise HTTPException(status_code=404, detail="User does not exist")
+    
+    user = User(**user)
     
     # Return the user
     return user
@@ -117,7 +121,7 @@ async def route_update_user(request: Request):
         # Return error
         raise HTTPException(status_code=404, detail="User does not exist")
     
-    user.Role = role
+    user.role = role
 
     # Update the user
     await collection.replace_one({"uuid": user.uuid}, user.dict())

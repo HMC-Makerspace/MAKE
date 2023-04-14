@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Dict, List, Optional
 from bson import ObjectId
 from pydantic import BaseModel, Field
 import motor.motor_asyncio
@@ -162,8 +162,7 @@ class User(BaseModel):
     email: str
     cx_id: int
     role: str
-    shifts: List[str]
-    quizzes: List[str]
+    passed_quizzes: Dict[str, str]
 
     class Config:
         arbitrary_types_allowed = True
@@ -177,7 +176,9 @@ class User(BaseModel):
                 "email": "john@g.hmc.edu",
                 "cx_id": "123456789",
                 "role": "User",
-                "shifts": []
+                "passed_quizzes": {
+                    "431278492": "1231234124",
+                }
             }
         }
 
