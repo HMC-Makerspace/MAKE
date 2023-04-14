@@ -2,7 +2,7 @@ const search_options = {
     limit: 1000, // don't return more results than you need!
     allowTypo: true, // if you don't care about allowing typos
     threshold: -10000, // don't return bad results
-    keys: ['name', 'specific_name', 'serial_number', 'model_number', 'brand', 'uuids_joined', 'kit'], // keys to search
+    keys: ['name', 'specific_name', 'serial_number', 'model_number', 'brand', 'qr_code', 'kit'], // keys to search
     all: true,
 }
 
@@ -15,7 +15,6 @@ async function fetchInventory(kiosk_mode = false) {
         state.inventory = inventory;
 
         inventory.forEach((element, index) => {
-            element.uuids_joined = element.uuids.join(" ");
             element.index = index;
         });
 
@@ -166,8 +165,7 @@ function generateInventoryDiv(result, kiosk_mode = false) {
 
     const item = result.obj;
 
-    div.id = `inventory-result-${item.index}`;
-
+    div.id = `inventory-result-${item.uuid}`;
 
     if (item.is_kit === true) {
         div.classList.add("kit");
@@ -210,7 +208,7 @@ function generateInventoryDiv(result, kiosk_mode = false) {
 
     const location = document.createElement("div");
     location.classList.add("inventory-result-location");
-    location.innerHTML = `<span class="room">${item.location_room}</span> <span class="area">${item.location_area}</span>`;
+    location.innerHTML = `<span class="room">${item.location_room}</span> <span class="area">${item.location_specific}</span>`;
     main_div.appendChild(location);
 
     if (item.is_kit === false) {
@@ -247,39 +245,39 @@ function generateInventoryDiv(result, kiosk_mode = false) {
     lower_div.classList.add("inventory-result-lower");
     lower_div.classList.add("not-shown");
 
-    if (item.serial_number !== "") {
+    if (item.serial_number !== null) {
         const serial_number = document.createElement("div");
         serial_number.classList.add("inventory-result-lower-detail");
         serial_number.innerText = `Serial Number: ${item.serial_number}`;
         lower_div.appendChild(serial_number);
     }
 
-    if (item.model_number !== "") {
+    if (item.model_number !== null) {
         const model_number = document.createElement("div");
         model_number.classList.add("inventory-result-lower-detail");
         model_number.innerText = `Model Number: ${item.model_number}`;
         lower_div.appendChild(model_number);
     }
 
-    if (item.specific_name !== "") {
+    if (item.specific_name !== null) {
         const specific_name = document.createElement("div");
         specific_name.classList.add("inventory-result-lower-detail");
         specific_name.innerText = `Specific Name: ${item.specific_name}`;
         lower_div.appendChild(specific_name);
     }
 
-    if (item.brand !== "") {
+    if (item.brand !== null) {
         const brand = document.createElement("div");
         brand.classList.add("inventory-result-lower-detail");
         brand.innerText = `Brand: ${item.brand}`;
         lower_div.appendChild(brand);
     }
 
-    if (item.uuids_joined !== "") {
-        const uuid = document.createElement("div");
-        uuid.classList.add("inventory-result-lower-detail");
-        uuid.innerText = `UUID(s): ${item.uuids_joined}`;
-        lower_div.appendChild(uuid);
+    if (item.qr_code !== null) {
+        const qr_code = document.createElement("div");
+        qr_code.classList.add("inventory-result-lower-detail");
+        qr_code.innerText = `QR Code(s): ${item.qr_code}`;
+        lower_div.appendChild(qr_code);
     }
 
     const show_lower_div_button = document.createElement("button");
@@ -308,14 +306,14 @@ function generateInventoryDiv(result, kiosk_mode = false) {
         checkout_button_more.classList.add("inventory-result-checkout-more");
         checkout_button_more.innerText = "+";
         checkout_button_more.addEventListener("click", () => {
-            addToCart(item.name, item.index);
+            addToCart(item.uuid);
         });
 
         const checkout_button_less = document.createElement("button");
         checkout_button_less.classList.add("inventory-result-checkout-less");
         checkout_button_less.innerText = "-";
         checkout_button_less.addEventListener("click", () => {
-            removeFromCart(item.name);
+            removeFromCart(item.uuid);
         });
 
         checkout_buttons.appendChild(checkout_button_less);

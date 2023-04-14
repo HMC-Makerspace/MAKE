@@ -19,7 +19,7 @@ function renderCheckouts() {
     history.appendChild(createCheckoutHeader(true));
 
     for (let checkout of l) {
-        if (!checkout.checked_in) {
+        if (!checkout.timestamp_in) {
             current.appendChild(createCheckoutDiv(checkout));
         } else {
             history.appendChild(createCheckoutDiv(checkout));
@@ -34,12 +34,12 @@ function renderCheckouts() {
 // - Times notified
 // - Name
 // - If in kiosk mode, check in button
-function createCheckoutHeader(checked_in, kiosk_mode=false) {
+function createCheckoutHeader(timestamp_in, kiosk_mode=false) {
     let div = document.createElement("div");
     div.classList.add("checkout-header");
     div.classList.add("checkout-entry");
 
-    if (checked_in) {
+    if (timestamp_in) {
         div.classList.add("checked-in");
     }
 
@@ -53,7 +53,7 @@ function createCheckoutHeader(checked_in, kiosk_mode=false) {
 
     let t_in = document.createElement("div");
     t_in.classList.add("t-in");
-    if (checked_in) {
+    if (timestamp_in) {
         t_in.classList.add("checked-in");
     } else {
         t_in.classList.add("checked-out");
@@ -77,7 +77,7 @@ function createCheckoutHeader(checked_in, kiosk_mode=false) {
         div.appendChild(name);
     }
 
-    if (kiosk_mode && !checked_in) {
+    if (kiosk_mode && !timestamp_in) {
         let check_in = document.createElement("div");
         check_in.classList.add("checkout-entry-check-in");
         check_in.innerHTML = "Check In";
@@ -101,18 +101,18 @@ function checkoutFormatDate(date) {
 
 function createCheckoutDiv(checkout, kiosk_mode = false) {
     let div = document.createElement("div");
-    div.id = "checkout-" + checkout.checkout_uuid;
+    div.id = "checkout-" + checkout.uuid;
     div.classList.add("checkout-entry");
 
     let t_out_info = document.createElement("div");
     t_out_info.classList.add("t-out-info");
-    t_out_info.innerHTML = ` ${checkoutFormatDate(new Date(checkout.timestamp_checked_out * 1000))}`;
+    t_out_info.innerHTML = ` ${checkoutFormatDate(new Date(checkout.timestamp_out * 1000))}`;
     div.appendChild(t_out_info);
 
     let t_in_info = document.createElement("div");
     t_in_info.classList.add("t-in-info");
-    if (checkout.checked_in) {
-        t_in_info.innerHTML = ` ${checkoutFormatDate(new Date(checkout.timestamp_checked_in * 1000).toLocaleString())}`;
+    if (checkout.timestamp_in !== null) {
+        t_in_info.innerHTML = ` ${checkoutFormatDate(new Date(checkout.timestamp_in * 1000).toLocaleString())}`;
     } else {
         t_in_info.innerHTML = ` ${checkoutFormatDate(new Date(checkout.timestamp_due * 1000).toLocaleString())}`;
     }
@@ -122,17 +122,19 @@ function createCheckoutDiv(checkout, kiosk_mode = false) {
     let item_name = document.createElement("div");
     item_name.classList.add("checkout-entry-items");
 
-    for (let item of checkout.items) {
+    for (let uuid of Object.keys(checkout.items)) {
         let item_div = document.createElement("div");
         item_div.classList.add("checkout-entry-item");
-        item_div.innerHTML = `${item}`;
+        let name = state.inventory.find((item) => item.uuid === uuid).name;
+
+        item_div.innerHTML = `${checkout.items[uuid]}x ${name ?? `[${uuid}]`}`;
         item_name.appendChild(item_div);
     }
     div.appendChild(item_name);
 
     let times_notified = document.createElement("div");
     times_notified.classList.add("checkout-entry-times-notified");
-    times_notified.innerHTML = `Emails sent: <b>${checkout.num_time_notified}</b>`;
+    times_notified.innerHTML = `Emails sent: <b>${checkout.notifications_sent}</b>`;
     div.appendChild(times_notified);
 
 
@@ -143,20 +145,22 @@ function createCheckoutDiv(checkout, kiosk_mode = false) {
         name.classList.add("checkout-entry-name");
 
         if (state.users !== null) {
-            name.innerHTML = `${state.users[checkout.cx_id].name ?? checkout.cx_id}`;
+            let user = state.users.find((user) => user.uuid === checkout.checked_out_by);
+            
+            name.innerHTML = `${user.name ?? checkout.checked_out_by}`;
         } else {
-            name.innerHTML = `${checkout.cx_id}`;
+            name.innerHTML = `${checkout.checked_out_by}`;
         }
 
         div.appendChild(name);
-        if (checkout.checked_in) {
+        if (checkout.timestamp_in) {
             div.classList.add("checked-in");
         } else {
             let check_in_button = document.createElement("button");
             check_in_button.classList.add("check-in-button");
             check_in_button.innerHTML = "Check In";
             check_in_button.onclick = () => {
-                checkIn(checkout.checkout_uuid);
+                checkIn(checkout.uuid);
             }
 
             div.appendChild(check_in_button);

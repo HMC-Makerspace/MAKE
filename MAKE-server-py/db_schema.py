@@ -311,11 +311,12 @@ The following fields are stored:
 class Checkout(BaseModel):
     _id: Optional[PyObjectId] = Field(alias="_id")
     uuid: str
-    items: List[dict]
+    items: Dict[str, int]
     checked_out_by: str
     timestamp_out: str
     timestamp_due: str
     timestamp_in: Union[str, None]
+    notifications_sent: int
 
     class Config:
         arbitrary_types_allowed = True
@@ -327,11 +328,14 @@ class Checkout(BaseModel):
                 "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
                 "items": [
                     {
-                        "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                        "quantity": 1
+                        "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l": 1
                     }
                 ],
-                "checked_out_by": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"
+                "checked_out_by": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "timestamp_out": "165231121",
+                "timestamp_due": "165231121",
+                "timestamp_in": None,
+                "notifications_sent": 2
             }
         }
 

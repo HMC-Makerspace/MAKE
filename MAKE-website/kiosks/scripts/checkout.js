@@ -3,8 +3,9 @@ var state = {
     inventory: null,
     checkouts: null,
     users: null,
-    cart: [],
-    current_id_number: 0,
+    cart: {},
+    current_cx_id: 0,
+    current_user_info: null,
 }
 
 document.documentElement.setAttribute('data-theme', 'dark');
@@ -62,7 +63,7 @@ async function authenticate() {
             e.preventDefault();
             correct_sequence = 0;
             setPage("inventory");
-            state.cart = [];
+            state.cart = {};
             document.getElementById("id-input").value = "";
             document.getElementById("id-input").focus();
         }
@@ -103,9 +104,10 @@ async function authenticate() {
             e.target.value = e.target.value.substring(0, e.target.value.length - 2);
         }
 
-        state.current_id_number = e.target.value;
+        state.current_cx_id = e.target.value;
 
-        fetchUserInfo(state.current_id_number.replace(";", "")).then((user_info) => {
+        fetchUserInfo(state.current_cx_id.replace(";", "")).then((user_info) => {
+            state.current_user_info = user_info;
             createUserInfo(user_info)
         });
     });
@@ -351,8 +353,8 @@ function clearUser() {
     document.getElementById("id-input").value = "";
     document.getElementById("id-input").focus();
     document.getElementById("id-error").classList.add("hidden");
-    state.current_id_number = 0;
-    state.cart = [];
+    state.current_cx_id = 0;
+    state.cart = {};
     updateSelectedItems();
 }
 
@@ -395,44 +397,47 @@ function updatePage() {
     }
 }
 
-function addToCart(name, index) {
-    if (state.current_id_number === 0) {
+function addToCart(uuid) {
+    if (state.current_cx_id === 0) {
         return;
     }
 
-    const item = {
-        name: name,
-        index: index
+    if (state.cart[uuid] === undefined) {
+        state.cart[uuid] = 1;
+    } else {
+        state.cart[uuid] += 1;
     }
 
-    state.cart = [...state.cart, item];
     updateSelectedItems();
     updateCartHTML();
 }
 
 function updateSelectedItems() {
-    const selected_els = document.getElementsByClassName("inventory-result");
-    for (let i = 1; i < selected_els.length; i++) {
-        const el = selected_els[i];
+    const selected_els = document.querySelectorAll(".inventory-result.selected");
+    
+    for (let el of selected_els) {
+        el.classList.remove("selected");
+    }
 
-        if (state.cart.filter(item => item.index == el.id.split("-")[2]).length > 0) {
+    for (let uuid of Object.keys(state.cart)) {
+        const el = document.getElementById(`inventory-result-${uuid}`);
+
+        if (el !== null) {
             el.classList.add("selected");
-        } else {
-            el.classList.remove("selected");
         }
     }
 }
 
-function removeFromCart(name) {
-    // Remove the first instance of the item from the cart
-    // leave the rest though
+function removeFromCart(uuid) {
+    if (state.cart[uuid] === undefined) {
+        return;
+    }
 
-    // Reverse the cart so that the first instance of the item is the last one
-    // in the array
-    state.cart.reverse();
-    const index = state.cart.findIndex(item => item.name === name);
-    state.cart.splice(index, 1);
-    state.cart.reverse();
+    if (state.cart[uuid] <= 1) {
+        delete state.cart[uuid];
+    } else {
+        state.cart[uuid] -= 1;
+    }
 
     updateSelectedItems();
     updateCartHTML();
@@ -443,14 +448,33 @@ function updateCartHTML() {
 
     el.innerHTML = "";
 
-    for (let item of state.cart) {
+    for (let uuid of Object.keys(state.cart)) {
+        const item = state.inventory.find((item) => item.uuid === uuid);
+
         el.innerHTML += `
             <div class="cart-item">
                 <div class="cart-item-name">${item.name}</div>
-                <div class="cart-item-remove" onclick="removeFromCart('${item.name}')">Remove</div>
+                <div class="cart-item-quantity">
+                    <input id="cart-item-quantity-${uuid}" class="cart-item-quantity-input" type="" value="${state.cart[uuid]}"
+                    onchange="updateCartQuantity('${uuid}')">
+                </div>
             </div>
         `;
     }
+}
+
+function updateCartQuantity(uuid) {
+    const el = document.getElementById(`cart-item-quantity-${uuid}`);
+    const value = parseInt(el.value);
+
+    if (value <= 0) {
+        delete state.cart[uuid];
+    } else {
+        state.cart[uuid] = value;
+    }
+
+    updateCartHTML();
+    updateSelectedItems();
 }
 
 // Sun, Mon, Tue, Wed, Thu, Fri, Sat
@@ -510,7 +534,7 @@ async function commitCheckout() {
     let sec_length = getCheckoutLength();
 
     // Generate new uuid
-    const uuid = uuidv4();
+    const uuid = self.crypto.randomUUID();
 
     const response = await fetch(`${API}/checkouts/create_new_checkout`, {
         method: "POST",
@@ -521,10 +545,11 @@ async function commitCheckout() {
         body: JSON.stringify({
             uuid: uuid,
             items: state.cart,
-            timestamp_out: new Date().getTime(),
+            timestamp_out: (new Date().getTime()) / 1000,
             timestamp_in: null,
-            timestamp_due: new Date().getTime() + sec_length * 1000,
-            checked_out_by: state.current_uuid,
+            timestamp_due: ((new Date().getTime()) / 1000) + sec_length,
+            checked_out_by: state.current_user_info.uuid,
+            notifications_sent: 0,
         })
     });
 
@@ -569,6 +594,8 @@ async function commitReservation() {
 
     const start_date_unix = start_date.getTime() / 1000;
 
+    const uuid = self.crypto.randomUUID();
+
     const response = await fetch(`${API}/checkouts/create_new_checkout`, {
         method: "POST",
         headers: {
@@ -580,8 +607,9 @@ async function commitReservation() {
             items: state.cart,
             timestamp_out: start_date_unix,
             timestamp_in: null,
-            timestamp_due: new Date().getTime() + sec_length * 1000,
-            checked_out_by: state.current_uuid,
+            timestamp_due: ((new Date().getTime())) / 1000 + sec_length,
+            checked_out_by: state.current_user_info.uuid,
+            notifications_sent: 0,
         })
     });
 
@@ -622,13 +650,12 @@ async function checkIn(uuid) {
         {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
                 "api-key": api_key,
             },
         }
     );
 
-    if (response.status === 200) {
+    if (response.status === 201) {
         displaySuccessInCheckout(uuid);
     } else {
         displayErrorInCheckout(uuid);

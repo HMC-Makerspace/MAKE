@@ -35,6 +35,8 @@ async def route_get_checkouts(request: Request):
     # Get all checkouts
     checkouts = await collection.find().to_list(None)
 
+    checkouts = [Checkout(**checkout) for checkout in checkouts]
+
     # Return the checkouts
     return checkouts
 
@@ -66,10 +68,12 @@ async def route_get_checkout_record(request: Request, checkout_uuid: str):
         # Return error
         raise HTTPException(status_code=404, detail="Checkout does not exist")
 
+    checkout = Checkout(**checkout)
+
     # Return the checkout
     return checkout
 
-@checkouts_router.post("/create_new_checkout")
+@checkouts_router.post("/create_new_checkout", status_code=201)
 async def route_create_new_checkout(request: Request):
     # Create a checkout
     logging.getLogger().setLevel(logging.INFO)
@@ -84,7 +88,7 @@ async def route_create_new_checkout(request: Request):
     if not validate_api_key(db, api_key, "checkouts"):
         # Invalid API key
         # Return error
-        raise HTTPException(status_code=404, detail="Invalid API key")
+        raise HTTPException(status_code=401, detail="Invalid API key")
 
     # Get the checkouts collection
     collection = await db.get_collection("checkouts")
@@ -92,8 +96,8 @@ async def route_create_new_checkout(request: Request):
     # Insert the checkout
     await collection.insert_one(checkout.dict())
 
-    # Return the checkout
-    return checkout
+    # Return status code 201
+    return
 
 @checkouts_router.post("/update_checkout/{checkout_uuid}")
 async def route_update_checkout(request: Request, checkout_uuid: str):
@@ -121,7 +125,7 @@ async def route_update_checkout(request: Request, checkout_uuid: str):
     # Return the checkout
     return checkout
 
-@checkouts_router.post("/check_in_checkout/{checkout_uuid}")
+@checkouts_router.post("/check_in_checkout/{checkout_uuid}", status_code=201)
 async def route_check_in_checkout(request: Request, checkout_uuid: str):
     # Check in a checkout
     logging.getLogger().setLevel(logging.INFO)
@@ -135,7 +139,7 @@ async def route_check_in_checkout(request: Request, checkout_uuid: str):
     if not validate_api_key(db, api_key, "checkouts"):
         # Invalid API key
         # Return error
-        raise HTTPException(status_code=404, detail="Invalid API key")
+        raise HTTPException(status_code=401, detail="Invalid API key")
 
     # Get the checkouts collection
     collection = await db.get_collection("checkouts")
@@ -144,7 +148,7 @@ async def route_check_in_checkout(request: Request, checkout_uuid: str):
     await collection.update_one({"uuid": checkout_uuid}, {"$set": {"timestamp_in": datetime.datetime.now().timestamp()}})
 
     # Return success
-    return {"success": True}
+    return
 
 @checkouts_router.post("/delete_checkout/{checkout_uuid}")
 async def route_delete_checkout(request: Request, checkout_uuid: str):
