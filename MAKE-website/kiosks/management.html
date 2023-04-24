@@ -37,39 +37,68 @@
             <button id="workshops-button" class="set-page" onclick="setPage('workshops')">Workshops</button>
         </div>
 
-        <div class="main-content" id="page-home">
-            <h1>MAKE Management Console</h1>
-            <p>Welcome to the MAKE Management Console. 
-                This is where you can manage the inventory, student storage, 
-                steward shifts, workshops, and
-                users of the MAKE Lab.</p>
-            <p>Click on the buttons above to get started.</p>
+        <div class="main-content content-container" id="page-home">
+            <div class="content-header">
+                <h1>MAKE Management Console</h1>
+                <p>
+                    Welcome to the MAKE Management Console. 
+                    This is where you can manage the inventory, student storage, 
+                    steward shifts, workshops, and
+                    users of the Makerspace.
+                </p>
+                <p>
+                    Changes made here will be updated in real time on
+                    make.hmc.edu.
+                </p>
+                <p>Click on the buttons above to get started.</p>
+            </div>
         </div>
 
-        <div class="main-content hidden" id="page-inventory">
-
-        </div>
-
-        <div class="main-content hidden" id="page-student-storage">
-
-        </div>
-
-        <div class="main-content hidden" id="page-users">
-        
-        </div>
-
-        <div class="main-content hidden" id="page-shifts">
+        <div class="main-content content-container hidden" id="page-inventory">
 
         </div>
 
-        <div class="main-content hidden" id="page-checkouts">
+        <div class="main-content content-container hidden" id="page-student-storage">
+            <div class="content-header">
+                <h1>Student Storage</h1>
+                <p>
+                    This is where you can manage the student storage
+                    of the Makerspace.
+                </p>
+            </div>
+            
+            <div id="overall-student-storage" class="content-body">
+
+            </div>
+        </div>  
+
+        <div class="main-content content-container hidden" id="page-users">
+            <div id="users-search" class="content-header">
+                <input type="text" id="users-search-input" placeholder="Search by name, email, or ID number...">
+            </div>
+
+            <div id="users-results" class="content-body">
+
+            </div>
+        </div>
+
+        <div class="main-content content-container hidden" id="page-shifts">
 
         </div>
 
-        <div class="main-content hidden" id="page-workshops">
+        <div class="main-content content-container hidden" id="page-checkouts">
 
         </div>
 
+        <div class="main-content content-container hidden" id="page-workshops">
+
+        </div>
+
+    </div>
+
+    <div id="popup-container" class="hidden">
+        <div id="popup-background" onclick="closePopup()"></div>
+        <div id="popup-content"></div>
     </div>
 
     <script src="/scripts/libs/fuzzysort.min.js"></script>

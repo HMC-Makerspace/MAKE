@@ -219,3 +219,94 @@ function openInNewTab(url) {
     var win = window.open(encoded, '_blank');
     win.focus();
 }
+
+function searchUsers(search) {
+    if (state.users === null) {
+        return [];
+    }
+
+    const results = fuzzysort.go(search, Object.values(state.users), user_search_options);
+
+    const results_norm = results.sort((a, b) => b.score - a.score);
+
+    return results_norm;
+}
+
+function createUserDiv(user, editable=false) {
+    let div = document.createElement("div");
+    div.classList.add("user-result");
+
+    let name = document.createElement("div");
+    name.classList.add("user-result-name");
+    name.innerHTML = user.name;
+
+    let id = document.createElement("div");
+    id.classList.add("user-result-id");
+    id.innerHTML = user.cx_id;
+
+    let email = document.createElement("div");
+    email.classList.add("user-result-email");
+    email.innerHTML = user.email;
+
+    let auth = document.createElement("div");
+    auth.classList.add("user-result-auth");
+    auth.innerHTML = user.role;
+
+    let passed_quizzes = document.createElement("div");
+    passed_quizzes.classList.add("user-result-passed-quizzes");
+    for (let timestamp of Object.keys(user.passed_quizzes)) {
+        if (determineValidQuizDate(Number(timestamp))) {
+            let quiz_div = document.createElement("div");
+            quiz_div.innerHTML = QUIZ_ID_TO_NAME[user.passed_quizzes[timestamp]];
+            passed_quizzes.appendChild(quiz_div);
+        }
+    }
+
+    div.appendChild(name);
+    div.appendChild(id);
+    div.appendChild(email);
+    div.appendChild(auth);
+    div.appendChild(passed_quizzes);
+
+    if (editable) {
+        div.classList.add("editable");
+
+        let edit = document.createElement("button");
+        edit.classList.add("user-result-edit");
+        edit.innerHTML = "Edit";
+        edit.addEventListener("click", () => {
+            showEditUser(user.uuid);
+        });
+
+        div.appendChild(edit);
+    }
+
+    return div;
+}
+const user_search_options = {
+    limit: 1000, // don't return more results than you need!
+    allowTypo: true, // if you don't care about allowing typos
+    threshold: -10000, // don't return bad results
+    keys: ['name', 'cx_id_str', 'email', 'role'], // keys to search
+    all: true,
+}
+
+function submitUserSearch(editable=false) {
+    if (state.users === null) {
+        return;
+    }
+
+    const search = document.getElementById("users-search-input").value;
+
+    const search_results = searchUsers(search);
+
+    const users = document.getElementById("users-results");
+
+    let divs = [];
+    for (let user of search_results) {
+        divs.push(createUserDiv(user.obj, editable));
+    }
+
+    removeAllChildren(users);
+    appendChildren(users, divs);
+}

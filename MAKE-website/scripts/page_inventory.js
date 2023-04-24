@@ -211,9 +211,11 @@ function generateInventoryDiv(result, kiosk_mode = false) {
     location.innerHTML = `<span class="room">${item.location_room}</span> <span class="area">${item.location_specific}</span>`;
     main_div.appendChild(location);
 
-    if (item.is_kit === false) {
+
+    if (item.kit_contents == null) {
         const quantity = document.createElement("div");
         quantity.classList.add("inventory-result-quantity");
+
         if (item.quantity >= 0) {
             quantity.classList.add("number");
             if (item.checked_quantity > 0) {
@@ -222,19 +224,26 @@ function generateInventoryDiv(result, kiosk_mode = false) {
                 quantity.innerText = `${item.quantity}`;
             }
         } else {
+            console.log("Quantity is less than 0:", item.quantity);
+            console.log("type:", typeof item.quantity);
+
             switch (item.quantity) {
-                case -1:
+                case -1 || "-1":
                     quantity.classList.add("low");
                     quantity.innerText += "Low";
                     break;
-                case -2:
+                case -2 || "-2":
                     quantity.classList.add("medium");
                     quantity.innerText += "Medium";
                     break;
-                case -3:
+                case -3 || "-3":
                     quantity.classList.add("high");
                     quantity.innerText += "High";
                     break;
+                default:
+                    console.log("Unknown quantity:", item.quantity);
+                    quantity.classList.add("unknown");
+                    quantity.innerText += item.quantity;
             }
         }
         main_div.appendChild(quantity);

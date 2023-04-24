@@ -568,6 +568,36 @@ Management Console
   min-height: 200px;
 }
 
+.user-result.editable {
+  grid-template-columns: 2fr 1fr 3fr 0.5fr 5fr .5fr;
+}
+
+.user-result.editable button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+#popup-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+
+#popup-container >* {
+  position: relative;
+  z-index: 101;
+}
+
 /*
 
 LOOM

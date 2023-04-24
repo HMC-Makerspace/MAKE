@@ -31,7 +31,15 @@ async function authenticate() {
 
     setInterval(fetchUsers, 5000);
     setInterval(fetchStudentStorageAdmin, 5000);
-    await fetchUsers();
+
+    fetchUsers().then(() => {
+        for (let key of Object.keys(state.users)) {
+            state.users[key].cx_id_str = state.users[key].cx_id.toString();
+        }
+
+        submitUserSearch(editable=true);
+        document.getElementById("users-search-input").addEventListener("keyup", submitUserSearch, editable=true);
+    });
     await fetchStudentStorageAdmin();
 
     setInterval(renderAll(), 5000);
@@ -57,117 +65,29 @@ async function fetchStudentStorageAdmin() {
         state.student_storage = student_storage;
 
         console.log(state.student_storage);
-
-        renderStudentStorage();
     }
 }
 
 function renderAll() {
-    renderStats();
+    renderStudentStorage();
 }
 
-function renderStats() {
-    const stats = document.getElementById("stats-info");
 
-    removeAllChildren(stats);
-    appendChildren(stats, generateStatsDivs(state.users));
+function showEditUser(uuid) {
+    let user = state.users.find(user => user.uuid === uuid);
+
+    document.getElementById("popup-container").classList.remove("hidden");
+    document.getElementById("edit-user").classList.remove("hidden");
+
+    document.getElementById("edit-user-name").value = user.name;
+    document.getElementById("edit-user-email").value = user.email;
+    document.getElementById("edit-user-cx_id").value = user.cx_id;
+    document.getElementById("edit-user-role").value = user.cx_id;        
 }
 
-function generateStatsDivs(users) {
-    const divs = [];
-
-    // First, total quiz stats
-    const total_div = document.createElement("h2");
-    total_div.innerText = `Total Unique Quiz Takers`;
-    divs.push(total_div);
-    const total_count = document.createElement("table");
-    total_count.id = "total-count-table";
-
-    const total_count_header = document.createElement("tr");
-    total_count_header.innerHTML = `<th>School</th><th>Count</th><th>Percent of school</th>`;
-    total_count.appendChild(total_count_header);
-
-    const all_count = document.createElement("tr");
-    const all_count_users = Object.keys(state.users).length;
-    const total_pops = Object.values(school_pops).reduce((acc, cur) => acc + cur, 0);
-    const all_count_percent = Math.round((all_count_users / total_pops) * 100);
-
-    all_count.innerHTML = `<td>All</td><td>${all_count_users}</td><td>${all_count_percent}%</td>`;
-    total_count.appendChild(all_count);
-        
-    for (let school_id of Object.keys(school_names)) {
-        const count = document.createElement("tr");
-        const school_count = Object.values(state.users).filter(user => `${user.cx_id}`.startsWith(school_id)).length;
-        const school_perc = Math.round((school_count / school_pops[school_id]) * 100);
-
-        count.innerHTML = `<td>${school_names[school_id]}</td><td>${school_count}</td><td>${school_perc}%</td>`;
-
-        total_count.appendChild(count);
-    }
-
-    divs.push(total_count);
-
-    return divs;
-}
-
-async function updateStatus() {
-    const status = document.getElementById("auth-type").value;
-
-    const el = document.getElementById("auth-input");
-
-    const text = el.value;
-
-    let seperator = "\n";
-    if (text.includes(",")) {
-        seperator = ",";
-    }
-
-    const users = text.split(seperator);
-    const results = [];
-
-    for (let user of users) {
-        const id = findID(user);
-
-        if (id === null) {
-            results.push(`${user} not found`);
-            continue;
-        } else {
-
-            const response = await fetch(`${API}/users/update_user_role`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "api-key": api_key,
-                },
-                body: JSON.stringify({
-                    uuid: uuid,
-                    role: status.toLowerCase(),
-                }),
-            });
-
-            if (response.status !== 201) {
-                results.push(`${user} failed to set to ${status}`);
-            }
-        }
-    }
-
-    el.value += "\n\n";
-    el.value += results.join("\n");
-}
-
-function findID(user) {
-    user = user.trim().toLowerCase();
-
-    for (let id of Object.keys(state.users)) {
-        const name = state.users[id].name.toLowerCase();
-        const name_parts = name.split(" ");
-        const user_parts = user.split(" ");
-        if (name === user || state.users[id].email === user || state.users[id].id == user) {
-            return id;
-        } else if (name_parts[0] === user_parts[0] && name_parts[name_parts.length - 1] === user_parts[user_parts.length - 1]) {
-            return id;
-        }
-    }
-
-    return null;
+function hidePopup() {
+    document.getElementById("popup-container").classList.add("hidden");
+    document.getElementById("edit-user").classList.add("hidden");
+    document.getElementById("edit-inventory").classList.add("hidden");
+    document.getElementById("edit-shift").classList.add("hidden");
 }
