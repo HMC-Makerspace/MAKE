@@ -1,3 +1,4 @@
+import datetime
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
@@ -5,6 +6,7 @@ import asyncio
 import uvicorn
 import logging
 import sys
+import utilities
 
 # Import the database schema
 from db_schema import *
@@ -97,6 +99,8 @@ class BackgroundRunner:
             # Create/update users from quizzes
             await create_update_users_from_quizzes()
 
+            utilities.last_updated_time = datetime.datetime.now()
+
             await asyncio.sleep(60)
 
 
@@ -134,5 +138,5 @@ if __name__ == "__main__":
                     workers=16, ssl_keyfile=SSL_CERT_PRIVKEY, ssl_certfile=SSL_CERT_PERMKEY)
     else:
         logging.info("Started MAKE in debug mode!")
-        uvicorn.run("main:app", host="127.0.0.1", port=5000,
+        uvicorn.run("main:app", host="127.0.0.1", port=8080,
                     log_level="info", reload=True)

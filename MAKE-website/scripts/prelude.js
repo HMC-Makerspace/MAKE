@@ -5,7 +5,7 @@ Constants
 */
 
 const API = '/api/v2';
-
+const VER = "2.0.0"
 
 /*
 
@@ -32,8 +32,15 @@ var state = {
 
 // Function to load/save state from localstorage
 function loadState() {
-    const new_state = JSON.parse(localStorage.getItem('state')) ?? state;
-    state = validateState(new_state);
+    const version = localStorage.getItem("make-version");
+
+    if (version == VER) {
+        const new_state = JSON.parse(localStorage.getItem('state')) ?? state;
+        state = validateState(new_state);
+    } else {
+        console.log("Version has changed, wiping localstorage")
+        saveState();
+    }
 }
 
 function validateState(new_state) {

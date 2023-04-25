@@ -1,4 +1,6 @@
+import datetime
 import logging
+import utilities
 from utilities import validate_api_key
 from db_schema import *
 from machines.loom import render_loom_file
@@ -17,7 +19,22 @@ async def route_get_status():
     # Get the status
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Getting status...")
-    return {"status": "ok"}
+
+    db = MongoDB()
+
+    checkouts = await db.get_collection("checkouts")
+    users = await db.get_collection("users")
+    inventory = await db.get_collection("inventory")
+
+    return {
+        "status": "alive",
+        "last_update": utilities.last_updated_time.timestamp(),
+        "time": datetime.datetime.now().timestamp(),
+        "total_checkouts": await checkouts.count_documents({}), 
+        "total_users": await users.count_documents({}),
+        "total_items": await inventory.count_documents({}),
+        "version": "2.0.0",
+    }
 
 
 @misc_router.post("/render_loom_file")

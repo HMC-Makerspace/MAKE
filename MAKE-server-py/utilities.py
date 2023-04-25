@@ -4,6 +4,9 @@ from config import *
 import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import datetime
+
+last_updated_time = datetime.datetime.now()
 
 async def validate_api_key(db, api_key_str, scope):
     # Get the API keys collection
