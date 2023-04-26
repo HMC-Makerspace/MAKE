@@ -86,11 +86,11 @@ async def route_get_user_by_cx_id(cx_id: int):
     # Return the user
     return user
 
-@user_router.post("/update_user_role")
+@user_router.post("/update_user")
 async def route_update_user(request: Request):
     # Update a user's role
     logging.getLogger().setLevel(logging.INFO)
-    logging.info("Updating user role...")
+    logging.info("Updating user...")
 
     # Get the API key
     api_key = request.headers["api-key"]
@@ -98,7 +98,7 @@ async def route_update_user(request: Request):
     db = MongoDB()
 
     # Check if the API key is valid
-    is_valid = await validate_api_key(db, api_key)
+    is_valid = await validate_api_key(db, api_key, "users")
 
     if not is_valid:
         # The API key is not valid
@@ -111,7 +111,9 @@ async def route_update_user(request: Request):
     # Get the user UUID and role
     json = await request.json()
     user_uuid = json["uuid"]
-    role = json["role"]
+
+    print(json["uuid"])
+    print(json["role"])
 
     # Check if the user already exists
     user = await collection.find_one({"uuid": user_uuid})
@@ -121,8 +123,16 @@ async def route_update_user(request: Request):
         # Return error
         raise HTTPException(status_code=404, detail="User does not exist")
     
-    user.role = role
+    user["role"] = json["role"]
+    user["cx_id"] = json["cx_id"]
+    user["name"] = json["name"]
+    user["email"] = json["email"]
 
+    try :
+        user = User(**user)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid user data") from e
+    
     # Update the user
     await collection.replace_one({"uuid": user.uuid}, user.dict())
 

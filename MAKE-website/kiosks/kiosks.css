@@ -505,6 +505,10 @@ Management Console
   transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
+#main-admin-grid >.content-container {
+  height: calc(100vh - 40px);
+}
+
 #admin-header {
   grid-area: header;
   display: flex;
@@ -593,9 +597,37 @@ Management Console
   z-index: 100;
 }
 
-#popup-container >* {
-  position: relative;
-  z-index: 101;
+#popup-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999;
+}
+
+#popup-content {
+  z-index: 1000;
+  background-color: var(--theme-color-5);
+  padding: 40px;
+}
+
+#popup-content >* {
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+}
+
+#edit-user-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+#edit-user-buttons button {
+  width: 100px;
+  height: 30px;
 }
 
 /*

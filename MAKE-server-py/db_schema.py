@@ -146,7 +146,7 @@ The following fields are stored:
 - Name: The name of the user
 - Email: The email of the user
 - CX ID: The CX ID of the user
-- Role: The role of the user. Either User, Steward, Head Steward, or Admin
+- Role: The role of the user. Either user, steward, head_steward, or admin
 - Quizzes: A list of the quizzes that the user has taken & passed
 
 If the user is a Steward or Head Steward, the following fields are stored:
@@ -175,7 +175,7 @@ class User(BaseModel):
                 "name": "John Doe",
                 "email": "john@g.hmc.edu",
                 "cx_id": "123456789",
-                "role": "User",
+                "role": "user",
                 "passed_quizzes": {
                     "431278492": "1231234124",
                 }

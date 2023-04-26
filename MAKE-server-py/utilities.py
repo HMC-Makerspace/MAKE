@@ -18,6 +18,7 @@ async def validate_api_key(db, api_key_str, scope):
     if api_key is None:
         return False
     
+    # Always allow admin scope, otherwise check if the scope is in the API key's scope
     if scope not in api_key["scope"] and "admin" not in api_key["scope"]:
         return False
     

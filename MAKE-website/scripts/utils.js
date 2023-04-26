@@ -48,6 +48,12 @@ const QUIZ_ID_TO_NAME = {
     "1235553349": "Loom",
 }
 
+const ROLE_TO_READABLE = {
+    "admin": "Admin",
+    "user": "User",
+    "steward": "Steward",
+    "head_steward": "Head Steward",
+}
 
 // Cut off date for quizzes is on June 1st yearly
 // If a quiz was taken before this date, it is not counted
@@ -114,8 +120,9 @@ function setPage(page, create_history = true) {
 
     const menu = document.getElementById('left-bar');
 
-    menu.classList.remove('show');
-
+    if (menu) {
+        menu.classList.remove('show');
+    }
 }
 
 function onHashChange() {
@@ -232,7 +239,7 @@ function searchUsers(search) {
     return results_norm;
 }
 
-function createUserDiv(user, editable=false) {
+function createUserDiv(user, editable = false) {
     let div = document.createElement("div");
     div.classList.add("user-result");
 
@@ -250,14 +257,20 @@ function createUserDiv(user, editable=false) {
 
     let auth = document.createElement("div");
     auth.classList.add("user-result-auth");
-    auth.innerHTML = user.role;
+    auth.innerHTML = ROLE_TO_READABLE[user.role] ?? "Unknown: " + user.role;
 
     let passed_quizzes = document.createElement("div");
+
+    let quizzes_used = [];
+
     passed_quizzes.classList.add("user-result-passed-quizzes");
     for (let timestamp of Object.keys(user.passed_quizzes)) {
-        if (determineValidQuizDate(Number(timestamp))) {
+        if (!quizzes_used.includes(user.passed_quizzes[timestamp]) 
+                && determineValidQuizDate(Number(timestamp))) {
             let quiz_div = document.createElement("div");
             quiz_div.innerHTML = QUIZ_ID_TO_NAME[user.passed_quizzes[timestamp]];
+
+            quizzes_used.push(user.passed_quizzes[timestamp]);
             passed_quizzes.appendChild(quiz_div);
         }
     }
@@ -291,7 +304,7 @@ const user_search_options = {
     all: true,
 }
 
-function submitUserSearch(editable=false) {
+function submitUserSearch(editable = false) {
     if (state.users === null) {
         return;
     }

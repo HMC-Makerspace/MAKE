@@ -37,8 +37,8 @@ async function authenticate() {
             state.users[key].cx_id_str = state.users[key].cx_id.toString();
         }
 
-        submitUserSearch(editable=true);
-        document.getElementById("users-search-input").addEventListener("keyup", submitUserSearch, editable=true);
+        submitUserSearch(editable = true);
+        document.getElementById("users-search-input").addEventListener("keyup", submitUserSearch, editable = true);
     });
     await fetchStudentStorageAdmin();
 
@@ -82,12 +82,54 @@ function showEditUser(uuid) {
     document.getElementById("edit-user-name").value = user.name;
     document.getElementById("edit-user-email").value = user.email;
     document.getElementById("edit-user-cx_id").value = user.cx_id;
-    document.getElementById("edit-user-role").value = user.cx_id;        
+    document.getElementById("edit-user-role").value = user.role;
+
+    document.getElementById("edit-user-save").onclick = () => {
+        saveUser(uuid);
+    }
 }
 
-function hidePopup() {
+async function saveUser(uuid) {
+    let user = {
+        uuid: uuid,
+        name: document.getElementById("edit-user-name").value,
+        email: document.getElementById("edit-user-email").value,
+        cx_id: Number(document.getElementById("edit-user-cx_id").value),
+        role: document.getElementById("edit-user-role").value,
+    }
+
+    let request = await fetch(`${API}/users/update_user`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+            body: JSON.stringify(user)
+        }
+    );
+
+    if (request.status == 200) {
+        console.log("User updated");
+        fetchUsers().then(() => {
+            for (let key of Object.keys(state.users)) {
+                state.users[key].cx_id_str = state.users[key].cx_id.toString();
+            }
+    
+            submitUserSearch(editable = true);
+        });
+
+        closePopup();
+    } else {
+        console.log("Error updating user");
+    }
+}
+
+function closePopup() {
     document.getElementById("popup-container").classList.add("hidden");
-    document.getElementById("edit-user").classList.add("hidden");
-    document.getElementById("edit-inventory").classList.add("hidden");
-    document.getElementById("edit-shift").classList.add("hidden");
+    const content = document.getElementById("popup-content");
+
+    for (let child of content.children) {
+        child.classList.add("hidden");
+    }
 }
