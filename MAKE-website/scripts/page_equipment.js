@@ -136,6 +136,12 @@ const main_area_equipment = [
         description: "The Cricut Explore Air 2 is a machine that can cut out designs from paper, vinyl, and other materials. It can also be used to draw and write on paper.",
         image: "img/equipment/cricut.webp",
         manual: "https://docs.google.com/document/d/1Wom5XbKVJKwy3peKGTlM5m1HFji67XZr2B0jyBUi5jk/edit"
+    },
+    {
+        name: "Button Maker",
+        description: "The 2.25 and 1 inch button makers can be used to make custom buttons. The button maker can be used with embroidered fabric, paper, and other materials.",
+        image: "img/equipment/buttonmaker.webp",
+        manual: "https://drive.google.com/file/d/1EdwbQ0uiCozDRTExHXTBNiJCvsdNNxOv/view?usp=sharing"
     }
 ];
 
