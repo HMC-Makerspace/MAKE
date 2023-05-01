@@ -1,6 +1,6 @@
 # MAKE - Unified managment application for HMC's Makerspace 
 
-# Live at [make.hmc.edu](https://make.hmc.edu)
+### Live at [make.hmc.edu](https://make.hmc.edu)
 
 ## What does MAKE handle?
 - Inventory management and discovery
