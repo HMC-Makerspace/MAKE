@@ -6,6 +6,8 @@ var state = {
     inventory: null,
 };
 
+var shifts_updated = false;
+
 const API = '/api/v2';
 
 document.documentElement.setAttribute('data-theme', 'dark');
@@ -62,12 +64,37 @@ async function authenticate() {
         document.getElementById("users-search-input").addEventListener("keyup", submitUserSearch, editable = true);
     });
     await fetchStudentStorageAdmin();
+    await fetchShiftsAdmin();
 
     setInterval(renderAll(), 5000);
     renderAll();
+
+    // Register esc to close popup
+    document.addEventListener("keyup", (e) => {
+        if (e.key === "Escape") {
+            closePopup();
+        }
+    });
 }
 
 authenticate();
+
+async function fetchShiftsAdmin() {
+    const response = await fetch(`${API}/shifts/get_full_shift_schedule`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+        }
+    );
+
+    if (response.status == 200) {
+        const shifts = await response.json();
+
+        state.shifts = shifts;
+    }
+}
 
 async function fetchStudentStorageAdmin() {
     const response = await fetch(`${API}/student_storage/get_student_storage`,
@@ -90,6 +117,7 @@ async function fetchStudentStorageAdmin() {
 
 function renderAll() {
     renderStudentStorage();
+    renderScheduleAdmin();
 }
 
 
@@ -104,12 +132,42 @@ function showEditUser(uuid) {
     document.getElementById("edit-user-cx_id").value = user.cx_id;
     document.getElementById("edit-user-role").value = user.role;
 
+    document.getElementById("edit-user-proficiencies").innerHTML = "";
+
+    if (user.role == "steward" || user.role == "head_steward") {
+        for (let prof of PROFICIENCIES) {
+            let prof_div = document.createElement("div");
+            prof_div.classList.add("edit-proficiency-container");
+
+            let prof_checkbox = document.createElement("input");
+            prof_checkbox.type = "checkbox";
+            if (user.proficiencies) {
+                prof_checkbox.checked = user.proficiencies.includes(prof);
+            } else {
+                prof_checkbox.checked = false;
+            }
+            prof_checkbox.id = `edit-user-proficiency-${prof}`;
+
+            let prof_label = document.createElement("label");
+            prof_label.innerText = prof;
+            prof_label.htmlFor = `edit-user-proficiency-${prof}`;
+
+            prof_div.appendChild(prof_checkbox);
+            prof_div.appendChild(prof_label);
+
+            document.getElementById("edit-user-proficiencies").appendChild(prof_div);
+        }
+    }
+        
+
     document.getElementById("edit-user-save").onclick = () => {
         saveUser(uuid);
     }
 }
 
 async function saveUser(uuid) {
+    let prev_user = state.users.find(user => user.uuid === uuid);
+
     let user = {
         uuid: uuid,
         name: document.getElementById("edit-user-name").value,
@@ -117,6 +175,19 @@ async function saveUser(uuid) {
         cx_id: Number(document.getElementById("edit-user-cx_id").value),
         role: document.getElementById("edit-user-role").value,
     }
+
+    let profs = [];
+
+    if (prev_user.role == "steward" || prev_user.role == "head_steward") {
+        for (let prof of PROFICIENCIES) {
+            if (document.getElementById(`edit-user-proficiency-${prof}`).checked) {
+                profs.push(prof);
+            }
+        }
+
+        user.proficiencies = profs;
+    }
+
 
     let request = await fetch(`${API}/users/update_user`,
         {
@@ -152,4 +223,233 @@ function closePopup() {
     for (let child of content.children) {
         child.classList.add("hidden");
     }
+
+    if (shifts_updated) {
+        renderScheduleAdmin();
+        pushShiftsAdmin();
+        shifts_updated = false;
+    }
+}
+
+async function pushShiftsAdmin() {
+    const response = await fetch(`${API}/shifts/update_shift_schedule`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+            method: "POST",
+            body: JSON.stringify(state.shifts),
+        }
+    );
+
+    if (response.status == 201) {
+        console.log("Shifts updated");
+    } else {
+        console.log("Error updating shifts");
+    }
+}
+
+function renderScheduleAdmin() {
+    const schedule = document.getElementById("schedule-table");
+
+    removeAllChildren(schedule);
+
+    appendChildren(schedule, generateScheduleDivsAdmin());
+}
+
+function generateScheduleDivsAdmin() {
+    let divs = [];
+
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const time_start = 12;
+    const time_end = 24;
+
+    // Append header of days to table
+    const header = document.createElement("tr");
+
+    const day_header = document.createElement("th");
+    day_header.innerText = "Time";
+    header.appendChild(day_header);
+
+    for (let day of days) {
+        const day_header = document.createElement("th");
+        day_header.innerText = day;
+        header.appendChild(day_header);
+    }
+
+    divs.push(header);
+
+    for (let i = time_start; i < time_end; i++) {
+        const row = document.createElement("tr");
+
+        const time = document.createElement("th");
+        time.innerText = `${formatHour(i)} - ${formatHour(i + 1)}`;
+
+        row.appendChild(time);
+
+        for (let day of days) {
+            const cell = document.createElement("td");
+
+            const inner_div = document.createElement("div");
+            inner_div.classList.add("schedule-shift");
+
+            const shift = state.shifts.find(shift => shift.day === day && shift.timestamp_start === formatHour(i));
+
+            if (shift) {
+                inner_div.classList.add(`stewards-${shift.stewards.length}`);
+                for (let uuid of shift.stewards) {
+                    const user = state.users.find(user => user.uuid === uuid);
+
+                    if (user.role == "head_steward") {
+                        inner_div.classList.add("head-steward");
+                    }
+
+                    const user_div = document.createElement("span");
+                    user_div.innerText = user.name;
+                    user_div.classList.add("steward");
+
+                    inner_div.appendChild(user_div);
+                }
+            }
+
+            cell.appendChild(inner_div);
+
+            cell.onclick = () => {
+                showEditShift(day, i);
+            };
+
+            row.appendChild(cell);
+        }
+
+        divs.push(row);
+    }
+    
+    return divs;
+}
+
+function showEditShift(day, hour) {
+    let shift = state.shifts.find(shift => shift.day === day && shift.timestamp_start === formatHour(hour));
+
+    let all_stewards = state.users.filter(user => user.role === "steward" || user.role === "head_steward");
+
+    // Sort by name
+    all_stewards.sort((a, b) => {
+        if (a.name < b.name) {
+            return -1;
+        } else {
+            return 1;
+        }
+    });
+
+    document.getElementById("popup-container").classList.remove("hidden");
+    document.getElementById("edit-shift").classList.remove("hidden");
+    document.getElementById("edit-shift-day-time").innerText = `${day} @ ${formatHour(hour)}`;
+
+    renderShiftStewards(all_stewards, shift, day, hour);
+}
+
+function renderShiftStewards(all_stewards, shift, day, hour) {
+    const shift_stewards = document.getElementById("edit-shifted-stewards");
+    const other_stewards = document.getElementById("edit-unshifted-stewards");
+
+    if (shift == undefined || shift == null) {
+        shift = {
+            stewards: [],
+        };
+    }
+
+    removeAllChildren(shift_stewards);
+    removeAllChildren(other_stewards);
+
+    // First add all stewards on shift
+    for (let uuid of shift.stewards) {
+        const user = all_stewards.find(user => user.uuid === uuid);
+
+        shift_stewards.appendChild(generateEditStewardShiftDiv(user, true, day, hour));
+    }
+
+    // Then add all stewards not on shift
+    for (let user of all_stewards) {
+        if (!shift.stewards.includes(user.uuid)) {
+            other_stewards.appendChild(generateEditStewardShiftDiv(user, false, day, hour));
+        }
+    }
+}
+
+function generateEditStewardShiftDiv(user, on_shift, day, hour) {
+    const user_div = document.createElement("div");
+    user_div.classList.add("add-remove-steward-info");
+    // Append name and cx_id
+    const name = document.createElement("span");
+    name.innerText = `${user.name} (${user.cx_id})`;
+    user_div.appendChild(name);
+
+    const add_remove_button = document.createElement("button");
+
+    if (on_shift) {
+        user_div.classList.add("on-shift");
+
+        add_remove_button.innerText = "-";
+        add_remove_button.onclick = () => {
+            deleteStewardFromShift(user.uuid, day, hour);
+        }
+
+        // Add button to right side
+        user_div.appendChild(add_remove_button);
+    } else {
+        user_div.classList.add("off-shift");
+
+        add_remove_button.innerText = "+";
+        add_remove_button.onclick = () => {
+            addStewardToShift(user.uuid, day, hour);
+        }
+
+        // Add button to left side
+        user_div.insertBefore(add_remove_button, user_div.firstChild);
+    }
+
+    return user_div;
+}
+
+function addStewardToShift(uuid, day, hour) {
+    shifts_updated = true;
+
+    let shift_index = state.shifts.findIndex(shift => shift.day === day && shift.timestamp_start === formatHour(hour));
+
+    if (shift_index === -1) {
+        shift = {
+            day: day,
+            timestamp_start: formatHour(hour),
+            timestamp_end: formatHour(hour + 1),
+            stewards: [uuid],
+        };
+
+        state.shifts.push(shift);
+    } else {
+        state.shifts[shift_index].stewards.push(uuid);
+    }
+
+    showEditShift(day, hour);
+}
+
+function deleteStewardFromShift(uuid, day, hour) {
+    shifts_updated = true;
+
+    let shift_index = state.shifts.findIndex(shift => shift.day === day && shift.timestamp_start === formatHour(hour));
+
+    if (shift_index === -1) {
+        // Something went wrong...
+        return;
+    }
+
+    let user_index = state.shifts[shift_index].stewards.findIndex(user_uuid => user_uuid === uuid);
+
+    if (user_index === -1) {
+        return;
+    }
+
+    state.shifts[shift_index].stewards.splice(user_index, 1);
+
+    showEditShift(day, hour);
 }

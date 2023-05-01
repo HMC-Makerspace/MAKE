@@ -52,10 +52,12 @@ async function start() {
     })
 
     document.getElementById("page-schedule").addEventListener("click", (e) => {
-        // If the target is the schedule page, remove the highlight
-        if (e.target.id == "schedule-help" || e.target.id == "schedule-content")  {
-            removeHighlightProficiency();
+        console.log(e.target.classList);
+        // If the target does not contain class "proficiency", return
+        if (e.target.classList.contains("steward") || e.target.classList.contains("proficiency")) {
+            return;
         }
+        removeHighlightProficiency();
     });
 }   
 

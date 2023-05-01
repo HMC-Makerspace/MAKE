@@ -34,6 +34,7 @@
             <button id="student-storage-button" class="set-page" onclick="setPage('student-storage')">Student Storage</button>
             <button id="users-button" class="set-page" onclick="setPage('users')">Users</button>
             <button id="shifts-button" class="set-page" onclick="setPage('shifts')">Shifts</button>
+            <button id="proficiencies-button" class="set-page" onclick="setPage('proficiencies')">Proficiencies</button>
             <button id="workshops-button" class="set-page" onclick="setPage('workshops')">Workshops</button>
         </div>
 
@@ -92,6 +93,10 @@
             <table id="schedule-table"></table>
         </div>
 
+        <div class="main-content content-container hidden" id="page-proficiencies">
+        
+        </div>
+
         <div class="main-content content-container hidden" id="page-checkouts">
 
         </div>
@@ -105,11 +110,14 @@
     <div id="popup-container" class="hidden">
         <div id="popup-background" onclick="closePopup()"></div>
         <div id="popup-content">
+            
             <div id="edit-user" class="hidden">
                 <h1>Edit User</h1>
+
                 <input id="edit-user-name">
                 <input id="edit-user-email">
                 <input type="number" id="edit-user-cx_id">
+                
                 <select id="edit-user-role">
                     <option value="user">User</option>
                     <option value="steward">Steward</option>
@@ -117,12 +125,33 @@
                     <option value="admin">Admin</option>
                 </select>
 
-                <div id="edit-user-buttons">
+                <div id="edit-user-proficiencies">
+                </div>
+
+                <div class="edit-buttons">
                     <button id="edit-user-save" onclick="saveUser()">Save</button>
                     <button id="edit-user-cancel" onclick="closePopup()">Cancel</button>
                 </div>
             </div>
 
+            <div id="edit-shift" class="hidden">
+                <h1>Edit Shift</h1>
+                
+                <div id="edit-shift-day-time"></div>
+
+                <div id="edit-shift-stewards">
+                    <div id="edit-shifted-stewards">
+
+                    </div>
+
+                    <div id="edit-unshifted-stewards">
+                    
+                    </div>
+                </div>
+
+                <div class="edit-buttons">
+                    <button id="edit-shift-cancel" onclick="closePopup()">Close</button>
+            </div>
         </div>
     </div>
 

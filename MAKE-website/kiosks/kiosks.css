@@ -454,7 +454,7 @@ label {
 
 .user-result {
   display: grid;
-  grid-template-columns: 2fr 1fr 3fr 0.5fr 5fr;
+  grid-template-columns: 2fr 1fr 3fr 1fr 5fr;
   background-color: var(--theme-color-3);
   border-radius: var(--roundness);
   color: var(--text-color-main);
@@ -573,7 +573,7 @@ Management Console
 }
 
 .user-result.editable {
-  grid-template-columns: 2fr 1fr 3fr 0.5fr 5fr .5fr;
+  grid-template-columns: 2fr 1fr 3fr 1fr 5fr .5fr;
 }
 
 .user-result.editable button {
@@ -618,16 +618,61 @@ Management Console
   row-gap: 10px;
 }
 
-#edit-user-buttons {
+.edit-buttons {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-evenly;
 }
 
-#edit-user-buttons button {
+.edit-buttons button {
   width: 100px;
   height: 30px;
+}
+
+#schedule-table tr {
+  height: 40px;
+}
+
+#schedule-table .schedule-shift {
+  cursor: pointer;
+}
+
+#schedule-table .schedule-shift:hover {
+  background-color: var(--theme-color-4);
+}
+
+#edit-shift-stewards {
+  display: flex;
+  flex-direction: row;
+  height: 60vh;
+  width: 800px;
+  padding: 10px;
+  column-gap: 10px;
+}
+
+#edit-shifted-stewards, #edit-unshifted-stewards {
+  background-color: var(--theme-color-2);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  overflow-y: scroll;
+  width: 400px;
+}
+
+.add-remove-steward-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: 10px;
+  width: 100%;
+}
+
+.add-remove-steward-info.on-shift {
+  justify-content: flex-end;
+
 }
 
 /*

@@ -22,6 +22,7 @@ except ImportError:
 from routes.routes_inventory import inventory_router
 from routes.routes_users import user_router
 from routes.routes_checkouts import checkouts_router
+from routes.routes_shifts import shifts_router
 from routes.routes_misc import misc_router
 
 # Import all other files
@@ -65,7 +66,9 @@ app = FastAPI(
 app.include_router(inventory_router)
 app.include_router(user_router)
 app.include_router(checkouts_router)
+app.include_router(shifts_router)
 app.include_router(misc_router)
+
 
 # Mount the static files in html mode
 app.mount("/", StaticFiles(directory="../MAKE-website", html=True), name="static")

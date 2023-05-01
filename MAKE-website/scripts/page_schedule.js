@@ -1,5 +1,5 @@
 async function fetchSchedule() {
-    const response = await fetch(`${API}/schedule/get_schedule`);
+    const response = await fetch(`${API}/shifts/get_shift_schedule`);
     if (response.status == 200) {
         const schedule = await response.json();
         
@@ -15,7 +15,9 @@ function renderSchedule(schedule) {
     const num_stewards = document.getElementById("num-stewards");
 
     // Get current number of stewards
-    let day = new Date().getDay();
+    let now = new Date();
+
+    let day = now.getDay();
     // Monday is 0, Sunday is 6
     if (day == 0) {
         day = 6;
@@ -23,23 +25,24 @@ function renderSchedule(schedule) {
         day -= 1;
     }
 
-    let num;
+    // Get current hour
+    let hour = now.getHours();
 
-    const shifts = schedule.days[day].shifts;
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-    let hour = new Date().getHours() - 13;
+    const current_shift = state.schedule.find((shift) => shift.day == days[day] && formatHour(hour) == shift.timestamp_start);
 
-    if (hour < 0 || hour >= shifts.length) {
-        num = 0;
-    } else {
-        num = shifts[hour].num_stewards;
+    let num = 0;
+
+    if (current_shift) {
+        num = current_shift.stewards.length;
     }
 
     num_stewards.innerText = num;
     
     removeAllChildren(schedule_table);
     
-    appendChildren(schedule_table, generateScheduleDivs(schedule));
+    appendChildren(schedule_table, generateScheduleDivs(state.schedule));
 }
 
 function generateScheduleDivs(schedule) {
@@ -49,20 +52,11 @@ function generateScheduleDivs(schedule) {
         generateAllProfs(schedule);
     }
 
-    // Put last day first, Sunday
-    let days = schedule.days;
-    days.unshift(days.pop());
+    let divs = [];
 
-    const divs = [];
-
-    // Find longest shift time
-    let longest_shift = [];
-
-    for (let day of days) {
-        if (day.shifts.length > longest_shift.length) {
-            longest_shift = day.shifts;
-        }
-    }
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const time_start = 13;
+    const time_end = 22;
 
     // Append header of days to table
     const header = document.createElement("tr");
@@ -73,74 +67,72 @@ function generateScheduleDivs(schedule) {
 
     for (let day of days) {
         const day_header = document.createElement("th");
-        day_header.innerText = day.day;
+        day_header.innerText = day;
         header.appendChild(day_header);
     }
 
     divs.push(header);
 
-    // Use longest shift as base
-    for (let i = 0; i < longest_shift.length; i++) {
+    for (let i = time_start; i < time_end; i++) {
         const row = document.createElement("tr");
 
-        const shift_header = document.createElement("th");
-        shift_header.innerText = longest_shift[i].time_string;
-        row.appendChild(shift_header);
+        const time = document.createElement("th");
+        time.innerText = `${formatHour(i)} - ${formatHour(i + 1)}`;
+
+        row.appendChild(time);
 
         for (let day of days) {
             const cell = document.createElement("td");
 
-            cell.appendChild(generateScheduleShiftDiv(day.shifts[i] ?? {num_stewards: 0, proficiencies: []}));
+            const inner_div = document.createElement("div");
+            inner_div.classList.add("schedule-shift");
 
+            const shift = state.schedule.find(shift => shift.day === day && shift.timestamp_start === formatHour(i));
+
+            if (shift) {
+                inner_div.classList.add("proficiency");
+                inner_div.classList.add(`stewards-${shift.stewards.length}`);
+                for (let name of shift.stewards) {
+
+                    if (shift.head_steward) {
+                        inner_div.classList.add("head-steward");
+                    }
+
+                    const user_div = document.createElement("span");
+                    user_div.innerText = name;
+                    user_div.classList.add("steward");
+
+                    inner_div.appendChild(user_div);
+                }
+
+                
+                for (let proficiency of shift.proficiencies) {
+                    inner_div.classList.add(toCSSSafeString(proficiency));
+                }
+
+                cell.onclick = () => {
+                    removeHighlightProficiency();
+                    inner_div.classList.add("highlight");
+                    highlightSourceProfs(shift.proficiencies);
+                };
+            }
+
+            cell.appendChild(inner_div);
             row.appendChild(cell);
         }
 
         divs.push(row);
     }
-
+    
     return divs;
 }
 
-function generateAllProfs(schedule) {
+function generateAllProfs() {
     const info = document.getElementById("schedule-info");
 
-    const profs = schedule.all_proficiencies;
-
-    const profs_to_append = generateProficiencyDivs(profs);
+    const profs_to_append = generateProficiencyDivs(PROFICIENCIES);
 
     appendChildren(info, profs_to_append);
-}
-
-function generateScheduleShiftDiv(shift) {
-    const shift_div = document.createElement("div");
-    shift_div.classList.add("schedule-shift");
-    shift_div.classList.add("proficiency");
-
-    if (shift.num_stewards > 0) {
-        shift_div.classList.add(`stewards-${shift.num_stewards}`);
-
-        for (let steward of shift.stewards) {
-            if (steward != "Steward") {
-                shift_div.innerHTML += `<span class="steward">${steward}</span>`;
-            }
-
-            if (shift.head_steward) {
-                shift_div.classList.add("head-steward");
-            }
-        }
-
-        for (let proficiency of shift.proficiencies) {
-            shift_div.classList.add(toCSSSafeString(proficiency));
-        }
-
-        shift_div.addEventListener("click", () => {
-            removeHighlightProficiency();
-            shift_div.classList.add("highlight");
-            highlightSourceProfs(shift.proficiencies);
-        });
-    }  
-
-    return shift_div;
 }
 
 function toCSSSafeString(str) {

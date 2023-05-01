@@ -150,8 +150,7 @@ The following fields are stored:
 - Quizzes: A list of the quizzes that the user has taken & passed
 
 If the user is a Steward or Head Steward, the following fields are stored:
-- Shifts: A list of the shifts that the user is working
-
+- Proficiencies: A list of the proficiencies that the user has
 '''
 
 
@@ -163,6 +162,7 @@ class User(BaseModel):
     cx_id: int
     role: str
     passed_quizzes: Dict[str, str]
+    proficiencies: Union[List[str], None]
 
     class Config:
         arbitrary_types_allowed = True
@@ -178,7 +178,8 @@ class User(BaseModel):
                 "role": "user",
                 "passed_quizzes": {
                     "431278492": "1231234124",
-                }
+                },
+                "proficiencies": ["3D Printing", "Laser Cutting"]
             }
         }
 
@@ -286,8 +287,8 @@ class Shift(BaseModel):
         }
         schema_extra = {
             "example": {
-                "timestamp_start": "10:00",
-                "timestamp_end": "12:00",
+                "timestamp_start": "10:00 AM",
+                "timestamp_end": "12:00 PM",
                 "day": "Monday",
                 "stewards": ["d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"]
             }

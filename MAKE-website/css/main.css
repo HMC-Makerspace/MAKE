@@ -41,6 +41,7 @@
 
   --shift-1: #a3d8a6;
   --shift-2: #7ac77d;
+  --shift-3: #4e9e4e;
 
   --roundness: 0px;
   --button-outline-color: #ffffff;
@@ -105,6 +106,7 @@
 
   --shift-1: #2d463c;
   --shift-2: #39725b;
+  --shift-3: #53a081;
 
   --brightness: 1.2;
   --invert: 100%;
@@ -1293,6 +1295,10 @@ Schedule
   background-color: var(--shift-2);
 }
 
+.stewards-3 {
+  background-color: var(--shift-3);
+}
+
 .head-steward {
   background-color: var(--theme-color-1);
   color: var(--black);
@@ -1309,6 +1315,7 @@ Schedule
 
 .stewards-1.info,
 .stewards-2.info,
+.stewards-3.info,
 .head-steward.info {
   font-weight: bold;
   padding: 10px;
@@ -1328,7 +1335,10 @@ Schedule
 }
 
 .schedule-shift.proficiency.stewards-1:hover,
-.schedule-shift.proficiency.stewards-2:hover {
+.schedule-shift.proficiency.stewards-2:hover,
+.schedule-shift.proficiency.stewards-3:hover,
+.schedule-shift.proficiency.head-steward:hover
+ {
   background-color: var(--theme-color-8);
   color: var(--white);
   cursor: pointer;

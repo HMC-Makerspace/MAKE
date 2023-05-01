@@ -55,6 +55,25 @@ const ROLE_TO_READABLE = {
     "head_steward": "Head Steward",
 }
 
+const PROFICIENCIES = [
+    "3D Printing",
+    "Advanced 3D Printing",
+    "Large Format Printer",
+    "Laser Cutter",
+    "Leather Sewing Machine",
+    "Loom",
+    "Oscilloscopes",
+    "Printing Press",
+    "Sergers",
+    "Sewing",
+    "Soldering",
+    "Spray Paint",
+    "Studio (Audio)",
+    "Studio (Video)",
+    "Waterjet",
+    "Welding"
+];
+
 // Cut off date for quizzes is on June 1st yearly
 // If a quiz was taken before this date, it is not counted
 // if there 
@@ -322,4 +341,16 @@ function submitUserSearch(editable = false) {
 
     removeAllChildren(users);
     appendChildren(users, divs);
+}
+
+function formatHour(hour_num) {
+    if (hour_num > 12) {
+        return `${hour_num - 12}:00 PM`;
+    } else if (hour_num == 12) {
+        return `${hour_num}:00 PM`;
+    } else if (hour_num == 0) {
+        return `12:00 AM`;
+    } else {
+        return `${hour_num}:00 AM`;
+    }
 }

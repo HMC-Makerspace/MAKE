@@ -128,6 +128,9 @@ async def route_update_user(request: Request):
     user["name"] = json["name"]
     user["email"] = json["email"]
 
+    if "proficiencies" in json:
+        user["proficiencies"] = json["proficiencies"]
+
     try :
         user = User(**user)
     except Exception as e:
