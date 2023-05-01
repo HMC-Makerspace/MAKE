@@ -203,10 +203,3 @@ function removeHighlightProficiency() {
         prof.classList.remove("highlight");
     }
 }
-
-document.getElementById("page-schedule").addEventListener("click", (e) => {
-    // If the target is the schedule page, remove the highlight
-    if (e.target.id == "schedule-help" || e.target.id == "schedule-content")  {
-        removeHighlightProficiency();
-    }
-});

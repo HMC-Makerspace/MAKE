@@ -51,6 +51,12 @@ async function start() {
         }
     })
 
+    document.getElementById("page-schedule").addEventListener("click", (e) => {
+        // If the target is the schedule page, remove the highlight
+        if (e.target.id == "schedule-help" || e.target.id == "schedule-content")  {
+            removeHighlightProficiency();
+        }
+    });
 }   
 
 window.onpopstate = onHashChange;

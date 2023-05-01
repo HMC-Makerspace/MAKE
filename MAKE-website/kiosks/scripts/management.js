@@ -21,13 +21,34 @@ async function authenticate() {
         alert("No API key provided.");
     }
 
+    // Fetch api scope
+    const response = await fetch(`${API}/misc/api_key_scope`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ api_key: api_key }),
+            method: "POST",
+        }
+    );
+
+    if (response.status == 200) {
+        const body = await response.json();
+
+        if (body.scope == "admin") {
+            console.log("Authenticated as admin");
+        } else {
+            alert("API key does not have admin scope.");
+        }
+    } else {
+        alert("Invalid API key.");
+    }
+
     // Remove api key from url, but keep the rest of the url
     window.history.replaceState({}, document.title, window.location.pathname);
 
     // Save api key to local storage
     localStorage.setItem('admin_api_key', api_key);
-
-    console.log(`Authenticating with admin key ${api_key}`);
 
     setInterval(fetchUsers, 5000);
     setInterval(fetchStudentStorageAdmin, 5000);
@@ -44,7 +65,6 @@ async function authenticate() {
 
     setInterval(renderAll(), 5000);
     renderAll();
-    console.log(state.users);
 }
 
 authenticate();

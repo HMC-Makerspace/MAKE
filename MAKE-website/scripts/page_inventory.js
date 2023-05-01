@@ -224,19 +224,16 @@ function generateInventoryDiv(result, kiosk_mode = false) {
                 quantity.innerText = `${item.quantity}`;
             }
         } else {
-            console.log("Quantity is less than 0:", item.quantity);
-            console.log("type:", typeof item.quantity);
-
             switch (item.quantity) {
-                case -1 || "-1":
+                case "-1":
                     quantity.classList.add("low");
                     quantity.innerText += "Low";
                     break;
-                case -2 || "-2":
+                case "-2":
                     quantity.classList.add("medium");
                     quantity.innerText += "Medium";
                     break;
-                case -3 || "-3":
+                case "-3":
                     quantity.classList.add("high");
                     quantity.innerText += "High";
                     break;
@@ -244,6 +241,7 @@ function generateInventoryDiv(result, kiosk_mode = false) {
                     console.log("Unknown quantity:", item.quantity);
                     quantity.classList.add("unknown");
                     quantity.innerText += item.quantity;
+                    break;
             }
         }
         main_div.appendChild(quantity);

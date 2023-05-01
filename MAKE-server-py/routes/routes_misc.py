@@ -61,3 +61,28 @@ async def route_render_loom_file(request: Request):
     
     # Return the rendered loom file
     return result
+
+@misc_router.post("/api_key_scope")
+async def route_validate_api_key(request: Request):
+    # Get the request body
+    body = await request.json()
+    
+    # Validate the API key
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Checking API key scope...")
+
+    db = MongoDB()
+
+    api_keys = await db.get_collection("api_keys")
+        
+    # Get the API key
+    api_key = await api_keys.find_one({"key": body["api_key"]})
+
+    if api_key is None:
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    else:
+        # The API key is valid
+        # Return the API key's scope
+        return {"scope": api_key["scope"]}
