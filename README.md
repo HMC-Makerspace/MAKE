@@ -1,7 +1,5 @@
 # MAKE - Unified managment application for HMC's Makerspace 
 
-[![Rust](https://github.com/IonImpulse/MAKE/actions/workflows/rust.yml/badge.svg)](https://github.com/IonImpulse/MAKE/actions/workflows/rust.yml)
-
 # Live at [make.hmc.edu](https://make.hmc.edu)
 
 ## What does MAKE handle?
