@@ -1,3 +1,21 @@
+async function fetchCheckouts() {
+    if (state.user_object === null) {
+        return;
+    }
+
+    const response = await fetch(`${API}/checkouts/get_checkouts_for_user/${state.user_object.uuid}`);
+
+    if (response.status == 200) {
+        const checkouts = await response.json();
+
+        state.user_checkouts = checkouts;
+
+        saveState();
+
+        renderCheckouts();
+    }
+}
+
 function renderCheckouts() {
     const current = document.getElementById("checkouts-current");
     const history = document.getElementById("checkouts-history");
@@ -7,11 +25,11 @@ function renderCheckouts() {
     current.innerHTML = "<h2>Current Checkouts</h2>";
     history.innerHTML = "<h2>Previous Checkouts</h2>";
 
-    if (state.user_object === null) {
+    if (state.user_checkouts === null) {
         return;
     }
 
-    let l = JSON.parse(JSON.stringify(state.user_object.all_checkouts));
+    let l = JSON.parse(JSON.stringify(state.user_checkouts));
 
     l.reverse();
 
@@ -91,7 +109,6 @@ function createCheckoutHeader(timestamp_in, kiosk_mode=false) {
 // Then convert a timestamp like 3/25/2023, 12:17:09 PM
 // to 3/25/2023 <br> 12:17 PM
 function checkoutFormatDate(date) {
-    console.log(date);
     let date_str = date.toLocaleString().replace(", ", "<br>");
     let date_arr = date_str.split(":");
 
@@ -108,8 +125,6 @@ function createCheckoutDiv(checkout, kiosk_mode = false) {
     let t_out_info = document.createElement("div");
     t_out_info.classList.add("t-out-info");
 
-    console.log(checkout);
-    
     t_out_info.innerHTML = ` ${checkoutFormatDate(new Date(checkout.timestamp_out * 1000))}`;
     div.appendChild(t_out_info);
 

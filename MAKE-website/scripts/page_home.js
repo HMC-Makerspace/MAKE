@@ -37,29 +37,6 @@ function logout() {
     displayLoggedOut();
 }
 
-const font_list = [
-    "Edu VIC WA NT Beginner",
-    "Libre Baskerville",
-    "Dancing Script",
-    "Varela Round",
-    "Pacifico",
-    "Abril Fatface",
-    "Bree Serif",
-    "Permanent Marker",
-    "Alfa Slab One",
-    "var(--title-font)"
-];
-
-function animateChangeFonts() {
-    const el = document.getElementById('main-title-ani');
-
-    for (let i = 0; i < font_list.length; i++) {
-        setTimeout(() => {
-            el.style.fontFamily = font_list[i];
-        }, i * 200);
-    }
-}
-
 function toggleMobileMenu() {
     const menu = document.getElementById('left-bar');
 

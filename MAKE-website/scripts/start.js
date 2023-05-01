@@ -21,11 +21,6 @@ async function start() {
         setPage(page);
     }
 
-    setInterval(fetchInventory, 100000);
-    setInterval(fetchStudentStorage, 10000);
-    setInterval(fetchSchedule, 100000);
-    //setInterval(fetchPrinters, 10000);
-
     fetchInventory().then(() => {
         submitSearch();
         document.getElementById("inventory-search-input").addEventListener("keyup", submitSearch);
@@ -36,6 +31,7 @@ async function start() {
     fetchStudentStorage();
     fetchSchedule();
     fetchWorkshops();
+    fetchCheckouts();
     //fetchPrinters();
 
     document.getElementById("restock-dialog").addEventListener("click", function (event) {

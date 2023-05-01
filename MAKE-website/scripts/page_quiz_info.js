@@ -46,7 +46,7 @@ function renderQuizInfo() {
 
     for (let timestamp of Object.keys(state.user_object.passed_quizzes)) {
         if (determineValidQuizDate(timestamp)) {
-            const quiz = QUIZ_IDS_TO_NAMES[state.user_object.passed_quizzes[timestamp]];
+            const quiz = QUIZ_ID_TO_NAME[state.user_object.passed_quizzes[timestamp]];
             const el = document.getElementById("quiz-" + quiz);
             el.classList.add("quiz-passed");
             const status = el.getElementsByClassName("quiz-status")[0];

@@ -21,6 +21,7 @@ var state = {
         printer: null
     },
     user_object: null,
+    user_checkouts: null,
     settings: null,
     inventory: null,
     student_storage: null,
@@ -55,6 +56,7 @@ function validateState(new_state) {
 
 function saveState() {
     localStorage.setItem('state', JSON.stringify(state));
+    localStorage.setItem('make-version', VER);
 }
 
 function displayLoggedIn() {

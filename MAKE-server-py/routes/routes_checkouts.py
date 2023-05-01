@@ -40,6 +40,23 @@ async def route_get_checkouts(request: Request):
     # Return the checkouts
     return checkouts
 
+@checkouts_router.get("/get_checkouts_for_user/{user_uuid}")
+async def route_get_checkouts_for_user(request: Request, user_uuid: str):
+    # Get checkouts
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Getting checkouts...")
+
+    db = MongoDB()
+    collection = await db.get_collection("checkouts")
+
+    # Get all checkouts by uuid
+    checkouts = await collection.find({"checked_out_by": user_uuid}).to_list(None)
+
+    checkouts = [Checkout(**checkout) for checkout in checkouts]
+
+    # Return the checkouts
+    return checkouts
+
 @checkouts_router.get("/get_checkout/{checkout_uuid}")
 async def route_get_checkout_record(request: Request, checkout_uuid: str):
     # Get a checkout
