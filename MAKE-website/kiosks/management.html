@@ -43,6 +43,7 @@
                 <h1>MAKE Management Console</h1>
                 <p>
                     Welcome to the MAKE Management Console. 
+                    <br>
                     This is where you can manage the inventory, student storage, 
                     steward shifts, workshops, and
                     users of the Makerspace.
@@ -61,10 +62,8 @@
 
         <div class="main-content content-container hidden" id="page-student-storage">
             <div class="content-header">
-                <h1>Student Storage</h1>
                 <p>
-                    This is where you can manage the student storage
-                    of the Makerspace.
+                    View and edit student storage assignments.
                 </p>
             </div>
             
@@ -84,13 +83,29 @@
         </div>
 
         <div class="main-content content-container hidden" id="page-shifts">
-            <div class="stewards-legend">
-                <div class="stewards-1 info">One Steward on duty</div>
-                <div class="stewards-2 info">Two Stewards on duty</div>
-                <div class="head-steward info">Head Steward Office hours</div>
+            <div class="content-header">
+                <p>
+                    Schedule shifts by clicking on a cell. Changes are saved automatically.
+                </p>
+                <p>
+                    <b>Total scheduled shift hours: <span id="total-hours">...</span></b>
+                </p>
             </div>
+            <div class="content-body">
+                <div class="stewards-legend">
+                    <div class="stewards-1 info">One Steward on duty</div>
+                    <div class="stewards-2 info">Two Stewards on duty</div>
+                    <div class="head-steward info">Head Steward Office hours</div>
+                </div>
+    
+                <table id="schedule-table"></table>
 
-            <table id="schedule-table"></table>
+                <h1>
+                    Steward List
+                </h1>
+
+                <div id="stewards-list-shifts"></div>
+            </div>
         </div>
 
         <div class="main-content content-container hidden" id="page-proficiencies">

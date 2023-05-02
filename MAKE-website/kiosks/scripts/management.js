@@ -254,15 +254,80 @@ function renderScheduleAdmin() {
     const schedule = document.getElementById("schedule-table");
 
     removeAllChildren(schedule);
-
     appendChildren(schedule, generateScheduleDivsAdmin());
+
+    const steward_list = document.getElementById("stewards-list-shifts");
+
+    removeAllChildren(steward_list);
+    appendChildren(steward_list, generateStewardShiftList());
+}
+
+function generateStewardShiftList() {
+    // Generate list of stewards and mark how many shifts they have
+    let all_stewards = state.users.filter(user => user.role == "steward" || user.role == "head_steward");
+
+    all_stewards.sort((a, b) => {
+        if (a.name < b.name) {
+            return -1;
+        } else {
+            return 1;
+        }
+    });
+
+    let stewards_hours = {};
+    let total_shift_hours = 0;
+
+    for (let shift of state.shifts) {
+        for (let uuid of shift.stewards) {
+            if (uuid in stewards_hours) {
+                stewards_hours[uuid] += 1;
+            } else {
+                stewards_hours[uuid] = 1;
+            }
+
+            total_shift_hours++;
+        }
+    }
+
+    let divs = [];
+
+    for (let steward of all_stewards) {
+        let div = document.createElement("div");
+        div.classList.add("steward-shift-list-item");
+
+        let name = document.createElement("div");
+        name.classList.add("steward-shift-list-item-name");
+        name.innerText = steward.name;
+        div.appendChild(name);
+
+        let cx_id = document.createElement("div");
+        cx_id.classList.add("steward-shift-list-item-cx_id");
+        cx_id.innerText = steward.cx_id;
+        div.appendChild(cx_id);
+
+        let email = document.createElement("div");
+        email.classList.add("steward-shift-list-item-email");
+        email.innerText = steward.email;
+        div.appendChild(email);
+
+        let shifts = document.createElement("div");
+        shifts.classList.add("steward-shift-list-item-shifts");
+        shifts.innerText = `${stewards_hours[steward.uuid] ?? 0} shift hours`;
+        div.appendChild(shifts);
+
+        divs.push(div);
+    }
+    
+    document.getElementById("total-hours").innerText = total_shift_hours;
+    
+    return divs;
 }
 
 function generateScheduleDivsAdmin() {
     let divs = [];
 
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const time_start = 12;
+    const time_start = 0;
     const time_end = 24;
 
     // Append header of days to table

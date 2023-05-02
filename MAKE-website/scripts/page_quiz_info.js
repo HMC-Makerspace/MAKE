@@ -98,7 +98,10 @@ function openQuiz(quiz_name) {
         case "waterjet":
             quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLSev6cU296gQyqFxOxi2LFmJPCDthz_QBMYkP52AbKcr-7HFFg/viewform?usp=pp_url&entry.382887588=${name}&entry.1395074003=${cx_id}&entry.1482318217=${email}`;
             break;
+        case "loom":
+            quiz_link = `https://docs.google.com/forms/d/e/1FAIpQLSdbzUnLeSloX5LDFGJP0tg-8oK3MadUkEaeKOtBy2AZ918g2Q/viewform?usp=pp_url&entry.1421487221=${name}&entry.216407767=${cx_id}&entry.1881621455=${email}`;
+            break;
     }
-    
+
     window.open(encodeURI(quiz_link), "_blank");        
 }
