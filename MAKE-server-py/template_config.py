@@ -23,3 +23,14 @@ QUIZ_IDS = {
     "Waterjet": "2100779718",
     "Loom": "1235553349",
 }
+
+# Student Storage Structure
+STUDENT_STORAGE_STRUCTURE = {
+    "A": 16,
+    "B": 16,
+    "C": 16,
+    "D": 16,
+    "E": 4,
+    "F": 4,
+    "G": 4,
+}

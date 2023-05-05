@@ -10,6 +10,8 @@ var shifts_updated = false;
 
 const API = '/api/v2';
 
+window.onpopstate = onHashChange;
+
 document.documentElement.setAttribute('data-theme', 'dark');
 localStorage.setItem("theme", "dark");
 
@@ -116,10 +118,70 @@ async function fetchStudentStorageAdmin() {
 }
 
 function renderAll() {
+    renderStats();
     renderStudentStorage();
     renderScheduleAdmin();
+    renderProficiencies();
 }
 
+function renderProficiencies() {
+    const proficiencies = document.getElementById("proficiencies-list");
+
+    removeAllChildren(proficiencies);
+    appendChildren(proficiencies, generateProficiencyDivs(state.users));
+}
+
+function generateProficiencyDivs(users) {
+    const divs = [];
+
+    const proficiencies = {};
+
+    return divs;
+}
+
+function renderStats() {
+    const stats = document.getElementById("stats-info");
+
+    removeAllChildren(stats);
+    appendChildren(stats, generateStatsDivs(state.users));
+}
+
+function generateStatsDivs(users) {
+    const divs = [];
+
+    // First, total quiz stats
+    const total_div = document.createElement("h2");
+    total_div.innerText = `Total Unique Quiz Takers`;
+    divs.push(total_div);
+    const total_count = document.createElement("table");
+    total_count.id = "total-count-table";
+
+    const total_count_header = document.createElement("tr");
+    total_count_header.innerHTML = `<th>School</th><th>Count</th><th>Percent of school</th>`;
+    total_count.appendChild(total_count_header);
+
+    const all_count = document.createElement("tr");
+    const all_count_users = Object.keys(state.users).length;
+    const total_pops = Object.values(school_pops).reduce((acc, cur) => acc + cur, 0);
+    const all_count_percent = Math.round((all_count_users / total_pops) * 100);
+
+    all_count.innerHTML = `<td>All</td><td>${all_count_users}</td><td>${all_count_percent}%</td>`;
+    total_count.appendChild(all_count);
+        
+    for (let school_id of Object.keys(school_names)) {
+        const count = document.createElement("tr");
+        const school_count = Object.values(state.users).filter(user => `${user.cx_id}`.startsWith(school_id)).length;
+        const school_perc = Math.round((school_count / school_pops[school_id]) * 100);
+
+        count.innerHTML = `<td>${school_names[school_id]}</td><td>${school_count}</td><td>${school_perc}%</td>`;
+
+        total_count.appendChild(count);
+    }
+
+    divs.push(total_count);
+
+    return divs;
+}
 
 function showEditUser(uuid) {
     let user = state.users.find(user => user.uuid === uuid);
@@ -231,6 +293,82 @@ function closePopup() {
     }
 }
 
+function showMassAssignRoles() {
+    document.getElementById("popup-container").classList.remove("hidden");
+    document.getElementById("mass-assign-roles").classList.remove("hidden");
+
+    document.getElementById("mass-assign-roles-save").onclick = () => {
+        massAssignRoles();
+    }
+}
+
+async function massAssignRoles() {
+    let users_to_update = [];
+    
+    const role = document.getElementById("mass-assign-roles-selection").value;
+    const identifiers = document.getElementById("mass-assign-roles-text").value.split("\n");
+    let errors = [];
+
+    for (let identifier of identifiers) {
+        let user = state.users.find(user => String(user.cx_id) === identifier || user.email === identifier || user.uuid === identifier);
+
+        if (user) {
+            user.role = role;
+            users_to_update.push(user);
+        } else {
+            errors.push({
+                identifier: identifier,
+                error: "User not found"
+            });
+        }   
+    }
+
+
+    for (let user of users_to_update) {
+        let request = await fetch(`${API}/users/update_user`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "api-key": api_key,
+                    },
+                    body: JSON.stringify(user)
+                }
+            );
+
+        if (request.status != 200) {
+            errors.push({
+                identifier: user.cx_id,
+                error: "Error updating user: " + request.status
+            });
+        }
+    } 
+
+    const status = document.getElementById("mass-assign-roles-status");
+
+    if (errors.length == 0) {
+        status.innerText = `${users_to_update.length} users updated`;
+        fetchUsers().then(() => {
+            for (let key of Object.keys(state.users)) {
+                state.users[key].cx_id_str = state.users[key].cx_id.toString();
+            }
+    
+            submitUserSearch(editable = true);
+        });
+    }
+    else {
+        console.log("Error updating users");
+        console.log(errors);
+
+        status.innerText = `${users_to_update.length - errors.length} users updated, ${errors.length} errors:`;
+
+        for (let error of errors) {
+            status.innerHTML += `<br>${error.identifier}: ${error.error}`;
+        }
+    }
+
+}
+
 async function pushShiftsAdmin() {
     const response = await fetch(`${API}/shifts/update_shift_schedule`,
         {
@@ -310,9 +448,20 @@ function generateStewardShiftList() {
         email.innerText = steward.email;
         div.appendChild(email);
 
+        let hours = stewards_hours[steward.uuid] ?? 0;
+
         let shifts = document.createElement("div");
         shifts.classList.add("steward-shift-list-item-shifts");
-        shifts.innerText = `${stewards_hours[steward.uuid] ?? 0} shift hours`;
+
+        if (hours < 2) {
+            shifts.classList.add("not-enough-hours");
+        } else if (hours < 5) {
+            shifts.classList.add("good-hours");
+        } else {
+            shifts.classList.add("too-many-hours");
+        }
+
+        shifts.innerText = `${hours} shift hours`;
         div.appendChild(shifts);
 
         divs.push(div);
@@ -410,6 +559,9 @@ function showEditShift(day, hour) {
     document.getElementById("popup-container").classList.remove("hidden");
     document.getElementById("edit-shift").classList.remove("hidden");
     document.getElementById("edit-shift-day-time").innerText = `${day} @ ${formatHour(hour)}`;
+    document.getElementById("show-valid-stewards").onchange = () => {
+        showEditShift(day, hour);
+    };
 
     renderShiftStewards(all_stewards, shift, day, hour);
 }
@@ -423,19 +575,40 @@ function renderShiftStewards(all_stewards, shift, day, hour) {
             stewards: [],
         };
     }
+    
+    let stewards_hours = {};
+
+    for (let shift of state.shifts) {
+        for (let uuid of shift.stewards) {
+            if (uuid in stewards_hours) {
+                stewards_hours[uuid] += 1;
+            } else {
+                stewards_hours[uuid] = 1;
+            }
+        }
+    }
 
     removeAllChildren(shift_stewards);
     removeAllChildren(other_stewards);
 
     // First add all stewards on shift
     for (let uuid of shift.stewards) {
-        const user = all_stewards.find(user => user.uuid === uuid);
+        // Search though users, not just stewards, in case a steward was demoted
+        const user = state.users.find(user => user.uuid === uuid);
 
         shift_stewards.appendChild(generateEditStewardShiftDiv(user, true, day, hour));
     }
 
+    // "Valid" stewards are stewards who have enough hours to be on shift,
+    // ie they have at least 2 hours
+    const show_valid_stewards = document.getElementById("show-valid-stewards").checked;
+
     // Then add all stewards not on shift
     for (let user of all_stewards) {
+        if (show_valid_stewards && (stewards_hours[user.uuid] ?? 0) >= 2) {
+            continue;
+        }
+
         if (!shift.stewards.includes(user.uuid)) {
             other_stewards.appendChild(generateEditStewardShiftDiv(user, false, day, hour));
         }

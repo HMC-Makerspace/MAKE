@@ -36,12 +36,12 @@ function renderStudentStorage(kiosk_mode=false) {
     removeAllChildren(storage);
 
     if (kiosk_mode) {
-        appendChildren(storage, generateStudentStorageDivs(student_storage_state.slots, kiosk_mode=true));   
+        appendChildren(storage, generateStudentStorageDivs(student_storage_state, kiosk_mode=true));   
     } else {
         if (state.student_storage === null || state.cx_id === null) {
             return;
         } else {
-            appendChildren(storage, generateStudentStorageDivs(state.student_storage.slots));
+            appendChildren(storage, generateStudentStorageDivs(state.student_storage));
         }
     }
 

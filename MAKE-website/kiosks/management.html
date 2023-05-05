@@ -30,34 +30,30 @@
     <div id="main-admin-grid">
         <div id="admin-header">
             <button id="home-button" class="set-page active-button" onclick="setPage('home')">Home</button>
-            <button id="inventory-button" class="set-page" onclick="setPage('inventory')">Inventory</button>
-            <button id="student-storage-button" class="set-page" onclick="setPage('student-storage')">Student Storage</button>
             <button id="users-button" class="set-page" onclick="setPage('users')">Users</button>
             <button id="shifts-button" class="set-page" onclick="setPage('shifts')">Shifts</button>
             <button id="proficiencies-button" class="set-page" onclick="setPage('proficiencies')">Proficiencies</button>
             <button id="workshops-button" class="set-page" onclick="setPage('workshops')">Workshops</button>
+            <button id="student-storage-button" class="set-page" onclick="setPage('student-storage')">Student Storage</button>
         </div>
 
         <div class="main-content content-container" id="page-home">
             <div class="content-header">
                 <h1>MAKE Management Console</h1>
                 <p>
+                    <br>
                     Welcome to the MAKE Management Console. 
                     <br>
-                    This is where you can manage the inventory, student storage, 
-                    steward shifts, workshops, and
-                    users of the Makerspace.
+                    Changes made here will be updated in real time.
                 </p>
-                <p>
-                    Changes made here will be updated in real time on
-                    make.hmc.edu.
-                </p>
-                <p>Click on the buttons above to get started.</p>
             </div>
-        </div>
 
-        <div class="main-content content-container hidden" id="page-inventory">
-
+            <div class="content-body">
+                <div id="stats">
+                    <h1>Statistics</h1>
+                    <div id="stats-info"></div>
+                </div>
+            </div>
         </div>
 
         <div class="main-content content-container hidden" id="page-student-storage">
@@ -67,7 +63,7 @@
                 </p>
             </div>
             
-            <div id="overall-student-storage" class="content-body">
+            <div id="overall-student-storage" class="content-body" style="overflow: unset;">
 
             </div>
         </div>  
@@ -75,6 +71,8 @@
         <div class="main-content content-container hidden" id="page-users">
             <div id="users-search" class="content-header">
                 <input type="text" id="users-search-input" placeholder="Search by name, email, or ID number...">
+
+                <button id="open-mass-assign-roles" onclick="showMassAssignRoles()">Mass Role Assignment</button>
             </div>
 
             <div id="users-results" class="content-body">
@@ -104,16 +102,24 @@
                     Steward List
                 </h1>
 
+                <p>
+
+                </p>
+
                 <div id="stewards-list-shifts"></div>
             </div>
         </div>
 
         <div class="main-content content-container hidden" id="page-proficiencies">
-        
-        </div>
+            <div class="content-header">
+                <p>
+                    View and edit proficiencies.
+                </p>
+            </div>
 
-        <div class="main-content content-container hidden" id="page-checkouts">
+            <div class="content-body" id="proficiencies-list">
 
+            </div>
         </div>
 
         <div class="main-content content-container hidden" id="page-workshops">
@@ -154,6 +160,11 @@
                 
                 <div id="edit-shift-day-time"></div>
 
+                <div id="edit-shift-options">
+                    <input type="checkbox" id="show-valid-stewards">Only show Stewards with < 2 shift hours<br>
+                </div>
+
+
                 <div id="edit-shift-stewards">
                     <div id="edit-shifted-stewards">
 
@@ -166,6 +177,28 @@
 
                 <div class="edit-buttons">
                     <button id="edit-shift-cancel" onclick="closePopup()">Close</button>
+                </div> 
+            </div>
+
+            <div id="mass-assign-roles" class="hidden">
+                <h1>Mass Assign Roles</h1>
+                
+                <textarea id="mass-assign-roles-text" placeholder="Enter a list of CX IDs, emails, or UUIDs, one per line."></textarea>
+
+                <select id="mass-assign-roles-selection">
+                    <option value="user">User</option>
+                    <option value="steward">Steward</option>
+                    <option value="head_steward">Head Steward</option>
+                    <option value="admin">Admin</option>
+                </select>
+
+                <button id="mass-assign-roles-save" onclick="massAssignRoles()">Update</button>
+
+                <div id="mass-assign-roles-status"></div>
+
+                <div class="edit-buttons">
+                    <button id="mass-assign-roles-cancel" onclick="closePopup()">Close</button>
+                </div>
             </div>
         </div>
     </div>

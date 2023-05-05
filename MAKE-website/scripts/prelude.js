@@ -131,7 +131,7 @@ function toggleQuickNav() {
     quick_nav.classList.toggle('hidden');
 }
 
-function openKiosk(element, url, with_api_key = true) {
+function openUtility(element, url, with_api_key = true) {
     // If with_api_key, get next element
     let api_key = "";
 
