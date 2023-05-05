@@ -86,6 +86,8 @@
             <button id="home-button" class="active-button" onclick="setPage('home')"><img class="page-icon"
                     src="/img/home-icon.svg" alt="">
                 <span>Home</span></button>
+            <button id="steward-button" class="hidden" onclick="setPage('steward')"><img class="page-icon"
+                    src="/img/steward-icon.svg" alt=""> <span>Steward<br>Resources</span></button>
             <button id="quiz-info-button" onclick="setPage('quiz-info')"><img class="page-icon"
                     src="/img/quiz-icon.svg" alt=""> <span>Quizzes<br>&
                     Information</span></button>
@@ -177,6 +179,25 @@
                     Currently logged in as <span id="logged-in-name"></span>
                 </p2>
                 <button id="logout-button" class="big" onclick="logout()">Log Out</button>
+            </div>
+        </section>
+
+        <!--
+
+        STEWARD ONLY PAGE
+
+        -->
+        <section id="page-steward" class="main-content hidden">
+            <div class="content-container">
+                <div class="content-header">
+                    <p>
+                        Welcome back, <span id="steward-name"></span>!
+                    </p>
+                    <p>
+                        On this page you can find your scheduled shifts, pick up/drop shifts, and view steward
+                        specific resources and information.
+                    </p>
+                </div>
             </div>
         </section>
 

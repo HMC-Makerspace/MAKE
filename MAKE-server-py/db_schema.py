@@ -35,6 +35,7 @@ schema = [
     'shifts',
     'workshops',
     'printer_logs',
+    'filament_logs',
     'api_keys'
 ]
 
