@@ -24,6 +24,7 @@ from routes.routes_users import user_router
 from routes.routes_checkouts import checkouts_router
 from routes.routes_shifts import shifts_router
 from routes.routes_misc import misc_router
+from routes.routes_student_storage import student_storage_router
 
 # Import all other files
 from users.quizzes import scrape_quiz_results
@@ -67,6 +68,7 @@ app.include_router(inventory_router)
 app.include_router(user_router)
 app.include_router(checkouts_router)
 app.include_router(shifts_router)
+app.include_router(student_storage_router)
 app.include_router(misc_router)
 
 
