@@ -25,12 +25,13 @@ from routes.routes_checkouts import checkouts_router
 from routes.routes_shifts import shifts_router
 from routes.routes_misc import misc_router
 from routes.routes_student_storage import student_storage_router
+from routes.routes_machines import machines_router
 
 # Import all other files
 from users.quizzes import scrape_quiz_results
 from users.users import create_update_users_from_quizzes
 
-
+# SSL certificate paths, on a Debian system
 SSL_CERT_PRIVKEY = "/etc/letsencrypt/live/make.hmc.edu/privkey.pem"
 SSL_CERT_PERMKEY = "/etc/letsencrypt/live/make.hmc.edu/fullchain.pem"
 
@@ -69,6 +70,7 @@ app.include_router(user_router)
 app.include_router(checkouts_router)
 app.include_router(shifts_router)
 app.include_router(student_storage_router)
+app.include_router(machines_router)
 app.include_router(misc_router)
 
 
