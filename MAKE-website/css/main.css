@@ -294,7 +294,7 @@ p3 {
 #left-bar button.active-button,
 #left-bar button:hover {
   color: var(--text-color-main);
-  background-color: var(--theme-color-2);
+  background: var(--theme-color-2);
 }
 
 button {
