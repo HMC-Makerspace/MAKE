@@ -3,6 +3,9 @@ DB_NAME = "make"
 DB_USER = ""
 DB_PASSWORD = ""
 
+# Discord Bot Token
+DISCORD_BOT_TOKEN = ""
+
 # Misc Emails
 MAKERSPACE_MANAGEMENT_EMAIL = "makerspace-management-l@g.hmc.edu"
 MAKERSPACE_MANAGER_EMAIL = "kneal@g.hmc.edu"
