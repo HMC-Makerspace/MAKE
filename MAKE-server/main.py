@@ -18,6 +18,9 @@ except ImportError:
     print("Config file not found. Please copy template_config.py file and rename to config.py.")
     sys.exit()
 
+# Import discord bot
+from discord.make_bot import run_discord_bot
+
 # Import routes preventing circular import
 from routes.routes_inventory import inventory_router
 from routes.routes_users import user_router
@@ -134,6 +137,12 @@ if __name__ == "__main__":
     asyncio.run(validate_database_schema(db.db))
 
     logging.info("Database schema is valid!")
+
+    # Start the discord bot
+    logging.info("Starting discord bot...")
+    asyncio.create_task(run_discord_bot(DISCORD_BOT_TOKEN))
+
+    logging.info("Discord bot started!")
 
     # When this python file is run directly, run the uvicorn server
     # in debug mode, and reload the server when the code changes.
