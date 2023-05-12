@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import discord
 from discord.ext import tasks, commands
@@ -36,12 +37,11 @@ class MakeBot(commands.Bot):
 
     @tasks.loop(seconds=60)
     async def check_shifts(self):
+        await asyncio.sleep(1)
         hour = datetime.datetime.now().hour
-        day_of_week = datetime.datetime.now().weekday()
+        # Get yyyy-mm-dd
+        day_timestamp = datetime.datetime.now().strftime("%Y-%m-%d")
 
-        day_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][day_of_week]
-
-        hour = 3 + 12;
         if hour == 0:
             hour = "12:00 AM"
         elif hour == 12:
@@ -59,16 +59,33 @@ class MakeBot(commands.Bot):
         db = MongoDB()
 
         shifts = await db.get_collection("shifts")
+        
         print("Checking shifts", hour, "...")
         shift = await shifts.find_one({"timestamp_start": hour})
         if shift is not None:
-            if len(shift.stewards_dropped) == len(shift.stewards) and len(shift.stewards_picked_up) == 0:
-                # send message to announcement channel
-                channel = bot.get_channel(self.announcement_channel_id)
+            # If there's a shift scheduled for this hour, check if theres dropped shifts
+            shift_changes = await db.get_collection("shift_changes")
 
-                if channel is not None:
-                    await channel.send(f'''**CLOSURE**: The Makerspace will be closed for the next hour. Sorry for the inconvenience!''')
-                    no_steward_message_sent = hour
+            # Find all dropped shifts for this hour
+            changes = await shift_changes.find({"day_timestamp": day_timestamp, "timestamp_start": hour}).to_list(None)
+
+            if changes is not None:
+                dropped = 0
+                pickup = 0
+
+                for change in changes:
+                    if change["is_drop"]:
+                        dropped += 1
+                    else:
+                        pickup += 1
+
+                # All stewards have dropped their shifts and no one has picked up
+                if dropped == len(shift["stewards"]) and pickup == 0:
+                    # Send message to announcement channel
+                    channel = self.get_channel(self.announcement_channel_id)
+                    await channel.send(f"**Schedule change:** there will be no stewards for the {hour} shift today. We apologize for the inconvenience.")
+
+                    self.no_steward_message_sent = hour
 
 bot = MakeBot()
 
@@ -211,9 +228,9 @@ async def grant_create_role(user, role_name, to_remove=[]):
             if role is not None:
                 await user.remove_roles(role)
 
-def run_discord_bot(TOKEN):
+async def run_discord_bot(TOKEN):
     if TOKEN == "":
         print("DISCORD_TOKEN is not set")
         return
     
-    bot.run(TOKEN)
+    await bot.start(TOKEN)

@@ -33,6 +33,7 @@ schema = [
     'checkouts',
     'student_storage',
     'shifts',
+    'shift_changes',
     'workshops',
     'printer_logs',
     'filament_logs',
@@ -296,6 +297,32 @@ class Shift(BaseModel):
         }
 
 
+class ShiftChange(BaseModel):
+    _id: Optional[PyObjectId] = Field(alias="_id")
+    uuid: str
+    day_timestamp: str
+    timestamp_start: str
+    timestamp_end: str
+    is_drop: bool
+    is_pickup: bool
+    steward: str
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {
+            ObjectId: str
+        }
+        schema_extra = {
+            "example": {
+                "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "day": "2023-01-01",
+                "timestamp_start": "10:00 AM",
+                "timestamp_end": "12:00 PM",
+                "is_drop": True,
+                "is_pickup": False,
+                "steward": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"
+            }
+        }
 '''
 The checkouts class is used to store information about the checkouts.
 The following fields are stored:

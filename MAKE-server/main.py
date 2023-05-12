@@ -119,6 +119,7 @@ runner = BackgroundRunner()
 @app.on_event('startup')
 async def app_startup():
     asyncio.create_task(runner.run_main())
+    asyncio.create_task(run_discord_bot(DISCORD_BOT_TOKEN))
 
 if __name__ == "__main__":
     # Setup logging to display everything to the console
@@ -140,8 +141,7 @@ if __name__ == "__main__":
 
     # Start the discord bot
     logging.info("Starting discord bot...")
-    asyncio.create_task(run_discord_bot(DISCORD_BOT_TOKEN))
-
+    
     logging.info("Discord bot started!")
 
     # When this python file is run directly, run the uvicorn server
@@ -155,4 +155,4 @@ if __name__ == "__main__":
     else:
         logging.info("Started MAKE in debug mode!")
         uvicorn.run("main:app", host="127.0.0.1", port=8080,
-                    log_level="info", reload=True)
+                    log_level="info", reload=False)
