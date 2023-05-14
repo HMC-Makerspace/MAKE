@@ -200,7 +200,7 @@ function createUserInfo(user_info) {
         document.getElementById("id-input").focus();
     } else {
         // Look at all checkouts for overdue checkouts
-        let checkouts = state.checkouts.filter((checkout) => checkout.uuid === user_info.uuid);
+        let checkouts = state.checkouts.filter((checkout) => checkout.checked_out_by === user_info.uuid);
         let now = new Date();
 
         let total_overdue = 0;
@@ -218,7 +218,7 @@ function createUserInfo(user_info) {
             <div id="user-info-name">${user_info.name}</div>
             <div id="user-info-id">${user_info.cx_id}</div>
             <div id="user-info-email">${user_info.email}</div>
-            <div id="user-info-auth" class="${user_info.role}">${user_info.role}</div>
+            <div id="user-info-auth" class="${user_info.role}">${ROLE_TO_READABLE[user_info.role] ?? user_info.role}</div>
             <div id="user-info-pending-checkouts">Overdue Checkouts: ${total_overdue}</div>
             <div id="user-info-all-checkouts">All Checkouts: ${checkouts.length}</div>
             <div id="user-info-passed-quizzes">${createPassedQuizzes(user_info.passed_quizzes)}</div>

@@ -74,6 +74,9 @@ const PROFICIENCIES = [
     "Welding"
 ];
 
+const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+
 // Cut off date for quizzes is on June 1st yearly
 // If a quiz was taken before this date, it is not counted
 // if there 
@@ -284,8 +287,8 @@ function createUserDiv(user, editable = false) {
 
     passed_quizzes.classList.add("user-result-passed-quizzes");
     for (let timestamp of Object.keys(user.passed_quizzes)) {
-        if (!quizzes_used.includes(user.passed_quizzes[timestamp]) 
-                && determineValidQuizDate(Number(timestamp))) {
+        if (!quizzes_used.includes(user.passed_quizzes[timestamp])
+            && determineValidQuizDate(Number(timestamp))) {
             let quiz_div = document.createElement("div");
             quiz_div.innerHTML = QUIZ_ID_TO_NAME[user.passed_quizzes[timestamp]];
 
@@ -352,5 +355,20 @@ function formatHour(hour_num) {
         return `12:00 AM`;
     } else {
         return `${hour_num}:00 AM`;
+    }
+}
+
+function closePopup() {
+    document.getElementById("popup-container").classList.add("hidden");
+    const content = document.getElementById("popup-content");
+
+    for (let child of content.children) {
+        child.classList.add("hidden");
+    }
+
+    if (shifts_updated) {
+        renderScheduleAdmin();
+        pushShiftsAdmin();
+        shifts_updated = false;
     }
 }

@@ -75,10 +75,6 @@ function displayLoggedIn() {
 
     if (state.user_object !== null) {
         name_el.innerText = state.user_object.name;
-
-        if (state.user_object.role == "steward" || state.user_object.role == "head_steward") {
-            document.getElementById('steward-button').classList.remove('hidden');
-        }
     }
 
 }

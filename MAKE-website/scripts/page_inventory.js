@@ -238,7 +238,6 @@ function generateInventoryDiv(result, kiosk_mode = false) {
                     quantity.innerText += "High";
                     break;
                 default:
-                    console.log("Unknown quantity:", item.quantity);
                     quantity.classList.add("unknown");
                     quantity.innerText += item.quantity;
                     break;

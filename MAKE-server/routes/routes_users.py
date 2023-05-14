@@ -142,3 +142,43 @@ async def route_update_user(request: Request):
     # Return success
     return
     
+@user_router.post("/update_user_by_uuid", status_code=201)
+async def route_update_user_by_uuid(request: Request):
+    # Update a user's role
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Updating user by uuid...")
+
+    db = MongoDB()
+
+    # Get the users collection
+    collection = await db.get_collection("users")
+
+    # Get the user UUID and role
+    json = await request.json()
+    user_uuid = json["uuid"]
+
+    # Check if the user already exists
+    user = await collection.find_one({"uuid": user_uuid})
+
+    if user is None:
+        # The user does not exist
+        # Return error
+        raise HTTPException(status_code=404, detail="User does not exist")
+    
+    user["cx_id"] = json["cx_id"]
+    user["name"] = json["name"]
+    user["email"] = json["email"]
+
+    if "proficiencies" in json:
+        user["proficiencies"] = json["proficiencies"]
+
+    try :
+        user = User(**user)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid user data") from e
+    
+    # Update the user
+    await collection.replace_one({"uuid": user.uuid}, user.dict())
+
+    # Return success
+    return

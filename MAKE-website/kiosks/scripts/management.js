@@ -278,21 +278,6 @@ async function saveUser(uuid) {
     }
 }
 
-function closePopup() {
-    document.getElementById("popup-container").classList.add("hidden");
-    const content = document.getElementById("popup-content");
-
-    for (let child of content.children) {
-        child.classList.add("hidden");
-    }
-
-    if (shifts_updated) {
-        renderScheduleAdmin();
-        pushShiftsAdmin();
-        shifts_updated = false;
-    }
-}
-
 function showMassAssignRoles() {
     document.getElementById("popup-container").classList.remove("hidden");
     document.getElementById("mass-assign-roles").classList.remove("hidden");
@@ -475,7 +460,6 @@ function generateStewardShiftList() {
 function generateScheduleDivsAdmin() {
     let divs = [];
 
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const time_start = 0;
     const time_end = 24;
 
@@ -486,7 +470,7 @@ function generateScheduleDivsAdmin() {
     day_header.innerText = "Time";
     header.appendChild(day_header);
 
-    for (let day of days) {
+    for (let day of DAYS) {
         const day_header = document.createElement("th");
         day_header.innerText = day;
         header.appendChild(day_header);
@@ -502,7 +486,7 @@ function generateScheduleDivsAdmin() {
 
         row.appendChild(time);
 
-        for (let day of days) {
+        for (let day of DAYS) {
             const cell = document.createElement("td");
 
             const inner_div = document.createElement("div");

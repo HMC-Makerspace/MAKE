@@ -16,7 +16,7 @@ async function fetchStudentStorage(kiosk_mode=false) {
     }
 
     if (state.cx_id !== null) {
-        const response = await fetch(`${API}/student_storage/get_for_user/${state.uuid}`);
+        const response = await fetch(`${API}/student_storage/get_student_storage_for_user/${state.user_object.uuid}`);
 
         if (response.status == 200) {
             const student_storage = await response.json();

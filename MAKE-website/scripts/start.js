@@ -6,7 +6,10 @@ async function start() {
         displayLoggedOut();
     }
 
-    getNowPlaying();
+    if (state.user_object.role == "steward" || state.user_object.role == "head_steward" || state.user_object.role == "admin") {
+        document.getElementById('steward-button').classList.remove('hidden');
+        await populateStewardPage();
+    }
 
     //animateChangeFonts();
 
@@ -43,9 +46,17 @@ async function start() {
     document.addEventListener("keydown", function (event) {
         // If user is not focused on an input, and the user presses the k key, show quick-nav
         if (event.key.toLowerCase() === "k" && document.activeElement.tagName !== "INPUT") {
-            toggleQuickNav();
+            document.getElementById("quick-nav").classList.remove("hidden");
+            document.getElementById("popup-container").classList.remove("hidden");
         }
     })
+
+    // Register esc to close popup
+    document.addEventListener("keyup", (e) => {
+        if (e.key === "Escape") {
+            closePopup();
+        }
+    });
 
     document.getElementById("page-schedule").addEventListener("click", (e) => {
         console.log(e.target.classList);
@@ -55,6 +66,9 @@ async function start() {
         }
         removeHighlightProficiency();
     });
+
+    // Hide fader
+    document.getElementById("fader").classList.add("fade-out");
 }   
 
 window.onpopstate = onHashChange;

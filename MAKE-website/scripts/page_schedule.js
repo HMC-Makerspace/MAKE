@@ -28,9 +28,7 @@ function renderSchedule(schedule) {
     // Get current hour
     let hour = now.getHours();
 
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-    const current_shift = state.schedule.find((shift) => shift.day == days[day] && formatHour(hour) == shift.timestamp_start);
+    const current_shift = state.schedule.find((shift) => shift.day == DAYS[day] && formatHour(hour) == shift.timestamp_start);
 
     let num = 0;
 

@@ -602,55 +602,6 @@ Management Console
   justify-content: center;
 }
 
-#popup-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 100;
-}
-
-#popup-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 999;
-}
-
-#popup-content {
-  z-index: 1000;
-  background-color: var(--theme-color-5);
-  padding: 40px;
-}
-
-#popup-content >* {
-  display: flex;
-  flex-direction: column;
-  row-gap: 10px;
-}
-
-.edit-buttons {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-evenly;
-}
-
-.edit-buttons button {
-  width: 100px;
-  height: 30px;
-}
-
 #schedule-table tr {
   height: 40px;
 }

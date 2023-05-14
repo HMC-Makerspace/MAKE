@@ -124,3 +124,41 @@ async def route_update_shift_schedule(request: Request):
         await shifts.insert_many(new_shifts)
 
     return
+
+@shifts_router.get("/get_shifts_for_steward/{steward_uuid}")
+async def route_get_shifts_for_steward(request: Request, steward_uuid: str):
+    db = MongoDB()
+
+    shifts = await db.get_collection("shifts")
+
+    if shifts is None:
+        return []
+    
+    # Find and return all shifts where the "stewards" field contains the steward's UUID
+    # The stewards field is a list of UUIDs, so we can use the $in operator
+    shifts = await shifts.find({"stewards": {"$in": [steward_uuid]}}).to_list(None)
+
+    shifts = [Shift(**shift) for shift in shifts]
+
+    return shifts
+
+@shifts_router.get("/get_shift_changes")
+async def route_get_shift_changes(request: Request):
+    db = MongoDB()
+
+    shift_changes = await db.get_collection("shift_changes")
+
+    if shift_changes is None:
+        return []
+    
+    shift_changes = await shift_changes.find().to_list(None)
+
+    shift_changes = [ShiftChange(**shift_change) for shift_change in shift_changes]
+
+    return shift_changes
+
+@shifts_router.post("/drop_shift")
+async def route_drop_shift(request: Request):
+    db = MongoDB()
+
+    
