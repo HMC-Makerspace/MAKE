@@ -134,7 +134,7 @@ async function generateShiftDiv(shift) {
     let s = stewards.length != 1 ? "s" : "";
     shift_stewards.innerText = `Shift partner${s}: `;
     for (let i = 0; i < stewards.length; i++) {
-        shift_stewards.innerText += `${stewards[i].name}`;
+        shift_stewards.innerText += `${stewards[i].name} (${stewards[i].email})`;
         if (i != stewards.length - 1) {
             shift_stewards.innerText += ", ";
         }

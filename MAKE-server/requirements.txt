@@ -5,3 +5,4 @@ aiohttp==3.8.4
 fuzzywuzzy==0.18.0
 levenshtein==0.20.9
 discord.py==2.2.3
+pillow==9.5.0

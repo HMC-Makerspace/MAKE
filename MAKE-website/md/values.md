@@ -12,7 +12,7 @@ Students run and manage the space, making sure that we stay attuned to the needs
 Students should feel welcome to experiment and try new things, with help and guidance from stewards.
 
 ## 3. Welcoming Environment
-Students can work on their projects at any time, in a non-judgemental space.
+Students can work on their projects at any time, in a non-judgmental space.
 
 ## 4. Accessibility
 We strive to create a space with low barriers of entry that is open to all, regardless of ability or background.

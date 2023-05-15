@@ -1,6 +1,7 @@
 import datetime
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 
 import asyncio
 import uvicorn
@@ -76,6 +77,8 @@ app.include_router(student_storage_router)
 app.include_router(machines_router)
 app.include_router(misc_router)
 
+# Add /discord to redirect to https://discord.gg/uveewgBmME
+app.add_api_route("/discord", lambda: RedirectResponse(url="https://discord.gg/uveewgBmME"))
 
 # Mount the static files in html mode
 app.mount("/", StaticFiles(directory="../MAKE-website", html=True), name="static")
