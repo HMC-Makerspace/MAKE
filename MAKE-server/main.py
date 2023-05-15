@@ -153,7 +153,7 @@ if __name__ == "__main__":
     if "--prod" in sys.argv:
         logging.info("Started MAKE in production mode!")
         # Production mode
-        uvicorn.run("main:app", host="0.0.0.0", port=443, log_level="info", reload=False,
+        uvicorn.run("main:app", host="0.0.0.0", port=8000, log_level="info", reload=False,
                     workers=1, ssl_keyfile=SSL_CERT_PRIVKEY, ssl_certfile=SSL_CERT_PERMKEY)
     else:
         logging.info("Started MAKE in debug mode!")
