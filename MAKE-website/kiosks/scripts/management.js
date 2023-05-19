@@ -57,16 +57,15 @@ async function authenticate() {
     setInterval(fetchUsers, 5000);
     setInterval(fetchStudentStorageAdmin, 5000);
 
-    fetchUsers().then(() => {
-        for (let key of Object.keys(state.users)) {
-            state.users[key].cx_id_str = state.users[key].cx_id.toString();
-        }
-
-        submitUserSearch(editable = true);
-        document.getElementById("users-search-input").addEventListener("keyup", submitUserSearch, editable = true);
-    });
+    await fetchUsers();
     await fetchStudentStorageAdmin();
     await fetchShiftsAdmin();
+
+    for (let key of Object.keys(state.users)) {
+        state.users[key].cx_id_str = state.users[key].cx_id.toString();
+    }
+
+    submitUserSearch(editable = true);
 
     setInterval(renderAll(), 5000);
     renderAll();
