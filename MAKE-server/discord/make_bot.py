@@ -171,39 +171,42 @@ class PronounView(discord.ui.View):
 class YearView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
+
+    @discord.ui.button(label='Staff/Faculty', style=discord.ButtonStyle.blurple, custom_id='persistent_view:year:staff/faculty')
+    async def staff_faculty(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message('Gained role Staff/Faculty!', ephemeral=True)
+        await grant_create_role(interaction.user, "Staff/Faculty", to_remove=["2021", "2022", "2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040"])
     
     @discord.ui.button(label='2024', style=discord.ButtonStyle.blurple, custom_id='persistent_view:year:2024')
     async def year_2021(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message('Gained role 2024!', ephemeral=True)
-        await grant_create_role(interaction.user, "2024", to_remove=["2025", "2026", "2027", "2028", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040"])
+        await grant_create_role(interaction.user, "2024", to_remove=["Staff/Faculty", "2025", "2026", "2027", "2028", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040"])
 
     @discord.ui.button(label='2025', style=discord.ButtonStyle.blurple, custom_id='persistent_view:year:2025')
     async def year_2025(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message('Gained role 2025!', ephemeral=True)
-        await grant_create_role(interaction.user, "2025", to_remove=["2024", "2026", "2027", "2028", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040"])
+        await grant_create_role(interaction.user, "2025", to_remove=["Staff/Faculty", "2024", "2026", "2027", "2028", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040"])
 
     @discord.ui.button(label='2026', style=discord.ButtonStyle.blurple, custom_id='persistent_view:year:2026')
     async def year_2026(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message('Gained role 2026!', ephemeral=True)
-        await grant_create_role(interaction.user, "2026", to_remove=["2024", "2025", "2027", "2028", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040"])
+        await grant_create_role(interaction.user, "2026", to_remove=["Staff/Faculty", "2024", "2025", "2027", "2028", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040"])
 
     @discord.ui.button(label='2027', style=discord.ButtonStyle.blurple, custom_id='persistent_view:year:2027')
     async def year_2027(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message('Gained role 2027!', ephemeral=True)
-        await grant_create_role(interaction.user, "2027", to_remove=["2024", "2025", "2026", "2028", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040"])
+        await grant_create_role(interaction.user, "2027", to_remove=["Staff/Faculty", "2024", "2025", "2026", "2028", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040"])
 
     @discord.ui.button(label='2028', style=discord.ButtonStyle.blurple, custom_id='persistent_view:year:2028')
     async def year_2028(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message('Gained role 2028!', ephemeral=True)
-        await grant_create_role(interaction.user, "2028", to_remove=["2024", "2025", "2026", "2027", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040"])
+        await grant_create_role(interaction.user, "2028", to_remove=["Staff/Faculty", "2024", "2025", "2026", "2027", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040"])
 
 
 
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def send_reaction_message(ctx):
-    await ctx.send('''***Reaction Roles***''')
-
     await ctx.send('''**Select your college**''', view=CollegeView())
 
     await ctx.send('''**Select your pronouns**''', view=PronounView())
