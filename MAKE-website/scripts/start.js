@@ -2,14 +2,16 @@ async function start() {
     if (state.cx_id !== null) {
         displayLoggedIn();
         await updateUserInfo();
+
+        if (state.user_object.role == "steward" || state.user_object.role == "head_steward" || state.user_object.role == "admin") {
+            document.getElementById('steward-button').classList.remove('hidden');
+            await populateStewardPage();
+        }
     } else {
         displayLoggedOut();
     }
 
-    if (state.user_object.role == "steward" || state.user_object.role == "head_steward" || state.user_object.role == "admin") {
-        document.getElementById('steward-button').classList.remove('hidden');
-        await populateStewardPage();
-    }
+
 
     //animateChangeFonts();
 
