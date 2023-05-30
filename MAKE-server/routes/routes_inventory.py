@@ -41,7 +41,7 @@ async def route_get_inventory_item(item_uuid: str):
     collection = await db.get_collection("inventory")
 
     # Get the inventory item
-    inventory_item = await collection.find_one({"UUID": item_uuid})
+    inventory_item = await collection.find_one({"uuid": item_uuid})
 
     if inventory_item is None:
         # The inventory item does not exist
@@ -74,7 +74,7 @@ async def route_create_inventory_item(request: Request):
     collection = await db.get_collection("inventory")
 
     # Check if the inventory item already exists
-    check = await collection.find_one({"UUID": item.UUID})
+    check = await collection.find_one({"uuid": item.uuid})
 
     if check is not None:
         # The inventory item already exists
@@ -88,7 +88,7 @@ async def route_create_inventory_item(request: Request):
     return
 
 
-@inventory_router.post("/update_inventory_item")
+@inventory_router.post("/update_inventory_item", status_code=200)
 async def route_update_inventory_item(request: Request):
     # Update an inventory item
     logging.getLogger().setLevel(logging.INFO)
@@ -109,7 +109,7 @@ async def route_update_inventory_item(request: Request):
     collection = await db.get_collection("inventory")
 
     # Check if the inventory item already exists
-    check = await collection.find_one({"UUID": item.UUID})
+    check = await collection.find_one({"uuid": item.uuid})
 
     if check is None:
         # The inventory item does not exist
@@ -118,7 +118,7 @@ async def route_update_inventory_item(request: Request):
             status_code=404, detail="Inventory item does not exist")
 
     # Update the inventory item
-    await collection.replace_one({"UUID": item.UUID}, item.dict())
+    await collection.replace_one({"uuid": item.uuid}, item.dict())
 
     # Return the inventory item
     return
@@ -144,7 +144,7 @@ async def route_delete_inventory_item(request: Request):
     collection = await db.get_collection("inventory")
 
     # Check if the inventory item already exists
-    check = await collection.find_one({"UUID": item_uuid})
+    check = await collection.find_one({"uuid": item_uuid})
 
     if check is None:
         # The inventory item does not exist
@@ -153,7 +153,7 @@ async def route_delete_inventory_item(request: Request):
             status_code=404, detail="Inventory item does not exist")
 
     # Delete the inventory item
-    await collection.delete_one({"UUID": item_uuid})
+    await collection.delete_one({"uuid": item_uuid})
 
     # Return the inventory item
     return

@@ -702,6 +702,118 @@ Management Console
   height: 400px;
 }
 
+
+/*
+
+INVENTORY
+
+*/
+
+#edit-inventory-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  grid-template-areas: "header header" "utilities inventory";
+  grid-template-rows: 60px 1fr;
+  grid-template-columns: 200px 1fr;
+  background-color: var(--theme-color-5);
+}
+
+#edit-inventory-header {
+  grid-area: header;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  column-gap: 20px;
+}
+
+#edit-inventory-results {
+  grid-area: inventory;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  overflow-y: scroll;
+}
+
+#edit-item {
+  display: grid;
+  grid-template-areas: "header header" "left right" "buttons buttons";
+  column-gap: 20px;
+}
+
+#edit-item >* {
+  display: flex;
+  flex-direction: column;
+}
+
+#edit-item #left {
+  grid-area: left;
+}
+
+#edit-item #right {
+  grid-area: right;
+}
+
+#edit-item .edit-buttons {
+  grid-area: buttons;
+  flex-direction: row;
+}
+
+#edit-item label {
+  margin-top: 10px;
+  height: 25px;
+}
+
+#edit-item #edit-item-role {
+  height: 44px;
+}
+
+.edit-inventory-item {
+  display: grid;
+  grid-template-areas: "name role quantity" "location edit delete";
+  grid-template-columns: 3fr 1fr 1fr;
+  row-gap: 5px;
+  background-color: var(--theme-color-2);
+  width: calc(100% - 40px);
+  padding: 10px;
+}
+
+.edit-inventory-item:nth-child(even) {
+  background-color: var(--theme-color-3);
+} 
+
+.edit-inventory-item >* {
+  margin: 0;
+  font-weight: normal;
+}
+
+.edit-inventory-item h2 {
+  grid-area: name;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.edit-inventory-item h3 {
+  font-size: 14px;
+}
+
+.edit-inventory-item button {
+  width: 100px;
+}
+
+.edit-inventory-item .edit {
+  grid-area: edit;
+}
+
+.edit-inventory-item .delete {
+  grid-area: delete;
+}
+
 /*
 
 LOOM

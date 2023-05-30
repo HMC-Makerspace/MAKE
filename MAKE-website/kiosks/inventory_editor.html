@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Inventory Editor</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@200;400&family=Righteous&display=swap" rel="stylesheet"> 
+    
+    
+        <link rel="stylesheet" href="/css/main.css">
+        <link rel="stylesheet" href="/kiosks/kiosks.css">
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+            
+        <div id="edit-inventory-grid">
+            <div id="edit-inventory-header">
+                <input type="text" id="edit-inventory-search-input" placeholder="Search for item...">
+
+                <span>
+                    <input type="checkbox" id="inventory-in-stock">
+                    <label for="inventory-in-stock">In Stock</label>
+                </span>
+
+                <span>
+                    <select aria-label="Select room to filter by" id="room-select">
+                        <option value="">-- Select Room/Area --</option>
+                        <option value="Main">Main Makerspace</option>
+                        <option value="Laser3D">3D Printer & Laser Cutter Room</option>
+                        <option value="Studio">Studio</option>
+                        <option value="Cage">The Cage</option>
+                        <option value="Welding">Welding Area</option>
+                        <option value="Electronics">Electronics Benches</option>
+                        <option value="Composite">Composite Room</option>
+                        <option value="Outdoor Storage">Outdoor Storage</option>
+                    </select>
+                </span>
+
+                <span>
+                    <select aria-label="Filter by Tool or Material" id="tool-material-select">
+                        <option value="">-- Select Tool/Material --</option>
+                        <option value="T">Tool</option>
+                        <option value="M">Material</option>
+                    </select>
+                </span>
+                <button id="edit-inventory-add-button" onclick="createInventoryItem()">Add Item</button>
+            </div>
+
+            <div id="edit-inventory-utilities">
+
+            </div>
+
+            <div id="edit-inventory-results">
+
+            </div>
+        </div>
+
+        <div id="popup-container" class="hidden">
+            <div id="popup-background" onclick="closePopup()"></div>
+            <div id="popup-content">
+                
+                <div id="edit-item" class="hidden">
+                    <h1>Edit Item</h1>
+
+                    <div id="left">
+                        <label for="edit-item-name">Name</label>
+                        <input id="edit-item-name">
+
+                        <label for="edit-item-role">Type</label>
+                        <select id="edit-item-role">
+                            <option value="M">Material</option>
+                            <option value="T">Tool</option>
+                        </select>
+                        
+                        <label for="edit-item-quantity">Quantity</label>
+                        <input id="edit-item-quantity" type="number">
+
+                        <label for="edit-item-location-room">Location (room)</label>
+                        <input id="edit-item-location-room">
+                        <label for="edit-item-location-specific">Location (specific)</label>
+                        <input id="edit-item-location-specific">
+                    </div>
+                    
+                    <div id="right">
+                        <label for="edit-item-specific-name">Specific Name</label>
+                        <input id="edit-item-specific-name">
+                        <label for="edit-item-reorder-url">Reorder URL</label>
+                        <input id="edit-item-reorder-url">
+                        <label for="edit-item-serial-number">Serial Number</label>
+                        <input id="edit-item-serial-number">
+                        <label for="edit-item-brand">Brand</label>
+                        <input id="edit-item-brand">
+                        <label for="edit-item-qr-code">QR Code(s)</label>
+                        <input id="edit-item-qr-code">
+                    </div>
+
+                    <div class="edit-buttons">
+                        <button id="edit-item-save" onclick="saveItem()">Save</button>
+                        <button id="edit-item-cancel" onclick="closePopup()">Cancel</button>
+                    </div>
+                </div>
+
+                <div id="delete-item" class="hidden">
+                    <h1>Delete Item</h1>
+                    <p>Are you sure you want to delete this item?</p>
+
+                    <div id="delete-item-name"></div>
+
+                    <p>This action cannot be undone.</p>
+
+                    <div class="edit-buttons">
+                        <button id="delete-item-confirm" onclick="deleteItem()">Delete</button>
+                        <button id="delete-item-cancel" onclick="closePopup()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="/scripts/libs/fuzzysort.min.js"></script>
+        <script src="/scripts/libs/sweetalert.min.js"></script>
+        <script src="/scripts/utils.js"></script>
+    
+        <script src="/scripts/page_inventory.js"></script>
+        <script src="/scripts/page_quiz_info.js"></script>
+        <script src="/scripts/page_checkouts.js"></script>
+            
+        <script src="/kiosks/scripts/inventory.js"></script>
+    </body>
+</html>
