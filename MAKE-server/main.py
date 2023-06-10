@@ -24,8 +24,8 @@ from discord.make_bot import run_discord_bot
 
 # Import routes preventing circular import
 from routes.routes_inventory import inventory_router
-#from routes.routes_users import user_router
-#from routes.routes_checkouts import checkouts_router
+from routes.routes_users import user_router
+from routes.routes_checkouts import checkouts_router
 from routes.routes_shifts import shifts_router
 from routes.routes_misc import misc_router
 from routes.routes_student_storage import student_storage_router
@@ -70,8 +70,8 @@ app = FastAPI(
 )
 
 app.include_router(inventory_router)
-#app.include_router(user_router)
-#app.include_router(checkouts_router)
+app.include_router(user_router)
+app.include_router(checkouts_router)
 app.include_router(shifts_router)
 app.include_router(student_storage_router)
 app.include_router(machines_router)
@@ -105,7 +105,7 @@ class BackgroundRunner:
     async def run_main(self):
         # Wait 10 seconds before starting the background tasks
         await asyncio.sleep(1)
-        """
+        
         while True:
             # Scrape quiz results
             await scrape_quiz_results()
@@ -116,7 +116,7 @@ class BackgroundRunner:
             utilities.last_updated_time = datetime.datetime.now()
 
             await asyncio.sleep(60)
-        """
+        
 
 
 runner = BackgroundRunner()
