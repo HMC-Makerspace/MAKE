@@ -70,8 +70,8 @@ app = FastAPI(
 )
 
 app.include_router(inventory_router)
-app.include_router(user_router)
-app.include_router(checkouts_router)
+#app.include_router(user_router)
+#app.include_router(checkouts_router)
 app.include_router(shifts_router)
 app.include_router(student_storage_router)
 app.include_router(machines_router)
