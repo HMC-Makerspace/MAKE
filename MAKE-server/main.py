@@ -105,6 +105,7 @@ class BackgroundRunner:
     async def run_main(self):
         # Wait 10 seconds before starting the background tasks
         await asyncio.sleep(1)
+        """
         while True:
             # Scrape quiz results
             await scrape_quiz_results()
@@ -115,6 +116,7 @@ class BackgroundRunner:
             utilities.last_updated_time = datetime.datetime.now()
 
             await asyncio.sleep(60)
+        """
 
 
 runner = BackgroundRunner()
