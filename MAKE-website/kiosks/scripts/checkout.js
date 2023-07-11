@@ -200,7 +200,9 @@ function createUserInfo(user_info) {
         document.getElementById("id-input").focus();
     } else {
         // Look at all checkouts for overdue checkouts
-        let checkouts = state.checkouts.filter((checkout) => checkout.checked_out_by === user_info.uuid);
+        // Ensure that we only look at checkouts that are currently checked out, 
+        // so filter out checkouts that have a timestamp_in
+        let checkouts = state.checkouts.filter((checkout) => checkout.checked_out_by === user_info.uuid && checkout.timestamp_in !== null);
         let now = new Date();
 
         let total_overdue = 0;
