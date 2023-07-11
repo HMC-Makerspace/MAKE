@@ -346,6 +346,8 @@ class Checkout(BaseModel):
     timestamp_due: str
     timestamp_in: Union[str, None]
     notifications_sent: int
+    times_renewed: int
+    last_renew: str
 
     class Config:
         arbitrary_types_allowed = True
@@ -364,7 +366,9 @@ class Checkout(BaseModel):
                 "timestamp_out": "165231121",
                 "timestamp_due": "165231121",
                 "timestamp_in": None,
-                "notifications_sent": 2
+                "notifications_sent": 2,
+                "times_renewed": 0,
+                "last_renew": None
             }
         }
 
