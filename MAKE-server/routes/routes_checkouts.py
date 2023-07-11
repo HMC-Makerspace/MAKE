@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime,timedelta
 import logging
 from utilities import validate_api_key
 from db_schema import *
@@ -167,6 +167,43 @@ async def route_check_in_checkout(request: Request, checkout_uuid: str):
     # Return success
     return
 
+@checkouts_router.post("/renew_checkout/{checkout_uuid}")
+async def route_renew_checkout(request: Request, checkout_uuid: str):
+    # Renew a checkout
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Renewing checkout...")
+
+    # Get the API key
+    api_key = request.headers["api-key"]
+    db = MongoDB()
+
+    # Validate API key
+    if not validate_api_key(db, api_key, "checkouts"):
+        # Invalid API key
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    # Get the checkouts collection
+    collection = await db.get_collection("checkouts")
+
+    # Get old due date
+    checkout = await collection.find_one({"uuid": checkout_uuid})
+    if checkout is None:
+        # The checkout does not exist
+        # Return error
+        raise HTTPException(status_code=404, detail="Checkout does not exist")
+        
+    old_date = checkout["timestamp_due"]
+
+    #Get new due date
+    new_date = old_date + timedelta(days=1)
+
+    # Renew the checkout 
+    await collection.update_one({"uuid": checkout_uuid}, {"$set": {"timestamp_due": new_date.timestamp()})
+
+    # Return success
+    return
+
 @checkouts_router.post("/delete_checkout/{checkout_uuid}")
 async def route_delete_checkout(request: Request, checkout_uuid: str):
     # Delete a checkout
@@ -191,3 +228,4 @@ async def route_delete_checkout(request: Request, checkout_uuid: str):
 
     # Return success
     return {"success": True}
+
