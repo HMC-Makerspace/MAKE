@@ -208,7 +208,7 @@ async def route_renew_checkout(request: Request, checkout_uuid: str):
     new_date = old_date + timedelta(days=1)
 
     # Renew the checkout 
-    await collection.update_one({"uuid": checkout_uuid}, {"$set": {"timestamp_due": new_date.timestamp()})
+    await collection.update_one({"uuid": checkout_uuid}, {"$set": {"timestamp_due": new_date.timestamp()}})
 
     # Return success
     return
