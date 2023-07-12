@@ -109,10 +109,11 @@ async def route_create_new_checkout(request: Request):
 
     # Get the checkouts collection
     collection = await db.get_collection("checkouts")
-    
+
+    # Set base renewals left to 3
+    checkout.dict()["renewals_left"]=3
 
     # Insert the checkout
-    checkout.dict()["renewals_left"]=3
     await collection.insert_one(checkout.dict())
 
 
@@ -199,10 +200,11 @@ async def route_renew_checkout(request: Request, checkout_uuid: str):
     #Check if there are renewals left
     if checkout["renewals_left"]==0:
         raise HTTPException(status_code=418, detail="No renewals left") # Placeholder status code
-    
+
+    # Get old date
     old_date = checkout["timestamp_due"]
 
-    #Get new due date
+    # Get new due date
     new_date = old_date + timedelta(days=1)
 
     # Renew the checkout 
