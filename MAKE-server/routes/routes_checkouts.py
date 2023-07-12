@@ -109,9 +109,12 @@ async def route_create_new_checkout(request: Request):
 
     # Get the checkouts collection
     collection = await db.get_collection("checkouts")
+    
 
     # Insert the checkout
+    checkout.dict()["renewals_left"]=3
     await collection.insert_one(checkout.dict())
+
 
     # Return status code 201
     return
@@ -192,7 +195,11 @@ async def route_renew_checkout(request: Request, checkout_uuid: str):
         # The checkout does not exist
         # Return error
         raise HTTPException(status_code=404, detail="Checkout does not exist")
-        
+
+    #Check if there are renewals left
+    if checkout["renewals_left"]==0:
+        raise HTTPException(status_code=418, detail="No renewals left") # Placeholder status code
+    
     old_date = checkout["timestamp_due"]
 
     #Get new due date
