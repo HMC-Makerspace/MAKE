@@ -595,6 +595,33 @@ async function checkIn(uuid) {
     }, 500);
 }
 
+async function renew(uuid) {
+    const response = await fetch(`${API}/checkouts/renew_checkout/${uuid}`,
+        {
+            method: "POST",
+            headers: {
+                "api-key": api_key,
+            },
+        }
+    );
+
+    if (response.status === 201) {
+        displaySuccessInCheckout(uuid);
+    } else {
+        displayErrorInCheckout(uuid);
+    }
+
+    setTimeout(() => {
+        const el = document.getElementById(`checkout-${uuid}`);
+
+        if (el.classList.contains("success")) {
+            fetchCheckouts();
+        } else {
+            el.classList.remove("error");
+        }
+    }, 500);
+}
+
 function displaySuccessInCheckout(uuid) {
     const el = document.getElementById(`checkout-${uuid}`);
     el.classList.add("success");
