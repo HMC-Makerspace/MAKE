@@ -88,11 +88,10 @@ function createCheckoutHeader(timestamp_in, kiosk_mode=false) {
     times_notified.innerHTML = "Times Notified";
     div.appendChild(times_notified);
 
-    if (!kiosk_mode) {
-        let renew = document.createElement("div");
-        renew.classList.add("checkout-entry-renew");
-        renew.innerHTML = "Renew";
-        div.appendChild(renew);
+    let renew = document.createElement("div");
+    renew.classList.add("checkout-entry-renew");
+    renew.innerHTML = "Renew";
+    div.appendChild(renew);
     }
     
     if (kiosk_mode) {
