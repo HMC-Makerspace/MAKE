@@ -88,6 +88,13 @@ function createCheckoutHeader(timestamp_in, kiosk_mode=false) {
     times_notified.innerHTML = "Times Notified";
     div.appendChild(times_notified);
 
+    if (!kiosk_mode) {
+        let renew = document.createElement("div");
+        renew.classList.add("checkout-entry-renew");
+        renew.innerHTML = "Renew";
+        div.appendChild(renew);
+    }
+    
     if (kiosk_mode) {
         let name = document.createElement("div");
         name.classList.add("checkout-entry-name");
@@ -100,13 +107,6 @@ function createCheckoutHeader(timestamp_in, kiosk_mode=false) {
         check_in.classList.add("checkout-entry-check-in");
         check_in.innerHTML = "Check In";
         div.appendChild(check_in);
-    }
-
-    if (!kiosk_mode) {
-        let renew = document.createElement("div");
-        renew.classList.add("checkout-entry-renew");
-        renew.innerHTML = "Renew";
-        div.appendChild(renew);
     }
 
     return div;
