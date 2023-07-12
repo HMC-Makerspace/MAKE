@@ -211,7 +211,7 @@ async def route_renew_checkout(request: Request, checkout_uuid: str):
     await collection.update_one({"uuid": checkout_uuid}, {"$set": {"timestamp_due": new_date.timestamp()}})
 
     # Return success
-    return
+    return checkout
 
 @checkouts_router.post("/delete_checkout/{checkout_uuid}")
 async def route_delete_checkout(request: Request, checkout_uuid: str):
