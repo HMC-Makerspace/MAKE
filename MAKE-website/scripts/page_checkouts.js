@@ -102,6 +102,13 @@ function createCheckoutHeader(timestamp_in, kiosk_mode=false) {
         div.appendChild(check_in);
     }
 
+    if (!kiosk_mode) {
+        let renew = document.createElement("div");
+        renew.classList.add("checkout-entry-renew");
+        renew.innerHTML = "Renew";
+        div.appendChild(renew);
+    }
+
     return div;
 }
 
@@ -155,6 +162,20 @@ function createCheckoutDiv(checkout, kiosk_mode = false) {
     times_notified.classList.add("checkout-entry-times-notified");
     times_notified.innerHTML = `Emails sent: <b>${checkout.notifications_sent}</b>`;
     div.appendChild(times_notified);
+
+    if (!kiosk_mode) {
+        if (checkout.timestamp_in) {
+            div.classList.add("checked-in");
+        } else {
+            let renew_button = document.createElement("button");
+            renew_button.classList.add("renew-button");
+            renew_button.innerHTML = "Renew";
+            renew_button.onclick = () => {
+                renew(checkout.uuid);
+            }
+
+            div.appendChild(check_in_button);
+    }
 
 
     if (kiosk_mode) {
