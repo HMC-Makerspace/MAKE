@@ -92,7 +92,6 @@ function createCheckoutHeader(timestamp_in, kiosk_mode=false) {
     renew.classList.add("checkout-entry-renew");
     renew.innerHTML = "Renew";
     div.appendChild(renew);
-    }
     
     if (kiosk_mode) {
         let name = document.createElement("div");
@@ -172,8 +171,7 @@ function createCheckoutDiv(checkout, kiosk_mode = false) {
             renew_button.onclick = () => {
                 renew(checkout.uuid);
             }
-
-            div.appendChild(check_in_button);
+        }
     }
 
 
