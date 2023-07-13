@@ -34,7 +34,7 @@ function renderCheckouts() {
     l.reverse();
 
     current.appendChild(createCheckoutHeader());
-    history.appendChild(createCheckoutHeader(true));
+    history.appendChild(createCheckoutHeader());
 
     for (let checkout of l) {
         if (!checkout.timestamp_in) {
@@ -52,7 +52,7 @@ function renderCheckouts() {
 // - Times notified
 // - Name
 // - If in kiosk mode, check in button
-function createCheckoutHeader(timestamp_in, kiosk_mode=false) {
+function createCheckoutHeader(kiosk_mode=false, timestamp_in=false) {
     let div = document.createElement("div");
     div.classList.add("checkout-header");
     div.classList.add("checkout-entry");
@@ -87,17 +87,17 @@ function createCheckoutHeader(timestamp_in, kiosk_mode=false) {
     times_notified.classList.add("checkout-entry-times-notified");
     times_notified.innerHTML = "Times Notified";
     div.appendChild(times_notified);
-
-    let renew = document.createElement("div");
-    renew.classList.add("checkout-entry-renew");
-    renew.innerHTML = "Renew";
-    div.appendChild(renew);
     
     if (kiosk_mode) {
         let name = document.createElement("div");
         name.classList.add("checkout-entry-name");
         name.innerHTML = "Name";
         div.appendChild(name);
+
+        let renew = document.createElement("div");
+        renew.classList.add("checkout-entry-renew");
+        renew.innerHTML = "Renew";
+        div.appendChild(renew);
     }
 
     if (kiosk_mode && !timestamp_in) {
@@ -169,11 +169,10 @@ function createCheckoutDiv(checkout, kiosk_mode = false) {
             renew_button.classList.add("renew-button");
             renew_button.innerHTML = "Renew";
             renew_button.onclick = () => {
-                renew(checkout.uuid);
+                renewCheckout(checkout.uuid);
             }
         }
     }
-
 
     if (kiosk_mode) {
         div.classList.add("kiosk-mode");

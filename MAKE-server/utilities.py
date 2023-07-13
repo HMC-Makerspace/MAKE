@@ -27,12 +27,14 @@ async def validate_api_key(db, api_key_str, scope):
 async def format_email_template(template_name: str, text_list: List[str]):
     # Format an email template
     # Get the template
-    template = open(f"/email_templates/{template_name}.html", "r").read()
+    template = open(f"email_templates/{template_name}.html", "r").read()
 
     # Format the template
-    formatted_template = template.format(**text_list)
+    formatted_template = template.format(
+        text_list=text_list
+    )
 
-    return formatted_template
+    return str(formatted_template)
 
 
 async def email_user(user_email: str, cc_email: List[str], subject: str, html_body: str):

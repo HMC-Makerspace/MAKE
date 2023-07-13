@@ -34,6 +34,7 @@ from routes.routes_machines import machines_router
 # Import all other files
 from users.quizzes import scrape_quiz_results
 from users.users import create_update_users_from_quizzes
+from inventory.checkouts import send_overdue_emails
 
 # SSL certificate paths, on a Debian system
 SSL_CERT_PRIVKEY = "/etc/letsencrypt/live/make.hmc.edu/privkey.pem"
@@ -103,10 +104,13 @@ class BackgroundRunner:
         return
 
     async def run_main(self):
-        # Wait 10 seconds before starting the background tasks
+        # Wait 1 second before starting the background tasks
         await asyncio.sleep(1)
         
         while True:
+            # Send emails for checkouts that are overdue
+            await send_overdue_emails()
+
             # Scrape quiz results
             await scrape_quiz_results()
 

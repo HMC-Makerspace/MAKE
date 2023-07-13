@@ -156,14 +156,14 @@ function updateCheckoutsHTML() {
         current_divs.push(createCheckoutDiv(checkout, kiosk_mode = true));
     }
 
-    current_divs.push(createCheckoutHeader(false, kiosk_mode = true));
+    current_divs.push(createCheckoutHeader(kiosk_mode=true, timestamp_in=false));
 
     let history_divs = [];
     for (let checkout of checkout_history) {
         history_divs.push(createCheckoutDiv(checkout, kiosk_mode = true));
     }
 
-    history_divs.push(createCheckoutHeader(true, kiosk_mode = true));
+    history_divs.push(createCheckoutHeader(kiosk_mode=true, timestamp_in=true));
 
     // Reverse order of both lists
     current_divs.reverse();
@@ -595,7 +595,7 @@ async function checkIn(uuid) {
     }, 500);
 }
 
-async function renew(uuid) {
+async function renewCheckout(uuid) {
     const response = await fetch(`${API}/checkouts/renew_checkout/${uuid}`,
         {
             method: "POST",
