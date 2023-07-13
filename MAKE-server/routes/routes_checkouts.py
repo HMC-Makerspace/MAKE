@@ -166,7 +166,7 @@ async def route_check_in_checkout(request: Request, checkout_uuid: str):
     collection = await db.get_collection("checkouts")
 
     # Check in the checkout
-    await collection.update_one({"uuid": checkout_uuid}, {"$set": {"timestamp_in": datetime.datetime.now().timestamp()}})
+    await collection.update_one({"uuid": checkout_uuid}, {"$set": {"timestamp_in": datetime.now().timestamp()}})
 
     # Return success
     return
@@ -197,9 +197,9 @@ async def route_renew_checkout(request: Request, checkout_uuid: str):
         # Return error
         raise HTTPException(status_code=404, detail="Checkout does not exist")
 
-    #Check if there are renewals left
-    #if checkout["renewals_left"]==0:
-     #   raise HTTPException(status_code=418, detail="No renewals left") # Placeholder status code
+    # 403 forbidden if no renewals left
+    if checkout["renewals_left"]==0:
+        raise HTTPException(status_code=403, detail="No renewals left") 
 
     # Get old date
     old_date = checkout["timestamp_due"]
@@ -237,4 +237,3 @@ async def route_delete_checkout(request: Request, checkout_uuid: str):
 
     # Return success
     return {"success": True}
-
