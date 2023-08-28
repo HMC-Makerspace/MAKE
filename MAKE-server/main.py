@@ -109,7 +109,7 @@ class BackgroundRunner:
         
         while True:
             # Send emails for checkouts that are overdue
-            await send_overdue_emails()
+            #await send_overdue_emails()
 
             # Scrape quiz results
             await scrape_quiz_results()
