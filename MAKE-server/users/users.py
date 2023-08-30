@@ -24,6 +24,15 @@ async def create_update_users_from_quizzes():
     # Get the users collection
     users_collection = await db.get_collection("users")
 
+    logging.info("Clearing passed quizzes for all users...")
+    # Set all passed quizzes to an empty dictionary
+    await users_collection.update_many(
+        {},
+        {"$set": {"passed_quizzes": {}}}
+    )
+
+    logging.info("Cleared!")
+
     # Now we have our data. Let's iterate through all quiz results
     # and create/update users as necessary
 

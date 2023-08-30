@@ -107,8 +107,12 @@
                     src="/img/student-storage-icon.svg" alt=""> <span>Student<br>Storage</span></button>
             <button id="checkouts-button" onclick="setPage('checkouts')"><img class="page-icon"
                     src="/img/checkout-icon.svg" alt=""> <span>Checkouts</span></button>
+
+                    <!--
             <button id="3d-printers-button" onclick="setPage('3d-printers')"><img class="page-icon"
                     src="/img/printer-icon.svg" alt=""> <span>3D Printers</span></button>
+                    -->
+
             <button id="student-projects-button" onclick="setPage('student-projects')"><img class="page-icon"
                     src="/img/student-projects-icon.svg" alt=""> <span>Student Project<br>Application</span></button>
             <button id="values-button" onclick="setPage('values')"><img class="page-icon" src="/img/values-icon.svg" alt="">
@@ -135,14 +139,8 @@
         <section id="page-home" class="main-content">
             <div id="current-announcement">
                 <div id="announcement-text">
-                    Between May 23rd and July 14th, the Makerspace has steward hours from 1:30pm to 4:30pm on Tuesdays and Fridays.
+                    The Makerspace is open September 5th! Quizzes have been reset as of August 1st, so please retake any quizzes you need to.
                 </div>
-            </div>
-
-            <div id="top-right-music">
-                <h3>Now Playing</h3>
-                <div id="music-art"></div>
-                <p id="music-title"></p>
             </div>
 
             <div id="welcome-message">
@@ -150,8 +148,8 @@
                 <h1 class="title-font" id="main-title-ani">MAKE</h1>
             </div>
 
-            <h2 id="status">
-                The Makerspace is <span id="open-closed">OPEN</span> with <span id="num-stewards">...</span> stewards on duty.
+            <h2 id="status" class="closed">
+                The Makerspace is <span id="open-closed">CLOSED</span> with <span id="num-stewards">...</span> stewards on duty.
             </h2>
 
             <div id="college-id-container" class="id-n content-body">
@@ -192,11 +190,15 @@
         <section id="page-steward" class="main-content hidden">
             <div class="content-container">
                 <div class="content-body" id="steward-resources">
-                    <h3>Quick Links</h3>
+                    <h3>Quick Info</h3>
                     <div id="steward-quick-links" class="steward-resource">
-                        <button id="steward-drive" onclick="openInNewTab('https://drive.google.com/drive/folders/0AH0hueN2V6xzUk9PVA')">Steward Drive</button>
-                        <button id="steward-passwords" onclick="openInNewTab('https://docs.google.com/document/d/1suOPAL12zjOgRAXtfOzo0-uRTozlsU3pYaeZSVGPDIM/edit')">Usernames & Passwords</button>
-                        <button id="steward-training" onclick="openInNewTab('https://docs.google.com/spreadsheets/d/1MqfXG75uFPvAfV-MlQ61gyR9UpucHsPLjxLhtONm4eM/edit?usp=sharing')">Training Schedule</button>
+                        <button onclick="openInNewTab('https://drive.google.com/drive/folders/0AH0hueN2V6xzUk9PVA')">Steward Drive</button>
+                        <button onclick="openInNewTab('https://docs.google.com/document/d/1sNywFxnBcZsGDaA5ouCM8ctp4hqdYZUU06EicxFaEa4/edit')">Steward Reference Manual</button>
+                        <button onclick="openInNewTab('https://docs.google.com/document/d/1suOPAL12zjOgRAXtfOzo0-uRTozlsU3pYaeZSVGPDIM/edit')">Usernames & Passwords</button>
+                        <button onclick="openInNewTab('https://docs.google.com/spreadsheets/d/e/2PACX-1vSY5bheau9FqUYYwx_tjP3c9eh0fUjJ48BkXrT7rVUBlNMs371UXuy7QmfQToPSz9FuCeVbjrQUUdfr/pubhtml')">Training Schedule</button>
+                        <p>
+                            
+                        </p>
                     </div>
                     
                     <h3>Your Shifts</h3>
@@ -446,9 +448,9 @@
                     </div>
 
                     <p3 class="honor-code-warning">
-                        Completion of each quiz with a 100% will automatically grant swipe access to the relevent
-                        room and/or
-                        permission to operate the machine. Swipe access is updated daily at 2AM.
+                        We are working with F&M to update swipe access to the Makerspace. It may take up to 2 weeks
+                        for swipe access to be granted after taking the a safety quiz. You can still use the Makerspace
+                        and check out tools while waiting for swipe access to be granted.
                         <br><br>
                         Failing to successfully complete the quiz prior to use is an honor code violation, and may
                         result in a suspension or ban from the Makerspace.
@@ -463,11 +465,6 @@
 
         -->
         <section id="page-schedule" class="main-content hidden">
-            <div id="current-announcement">
-                <div id="announcement-text">
-                    Between May 23rd and July 14th, the Makerspace has steward hours from 1:30pm to 4:30pm on Tuesdays and Fridays.
-                </div>
-            </div>
             <div class="content-container">
                 <div id="schedule-help" class="content-header">
                     <p3>

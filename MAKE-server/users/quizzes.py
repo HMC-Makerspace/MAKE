@@ -22,6 +22,8 @@ GRAD_SCHOOL_EMAIL_DOMAINS = {
     '2': "cgu.edu",
 }
 
+# This should be August 1st of each year
+QUIZ_RESET_DAY = 213
 
 async def scrape_quiz_results():
     # Set logging level
@@ -57,6 +59,30 @@ async def get_quiz_results(quiz_id):
     quiz_responses = []
 
     quiz_url = BASE_QUIZ_URL + quiz_id + POST_QUIZ_URL
+
+    # Make timestamp that quizzes are valid after.
+    # This resets every year on QUIZ_RESET_DAY
+    quizzes_valid_after = 0
+
+    # Get the current date
+    current_date = datetime.now()
+
+    # Get the current year
+    current_year = current_date.year
+
+    # Get day of year
+    day_of_year = current_date.timetuple().tm_yday
+
+    if day_of_year < QUIZ_RESET_DAY:
+        # The quiz date is valid if the quiz timestamp is in the previous year
+        quizzes_valid_after = datetime(current_year - 1, 8, 1).timestamp()
+    else:
+        # The quiz date is valid if the quiz timestamp is in the current year
+        quizzes_valid_after = datetime(current_year, 8, 1).timestamp()
+
+    total_valid = 0
+    total_invalid = 0
+
     async with aiohttp.ClientSession() as session:
         async with session.get(quiz_url) as response:
             # Decode the response as a string
@@ -87,8 +113,19 @@ async def get_quiz_results(quiz_id):
                     passed=determine_if_passed(quiz_result[1])
                 )
 
+                # Check if the quiz date is valid
+                if quiz_response.timestamp < quizzes_valid_after:
+                    total_invalid += 1
+                    quiz_response.passed = False
+                else:
+                    total_valid += 1
+
                 # Add the quiz response to the list of quiz responses
                 quiz_responses.append(quiz_response)
+
+    logging.info(
+        f"Found {total_valid} valid quiz results and {total_invalid} invalid quiz results for {quiz_id} quiz.")
+
 
     # Return the quiz results
     return quiz_responses
@@ -247,23 +284,8 @@ async def update_quiz_results(quiz_id: str, quiz_results: List[QuizResponse]):
     # Get the collection
     collection = await db.get_collection("quizzes")
 
-    # Get most recent timestamp in database
-    most_recent_timestamp = await collection.find_one({"gid": quiz_id}, sort=[("timestamp", -1)])
-
-    if most_recent_timestamp is None:
-        # There are no quiz results in the database
-        most_recent_timestamp = 0
-    else:
-        # Get the most recent timestamp
-        most_recent_timestamp = most_recent_timestamp["timestamp"]
-
-    # Remove all quiz results in quiz_results that are older than the most recent timestamp
-    quiz_results = [
-        quiz_result for quiz_result in quiz_results if quiz_result.timestamp > most_recent_timestamp]
-
-    if len(quiz_results) == 0:
-        # There are no quiz results to update
-        return 0
+    # Delete all quiz results for the quiz
+    await collection.delete_many({"gid": quiz_id})
 
     # Convert all quiz results to a list of dictionaries
     quiz_results = [quiz_result.dict() for quiz_result in quiz_results]

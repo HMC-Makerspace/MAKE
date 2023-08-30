@@ -33,7 +33,7 @@ async def route_get_status():
         "total_checkouts": await checkouts.count_documents({}), 
         "total_users": await users.count_documents({}),
         "total_items": await inventory.count_documents({}),
-        "version": "2.0.0",
+        "version": "2.1.0",
     }
 
 
