@@ -603,7 +603,7 @@ function generateEditStewardShiftDiv(user, on_shift, day, hour) {
     user_div.classList.add("add-remove-steward-info");
     // Append name and cx_id
     const name = document.createElement("span");
-    name.innerText = `${user.name} (${user.cx_id})`;
+    name.innerText = `${user.name} (${user.email})`;
     user_div.appendChild(name);
 
     const add_remove_button = document.createElement("button");
