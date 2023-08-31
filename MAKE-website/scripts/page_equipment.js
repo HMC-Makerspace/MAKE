@@ -6,6 +6,12 @@ const laser3d_equipment = [
         manual: "https://docs.google.com/document/d/1JNqDC9X5x_eaMU51Pfan4zC-YUiqhW1XqpONjFzrzyM/edit#heading=h.skjsghxs3yl6"
     },
     {
+        name: "Glowforge Laser Cutter",
+        description: "Smaller laser cutter with a built-in camera that can cut & engrave on a variety of materials, such as wood, acrylic, and cardboard. The built-in camera allows for precise placement of designs on materials.",
+        image: "img/equipment/glowforge.webp",
+        manual: "https://docs.google.com/document/d/1YLAlbvcPb3p04SeVqwvQ-6_EGABFlFwP_2Nr1nNKf3A/edit#heading=h.n01b46lm0fpk"
+    },
+    {
         name: "Epilog Laser Cutter",
         description: "Smaller laser cutter, faster and more accurate then the full spectrum laser cutter, but with reduced cutting area.",
         image: "img/equipment/epiloglaser.webp",
