@@ -123,7 +123,7 @@ function downloadCurrentRender() {
 document.getElementById("tabby-width").addEventListener("change", function () {
     // Ensure min/max values are respected
     let value = Number(document.getElementById("tabby-width").value);
-    if (value < 7) {
-        document.getElementById("tabby-width").value = 7;
+    if (value < 5) {
+        document.getElementById("tabby-width").value = 5;
     }
 });
