@@ -71,3 +71,7 @@ All FDM (filament) printing is free for personal use. If you are printing items 
 ## How can I hear about workshops?
 
 You can hear about workshops and sign up for them through the Makerspace Google Site. We will post updates whenever one is scheduled. You can also hear about them through our instagram, [@hmcmakerspace](https://www.instagram.com/hmcmakerspace/)
+
+## How can I change my displayed name or linked email on MAKE?
+
+Please reach out to makerspace management at <a href="mailto:makerspace-management-l@g.hmc.edu">makerspace-management-l@g.hmc.edu</a>. We'll update your information as soon as possible.
