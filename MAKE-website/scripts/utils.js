@@ -319,7 +319,7 @@ function createUserDiv(user, editable = false) {
     return div;
 }
 const user_search_options = {
-    limit: 1000, // don't return more results than you need!
+    limit: 100, // don't return more results than you need!
     allowTypo: true, // if you don't care about allowing typos
     threshold: -10000, // don't return bad results
     keys: ['name', 'cx_id_str', 'email', 'role'], // keys to search
