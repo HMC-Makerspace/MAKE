@@ -1953,14 +1953,15 @@ STEWARD RESOURCES
   align-items: center;
   justify-content: center;
   row-gap: 10px;
-  column-gap: 20px;
 }
 
 #steward-quick-links button {
   font-size: 1em;
   font-weight: bold;
-  width: 300px;
+  width: 240px;
   height: 60px;
+  margin-right: 10px;
+  margin-left: 10px;
 }
 
 #steward-shifts {

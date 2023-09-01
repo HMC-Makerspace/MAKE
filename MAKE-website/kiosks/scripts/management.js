@@ -286,6 +286,18 @@ function showMassAssignRoles() {
     }
 }
 
+function toggleOnlyStewards() {
+    const only_stewards = document.getElementById("only-stewards").checked;
+
+    if (only_stewards) {
+        document.getElementById("only-stewards-label").innerText = "Only stewards";
+    } else {
+        document.getElementById("only-stewards-label").innerText = "All users";
+    }
+
+    submitUserSearch(editable = true);
+}
+
 async function massAssignRoles() {
     let users_to_update = [];
     
