@@ -110,7 +110,7 @@ async def get_quiz_results(quiz_id):
                     name=quiz_result[2],
                     cx_id=cx_id,
                     email=email,
-                    passed=determine_if_passed(quiz_result[1], cx_id)
+                    passed=determine_if_passed(quiz_result[1])
                 )
 
                 # Check if the quiz date is valid
