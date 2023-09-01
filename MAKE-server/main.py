@@ -108,18 +108,30 @@ class BackgroundRunner:
         await asyncio.sleep(1)
         
         while True:
-            # Send emails for checkouts that are overdue
-            #await send_overdue_emails()
+            try:
+                # Send emails for checkouts that are overdue
+                #await send_overdue_emails()
 
-            # Scrape quiz results
-            await scrape_quiz_results()
+                # Scrape quiz results
+                await scrape_quiz_results()
 
-            # Create/update users from quizzes
-            await create_update_users_from_quizzes()
+                # Create/update users from quizzes
+                await create_update_users_from_quizzes()
 
-            utilities.last_updated_time = datetime.datetime.now()
+                utilities.last_updated_time = datetime.datetime.now()
 
-            await asyncio.sleep(60)
+                await asyncio.sleep(60)
+            except Exception as e:
+                # Save to log file
+                with open("error_log.txt", "a") as f:
+                    f.write(f"{datetime.datetime.now()}: {e}\n")
+
+                # Print to console
+                print(f"{datetime.datetime.now()}: {e}")
+
+                # Wait 1 minute before trying again
+                await asyncio.sleep(60)
+
         
 
 
