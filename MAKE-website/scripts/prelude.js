@@ -77,6 +77,8 @@ function displayLoggedIn() {
         name_el.innerText = state.user_object.name;
     }
 
+    displayStewardInfo();
+
 }
 
 function displayLoggedOut() {
@@ -91,8 +93,26 @@ function displayLoggedOut() {
         el.classList.remove('hidden');
     }
 
+    displayStewardInfo();
+
     renderQuizInfo();
     renderCheckouts();
+}
+
+async function displayStewardInfo() {
+    const steward_button = document.getElementById('steward-button');
+     
+    if (state.user_object === null) {
+        steward_button.classList.add('hidden');
+
+        return;
+    }
+
+    if (state.user_object.role == "steward" || state.user_object.role == "head_steward" || state.user_object.role == "admin") {
+        steward_button.classList.remove('hidden');
+
+        await populateStewardPage();
+    }
 }
 
 async function updateUserInfo() {

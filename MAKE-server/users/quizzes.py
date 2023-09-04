@@ -268,11 +268,20 @@ def determine_if_passed(score):
     if len(score_list) != 2:
         # The score is not formatted correctly
         return False
-    elif score_list[0] == score_list[1]:
-        # The user passed the quiz
-        return True
-    else:
-        # The user failed the quiz
+    
+    try:
+        # Convert the score to an integer
+        score = int(score_list[0])
+        max_score = int(score_list[1])
+
+        # Determine if the user passed the quiz
+        if score >= max_score:
+            return True
+        else:
+            return False
+    except Exception as e:
+        logging.warn(f"Error determining if user passed quiz: {e}")
+
         return False
 
 

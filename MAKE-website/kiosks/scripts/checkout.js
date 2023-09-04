@@ -51,7 +51,7 @@ async function authenticate() {
         }
 
         submitUserSearch();
-        document.getElementById("users-search-input").addEventListener("keyup", submitUserSearch);
+        document.getElementById("users-search-input").addEventListener("keyup", () => { submitUserSearch(editable = false) });
         fetchCheckouts();
     });
 
