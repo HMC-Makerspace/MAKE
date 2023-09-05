@@ -212,7 +212,7 @@ function generateInventoryDiv(result, kiosk_mode = false) {
     main_div.appendChild(location);
 
 
-    if (item.kit_contents == null) {
+    if (item.quantity !== null) {
         const quantity = document.createElement("div");
         quantity.classList.add("inventory-result-quantity");
 

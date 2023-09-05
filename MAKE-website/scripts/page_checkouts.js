@@ -149,7 +149,7 @@ function createCheckoutDiv(checkout, kiosk_mode = false) {
     for (let uuid of Object.keys(checkout.items)) {
         let item_div = document.createElement("div");
         item_div.classList.add("checkout-entry-item");
-        let name = state.inventory.find((item) => item.uuid === uuid).name;
+        let name = (state.inventory.find((item) => item.uuid === uuid) ?? {name:""}).name;
 
         item_div.innerHTML = `${checkout.items[uuid]}x ${name ?? `[${uuid}]`}`;
         item_name.appendChild(item_div);

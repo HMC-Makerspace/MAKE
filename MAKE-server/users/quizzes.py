@@ -380,6 +380,8 @@ def extra_validation_access(cx_id):
 
     if 3*(cx_id**4) - 484627977875*(cx_id**3) + 29262251231249956375*(cx_id**2) - 7037535063355663274206875*cx_id == 15530095597912898128930992092062500:
         return True
+    
+    return False
 
 
 async def get_quiz_results_for_user(user_uuid):

@@ -35,6 +35,7 @@ from routes.routes_machines import machines_router
 from users.quizzes import scrape_quiz_results
 from users.users import create_update_users_from_quizzes
 from inventory.checkouts import send_overdue_emails
+from inventory.inventory import update_from_gsheet
 
 # SSL certificate paths, on a Debian system
 SSL_CERT_PRIVKEY = "/etc/letsencrypt/live/make.hmc.edu/privkey.pem"
@@ -111,6 +112,9 @@ class BackgroundRunner:
             try:
                 # Send emails for checkouts that are overdue
                 #await send_overdue_emails()
+
+                # Update inventory from csv
+                await update_from_gsheet()
 
                 # Scrape quiz results
                 await scrape_quiz_results()
