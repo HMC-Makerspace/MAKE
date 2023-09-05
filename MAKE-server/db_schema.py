@@ -105,7 +105,7 @@ class InventoryItem(BaseModel):
     role: Union[str, None]
     # Quantity can be a number or a string
     quantity: Union[str, None]
-    in_overstock: bool
+    in_overstock: Union[bool, None]
     overstock_quantity: Union[str, None]
     location_room: Union[str, None]
     location_specific: Union[str, None]
