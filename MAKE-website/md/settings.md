@@ -5,11 +5,12 @@
     Toggle light/dark mode
 </button>
 
-## API Status - make.hmc.edu/v1/api/
+## API Status - make.hmc.edu/v2/api/
 
 <button id="refresh-status" onclick="fetchStatus()">
     Refresh
 </button>
+
 
 <div id="statuses">
 </div>

@@ -2,7 +2,7 @@
 
 ## What are the Makerspace hours?
 
-The Makerspace is open to 7C students & faculty 24/7, but we have stewards on shift from:
+The Makerspace is open to 7C students, faculty, and staff 24/7, but we have stewards on shift from:
 
 - 1-10PM Monday-Thursday
 - 1-7PM Friday and Saturday
@@ -10,7 +10,7 @@ The Makerspace is open to 7C students & faculty 24/7, but we have stewards on sh
 
 While stewards are on duty, you can check out tools/equipment and ask them for assistance.
 
-You can also ask questions on the [Makerspace Discord](https://discord.gg/uveewgBmME)!
+You can also ask questions on the [Makerspace Discord](https://make.hmc.edu/discord)!
 
 ## How is the Makerspace run?
 
