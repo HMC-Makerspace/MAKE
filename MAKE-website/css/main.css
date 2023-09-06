@@ -2121,6 +2121,7 @@ Mobile Styles
 
   .content-body {
     overflow-y: unset;
+    padding-bottom: 200px;
   }
 
   .quiz-info-storage-help {
