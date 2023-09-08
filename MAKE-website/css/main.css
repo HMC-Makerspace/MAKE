@@ -352,21 +352,25 @@ p3 {
   transition: background-color 0.2s ease-in-out, opacity 0.2 ease-in-out;
 }
 
-#left-bar button img {
-  transition: filter 0.1s ease-in-out, transform 0.2s ease-in-out;
+#left-bar button .material-symbols-outlined {
+  transition: background-color 0.2s ease-in-out, opacity 0.2 ease-in-out, color 0.2s ease-in-out;
+  color: black;
+  font-size: 30px;
+  margin-right: 10px;
 }
 
-#left-bar button.active-button img,
-#left-bar button:hover img {
-  transform: scale(1.1);
-  filter: invert(var(--invert));
-}
 
 #left-bar button.active-button,
-#left-bar button:hover {
+#left-bar button:hover,
+#left-bar button.active-button .material-symbols-outlined,
+#left-bar button:hover .material-symbols-outlined {
   color: var(--text-color-main);
-  background: var(--theme-color-2);
 }
+
+#left-bar button.active-button, #left-bar button:hover {
+  background-color: var(--theme-color-2);
+}
+
 
 button {
   background-color: var(--theme-color-1);
@@ -648,9 +652,8 @@ HOME
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
   min-height: 250px;
-  padding: 30px;
+  padding: 5px;
 }
 
 #welcome-message {
@@ -659,7 +662,7 @@ HOME
 }
 
 #main-title-ani {
-  font-size: 10em;
+  font-size: min(20vh, 10em);
   text-align: left !important;
   cursor: pointer;
   margin: unset;
@@ -1956,12 +1959,18 @@ STEWARD RESOURCES
 }
 
 #steward-quick-links button {
-  font-size: 1em;
+  font-size: .8em;
   font-weight: bold;
   width: 240px;
   height: 60px;
   margin-right: 10px;
   margin-left: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
 }
 
 #steward-shifts {
@@ -1972,7 +1981,7 @@ STEWARD RESOURCES
   row-gap: 20px;
 }
 
-.steward-shift-container {
+.steward-shift-container, .shift-change-container {
   width: 100%;
   display: grid;
   grid-template-columns: 3fr 3fr 1fr;

@@ -18,6 +18,7 @@
         href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alfa+Slab+One&family=Bree+Serif&family=Dancing+Script:wght@700&family=Edu+VIC+WA+NT+Beginner&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@200;400&family=Libre+Baskerville:wght@700&family=Pacifico&family=Permanent+Marker&family=Righteous&family=Varela+Round&display=swap"
         rel="stylesheet">
 
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0" />        
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -87,40 +88,90 @@
                 <div id="main-logo" onclick="setPage('home')">MAKE</div>
                 <div id="mobile-logo" onclick="toggleMobileMenu()">≡</div>
             </div>
-            <button id="home-button" class="active-button" onclick="setPage('home')"><img class="page-icon"
-                    src="/img/home-icon.svg" alt="">
-                <span>Home</span></button>
-            <button id="steward-button" class="hidden" onclick="setPage('steward')"><img class="page-icon"
-                    src="/img/steward-only-icon.svg" alt=""> <span>Steward<br>Resources</span></button>
-            <button id="quiz-info-button" onclick="setPage('quiz-info')"><img class="page-icon"
-                    src="/img/quiz-icon.svg" alt=""> <span>Quizzes<br>&
-                    Information</span></button>
-            <button id="equipment-button" onclick="setPage('equipment')"><img class="page-icon"
-                    src="/img/tool-icon.svg" alt=""> <span>Equipment<br>& Manuals</span></button>
-            <button id="schedule-button" onclick="setPage('schedule')"><img class="page-icon"
-                    src="/img/schedule-icon.svg" alt=""> <span>Schedule</span></button>
-            <button id="workshops-button" onclick="setPage('workshops')"><img class="page-icon"
-                    src="/img/workshops-icon.svg" alt=""> <span>Workshops</span></button>
-            <button id="inventory-button" onclick="setPage('inventory')"><img class="page-icon"
-                    src="/img/inventory-icon.svg" alt=""> <span>Inventory</span></button>
-            <button id="student-storage-button" onclick="setPage('student-storage')"><img class="page-icon"
-                    src="/img/student-storage-icon.svg" alt=""> <span>Student<br>Storage</span></button>
-            <button id="checkouts-button" onclick="setPage('checkouts')"><img class="page-icon"
-                    src="/img/checkout-icon.svg" alt=""> <span>Checkouts</span></button>
+            <button id="home-button" class="active-button" onclick="setPage('home')">
+                <span class="material-symbols-outlined">
+                    home
+                </span>
+                <span>Home</span>
+            </button>
+            <button id="steward-button" class="hidden" onclick="setPage('steward')">
+                <span class="material-symbols-outlined">
+                    person_apron
+                </span>
+                <span>Steward<br>Resources</span>
+            </button>
+            <button id="quiz-info-button" onclick="setPage('quiz-info')">
+                <span class="material-symbols-outlined">
+                    quiz
+                </span>
+                <span>Quizzes<br>& Information</span>
+            </button>
+            <button id="equipment-button" onclick="setPage('equipment')">
+                <span class="material-symbols-outlined">
+                    handyman
+                </span>    
+                <span>Equipment<br>& Manuals</span>
+            </button>
+            <button id="schedule-button" onclick="setPage('schedule')">
+                <span class="material-symbols-outlined">
+                    calendar_month
+                </span>
+                <span>Schedule</span>
+            </button>
+            <button id="workshops-button" onclick="setPage('workshops')">
+                <span class="material-symbols-outlined">
+                    factory
+                </span>
+                <span>Workshops</span>
+            </button>
+            <button id="inventory-button" onclick="setPage('inventory')">
+                <span class="material-symbols-outlined">
+                    inventory_2
+                </span>
+                <span>Inventory</span>
+            </button>
+            <button id="student-storage-button" onclick="setPage('student-storage')">
+                <span class="material-symbols-outlined">
+                    shelves
+                </span>
+                <span>Student<br>Storage</span>
+            </button>
+            <button id="checkouts-button" onclick="setPage('checkouts')">
+                <span class="material-symbols-outlined">
+                    shopping_cart
+                </span>
+                <span>Checkouts</span>
+            </button>
 
                     <!--
             <button id="3d-printers-button" onclick="setPage('3d-printers')"><img class="page-icon"
                     src="/img/printer-icon.svg" alt=""> <span>3D Printers</span></button>
                     -->
 
-            <button id="student-projects-button" onclick="setPage('student-projects')"><img class="page-icon"
-                    src="/img/student-projects-icon.svg" alt=""> <span>Student Project<br>Application</span></button>
-            <button id="values-button" onclick="setPage('values')"><img class="page-icon" src="/img/values-icon.svg" alt="">
-                <span>Values</span></button>
-            <button id="faq-button" onclick="setPage('faq')"><img class="page-icon" src="/img/faq.svg"  alt="">
-                <span>FAQ</span></button>
-            <button id="settings-button" onclick="setPage('settings')"><img class="page-icon"
-                    src="/img/settings-icon.svg" alt=""><span>Settings</span></button>
+            <button id="student-projects-button" onclick="setPage('student-projects')">
+                <span class="material-symbols-outlined">
+                    request_page
+                </span>
+                <span>Student Project<br>Application</span>
+            </button>
+            <button id="values-button" onclick="setPage('values')">
+                <span class="material-symbols-outlined">
+                    partner_exchange
+                    </span>
+                <span>Values</span>
+            </button>
+            <button id="faq-button" onclick="setPage('faq')">
+                <span class="material-symbols-outlined">
+                    help
+                </span>
+                <span>FAQ</span>
+            </button>
+            <button id="settings-button" onclick="setPage('settings')">
+                <span class="material-symbols-outlined">
+                    settings
+                </span>
+                <span>Settings</span>
+            </button>
 
             <div class="hmc-content">
                 A Resource of
@@ -192,11 +243,37 @@
                 <div class="content-body" id="steward-resources">
                     <h3>Quick Info</h3>
                     <div id="steward-quick-links" class="steward-resource">
-                        <button onclick="openInNewTab('https://drive.google.com/drive/folders/0AH0hueN2V6xzUk9PVA')">Steward Drive</button>
-                        <button onclick="openInNewTab('https://docs.google.com/document/d/1sNywFxnBcZsGDaA5ouCM8ctp4hqdYZUU06EicxFaEa4/edit')">Steward Reference Manual</button>
-                        <button onclick="openInNewTab('https://docs.google.com/document/d/1suOPAL12zjOgRAXtfOzo0-uRTozlsU3pYaeZSVGPDIM/edit')">Usernames & Passwords</button>
-                        <button onclick="openInNewTab('https://docs.google.com/spreadsheets/d/e/2PACX-1vSY5bheau9FqUYYwx_tjP3c9eh0fUjJ48BkXrT7rVUBlNMs371UXuy7QmfQToPSz9FuCeVbjrQUUdfr/pubhtml')">Training Schedule</button>
-                        <button onclick="openInNewTab('https://forms.gle/ERQCxNsGLwV2GKiS8')">Report Injury</button>
+                        <button onclick="openInNewTab('https://drive.google.com/drive/folders/0AH0hueN2V6xzUk9PVA')">
+                            <span class="material-symbols-outlined">
+                                smb_share
+                            </span>
+                            Steward Drive
+                        </button>
+                        <button onclick="openInNewTab('https://docs.google.com/document/d/1sNywFxnBcZsGDaA5ouCM8ctp4hqdYZUU06EicxFaEa4/edit')">
+                            <span class="material-symbols-outlined">
+                                developer_guide
+                            </span>
+                            Steward Reference Manual
+                        </button>
+                        <button onclick="openInNewTab('https://docs.google.com/document/d/1suOPAL12zjOgRAXtfOzo0-uRTozlsU3pYaeZSVGPDIM/edit')">
+                            <span class="material-symbols-outlined">
+                                lock_open
+                            </span>
+                            Usernames & Passwords
+                        </button>
+                        <button onclick="openInNewTab('https://docs.google.com/spreadsheets/d/e/2PACX-1vSY5bheau9FqUYYwx_tjP3c9eh0fUjJ48BkXrT7rVUBlNMs371UXuy7QmfQToPSz9FuCeVbjrQUUdfr/pubhtml')">
+                            <span class="material-symbols-outlined">
+                                today
+                            </span>
+                            Training Schedule
+                        </button>
+                        <button onclick="openInNewTab('https://forms.gle/ERQCxNsGLwV2GKiS8')">
+                            <span class="material-symbols-outlined">
+                                personal_injury
+                            </span>
+                            Report Injury
+                        </button>
+
                         <p>
                             
                         </p>
@@ -653,19 +730,24 @@
 
             <div id="drop-shift" class="hidden">
                 <h2>Drop Shift</h2>
-                <div id="drop-shift-details">
-
-                </div>
-
-                <!-- Date selector -->
+                <div id="drop-shift-details"></div>
 
                 <input type="date" id="drop-shift-date" name="drop-shift-date">
-
                 
                 <div class="edit-buttons">
                     <button id="edit-shift-submit" onclick="submitDropShift()">Drop Shift</button>
                     <button id="edit-shift-cancel" onclick="closePopup()">Cancel</button>
                 </div> 
+            </div>
+
+            <div id="pickup-shift" class="hidden">
+                <h2>Pickup Shift</h2>
+                <div id="pickup-shift-details"></div>
+                
+                <div class="edit-buttons">
+                    <button id="edit-shift-submit" onclick="submitPickupShift()">Pickup Shift</button>
+                    <button id="edit-shift-cancel" onclick="closePopup()">Cancel</button>
+                </div>
             </div>
         </div>
     </div>

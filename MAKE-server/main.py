@@ -2,6 +2,7 @@ import datetime
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from fastapi.middleware.gzip import GZipMiddleware
 
 import asyncio
 import uvicorn
@@ -70,6 +71,8 @@ app = FastAPI(
     },
 
 )
+
+app.add_middleware(GZipMiddleware)
 
 app.include_router(inventory_router)
 app.include_router(user_router)

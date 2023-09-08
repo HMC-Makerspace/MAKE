@@ -651,7 +651,7 @@ Management Console
   background-color: var(--theme-color-4);
 }
 
-#stewards-list-shifts {
+#stewards-list-shifts, #shift-change-list {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -672,7 +672,7 @@ Management Console
   background-color: var(--theme-color-2);
 }
 
-.steward-shift-list-item:nth-child(even) {
+.steward-shift-list-item:nth-child(even), .shift-change-list-item:nth-child(even) {
   background-color: var(--theme-color-3);
 }
 
@@ -702,6 +702,31 @@ Management Console
   height: 400px;
 }
 
+.shift-change-list-item {
+  display: grid;
+  grid-template-columns: 3fr 2fr 1fr 3fr 1fr;
+  align-items: center;
+  justify-content: center;
+  place-items: left;
+  padding-left: 20px;
+  width: 90%;
+  height: 30px;
+  background-color: var(--theme-color-2);
+}
+
+.shift-change-list-item .drop-or-pickup {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: var(--low-color);
+}
+
+.shift-change-list-item .drop-or-pickup.pickup {
+  background-color: var(--high-color);
+}
 
 /*
 

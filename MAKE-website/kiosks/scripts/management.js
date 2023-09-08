@@ -3,6 +3,7 @@ var state = {
     student_storage: null,
     workshops: null,
     shifts: null,
+    shift_changes: null,
     inventory: null,
 };
 
@@ -60,6 +61,7 @@ async function authenticate() {
     await fetchUsers();
     await fetchStudentStorageAdmin();
     await fetchShiftsAdmin();
+    await fetchShiftChangesAdmin();
 
     for (let key of Object.keys(state.users)) {
         state.users[key].cx_id_str = state.users[key].cx_id.toString();
@@ -94,6 +96,23 @@ async function fetchShiftsAdmin() {
         const shifts = await response.json();
 
         state.shifts = shifts;
+    }
+}
+
+async function fetchShiftChangesAdmin() {
+    const response = await fetch(`${API}/shifts/get_shift_changes`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+        }
+    );
+
+    if (response.status == 200) {
+        const changes = await response.json();
+
+        state.shift_changes = changes;
     }
 }
 
@@ -385,18 +404,6 @@ async function pushShiftsAdmin() {
 }
 
 function renderScheduleAdmin() {
-    const schedule = document.getElementById("schedule-table");
-
-    removeAllChildren(schedule);
-    appendChildren(schedule, generateScheduleDivsAdmin());
-
-    const steward_list = document.getElementById("stewards-list-shifts");
-
-    removeAllChildren(steward_list);
-    appendChildren(steward_list, generateStewardShiftList());
-}
-
-function generateStewardShiftList() {
     // Generate list of stewards and mark how many shifts they have
     let all_stewards = state.users.filter(user => user.role == "steward" || user.role == "head_steward");
 
@@ -407,7 +414,24 @@ function generateStewardShiftList() {
             return 1;
         }
     });
+    
+    const schedule = document.getElementById("schedule-table");
 
+    removeAllChildren(schedule);
+    appendChildren(schedule, generateScheduleDivsAdmin());
+
+    const steward_list = document.getElementById("stewards-list-shifts");
+
+    removeAllChildren(steward_list);
+    appendChildren(steward_list, generateStewardShiftList(all_stewards));
+
+    const shift_change_list = document.getElementById("shift-change-list");
+
+    removeAllChildren(shift_change_list);
+    appendChildren(shift_change_list, generateShiftChangeList(all_stewards));
+}
+
+function generateStewardShiftList(all_stewards) {
     let stewards_hours = {};
     let total_shift_hours = 0;
 
@@ -465,6 +489,59 @@ function generateStewardShiftList() {
     
     document.getElementById("total-hours").innerText = total_shift_hours;
     
+    return divs;
+}
+
+function generateShiftChangeList(all_stewards) {
+    let divs = [];
+
+    // Sort shift changes by date, so that the newest are at the top
+    state.shift_changes.sort((a, b) => {
+        let a_date = new Date(a.date + " " + a.timestamp_start);
+        let b_date = new Date(b.date + " " + b.timestamp_start);
+        
+        if (a_date < b_date) {
+            return 1;
+        } else {
+            return -1;
+        }
+    });
+
+    for (let change of state.shift_changes) {
+        let div = document.createElement("div");
+        div.classList.add("shift-change-list-item");
+        
+        let date = document.createElement("div");
+        date.classList.add("shift-change-list-item-date");
+        date.innerText = `${change.date} @ ${change.timestamp_start} - ${change.timestamp_end}`;
+        div.appendChild(date);
+
+        let name = document.createElement("div");
+        name.classList.add("name");
+        // Get steward uuid from change and find steward
+        let steward = all_stewards.find(steward => steward.uuid === change.steward) ?? {name: "Unknown steward", email: "Unknown steward", cx_id: "Unknown steward"};
+        name.innerText = steward.name;
+        div.appendChild(name);
+
+        let cx_id = document.createElement("div");
+        cx_id.classList.add("cx_id");
+        cx_id.innerText = steward.cx_id;
+        div.appendChild(cx_id);
+
+        let email = document.createElement("div");
+        email.classList.add("email");
+        email.innerText = steward.email;
+        div.appendChild(email);
+
+        let drop_or_pickup = document.createElement("div");
+        drop_or_pickup.classList.add("drop-or-pickup");
+        drop_or_pickup.classList.add(change.is_drop ? "drop" : "pickup");
+        drop_or_pickup.innerText = change.is_drop ? "Drop" : "Pickup";
+        div.appendChild(drop_or_pickup);
+
+        divs.push(div);
+    }
+
     return divs;
 }
 
