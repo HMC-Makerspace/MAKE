@@ -83,7 +83,7 @@ async function populateStewardPage() {
     let today = new Date();
     today.setDate(today.getDate() - 1);
 
-    let my_picked_up_shifts = all_changes.filter((change) => {
+    let my_changed_shifts = all_changes.filter((change) => {
         if (change.is_pickup && change.steward == state.user_object.uuid) {
             // Only return shifts that are today or in the future
             let change_date = new Date(change.date);
@@ -98,11 +98,11 @@ async function populateStewardPage() {
        divs.push(await generateShiftDiv(shift));
     }
 
-    for (let shift of my_picked_up_shifts) {
+    for (let shift of my_changed_shifts) {
         shift.stewards = [state.user_object.uuid];
         shift.day = DAYS[new Date(shift.date + "T00:00:00-08:00").getDay()];
     
-        divs.push(await generateShiftDiv(shift, pickup=true));
+        divs.push(await generateShiftDiv(shift, change=true));
     }
 
     removeAllChildren(shift_container);
@@ -159,7 +159,7 @@ async function populateStewardPage() {
     appendChildren(available_shifts, divs);
 }
 
-async function generateShiftDiv(shift, pickup=false) {
+async function generateShiftDiv(shift, change=false) {
     let stewards = [];
 
     for (let steward of shift.stewards) {
@@ -179,7 +179,8 @@ async function generateShiftDiv(shift, pickup=false) {
 
     let shift_time_date = document.createElement("div");
     shift_time_date.classList.add("steward-shift-time-date");
-    if (pickup) {
+
+    if (change) {
         shift_time_date.innerText = `(${shift.date}) `;
     }
     shift_time_date.innerText += `${shift.day} - ${shift.timestamp_start} to ${shift.timestamp_end}`;
@@ -187,8 +188,8 @@ async function generateShiftDiv(shift, pickup=false) {
     let shift_stewards = document.createElement("div");
     shift_stewards.classList.add("steward-shift-stewards");
 
-    if (pickup) {
-        shift_stewards.innerText = "Picked up shift";
+    if (change) {
+        shift_stewards.innerText = "Shift Change";
     } else {
         let s = stewards.length != 1 ? "s" : "";
         shift_stewards.innerText = `Shift partner${s}: `;
@@ -203,8 +204,8 @@ async function generateShiftDiv(shift, pickup=false) {
 
     let shift_drop_button = document.createElement("button");
     shift_drop_button.classList.add("steward-shift-drop-button");
-    if (pickup) {
-        shift_drop_button.innerText = "Cancel Pickup";
+    if (change) {
+        shift_drop_button.innerText = "Cancel Shift Change";
         shift_drop_button.onclick = async () => cancelShiftChange(shift);
     } else {
         shift_drop_button.innerText = "Drop A Shift";
