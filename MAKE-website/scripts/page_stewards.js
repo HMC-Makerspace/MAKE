@@ -189,7 +189,7 @@ async function generateShiftDiv(shift, change=false) {
     shift_stewards.classList.add("steward-shift-stewards");
 
     if (change) {
-        shift_stewards.innerText = `Shift Change: ${shift.is_drop ? "Dropped" : "Picked Up"}}`;
+        shift_stewards.innerText = `Shift Change: ${shift.is_drop ? "Dropped" : "Picked Up"}`;
     } else {
         let s = stewards.length != 1 ? "s" : "";
         shift_stewards.innerText = `Shift partner${s}: `;
