@@ -129,9 +129,6 @@ async function populateStewardPage() {
         return pickup_changes.length == 0;
     });
 
-    console.log(drop_changes);
-
-
     drop_changes.sort((a, b) => {
         let a_date = new Date(a.date + " " + a.timestamp_start);
         let b_date = new Date(b.date + " " + b.timestamp_start);
