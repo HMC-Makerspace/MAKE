@@ -240,3 +240,117 @@ async def route_drop_shift(request: Request):
     await shift_changes.insert_one(item.dict())
 
     return
+
+@shifts_router.post("/pickup_shift", status_code=201)
+async def route_pickup_shift(request: Request):
+    item = ShiftChange(**await request.json())
+
+    db = MongoDB()
+
+    # Check the steward uuid exists and that they are a steward
+    users = await db.get_collection("users")
+    user = await users.find_one({"uuid": item.steward})
+
+    if user is None:
+        # The user does not exist
+        # Return error
+        raise HTTPException(status_code=400, detail="User does not exist")
+    
+    if "steward" not in user["role"]:
+        # The user is not a steward
+        # Return error
+        raise HTTPException(status_code=400, detail="User is not a steward")
+    
+    # Check the shift uuid exists
+    shifts = await db.get_collection("shifts")
+
+    if shifts is None:
+        # No shifts exist
+        # Return error
+        raise HTTPException(status_code=400, detail="Shift does not exist")
+    
+    '''
+    class Shift(BaseModel):
+    _id: Optional[PyObjectId] = Field(alias="_id")
+    timestamp_start: str
+    timestamp_end: str
+    day: str
+    stewards: List[str]
+    '''
+
+    day_name = datetime.datetime.strptime(item.date, "%Y-%m-%d").strftime("%A")
+
+    shift = await shifts.find_one({"day": day_name, "timestamp_start": item.timestamp_start, "timestamp_end": item.timestamp_end})
+
+    if shift is None:
+        # The shift does not exist
+        # Return error
+        raise HTTPException(status_code=400, detail="Shift does not exist")
+    
+    # Check that someone has dropped the shift
+    shift_changes = await db.get_collection("shift_changes")
+    shift_change = await shift_changes.find_one({"date": item.date, "timestamp_start": item.timestamp_start, "timestamp_end": item.timestamp_end, "is_drop": True})
+
+    if shift_change is None:
+        # The shift has not been dropped
+        # Return error
+        raise HTTPException(status_code=400, detail="Shift has not been dropped")
+
+    # Check that the steward is not already in the shift change collection with the same day, start, and end
+    shift_change = await shift_changes.find_one({"date": item.date, "timestamp_start": item.timestamp_start, "timestamp_end": item.timestamp_end, "steward": item.steward})
+
+    if shift_change is not None:
+        # The shift change already exists
+        # Return error
+        raise HTTPException(status_code=400, detail="Shift change already exists")
+    
+    # Insert the shift change object into the database
+    await shift_changes.insert_one(item.dict())
+
+    return
+
+@shifts_router.post("/cancel_shift_change", status_code=201)
+async def route_cancel_shift_change(request: Request):
+    # Only fields in body are uuid and steward
+    # UUID is the shift change uuid
+    # Steward is the steward uuid
+
+    body = await request.json()
+
+    db = MongoDB()
+
+    # Check the steward uuid exists and that they are a steward
+    users = await db.get_collection("users")
+
+    user = await users.find_one({"uuid": body["steward"]})
+
+    if user is None:
+        # The user does not exist
+        # Return error
+        raise HTTPException(status_code=400, detail="User does not exist")
+    
+    if "steward" not in user["role"]:
+        # The user is not a steward
+        # Return error
+        raise HTTPException(status_code=400, detail="User is not a steward")
+    
+    # Check the shift change uuid exists
+    shift_changes = await db.get_collection("shift_changes")
+
+    shift_change = await shift_changes.find_one({"uuid": body["uuid"]})
+
+    if shift_change is None:
+        # The shift change does not exist
+        # Return error
+        raise HTTPException(status_code=400, detail="Shift change does not exist")
+    
+    # Make sure the steward is the steward in the shift change
+    if shift_change["steward"] != body["steward"]:
+        # The steward is not the steward in the shift change
+        # Return error
+        raise HTTPException(status_code=400, detail="Steward is not the steward in the shift change")
+    
+    # Delete the shift change
+    await shift_changes.delete_one({"uuid": body["uuid"]})
+
+    return

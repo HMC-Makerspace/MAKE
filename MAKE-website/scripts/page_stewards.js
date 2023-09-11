@@ -76,8 +76,19 @@ async function populateStewardPage() {
     }
 
     shifts = await shifts;
+    let all_changes = await changes;
 
-    console.log(shifts);
+    let today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let my_picked_up_shifts = all_changes.filter((change) => {
+        if (change.is_pickup && change.steward == state.user_object.uuid) {
+            // Only return shifts that are today or in the future
+            let change_date = new Date(change.date);
+
+            return change_date >= today;
+        }
+    });
 
     let shift_container = document.getElementById("steward-shifts");
     let divs = [];
@@ -85,15 +96,21 @@ async function populateStewardPage() {
        divs.push(await generateShiftDiv(shift));
     }
 
+    for (let shift of my_picked_up_shifts) {
+        shift.stewards = [state.user_object.uuid];
+        shift.day = DAYS[new Date(shift.date + "T00:00:00-08:00").getDay()];
+    
+        divs.push(await generateShiftDiv(shift, pickup=true));
+    }
+
     removeAllChildren(shift_container);
     appendChildren(shift_container, divs);
 
-    changes = await changes;
-    let today = new Date();
     // Rollback day by one to account for timezones
     today.setDate(today.getDate() - 1);
 
-    changes.filter((change) => {
+    // This hide all shifts that are pickups or in the past
+    let drop_changes = all_changes.filter((change) => {
         if (change.is_pickup) {
             return false;
         }
@@ -104,10 +121,17 @@ async function populateStewardPage() {
         return change_date >= today;
     });
 
-    console.log(changes);
+    // Now, hide all shifts that are drops but have a correspoding pickup
+    drop_changes = drop_changes.filter((change) => {
+        let pickup_changes = all_changes.filter((pickup) => {
+            return pickup.is_pickup && pickup.date == change.date && pickup.timestamp_start == change.timestamp_start && pickup.timestamp_end == change.timestamp_end;
+        });
+    });
+
+    console.log(drop_changes);
 
 
-    changes.sort((a, b) => {
+    drop_changes.sort((a, b) => {
         let a_date = new Date(a.date + " " + a.timestamp_start);
         let b_date = new Date(b.date + " " + b.timestamp_start);
         
@@ -120,7 +144,7 @@ async function populateStewardPage() {
 
     let available_shifts = document.getElementById("steward-available-shifts");
     divs = [];
-    for (let change of changes) {
+    for (let change of drop_changes) {
         divs.push(await generateShiftChangeDiv(change));
     }
 
@@ -134,7 +158,7 @@ async function populateStewardPage() {
     appendChildren(available_shifts, divs);
 }
 
-async function generateShiftDiv(shift) {
+async function generateShiftDiv(shift, pickup=false) {
     let stewards = [];
 
     for (let steward of shift.stewards) {
@@ -154,24 +178,37 @@ async function generateShiftDiv(shift) {
 
     let shift_time_date = document.createElement("div");
     shift_time_date.classList.add("steward-shift-time-date");
-    shift_time_date.innerText = `${shift.day} - ${shift.timestamp_start} to ${shift.timestamp_end}`;
+    if (pickup) {
+        shift_time_date.innerText = `(${shift.date}) `;
+    }
+    shift_time_date.innerText += `${shift.day} - ${shift.timestamp_start} to ${shift.timestamp_end}`;
 
     let shift_stewards = document.createElement("div");
     shift_stewards.classList.add("steward-shift-stewards");
 
-    let s = stewards.length != 1 ? "s" : "";
-    shift_stewards.innerText = `Shift partner${s}: `;
-    for (let i = 0; i < stewards.length; i++) {
-        shift_stewards.innerText += `${stewards[i].name} (${stewards[i].email})`;
-        if (i != stewards.length - 1) {
-            shift_stewards.innerText += ", ";
+    if (pickup) {
+        shift_stewards.innerText = "Picked up shift";
+    } else {
+        let s = stewards.length != 1 ? "s" : "";
+        shift_stewards.innerText = `Shift partner${s}: `;
+        for (let i = 0; i < stewards.length; i++) {
+            shift_stewards.innerText += `${stewards[i].name} (${stewards[i].email})`;
+            if (i != stewards.length - 1) {
+                shift_stewards.innerText += ", ";
+            }
         }
     }
+    
 
     let shift_drop_button = document.createElement("button");
     shift_drop_button.classList.add("steward-shift-drop-button");
-    shift_drop_button.innerText = "Drop A Shift";
-    shift_drop_button.onclick = async () => dropShift(shift);
+    if (pickup) {
+        shift_drop_button.innerText = "Cancel Pickup";
+        shift_drop_button.onclick = async () => cancelShiftChange(shift);
+    } else {
+        shift_drop_button.innerText = "Drop A Shift";
+        shift_drop_button.onclick = async () => dropShift(shift);
+    }
 
     shift_div.appendChild(shift_time_date);
     shift_div.appendChild(shift_stewards);
@@ -187,7 +224,7 @@ async function generateShiftChangeDiv(change) {
     let shift_time_date = document.createElement("div");
     shift_time_date.classList.add("time-date");
     let date = new Date(change.date + "T00:00:00-08:00");
-    shift_time_date.innerText = `${change.date} (${DAYS[date.getDay()]}) - ${change.timestamp_start} to ${change.timestamp_end}`;
+    shift_time_date.innerText = `(${change.date}) ${DAYS[date.getDay()]} - ${change.timestamp_start} to ${change.timestamp_end}`;
     shift_div.appendChild(shift_time_date);
 
     let dropped_by = document.createElement("div");
@@ -205,8 +242,15 @@ async function generateShiftChangeDiv(change) {
 
     let shift_change_button = document.createElement("button");
     shift_change_button.classList.add("pickup-shift-button");
-    shift_change_button.innerText = "Pick Up Shift";
-    shift_change_button.onclick = async () => pickUpShift(change);
+
+    if (change.steward === state.user_object.uuid) {
+        shift_change_button.innerText = "Cancel Drop";
+        shift_change_button.onclick = async () => cancelShiftChange(change);
+    } else {
+        shift_change_button.innerText = "Pick Up Shift";
+        shift_change_button.onclick = async () => pickUpShift(change);
+    }
+
     shift_div.appendChild(shift_change_button);
 
     return shift_div;
@@ -260,8 +304,9 @@ async function submitDropShift(shift) {
         }); 
         
         if (response.status == 201) {
-            closePopup();
             alert("Shift dropped successfully");
+            await populateStewardPage();
+            closePopup();
         } else {
             let error = await response.json();
             
@@ -287,11 +332,33 @@ async function submitPickUpShift(shift) {
     }); 
     
     if (response.status == 201) {
-        closePopup();
         alert("Shift picked up successfully");
+        await populateStewardPage();
+        closePopup();
     } else {
         let error = await response.json();
         
         alert("Error picking up shift: " + error.detail);
+    }
+}
+
+async function cancelShiftChange(shift) {
+    // Call the API to drop the shift
+    const response = await fetch(`${API}/shifts/cancel_shift_change`, {
+        method: "POST",
+        body: JSON.stringify({
+            uuid: shift.uuid,
+            steward: state.user_object.uuid,
+        })
+    }); 
+    
+    if (response.status == 201) {
+        alert("Shift change canceled successfully");
+        await populateStewardPage();
+        closePopup();
+    } else {
+        let error = await response.json();
+        
+        alert("Error canceling shift change: " + error.detail);
     }
 }
