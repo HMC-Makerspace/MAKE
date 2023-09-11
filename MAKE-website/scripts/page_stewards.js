@@ -53,7 +53,7 @@ async function populateStewardPage() {
 
     const prof_container = document.getElementById("steward-proficiencies");
     removeAllChildren(prof_container);
-    
+
     for (let prof of PROFICIENCIES) {
         let prof_div = document.createElement("div");
         prof_div.classList.add("edit-proficiency-container");
@@ -81,7 +81,7 @@ async function populateStewardPage() {
     let all_changes = await changes;
 
     let today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setDate(today.getDate() - 1);
 
     let my_picked_up_shifts = all_changes.filter((change) => {
         if (change.is_pickup && change.steward == state.user_object.uuid) {
@@ -108,9 +108,6 @@ async function populateStewardPage() {
     removeAllChildren(shift_container);
     appendChildren(shift_container, divs);
 
-    // Rollback day by one to account for timezones
-    today.setDate(today.getDate() - 1);
-
     // This hide all shifts that are pickups or in the past
     let drop_changes = all_changes.filter((change) => {
         if (change.is_pickup) {
@@ -128,6 +125,8 @@ async function populateStewardPage() {
         let pickup_changes = all_changes.filter((pickup) => {
             return pickup.is_pickup && pickup.date == change.date && pickup.timestamp_start == change.timestamp_start && pickup.timestamp_end == change.timestamp_end;
         });
+
+        return pickup_changes.length == 0;
     });
 
     console.log(drop_changes);
