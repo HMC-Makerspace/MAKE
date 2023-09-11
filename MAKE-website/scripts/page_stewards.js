@@ -52,6 +52,8 @@ async function populateStewardPage() {
     let changes = fetchShiftChanges();
 
     const prof_container = document.getElementById("steward-proficiencies");
+    removeAllChildren(prof_container);
+    
     for (let prof of PROFICIENCIES) {
         let prof_div = document.createElement("div");
         prof_div.classList.add("edit-proficiency-container");
