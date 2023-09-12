@@ -339,7 +339,7 @@ p3 {
 }
 
 #left-bar button {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
   width: 100%;
   height: 5vh;
@@ -355,7 +355,7 @@ p3 {
 #left-bar button .material-symbols-outlined {
   transition: background-color 0.2s ease-in-out, opacity 0.2 ease-in-out, color 0.2s ease-in-out;
   color: black;
-  font-size: 30px;
+  font-size: 25px;
   margin-right: 10px;
 }
 
