@@ -83,7 +83,7 @@ app.include_router(machines_router)
 app.include_router(misc_router)
 
 # Add /discord to redirect to https://discord.gg/uveewgBmME
-app.add_api_route("/discord", lambda: RedirectResponse(url="https://discord.gg/uveewgBmME"))
+app.add_api_route("/discord", lambda: RedirectResponse(url="https://discord.gg/XMJspQp8b4"))
 
 # Mount the static files in html mode
 app.mount("/", StaticFiles(directory="../MAKE-website", html=True), name="static")
