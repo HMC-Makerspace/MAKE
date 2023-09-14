@@ -174,6 +174,9 @@ function generateProficiencyDivs(users) {
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
             checkbox.checked = steward.proficiencies?.includes(prof) ?? false;
+            if (checkbox.checked) {
+                cell.classList.add("checked")
+            }
             checkbox.disabled = true;
 
             cell.appendChild(checkbox);

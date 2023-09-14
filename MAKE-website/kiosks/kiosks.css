@@ -735,15 +735,29 @@ table#proficiencies-list {
 
 table#proficiencies-list tr:first-child {
   height: 70px;
+  font-size: 18px
 }
 
 table#proficiencies-list th.prof {
-  /* Rotate 30 degrees */
-  font-size: .8em;
+  font-size: 12px;
+}
+
+table#proficiencies-list tr>* {
+  padding: 5px;
+}
+
+/* input elements that are checked */
+table#proficiencies-list td.checked {
+  background-color: var(--high-color);
+}
+
+
+table#proficiencies-list tr:nth-child(odd) {
+  background-color: var(--theme-color-2);
 }
 
 table#proficiencies-list tr:nth-child(even) {
-  background-color: var(--theme-color-2);
+  background-color: var(--theme-color-3);
 }
 
 table#proficiencies-list td.proficiency-cell {
