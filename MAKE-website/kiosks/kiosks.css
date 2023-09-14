@@ -731,12 +731,14 @@ Management Console
 table#proficiencies-list {
   width: 90%;
   margin: 0 auto;
+  border-collapse: collapse;
+  margin-top: 20px;
 }
 
 table#proficiencies-list tr:first-child {
   height: 70px;
   font-size: 18px;
-  top: 0;
+  top: 20px;
   position: sticky;
 }
 
