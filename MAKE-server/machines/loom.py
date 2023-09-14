@@ -3,7 +3,7 @@ import PIL
 import PIL.Image
 import base64
 
-def render_loom_file(loom_file: str, file_extension: str, output_format: str, loom_width: int, desired_width: int, invert: bool, tabby_width: int):
+def render_loom_file(loom_file: str, file_extension: str, output_format: str, loom_width: int, desired_height: int, invert: bool, tabby_width: int):
     # Decode loom file from base64
     img_data = base64.b64decode(str(loom_file))
     loom_image = PIL.Image.open(io.BytesIO(img_data ))
@@ -11,23 +11,42 @@ def render_loom_file(loom_file: str, file_extension: str, output_format: str, lo
     # Get the loom image width and height
     loom_image_width, loom_image_height = loom_image.size
 
-    # Calculate new width/height
-    new_width = desired_width
-    new_height = int(loom_image_height * (desired_width / loom_image_width))
+    # If the desired height isn't 0, calculate the new width/height
+    if desired_height != 0:
+        # Calculate new width/height
+        new_width = int(loom_image_width * (desired_height / loom_image_height))
+        new_height = desired_height
 
-    # Resize the loom image
-    loom_image = loom_image.resize((new_width, new_height), PIL.Image.ANTIALIAS)
+        # If the width is too large, clamp it to the loom width
+        # then recalculate the height
+        if new_width > loom_width:
+            new_width = loom_width
+            new_height = int(loom_image_height * (loom_width / loom_image_width))
+            
 
-    # If the desired width is less than the loom width, place the loom image in the middle of a blank image
-    if desired_width < loom_width:
-        # Create a blank image
-        blank_image = PIL.Image.new('RGB', (loom_width, new_height), (255, 255, 255))
+        # Resize the loom image
+        loom_image = loom_image.resize((new_width, new_height), PIL.Image.ANTIALIAS)
 
-        # Place the loom image in the middle of the blank image
-        blank_image.paste(loom_image, (int((loom_width - desired_width) / 2), 0))
+    loom_image_width, loom_image_height = loom_image.size
 
-        # Set the loom image to the blank image
-        loom_image = blank_image
+    # If it's smaller then the loom width, place it in the center of a blank image
+    # and increase tabby width to fill the rest of the space
+    if loom_image_width < loom_width:
+        # Calculate the blank space on either side of the image
+        blank_space = loom_width - loom_image_width
+
+        # Calculate the tabby width
+        tabby_width = max(blank_space // 2, tabby_width)
+
+        # Create a new blank image
+        new_image = PIL.Image.new('L', (loom_width, loom_image_height), 255)
+
+        # Paste the loom image in the center of the blank image
+        new_image.paste(loom_image, (blank_space // 2, 0))
+
+        # Set the loom image to the new image
+        loom_image = new_image
+
 
     # Dither the image
     loom_image = loom_image.convert('1', dither=PIL.Image.FLOYDSTEINBERG)

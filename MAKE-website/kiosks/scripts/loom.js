@@ -93,7 +93,7 @@ function renderPreview() {
             file: file_data_base64,
             extension: state.file.name.split('.').pop(),
             output_format: "png",
-            desired_width: Number(document.getElementById("desired-width").value),
+            desired_height: Number(document.getElementById("desired-height").value),
             loom_width: Number(document.getElementById("loom-width").value),
             invert: document.getElementById("invert").checked,
             tabby_width: Number(document.getElementById("tabby-width").value),
@@ -123,7 +123,7 @@ function downloadCurrentRender() {
 document.getElementById("tabby-width").addEventListener("change", function () {
     // Ensure min/max values are respected
     let value = Number(document.getElementById("tabby-width").value);
-    if (value < 5) {
-        document.getElementById("tabby-width").value = 5;
+    if (value < 10) {
+        document.getElementById("tabby-width").value = 10;
     }
 });

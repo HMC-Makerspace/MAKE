@@ -47,7 +47,7 @@ async def route_render_loom_file(request: Request):
     logging.info("Rendering loom file...")
 
     try :
-        result = render_loom_file(body["file"], body["extension"], body["output_format"], body["loom_width"], body["desired_width"], body["invert"], body["tabby_width"])
+        result = render_loom_file(body["file"], body["extension"], body["output_format"], body["loom_width"], body["desired_height"], body["invert"], body["tabby_width"])
     except Exception as e:
         # The loom file could not be rendered
         # Return error
