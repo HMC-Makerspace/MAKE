@@ -735,7 +735,9 @@ table#proficiencies-list {
 
 table#proficiencies-list tr:first-child {
   height: 70px;
-  font-size: 18px
+  font-size: 18px;
+  top: 0;
+  position: sticky;
 }
 
 table#proficiencies-list th.prof {
