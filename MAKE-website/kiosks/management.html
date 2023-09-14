@@ -73,9 +73,6 @@
                 <input type="text" id="users-search-input" placeholder="Search by name, email, or ID number..." onkeyup="submitUserSearch(editable = true)">
 
                 <button id="open-mass-assign-roles" onclick="showMassAssignRoles()">Mass Role Assignment</button>
-
-                <button id="toggle-only-stewards" onclick="toggleOnlyStewards()">Only show Stewards</button>
-
             </div>
 
             <div id="users-results" class="content-body">
@@ -117,12 +114,14 @@
         <div class="main-content content-container hidden" id="page-proficiencies">
             <div class="content-header">
                 <p>
-                    View and edit proficiencies.
+                    View and <s>edit</s> proficiencies.
                 </p>
             </div>
 
-            <div class="content-body" id="proficiencies-list">
+            <div class="content-body">
+                <table id="proficiencies-list">
 
+                </table>
             </div>
         </div>
 

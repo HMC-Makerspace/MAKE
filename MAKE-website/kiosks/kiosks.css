@@ -728,6 +728,28 @@ Management Console
   background-color: var(--high-color);
 }
 
+table#proficiencies-list {
+  width: 90%;
+  margin: 0 auto;
+}
+
+table#proficiencies-list tr:first-child {
+  height: 70px;
+}
+
+table#proficiencies-list th.prof {
+  /* Rotate 30 degrees */
+  font-size: .8em;
+}
+
+table#proficiencies-list tr:nth-child(even) {
+  background-color: var(--theme-color-2);
+}
+
+table#proficiencies-list td.proficiency-cell {
+  text-align: center;
+}
+
 /*
 
 INVENTORY

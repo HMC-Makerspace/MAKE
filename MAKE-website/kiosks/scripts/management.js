@@ -152,7 +152,38 @@ function renderProficiencies() {
 function generateProficiencyDivs(users) {
     const divs = [];
 
-    const proficiencies = {};
+    users = users.filter(user => user.role == "steward" || user.role == "head_steward");
+
+    // Add header
+    const header = document.createElement("tr");
+    header.innerHTML = `<th>Name</th><th>CX ID</th><th>Email</th>`;
+    for (let prof of PROFICIENCIES) {
+        header.innerHTML += `<th class='prof'>${prof.replaceAll(" ", "<br>")}</th>`;
+    }
+
+    divs.push(header);
+
+    for (let steward of users) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${steward.name}</td><td>${steward.cx_id}</td><td>${steward.email}</td>`;
+
+        for (let prof of PROFICIENCIES) {
+            const cell = document.createElement("td");
+            cell.classList.add("proficiency-cell");
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = steward.proficiencies?.includes(prof) ?? false;
+            checkbox.disabled = true;
+
+            cell.appendChild(checkbox);
+
+            row.appendChild(cell);
+        }
+
+        divs.push(row);
+    }
+
 
     return divs;
 }
