@@ -208,11 +208,20 @@ function generateInventoryDiv(result, kiosk_mode = false) {
 
     const location = document.createElement("div");
     location.classList.add("inventory-result-location");
-    location.innerHTML = `<span class="room">${item.location_room}</span> <span class="area">${item.location_specific}</span>`;
+    location.innerHTML = `<span class="room">${item.location_room}</span>`;
+
+    if (item.location_specific !== null && item.location_specific !== "") {
+        location.innerHTML += `<span class="area">${item.location_specific}</span>`;
+    }
+
+    if (item.in_overstock === true) {
+        location.innerHTML += `<span class="overstock">+ Overstock</span>`;
+    }
+
     main_div.appendChild(location);
 
 
-    if (item.quantity !== null) {
+    if (item.quantity !== null && item.quantity !== "") {
         const quantity = document.createElement("div");
         quantity.classList.add("inventory-result-quantity");
 
@@ -251,35 +260,35 @@ function generateInventoryDiv(result, kiosk_mode = false) {
     lower_div.classList.add("inventory-result-lower");
     lower_div.classList.add("not-shown");
 
-    if (item.serial_number !== null) {
+    if (item.serial_number !== null && item.serial_number !== "") {
         const serial_number = document.createElement("div");
         serial_number.classList.add("inventory-result-lower-detail");
         serial_number.innerText = `Serial Number: ${item.serial_number}`;
         lower_div.appendChild(serial_number);
     }
 
-    if (item.model_number !== null) {
+    if (item.model_number !== null && item.model_number !== "") {
         const model_number = document.createElement("div");
         model_number.classList.add("inventory-result-lower-detail");
         model_number.innerText = `Model Number: ${item.model_number}`;
         lower_div.appendChild(model_number);
     }
 
-    if (item.specific_name !== null) {
+    if (item.specific_name !== null && item.specific_name !== "") {
         const specific_name = document.createElement("div");
         specific_name.classList.add("inventory-result-lower-detail");
         specific_name.innerText = `Specific Name: ${item.specific_name}`;
         lower_div.appendChild(specific_name);
     }
 
-    if (item.brand !== null) {
+    if (item.brand !== null && item.brand !== "") {
         const brand = document.createElement("div");
         brand.classList.add("inventory-result-lower-detail");
         brand.innerText = `Brand: ${item.brand}`;
         lower_div.appendChild(brand);
     }
 
-    if (item.qr_code !== null) {
+    if (item.qr_code !== null && item.qr_code !== "") {
         const qr_code = document.createElement("div");
         qr_code.classList.add("inventory-result-lower-detail");
         qr_code.innerText = `QR Code(s): ${item.qr_code}`;

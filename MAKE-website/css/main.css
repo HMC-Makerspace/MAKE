@@ -942,6 +942,10 @@ INVENTORY
   background-color: var(--theme-color-5);
 }
 
+.inventory-result-location .overstock {
+  background-color: var(--theme-color-4);
+}
+
 .inventory-result-quantity {
   background-color: var(--theme-color-3);
   color: var(--text-color-main);
