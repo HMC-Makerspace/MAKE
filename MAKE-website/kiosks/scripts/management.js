@@ -535,9 +535,9 @@ function generateShiftChangeList(all_stewards) {
         let b_date = new Date(b.date + " " + b.timestamp_start);
         
         if (a_date < b_date) {
-            return 1;
-        } else {
             return -1;
+        } else {
+            return 1;
         }
     });
 
