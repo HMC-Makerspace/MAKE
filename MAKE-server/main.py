@@ -82,7 +82,11 @@ app.include_router(student_storage_router)
 app.include_router(machines_router)
 app.include_router(misc_router)
 
-# Add /discord to redirect to https://discord.gg/uveewgBmME
+# Add /discord to redirect to grandfathered, permanament discord invite
+# of https://discord.gg/XMJspQp8b4
+# NEVER DELETE THIS FROM THE DISCORD SERVER
+# THE ONLY WAY TO GET ANOTHER ONE IS TO TURN ON
+# COMMUNITY MODE
 app.add_api_route("/discord", lambda: RedirectResponse(url="https://discord.gg/XMJspQp8b4"))
 
 # Mount the static files in html mode

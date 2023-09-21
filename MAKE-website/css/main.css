@@ -342,7 +342,7 @@ p3 {
   font-size: 12px;
   font-weight: bold;
   width: 100%;
-  height: 5vh;
+  height: 6vh;
   padding-left: 30px;
   border-radius: unset;
   text-align: left;
@@ -561,6 +561,8 @@ a:visited {
 }
 
 .hmc-content {
+  position: absolute;
+  bottom: 30px;
   display: flex;
   flex-direction: column;
   row-gap: 5px;
@@ -2044,7 +2046,7 @@ Mobile Styles
   }
 
   #left-bar.show {
-    height: 80%;
+    height: fit-content;
   }
 
   #logo-container:hover > * {
@@ -2052,6 +2054,7 @@ Mobile Styles
   }
 
   .hmc-content {
+    position: unset;
     margin-bottom: 20px;
   }
 
