@@ -2,6 +2,7 @@ from datetime import datetime
 import uuid
 import logging
 from fuzzywuzzy import fuzz
+from pymongo import UpdateOne
 from db_schema import MongoDB, User
 from config import *
 
@@ -24,15 +25,6 @@ async def create_update_users_from_quizzes():
     # Get the users collection
     users_collection = await db.get_collection("users")
 
-    logging.info("Clearing passed quizzes for all users...")
-    # Set all passed quizzes to an empty dictionary
-    await users_collection.update_many(
-        {},
-        {"$set": {"passed_quizzes": {}}}
-    )
-
-    logging.info("Cleared!")
-
     # Now we have our data. Let's iterate through all quiz results
     # and create/update users as necessary
 
@@ -40,11 +32,15 @@ async def create_update_users_from_quizzes():
     num_users_created = 0
     num_total_updates = 0
 
+    users_updates = {}
+    
     for quiz_result in quiz_results:
         email_search = await users_collection.find_one(
-            {"email": quiz_result["email"]})
+            {"email": quiz_result["email"]}
+        )
         cx_id_search = await users_collection.find_one(
-            {"cx_id": quiz_result["cx_id"]})
+            {"cx_id": quiz_result["cx_id"]}
+        )
 
         user_uuid = None
         quizzes_to_set = {}
@@ -147,15 +143,29 @@ async def create_update_users_from_quizzes():
         # If the uuid is not None, we need to update the user
         # with the new set of quizzes
         if user_uuid is not None:
-            # Update the user in the database
-            await users_collection.update_one(
-                {"uuid": user_uuid},
-                {"$set": {"passed_quizzes": quizzes_to_set}}
-            )
+            if user_uuid not in users_updates:
+                users_updates[user_uuid] = quizzes_to_set
+            else:
+                users_updates[user_uuid].update(quizzes_to_set)
 
             # Increment the number of users updated
             num_total_updates += 1
 
+    # Run all the updates at once
+    if users_updates:
+        users_updates = [
+            {"uuid": uuid, "quizzes": quizzes} for uuid, quizzes in users_updates.items()
+        ]
+
+        await users_collection.bulk_write(
+            [
+                UpdateOne(
+                    {"uuid": user["uuid"]},
+                    {"$set": {"passed_quizzes": user["quizzes"]}},
+                )
+                for user in users_updates
+            ]
+        )
 
     logging.info(f"Created {num_users_created} users")
     logging.info(f"Updated {num_total_updates} times")
