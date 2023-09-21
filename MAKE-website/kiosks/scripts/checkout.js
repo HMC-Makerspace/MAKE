@@ -558,14 +558,23 @@ function displaySuccessInCart() {
     }
 }
 
-function displayErrorInCart(err) {
+async function displayErrorInCart(err) {
     const els = document.getElementsByClassName("cart-item");
     for (let item of els) {
         item.classList.add("error");
     }
 
-    document.getElementById("id-error").innerHTML = `Error: ${err.statusText}`;
+    // Try to get detail from body
+    let body = await err.json();
+
+    if (body.detail !== undefined) {
+        document.getElementById("id-error").innerHTML = `Error: ${body.detail}`;
+    } else {
+        document.getElementById("id-error").innerHTML = `Error: ${err.status} ${err.statusText}`;
+    }
+
     document.getElementById("id-error").classList.remove("hidden");
+
 }
 
 async function checkIn(uuid) {

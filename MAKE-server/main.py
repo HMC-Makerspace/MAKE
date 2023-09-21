@@ -114,7 +114,7 @@ class BackgroundRunner:
         while True:
             try:
                 # Send emails for checkouts that are overdue
-                #await send_overdue_emails()
+                await send_overdue_emails()
 
                 # Update inventory from csv
                 await update_from_gsheet()

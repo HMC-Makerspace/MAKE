@@ -29,6 +29,9 @@ async def format_email_template(template_name: str, text_list: List[str]):
     # Get the template
     template = open(f"email_templates/{template_name}.html", "r").read()
 
+    # Format the list as bullet points
+    text_list = "".join([f"<li>{text}</li>" for text in text_list])
+
     # Format the template
     formatted_template = template.format(
         text_list=text_list
@@ -41,7 +44,6 @@ async def email_user(user_email: str, cc_email: List[str], subject: str, html_bo
     # Email a user
     sender_email = f" MAKE <{GMAIL_EMAIL}>"
     receiver_email = user_email
-    password = GMAIL_PASS
 
     message = MIMEMultipart("alternative")
     message["Subject"] = subject

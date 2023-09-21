@@ -1,3 +1,4 @@
+import datetime
 import logging
 from typing import Dict
 import uuid
@@ -48,10 +49,10 @@ async def send_checkout_email(checkout_uuid: str):
     body = await format_email_template("expired_checkout", [item["name"] for item in items])
 
     try :
-        await email_user(user["email"], [], f"MAKE Tool Checkout Notification #{checkout['notifications_sent']}", body)
+        await email_user(user["email"], [], f"MAKE Tool Checkout Notification #{checkout['notifications_sent'] + 1}", body)
     except Exception as e:
         # Show warning
-        logging.getLogger().setLevel(logging.WARNING)
+        logging.getLogger().setLevel(logging.WARNING)   
         logging.warning("Failed to send checkout email: " + str(e))
         return False
 
@@ -71,13 +72,15 @@ async def send_overdue_emails():
     checkout_collection = await db.get_collection("checkouts")
 
     # Find checkouts that timestamp_in is not None and timestamp_out is not None
-    checkouts = await checkout_collection.find({"timestamp_in": {"$ne": None}, "timestamp_out": {"$ne": None}}).to_list(None)
+    checkouts = await checkout_collection.find({"timestamp_in": {"$eq": None}, "timestamp_out": {"$ne": None}}).to_list(None)
 
     checkouts = [Checkout(**checkout) for checkout in checkouts]
-    
+
     for checkout in checkouts:
         # Calculate the number of days overdue
-        days_overdue = (float(checkout.timestamp_in) - float(checkout.timestamp_out)) / (60 * 60 * 24)
+        timestamp_now = float(datetime.datetime.now().timestamp())
+
+        days_overdue = (timestamp_now - float(checkout.timestamp_due)) / (60 * 60 * 24)
 
         if days_overdue > checkout.notifications_sent:
             # Send an email
@@ -87,3 +90,7 @@ async def send_overdue_emails():
                 # Update the notifications_sent field
                 logging.info("Successfully sent email")
                 await checkout_collection.update_one({"uuid": checkout.uuid}, {"$set": {"notifications_sent": checkout.notifications_sent + 1}})
+            else:
+                # Show warning
+                logging.getLogger().setLevel(logging.WARNING)
+                logging.warning("Failed to send email")

@@ -110,12 +110,14 @@ async def route_create_new_checkout(request: Request):
     # Get the checkouts collection
     collection = await db.get_collection("checkouts")
 
-    # Set base renewals left to 3
-    # checkout.dict()["renewals_left"]=3
-
+    # Ensure that there's more then 0 items
+    if len(checkout.items) == 0:
+        # No items
+        # Return error
+        raise HTTPException(status_code=400, detail="No items")
+    
     # Insert the checkout
     await collection.insert_one(checkout.dict())
-
 
     # Return status code 201
     return
