@@ -169,10 +169,23 @@ async def route_search_inventory(search_query: str):
     db = MongoDB()
     collection = await db.get_collection("inventory")
 
-    # Search the inventory
+    # Search the inventory by all fields without using $text
     search_results = await collection.find(
-        {"$text": {"$search": search_query}}).to_list(None)
+        {"$or": [
+            {"name": {"$regex": search_query, "$options": "i"}},
+            {"location_room": {"$regex": search_query, "$options": "i"}},
+            {"location_specific": {"$regex": search_query, "$options": "i"}},
+            {"reorder_url": {"$regex": search_query, "$options": "i"}},
+            {"specific_name": {"$regex": search_query, "$options": "i"}},
+            {"serial_number": {"$regex": search_query, "$options": "i"}},
+            {"brand": {"$regex": search_query, "$options": "i"}},
+            {"model_number": {"$regex": search_query, "$options": "i"}},
+            {"kit_ref": {"$regex": search_query, "$options": "i"}},
+            {"kit_contents": {"$regex": search_query, "$options": "i"}},
+        ]}).to_list(None)
 
+    search_results = [InventoryItem(**item) for item in search_results]
+    
     # Return the search results
     return search_results
 
