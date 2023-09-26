@@ -1,6 +1,7 @@
 import io
 import PIL
 import PIL.Image
+import PIL.ImageOps
 import base64
 
 def render_loom_file(loom_file: str, file_extension: str, output_format: str, loom_width: int, desired_height: int, invert: bool, tabby_width: int):
@@ -97,35 +98,35 @@ def correct_image(image):
 
     # Correct the rows
     for y in range(height):
-        consecutive_black_pixels = 0
+        consecutive_white_pixels = 0
         for x in range(width):
             pixel = image.getpixel((x, y))
-            if pixel == 0:  # Black pixel
-                consecutive_black_pixels += 1
-                if consecutive_black_pixels > 5:
-                    if y % 2 == 0:
-                        image.putpixel((x, y), 255)  # Change to white pixel
-                    else:
-                        image.putpixel((x - 1, y), 255)  # Change the previous pixel to white
-                    consecutive_black_pixels = 1
-            else:
-                consecutive_black_pixels = 0
-
-    # Correct the columns
-    for x in range(width):
-        consecutive_white_pixels = 0
-        for y in range(height):
-            pixel = image.getpixel((x, y))
-            if pixel == 255:  # White pixel
+            if pixel == 255:  # Black pixel
                 consecutive_white_pixels += 1
                 if consecutive_white_pixels > 5:
-                    if x % 2 == 0:
-                        image.putpixel((x, y), 0)  # Change to black pixel
+                    if y % 2 == 0:
+                        image.putpixel((x, y), 0)  # Change to white pixel
                     else:
-                        image.putpixel((x, y - 1), 0)  # Change the previous pixel to black
+                        image.putpixel((x - 1, y), 0)  # Change the previous pixel to white
                     consecutive_white_pixels = 1
             else:
                 consecutive_white_pixels = 0
+
+    # Correct the columns
+    for x in range(width):
+        consecutive_black_pixels = 0
+        for y in range(height):
+            pixel = image.getpixel((x, y))
+            if pixel == 0:  # White pixel
+                consecutive_black_pixels += 1
+                if consecutive_black_pixels > 5:
+                    if x % 2 == 0:
+                        image.putpixel((x, y), 255)  # Change to black pixel
+                    else:
+                        image.putpixel((x, y - 1), 255)  # Change the previous pixel to black
+                    consecutive_black_pixels = 1
+            else:
+                consecutive_black_pixels = 0
 
 
     return image
