@@ -4,7 +4,7 @@ async function fetchSchedule() {
         const schedule = await response.json();
         
         state.schedule = schedule;
-
+        console.log(state.schedule);
         renderSchedule(schedule);
     }
 }
@@ -28,7 +28,7 @@ function renderSchedule(schedule) {
     // Get current hour
     let hour = now.getHours();
 
-    const current_shift = state.schedule.find((shift) => shift.day == DAYS[day] && formatHour(hour) == shift.timestamp_start);
+    const current_shift = schedule.find((shift) => shift.day == DAYS[day] && formatHour(hour) == shift.timestamp_start);
 
     let num = 0;
 
@@ -90,28 +90,34 @@ function generateScheduleDivs(schedule) {
             if (shift) {
                 inner_div.classList.add("proficiency");
                 inner_div.classList.add(`stewards-${shift.stewards.length}`);
-                for (let name of shift.stewards) {
+                
+                for (let steward_obj of shift.stewards) {
 
                     if (shift.head_steward) {
                         inner_div.classList.add("head-steward");
                     }
 
                     const user_div = document.createElement("span");
-                    user_div.innerText = name;
+                    user_div.innerText = steward_obj.name;
                     user_div.classList.add("steward");
 
                     inner_div.appendChild(user_div);
-                }
 
-                
-                for (let proficiency of shift.proficiencies) {
-                    inner_div.classList.add(toCSSSafeString(proficiency));
+                    for (let proficiency of steward_obj.proficiencies ?? []) {
+                        inner_div.classList.add(toCSSSafeString(proficiency));
+                        if (!inner_div.dataset.proficiency) {
+                            inner_div.dataset.proficiency = "";
+                        }
+                        inner_div.dataset.proficiency += `${toCSSSafeString(proficiency)} `;
+                    }
                 }
 
                 cell.onclick = () => {
                     removeHighlightProficiency();
                     inner_div.classList.add("highlight");
-                    highlightSourceProfs(shift.proficiencies);
+                    for (let steward_obj of shift.stewards) {
+                        highlightSourceProfs(steward_obj.proficiencies);
+                    }   
                 };
             }
 
@@ -171,8 +177,18 @@ function highlightProficiency(proficiency) {
     const css_safe_prof = toCSSSafeString(proficiency);
 
     for (let shift of all_schedule_shifts) {
-        if (shift.classList.contains(css_safe_prof)) {
-            shift.classList.add("highlight");
+        if (!shift.classList.contains(css_safe_prof)) {
+            shift.classList.add("grayed-out");
+            continue;
+        }
+        
+        // Count how many times the classname string has the proficiency string in it
+        // Max it out at 3
+        console.log(shift.dataset);
+        const count = Math.min((shift.dataset.proficiency.match(new RegExp(css_safe_prof, "g")) ?? []).length, 3);
+        
+        if (count > 0) {
+            shift.classList.add(`highlight-${count}`);
         } else {
             shift.classList.add("grayed-out");
         }
@@ -183,7 +199,7 @@ function highlightProficiency(proficiency) {
 }
 
 function highlightSourceProfs(proficiencies) {
-    for (let proficiency of proficiencies) {
+    for (let proficiency of proficiencies ?? []) {
         const els = document.querySelectorAll(`.trigger.${toCSSSafeString(proficiency)}`);
 
         for (let el of els) {
@@ -196,6 +212,9 @@ function removeHighlightProficiency() {
     const profs = document.getElementsByClassName("proficiency");
 
     for (let prof of profs) {
+        prof.classList.remove("highlight-1");
+        prof.classList.remove("highlight-2");
+        prof.classList.remove("highlight-3");
         prof.classList.remove("highlight");
         prof.classList.remove("grayed-out");
     }

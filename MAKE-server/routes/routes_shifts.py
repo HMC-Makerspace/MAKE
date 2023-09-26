@@ -33,34 +33,30 @@ async def route_get_shift_schedule(request: Request):
         shift = shift.dict()
 
         shift_stewards = [await users.find_one({"uuid": steward}) for steward in shift["stewards"]]
-        shift["proficiencies"] = []
 
-        names = []
-        head_steward = False
-        # Censor last names and add in proficiencies
+        shift["stewards"] = []
+        
         for steward in shift_stewards:
-            try:
-                shift["proficiencies"] += steward["proficiencies"]
-            except:
-                pass
+            if steward is None:
+                # The steward does not exist
+                # Return error
+                raise HTTPException(status_code=400, detail="Steward does not exist")
+
+            name = ""
 
             if " " in steward["name"]:
                 # Censor the last name
-                names.append(steward["name"].split(" ")[0])
+                name = steward["name"].split(" ")[0]
             else:
-                names.append(steward["name"])
+                name = steward["name"]
 
-            if steward["role"] == "head_steward":
-                head_steward = True
+            shift["stewards"].append({
+                "name": name,
+                "proficiencies": steward["proficiencies"],
+                "role": steward["role"],
+            })
             
-        
-        # Remove duplicates
-        shift["proficiencies"] = list(set(shift["proficiencies"]))
-        shift["stewards"] = names
-        shift["head_steward"] = head_steward
-
         censored_shifts.append(shift)
-
 
     return censored_shifts
 

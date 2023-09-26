@@ -16,7 +16,6 @@ async function fetchStatus() {
             const status = await response.json();
     
             const statuses = document.getElementById("statuses");
-            console.log(status);
             
             statuses.innerHTML = `
             <div>Alive</div

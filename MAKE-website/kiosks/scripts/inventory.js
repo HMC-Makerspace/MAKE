@@ -80,7 +80,6 @@ async function fetchEditableInventory() {
     if (response.status == 200) {
         const inventory = await response.json();
 
-        console.log(inventory);
         state.inventory = inventory;
     }
 }

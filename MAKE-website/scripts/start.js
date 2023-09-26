@@ -54,7 +54,6 @@ async function start() {
     });
 
     document.getElementById("page-schedule").addEventListener("click", (e) => {
-        console.log(e.target.classList);
         // If the target does not contain class "proficiency", return
         if (e.target.classList.contains("steward") || e.target.classList.contains("proficiency")) {
             return;

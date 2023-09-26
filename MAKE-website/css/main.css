@@ -1471,12 +1471,24 @@ table tr:nth-child(even) {
   background-color: var(--shift-1);
 }
 
+.highlight-1 {
+  background-color: var(--shift-1) !important;
+}
+
 .stewards-2 {
   background-color: var(--shift-2);
 }
 
+.highlight-2 {
+  background-color: var(--shift-2) !important;
+}
+
 .stewards-3 {
   background-color: var(--shift-3);
+}
+
+.highlight-3 {
+  background-color: var(--shift-3) !important;
 }
 
 .head-steward {

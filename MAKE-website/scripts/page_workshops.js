@@ -8,12 +8,7 @@ async function fetchWorkshops() {
     const response = await fetch(`${API}/workshops/get_workshops_for_user/${uuid}`);
 
     if (response.status == 200) {
-        console.log("Workshops fetched successfully");
-        console.log(response);
-
         const workshops = await response.json();
-
-        console.log(workshops);
 
         state.workshops = workshops;
 
@@ -75,7 +70,6 @@ function generateWorkshopDiv(workshop, is_past=false) {
     div.appendChild(title);
 
     const date = document.createElement("p");
-    console.log(workshop);
     let start_time = new Date(workshop.timestamp_start * 1000);
     let end_time = new Date(workshop.timestamp_end * 1000);
 
@@ -156,8 +150,6 @@ async function rsvpToWorkshop(workshop_uuid) {
     );
 
     if (response.status == 201) {
-        console.log("RSVP'd to workshop successfully");
-
         await fetchWorkshops();
     }
 }
@@ -177,8 +169,6 @@ async function cancelRsvpToWorkshop(workshop_uuid) {
     );
 
     if (response.status == 201) {
-        console.log("Cancelled RSVP to workshop successfully");
-
         await fetchWorkshops();
     }
 }
