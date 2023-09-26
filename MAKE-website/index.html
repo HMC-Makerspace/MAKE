@@ -51,7 +51,18 @@
 
     <script>
         function getTheme() {
+            let ver = localStorage.getItem("make-version");
             let theme = localStorage.getItem("theme");
+
+            // If the version isn't present, that means 
+            // it's the first time the user has visited the site
+
+            // Set the theme to dark always
+            if (ver == null) {
+                localStorage.setItem("theme", "dark");
+                theme = "dark";
+            }
+
             if (theme == null) {
                 const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
                 if (darkThemeMq.matches) {
@@ -176,6 +187,19 @@
             </div>
         </nav>
 
+        <!--
+
+        ERROR PAGE
+
+        -->
+
+        <section id="page-error" class="main-content">
+            <div class="content-container">
+                <div id="error-content" class="content-body">
+                </div>
+            </div>
+        </section>
+
         <!-- 
         
         HOME PAGE
@@ -191,11 +215,31 @@
             <div id="welcome-message">
                 <h1>Welcome to</h1>
                 <h1 class="title-font" id="main-title-ani">MAKE</h1>
+                <h2>Website for Harvey Mudd College's Makerspace</h2>
+
+                <div id="welcome-buttons">
+                    <button onclick="setPage('quiz-info')">
+                        <span class="material-symbols-outlined">
+                            verified_user
+                        </span>
+                        Get certified
+                    </button>
+                    <button onclick="setPage('schedule')">
+                        <span class="material-symbols-outlined">
+                            calendar_month
+                        </span>
+                        View our schedule
+                    </button>
+                    <button onclick="openInNewTab('https://make.hmc.edu/discord')">
+                        <img src="/img/discord.webp" alt="" height="24px">
+                        Join the Discord
+                    </button>
+                </div>
             </div>
 
-            <h2 id="status">
+            <h3 id="status">
                 The Makerspace is <span id="open-closed">OPEN</span> with <span id="num-stewards">...</span> stewards on duty.
-            </h2>
+            </h3>
 
             <div id="college-id-container" class="id-n content-body">
                 <input aria-label="College ID number login" type="tel" id="college-id-input" placeholder="Enter your college ID number" onchange="login()">
@@ -374,14 +418,12 @@
             <div class="content-container">
                 <div id="workshops-header" class="content-header">
                     <p3>
-                        Workshops are held in the Main Makerspace area.
-                        <br>
-                        All workshops are first-come, first-serve, up to the workshop-specific capacity.
-                        <br>
-                        If you haven't taken the General Safety Quiz, navigate to Quizzes & Information and take the
-                        quiz before logging in.
-                        <br>
-                        Please allow 3-5 minutes for the quiz to be processed before attemping to log in again.
+                        Workshops are held in the Main Makerspace area, unless otherwise noted.
+                    </p3>
+
+                    <p3>
+                        To attend a workshop, please RSVP. You will receive a reminder email the day of the workshop.
+
                     </p3>
                 </div>
 
@@ -759,6 +801,7 @@
 <script src="scripts/page_equipment.js"></script>
 <script src="scripts/page_values.js"></script>
 <script src="scripts/page_settings.js"></script>
+<script src="scripts/page_error.js"></script>
 
 <script src="scripts/start.js"></script>
 

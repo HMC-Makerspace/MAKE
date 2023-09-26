@@ -215,7 +215,7 @@ function generateInventoryDiv(result, kiosk_mode = false) {
     }
 
     if (item.in_overstock === true) {
-        location.innerHTML += `<span class="overstock">+ Overstock</span>`;
+        location.innerHTML += `<span class="overstock">In Overstock</span>`;
     }
 
     main_div.appendChild(location);

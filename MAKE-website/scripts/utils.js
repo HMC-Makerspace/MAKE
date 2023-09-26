@@ -193,7 +193,7 @@ function toggle_theme() {
     }
 }
 
-async function renderMD(file_path, title) {
+async function renderMD(file_path, title, to_insert = null) {
     const equipmentDiv = document.getElementById(`${title}-content`);
 
     const el = document.createElement("div");
@@ -223,6 +223,16 @@ async function renderMD(file_path, title) {
             if (child.firstChild.tagName === "IMG") {
                 child.classList.add("md-img-container");
             }
+        }
+    }
+
+    if (to_insert) {
+        // Should be key-pair value of what to insert
+        // Key can be found by searching for {{key}}
+        // Value is what to replace it with
+        for (let key of Object.keys(to_insert)) {
+            const regex = new RegExp(`{{${key}}}`, "g");
+            equipmentDiv.innerHTML = equipmentDiv.innerHTML.replace(regex, to_insert[key]);
         }
     }
 }

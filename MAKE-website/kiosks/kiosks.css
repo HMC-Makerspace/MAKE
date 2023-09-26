@@ -728,26 +728,8 @@ Management Console
   background-color: var(--high-color);
 }
 
-table#proficiencies-list {
-  width: 90%;
-  margin: 0 auto;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-table#proficiencies-list tr:first-child {
-  height: 70px;
-  font-size: 18px;
-  top: 20px;
-  position: sticky;
-}
-
-table#proficiencies-list th.prof {
+table th.prof {
   font-size: 12px;
-}
-
-table#proficiencies-list tr>* {
-  padding: 5px;
 }
 
 /* input elements that are checked */
@@ -755,19 +737,31 @@ table#proficiencies-list td.checked {
   background-color: var(--high-color);
 }
 
-
-table#proficiencies-list tr:nth-child(odd) {
-  background-color: var(--theme-color-2);
-}
-
-table#proficiencies-list tr:nth-child(even) {
-  background-color: var(--theme-color-3);
-}
-
 table#proficiencies-list td.proficiency-cell {
   text-align: center;
 }
 
+#create-new-workshop-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 auto;
+  margin-top: 20px;
+  height: 40px;
+  width: 200px;
+  font-weight: bold;
+}
+
+tr.workshop-admin {
+  background-color: var(--theme-color-2);
+}
+
+td.workshop-edit button {
+  width: 100%;
+  height: 100%;
+}
 /*
 
 INVENTORY

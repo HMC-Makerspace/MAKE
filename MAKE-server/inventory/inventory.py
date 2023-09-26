@@ -41,7 +41,7 @@ async def update_from_gsheet():
         # Quantity can be a number or a string
         quantity: Union[str, None]
         in_overstock: bool
-        overstock_quantity: Union[str, None]
+        is_numbered: bool
         location_room: Union[str, None]
         location_specific: Union[str, None]
         reorder_url: Union[str, None]
@@ -109,7 +109,7 @@ async def item_from_row(row: List[str], uuid=None) -> dict:
     # Update the item with all fields that are in the object
     '''
     Example first 2 lines:
-    Name	Tool / Material (T/M)	Kit Ref.	Quanity (#, Low / Med / High)	Location (room)	Location (specific)	Overstock closet?	Overstock quantity	URL (optional)	Specific Name (optional)	Serial Number (optional)	Brand (optional)	Model Number (optional)	UUID
+    Name	Tool / Material (T/M)	Kit Ref.	Quanity (#, Low / Med / High)	Location (room)	Location (specific)	Overstock closet?	Is Numbered?	URL (optional)	Specific Name (optional)	Serial Number (optional)	Brand (optional)	Model Number (optional)	UUID
     Case, O-Connor Matte Box Kit	T		1	Studio	Studio 5, Shelf 2	FALSE							
     Case, Shape Matte Box Kit	T	Matte Box Kit, Shape	1	Studio	Studio 5, Shelf 1	FALSE							
     '''
@@ -132,6 +132,7 @@ async def item_from_row(row: List[str], uuid=None) -> dict:
             quantity = 0
 
     in_overstock = row[6].lower() == "true"
+    is_numbered = row[7].lower() == "true"
 
     # Create a new item with the updated fields
     new_item = {
@@ -140,7 +141,7 @@ async def item_from_row(row: List[str], uuid=None) -> dict:
         "role": row[1],
         "quantity": quantity,
         "in_overstock": in_overstock,
-        "overstock_quantity": row[7],
+        "is_numbered": is_numbered,
         "location_room": row[4],
         "location_specific": row[5],
         "reorder_url": row[8],

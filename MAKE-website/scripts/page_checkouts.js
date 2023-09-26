@@ -93,14 +93,14 @@ function createCheckoutHeader(kiosk_mode=false, timestamp_in=false) {
         name.classList.add("checkout-entry-name");
         name.innerHTML = "Name";
         div.appendChild(name);
-
-        let renew = document.createElement("div");
-        renew.classList.add("checkout-entry-renew");
-        renew.innerHTML = "Renew";
-        div.appendChild(renew);
     }
 
     if (kiosk_mode && !timestamp_in) {
+        let extend = document.createElement("div");
+        extend.classList.add("checkout-entry-extend");
+        extend.innerHTML = "Extend";
+        div.appendChild(extend);
+
         let check_in = document.createElement("div");
         check_in.classList.add("checkout-entry-check-in");
         check_in.innerHTML = "Check In";
@@ -164,13 +164,6 @@ function createCheckoutDiv(checkout, kiosk_mode = false) {
     if (!kiosk_mode) {
         if (checkout.timestamp_in) {
             div.classList.add("checked-in");
-        } else {
-            let renew_button = document.createElement("button");
-            renew_button.classList.add("renew-button");
-            renew_button.innerHTML = "Renew";
-            renew_button.onclick = () => {
-                renewCheckout(checkout.uuid);
-            }
         }
     }
 
@@ -192,6 +185,15 @@ function createCheckoutDiv(checkout, kiosk_mode = false) {
         if (checkout.timestamp_in) {
             div.classList.add("checked-in");
         } else {
+            let extend_button = document.createElement("button");
+            extend_button.classList.add("extend-button");
+            extend_button.innerHTML = "+ 24 Hours";
+            extend_button.onclick = () => {
+                extendCheckout(checkout.uuid);
+            }
+
+            div.appendChild(extend_button);
+
             let check_in_button = document.createElement("button");
             check_in_button.classList.add("check-in-button");
             check_in_button.innerHTML = "Check In";

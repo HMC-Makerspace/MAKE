@@ -1,8 +1,11 @@
 import datetime
 from fastapi import FastAPI
+from fastapi import Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.exceptions import HTTPException
+
 
 import asyncio
 import uvicorn
@@ -31,6 +34,7 @@ from routes.routes_shifts import shifts_router
 from routes.routes_misc import misc_router
 from routes.routes_student_storage import student_storage_router
 from routes.routes_machines import machines_router
+from routes.routes_workshops import workshops_router
 
 # Import all other files
 from users.quizzes import scrape_quiz_results
@@ -80,6 +84,7 @@ app.include_router(checkouts_router)
 app.include_router(shifts_router)
 app.include_router(student_storage_router)
 app.include_router(machines_router)
+app.include_router(workshops_router)
 app.include_router(misc_router)
 
 # Add /discord to redirect to grandfathered, permanament discord invite
@@ -105,6 +110,15 @@ async def validate_database_schema(db):
             await db.create_collection(name)
             # Print log message
             logging.info(f"Created collection {name} in database {db.name}")
+
+    # Check that there's a single document in the status collection
+    # with the name "status"
+    status = await db["status"].find_one({"name": "status"})
+    if status is None:
+        # Create the status document
+        await db["status"].insert_one({"name": "status"})
+        # Print log message
+        logging.info(f"Created status document in database {db.name}")
 
 
 class BackgroundRunner:

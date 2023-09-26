@@ -1,7 +1,7 @@
 # Values
 The Makerspace has seven **core values** that we strive to uphold.
 These values are the foundation of our community and are what we use to guide our decisions. 
-All Stewards and member of management are expected to uphold these values.
+All Stewards and members of management are expected to uphold these values.
 
 They are as follows:
 

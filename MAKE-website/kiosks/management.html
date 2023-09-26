@@ -125,7 +125,19 @@
         </div>
 
         <div class="main-content content-container hidden" id="page-workshops">
+            <div class="content-header">
+                <p>
+                    View, create, and edit workshops.
+                </p>
+            </div>
 
+            <div class="content-body">
+                <button id="create-new-workshop-button" onclick="showCreateEditWorkshop()">Create New Workshop</button>
+
+                <table id="workshops-list">
+
+                </table>
+            </div>
         </div>
 
     </div>
@@ -201,6 +213,41 @@
                     <button id="mass-assign-roles-cancel" onclick="closePopup()">Close</button>
                 </div>
             </div>
+
+            <div id="edit-workshop" class="hidden">
+                <h1>Create/Edit Workshop</h1>
+
+                <label for="edit-workshop-is_live">Is Live on MAKE</label>
+                <input id="edit-workshop-is_live" type="checkbox">
+
+                <label for="edit-workshop-title">Title</label>
+                <input id="edit-workshop-title" placeholder="Waterjet a Bottle Opener">
+
+                <label for="edit-workshop-description">Description</label>
+                <textarea id="edit-workshop-description" placeholder="Create a bottle opener from scratch with a custom design!"></textarea>
+
+                <label for="edit-workshop-tnstructors">Instructors</label>
+                <input id="edit-workshop-instructors" placeholder="Ethan and Jordan">
+                
+                <label>Start</label>
+                <input id="edit-workshop-timestamp_start" type="datetime-local" placeholder="Start Time">
+                <label>End</label>
+                <input id="edit-workshop-timestamp_end" type="datetime-local" placeholder="End Time">
+
+                <label for="edit-workshop-capacity">Capacity</label>
+                <input id="edit-workshop-capacity" type="number" placeholder="4">
+
+                <div id="edit-workshop-required_quizzes">
+                    
+                </div>
+
+                <div id="edit-workshop-rsvp_list">
+                </div>  
+                
+                <div class="edit-buttons">
+                    <button id="edit-workshop-save" onclick="saveWorkshop()">Save</button>
+                    <button id="edit-workshop-cancel" onclick="closePopup()">Cancel</button>
+                </div>
         </div>
     </div>
 

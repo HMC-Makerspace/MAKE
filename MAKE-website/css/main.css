@@ -387,9 +387,10 @@ button:hover {
 }
 
 button.big {
-  font-size: 1.2em;
-  height: 50px;
+  font-size: 1em;
+  height: 40px;
   padding: 10px;
+  font-weight: bold;
 }
 
 button:hover,
@@ -460,7 +461,7 @@ input[type="checkbox"] {
 }
 
 
-input {
+input, textarea {
   background-color: var(--theme-color-3);
   font-size: 16px;
   color: var(--text-color-main);
@@ -470,7 +471,7 @@ input {
   transition: background-color 0.3s ease-in-out;
 }
 
-input.focus {
+input.focus, textarea.focus {
   outline: unset;
 }
 
@@ -551,6 +552,15 @@ a:visited {
 .content-header {
   border-radius: var(--roundness) var(--roundness) 0 0;
   background-color: var(--theme-color-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.content-header >p3 {
+  width: 60%;
 }
 
 .content-body {
@@ -612,8 +622,6 @@ HOME
   width: 75%;
 }
 
-
-
 #status {
   display: flex;
   flex-direction: row;
@@ -667,54 +675,45 @@ HOME
   text-align: center;
 }
 
+#welcome-message h1 {
+  margin: unset;
+}
+
+#welcome-message h2 {
+  font-size: 1em;
+  font-weight: bold;
+  color: var(--text-color-light);
+  margin-bottom: 20px;
+}
+
+#welcome-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+#welcome-buttons button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 180px;
+  height: 40px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+#welcome-buttons button:hover img {
+  filter: invert(100%);
+}
+
 #main-title-ani {
   font-size: min(20vh, 10em);
   text-align: left !important;
   cursor: pointer;
-  margin: unset;
-}
-
-#top-right-music {
-  display: none;
-  position: absolute;
-  top: 0;
-  right: 50px;
-  width: 140px;
-  height: 140px;
-  text-align: right;
-}
-
-#top-right-music:before {
-  content: ' ';
-  border-top: 236px solid #1DB954;
-  border-right: 236px solid transparent;
-  transform: rotate(90deg) translateY(186px);
-  width: 0;
-  position: absolute;
-}
-
-#top-right-music>* {
-  position: relative;
-  z-index: 300;
-}
-
-#music-title {
-  font-size: 0.8em;
-  font-weight: bold;
-  margin-bottom: 0;
-  text-align: right;
-  padding: 5px;
-}
-
-#music-art {
-  width: 128px;
-  height: 128px;
-  border-radius: 5px;
-  background-color: var(--white);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  left: 15px;
 }
 
 /*
@@ -1394,6 +1393,34 @@ Schedule
 
 */
 
+table {
+  width: 90%;
+  margin: 0 auto;
+  border-spacing: 0;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table td, 
+table th{
+padding: 5px;
+}
+
+table tr:first-child {
+  height: 70px;
+  font-size: 18px;
+  top: 20px;
+  position: sticky;
+}
+
+table tr:nth-child(odd) {
+  background-color: var(--theme-color-2);
+}
+
+table tr:nth-child(even) {
+  background-color: var(--theme-color-3);
+}
+
 #schedule-help {
   display: flex;
   flex-direction: row;
@@ -1406,6 +1433,7 @@ Schedule
   width: 90%;
   margin: 0 auto;
   margin-top: 20px;
+  border-collapse:separate;
 }
 
 #schedule-table th {
@@ -1413,6 +1441,12 @@ Schedule
   text-align: center;
   width: 60px;
   font-size: 0.8em;
+}
+
+#schedule-table tr, #schedule-table td, #schedule-table th {
+  padding: 0;
+  border: 1px solid var(--theme-color-5);
+  height: 50px;
 }
 
 #schedule-table tr {
@@ -1478,6 +1512,11 @@ Schedule
 #schedule-table .proficiencies {
   color: var(--white);
   font-size: 0.7em;
+}
+
+.schedule-shift.proficiency.grayed-out {
+  filter: grayscale(100%);
+  cursor: not-allowed;
 }
 
 .schedule-shift.proficiency.stewards-1:hover,
@@ -1657,7 +1696,8 @@ FAQ
 
 #faq-content,
 #settings-content,
-#values-content {
+#values-content,
+#error-content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1795,7 +1835,7 @@ Workshops
   font-weight: bolder;
   padding: 10px;
   padding-left: 20px;
-  width: 250px;
+  width: fit-content;
 }
 
 .workshop .description {
@@ -1863,14 +1903,6 @@ Student Project Application
   margin: 0 auto;
 }
 
-
-#student-projects-help {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-}
 
 #student-projects-help * {
   width: 60%;

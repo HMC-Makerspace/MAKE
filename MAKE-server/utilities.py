@@ -5,6 +5,7 @@ import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import datetime
+import urllib.parse
 
 last_updated_time = datetime.datetime.now()
 
@@ -62,3 +63,6 @@ async def email_user(user_email: str, cc_email: List[str], subject: str, html_bo
         server.sendmail(
             sender_email, [receiver_email] + cc_email, message.as_string()
         )
+
+def url_encode(to_encode: str):
+    return urllib.parse.quote(to_encode)

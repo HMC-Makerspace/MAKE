@@ -1,9 +1,21 @@
 async function fetchWorkshops() {
-    const response = await fetch(`${API}/workshops/get_workshops`);
+    let uuid = "";
+
+    if (state.user_object !== null) {
+        uuid = state.user_object.uuid;
+    }
+
+    const response = await fetch(`${API}/workshops/get_workshops_for_user/${uuid}`);
+
     if (response.status == 200) {
+        console.log("Workshops fetched successfully");
+        console.log(response);
+
         const workshops = await response.json();
-        
-        state.workshops = workshops.workshops;
+
+        console.log(workshops);
+
+        state.workshops = workshops;
 
         renderWorkshops();
     }
@@ -12,6 +24,9 @@ async function fetchWorkshops() {
 function renderWorkshops() {
     const upcoming_workshops = document.getElementById("upcoming-workshops");
     const previous_workshops = document.getElementById("previous-workshops");
+
+    removeAllChildren(upcoming_workshops);
+    removeAllChildren(previous_workshops);
 
     const now = new Date();
 
@@ -60,61 +75,57 @@ function generateWorkshopDiv(workshop, is_past=false) {
     div.appendChild(title);
 
     const date = document.createElement("p");
-    date.innerText = `${workshop.date} @ ${workshop.time != "" ? workshop.time : "TBD"}`;
+    console.log(workshop);
+    let start_time = new Date(workshop.timestamp_start * 1000);
+    let end_time = new Date(workshop.timestamp_end * 1000);
+
+    let start_time_string = start_time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    let end_time_string = end_time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    // Want to have it in the format of:
+    date.innerText = `${start_time.toLocaleDateString()} @ ${start_time_string} - ${end_time_string}`;
+    
     date.classList.add("date");
     div.appendChild(date);
 
     const instructor = document.createElement("p");
-    instructor.innerHTML = `<b>Taught by:</b> <i>${workshop.instructor}</i>`;
+    instructor.innerHTML = `<b>Taught by:</b> <i>${workshop.instructors}</i>`;
     instructor.classList.add("instructor");
     div.appendChild(instructor);
 
     const description = document.createElement("p");
-    description.innerHTML = `<b>Learning Outcome:</b> ${workshop.description}`;
+    description.innerHTML = `<b>Description:</b> ${workshop.description}`;
     description.classList.add("description");
     div.appendChild(description);
 
-    const slots_available = document.createElement("p");
-    slots_available.innerHTML = `<b>Capacity:</b> ${workshop.slots_available}`;
-    slots_available.classList.add("capacity");
-    div.appendChild(slots_available);
+    const capacity = document.createElement("p");
+    capacity.innerHTML = `<b>Signups:</b> ${workshop.signups} / ${workshop.capacity} slots`;
+
+    if (workshop.position !== -1) {
+        capacity.innerHTML += `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp <b>Position:</b> ${workshop.position + 1}`;
+    }
+
+    capacity.classList.add("capacity");
+    div.appendChild(capacity);
 
     if (!is_past) {
-        // Create add to calendar buttons
-        const calendar_buttons = document.createElement("div");
-        calendar_buttons.classList.add("calendar-buttons");
-        
-        const google_button = document.createElement("button");
-        google_button.classList.add("calendar-button");
-        google_button.classList.add("google");
-        google_button.innerText = "Add to gCal";
-        google_button.onclick = () => {
-            openInNewTab(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${workshop.title}&dates=${workshop.date}T${workshop.time.replace(":", "")}00Z/${workshop.date}T${workshop.time.replace(":", "")}00Z&details=${workshop.description}&location=Makerspace&sf=true&output=xml`);
-        };
+        // Add signup button
+        const signup = document.createElement("button");
+        signup.classList.add("signup");
 
-        calendar_buttons.appendChild(google_button);
+        if (workshop.position === -1) {
+            signup.innerText = "RSVP";
+            signup.addEventListener("click", () => {
+                rsvpToWorkshop(workshop.uuid);
+            });
+        } else {
+            signup.innerText = "Cancel RSVP";
+            signup.addEventListener("click", () => {
+                cancelRsvpToWorkshop(workshop.uuid);
+            });
+        }
 
-        const ics_button = document.createElement("button");
-        ics_button.classList.add("calendar-button");
-        ics_button.classList.add("ics");
-        ics_button.innerText = "Add to iCal";
-        ics_button.onclick = () => {
-            openInNewTab(`data:text/calendar;charset=utf8,${encodeURIComponent(`BEGIN:VCALENDAR
-            VERSION:2.0
-            BEGIN:VEVENT
-            URL:${window.location.href}
-            DTSTART:${workshop.date}T${workshop.time.replace(":", "")}00Z
-            DTEND:${workshop.date}T${workshop.time.replace(":", "")}00Z
-            SUMMARY:${workshop.title}
-            DESCRIPTION:${workshop.description}
-            LOCATION:Makerspace
-            END:VEVENT
-            END:VCALENDAR`)}`);
-        };
 
-        calendar_buttons.appendChild(ics_button);
-
-        div.appendChild(calendar_buttons);
+        div.appendChild(signup);
     } else {
         const signup = document.createElement("h3");
         signup.classList.add("signup");
@@ -123,4 +134,51 @@ function generateWorkshopDiv(workshop, is_past=false) {
     }
 
     return div;
+}
+
+async function rsvpToWorkshop(workshop_uuid) {
+    if (state.user_object === null) {
+        alert("You must be logged in to RSVP to a workshop!");
+        return;
+    }
+
+    const response = await fetch(`${API}/workshops/rsvp_to_workshop`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                workshop_uuid: workshop_uuid,
+                user_uuid: state.user_object.uuid
+            })
+        }
+    );
+
+    if (response.status == 201) {
+        console.log("RSVP'd to workshop successfully");
+
+        await fetchWorkshops();
+    }
+}
+
+async function cancelRsvpToWorkshop(workshop_uuid) {
+    const response = await fetch(`${API}/workshops/cancel_rsvp_to_workshop`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                workshop_uuid: workshop_uuid,
+                user_uuid: state.user_object.uuid
+            })
+        }
+    );
+
+    if (response.status == 201) {
+        console.log("Cancelled RSVP to workshop successfully");
+
+        await fetchWorkshops();
+    }
 }

@@ -62,6 +62,7 @@ async function authenticate() {
     await fetchStudentStorageAdmin();
     await fetchShiftsAdmin();
     await fetchShiftChangesAdmin();
+    await fetchWorkshopsAdmin();
 
     for (let key of Object.keys(state.users)) {
         state.users[key].cx_id_str = state.users[key].cx_id.toString();
@@ -130,17 +131,203 @@ async function fetchStudentStorageAdmin() {
         const student_storage = await response.json();
 
         state.student_storage = student_storage;
-
-        console.log(state.student_storage);
     }
 }
+
+async function fetchWorkshopsAdmin() {
+    const response = await fetch(`${API}/workshops/get_workshops`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+        }
+    );
+
+    if (response.status == 200) {
+        const workshops = await response.json();
+
+        state.workshops = workshops;
+    }
+}
+
 
 function renderAll() {
     renderStats();
     renderStudentStorage();
     renderScheduleAdmin();
     renderProficiencies();
+    renderWorkshopsAdmin();
 }
+
+function renderWorkshopsAdmin() {
+    const workshops = document.getElementById("workshops-list");
+
+    removeAllChildren(workshops);
+    appendChildren(workshops, generateWorkshopDivsAdmin());
+}
+
+function generateWorkshopDivsAdmin() {
+    let divs = [];
+
+    // Add header
+    let header = document.createElement("tr");
+    header.innerHTML = `<th>Title</th><th>Description</th><th>Instructors</th><th>Start Time</th><th>End Time</th><th>Capacity</th><th>Signups</th><th>Is Live</th><th>Edit</th>`;
+    divs.push(header);
+
+    for (let workshop of state.workshops) {
+        let div = document.createElement("tr");
+        div.classList.add("workshop-admin");
+
+        let title = document.createElement("td");
+        title.classList.add("workshop-title");
+        title.innerText = workshop.title;
+        div.appendChild(title);
+
+        let description = document.createElement("td");
+        description.classList.add("workshop-description");
+        description.innerText = workshop.description;
+        div.appendChild(description);
+
+        let instructors = document.createElement("td");
+        instructors.classList.add("workshop-instructors");
+        instructors.innerText = workshop.instructors;
+        div.appendChild(instructors);
+
+        let timestamp_start = document.createElement("td");
+        timestamp_start.classList.add("workshop-timestamp_start");
+        timestamp_start.innerText = new Date(workshop.timestamp_start * 1000).toLocaleString();
+        div.appendChild(timestamp_start);
+
+        let timestamp_end = document.createElement("td");
+        timestamp_end.classList.add("workshop-timestamp_end");
+        timestamp_end.innerText = new Date(workshop.timestamp_end * 1000).toLocaleString();
+        div.appendChild(timestamp_end);
+
+        let capacity = document.createElement("td");
+        capacity.classList.add("workshop-capacity");
+        capacity.innerText = workshop.capacity;
+        div.appendChild(capacity);
+
+        let rsvp_list = document.createElement("td");
+        rsvp_list.classList.add("workshop-rsvp_list");
+        rsvp_list.innerText = workshop.rsvp_list.length;
+        div.appendChild(rsvp_list);
+
+        let is_live = document.createElement("td");
+        is_live.classList.add("workshop-is_live");
+        is_live.innerText = workshop.is_live;
+        div.appendChild(is_live);
+
+        let edit_button_container = document.createElement("td");
+        edit_button_container.classList.add("workshop-edit");
+        
+        let edit_button = document.createElement("button");
+        edit_button.innerText = "Edit";
+        edit_button.onclick = () => {
+            showCreateEditWorkshop(workshop.uuid);
+        };
+
+        edit_button_container.appendChild(edit_button);
+        div.appendChild(edit_button_container);
+
+        divs.push(div);
+    }
+
+    return divs;
+}
+
+function showCreateEditWorkshop(uuid) {
+    let workshop = state.workshops.find(workshop => workshop.uuid === uuid);
+
+
+    if (workshop) {
+        let pacific_offset = new Date().getTimezoneOffset() * 60 * 1000;
+        let time_start = new Date(workshop.timestamp_start * 1000) - pacific_offset;
+        let time_end = new Date(workshop.timestamp_end * 1000) - pacific_offset;
+    
+        // Get ISO timestamp for Pacific time
+        time_start = new Date(time_start).toISOString().split(".")[0];
+        time_end = new Date(time_end).toISOString().split(".")[0];
+
+        document.getElementById("edit-workshop-title").value = workshop.title;
+        document.getElementById("edit-workshop-description").value = workshop.description;
+        document.getElementById("edit-workshop-instructors").value = workshop.instructors;
+        document.getElementById("edit-workshop-timestamp_start").value = time_start;
+        document.getElementById("edit-workshop-timestamp_end").value = time_end;
+        document.getElementById("edit-workshop-capacity").value = workshop.capacity;
+        document.getElementById("edit-workshop-is_live").checked = workshop.is_live;
+        document.getElementById("edit-workshop-save").onclick = () => {
+            saveWorkshop(uuid);
+        };
+    } else {
+        document.getElementById("edit-workshop-title").value = "";
+        document.getElementById("edit-workshop-description").value = "";
+        document.getElementById("edit-workshop-instructors").value = "";
+        document.getElementById("edit-workshop-timestamp_start").value = "";
+        document.getElementById("edit-workshop-timestamp_end").value = "";
+        document.getElementById("edit-workshop-capacity").value = "";
+        document.getElementById("edit-workshop-is_live").value = "";
+        document.getElementById("edit-workshop-save").onclick = () => {
+            saveWorkshop();
+        };
+    }
+
+    // Open popup
+    document.getElementById("popup-container").classList.remove("hidden");
+    document.getElementById("edit-workshop").classList.remove("hidden");
+}
+
+async function saveWorkshop(uuid = null) {
+    let create_new = false;
+
+    if (uuid === null) {
+        create_new = true;
+        uuid = self.crypto.randomUUID();
+    }
+
+    let workshop = {
+        uuid: uuid,
+        title: document.getElementById("edit-workshop-title").value,
+        description: document.getElementById("edit-workshop-description").value,
+        instructors: document.getElementById("edit-workshop-instructors").value,
+        timestamp_start: new Date(document.getElementById("edit-workshop-timestamp_start").value).getTime() / 1000,
+        timestamp_end: new Date(document.getElementById("edit-workshop-timestamp_end").value).getTime() / 1000,
+        capacity: document.getElementById("edit-workshop-capacity").value,
+        is_live: document.getElementById("edit-workshop-is_live").checked,
+        rsvp_list: [],
+        required_quizzes: [],
+    };  
+
+    let create_update = "update_workshop";
+
+    if (create_new) {
+        create_update = "create_workshop";
+    }
+
+    let request = await fetch(`${API}/workshops/${create_update}`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+            body: JSON.stringify(workshop),
+        }
+    );
+
+    if (request.status == 201) {
+        await fetchWorkshopsAdmin();
+        renderWorkshopsAdmin();
+
+        closePopup();
+    } else {
+        // Alert with details
+        const body = await request.json();
+        alert("Error saving workshop: " + request.status + "\n" + body.error);
+    }
+}
+
 
 function renderProficiencies() {
     const proficiencies = document.getElementById("proficiencies-list");
@@ -529,19 +716,21 @@ function generateStewardShiftList(all_stewards) {
 function generateShiftChangeList(all_stewards) {
     let divs = [];
 
+    let sorted_shifts = state.shift_changes;
+
     // Sort shift changes by date, so that the newest are at the top
-    state.shift_changes.sort((a, b) => {
-        let a_date = new Date(a.date + " " + a.timestamp_start);
-        let b_date = new Date(b.date + " " + b.timestamp_start);
-        
+    sorted_shifts.sort((a, b) => {
+        let a_date = new Date(a.date);
+        let b_date = new Date(b.date);
+
         if (a_date < b_date) {
-            return -1;
-        } else {
             return 1;
+        } else {
+            return -1;
         }
     });
 
-    for (let change of state.shift_changes) {
+    for (let change of sorted_shifts) {
         let div = document.createElement("div");
         div.classList.add("shift-change-list-item");
         

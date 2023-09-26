@@ -167,13 +167,19 @@ function generateProficiencyDivs(proficiencies) {
 }
 
 function highlightProficiency(proficiency) {
+    const all_schedule_shifts = document.getElementsByClassName("schedule-shift");
     const css_safe_prof = toCSSSafeString(proficiency);
 
-    const profs = document.getElementsByClassName(css_safe_prof);
-
-    for (let prof of profs) {
-        prof.classList.add("highlight");
+    for (let shift of all_schedule_shifts) {
+        if (shift.classList.contains(css_safe_prof)) {
+            shift.classList.add("highlight");
+        } else {
+            shift.classList.add("grayed-out");
+        }
     }
+
+    const trigger_prof = document.querySelector(`.trigger.${css_safe_prof}`);
+    trigger_prof.classList.add("highlight");
 }
 
 function highlightSourceProfs(proficiencies) {
@@ -191,5 +197,6 @@ function removeHighlightProficiency() {
 
     for (let prof of profs) {
         prof.classList.remove("highlight");
+        prof.classList.remove("grayed-out");
     }
 }

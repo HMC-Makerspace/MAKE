@@ -25,6 +25,7 @@ class MongoDB():
             return None
         
 schema = [
+    'status'
     'quiz_updates',
     'inventory',
     'restock_requests',
@@ -39,6 +40,11 @@ schema = [
     'filament_logs',
     'api_keys'
 ]
+
+STATUS_TEMPLATE = {
+    "motd": "Welcome to make.hmc.edu",
+    "is_open": False,
+}
 
 # Convert ObjectIds to strings before storing them as the _id.
 
@@ -430,12 +436,15 @@ The following fields are stored:
 class Workshop(BaseModel):
     _id: Optional[PyObjectId] = Field(alias="_id")
     uuid: str
-    name: str
+    title: str
     description: str
-    stewards: List[str]
-    timestamp: str
-    length: int
+    instructors: str
+    timestamp_start: str
+    timestamp_end: str
     capacity: int
+    required_quizzes: List[str]
+    rsvp_list: List[str]
+    is_live: bool
 
     class Config:
         arbitrary_types_allowed = True
@@ -445,12 +454,15 @@ class Workshop(BaseModel):
         schema_extra = {
             "example": {
                 "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                "name": "Soldering Workshop",
+                "title": "Soldering Workshop",
                 "description": "Learn how to solder!",
-                "stewards": ["d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"],
-                "timestamp": "2021-01-01 00:00:00",
-                "length": 60,
-                "capacity": 10
+                "instructors": "John Doe and Jane Doe",
+                "timestamp_start": "12511032",
+                "timestamp_end": "12511032",
+                "capacity": 10,
+                "required_quizzes": ["123456789"],
+                "rsvp_list": ["d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"],
+                "is_live": True
             }
         }
 
