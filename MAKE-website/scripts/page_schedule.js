@@ -4,7 +4,6 @@ async function fetchSchedule() {
         const schedule = await response.json();
         
         state.schedule = schedule;
-        console.log(state.schedule);
         renderSchedule(schedule);
     }
 }
@@ -105,10 +104,10 @@ function generateScheduleDivs(schedule) {
 
                     for (let proficiency of steward_obj.proficiencies ?? []) {
                         inner_div.classList.add(toCSSSafeString(proficiency));
-                        if (!inner_div.dataset.proficiency) {
-                            inner_div.dataset.proficiency = "";
+                        if (!inner_div.dataset.proficiencies) {
+                            inner_div.dataset.proficiencies = "";
                         }
-                        inner_div.dataset.proficiency += `${toCSSSafeString(proficiency)} `;
+                        inner_div.dataset.proficiencies += `${toCSSSafeString(proficiency)} `;
                     }
                 }
 
@@ -186,7 +185,7 @@ function highlightProficiency(proficiency) {
         // Max it out at 3
         // make sure to only search for whole words matching whole words, don't check inside of other words
         const regex = new RegExp(`\\b${css_safe_prof}\\b`, "g");
-        const count = Math.min((shift.className.match(regex) ?? []).length, 3);
+        const count = Math.min((shift.dataset.proficiencies.match(regex) ?? []).length, 3);
         
         if (count > 0) {
             shift.classList.add(`highlight-${count}`);
