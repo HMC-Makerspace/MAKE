@@ -146,7 +146,7 @@ async def route_update_checkout(request: Request, checkout_uuid: str):
     await collection.update_one({"uuid": checkout_uuid}, {"$set": checkout.dict()})
 
     # Return the checkout
-    return checkout
+    return
 
 @checkouts_router.post("/check_in_checkout/{checkout_uuid}", status_code=201)
 async def route_check_in_checkout(request: Request, checkout_uuid: str):

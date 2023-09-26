@@ -641,6 +641,27 @@ function displayErrorInCheckout(uuid) {
     el.classList.add("error");
 }
 
+async function extendCheckout(checkout_uuid) {
+    let checkout = state.checkouts.find((checkout) => checkout.uuid === checkout_uuid);
+
+    // Add 24 hours to the timestamp_due
+    checkout.timestamp_due = String(Number(checkout.timestamp_due) + (24 * 3600));
+
+    const response = await fetch(`${API}/checkouts/update_checkout/${checkout_uuid}`,
+        {
+            method: "POST",
+            headers: {
+                "api-key": api_key,
+            },
+            body: JSON.stringify(checkout)
+        }
+    );
+
+    if (response.status === 200) {
+        await fetchCheckouts();
+    }
+}
+
 function editItem(item) {
 
 }

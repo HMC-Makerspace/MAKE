@@ -181,11 +181,12 @@ function highlightProficiency(proficiency) {
             shift.classList.add("grayed-out");
             continue;
         }
-        
+
         // Count how many times the classname string has the proficiency string in it
         // Max it out at 3
-        console.log(shift.dataset);
-        const count = Math.min((shift.dataset.proficiency.match(new RegExp(css_safe_prof, "g")) ?? []).length, 3);
+        // make sure to only search for whole words matching whole words, don't check inside of other words
+        const regex = new RegExp(`\\b${css_safe_prof}\\b`, "g");
+        const count = Math.min((shift.className.match(regex) ?? []).length, 3);
         
         if (count > 0) {
             shift.classList.add(`highlight-${count}`);
