@@ -34,6 +34,7 @@
             <button id="shifts-button" class="set-page" onclick="setPage('shifts')">Shifts</button>
             <button id="proficiencies-button" class="set-page" onclick="setPage('proficiencies')">Proficiencies</button>
             <button id="workshops-button" class="set-page" onclick="setPage('workshops')">Workshops</button>
+            <button id="restock-requests-button" class="set-page" onclick="setPage('restock-requests')">Restock Requests</button>
         </div>
 
         <div class="main-content content-container" id="page-home">
@@ -140,12 +141,30 @@
             </div>
         </div>
 
+        <div class="main-content content-container hidden" id="page-restock-requests">
+            <div class="content-header">
+                <p>
+                    View, approve, and deny restock requests.
+                </p>
+            </div>
+
+            <div class="content-body">
+                <h1>Pending Requests</h1>
+                <table id="pending-restock-requests-list">
+
+                </table>
+
+                <h1>Completed Requests</h1>
+                <table id="completed-restock-requests-list">
+
+                </table>
+            </div>
+        </div>
     </div>
 
     <div id="popup-container" class="hidden">
         <div id="popup-background" onclick="closePopup()"></div>
         <div id="popup-content">
-            
             <div id="edit-user" class="hidden">
                 <h1>Edit User</h1>
 
@@ -248,6 +267,36 @@
                     <button id="edit-workshop-save" onclick="saveWorkshop()">Save</button>
                     <button id="edit-workshop-cancel" onclick="closePopup()">Cancel</button>
                 </div>
+            </div>
+
+            <div id="complete-restock-request" class="hidden">
+                <h1>Complete Restock Request</h1>
+
+                <div id="complete-restock-request-user"></div>
+                <div id="complete-restock-request-item"></div>
+
+                <div id="complete-restock-request-reason"></div>
+                <div id="complete-restock-request-quantity"></div>
+
+                <h2>Actions: </h2>
+                <label for="complete-restock-request-notes">Notes (optional, will be sent to user)</label>
+                <textarea id="complete-restock-request-notes" placeholder="Notes..."></textarea>
+
+                <p>
+                    The request may take a few seconds to process.    
+                </p>
+
+                <p>
+                    Please do not refresh the page or resubmit the request.
+                </p>
+
+                <button id="complete-restock-request-approve" onclick="completeRestockRequest()">Approve</button>
+                <button id="complete-restock-request-deny" onclick="completeRestockRequest()">Deny</button>
+
+                <div class="edit-buttons">
+                    <button id="complete-restock-request-cancel" onclick="closePopup()">Cancel</button>
+                </div> 
+            </div>
         </div>
     </div>
 

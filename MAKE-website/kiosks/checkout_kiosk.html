@@ -60,11 +60,6 @@
                         <input type="text" id="inventory-search-input" placeholder="Search for item...">
 
                         <span>
-                            <input type="checkbox" id="inventory-in-stock">
-                            <label for="inventory-in-stock">In Stock</label>
-                        </span>
-
-                        <span>
                             <select id="room-select">
                                 <option value="">-- Select Room/Area --</option>
                                 <option value="Main">Main Makerspace</option>
@@ -86,7 +81,7 @@
                             </select>
                         </span>
 
-                        <button id="restock-button" onclick="showRestock()">Restock/Request Form</button>
+                        <button id="restock-button" class="big" onclick="showRestock()">Restock Form</button>
                     </div>
 
                     <div id="inventory-results" class="content-body">

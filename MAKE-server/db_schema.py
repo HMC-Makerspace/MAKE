@@ -209,11 +209,15 @@ The following fields are stored:
 class RestockRequest(BaseModel):
     _id: Optional[PyObjectId] = Field(alias="_id")
     uuid: str
-    items_requested: str
-    requested_by: str
-    requested_by_email: str
-    timestamp_sent: int
-    timestamp_completed: Union[int, None]
+    item: str
+    quantity: str
+    reason: str
+    user_uuid: Union[str, None]
+    authorized_request: bool
+    timestamp_sent: str
+    timestamp_completed: Union[str, None]
+    is_approved: Union[bool, None]
+    completion_note: Union[str, None]
 
     class Config:
         arbitrary_types_allowed = True
@@ -223,11 +227,15 @@ class RestockRequest(BaseModel):
         schema_extra = {
             "example": {
                 "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                "items_requested": ["Soldering Iron"],
-                "requested_by": "John Doe",
-                "requested_by_email": "john@g.hmc.edu",
+                "item": "Soldering Iron",
+                "quantity": "1 more iron",
+                "reason": "Low/Out of Stock",
+                "user_uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "authorized_request": False,
                 "timestamp_sent": 1610000000,
-                "timestamp_completed": None
+                "timestamp_completed": None,
+                "is_approved": None,
+                "completion_note": None
             }
         }
 

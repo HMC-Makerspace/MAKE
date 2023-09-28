@@ -19,24 +19,18 @@ async function start() {
         setPage(page);
     }
 
-    fetchInventory().then(() => {
-        submitSearch();
-        document.getElementById("inventory-search-input").addEventListener("keyup", submitSearch);
-        document.getElementById("inventory-in-stock").addEventListener("change", submitSearch);
-        document.getElementById("room-select").addEventListener("change", submitSearch);
-        document.getElementById("tool-material-select").addEventListener("change", submitSearch);
-    });
-    fetchStudentStorage();
-    fetchSchedule();
-    fetchWorkshops();
-    fetchCheckouts();
+    const promises = [
+        fetchInventory().then(() => {
+            submitSearch();
+            document.getElementById("inventory-search-input").addEventListener("keyup", submitSearch);
+            document.getElementById("room-select").addEventListener("change", submitSearch);
+            document.getElementById("tool-material-select").addEventListener("change", submitSearch);
+        }),
+        fetchSchedule(),
+        fetchWorkshops(),
+        fetchCheckouts()
+    ];
     //fetchPrinters();
-
-    document.getElementById("restock-dialog").addEventListener("click", function (event) {
-        if (event.target.id === "restock-dialog") {
-            hideRestock()
-        }
-    });
 
     document.addEventListener("keydown", function (event) {
         // If user is not focused on an input, and the user presses the k key, show quick-nav
@@ -60,6 +54,9 @@ async function start() {
         }
         removeHighlightProficiency();
     });
+
+    // Await all promises
+    await Promise.all(promises);
 
     // Hide fader
     document.getElementById("fader").classList.add("fade-out");

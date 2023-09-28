@@ -2,8 +2,9 @@ import csv
 from datetime import datetime
 import logging
 from typing import List
+from utilities import format_email_template, email_user
 import aiohttp
-from db_schema import MongoDB, QuizResponse
+from db_schema import MongoDB, QuizResponse, RestockRequest
 from config import *
 from uuid import uuid4
 
@@ -155,3 +156,44 @@ async def item_from_row(row: List[str], uuid=None) -> dict:
     }
 
     return new_item
+
+
+async def email_user_restock_request_complete(restock: dict, user: dict):
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Sending checkout email...")
+    # Get the checkout
+    db = MongoDB()
+    
+    logging.info("Sending restock request complete email to " + user["email"] + "...")
+
+    # Use the restock_completion template
+    approved_or_denied = "approved" if restock["is_approved"] else "denied"
+
+    if restock["completion_note"]:
+        approved_or_denied += " due to " + restock["completion_note"]
+
+    approved_or_denied += "."
+
+    if restock["is_approved"]:
+        approved_or_denied += " The item has been ordered and will be restocked soon."
+
+
+    date = datetime.fromtimestamp(float(restock["timestamp_sent"])).strftime("%m/%d/%Y")
+
+    body = await format_email_template("restock_completion", {
+        "name": user["name"],
+        "date": date,
+        "item": restock["item"],
+        "approved_or_denied": approved_or_denied,
+    })
+
+    try :
+        await email_user(user["email"], [], f"Completed Restock Request ({date})", body)
+    except Exception as e:
+        # Show warning
+        logging.getLogger().setLevel(logging.WARNING)   
+        logging.warning("Failed to send checkout email: " + str(e))
+        return False
+
+    # Return success
+    return True

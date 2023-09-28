@@ -25,18 +25,13 @@ async def validate_api_key(db, api_key_str, scope):
     
     return True
 
-async def format_email_template(template_name: str, text_list: List[str]):
+async def format_email_template(template_name: str, key_values: dict):
     # Format an email template
     # Get the template
     template = open(f"email_templates/{template_name}.html", "r").read()
 
-    # Format the list as bullet points
-    text_list = "".join([f"<li>{text}</li>" for text in text_list])
-
     # Format the template
-    formatted_template = template.format(
-        text_list=text_list
-    )
+    formatted_template = template.format(**key_values)
 
     return str(formatted_template)
 

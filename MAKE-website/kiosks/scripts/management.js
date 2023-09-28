@@ -5,6 +5,7 @@ var state = {
     shifts: null,
     shift_changes: null,
     inventory: null,
+    restock_requests: null,
 };
 
 var shifts_updated = false;
@@ -63,6 +64,7 @@ async function authenticate() {
     await fetchShiftsAdmin();
     await fetchShiftChangesAdmin();
     await fetchWorkshopsAdmin();
+    await fetchRestockRequests();
 
     for (let key of Object.keys(state.users)) {
         state.users[key].cx_id_str = state.users[key].cx_id.toString();
@@ -151,6 +153,22 @@ async function fetchWorkshopsAdmin() {
     }
 }
 
+async function fetchRestockRequests() {
+    const response = await fetch(`${API}/inventory/get_restock_requests`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+        }
+    );
+
+    if (response.status == 200) {
+        const requests = await response.json();
+
+        state.restock_requests = requests;
+    }
+}
 
 function renderAll() {
     renderStats();
@@ -158,6 +176,204 @@ function renderAll() {
     renderScheduleAdmin();
     renderProficiencies();
     renderWorkshopsAdmin();
+    renderRestockRequests();
+}
+
+function renderRestockRequests() {
+    const pending_requests = document.getElementById("pending-restock-requests-list");
+    const completed_requests = document.getElementById("completed-restock-requests-list");
+    
+    removeAllChildren(pending_requests);
+    appendChildren(pending_requests, generatePendingRestockRequestDivs());
+
+    removeAllChildren(completed_requests);
+    appendChildren(completed_requests, generateCompletedRestockRequestDivs());
+}
+
+function replaceLinksWithA(str) {
+    return str.replaceAll(/(https?:\/\/[^\s]+)/g, "<a href='$1'>$1</a>");
+}
+
+function generatePendingRestockRequestDivs() {
+    const pending = state.restock_requests.filter(request => request.timestamp_completed === null);
+
+    let divs = [];
+
+    let header = document.createElement("tr");
+    header.innerHTML = `<th>Timestamp Requested</th><th>Requested By</th><th>Item</th><th>Reason</th><th>Complete</th>`;
+    divs.push(header);
+
+        /*
+    uuid: str
+    item: str
+    reason: str
+    user_uuid: Union[str, None]
+    authorized_request: bool
+    timestamp_sent: str
+    timestamp_completed: Union[str, None]
+    rejection_reason: Union[str, None]
+    */
+    for (let request of pending) {
+        let div = document.createElement("tr");
+        div.classList.add("restock-request");
+
+        let timestamp_requested = document.createElement("td");
+        timestamp_requested.classList.add("restock-request-timestamp_requested");
+        timestamp_requested.innerText = new Date(request.timestamp_sent * 1000).toLocaleString();
+        div.appendChild(timestamp_requested);
+
+        let requested_by = document.createElement("td");
+        requested_by.classList.add("restock-request-requested_by");
+        let requested_by_str = "";
+
+        if (request.user_uuid) {
+            let user = state.users.find(user => user.uuid === request.user_uuid) ?? null;
+
+            if (user) {
+                requested_by_str = user.name + " (" + user.email + ")";
+            }
+        } else {
+            requested_by_str = "Checkout Computer";
+        }
+
+        requested_by.innerText = requested_by_str;
+        div.appendChild(requested_by);
+
+        let item = document.createElement("td");
+        item.classList.add("restock-request-item");
+        item.innerHTML = replaceLinksWithA(request.item);
+        div.appendChild(item);
+
+        let reason = document.createElement("td");
+        reason.classList.add("restock-request-reason");
+        reason.innerText = request.reason;
+        div.appendChild(reason);
+
+        let complete = document.createElement("td");
+        complete.classList.add("restock-request-complete");
+
+        let complete_button = document.createElement("button");
+        complete_button.innerText = "Complete";
+        complete_button.onclick = () => {
+            showCompleteRestockRequest(request.uuid, requested_by_str);
+        };
+
+        complete.appendChild(complete_button);
+        div.appendChild(complete);
+
+        divs.push(div);
+    }
+
+    return divs;
+}
+
+function showCompleteRestockRequest(uuid, requested_by_str) {
+    let request = state.restock_requests.find(request => request.uuid === uuid);
+
+    document.getElementById("complete-restock-request-user").innerText = requested_by_str;
+    document.getElementById("complete-restock-request-item").innerText = request.item;
+    document.getElementById("complete-restock-request-reason").innerText = "Reason: " + request.reason;
+    document.getElementById("complete-restock-request-quantity").innerText = "Quantity: " + request.quantity;
+    document.getElementById("complete-restock-request-notes").value = "";
+
+    document.getElementById("complete-restock-request-approve").onclick = () => {
+        completeRestockRequest(uuid, true);
+    };
+
+    document.getElementById("complete-restock-request-deny").onclick = () => {
+        completeRestockRequest(uuid, false);
+    };
+
+    document.getElementById("popup-container").classList.remove("hidden");
+    document.getElementById("complete-restock-request").classList.remove("hidden");
+}
+
+async function completeRestockRequest(uuid, is_approved) {
+    let completion_note = document.getElementById("complete-restock-request-notes").value;
+
+    let request = {
+        uuid: uuid,
+        is_approved: is_approved,
+        completion_note: completion_note,
+    };
+
+    let response = await fetch(`${API}/inventory/complete_restock_request`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+            body: JSON.stringify(request),
+        }
+    );
+
+    if (response.status == 201) {
+        await fetchRestockRequests();
+        renderRestockRequests();
+
+        closePopup();
+    } else {
+        const body = await response.json();
+        alert("Error completing restock request: " + response.status + "\n" + body.detail);
+    }
+}
+
+function generateCompletedRestockRequestDivs(requests) {
+    const completed = state.restock_requests.filter(request => request.timestamp_completed !== null);
+
+    let divs = [];
+
+    let header = document.createElement("tr");
+    header.innerHTML = `<th>Timestamp Requested</th><th>Requested By</th><th>Item</th><th>Reason</th><th>Timestamp Completed</th><th>Completion Note</th>`;
+    divs.push(header);
+
+    for (let request of completed) {
+        let div = document.createElement("tr");
+        div.classList.add("restock-request");
+
+        let timestamp_requested = document.createElement("td");
+        timestamp_requested.classList.add("restock-request-timestamp_requested");
+        timestamp_requested.innerText = new Date(request.timestamp_sent * 1000).toLocaleString();
+        div.appendChild(timestamp_requested);
+
+        let requested_by = document.createElement("td");
+        requested_by.classList.add("restock-request-requested_by");
+        if (request.user_uuid) {
+            let user = state.users.find(user => user.uuid === request.user_uuid) ?? null;
+
+            if (user) {
+                requested_by.innerText = user.name + " (" + user.email + ")";
+            }
+        } else {
+            requested_by.innerText = "Checkout Computer";
+        }
+        div.appendChild(requested_by);
+
+        let item = document.createElement("td");
+        item.classList.add("restock-request-item");
+        item.innerHTML = replaceLinksWithA(request.item);
+        div.appendChild(item);
+
+        let reason = document.createElement("td");
+        reason.classList.add("restock-request-reason");
+        reason.innerText = request.reason;
+        div.appendChild(reason);
+
+        let timestamp_completed = document.createElement("td");
+        timestamp_completed.classList.add("restock-request-timestamp_completed");
+        timestamp_completed.innerText = new Date(request.timestamp_completed * 1000).toLocaleString();
+        div.appendChild(timestamp_completed);
+
+        let completion_note = document.createElement("td");
+        completion_note.classList.add("restock-request-completion_note");
+        completion_note.innerText = request.completion_note;
+        div.appendChild(completion_note);
+
+        divs.push(div);
+    }
+
+    return divs;
 }
 
 function renderWorkshopsAdmin() {

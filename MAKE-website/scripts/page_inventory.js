@@ -53,7 +53,7 @@ function submitSearch(kiosk_mode = false) {
 
 function getInventoryFilters() {
     const filters = {
-        stock: document.getElementById("inventory-in-stock").checked,
+        stock: false,
         room: document.getElementById("room-select").value,
         tool_material: document.getElementById("tool-material-select").value,
     }
@@ -343,92 +343,55 @@ function generateInventoryDiv(result, kiosk_mode = false) {
     return div;
 }
 
-
-function hideRestock() {
-    document.getElementById("restock-dialog").classList.add("hidden");
-}
-
 function showRestock() {
-    const els = document.getElementById("restock-inputs").getElementsByTagName("input");
-
-    for (let el of els) {
-        el.value = "";
-        el.classList.remove("error");
-        el.classList.remove("success");
-    }
-
-    document.getElementById("restock-dialog").classList.remove("hidden");
-}
-
-async function submitRestockNotice() {
-    const inputs = document.getElementById("restock-inputs").getElementsByTagName("input");
-
-    const email = inputs[0].value;
-    const name = inputs[1].value;
-    const current_quantity = inputs[2].value;
-    const requested_quantity = inputs[3].value;
-    const notes = inputs[4].value;
-
-    let is_error = false;
-
-    if (email === "") {
-        inputs[0].classList.add("error");
-        is_error = true;
-    }
-
-    if (name.trim() === "") {
-        inputs[1].classList.add("error");
-        is_error = true;
-    }
-
-    if (current_quantity.trim() === "") {
-        inputs[2].classList.add("error");
-        is_error = true;
-    }
-
-    if (requested_quantity.trim() === "") {
-        inputs[3].classList.add("error");
-        is_error = true;
-    }
-
-    if (is_error === true) {
-        setTimeout(() => {
-            for (let el of inputs) {
-                el.classList.remove("error");
-            }
-        }, 400);
+    if (state.user_object === null) {
+        alert("You must be logged to request a restock!");
         return;
     }
 
-    const body = JSON.stringify({
-        name: name,
-        current_quantity: current_quantity,
-        requested_quantity: requested_quantity,
-        notes: notes,
-        notified: false,
-        email: email,
-        authorized: api_key_exists,
-    });
+    document.getElementById("restock").classList.remove("hidden");
+    document.getElementById("popup-container").classList.remove("hidden");
+}
 
-    const response = await fetch(`${API}/inventory/add_restock_notice`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: body,
+async function submitRestock() {
+    const reason = document.getElementById("restock-reason").value;
+    const quantity = document.getElementById("restock-quantity").value;
+    const item = document.getElementById("restock-item").value;
+
+    if (quantity.trim() === "") {
+        alert("Please enter a quantity!");
+        return;
+    }
+
+    if (item.trim() === "") {
+        alert("Please enter an item!");
+        return;
+    }
+
+    if (state.user_object === null) {
+        alert("You must be logged in to request a restock!");
+        return;
+    }
+
+
+    const body = JSON.stringify({
+        user_uuid: state.user_object.uuid,
+        reason: reason,
+        quantity: quantity,
+        item: item,
     });
     
+    const response = await fetch(`${API}/inventory/add_restock_request`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: body
+    });
 
-    if (response.status >= 200 && response.status < 300) {
-        for (let input of inputs) {
-            input.classList.add("success")
-        }
-
-        setTimeout(() => {
-            hideRestock();
-            fetchInventory(kiosk_mode = true);
-        }, 400);
+    if (response.status == 201) {
+        closePopup();
     } else {
-        alert(result.message);
+        alert("Error submitting restock request: " + response.status);
     }
 }

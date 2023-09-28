@@ -46,7 +46,10 @@ async def send_checkout_email(checkout_uuid: str):
         logging.warning("Some items do not exist")
 
     # Send the email
-    body = await format_email_template("expired_checkout", [item["name"] for item in items])
+        # Format the list as bullet points
+    text_list = "".join([f"<li>{text}</li>" for text in [item["name"] for item in items]])
+
+    body = await format_email_template("expired_checkout", {"text_list": text_list})
 
     try :
         await email_user(user["email"], [], f"MAKE Tool Checkout Notification #{checkout['notifications_sent'] + 1}", body)
