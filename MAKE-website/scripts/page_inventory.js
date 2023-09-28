@@ -390,6 +390,7 @@ async function submitRestock() {
     });
 
     if (response.status == 201) {
+        alert("Restock request submitted!");
         closePopup();
     } else {
         alert("Error submitting restock request: " + response.status);

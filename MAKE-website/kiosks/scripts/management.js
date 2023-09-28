@@ -200,19 +200,10 @@ function generatePendingRestockRequestDivs() {
     let divs = [];
 
     let header = document.createElement("tr");
-    header.innerHTML = `<th>Timestamp Requested</th><th>Requested By</th><th>Item</th><th>Reason</th><th>Complete</th>`;
+    header.innerHTML = `<th>Timestamp Requested</th><th>Requested By</th><th>Item</th><th>Quantity</th><th>Reason</th><th>Complete</th>`;
     divs.push(header);
 
-        /*
-    uuid: str
-    item: str
-    reason: str
-    user_uuid: Union[str, None]
-    authorized_request: bool
-    timestamp_sent: str
-    timestamp_completed: Union[str, None]
-    rejection_reason: Union[str, None]
-    */
+
     for (let request of pending) {
         let div = document.createElement("tr");
         div.classList.add("restock-request");
@@ -243,6 +234,11 @@ function generatePendingRestockRequestDivs() {
         item.classList.add("restock-request-item");
         item.innerHTML = replaceLinksWithA(request.item);
         div.appendChild(item);
+
+        let quantity = document.createElement("td");
+        quantity.classList.add("restock-request-quantity");
+        quantity.innerText = request.quantity;
+        div.appendChild(quantity);
 
         let reason = document.createElement("td");
         reason.classList.add("restock-request-reason");
@@ -325,7 +321,7 @@ function generateCompletedRestockRequestDivs(requests) {
     let divs = [];
 
     let header = document.createElement("tr");
-    header.innerHTML = `<th>Timestamp Requested</th><th>Requested By</th><th>Item</th><th>Reason</th><th>Timestamp Completed</th><th>Completion Note</th>`;
+    header.innerHTML = `<th>Timestamp Requested</th><th>Requested By</th><th>Item</th><th>Quantity</th><th>Reason</th><th>Timestamp Completed</th><th>Completion Note</th>`;
     divs.push(header);
 
     for (let request of completed) {
@@ -355,6 +351,11 @@ function generateCompletedRestockRequestDivs(requests) {
         item.innerHTML = replaceLinksWithA(request.item);
         div.appendChild(item);
 
+        let quantity = document.createElement("td");
+        quantity.classList.add("restock-request-quantity");
+        quantity.innerText = request.quantity;
+        div.appendChild(quantity);
+        
         let reason = document.createElement("td");
         reason.classList.add("restock-request-reason");
         reason.innerText = request.reason;
