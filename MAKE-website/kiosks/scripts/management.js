@@ -195,7 +195,8 @@ function replaceLinksWithA(str) {
 }
 
 function generatePendingRestockRequestDivs() {
-    const pending = state.restock_requests.filter(request => request.timestamp_completed === null);
+    let pending = state.restock_requests.filter(request => request.timestamp_completed === null);
+    pending.reverse();
 
     let divs = [];
 
@@ -272,6 +273,9 @@ function showCompleteRestockRequest(uuid, requested_by_str) {
     document.getElementById("complete-restock-request-quantity").innerText = "Quantity: " + request.quantity;
     document.getElementById("complete-restock-request-notes").value = "";
 
+    document.getElementById("complete-restock-request-approve").removeAttribute("disabled");
+    document.getElementById("complete-restock-request-deny").removeAttribute("disabled");
+
     document.getElementById("complete-restock-request-approve").onclick = () => {
         completeRestockRequest(uuid, true);
     };
@@ -285,6 +289,9 @@ function showCompleteRestockRequest(uuid, requested_by_str) {
 }
 
 async function completeRestockRequest(uuid, is_approved) {
+    document.getElementById("complete-restock-request-approve").setAttribute("disabled", "disabled");
+    document.getElementById("complete-restock-request-deny").setAttribute("disabled", "disabled");
+
     let completion_note = document.getElementById("complete-restock-request-notes").value;
 
     let request = {
@@ -316,7 +323,8 @@ async function completeRestockRequest(uuid, is_approved) {
 }
 
 function generateCompletedRestockRequestDivs(requests) {
-    const completed = state.restock_requests.filter(request => request.timestamp_completed !== null);
+    let completed = state.restock_requests.filter(request => request.timestamp_completed !== null);
+    completed.reverse();
 
     let divs = [];
 
@@ -355,7 +363,7 @@ function generateCompletedRestockRequestDivs(requests) {
         quantity.classList.add("restock-request-quantity");
         quantity.innerText = request.quantity;
         div.appendChild(quantity);
-        
+
         let reason = document.createElement("td");
         reason.classList.add("restock-request-reason");
         reason.innerText = request.reason;
