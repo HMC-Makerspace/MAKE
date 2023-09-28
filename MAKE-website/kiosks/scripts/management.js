@@ -268,7 +268,7 @@ function showCompleteRestockRequest(uuid, requested_by_str) {
     let request = state.restock_requests.find(request => request.uuid === uuid);
 
     document.getElementById("complete-restock-request-user").innerText = requested_by_str;
-    document.getElementById("complete-restock-request-item").innerText = request.item;
+    document.getElementById("complete-restock-request-item").innerHTML = "Item: " + replaceLinksWithA(request.item);
     document.getElementById("complete-restock-request-reason").innerText = "Reason: " + request.reason;
     document.getElementById("complete-restock-request-quantity").innerText = "Quantity: " + request.quantity;
     document.getElementById("complete-restock-request-notes").value = "";
