@@ -12,21 +12,9 @@ While stewards are on duty, you can check out tools/equipment and ask them for a
 
 You can also ask questions on the [Makerspace Discord](https://make.hmc.edu/discord)!
 
-## How is the Makerspace run?
+## Where is the Makerspace?
 
-The Makerspace is run by a management team of six student head stewards & the Makerspace Manager, Kim Neal. In addition, we also employ ~40 student stewards who are responsible for helping users and managing the Makerspace during their [shift hours](/?p=schedule).
-
-## What is the difference between the Machine Shop and the Makerspace?
-
-The HMC Machine Shop is a facility with equipment and supplies for heavy-duty machining. It has a separate safety quiz and is only open during proctor hours. The Makerspace is open 24/7 to all 7C students & faculty who have passed the Makerspace’s safety quiz, and has a variety of different machines and supplies.
-
-## What does it mean that the makerspace is open 24/7?
-
-It means that the general space is open to use whenever you need it. If you have passed the safety quizzes to certain rooms, your swipe will work at all times and you can work in there as well. If you want to use any machinery, follow the buddy rule to make sure you are being safe.
-
-## Why are some tools locked up?
-
-Having the lock up cage allows the makerspace to have more expensive and more dangerous machines and tools that we otherwise would not be able to have. For the same reason the machine shop has hard close hours past midnight, it is not safe for folks to be using tools such as welders at early hours in the morning. If you do find yourself wanting to use tools such as a sewing machine after steward hours, you can ask a steward to check it out for you overnight. 
+The Makerspace is located on the ground floor of the McGregor Computer Science Center, which is on the corner of Platt and Dartmouth. Look for a large yellow sign that says Makerspace!
 
 ## What quizzes do I need to pass?
 
@@ -40,25 +28,37 @@ You get swipe through passing quizzes. To get swipe to the general makerspace, p
 
 Yes! Everything out on the floor is available to use. We only ask that if you are making a project for a class/club/other group that has funding through ASHMC you use those funds to buy your materials.
 
-## How can I get funding for a project?
-
-All 7C students have access to up to $50 worth of funding per semester. Separately, Harvey Mudd students have access to up to $200 worth of funding through the Brawn Grant. To apply, click on the Student Project Application tab and fill out the form.
-
-## Where is the Makerspace?
-
-It is the ground floor of the McGregor Computer Science Center, which is on the corner of Platt and Dartmouth. Look for a large yellow sign that says Makerspace!
-
 ## Can my club meet here?
 
-Yes! If your club plans on meeting in the makerspace, we ask that you email makerspace-management-l@g.hmc.edu to make sure that the time does not conflict with other clubs. 
+Yes! If your club plans on meeting in the Makerspace, we ask that you email makerspace-management-l@g.hmc.edu to make sure that the time does not conflict with other clubs. 
 
 ## What can a steward help me with?
 
 Stewards are available to answer any questions you have and assist you with projects, safety quizzes, and checking out tools. They will also run workshops and be able to teach you how to use different tools and machines during their shift hours. 
 
+## What does it mean that the makerspace is open 24/7?
+
+It means that the general space is open to use whenever you need it. If you have passed the safety quizzes to certain rooms, your swipe will work at all times and you can work in there as well. If you want to use any machinery, follow the buddy rule to make sure you are being safe.
+
+## Why are some tools locked up?
+
+Having the lock up cage allows the makerspace to have more expensive and more dangerous machines and tools that we otherwise would not be able to have. For the same reason the machine shop has hard close hours past midnight, it is not safe for folks to be using tools such as welders at early hours in the morning. If you do find yourself wanting to use tools such as a sewing machine after steward hours, you can ask a steward to check it out for you overnight. 
+
 ## Is the Makerspace open to all 7C students, faculty, and staff?
 
 Yes, the Makerspace is open to all 7C students, faculty, and staff!
+
+## What is the difference between the Machine Shop and the Makerspace?
+
+The HMC Machine Shop is a facility with equipment and supplies for heavy-duty machining. It has a separate safety quiz and is only open during proctor hours. The Makerspace is open 24/7 to all 7C students & faculty who have passed the Makerspace’s safety quiz, and has a variety of different machines and supplies.
+
+## How is the Makerspace run?
+
+The Makerspace is run by a management team of six student head stewards & the Makerspace Manager, Kim Neal. In addition, we also employ ~40 student stewards who are responsible for helping users and managing the Makerspace during their [shift hours](/?p=schedule).
+
+## How can I get funding for a project?
+
+All 7C students have access to up to $50 worth of funding per semester. Separately, Harvey Mudd students have access to up to $200 worth of funding through the Brawn Grant. To apply, click on the Student Project Application tab and fill out the form.
 
 ## How can I apply to be a steward?
 
@@ -70,7 +70,7 @@ All FDM (filament) printing is free for personal use. If you are printing items 
 
 ## How can I hear about workshops?
 
-You can hear about workshops and sign up for them through the Makerspace Google Site. We will post updates whenever one is scheduled. You can also hear about them through our instagram, [@hmcmakerspace](https://www.instagram.com/hmcmakerspace/)
+You can hear about workshops and sign up for them through the Makerspace Google Site. We will post updates whenever one is scheduled. You can also hear about them through our Instagram, [@hmcmakerspace](https://www.instagram.com/hmcmakerspace/).
 
 ## How can I change my displayed name or linked email on MAKE?
 

@@ -30,7 +30,7 @@ function renderWorkshops() {
         // However, add a 24 hour buffer to the date, so that workshops that are
         // scheduled for the same day as the current date will still be shown
         // as upcoming
-        const parsed_date = new Date(workshop.date);
+        const parsed_date = new Date(workshop.timestamp_start * 1000);
 
         // Add 24 hours to the date
         parsed_date.setDate(parsed_date.getDate() + 1);
@@ -76,7 +76,7 @@ function generateWorkshopDiv(workshop, is_past=false) {
     let start_time_string = start_time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     let end_time_string = end_time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     // Want to have it in the format of:
-    date.innerText = `${start_time.toLocaleDateString()} @ ${start_time_string} - ${end_time_string}`;
+    date.innerHTML = `${start_time.toLocaleDateString()}<br>${start_time_string.replace(/^0+/, '')} - ${end_time_string.replace(/^0+/, '')}`;
     
     date.classList.add("date");
     div.appendChild(date);
@@ -91,11 +91,20 @@ function generateWorkshopDiv(workshop, is_past=false) {
     description.classList.add("description");
     div.appendChild(description);
 
+    const required_quizzes = document.createElement("p");
+    required_quizzes.innerHTML = `<b>Required Quizzes:</b> ${workshop.required_quizzes.join(", ")}`;
+    required_quizzes.classList.add("required-quizzes");
+    div.appendChild(required_quizzes);
+
     const capacity = document.createElement("p");
     capacity.innerHTML = `<b>Signups:</b> ${workshop.signups} / ${workshop.capacity} slots`;
 
     if (workshop.position !== -1) {
-        capacity.innerHTML += `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp <b>Position:</b> ${workshop.position + 1}`;
+        capacity.innerHTML += `<br> <b>Position:</b> ${workshop.position + 1}`;
+    }
+
+    if (workshop.signups >= workshop.capacity) {
+        capacity.innerHTML += `<br> <b>Workshop is full, RSVP to be added to the waitlist!</b>`
     }
 
     capacity.classList.add("capacity");
@@ -104,7 +113,9 @@ function generateWorkshopDiv(workshop, is_past=false) {
     if (!is_past) {
         // Add signup button
         const signup = document.createElement("button");
+        signup.classList.add("big");
         signup.classList.add("signup");
+        signup.id =`signup-${workshop.uuid}`
 
         if (workshop.position === -1) {
             signup.innerText = "RSVP";
@@ -136,6 +147,9 @@ async function rsvpToWorkshop(workshop_uuid) {
         return;
     }
 
+    const signup_button = document.getElementById(`signup-${workshop_uuid}`);
+    signup_button.setAttribute("disabled", "disabled");
+
     const response = await fetch(`${API}/workshops/rsvp_to_workshop`,
         {
             method: "POST",
@@ -149,8 +163,13 @@ async function rsvpToWorkshop(workshop_uuid) {
         }
     );
 
+    signup_button.removeAttribute("disabled");
+
     if (response.status == 201) {
         await fetchWorkshops();
+    } else {
+        const error = await response.json();
+        alert("Error: " + error.detail);
     }
 }
 

@@ -19,6 +19,8 @@ async function start() {
         setPage(page);
     }
 
+    await fetchQuizzes();
+
     const promises = [
         fetchInventory().then(() => {
             submitSearch();
@@ -34,7 +36,7 @@ async function start() {
 
     document.addEventListener("keydown", function (event) {
         // If user is not focused on an input, and the user presses the k key, show quick-nav
-        if (event.key.toLowerCase() === "k" && document.activeElement.tagName !== "INPUT") {
+        if (event.key.toLowerCase() === "k" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
             document.getElementById("quick-nav").classList.remove("hidden");
             document.getElementById("popup-container").classList.remove("hidden");
         }
@@ -60,7 +62,22 @@ async function start() {
 
     // Hide fader
     document.getElementById("fader").classList.add("fade-out");
-}   
+    document.getElementById("main-title-ani").classList.add("show");
+}
+
+async function fetchQuizzes() {
+    const response = await fetch(`${API}/misc/get_quizzes`);
+
+    if (response.status == 200) {
+        const quizzes = await response.json();
+
+        state.quizzes = quizzes;
+
+        saveState();
+    } else {
+        console.log("Error fetching quizzes");
+    }
+}
 
 window.onpopstate = onHashChange;
 

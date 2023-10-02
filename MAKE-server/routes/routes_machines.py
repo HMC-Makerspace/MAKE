@@ -12,7 +12,7 @@ machines_router = APIRouter(
 )
 
 @machines_router.get("/add_filament_log/{kgs}")
-async def route_add_filament_log(request: Request):
+async def route_add_filament_log(request: Request, kgs: float):
     # Add a filament log
     # This is a GET request to make it easier to
     # use with arduino
@@ -24,7 +24,7 @@ async def route_add_filament_log(request: Request):
     collection = await db.get_collection("filament_logs")
 
     to_insert = {
-        "kgs": request.path_params["kgs"],
+        "kgs": kgs,
         "time": datetime.datetime.now().timestamp()
     }
 

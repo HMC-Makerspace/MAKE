@@ -1,5 +1,7 @@
 import datetime
 import logging
+
+from config import QUIZ_IDS
 import utilities
 from utilities import validate_api_key
 from db_schema import *
@@ -86,3 +88,11 @@ async def route_validate_api_key(request: Request):
         # The API key is valid
         # Return the API key's scope
         return {"scope": api_key["scope"]}
+
+@misc_router.get("/get_quizzes")
+async def route_get_quizzes():
+    # Get the quizzes
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Getting quizzes...")
+
+    return QUIZ_IDS

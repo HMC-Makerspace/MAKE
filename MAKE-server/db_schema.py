@@ -453,6 +453,7 @@ class Workshop(BaseModel):
     required_quizzes: List[str]
     rsvp_list: List[str]
     is_live: bool
+    users_notified: Union[List[str], None]
 
     class Config:
         arbitrary_types_allowed = True
@@ -470,7 +471,8 @@ class Workshop(BaseModel):
                 "capacity": 10,
                 "required_quizzes": ["123456789"],
                 "rsvp_list": ["d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"],
-                "is_live": True
+                "is_live": True,
+                "users_notified": ["d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l", "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"]
             }
         }
 

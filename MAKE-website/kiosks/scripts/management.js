@@ -6,6 +6,7 @@ var state = {
     shift_changes: null,
     inventory: null,
     restock_requests: null,
+    quizzes: null,
 };
 
 var shifts_updated = false;
@@ -59,6 +60,7 @@ async function authenticate() {
     setInterval(fetchUsers, 5000);
     setInterval(fetchStudentStorageAdmin, 5000);
 
+    await fetchQuizzes();
     await fetchUsers();
     await fetchStudentStorageAdmin();
     await fetchShiftsAdmin();
@@ -84,6 +86,22 @@ async function authenticate() {
 }
 
 authenticate();
+
+async function fetchQuizzes() {
+    const response = await fetch(`${API}/misc/get_quizzes`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
+
+    if (response.status == 200) {
+        const quizzes = await response.json();
+
+        state.quizzes = quizzes;
+    }
+}
 
 async function fetchShiftsAdmin() {
     const response = await fetch(`${API}/shifts/get_full_shift_schedule`,
@@ -322,14 +340,14 @@ async function completeRestockRequest(uuid, is_approved) {
     }
 }
 
-function generateCompletedRestockRequestDivs(requests) {
+function generateCompletedRestockRequestDivs() {
     let completed = state.restock_requests.filter(request => request.timestamp_completed !== null);
     completed.reverse();
 
     let divs = [];
 
     let header = document.createElement("tr");
-    header.innerHTML = `<th>Timestamp Requested</th><th>Requested By</th><th>Item</th><th>Quantity</th><th>Reason</th><th>Timestamp Completed</th><th>Completion Note</th>`;
+    header.innerHTML = `<th>Timestamp Requested</th><th>Requested By</th><th>Item</th><th>Quantity</th><th>Reason</th><th>Result</th><th>Timestamp Completed</th><th>Completion Note</th>`;
     divs.push(header);
 
     for (let request of completed) {
@@ -369,6 +387,12 @@ function generateCompletedRestockRequestDivs(requests) {
         reason.innerText = request.reason;
         div.appendChild(reason);
 
+        let is_approved = document.createElement("td");
+        is_approved.classList.add("restock-request-is_approved");
+        is_approved.classList.add(request.is_approved ? "approved" : "denied");
+        is_approved.innerText = request.is_approved ? "Approved" : "Denied";
+        div.appendChild(is_approved);
+
         let timestamp_completed = document.createElement("td");
         timestamp_completed.classList.add("restock-request-timestamp_completed");
         timestamp_completed.innerText = new Date(request.timestamp_completed * 1000).toLocaleString();
@@ -397,7 +421,7 @@ function generateWorkshopDivsAdmin() {
 
     // Add header
     let header = document.createElement("tr");
-    header.innerHTML = `<th>Title</th><th>Description</th><th>Instructors</th><th>Start Time</th><th>End Time</th><th>Capacity</th><th>Signups</th><th>Is Live</th><th>Edit</th>`;
+    header.innerHTML = `<th>Title</th><th>Description</th><th>Instructors</th><th>Start Time</th><th>End Time</th><th>Capacity</th><th>Signups</th><th>Is Live</th><th>Edit</th><th>Delete</th>`;
     divs.push(header);
 
     for (let workshop of state.workshops) {
@@ -456,6 +480,19 @@ function generateWorkshopDivsAdmin() {
         edit_button_container.appendChild(edit_button);
         div.appendChild(edit_button_container);
 
+        let delete_button_container = document.createElement("td");
+        delete_button_container.classList.add("workshop-delete");
+        
+        let delete_button = document.createElement("button");
+        delete_button.classList.add("delete");
+        delete_button.innerText = "X";
+        delete_button.onclick = () => {
+            deleteWorkshop(workshop.uuid);
+        };
+
+        delete_button_container.appendChild(delete_button);
+        div.appendChild(delete_button_container);
+
         divs.push(div);
     }
 
@@ -478,13 +515,19 @@ function showCreateEditWorkshop(uuid) {
         document.getElementById("edit-workshop-title").value = workshop.title;
         document.getElementById("edit-workshop-description").value = workshop.description;
         document.getElementById("edit-workshop-instructors").value = workshop.instructors;
-        document.getElementById("edit-workshop-timestamp_start").value = time_start;
-        document.getElementById("edit-workshop-timestamp_end").value = time_end;
+        document.getElementById("edit-workshop-date").value = time_start.substr(0, 10);
+        document.getElementById("edit-workshop-timestamp_start").value = time_start.substr(11, 5);
+        document.getElementById("edit-workshop-timestamp_end").value = time_end.substr(11, 5);
         document.getElementById("edit-workshop-capacity").value = workshop.capacity;
         document.getElementById("edit-workshop-is_live").checked = workshop.is_live;
         document.getElementById("edit-workshop-save").onclick = () => {
             saveWorkshop(uuid);
         };
+
+        const required_quizzes = document.getElementById("edit-workshop-required_quizzes");
+     
+        removeAllChildren(required_quizzes);
+        appendChildren(required_quizzes, generateRequiredQuizDivs(workshop.required_quizzes));
     } else {
         document.getElementById("edit-workshop-title").value = "";
         document.getElementById("edit-workshop-description").value = "";
@@ -496,11 +539,64 @@ function showCreateEditWorkshop(uuid) {
         document.getElementById("edit-workshop-save").onclick = () => {
             saveWorkshop();
         };
+
+        const required_quizzes = document.getElementById("edit-workshop-required_quizzes");
+             
+        removeAllChildren(required_quizzes);
+        appendChildren(required_quizzes, generateRequiredQuizDivs());
     }
 
     // Open popup
     document.getElementById("popup-container").classList.remove("hidden");
     document.getElementById("edit-workshop").classList.remove("hidden");
+}
+
+async function deleteWorkshop(uuid) {
+    let request = await fetch(`${API}/workshops/delete_workshop`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+            body: JSON.stringify({ uuid: uuid }),
+        }
+    );
+
+    if (request.status == 200) {
+        await fetchWorkshopsAdmin();
+        renderWorkshopsAdmin();
+    } else {
+        alert("Error deleting workshop: " + request.status);
+    }
+}
+
+function generateRequiredQuizDivs(required_quizzes = []) {
+    let divs = [];
+
+    for (let quiz of Object.keys(state.quizzes)) {
+        let div = document.createElement("div");
+        div.classList.add("edit-workshop-quiz-container");
+
+        let checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `edit-workshop-quiz-${quiz}`;
+
+        if (required_quizzes.includes(quiz)) {
+            checkbox.checked = true;
+        }
+
+        let label = document.createElement("label");
+        label.innerText = quiz;
+        label.htmlFor = `edit-workshop-quiz-${quiz}`;
+
+        div.appendChild(checkbox);
+        div.appendChild(label);
+
+        divs.push(div);
+    }
+
+    return divs;
 }
 
 async function saveWorkshop(uuid = null) {
@@ -511,17 +607,29 @@ async function saveWorkshop(uuid = null) {
         uuid = self.crypto.randomUUID();
     }
 
+    const date = document.getElementById("edit-workshop-date").value;
+    const timestamp_start = new Date(`${date}T${document.getElementById("edit-workshop-timestamp_start").value}`).getTime() / 1000;
+    const timestamp_end = new Date(`${date}T${document.getElementById("edit-workshop-timestamp_end").value}`).getTime() / 1000;
+    let required_quizzes = [];
+
+    for (let child of document.getElementById("edit-workshop-required_quizzes").children) {
+        if (child.children[0].checked) {
+            required_quizzes.push(child.children[0].id.split("-")[3]);
+        }
+    }
+
+
     let workshop = {
         uuid: uuid,
         title: document.getElementById("edit-workshop-title").value,
         description: document.getElementById("edit-workshop-description").value,
         instructors: document.getElementById("edit-workshop-instructors").value,
-        timestamp_start: new Date(document.getElementById("edit-workshop-timestamp_start").value).getTime() / 1000,
-        timestamp_end: new Date(document.getElementById("edit-workshop-timestamp_end").value).getTime() / 1000,
+        timestamp_start: timestamp_start,
+        timestamp_end: timestamp_end,
         capacity: document.getElementById("edit-workshop-capacity").value,
         is_live: document.getElementById("edit-workshop-is_live").checked,
         rsvp_list: [],
-        required_quizzes: [],
+        required_quizzes: required_quizzes
     };  
 
     let create_update = "update_workshop";

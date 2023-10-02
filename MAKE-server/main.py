@@ -39,6 +39,7 @@ from routes.routes_workshops import workshops_router
 # Import all other files
 from users.quizzes import scrape_quiz_results
 from users.users import create_update_users_from_quizzes
+from users.workshops import send_workshop_reminders
 from inventory.checkouts import send_overdue_emails
 from inventory.inventory import update_from_gsheet
 
@@ -142,6 +143,9 @@ class BackgroundRunner:
 
                 # Create/update users from quizzes
                 await create_update_users_from_quizzes()
+
+                # Send email reminders for workshops
+                await send_workshop_reminders()
 
                 utilities.last_updated_time = datetime.datetime.now()
 

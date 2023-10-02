@@ -248,14 +248,19 @@
                 <label for="edit-workshop-tnstructors">Instructors</label>
                 <input id="edit-workshop-instructors" placeholder="Ethan and Jordan">
                 
-                <label>Start</label>
-                <input id="edit-workshop-timestamp_start" type="datetime-local" placeholder="Start Time">
-                <label>End</label>
-                <input id="edit-workshop-timestamp_end" type="datetime-local" placeholder="End Time">
+                <label>Date</label>
+                <input id="edit-workshop-date" type="date" placeholder="Date">
+
+                <label>Start Time</label>
+                <input id="edit-workshop-timestamp_start" type="time" placeholder="Start Time">
+
+                <label>End Time</label>
+                <input id="edit-workshop-timestamp_end" type="time" placeholder="End Time">
 
                 <label for="edit-workshop-capacity">Capacity</label>
                 <input id="edit-workshop-capacity" type="number" placeholder="4">
 
+                <label>Required Quizzes</label>
                 <div id="edit-workshop-required_quizzes">
                     
                 </div>
@@ -282,17 +287,11 @@
                 <label for="complete-restock-request-notes">Notes (optional, will be sent to user)</label>
                 <textarea id="complete-restock-request-notes" placeholder="Notes..."></textarea>
 
-                <p>
-                    The request may take a few seconds to process.    
-                </p>
-
-                <p>
-                    Please do not refresh the page or resubmit the request.
-                </p>
-
-                <button id="complete-restock-request-approve" onclick="completeRestockRequest()">Approve</button>
-                <button id="complete-restock-request-deny" onclick="completeRestockRequest()">Deny</button>
-
+                <div class="edit-buttons">
+                    <button id="complete-restock-request-approve" class="big" onclick="completeRestockRequest()">Approve</button>
+                    <button id="complete-restock-request-deny" class="big" onclick="completeRestockRequest()">Deny</button>
+                </div>
+                
                 <div class="edit-buttons">
                     <button id="complete-restock-request-cancel" onclick="closePopup()">Cancel</button>
                 </div> 
@@ -303,14 +302,14 @@
     <script src="/scripts/libs/fuzzysort.min.js"></script>
     <script src="/scripts/libs/sweetalert.min.js"></script>
 
-    <script src="/scripts/page_inventory.js?v=2.0"></script>
-    <script src="/scripts/page_quiz_info.js?v=2.0"></script>
-    <script src="/scripts/page_checkouts.js?v=2.0"></script>
-    <script src="/scripts/page_student_storage.js?v=2.0"></script>
-    <script src="/scripts/page_schedule.js?v=2.0"></script>
-    <script src="/scripts/utils.js?v=2.0"></script>
+    <script src="/scripts/page_inventory.js?v=2.1"></script>
+    <script src="/scripts/page_quiz_info.js?v=2.1"></script>
+    <script src="/scripts/page_checkouts.js?v=2.1"></script>
+    <script src="/scripts/page_student_storage.js?v=2.1"></script>
+    <script src="/scripts/page_schedule.js?v=2.1"></script>
+    <script src="/scripts/utils.js?v=2.1"></script>
 
-    <script src="/kiosks/scripts/management.js?v=2.0"></script>
+    <script src="/kiosks/scripts/management.js?v=2.1"></script>
 </body>
 
 </html>

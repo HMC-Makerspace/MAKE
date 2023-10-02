@@ -1,18 +1,16 @@
 # MAKE - Unified managment application for HMC's Makerspace 
 
-### Live at [make.hmc.edu](https://make.hmc.edu)
+**Live at [make.hmc.edu](https://make.hmc.edu)**
 
 ## What does MAKE handle?
 - Inventory management and discovery
-- Student storage reservation and renewal system
+- Workshop scheduling and registration
 - Tool checkout system
-- 3D printer status & livestreaming system
+- Shift scheduling and management
+- Steward proficiency program
+- Student grant applications
 
 ## What is in each folder?
-`./Documentation` contains in-depth documentation about MAKE, such as how to maintain and add to the system, required maintainence, and API documentation.
-
-`./General Assets` contains various source & production files for commonly used assets.
-
-`./MAKE-server` contains the server files for MAKE, written in Rust.
+`./MAKE-server` contains the server files for MAKE, written in Python with FastAPI as a framework.
 
 `./MAKE-website` contains the website files for MAKE. These are served by the MAKE server as static resource files.
