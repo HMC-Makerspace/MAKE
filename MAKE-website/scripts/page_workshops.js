@@ -75,9 +75,27 @@ function generateWorkshopDiv(workshop, is_past=false) {
 
     let start_time_string = start_time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     let end_time_string = end_time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    // Want to have it in the format of:
-    date.innerHTML = `${start_time.toLocaleDateString()}<br>${start_time_string.replace(/^0+/, '')} - ${end_time_string.replace(/^0+/, '')}`;
-    
+
+    let day_of_week = start_time.toLocaleDateString([], {weekday: 'long'});
+    let month = start_time.toLocaleDateString([], {month: 'short'});
+    let day = start_time.toLocaleDateString([], {day: 'numeric'});
+
+    let day_suffix = "th";
+
+    if (day === "1" || day === "21" || day === "31") {
+        day_suffix = "st";
+    } else if (day === "2" || day === "22") {
+        day_suffix = "nd";
+    } else if (day === "3" || day === "23") {
+        day_suffix = "rd";
+    }
+
+
+    // Format as "Tuesday, Oct. 10th"
+    let date_string = `${day_of_week}, ${month}. ${day}${day_suffix}`;
+
+    date.innerHTML = `${date_string}<br>${start_time_string.replace(/^0+/, '')} - ${end_time_string.replace(/^0+/, '')}`;
+
     date.classList.add("date");
     div.appendChild(date);
 

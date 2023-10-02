@@ -1319,3 +1319,20 @@ function deleteStewardFromShift(uuid, day, hour) {
 
     showEditShift(day, hour);
 }
+
+function downloadMailchimp() {
+    // Download all users as a CSV formatted as:
+    // Email Address, First Name, Last Name
+    // Format name of csv as YYYY-MM-DD-mailchimp.csv
+    let csv = "Email Address,First Name,Last Name\n";
+
+    for (let user of state.users) {
+        csv += `${user.email},${user.name.split(" ")[0]},${user.name.split(" ")[1]}\n`;
+    }
+
+    let date = new Date();
+    let formatted_date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+
+    // Now download the file
+    downloadFile(`${formatted_date}-mailchimp.csv`, csv);
+}

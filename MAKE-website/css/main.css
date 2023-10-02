@@ -1900,6 +1900,8 @@ Workshops
   font-weight: bold;
   font-size: 1.5em;
   margin: 20px;
+  border-bottom: solid 2px var(--theme-color-9);
+  padding-bottom: 10px;
 }
 
 .workshop .instructor {
