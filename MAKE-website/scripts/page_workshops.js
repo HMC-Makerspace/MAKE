@@ -1,5 +1,5 @@
 async function fetchWorkshops() {
-    let uuid = "";
+    let uuid = "anon";
 
     if (state.user_object !== null) {
         uuid = state.user_object.uuid;
