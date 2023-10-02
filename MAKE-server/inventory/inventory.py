@@ -168,14 +168,13 @@ async def email_user_restock_request_complete(restock: dict, user: dict):
 
     # Use the restock_completion template
     approved_or_denied = "approved" if restock["is_approved"] else "denied"
+    approved_or_denied += ". "
 
     if restock["completion_note"]:
-        approved_or_denied += " due to " + restock["completion_note"]
-
-    approved_or_denied += "."
+        approved_or_denied += "Note from manager: <i>" + restock["completion_note"] + "</i>"
 
     if restock["is_approved"]:
-        approved_or_denied += " The item has been ordered and will be restocked soon."
+        approved_or_denied += "<br><br>The item has been ordered and will be restocked soon."
 
 
     date = datetime.fromtimestamp(float(restock["timestamp_sent"])).strftime("%m/%d/%Y")
