@@ -2393,20 +2393,16 @@ Mobile Styles
     padding: 12px;
   }
 
-  #college-id-container, #welcome-message, #logged-in-message {
+  #welcome-message {
     min-height: unset;
   }
 
-  #college-id-container {
-    padding: 30px 0;
+  #college-id-container, #logged-in-message {
+    padding: 20px;
+    min-height: 120px;
+    justify-content: flex-start;
   }
 
-  @media screen and (max-width: 767px) {
-    _::-webkit-full-page-media, _:future, :root #college-id-container {
-        padding-bottom: 65px;
-    }
-  }
-  
   #welcome-message h2 {
     font-size: .8em;
   }
