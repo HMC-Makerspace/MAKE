@@ -105,10 +105,8 @@ function generateWorkshopDiv(workshop, is_past=false) {
 
     if (workshop.position !== -1) {
         capacity.innerHTML += `<br> <b>Position:</b> ${workshop.position + 1}`;
-    }
-
-    if (workshop.signups >= workshop.capacity) {
-        capacity.innerHTML += `<br> <b>Workshop is full, RSVP to be added to the waitlist!</b>`
+    } else if (workshop.signups >= workshop.capacity) {
+        capacity.innerHTML += `<br> <b>Full, RSVP for waitlist</b>`
     }
 
     
