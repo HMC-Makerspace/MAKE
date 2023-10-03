@@ -221,17 +221,17 @@ async def route_rsvp_to_workshop(request: Request):
     date_start = date_start - timedelta(hours=7)
     date_end = date_end - timedelta(hours=7)
 
-    date_start = date_start.strftime("%Y%m%dT%H%M%S")
-    date_end = date_end.strftime("%Y%m%dT%H%M%S")
+    date_start_str = date_start.strftime("%Y%m%dT%H%M%S")
+    date_end_str = date_end.strftime("%Y%m%dT%H%M%S")
 
-    g_cal_link = f"https://calendar.google.com/calendar/render?action=TEMPLATE&text={workshop['title']}&details={workshop['description']}&dates={date_start}/{date_end}&location=201 Platt Blvd, Claremont, CA 91711"
+    g_cal_link = f"https://calendar.google.com/calendar/render?action=TEMPLATE&text={workshop['title']}&details={workshop['description']}&dates={date_start_str}/{date_end_str}&location=201 Platt Blvd, Claremont, CA 91711"
 
     calendar_link = f"<a target='_blank' rel='noopener' target='_blank' href= style='{style}' href='{g_cal_link}'>Click here to add it to your calendar!</a>"
  
     email_body = await format_email_template("workshop_confirmation", {
         "workshop": workshop["title"], 
-        "date": datetime.fromtimestamp(float(workshop["timestamp_start"])).strftime("%A, %B %d, %Y"),
-        "time": datetime.fromtimestamp(float(workshop["timestamp_start"])).strftime("%I:%M %p"),
+        "date": date_start.strftime("%A, %B %d, %Y"),
+        "time": date_start.strftime("%I:%M %p"),
         "calendar_link": calendar_link
     })
 
