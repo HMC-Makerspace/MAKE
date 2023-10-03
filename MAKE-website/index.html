@@ -244,8 +244,15 @@
             </h3>
 
             <div id="college-id-container" class="id-n content-body">
-                <input aria-label="College ID number login" type="tel" id="college-id-input" placeholder="Enter your college ID number" onchange="login()">
-                <button id="college-id-button" class="big" onclick="login()">Log In</button>
+                <div id="college-id-login">
+                    <input aria-label="College ID number login" type="tel" id="college-id-input" placeholder="Enter your college ID number" onchange="login()">
+                    <button id="college-id-button" class="big" onclick="login()" aria-label="log in">
+                        <span class="material-symbols-outlined">
+                            login
+                        </span>
+                    </button>
+                </div>
+
 
                 <p3 id="login-error" class="hidden">
                     Please take the <a href="https://docs.google.com/forms/d/e/1FAIpQLSfW3l2cxem3JwKqX3RJjjhJXKzAdwY9x4dYeXvOATGA-dhWzA/viewform">General Safety Quiz</a>, and try again in 3-5 minutes.
@@ -254,9 +261,15 @@
 
             <div id="logged-in-message" class="id-r hidden content-body">
                 <p2>
-                    Currently logged in as <span id="logged-in-name"></span>
+                    Logged in as <span id="logged-in-name"></span>
                 </p2>
-                <button id="logout-button" class="big" onclick="logout()">Log Out</button>
+                <button id="logout-button" class="big" onclick="logout()" aria-label="log out">
+                    <span class="material-symbols-outlined">
+                        logout
+                    </span>
+
+                    Log Out
+                </button>
             </div>
         </section>
 
