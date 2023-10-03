@@ -227,15 +227,28 @@ async def route_rsvp_to_workshop(request: Request):
     g_cal_link = f"https://calendar.google.com/calendar/render?action=TEMPLATE&text={workshop['title']}&details={workshop['description']}&dates={date_start_str}/{date_end_str}&location=201 Platt Blvd, Claremont, CA 91711"
 
     calendar_link = f"<a target='_blank' rel='noopener' target='_blank' href= style='{style}' href='{g_cal_link}'>Click here to add it to your calendar!</a>"
- 
-    email_body = await format_email_template("workshop_confirmation", {
-        "workshop": workshop["title"], 
-        "date": date_start.strftime("%A, %B %d, %Y"),
-        "time": date_start.strftime("%I:%M %p"),
-        "calendar_link": calendar_link
-    })
 
-    await email_user(user["email"], [], f"RSVP Confirmation: {workshop['title']}", email_body)
+
+    is_on_waitlist = len(workshop["rsvp_list"]) >= workshop["capacity"]
+
+    if is_on_waitlist:
+        email_body = await format_email_template("workshop_waitlist", {
+            "workshop": workshop["title"], 
+            "date": date_start.strftime("%A, %B %d, %Y"),
+            "time": date_start.strftime("%I:%M %p"),
+            "calendar_link": calendar_link
+        })
+        
+        await email_user(user["email"], [], f"RSVP Confirmation: {workshop['title']} (Waitlist)", email_body)
+    else:
+        email_body = await format_email_template("workshop_confirmation", {
+            "workshop": workshop["title"], 
+            "date": date_start.strftime("%A, %B %d, %Y"),
+            "time": date_start.strftime("%I:%M %p"),
+            "calendar_link": calendar_link
+        })
+            
+        await email_user(user["email"], [], f"RSVP Confirmation: {workshop['title']}", email_body)
 
     # Add the user to the workshop's rsvp_list
     workshop["rsvp_list"].append(body["user_uuid"])

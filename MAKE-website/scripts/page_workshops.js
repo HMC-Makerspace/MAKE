@@ -48,15 +48,6 @@ function renderWorkshops() {
         no_workshops.innerText = "No upcoming workshops!";
         upcoming_workshops.appendChild(no_workshops);
     }
-
-    // Add h2 headers to each section
-    const upcoming_header = document.createElement("h2");
-    upcoming_header.innerText = "Upcoming Workshops";
-    upcoming_workshops.prepend(upcoming_header);
-
-    const previous_header = document.createElement("h2");
-    previous_header.innerText = "Previous Workshops";
-    previous_workshops.prepend(previous_header);
 }
 
 function generateWorkshopDiv(workshop, is_past=false) {
@@ -105,14 +96,9 @@ function generateWorkshopDiv(workshop, is_past=false) {
     div.appendChild(instructor);
 
     const description = document.createElement("p");
-    description.innerHTML = `<b>Description:</b> ${workshop.description}`;
+    description.innerHTML = `${workshop.description}`;
     description.classList.add("description");
     div.appendChild(description);
-
-    const required_quizzes = document.createElement("p");
-    required_quizzes.innerHTML = `<b>Required Quizzes:</b> ${workshop.required_quizzes.join(", ")}`;
-    required_quizzes.classList.add("required-quizzes");
-    div.appendChild(required_quizzes);
 
     const capacity = document.createElement("p");
     capacity.innerHTML = `<b>Signups:</b> ${workshop.signups} / ${workshop.capacity} slots`;
@@ -125,8 +111,14 @@ function generateWorkshopDiv(workshop, is_past=false) {
         capacity.innerHTML += `<br> <b>Workshop is full, RSVP to be added to the waitlist!</b>`
     }
 
+    
     capacity.classList.add("capacity");
     div.appendChild(capacity);
+
+    const required_quizzes = document.createElement("p");
+    required_quizzes.innerHTML = `<b>Required Quizzes:</b> ${workshop.required_quizzes.join(", ")}`;
+    required_quizzes.classList.add("required-quizzes");
+    div.appendChild(required_quizzes);
 
     if (!is_past) {
         // Add signup button
