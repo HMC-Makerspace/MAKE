@@ -2208,7 +2208,7 @@ Mobile Styles
   }
 
   #current-announcement {
-    font-size: .8em;
+    font-size: .7em;
   }
 
   #main-logo {
@@ -2399,7 +2399,7 @@ Mobile Styles
 
   #college-id-container, #logged-in-message {
     padding: 20px;
-    min-height: 120px;
+    min-height: 180px;
     justify-content: flex-start;
   }
 
