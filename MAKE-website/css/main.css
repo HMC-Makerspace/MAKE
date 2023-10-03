@@ -1907,13 +1907,15 @@ Workshops
   border: 1px solid var(--theme-color-3);
   border-radius: 10px;
   display: grid;
-  height: 450px;
-  grid-template-rows: 80px 50px 50px auto 50px 40px 40px;
+  height: 500px;
+  grid-template-rows: 80px 50px 50px 190px 50px 40px 40px;
   padding: 20px;
   background: var(--theme-color-2);
 }
 
 .workshop p {
+  overflow: hidden;
+  text-overflow: ellipsis;
   margin: unset;
 }
 
