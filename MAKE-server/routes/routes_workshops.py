@@ -214,8 +214,15 @@ async def route_rsvp_to_workshop(request: Request):
     # Send email to user
     style = "background-color: #ee9d22; font-size: 18px; font-family: Helvetica, Arial, sans-serif; font-weight:bold; text-decoration: none; padding: 14px 20px; color: #1D2025; border-radius: 5px; display:inline-block; mso-padding-alt:0; box-shadow:0 3px 6px rgba(0,0,0,.2);"
 
-    date_start = datetime.fromtimestamp(float(workshop["timestamp_start"])).strftime("%Y%m%dT%H%M%S")
-    date_end = datetime.fromtimestamp(float(workshop["timestamp_end"])).strftime("%Y%m%dT%H%M%S")
+    date_start = datetime.fromtimestamp(float(workshop["timestamp_start"]))
+    date_end = datetime.fromtimestamp(float(workshop["timestamp_end"]))
+
+    # Get date in pacific time
+    date_start = date_start - timedelta(hours=7)
+    date_end = date_end - timedelta(hours=7)
+
+    date_start = date_start.strftime("%Y%m%dT%H%M%S")
+    date_end = date_end.strftime("%Y%m%dT%H%M%S")
 
     g_cal_link = f"https://calendar.google.com/calendar/render?action=TEMPLATE&text={workshop['title']}&details={workshop['description']}&dates={date_start}/{date_end}&location=201 Platt Blvd, Claremont, CA 91711"
 
