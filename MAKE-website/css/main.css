@@ -1811,10 +1811,36 @@ Equipment
 .equipment {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-start;
   width: 100%;
+  margin: 10px 0;
+}
+
+.equipment-header {
+  background-color: var(--theme-color-5);
+  width: 80%;
+  position: sticky;
+  top: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--theme-color-3);
+}
+
+.equipment-documents {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 5px;
+  place-items: center;
   margin: 0 auto;
+  margin-bottom: 20px;
+  width: 90%;
+}
+
+.equipment-documents button {
+  width: 100%;
+  min-height: 30px;
+  height: 100%;
 }
 
 .equipment-name {
@@ -1822,7 +1848,16 @@ Equipment
   font-size: 2em;
   margin-bottom: 10px;
   margin-left: 40px;
-  margin-top: 40px;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: 15px;
+}
+
+.equipment-name span.material-symbols-outlined {
+  font-size: 1.2em;
 }
 
 .equipment-machines {
@@ -2339,6 +2374,9 @@ Mobile Styles
     height: auto;
   }
 
+  .equipment-header {
+    position: unset;
+  }
   .equipment-name {
     font-size: 1.5em;
     margin-left: 20px;
