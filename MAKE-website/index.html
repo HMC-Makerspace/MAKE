@@ -255,7 +255,9 @@
 
 
                 <p3 id="login-error" class="hidden">
-                    Please take the <a href="https://docs.google.com/forms/d/e/1FAIpQLSfW3l2cxem3JwKqX3RJjjhJXKzAdwY9x4dYeXvOATGA-dhWzA/viewform">General Safety Quiz</a>, and try again in 3-5 minutes.
+                    That ID number is not associated with any acccount.
+                    <br>
+                    Please take the <a href="https://docs.google.com/forms/d/e/1FAIpQLSfW3l2cxem3JwKqX3RJjjhJXKzAdwY9x4dYeXvOATGA-dhWzA/viewform">General Safety Quiz</a> to create an account.
                 </p3>
             </div>
 
@@ -459,89 +461,23 @@
         -->
 
         <section id="page-quiz-info" class="main-content hidden">
-
             <div class="content-container">
-                <div id="quiz-info-storage-help" class="content-header">
+                <div class="content-header">
                     <p3>
-                        <b>General Usage Policies & Manuals</b>
-                        <br>
-                        <ul id="general-manual-policy-list" class="manual-policy-list">
-                        </ul>
-                        <br>
-                        <b>Additional Information</b>
-                        <br>
-                        <ul id="additional-info-list" class="manual-policy-list">
-                    </p3>
-                </div>
-
-                <div id="quiz-status" class="content-body">
-                    <div class="quiz-status-container">
-                        <div class="quiz-status-item" id="quiz-General">
-                            <p3>
-                                General Safety Quiz
-                            </p3>
-                            <button class="quiz-take" onclick="openQuiz('general')">Take</button>
-                            <div class="quiz-status"></div>
-                        </div>
-                        <div class="quiz-status-item" id="quiz-Laser3D">
-                            <p3>
-                                3D Printer & Laser Cutter Quiz
-                            </p3>
-                            <button class="quiz-take" onclick="openQuiz('laser3d')">Take</button>
-                            <div class="quiz-status"></div>
-                        </div>
-                        <div class="quiz-status-item" id="quiz-SprayPaint">
-                            <p3>
-                                Spray Paint Quiz
-                            </p3>
-                            <button class="quiz-take" onclick="openQuiz('spraypaint')">Take</button>
-                            <div class="quiz-status"></div>
-                        </div>
-                        <div class="quiz-status-item" id="quiz-Composite">
-                            <p3>
-                                Composite Quiz
-                            </p3>
-                            <button class="quiz-take" onclick="openQuiz('composite')">Take</button>
-                            <div class="quiz-status"></div>
-                        </div>
-                        <div class="quiz-status-item" id="quiz-Welding">
-                            <p3>
-                                Welding Quiz
-                            </p3>
-                            <button class="quiz-take" onclick="openQuiz('welding')">Take</button>
-                            <div class="quiz-status"></div>
-                        </div>
-                        <div class="quiz-status-item" id="quiz-Studio">
-                            <p3>
-                                Studio Quiz
-                            </p3>
-                            <button class="quiz-take" onclick="openQuiz('studio')">Take</button>
-                            <div class="quiz-status"></div>
-                        </div>
-                        <div class="quiz-status-item" id="quiz-Waterjet">
-                            <p3>
-                                Waterjet Quiz
-                            </p3>
-                            <button class="quiz-take" onclick="openQuiz('waterjet')">Take</button>
-                            <div class="quiz-status"></div>
-                        </div>
-                        <div class="quiz-status-item" id="quiz-Loom">
-                            <p3>
-                                Loom Quiz
-                            </p3>
-                            <button class="quiz-take" onclick="openQuiz('loom')">Take</button>
-                            <div class="quiz-status"></div>
-                        </div>
-                    </div>
-
-                    <p3 class="honor-code-warning">
-                        We are working with F&M to update swipe access to the Makerspace. It may take up to 2 weeks
-                        for swipe access to be granted after taking the a safety quiz. You can still use the Makerspace
-                        and check out tools while waiting for swipe access to be granted.
+                        Don't know where to start? Take the <b>General Safety Quiz</b> first, then take any other quizzes
+                        that interest you. Once you've passed a quiz with a score of 100% and are logged in, it will show up green on this page.
                         <br><br>
                         Failing to successfully complete the quiz prior to use is an honor code violation, and may
                         result in a suspension or ban from the Makerspace.
+                        <br><br>    
+                        Quizzes reset every year on <b>August 1st</b>.
                     </p3>
+                </div>
+                
+                <div id="quiz-info" class="content-body">
+                    <div id="quiz-list-container">
+                        
+                    </div>
                 </div>
             </div>
         </section>

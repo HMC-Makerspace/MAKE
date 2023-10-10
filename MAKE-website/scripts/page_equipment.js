@@ -145,6 +145,10 @@ const main_area_equipment = {
         {
             name: "Printing Press Glossary",
             link: "https://docs.google.com/document/d/1JiHqYf_kEaK3hFZ4yS2bjCtTyL6PKsosZmPeGssmNCo/edit"
+        },
+        {
+            name: "Injury Report Form",
+            link: "https://docs.google.com/forms/d/e/1FAIpQLScLeBtqgH2RYPFIgOTd5TCk7fGLsU5j8lMBNgLgPaZ5c7n9jQ/viewform?usp=sf_link"
         }
     ],
     "equipment": [
@@ -244,6 +248,41 @@ const welding_area_equipment = {
     ]
 };
 
+const spray_paint_booth_equipment = {
+    "documents": [
+        {
+            name: "Spray Paint Booth Manual",
+            link: "https://docs.google.com/document/d/1rWhhCfDzNkxNpQC1f5lGxxvZ7KNCTyGIw4CS1ixTPic/edit"
+        }
+    ],
+    "equipment": [
+        {
+            name: "Eastwood Concours 2 Paint Gun",
+            description: "The Eastwood Concours 2 Paint Gun is a HVLP paint gun that can be used to spray paint, primer, and clear coat.",
+            image: "img/equipment/paintgun.webp",
+            link: ""
+        }
+    ]
+};
+
+const composite_room_equipment = {
+    "documents": [
+        {
+            name: "Composite Room Policy",
+            link: "https://docs.google.com/document/d/1vf5Pw24-stQF0I0EhXi-4wItHGNquIOZGPalTngE7B8/edit"
+        }
+    ],
+    "equipment": [
+        {
+            name: "Vacuform Machine",
+            description: "The Vacuform Machine can be used to create molds for vacuum forming.",
+            image: "img/equipment/vacuform.webp",
+            link: ""
+        }
+    ]
+};
+
+
 const all_equipment = [
     {
         name: "Main Area & Cage",
@@ -270,6 +309,16 @@ const all_equipment = [
         obj: welding_area_equipment,
         icon: "bolt"
     },
+    {
+        name: "Spray Paint Booth",
+        obj: spray_paint_booth_equipment,
+        icon: "colors"
+    },
+    {
+        name: "Composite Room",
+        obj: composite_room_equipment,
+        icon: "layers"
+    }
 ];
 
 function renderEquipment() {

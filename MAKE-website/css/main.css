@@ -6,13 +6,13 @@
 
   --theme-color-1: #ee9d22;
   --theme-color-2: #ffffff;
-  --theme-color-3: #e6e6e6;
+  --theme-color-3: #d6d6d6;
   --theme-color-4: #2796eb; 
   --theme-color-5: #ececec;
   --theme-color-6: #e0cf34;
   --theme-color-7: #a918ec;
   --theme-color-8: #004174;
-  --theme-color-9: #5a5a5a;
+  --theme-color-9: #dbdbdb;
 
   --black: #28272b;
   --white: #ffffff;
@@ -27,7 +27,7 @@
   
   --low-color-dark: #af5a5a;
   --medium-color-dark: #cac96a;
-  --high-color-dark: #61ac61;
+  --high-color-dark: #99eb99;
 
   --text-color-main: #000000;
   --text-color-alt: #ffffff;
@@ -97,12 +97,12 @@
 
   --low-color: #9c5151;
   --medium-color: #afad59;
-  --high-color: #4e9e4e;
+  --high-color: #428842;
   --link-color: #00bcd4;
 
   --low-color-dark: #723a3a;
   --medium-color-dark: #7e7d41;
-  --high-color-dark: #3d773d;
+  --high-color-dark: #2d4d2d;
 
   --shift-1: #2d463c;
   --shift-2: #39725b;
@@ -689,7 +689,7 @@ HOME
   height: 20px;
   padding: 20px;
   font-weight: bold;
-  background-color: var(--high-color-dark);
+  background-color: var(--high-color);
   color: var(--white);
   margin: unset;
   font-size: 16px;
@@ -1204,25 +1204,14 @@ Quizzes & Information
 
 */
 
-#quiz-info-storage-help {
-  background-color: var(--theme-color-2);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--roundness) var(--roundness) 0 0;
-  padding: 10px;
-}
-
-#quiz-info-auth-statuses {
+#quiz-info {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   background-color: var(--theme-color-5);
-  border-radius: 0 0 var(--roundness) var(--roundness);
-  padding-top: 20px;
-  padding-bottom: 20px;
+  padding: 20px;
+  color: var(--text-color-main);
 }
 
 #auth-level {
@@ -1236,58 +1225,6 @@ Quizzes & Information
   padding: 10px;
 }
 
-.quiz-status-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--theme-color-2);
-  padding: 20px;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin: 12px;
-}
-
-.quiz-status-item {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: var(--theme-color-5);
-  text-align: center;
-  font-weight: bolder;
-  width: 120px;
-  height: 140px;
-}
-
-.quiz-passed {
-  background-color: var(--high-color);
-}
-
-.status-passed {
-  position: absolute;
-  bottom: 10px;
-  background-color: var(--high-color-dark);
-  padding: 10px;
-  cursor: pointer;
-  pointer-events: none;
-}
-
-.quiz-take {
-  position: absolute;
-  bottom: 10px;
-  padding: 10px;
-}
-
-.manual-policy-list {
-  columns: 3;
-  column-gap: 100px;
-}
-
-.manual-policy-list * {
-  margin-bottom: 5px;
-}
-
 .honor-code-warning {
   background-color: var(--theme-color-2);
   margin-top: 20px;
@@ -1297,12 +1234,66 @@ Quizzes & Information
   padding: 20px;
 }
 
-#quiz-status {
+#quiz-list-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  width: 90%;
+  margin: 20px auto;
+  gap: 10px;
+}
+
+.quiz-div {
+  background: var(--theme-color-2);
+  border-radius: 2px;
+  padding: 20px;
+  display: grid;
+  grid-template-areas: "title title" "description description" "reference take";
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 40px 70px auto;
+  gap: 10px;
+}
+
+.quiz-div h2 {
+  margin-bottom: 10px;
+  grid-area: title;
+  font-size: 1.2em;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  gap: 10px;
   align-items: center;
   justify-content: flex-start;
 }
+
+.quiz-div h2 span {
+  font-size: 2em;
+  font-weight: normal;
+}
+
+.quiz-div p {
+  grid-area: description;
+  font-size: .9em;
+  font-style: italic;
+  color: var(--text-color-light);
+}
+
+.quiz-div .quiz-reference,
+.quiz-div .quiz-take {
+
+}
+
+.quiz-div .quiz-reference:hover,
+.quiz-div .quiz-take:hover {
+}
+
+.quiz-div.quiz-passed {
+  border: 2px solid var(--high-color);
+  background-color: var(--high-color-dark);
+}
+
+.quiz-div.quiz-passed span {
+  color: var(--text-color-main);
+}
+
 
 /*
 
@@ -1819,11 +1810,12 @@ Equipment
 
 .equipment-header {
   background-color: var(--theme-color-5);
-  width: 80%;
+  width: 90%;
+  max-width: 1300px;
   position: sticky;
-  top: 10px;
+  top: 0;
   margin-top: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 40px;
   border: 1px solid var(--theme-color-3);
 }
 

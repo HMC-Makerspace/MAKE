@@ -48,6 +48,28 @@ const QUIZ_ID_TO_NAME = {
     "1235553349": "Loom",
 }
 
+const QUIZ_NAME_TO_READABLE = {
+    "General": "General Safety Quiz",
+    "Laser3D": "3D Printer & Laser Cutter Safety Quiz",
+    "SprayPaint": "Spray Paint Booth Safety Quiz",
+    "Composite": "Composite Room Safety Quiz",
+    "Welding": "Welding Area Safety Quiz",
+    "Studio": "Studio Safety Quiz",
+    "Waterjet": "Waterjet Safety Quiz",
+    "Loom": "Loom Safety Quiz",
+}
+
+const QUIZ_ID_TO_READABLE = {
+    "66546920": "General Safety Quiz",
+    "1524924728": "3D Printer & Laser Cutter Safety Quiz",
+    "1841312496": "Spray Paint Booth Safety Quiz",
+    "913890505": "Composite Room Safety Quiz",
+    "482685426": "Welding Area Safety Quiz",
+    "2079405017": "Studio Safety Quiz",
+    "2100779718": "Waterjet Safety Quiz",
+    "1235553349": "Loom Safety Quiz",
+}
+
 const ROLE_TO_READABLE = {
     "admin": "Admin",
     "user": "User",
