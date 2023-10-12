@@ -148,6 +148,10 @@ async function updateUserInfo() {
 
         return true;
     } else {
+        if (response.status == 429) {
+            alert("You have submitted too many login requests. Please wait a few minutes and try again.")
+        }
+        
         return false;
     }
 }

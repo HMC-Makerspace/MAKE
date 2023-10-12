@@ -1,3 +1,4 @@
+import datetime
 import logging
 from utilities import validate_api_key
 from db_schema import *
@@ -39,14 +40,14 @@ async def route_get_users(request: Request):
     return users
 
 @user_router.get("/get_user/{user_uuid}")
-async def route_get_user(user_uuid: str):
+async def route_get_user(request: Request, user_uuid: str):
     # Get a user
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Getting user...")
     logging.info(user_uuid)
 
-    # Get the users collection
     db = MongoDB()
+    # Get the users collection
     collection = await db.get_collection("users")
 
     # Get the user
@@ -63,7 +64,7 @@ async def route_get_user(user_uuid: str):
     return user
 
 @user_router.get("/get_user_by_cx_id/{cx_id}")
-async def route_get_user_by_cx_id(cx_id: int):
+async def route_get_user_by_cx_id(request: Request, cx_id: int):
     # Get a user
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Getting user by cx_id...")
@@ -72,15 +73,32 @@ async def route_get_user_by_cx_id(cx_id: int):
     # Get the users collection
     db = MongoDB()
     collection = await db.get_collection("users")
-
-    # Get the user
     user = await collection.find_one({"cx_id": cx_id})
-
+    
     if user is None:
         # The user does not exist
         # Return error
         raise HTTPException(status_code=404, detail="User does not exist")
     
+    # Get IP address
+    ip = request.client.host
+    logging.info(f"IP address {ip} requested user matching {cx_id}")
+    collection = await db.get_collection("ip_logs")
+
+    # See how many requests the user has made in the last 5 minutes
+    # If they've requested more then 4 different users, return an error
+    uuids = await collection.distinct("user", {"ip": ip, "timestamp": {"$gt": datetime.datetime.now().timestamp() - 300}})
+
+    # Log the IP address
+    await collection.insert_one({"ip": ip, "timestamp": datetime.datetime.now().timestamp(), "user": user["uuid"]})   
+
+    if len(uuids) > 3 and user["uuid"] not in uuids:
+        # The user has made too many requests
+        # Return error
+        raise HTTPException(status_code=429, detail="Too many requests")
+    
+
+
     user = User(**user)
     
     # Return the user

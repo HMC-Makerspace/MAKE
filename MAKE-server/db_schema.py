@@ -38,7 +38,8 @@ schema = [
     'workshops',
     'printer_logs',
     'filament_logs',
-    'api_keys'
+    'api_keys',
+    'ip_logs'
 ]
 
 STATUS_TEMPLATE = {
@@ -550,3 +551,35 @@ class APIKey(BaseModel):
                 "scope": "admin"
             }
         }
+
+
+'''
+IP Logs class is used to store information about the IP logs.
+The following fields are stored:
+- uuid: The uuid of the IP log
+- ip: The IP address of the user
+- user: The uuid of the user requested
+'''
+
+class IPLog(BaseModel):
+    _id: Optional[PyObjectId] = Field(alias="_id")
+    uuid: str
+    ip: str
+    user: str
+    timestamp: str
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {
+            ObjectId: str
+        }
+        schema_extra = {
+            "example": {
+                    
+                    "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j8k8l",
+                    "ip": "192.168.0.1",
+                    "user": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i8j7k8l",
+                    "timestamp": "3942102340"
+            }    
+        }
+        
