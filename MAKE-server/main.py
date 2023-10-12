@@ -47,6 +47,7 @@ from inventory.inventory import update_from_gsheet
 SSL_CERT_PRIVKEY = "/etc/letsencrypt/live/make.hmc.edu/privkey.pem"
 SSL_CERT_PERMKEY = "/etc/letsencrypt/live/make.hmc.edu/fullchain.pem"
 
+
 app = FastAPI(
     title="MAKE API V2",
     description="""
@@ -118,6 +119,10 @@ async def validate_database_schema(db):
     if status is None:
         # Create the status document
         await db["status"].insert_one({"name": "status"})
+
+        # Insert the STATUS_TEMPLATE into the status document
+        await db["status"].update_one({"name": "status"}, {"$set": STATUS_TEMPLATE})
+        
         # Print log message
         logging.info(f"Created status document in database {db.name}")
 

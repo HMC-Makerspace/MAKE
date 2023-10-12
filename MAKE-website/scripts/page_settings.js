@@ -14,7 +14,6 @@ async function fetchStatus() {
         let end = new Date().getTime();
         if (response.status == 200) {
             const status = await response.json();
-    
             const statuses = document.getElementById("statuses");
             
             statuses.innerHTML = `

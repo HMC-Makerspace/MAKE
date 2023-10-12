@@ -179,7 +179,7 @@ async def email_user_restock_request_complete(restock: dict, user: dict):
 
     date = datetime.fromtimestamp(float(restock["timestamp_sent"])).strftime("%m/%d/%Y")
 
-    body = await format_email_template("restock_completion", {
+    body = format_email_template("restock_completion", {
         "name": user["name"],
         "date": date,
         "item": restock["item"],

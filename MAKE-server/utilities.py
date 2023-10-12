@@ -25,7 +25,7 @@ async def validate_api_key(db, api_key_str, scope):
     
     return True
 
-async def format_email_template(template_name: str, key_values: dict):
+def format_email_template(template_name: str, key_values: dict):
     # Format an email template
     # Get the template
     template = open(f"email_templates/{template_name}.html", "r").read()

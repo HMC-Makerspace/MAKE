@@ -9,6 +9,7 @@
 - Shift scheduling and management
 - Steward proficiency program
 - Student grant applications
+- Restock requests and fulfillment
 
 ## What is in each folder?
 `./MAKE-server` contains the server files for MAKE, written in Python with FastAPI as a framework.

@@ -40,15 +40,23 @@ async def send_workshop_reminders():
             # Skip
             continue
 
-
         # Get the users that have RSVPed to the workshop
         rsvp_list = workshop["rsvp_list"]
-        users_notified = workshop["users_notified"] if "users_notified" in workshop else []
+        users_notified = workshop["users_notified"] if workshop["users_notified"] else []
 
         # Get the users in rsvp_list that have not been notified, up to the capacity of the workshop
-        users_to_notify = [user for user in rsvp_list[:workshop["capacity"]] if user not in users_notified]
+        users_to_notify = []
+        for user in rsvp_list[:workshop["capacity"]]:
+            if user not in users_notified:
+                users_to_notify.append(user)
+
         logging.info(f"Users to notify: {len(users_to_notify)}")
 
+        if len(users_to_notify) == 0:
+            # There are no users to notify
+            # Skip
+            continue
+        
         # We should now have a list of users to notify, up to the capacity of the workshop.
         # After the first round of notifications, this should be an empty list, or one/two users
         # on the waitlist
@@ -56,13 +64,16 @@ async def send_workshop_reminders():
 
         # Get the minutes until the workshop starts
         time_until = f"{int((workshop_start - datetime.now().timestamp()) / 60)} minutes"
-        body = format_email_template("workshop_reminder", {"workshop": workshop, "time_until":  time_until})
+        body = format_email_template("workshop_reminder", {"workshop": workshop['title'], "time_until":  time_until})
 
         for user in users_to_notify:
-            success = email_user(user["email"], [], f"Reminder: {workshop['name']}", body)
-
-            if success:
+            try:
+                await email_user(user["email"], [], f"Reminder: {workshop['title']}", body)
                 users_notified.append(user["uuid"])
+            except Exception as e:
+                # Show warning
+                logging.getLogger().setLevel(logging.WARNING)
+                logging.warning("Failed to send workshop reminder email: " + str(e))
 
 
         # Update the workshop

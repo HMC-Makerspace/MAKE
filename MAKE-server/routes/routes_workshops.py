@@ -232,7 +232,7 @@ async def route_rsvp_to_workshop(request: Request):
     is_on_waitlist = len(workshop["rsvp_list"]) >= workshop["capacity"]
 
     if is_on_waitlist:
-        email_body = await format_email_template("workshop_waitlist", {
+        email_body = format_email_template("workshop_waitlist", {
             "workshop": workshop["title"], 
             "date": date_start.strftime("%A, %B %d, %Y"),
             "time": date_start.strftime("%I:%M %p"),
@@ -241,7 +241,7 @@ async def route_rsvp_to_workshop(request: Request):
         
         await email_user(user["email"], [], f"RSVP Confirmation: {workshop['title']} (Waitlist)", email_body)
     else:
-        email_body = await format_email_template("workshop_confirmation", {
+        email_body = format_email_template("workshop_confirmation", {
             "workshop": workshop["title"], 
             "date": date_start.strftime("%A, %B %d, %Y"),
             "time": date_start.strftime("%I:%M %p"),
