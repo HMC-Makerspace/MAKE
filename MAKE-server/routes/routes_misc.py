@@ -27,9 +27,6 @@ async def route_get_status():
     checkouts = await db.get_collection("checkouts")
     users = await db.get_collection("users")
     inventory = await db.get_collection("inventory")
-    status = await db.get_collection("status")
-
-    status = await status.find_one({"name": "status"})
 
     return {
         "status": "alive",
@@ -39,8 +36,6 @@ async def route_get_status():
         "total_users": await users.count_documents({}),
         "total_items": await inventory.count_documents({}),
         "version": "2.1.0",
-        "motd": status["motd"],
-        "is_open": status["is_open"],
     }
 
 
