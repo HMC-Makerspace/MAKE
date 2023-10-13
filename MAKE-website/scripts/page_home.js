@@ -194,8 +194,11 @@ async function fetchAndDownload(uuid) {
     name = name.replace("\"", "");
     name = name.replace("\'", "");
     name = decodeURI(name);
-
-    console.log(name);
+    
+    // Remove the last char if its a _
+    if (name[name.length - 1] === "_") {
+        name = name.slice(0, -1);
+    }
     
     const element = document.createElement("a");
     element.setAttribute("href", URL.createObjectURL(file));
