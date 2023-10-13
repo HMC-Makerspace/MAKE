@@ -185,8 +185,18 @@ async function fetchAndDownload(uuid) {
     // So we can just download the data directly
 
     const file = await request.blob();
-    const name = request.headers.get("Content-Disposition").split("filename=")[1];
+    // content-disposition
+	// attachment; filename*=utf-8''anya%281%29.jpg
+    let name = request.headers.get("content-disposition").split("filename")[1];
 
+    name = name.replace("*=utf-8''", "");
+    name = name.replace("=", "");
+    name = name.replace("\"", "");
+    name = name.replace("\'", "");
+    name = decodeURI(name);
+
+    console.log(name);
+    
     const element = document.createElement("a");
     element.setAttribute("href", URL.createObjectURL(file));
     element.setAttribute("download", name);
