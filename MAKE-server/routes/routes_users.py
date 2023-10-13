@@ -1,5 +1,11 @@
 import datetime
 import logging
+import os
+import uuid
+
+from fastapi.responses import FileResponse
+
+from config import USER_STORAGE_LIMIT_BYTES
 from utilities import validate_api_key
 from db_schema import *
 
@@ -92,13 +98,11 @@ async def route_get_user_by_cx_id(request: Request, cx_id: int):
     # Log the IP address
     await collection.insert_one({"ip": ip, "timestamp": datetime.datetime.now().timestamp(), "user": user["uuid"]})   
 
-    if len(uuids) > 3 and user["uuid"] not in uuids:
+    if len(uuids) > 6 and user["uuid"] not in uuids:
         # The user has made too many requests
         # Return error
         raise HTTPException(status_code=429, detail="Too many requests")
     
-
-
     user = User(**user)
     
     # Return the user
@@ -200,3 +204,198 @@ async def route_update_user_by_uuid(request: Request):
 
     # Return success
     return
+
+@user_router.post("/get_file_list", status_code=201)
+async def route_get_file_list(request: Request):
+    # Get a user's file list
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Getting user's file list...")
+
+    db = MongoDB()
+
+    # Get the users collection
+    collection = await db.get_collection("users")
+
+    # Get the user UUID and role
+    json = await request.json()
+    user_uuid = json["user_uuid"]
+
+    # Check if the user already exists
+    user = await collection.find_one({"uuid": user_uuid})
+
+    if user is None:
+        # The user does not exist
+        # Return error
+        raise HTTPException(status_code=404, detail="User does not exist")
+    
+    user_files_collection = await db.get_collection("user_files")
+
+    if user_files_collection is None:
+        return []
+    
+    if "files" not in user:
+        return []
+
+    # Get the user's files, but exclude the file data
+    user_files = await user_files_collection.find({"uuid": {"$in": user["files"]}}).to_list(None)
+
+    user_files = [UserFile(**file) for file in user_files]
+
+    # Return the user's files
+    return user_files
+
+@user_router.post("/upload_file")
+async def route_upload_file_for_user(request: Request):
+    # Upload a file for a user
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Uploading file for user...")
+
+    db = MongoDB()
+
+    # Get the users collection
+    user_collection = await db.get_collection("users")
+
+    # Get the user UUID and role
+    form = await request.form()
+
+    user_uuid = form["user_uuid"]
+
+    # Check if the user already exists
+    user = await user_collection.find_one({"uuid": user_uuid})
+
+    if user is None:
+        # The user does not exist
+        # Return error
+        raise HTTPException(status_code=404, detail="User does not exist")
+    
+    user_files_collection = await db.get_collection("user_files")
+
+    if "files" not in user:
+        user["files"] = []
+
+    file_data = form["file"].file.read()
+
+    # Calculate file size
+    file_size_bytes = len(file_data)
+    stored_file_uuids = user["files"]
+    
+    if user_files_collection is not None:
+        stored_files = await user_files_collection.find({"uuid": {"$in": stored_file_uuids}}).to_list(None)
+    else :
+        stored_files = []
+
+    total_bytes = file_size_bytes + sum([file["size"] for file in stored_files])
+
+    if total_bytes > USER_STORAGE_LIMIT_BYTES:
+        # The user has exceeded their storage limit
+        # Return error
+        raise HTTPException(status_code=400, detail="User has exceeded their storage limit")
+    
+    # Add the file to the user's stored files
+    file_uuid = uuid.uuid4().hex
+
+    user["files"].append(file_uuid)
+
+    # Update the user
+    await user_collection.replace_one({"uuid": user_uuid}, user)
+
+    # Add the file to the user_files collection
+    await user_files_collection.insert_one({
+        "uuid": file_uuid,
+        "name": form["file"].filename,
+        "timestamp": datetime.datetime.now().timestamp(),
+        "size": file_size_bytes,
+        "user_uuid": user_uuid
+    })
+
+    # Store actual data as a separate file under the uuid,
+    # in the "user_files" directory
+    if not os.path.exists("user_files"):
+        os.mkdir("user_files")
+        
+    with open(f"user_files/{file_uuid}", "wb") as f:
+        f.write(file_data)
+    
+    # Return
+    return
+
+
+@user_router.post("/delete_file")
+async def route_delete_file_for_user(request: Request):
+    # Delete a file for a user
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Deleting file for user...")
+
+    db = MongoDB()
+
+    # Get the users collection
+    user_collection = await db.get_collection("users")
+
+    # Get the user UUID and role
+    json = await request.json()
+    file_uuid = json["file_uuid"]
+    
+    user_files_collection = await db.get_collection("user_files")
+
+    # Check if the file exists
+    file = await user_files_collection.find_one({"uuid": file_uuid})
+
+    if file is None:
+        # The file does not exist
+        # Return error
+        raise HTTPException(status_code=404, detail="File does not exist")
+    
+    # Get the user
+    user_uuid = file["user_uuid"]
+    user = await user_collection.find_one({"uuid": user_uuid})
+    
+    if user is None:
+        # The user does not exist
+        # Return error
+        raise HTTPException(status_code=404, detail="User does not exist")
+    
+    # Delete the file from the user's stored files
+    user["files"].remove(file_uuid)
+
+    # Update the user
+    await user_collection.replace_one({"uuid": user_uuid}, user)
+
+    # Delete the file
+    await user_files_collection.delete_one({"uuid": file_uuid})
+
+    # Delete the file from the user_files directory
+    if os.path.exists(f"user_files/{file_uuid}"):
+        os.remove(f"user_files/{file_uuid}")
+
+    # Return
+    return
+
+
+@user_router.get("/download_file/{file_uuid}")
+async def route_download_file(request: Request, file_uuid: str):
+    # Download a file
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Downloading file...")
+
+    db = MongoDB()
+
+    # Get the users collection
+    user_files_collection = await db.get_collection("user_files")
+
+    # Check if the file exists
+    file = await user_files_collection.find_one({"uuid": file_uuid})
+
+    if file is None:
+        # The file does not exist
+        # Return error
+        raise HTTPException(status_code=404, detail="File does not exist")
+    
+    # Get the file data from the user_files directory
+    if os.path.exists(f"user_files/{file_uuid}"):
+        return FileResponse(f"user_files/{file_uuid}", media_type="application/octet-stream", filename=file["name"])    
+    
+    else :
+        # The file does not exist
+        # Return error
+        raise HTTPException(status_code=404, detail="File does not exist")
+    

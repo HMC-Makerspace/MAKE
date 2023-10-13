@@ -169,3 +169,37 @@ async def create_update_users_from_quizzes():
 
     logging.info(f"Created {num_users_created} users")
     logging.info(f"Updated {num_total_updates} times")
+
+
+async def cleanup_user_files():
+    '''
+    This method goes through all the users and deletes their files
+    that are older then USER_FILE_TIME_LIMIT 
+    Additionally, it checks if the user has exceeded their storage limit,
+    and if so, deletes the oldest file until it's under the limit
+    '''
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Cleaning up user files...")
+
+    db = MongoDB()
+
+    # Get the users collection
+    user_collection = await db.get_collection("users")
+    file_collection = await db.get_collection("user_files")
+
+    freed_bytes = 0
+
+    # Iterate through all files that are older than the time limit
+    old_files = await file_collection.find({"timestamp": {"$lt": datetime.now().timestamp() - USER_STORAGE_LIMIT_SECONDS}}).to_list(None)
+
+    for file in old_files:
+        # Delete the file
+        await file_collection.delete_one({"uuid": file["uuid"]})
+
+        # Update the user's files field
+        await user_collection.update_one({"uuid": file["user_uuid"]}, {"$pull": {"files": file["uuid"]}})
+
+        # Add the size of the file to the freed_bytes variable
+        freed_bytes += file["size"]
+
+    logging.info(f"Freed {freed_bytes} bytes of storage")

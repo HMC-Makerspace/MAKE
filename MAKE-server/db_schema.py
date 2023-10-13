@@ -25,11 +25,12 @@ class MongoDB():
             return None
         
 schema = [
-    'status'
+    'status',
     'quiz_updates',
     'inventory',
     'restock_requests',
     'users',
+    'user_files',
     'quizzes',
     'checkouts',
     'student_storage',
@@ -39,7 +40,7 @@ schema = [
     'printer_logs',
     'filament_logs',
     'api_keys',
-    'ip_logs'
+    'ip_logs',
 ]
 
 STATUS_TEMPLATE = {
@@ -174,6 +175,7 @@ class User(BaseModel):
     role: str
     passed_quizzes: Dict[str, str]
     proficiencies: Union[List[str], None]
+    files: Union[List[object], None]
 
     class Config:
         arbitrary_types_allowed = True
@@ -192,6 +194,21 @@ class User(BaseModel):
                 },
                 "proficiencies": ["3D Printing", "Laser Cutting"]
             }
+        }
+
+
+class UserFile(BaseModel):
+    __id: Optional[PyObjectId] = Field(alias="_id")
+    uuid: str
+    name: str
+    timestamp: str
+    size: int
+    user_uuid: str
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {
+            ObjectId: str
         }
 
 
@@ -582,4 +599,3 @@ class IPLog(BaseModel):
                     "timestamp": "3942102340"
             }    
         }
-        

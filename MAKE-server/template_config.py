@@ -3,6 +3,13 @@ DB_NAME = "make"
 DB_USER = ""
 DB_PASSWORD = ""
 
+# Size of user storage in bytes
+# Default is 2GB
+USER_STORAGE_LIMIT_BYTES = 2 * 1024 * 1024 * 1024
+# Size of user storage in seconds
+# Default is 1 week
+USER_STORAGE_LIMIT_SECONDS = 60 * 60 * 24 * 7 
+
 # Discord Bot Token
 DISCORD_BOT_TOKEN = ""
 

@@ -265,13 +265,23 @@
                 <p2>
                     Logged in as <span id="logged-in-name"></span>
                 </p2>
-                <button id="logout-button" class="big" onclick="logout()" aria-label="log out">
-                    <span class="material-symbols-outlined">
-                        logout
-                    </span>
 
-                    Log Out
-                </button>
+                <div id="user-buttons">
+                    <button id="files-button" class="big" onclick="openFilesPopup()" aria-label="my files">
+                        <span class="material-symbols-outlined">
+                            folder
+                        </span>
+                        My Files
+                    </button>
+    
+                    <button id="logout-button" class="big" onclick="logout()" aria-label="log out">
+                        <span class="material-symbols-outlined">
+                            logout
+                        </span>
+    
+                        Log Out
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -724,6 +734,21 @@
                     <button id="pickup-shift-cancel" onclick="closePopup()">Cancel</button>
                 </div>
             </div>
+
+            <div id="my-files" class="hidden" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);" ondragleave="dragLeaveHandler(event);">
+                <h2>My Files</h2>
+                <p id="my-files-usage"></p>
+                <table id="my-files-list"></table>
+
+                <!--
+                Upload files
+                -->
+                <input type="file" id="my-files-upload" name="my-files-upload" aria-label="Upload files" onchange="uploadFile(event)">
+                <button id="my-files-upload-button" class="big" onclick="openFile()">Upload File</button>
+                
+                <div class="edit-buttons">
+                    <button id="my-files-cancel" onclick="closePopup()">Close</button>
+                </div>
         </div>
     </div>
     

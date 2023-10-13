@@ -732,7 +732,28 @@ HOME
   gap: 5px;
 }
 
-#logout-button {
+#user-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+#my-files {
+  min-width: 700px;
+  text-align: center;
+}
+
+#my-files-list {
+  margin-bottom: 40px;
+}
+
+#logout-button, #files-button {
   display: flex;
   flex-direction: row;
   align-items: center;

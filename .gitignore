@@ -1,4 +1,5 @@
 MAKE-server/config.py
 MAKE-server/error_log.txt
+MAKE-server/user_files/
 **/__pycache__/
 .DS_Store
