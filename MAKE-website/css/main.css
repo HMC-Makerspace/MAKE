@@ -1951,6 +1951,13 @@ Workshops
   max-width: 1200px;
 }
 
+.workshops-seperator {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
 .workshop {
   border: 1px solid var(--theme-color-3);
   border-radius: 10px;
