@@ -25,7 +25,11 @@ function renderWorkshops() {
 
     const now = new Date();
 
-    for (let workshop of state.workshops) {
+    let sorted_workshops = state.workshops.sort((a, b) => {
+        return b.timestamp_start - a.timestamp_start;
+    });
+
+    for (let workshop of sorted_workshops) {
         // if the workshop has past, append it to another element
         // However, add a 24 hour buffer to the date, so that workshops that are
         // scheduled for the same day as the current date will still be shown

@@ -424,7 +424,11 @@ function generateWorkshopDivsAdmin() {
     header.innerHTML = `<th>Title</th><th>Description</th><th>Instructors</th><th>Start Time</th><th>End Time</th><th>Capacity</th><th>Signups</th><th>Is Live</th><th>Edit</th><th>Delete</th>`;
     divs.push(header);
 
-    for (let workshop of state.workshops) {
+    let sorted_workshops = state.workshops.sort((a, b) => {
+        return b.timestamp_start - a.timestamp_start;
+    });
+
+    for (let workshop of sorted_workshops) {
         let div = document.createElement("tr");
         div.classList.add("workshop-admin");
 
