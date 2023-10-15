@@ -2456,5 +2456,32 @@ Mobile Styles
     font-size: 12px;
   }
 
+  #popup-content h2 {
+    margin: unset;
+  }
+
+  #popup-content p {
+    font-size: .8em;
+  }
   
+  .only-icon .material-symbols-outlined {
+    font-size: 14px;
+  }
+
+  table {
+    max-width: 90vw;
+  }
+
+  table tr {
+    max-width: 90vw;
+  }
+
+  table tr, table td:first-child, table th:first-child {
+    font-size: .8em !important;
+    height: unset !important;
+  }
+
+  #quick-transfer { 
+    min-width: unset;
+  }
 }

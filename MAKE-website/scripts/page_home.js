@@ -111,7 +111,7 @@ async function openFilesPopup() {
     for (let file of files) {
         total_size += file.size;
     }
-    usage.innerHTML = `Log into MAKE on any computer to quickly transfer files.<br>Files will be deleted after 7 days.<br><br>${bytesToReadable(total_size)} / ${bytesToReadable(2 * 1024 * 1024 * 1024)}`;
+    usage.innerHTML = `Log into MAKE on any computer to quickly transfer files.<br>Files will be deleted after 7 days.<br><br><b>${bytesToReadable(total_size)} / ${bytesToReadable(2 * 1024 * 1024 * 1024)}</b>`;
 
     const files_list = document.getElementById("quick-transfer-list");
 
