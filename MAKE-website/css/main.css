@@ -753,6 +753,11 @@ input[type="file"] {
   margin-bottom: 40px;
 }
 
+#my-files-upload-button {
+  width: 200px;
+  margin: 0 auto;
+}
+
 #logout-button, #files-button {
   display: flex;
   flex-direction: row;
