@@ -95,7 +95,7 @@ async function getNowPlaying() {
 
 async function openFilesPopup() {
     document.getElementById("popup-container").classList.remove("hidden");
-    document.getElementById("my-files").classList.remove("hidden");
+    document.getElementById("quick-transfer").classList.remove("hidden");
 
     let request = await fetch(`${API}/users/get_file_list`, {
         method: "POST",
@@ -106,18 +106,18 @@ async function openFilesPopup() {
 
     const files = await request.json();
 
-    const usage = document.getElementById("my-files-usage");
+    const usage = document.getElementById("quick-transfer-usage");
     let total_size = 0;
     for (let file of files) {
         total_size += file.size;
     }
-    usage.innerText = `${bytesToReadable(total_size)} / ${bytesToReadable(2 * 1024 * 1024 * 1024)}`;
+    usage.innerHTML = `Log into MAKE on any computer to quickly transfer files.<br>Files will be deleted after 7 days.<br><br>${bytesToReadable(total_size)} / ${bytesToReadable(2 * 1024 * 1024 * 1024)}`;
 
-    const files_list = document.getElementById("my-files-list");
+    const files_list = document.getElementById("quick-transfer-list");
 
     let divs = [];
     let header = document.createElement("tr");
-    header.innerHTML = "<th>Name</th><th>Size</th><th>Date</th><th></th><th></th>";
+    header.innerHTML = "<th>Name</th><th>Size</th><th>Time Left</th><th></th><th></th>";
     divs.push(header);
 
     for (let file of files) {
@@ -133,7 +133,12 @@ async function openFilesPopup() {
         div.appendChild(size);
 
         let date = document.createElement("td");
-        date.innerHTML = (new Date(Number(file.timestamp) * 1000)).toLocaleString().replace(", ", "&nbsp;");
+        // Use file.timestamp to calculate the expiration date
+        let timestamp = new Date(file.timestamp * 1000);
+        let expiration_date = new Date(timestamp.getTime() + 7 * 24 * 60 * 60 * 1000);
+        let time_left = timeLeft(timestamp, expiration_date);
+
+        date.innerHTML = `${time_left}`;
         div.appendChild(date);
 
         let download = document.createElement("td");
@@ -177,6 +182,23 @@ async function openFilesPopup() {
 
     removeAllChildren(files_list);
     appendChildren(files_list, divs);
+}
+
+function timeLeft(date_start, date_end) {
+    // Calculate the time left between two dates, either in days, hours, or minutes
+    const diff = date_end - date_start;
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor(diff / (1000 * 60));
+
+    if (days > 0) {
+        return `${days} days`;
+    } else if (hours > 0) {
+        return `${hours} hours`;
+    } else {
+        return `${minutes} minutes`;
+    }
 }
 
 async function fetchAndDownload(uuid) {
@@ -224,7 +246,7 @@ function bytesToReadable(bytes) {
 }
 
 function openFile() {
-    document.getElementById("my-files-upload").click();
+    document.getElementById("quick-transfer-upload").click();
 }
 
 async function uploadFile(event) {
@@ -241,7 +263,7 @@ async function uploadFile(event) {
         return;
     }
 
-    document.getElementById("my-files-upload-button").setAttribute("disabled", "disabled");
+    document.getElementById("quick-transfer-upload-button").setAttribute("disabled", "disabled");
 
     let formData = new FormData();
     formData.append("file", file);
@@ -254,7 +276,7 @@ async function uploadFile(event) {
     });
 
     openFilesPopup();
-    document.getElementById("my-files-upload-button").removeAttribute("disabled");
+    document.getElementById("quick-transfer-upload-button").removeAttribute("disabled");
 }
 
 async function deleteFile(uuid) {

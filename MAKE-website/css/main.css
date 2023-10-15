@@ -744,16 +744,16 @@ input[type="file"] {
   display: none;
 }
 
-#my-files {
+#quick-transfer {
   min-width: 700px;
   text-align: center;
 }
 
-#my-files-list {
+#quick-transfer-list {
   margin-bottom: 40px;
 }
 
-#my-files-upload-button {
+#quick-transfer-upload-button {
   width: 200px;
   margin: 0 auto;
 }

@@ -267,11 +267,11 @@
                 </p2>
 
                 <div id="user-buttons">
-                    <button id="files-button" class="big" onclick="openFilesPopup()" aria-label="my files">
+                    <button id="files-button" class="big" onclick="openFilesPopup()" aria-label="Quick Transfer">
                         <span class="material-symbols-outlined">
                             folder
                         </span>
-                        My Files
+                        Quick Transfer
                     </button>
     
                     <button id="logout-button" class="big" onclick="logout()" aria-label="log out">
@@ -739,19 +739,19 @@
                 </div>
             </div>
 
-            <div id="my-files" class="hidden" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);" ondragleave="dragLeaveHandler(event);">
-                <h2>My Files</h2>
-                <p id="my-files-usage"></p>
-                <table id="my-files-list"></table>
+            <div id="quick-transfer" class="hidden" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);" ondragleave="dragLeaveHandler(event);">
+                <h2>Quick Transfer</h2>
+                <p id="quick-transfer-usage"></p>
+                <table id="quick-transfer-list"></table>
 
                 <!--
                 Upload files
                 -->
-                <input type="file" id="my-files-upload" name="my-files-upload" aria-label="Upload files" onchange="uploadFile(event)">
-                <button id="my-files-upload-button" class="big" onclick="openFile()">Upload File</button>
+                <input type="file" id="quick-transfer-upload" name="quick-transfer-upload" aria-label="Upload files" onchange="uploadFile(event)">
+                <button id="quick-transfer-upload-button" class="big" onclick="openFile()">Upload File</button>
                 
                 <div class="edit-buttons">
-                    <button id="my-files-cancel" onclick="closePopup()">Close</button>
+                    <button id="quick-transfer-cancel" onclick="closePopup()">Close</button>
                 </div>
         </div>
     </div>
