@@ -18,7 +18,8 @@
         href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alfa+Slab+One&family=Bree+Serif&family=Dancing+Script:wght@700&family=Edu+VIC+WA+NT+Beginner&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@200;400&family=Libre+Baskerville:wght@700&family=Pacifico&family=Permanent+Marker&family=Righteous&family=Varela+Round&display=swap"
         rel="stylesheet">
 
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0" />        
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -120,7 +121,7 @@
             <button id="equipment-button" onclick="setPage('equipment')">
                 <span class="material-symbols-outlined">
                     handyman
-                </span>    
+                </span>
                 <span>Areas<br>& Equipment</span>
             </button>
             <button id="schedule-button" onclick="setPage('schedule')">
@@ -148,7 +149,7 @@
                 <span>Checkouts</span>
             </button>
 
-                    <!--
+            <!--
             <button id="3d-printers-button" onclick="setPage('3d-printers')"><img class="page-icon"
                     src="/img/printer-icon.svg" alt=""> <span>3D Printers</span></button>
                     -->
@@ -162,7 +163,7 @@
             <button id="values-button" onclick="setPage('values')">
                 <span class="material-symbols-outlined">
                     partner_exchange
-                    </span>
+                </span>
                 <span>Values</span>
             </button>
             <button id="faq-button" onclick="setPage('faq')">
@@ -183,7 +184,8 @@
                 <br>
                 Harvey Mudd College
                 <br>
-                <a href="https://www.hmc.edu/website-accessibility/" aria-label="Harvey Mudd Accessibility Guidelines/Complaints">Accessibility</a>
+                <a href="https://www.hmc.edu/website-accessibility/"
+                    aria-label="Harvey Mudd Accessibility Guidelines/Complaints">Accessibility</a>
             </div>
         </nav>
 
@@ -216,7 +218,7 @@
                 <h1>Welcome to</h1>
                 <h1 class="title-font" id="main-title-ani">MAKE</h1>
                 <h2>
-                    Website for Harvey Mudd College's Makerspace 
+                    Website for Harvey Mudd College's Makerspace
                 </h2>
 
                 <div id="welcome-buttons">
@@ -240,12 +242,14 @@
             </div>
 
             <h3 id="status">
-                The Makerspace is <span id="open-closed">OPEN</span> with <span id="num-stewards">...</span> stewards on duty.
+                The Makerspace is <span id="open-closed">OPEN</span> with <span id="num-stewards">...</span> stewards on
+                duty.
             </h3>
 
             <div id="college-id-container" class="id-n content-body">
                 <div id="college-id-login">
-                    <input aria-label="College ID number login" type="tel" id="college-id-input" placeholder="Enter your college ID number" onchange="login()">
+                    <input aria-label="College ID number login" type="tel" id="college-id-input"
+                        placeholder="Enter your college ID number" onchange="login()">
                     <button id="college-id-button" class="big" onclick="login()" aria-label="log in">
                         <span class="material-symbols-outlined">
                             login
@@ -257,7 +261,9 @@
                 <p3 id="login-error" class="hidden">
                     That ID number is not associated with any account.
                     <br>
-                    Please take the <a href="https://docs.google.com/forms/d/e/1FAIpQLSfW3l2cxem3JwKqX3RJjjhJXKzAdwY9x4dYeXvOATGA-dhWzA/viewform">General Safety Quiz</a> to create an account.
+                    Please take the <a
+                        href="https://docs.google.com/forms/d/e/1FAIpQLSfW3l2cxem3JwKqX3RJjjhJXKzAdwY9x4dYeXvOATGA-dhWzA/viewform">General
+                        Safety Quiz</a> to create an account.
                 </p3>
             </div>
 
@@ -273,12 +279,12 @@
                         </span>
                         Quick Transfer
                     </button>
-    
+
                     <button id="logout-button" class="big" onclick="logout()" aria-label="log out">
                         <span class="material-symbols-outlined">
                             logout
                         </span>
-    
+
                         Log Out
                     </button>
                 </div>
@@ -301,19 +307,22 @@
                             </span>
                             Steward Drive
                         </button>
-                        <button onclick="openInNewTab('https://docs.google.com/document/d/1sNywFxnBcZsGDaA5ouCM8ctp4hqdYZUU06EicxFaEa4/edit')">
+                        <button
+                            onclick="openInNewTab('https://docs.google.com/document/d/1sNywFxnBcZsGDaA5ouCM8ctp4hqdYZUU06EicxFaEa4/edit')">
                             <span class="material-symbols-outlined">
                                 developer_guide
                             </span>
                             Steward Reference Manual
                         </button>
-                        <button onclick="openInNewTab('https://docs.google.com/document/d/1suOPAL12zjOgRAXtfOzo0-uRTozlsU3pYaeZSVGPDIM/edit')">
+                        <button
+                            onclick="openInNewTab('https://docs.google.com/document/d/1suOPAL12zjOgRAXtfOzo0-uRTozlsU3pYaeZSVGPDIM/edit')">
                             <span class="material-symbols-outlined">
                                 lock_open
                             </span>
                             Usernames & Passwords
                         </button>
-                        <button onclick="openInNewTab('https://docs.google.com/spreadsheets/d/e/2PACX-1vSY5bheau9FqUYYwx_tjP3c9eh0fUjJ48BkXrT7rVUBlNMs371UXuy7QmfQToPSz9FuCeVbjrQUUdfr/pubhtml')">
+                        <button
+                            onclick="openInNewTab('https://docs.google.com/spreadsheets/d/e/2PACX-1vSY5bheau9FqUYYwx_tjP3c9eh0fUjJ48BkXrT7rVUBlNMs371UXuy7QmfQToPSz9FuCeVbjrQUUdfr/pubhtml')">
                             <span class="material-symbols-outlined">
                                 today
                             </span>
@@ -327,10 +336,10 @@
                         </button>
 
                         <p>
-                            
+
                         </p>
                     </div>
-                    
+
                     <h3>Your Shifts</h3>
                     <div id="steward-shifts">
 
@@ -338,12 +347,12 @@
 
                     <h3>Available Shifts</h3>
                     <div id="steward-available-shifts">
-                    
+
                     </div>
 
                     <h3>Your Proficiencies</h3>
                     <div id="steward-proficiencies">
-                    
+
                     </div>
                     <button id="save-proficiencies" onclick="updateStewardProficiencies()">Save Proficiencies</button>
                 </div>
@@ -359,7 +368,8 @@
 
             <div class="content-container">
                 <div id="inventory-search" class="content-header">
-                    <input aria-label="Search through inventory" type="text" id="inventory-search-input" placeholder="Search for item...">
+                    <input aria-label="Search through inventory" type="text" id="inventory-search-input"
+                        placeholder="Search for item...">
 
                     <span>
                         <select aria-label="Select room to filter by" id="room-select">
@@ -432,7 +442,7 @@
                     </div>
 
                     <h2 class="workshops-seperator">Previous Workshops</h2>
-                    
+
                     <div id="previous-workshops" class="workshop-container">
                     </div>
                 </div>
@@ -478,19 +488,21 @@
             <div class="content-container">
                 <div class="content-header">
                     <p3>
-                        Don't know where to start? Take the <b>General Safety Quiz</b> first, then take any other quizzes
-                        that interest you. Once you've passed a quiz with a score of 100% and are logged in, it will show up green on this page.
+                        Don't know where to start? Take the <b>General Safety Quiz</b> first, then take any other
+                        quizzes
+                        that interest you. Once you've passed a quiz with a score of 100% and are logged in, it will
+                        show up green on this page.
                         <br><br>
                         Failing to successfully complete the quiz prior to use is an honor code violation, and may
                         result in a suspension or ban from the Makerspace.
-                        <br><br>    
+                        <br><br>
                         Quizzes reset every year on <b>August 1st</b>.
                     </p3>
                 </div>
-                
+
                 <div id="quiz-info" class="content-body">
                     <div id="quiz-list-container">
-                        
+
                     </div>
                 </div>
             </div>
@@ -600,16 +612,20 @@
                 <div id="student-projects-help" class="content-header">
                     <p3>
                         Student Project Applications provide funding for projects that students would like to work on
-                        in the Makerspace. $50 is available per student per semester, with the Braun grant providing $200
+                        in the Makerspace. $50 is available per student per semester, with the Braun grant providing
+                        $200
                         per Harvey Mudd student per semester.
                         <br><br>
                         For more information, please read the
-                        <a href="https://docs.google.com/document/d/1vL0c9X3k5Puu1DT9c9-MUco-2kLTWvhHTXKJ1H0uOwk/">Terms and Conditions</a>.
-                    </p3>                        
+                        <a href="https://docs.google.com/document/d/1vL0c9X3k5Puu1DT9c9-MUco-2kLTWvhHTXKJ1H0uOwk/">Terms
+                            and Conditions</a>.
+                    </p3>
                 </div>
 
                 <div class="content-body">
-                    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfAChwtyPLkcO125CjXl74JcOLUnC-fbORyQc_Erpdh8P6mRg/viewform?embedded=true" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+                    <iframe
+                        src="https://docs.google.com/forms/d/e/1FAIpQLSfAChwtyPLkcO125CjXl74JcOLUnC-fbORyQc_Erpdh8P6mRg/viewform?embedded=true"
+                        width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
 
                 </div>
             </div>
@@ -623,6 +639,173 @@
         <section id="page-faq" class="main-content hidden">
             <div class="content-container">
                 <div id="faq-content" class="content-body">
+                    
+                    <div class="faq-category">
+                        <h2>General Information</h2>
+
+                        <div class="faq-question">
+                            <h3>What are the operating hours for the Makerspace?</h3>
+                            <p>
+                                Makerspace is accessible to 7C students, faculty, and staff 24/7. Stewards are available
+                                from 1-10PM from Monday-Thursday, 1-7PM on Friday and Saturday, and 1-9PM on Sunday.
+                                They can help with checking out tools or equipment and providing assistance. Questions
+                                can also be asked on the <a href="https://make.hmc.edu/discord">Makerspace Discord</a>.
+                            </p>
+                        </div>
+
+                        <div class="faq-question">
+                            <h3>Can all 7C students, faculty, and staff access the Makerspace?</h3>
+                            <p>Yes, the Makerspace is accessible to all 7C students, faculty, and staff.</p>
+                        </div>
+
+                        <div class="faq-question">
+                            <h3>Where is the Makerspace located?</h3>
+                            <p>
+                                The Makerspace is on the ground floor of the McGregor Computer Science Center, at the
+                                corner of Platt and Dartmouth.
+                            </p>
+                        </div>
+
+                        <div class="faq-question">
+                            <h3>What's the Machine Shop?</h3>
+                            <p>
+                                The HMC Machine Shop caters to heavy-duty machining and is only open during proctor
+                                hours. The Makerspace is open 24/7 to all 7C students & faculty who have passed its
+                                safety quiz, offering a variety of different machines and supplies.
+                            </p>
+                        </div>
+
+                        <div class="faq-question">
+                            <h3>How is the Makerspace managed?</h3>
+                            <p>
+                                A team of six student head stewards and the Makerspace Manager, Kim Neal, manage the
+                                Makerspace. Around ~40 student stewards assist users and manage the Makerspace during
+                                their <a href="/?p=schedule">shift hours</a>.
+                            </p>
+                        </div>
+
+                        <div class="faq-question">
+                            <h3>How to change my display name or email on MAKE?</h3>
+                            <p>Contact Makerspace management at <a
+                                    href="mailto:makerspace-management-l@g.hmc.edu">makerspace-management-l@g.hmc.edu</a>
+                                to update your information.</p>
+                        </div>
+                    </div>
+
+
+                    <div class="faq-category">
+                        <h2>Training, Tools & Materials</h2>
+
+                        <div class="faq-question">
+                            <h3>What are the required quizzes?</h3>
+                            <p>
+                                All users must pass the general safety quiz. Additional quizzes are necessary to use
+                                specific rooms or machines. Quiz completion results in room access within 5-10 minutes.
+                            </p>
+                        </div>
+
+                        <div class="faq-question">
+                            <h3>How do I obtain swipe access to different rooms?</h3>
+                            <p>
+                                Swipe access can be obtained by passing quizzes and visiting F&M, located next to Jay's
+                                Place. Specific quizzes grant access to corresponding areas.
+                            </p>
+                        </div>
+
+                        <div class="faq-question">
+                            <h3>How can I receive welding training?</h3>
+                            <p>
+                                Pass the welding quiz and attend bi-weekly welding training sessions on Fridays at 4 PM. Join the <a href="https://make.hmc.edu/discord">Makerspace Discord</a> for more information and updates!
+                            </p>
+                        </div>
+
+                        <div class="faq-question">
+                            <h3>How can I receive printing press training?</h3>
+                            <p>
+                                Join the <a href="https://make.hmc.edu/discord">Makerspace Discord</a> and ask for a training session! You can also view our schedule to see when a steward with printing press proficiency is on duty.
+                            </p>
+                        </div>
+
+                        <div class="faq-question">
+                            <h3>Can the materials in the Makerspace be used freely?</h3>
+                            <p>
+                                Yes, all floor materials are available for use. However, class, club, or group projects
+                                with funding must use their own materials.
+                            </p>
+                        </div>
+
+                        <div class="faq-question">
+                            <h3>Why are some tools locked up?</h3>
+                            <p>
+                                The lock-up system allows Makerspace to host expensive or dangerous machines. For safety
+                                reasons, users may not access these tools after regular hours but can request a steward
+                                for overnight checkout.
+                            </p>
+                        </div>
+
+                        <div class="faq-question">
+                            <h3>What are the charges for 3D printing?</h3>
+                            <p>
+                                All FDM (filament) printing expenses are covered for personal use. Users may be charged
+                                cost for filament or asked to provide their own for research or club prints. The
+                                Markforged, SLA (Resin), or SLS (powder) printers cost extra, charging as per the
+                                material used.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="faq-category">
+                        <h2>Stewards</h2>
+
+                        <div class="faq-question">
+                            <h3>What help is available from stewards?</h3>
+                            <p>
+                                Stewards can assist with project questions, safety quizzes, tool check-outs and provide
+                                training on using different tools and machines during their shift hours.
+                            </p>
+                        </div>
+
+                        <div class="faq-question">
+                            <h3>How does one apply to be a steward?</h3>
+                            <p>
+                                Stewards are hired each semester! Fill out an <a
+                                    href="https://forms.gle/YhVQA59cuWytMw559">interest form here</a> or watch for our
+                                in-Makerspace announcements when applications open.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="faq-category">
+                        <h2>Workshops, Clubs, & Events</h2>
+
+                        <div class="faq-question">
+                            <h3>How does one learn about workshops?</h3>
+                            <p>
+                                Workshops are announced weekly on our mailing list and on the <a href="/?p=workshops">workshops page</a>.
+                            </p>
+                        </div>
+
+                        <div class="faq-question">
+                            <h3>Can clubs meet at the Makerspace?</h3>
+                            <p>
+                                Yes, clubs can meet in Makerspace. Please notify <a
+                                    href="mailto:makerspace-management-l@g.hmc.edu">makerspace-management-l@g.hmc.edu</a>
+                                to ensure no scheduling conflicts.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="faq-category">
+                        <h2>Projects & Funding</h2>
+
+                        <div class="faq-question">
+                            <h3>How can I obtain funding for a project?</h3>
+                            <p>
+                                All 7C students get a $50 per semester funding. Harvey Mudd students get additional up
+                                to $200 through the Brawn Grant. Apply via the Student Project Application tab.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -674,11 +857,13 @@
                 </select>
 
                 <label for="restock-item">Item Name / Details</label>
-                <textarea type="text" id="restock-item" name="restock-item" aria-label="Item Name" placeholder="Super glue, amazon.com/item-link, etc..."></textarea>
+                <textarea type="text" id="restock-item" name="restock-item" aria-label="Item Name"
+                    placeholder="Super glue, amazon.com/item-link, etc..."></textarea>
 
                 <label for="restock-quantity">Quantity</label>
-                <input type="text" id="restock-quantity" name="restock-quantity" aria-label="Quantity" placeholder="Quantity...">
-                
+                <input type="text" id="restock-quantity" name="restock-quantity" aria-label="Quantity"
+                    placeholder="Quantity...">
+
                 <p>
                     You will receive an email when your request has been processed.
                 </p>
@@ -711,35 +896,36 @@
                     <button onclick="openUtility(this, '/kiosks/loom_utility.html', false)">Loom</button>
                 </div>
 
-                
+
                 <div class="edit-buttons">
                     <button id="edit-shift-cancel" onclick="closePopup()">Close</button>
-                </div> 
+                </div>
             </div>
 
             <div id="drop-shift" class="hidden">
                 <h2>Drop Shift</h2>
                 <div id="drop-shift-details"></div>
-                
+
                 <input type="date" id="drop-shift-date" name="drop-shift-date" aria-label="Drop shift date">
-                
+
                 <div class="edit-buttons">
                     <button id="edit-shift-submit" onclick="submitDropShift()">Drop Shift</button>
                     <button id="edit-shift-cancel" onclick="closePopup()">Cancel</button>
-                </div> 
+                </div>
             </div>
 
             <div id="pickup-shift" class="hidden">
                 <h2>Pickup Shift</h2>
                 <div id="pickup-shift-details"></div>
-                
+
                 <div class="edit-buttons">
                     <button id="pickup-shift-submit" onclick="submitPickupShift()">Pickup Shift</button>
                     <button id="pickup-shift-cancel" onclick="closePopup()">Cancel</button>
                 </div>
             </div>
 
-            <div id="quick-transfer" class="hidden" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);" ondragleave="dragLeaveHandler(event);">
+            <div id="quick-transfer" class="hidden" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);"
+                ondragleave="dragLeaveHandler(event);">
                 <h2>Quick Transfer</h2>
                 <p id="quick-transfer-usage"></p>
                 <table id="quick-transfer-list"></table>
@@ -747,15 +933,16 @@
                 <!--
                 Upload files
                 -->
-                <input type="file" id="quick-transfer-upload" name="quick-transfer-upload" aria-label="Upload files" onchange="uploadFile(event)">
+                <input type="file" id="quick-transfer-upload" name="quick-transfer-upload" aria-label="Upload files"
+                    onchange="uploadFile(event)">
                 <button id="quick-transfer-upload-button" class="big" onclick="openFile()">Upload File</button>
-                
+
                 <div class="edit-buttons">
                     <button id="quick-transfer-cancel" onclick="closePopup()">Close</button>
                 </div>
+            </div>
         </div>
-    </div>
-    
+
 </body>
 <script src="scripts/prelude.js?v=2.0"></script>
 
