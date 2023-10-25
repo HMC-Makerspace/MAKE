@@ -429,6 +429,25 @@ function generateWorkshopDivsAdmin() {
     });
 
     for (let workshop of sorted_workshops) {
+        // Print out object with:
+        // Name
+        // List of emails from uuids in RSVP
+
+        let to_print = {
+            title: workshop.title,
+            emails: [],
+        };
+
+        for (let uuid of workshop.rsvp_list) {
+            let user = state.users.find(user => user.uuid === uuid);
+
+            if (user) {
+                to_print.emails.push(user.email);
+            }
+        }
+
+        console.log(to_print);
+
         let div = document.createElement("tr");
         div.classList.add("workshop-admin");
 
