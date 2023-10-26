@@ -421,7 +421,7 @@ function generateWorkshopDivsAdmin() {
 
     // Add header
     let header = document.createElement("tr");
-    header.innerHTML = `<th>Title</th><th>Description</th><th>Instructors</th><th>Start Time</th><th>Capacity</th><th>Signups</th><th>Edit</th><th>Published</th><th>Delete</th>`;
+    header.innerHTML = `<th>Title</th><th>Description</th><th>Instructors</th><th>Start Time</th><th>Capacity</th><th>Live</th><th>Signups</th><th>Edit</th><th>Delete</th>`;
     divs.push(header);
 
     let sorted_workshops = state.workshops.sort((a, b) => {
@@ -476,10 +476,16 @@ function generateWorkshopDivsAdmin() {
         capacity.innerText = `${workshop.rsvp_list.length}/${workshop.capacity}`;
         div.appendChild(capacity);
 
+        let is_live = document.createElement("td");
+        is_live.classList.add("workshop-is_live");
+        is_live.classList.add(workshop.is_live ? "published" : "unpublished");
+        is_live.innerHTML = workshop.is_live ? "<span class='material-symbols-outlined'>published_with_changes</span>" : "<span class='material-symbols-outlined'>unpublished</span>";
+        div.appendChild(is_live);
+
         let rsvp_list = document.createElement("td");
         rsvp_list.classList.add("workshop-rsvp_list");
         let rsvp_button = document.createElement("button");
-        rsvp_button.innerText = `Manage Signups`;
+        rsvp_button.innerHTML = "<span class='material-symbols-outlined'>group</span>"
         rsvp_button.onclick = () => {
             showRSVPList(workshop.uuid);
         };
@@ -490,7 +496,7 @@ function generateWorkshopDivsAdmin() {
         edit_button_container.classList.add("workshop-edit");
         
         let edit_button = document.createElement("button");
-        edit_button.innerText = "Edit";
+        edit_button.innerHTML = "<span class='material-symbols-outlined'>tune</span>"
         edit_button.onclick = () => {
             showCreateEditWorkshop(workshop.uuid);
         };
@@ -498,18 +504,12 @@ function generateWorkshopDivsAdmin() {
         edit_button_container.appendChild(edit_button);
         div.appendChild(edit_button_container);
 
-        
-        let is_live = document.createElement("td");
-        is_live.classList.add("workshop-is_live");
-        is_live.innerText = workshop.is_live;
-        div.appendChild(is_live);
-
         let delete_button_container = document.createElement("td");
         delete_button_container.classList.add("workshop-delete");
         
         let delete_button = document.createElement("button");
         delete_button.classList.add("delete");
-        delete_button.innerText = "X";
+        delete_button.innerHTML = "<span class='material-symbols-outlined'>delete</span>"
         delete_button.onclick = () => {
             deleteWorkshop(workshop.uuid);
         };
@@ -658,6 +658,11 @@ function showCreateEditWorkshop(uuid) {
 }
 
 async function deleteWorkshop(uuid) {
+    // Confirm
+    if (!confirm("Are you sure you want to delete this workshop?")) {
+        return;
+    }
+
     let request = await fetch(`${API}/workshops/delete_workshop`,
         {
             method: "POST",
