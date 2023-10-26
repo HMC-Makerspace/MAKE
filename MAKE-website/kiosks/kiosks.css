@@ -788,6 +788,11 @@ td.workshop-edit button {
 .workshop-delete, .workshop-edit, .workshop-is_live, .workshop-capacity, .workshop-rsvp_list {
   text-align: center;
 }
+
+#workshop-signups {
+  width: 900px;
+}
+
 /*
 
 INVENTORY

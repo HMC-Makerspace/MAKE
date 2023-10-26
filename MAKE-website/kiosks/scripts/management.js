@@ -531,6 +531,10 @@ function showRSVPList(uuid) {
 
         removeAllChildren(rsvp_list);
 
+        let header = document.createElement("tr");
+        header.innerHTML = `<th>Name</th><th>Email</th><th>CX ID</th>`;
+        rsvp_list.appendChild(header);
+
         for (let uuid of workshop.rsvp_list) {
             let user = state.users.find(user => user.uuid === uuid);
 
