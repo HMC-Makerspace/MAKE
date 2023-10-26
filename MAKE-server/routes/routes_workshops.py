@@ -299,3 +299,55 @@ async def route_cancel_rsvp_to_workshop(request: Request):
     await collection.replace_one({"uuid": body["workshop_uuid"]}, workshop)
 
     return
+
+
+@workshops_router.post("/send_custom_workshop_email", status_code=201)
+async def route_send_custom_workshop_email(request: Request):
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Deleting workshop...")
+
+    # Get the request body
+    body = await request.json()
+
+    db = MongoDB()
+    api_key = request.headers["api-key"]
+    is_valid = await validate_api_key(db, api_key, "workshops")
+
+    if not is_valid:
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    # Get the workshops collection
+    collection = await db.get_collection("workshops")
+
+    # Get the workshop
+    workshop = await collection.find_one({"uuid": body["uuid"]})
+
+    if workshop is None:
+        # The workshop does not exist
+        # Return error
+        raise HTTPException(status_code=404, detail="Workshop does not exist")
+    
+    # Send email to users
+    subject = body["subject"]
+    body = body["body"]
+
+    # Replace \n with <br>
+    body = body.replace("\n", "<br>")
+
+    for user_uuid in workshop["rsvp_list"]:
+        users_collection = await db.get_collection("users")
+        user = await users_collection.find_one({"uuid": user_uuid})
+
+        if user is None:
+            # The user does not exist
+            # Return error
+            raise HTTPException(status_code=404, detail="User does not exist")
+
+        try:
+            await email_user(user["email"], [], subject, body)
+        except:
+            pass
+
+    return

@@ -421,7 +421,7 @@ function generateWorkshopDivsAdmin() {
 
     // Add header
     let header = document.createElement("tr");
-    header.innerHTML = `<th>Title</th><th>Description</th><th>Instructors</th><th>Start Time</th><th>End Time</th><th>Capacity</th><th>Signups</th><th>Is Live</th><th>Edit</th><th>Delete</th>`;
+    header.innerHTML = `<th>Title</th><th>Description</th><th>Instructors</th><th>Start Time</th><th>Capacity</th><th>Signups</th><th>Edit</th><th>Published</th><th>Delete</th>`;
     divs.push(header);
 
     let sorted_workshops = state.workshops.sort((a, b) => {
@@ -471,25 +471,20 @@ function generateWorkshopDivsAdmin() {
         timestamp_start.innerText = new Date(workshop.timestamp_start * 1000).toLocaleString();
         div.appendChild(timestamp_start);
 
-        let timestamp_end = document.createElement("td");
-        timestamp_end.classList.add("workshop-timestamp_end");
-        timestamp_end.innerText = new Date(workshop.timestamp_end * 1000).toLocaleString();
-        div.appendChild(timestamp_end);
-
         let capacity = document.createElement("td");
         capacity.classList.add("workshop-capacity");
-        capacity.innerText = workshop.capacity;
+        capacity.innerText = `${workshop.rsvp_list.length}/${workshop.capacity}`;
         div.appendChild(capacity);
 
         let rsvp_list = document.createElement("td");
         rsvp_list.classList.add("workshop-rsvp_list");
-        rsvp_list.innerText = workshop.rsvp_list.length;
+        let rsvp_button = document.createElement("button");
+        rsvp_button.innerText = `Manage Signups`;
+        rsvp_button.onclick = () => {
+            showRSVPList(workshop.uuid);
+        };
+        rsvp_list.appendChild(rsvp_button);
         div.appendChild(rsvp_list);
-
-        let is_live = document.createElement("td");
-        is_live.classList.add("workshop-is_live");
-        is_live.innerText = workshop.is_live;
-        div.appendChild(is_live);
 
         let edit_button_container = document.createElement("td");
         edit_button_container.classList.add("workshop-edit");
@@ -502,6 +497,12 @@ function generateWorkshopDivsAdmin() {
 
         edit_button_container.appendChild(edit_button);
         div.appendChild(edit_button_container);
+
+        
+        let is_live = document.createElement("td");
+        is_live.classList.add("workshop-is_live");
+        is_live.innerText = workshop.is_live;
+        div.appendChild(is_live);
 
         let delete_button_container = document.createElement("td");
         delete_button_container.classList.add("workshop-delete");
@@ -520,6 +521,84 @@ function generateWorkshopDivsAdmin() {
     }
 
     return divs;
+}
+
+function showRSVPList(uuid) {
+    let workshop = state.workshops.find(workshop => workshop.uuid === uuid);
+
+    if (workshop) {
+        const rsvp_list = document.getElementById("workshop-signups-list");
+
+        removeAllChildren(rsvp_list);
+
+        for (let uuid of workshop.rsvp_list) {
+            let user = state.users.find(user => user.uuid === uuid);
+
+            if (user) {
+                let div = document.createElement("tr");
+                div.classList.add("workshop-signup");
+            
+                let name = document.createElement("td");
+                name.classList.add("workshop-signup-name");
+                name.innerText = user.name;
+                div.appendChild(name);
+
+                let email = document.createElement("td");
+                email.classList.add("workshop-signup-email");
+                email.innerText = user.email;
+                div.appendChild(email);
+
+                let cx_id = document.createElement("td");
+                cx_id.classList.add("workshop-signup-cx_id");
+                cx_id.innerText = user.cx_id;
+                div.appendChild(cx_id);
+
+                rsvp_list.appendChild(div);
+            }
+        }
+
+        document.getElementById("workshop-signups-send-email").onclick = () => {
+            sendWorkshopEmail(workshop.uuid);
+        };
+
+        document.getElementById("workshop-signups").classList.remove("hidden");
+        document.getElementById("popup-container").classList.remove("hidden");
+    } else {
+        alert("Error finding workshop with uuid " + uuid);
+    }
+}
+
+async function sendWorkshopEmail(uuid) {
+    let subject = document.getElementById("workshop-signups-email-subject").value;
+    let body = document.getElementById("workshop-signups-email-body").value;
+
+    if (subject.trim() === "" || body.trim() === "") {
+        alert("Subject and/or body cannot be empty.");
+        return;
+    }
+
+    document.getElementById("workshop-signups-send-email").setAttribute("disabled", "disabled");
+
+    let request = await fetch(`${API}/workshops/send_custom_workshop_email`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+            body: JSON.stringify({
+                uuid: uuid,
+                subject: subject,
+                body: body,
+            }),
+        }
+    );
+
+    if (request.status == 201) {
+        alert("Email sent successfully.");
+    }
+
+    document.getElementById("workshop-signups-send-email").removeAttribute("disabled");
 }
 
 function showCreateEditWorkshop(uuid) {

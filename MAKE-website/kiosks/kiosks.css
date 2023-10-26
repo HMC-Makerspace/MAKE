@@ -785,7 +785,7 @@ td.workshop-edit button {
   padding-right: 10px;
 }
 
-.workshop-delete {
+.workshop-delete, .workshop-edit, .workshop-is_live, .workshop-capacity, .workshop-rsvp_list {
   text-align: center;
 }
 /*

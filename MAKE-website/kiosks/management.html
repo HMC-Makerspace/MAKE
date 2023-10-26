@@ -298,6 +298,27 @@
                     <button id="complete-restock-request-cancel" onclick="closePopup()">Cancel</button>
                 </div> 
             </div>
+
+            <div id="workshop-signups" class="hidden">
+                <h1>Workshop Signups</h1>
+
+                <h2>User List</h2>
+                <table id="workshop-signups-list"></table>
+
+
+                <h2>Send Email</h2>
+                <label for="workshop-signups-email-subject">Subject</label>
+                <input id="workshop-signups-email-subject" placeholder="Workshop Update...">
+
+                <label for="workshop-signups-email-body">Body</label>
+                <textarea id="workshop-signups-email-body" placeholder="Hello Makers..."></textarea>
+
+                <button id="workshop-signups-send-email" class="big" onclick="sendWorkshopEmail()">Send Email</button>
+
+                <div class="edit-buttons">
+                    <button id="workshop-signups-cancel" onclick="closePopup()">Close</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -311,7 +332,7 @@
     <script src="/scripts/page_schedule.js?v=2.1"></script>
     <script src="/scripts/utils.js?v=2.1"></script>
 
-    <script src="/kiosks/scripts/management.js?v=2.2"></script>
+    <script src="/kiosks/scripts/management.js?v=2.3"></script>
 </body>
 
 </html>
