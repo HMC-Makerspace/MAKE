@@ -4,7 +4,10 @@
 
   --background-color: #fafafa;
 
-  --theme-color-1: #ee9d22;
+  --make-color: #ee9d22;
+  --alt-make-color: #CC7E07;
+
+  --theme-color-1: var(--make-color);
   --theme-color-2: #ffffff;
   --theme-color-3: #d6d6d6;
   --theme-color-4: #2796eb; 
@@ -79,7 +82,7 @@
 [data-theme="dark"] {
   --background-color: #161616;
 
-  --theme-color-1: #ee9d22;
+  --theme-color-1: var(--make-color);
   --theme-color-2: #28272b;
   --theme-color-3: #424555;
   --theme-color-4: #004174;
@@ -524,8 +527,8 @@ input, textarea {
   color: var(--text-color-main);
   padding: 12px;
   border: unset;
-  cursor: pointer;
   transition: background-color 0.3s ease-in-out;
+  border-radius: 2px;
 }
 
 input.focus, textarea.focus {
@@ -559,6 +562,7 @@ select {
   border: unset;
   background-color: var(--theme-color-3);
   color: var(--text-color-main);
+  border-radius: 2px;
 }
 
 label {
@@ -600,6 +604,10 @@ a:visited {
   color: var(--link-color);
 }
 
+a.no-invert:link:hover {
+  filter: unset !important;
+}
+
 .content-container {
   display: flex;
   flex-direction: column;
@@ -630,21 +638,33 @@ a:visited {
 
 .hmc-content {
   position: absolute;
-  bottom: 30px;
+  bottom: 20px;
   display: flex;
   flex-direction: column;
-  row-gap: 5px;
+  row-gap: 10px;
   align-items: center;
   justify-content: center;
   font-size: .8em;
-  padding: 10px;
   margin-top: 1vh;
+  padding: 15px 0;
   color: var(--white);
-  background-color: var(--black);
+  width: 210px;
+  background-color: var(--alt-make-color);
+}
+
+.hmc-content p {
+  margin: unset;
+  margin-bottom: 5px;
 }
 
 .hmc-content a {
-  color: var(--link-color-light);
+  font-weight: bold;
+  color: var(--black)
+}
+
+.hmc-content img {
+  width: 60px;
+  height: 60px;
 }
 
 /*
