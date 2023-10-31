@@ -92,7 +92,7 @@ function generateScheduleDivs(schedule) {
                 
                 for (let steward_obj of shift.stewards) {
 
-                    if (shift.head_steward) {
+                    if (steward_obj.role == "head_steward") {
                         inner_div.classList.add("head-steward");
                     }
 
