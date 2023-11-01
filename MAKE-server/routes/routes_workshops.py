@@ -30,13 +30,27 @@ async def route_get_workshops(request: Request, user_uuid: str):
 
     workshops = [workshop.dict() for workshop in workshops if workshop.is_live == True]
 
+    collection = await db.get_collection("users")
+
+    user = await collection.find_one({"uuid": user_uuid})
+
+    if user is None:
+        # The user does not exist
+        # This is actually fine as we want to serve anonymous users
+        # Set user role to user
+        user = {
+            "role": "user"
+        }
+    
+
     # Remove the rsvp_list from each workshop and replace it with the length of the list
     for workshop in workshops:
         workshop["signups"] = len(workshop["rsvp_list"])
         workshop["position"] = workshop["rsvp_list"].index(user_uuid) if user_uuid in workshop["rsvp_list"] else -1
 
-        # Remove the rsvp_list
-        del workshop["rsvp_list"]
+        # Remove the rsvp_list if a user
+        if user["role"] == "user":
+            del workshop["rsvp_list"]
 
     # Return the checkouts
     return workshops
@@ -217,9 +231,18 @@ async def route_rsvp_to_workshop(request: Request):
     date_start = datetime.fromtimestamp(float(workshop["timestamp_start"]))
     date_end = datetime.fromtimestamp(float(workshop["timestamp_end"]))
 
-    # Get date in pacific time
+    # Get date in pacific time, accounting for daylight savings
+    # Subtract 7 hours, then check if it's daylight savings
+    # If it is, subtract another hour
     date_start = date_start - timedelta(hours=7)
     date_end = date_end - timedelta(hours=7)
+
+    # Check if it's daylight savings
+    if date_start.strftime("%Z") == "PDT":
+        # It's daylight savings
+        # Subtract an hour
+        date_start = date_start - timedelta(hours=1)
+        date_end = date_end - timedelta(hours=1)
 
     date_start_str = date_start.strftime("%Y%m%dT%H%M%S")
     date_end_str = date_end.strftime("%Y%m%dT%H%M%S")

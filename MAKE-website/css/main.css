@@ -2112,6 +2112,10 @@ Workshops
   text-align: center;
 }
 
+.workshop button.rsvp-list {
+  float: right;
+}
+
 @media screen and (max-width: 600px) {
   .workshop-container {
     grid-template-columns: 1fr;

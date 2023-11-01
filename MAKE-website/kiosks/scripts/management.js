@@ -487,7 +487,7 @@ function generateWorkshopDivsAdmin() {
         let rsvp_button = document.createElement("button");
         rsvp_button.innerHTML = "<span class='material-symbols-outlined'>group</span>"
         rsvp_button.onclick = () => {
-            showRSVPList(workshop.uuid);
+            showRSVPListAdmin(workshop.uuid);
         };
         rsvp_list.appendChild(rsvp_button);
         div.appendChild(rsvp_list);
@@ -523,7 +523,7 @@ function generateWorkshopDivsAdmin() {
     return divs;
 }
 
-function showRSVPList(uuid) {
+function showRSVPListAdmin(uuid) {
     let workshop = state.workshops.find(workshop => workshop.uuid === uuid);
 
     if (workshop) {

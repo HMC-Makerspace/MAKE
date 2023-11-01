@@ -113,6 +113,18 @@ function generateWorkshopDiv(workshop, is_past=false) {
         capacity.innerHTML += `<br> <b>Full, RSVP for waitlist</b>`
     }
 
+    // Add rsvp list button if rsvp_list exists
+    if (workshop.rsvp_list) {
+        const rsvp_list = document.createElement("button");
+        rsvp_list.classList.add("rsvp-list");
+        rsvp_list.innerText = "View RSVP List";
+
+        rsvp_list.onclick = () => {
+            showRSVPList(workshop.uuid);
+        };
+
+        capacity.appendChild(rsvp_list);
+    }
     
     capacity.classList.add("capacity");
     div.appendChild(capacity);
@@ -140,7 +152,6 @@ function generateWorkshopDiv(workshop, is_past=false) {
                 cancelRsvpToWorkshop(workshop.uuid);
             });
         }
-
 
         div.appendChild(signup);
     } else {
@@ -202,4 +213,39 @@ async function cancelRsvpToWorkshop(workshop_uuid) {
     if (response.status == 201) {
         await fetchWorkshops();
     }
+}
+
+async function showRSVPList(workshop_uuid) {
+    const workshop = state.workshops.find((workshop) => workshop.uuid == workshop_uuid);
+
+    const el = document.getElementById("rsvp-list-details");
+
+    removeAllChildren(el);
+    
+    let header = document.createElement("tr");
+    header.innerHTML = `<th>Name</th><th>Email</th>`;
+    el.appendChild(header);
+
+    for (let user_uuid of workshop.rsvp_list) {
+        let request = await fetch(`${API}/users/get_user/${user_uuid}`);
+
+        if (request.status == 200) {
+            let user = await request.json();
+
+            let user_el = document.createElement("tr");
+
+            let name_el = document.createElement("td");
+            name_el.innerText = user.name;
+            user_el.appendChild(name_el);
+
+            let email_el = document.createElement("td");
+            email_el.innerText = user.email;
+            user_el.appendChild(email_el);
+
+            el.appendChild(user_el);
+        }
+    }
+
+    document.getElementById("rsvp-list").classList.remove("hidden");
+    document.getElementById("popup-container").classList.remove("hidden");
 }
