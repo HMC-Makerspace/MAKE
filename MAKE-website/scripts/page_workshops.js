@@ -225,6 +225,9 @@ async function showRSVPList(workshop_uuid) {
     let header = document.createElement("tr");
     header.innerHTML = `<th>Name</th><th>Email</th>`;
     el.appendChild(header);
+    
+    document.getElementById("rsvp-list").classList.remove("hidden");
+    document.getElementById("popup-container").classList.remove("hidden");
 
     for (let user_uuid of workshop.rsvp_list) {
         let request = await fetch(`${API}/users/get_user/${user_uuid}`);
@@ -245,7 +248,4 @@ async function showRSVPList(workshop_uuid) {
             el.appendChild(user_el);
         }
     }
-
-    document.getElementById("rsvp-list").classList.remove("hidden");
-    document.getElementById("popup-container").classList.remove("hidden");
 }
