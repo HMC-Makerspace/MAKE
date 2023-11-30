@@ -1,4 +1,5 @@
 import datetime
+import os
 from fastapi import FastAPI
 from fastapi import Request
 from fastapi.staticfiles import StaticFiles
@@ -197,10 +198,8 @@ if __name__ == "__main__":
 
     logging.info("Database schema is valid!")
 
-    # Start the discord bot
-    logging.info("Starting discord bot...")
-    
-    logging.info("Discord bot started!")
+    # Set timezone to Pacific time, following daylight savings
+    os.environ["TZ"] = "US/Pacific"
 
     # When this python file is run directly, run the uvicorn server
     # in debug mode, and reload the server when the code changes.

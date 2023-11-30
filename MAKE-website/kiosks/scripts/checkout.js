@@ -46,7 +46,7 @@ async function authenticate() {
 
     fetchUsers().then(() => {
         for (let key of Object.keys(state.users)) {
-            state.users[key].cx_id_str = state.users[key].cx_id.toString();
+            state.users[key].cx_id_str = `${state.users[key].cx_id}`;
         }
 
         submitUserSearch();

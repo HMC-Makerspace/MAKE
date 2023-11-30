@@ -1,7 +1,8 @@
-from datetime import datetime,timedelta
+from datetime import datetime,timedelta, timezone
 import logging
 from utilities import email_user, format_email_template, validate_api_key
 from db_schema import *
+import requests
 
 from fastapi import APIRouter, HTTPException, Request
 
@@ -225,53 +226,16 @@ async def route_rsvp_to_workshop(request: Request):
         # Return error
         raise HTTPException(status_code=400, detail="You're already signed up for this workshop")
     
-    # Send email to user
-    style = "background-color: #ee9d22; font-size: 18px; font-family: Helvetica, Arial, sans-serif; font-weight:bold; text-decoration: none; padding: 14px 20px; color: #1D2025; border-radius: 5px; display:inline-block; mso-padding-alt:0; box-shadow:0 3px 6px rgba(0,0,0,.2);"
-
     date_start = datetime.fromtimestamp(float(workshop["timestamp_start"]))
     date_end = datetime.fromtimestamp(float(workshop["timestamp_end"]))
 
-    # Get date in pacific time, accounting for daylight savings
-    # Subtract 7 hours, then check if it's daylight savings
-    # If it is, subtract another hour
-    date_start = date_start - timedelta(hours=7)
-    date_end = date_end - timedelta(hours=7)
+    email_body = format_email_template("workshop_confirmation", {
+        "workshop": workshop["title"], 
+        "date": date_start.strftime("%A, %B %d, %Y"),
+        "time": f"{date_start.strftime('%I:%M %p')} - {date_end.strftime('%I:%M %p')}",
+    })
 
-    # Check if it's daylight savings
-    if date_start.strftime("%Z") == "PDT":
-        # It's daylight savings
-        # Subtract an hour
-        date_start = date_start - timedelta(hours=1)
-        date_end = date_end - timedelta(hours=1)
-
-    date_start_str = date_start.strftime("%Y%m%dT%H%M%S")
-    date_end_str = date_end.strftime("%Y%m%dT%H%M%S")
-
-    g_cal_link = f"https://calendar.google.com/calendar/render?action=TEMPLATE&text={workshop['title']}&details={workshop['description']}&dates={date_start_str}/{date_end_str}&location=201 Platt Blvd, Claremont, CA 91711"
-
-    calendar_link = f"<a target='_blank' rel='noopener' target='_blank' href= style='{style}' href='{g_cal_link}'>Click here to add it to your calendar!</a>"
-
-
-    is_on_waitlist = len(workshop["rsvp_list"]) >= workshop["capacity"]
-
-    if is_on_waitlist:
-        email_body = format_email_template("workshop_waitlist", {
-            "workshop": workshop["title"], 
-            "date": date_start.strftime("%A, %B %d, %Y"),
-            "time": date_start.strftime("%I:%M %p"),
-            "calendar_link": calendar_link
-        })
-        
-        await email_user(user["email"], [], f"RSVP Confirmation: {workshop['title']} (Waitlist)", email_body)
-    else:
-        email_body = format_email_template("workshop_confirmation", {
-            "workshop": workshop["title"], 
-            "date": date_start.strftime("%A, %B %d, %Y"),
-            "time": date_start.strftime("%I:%M %p"),
-            "calendar_link": calendar_link
-        })
-            
-        await email_user(user["email"], [], f"RSVP Confirmation: {workshop['title']}", email_body)
+    await email_user(user["email"], [], f"RSVP Confirmation: {workshop['title']}", email_body)
 
     # Add the user to the workshop's rsvp_list
     workshop["rsvp_list"].append(body["user_uuid"])
@@ -372,5 +336,50 @@ async def route_send_custom_workshop_email(request: Request):
             await email_user(user["email"], [], subject, body)
         except:
             pass
+
+    return
+
+
+@workshops_router.post("/subscribe", status_code=201)
+async def route_subscribe(request: Request):
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Subscribing to mailing list...")
+
+    # Get the request body
+    body = await request.json()
+    email = body["email"]
+
+    '''
+    <div id="mc_embed_shell">
+    <div id="mc_embed_signup">
+        <form action="https://hmc.us21.list-manage.com/subscribe/post?u=68887a68081c3fca3f7e8bc07&amp;id=e616cca7f1&amp;f_id=004de0e6f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_self" novalidate="">
+            <div id="mc_embed_signup_scroll"><h2>Subscribe</h2>
+                <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+                <div class="mc-field-group"><label for="mce-EMAIL">Email Address <span class="asterisk">*</span></label><input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required="" value=""></div>
+    <div hidden=""><input type="hidden" name="tags" value="2962934"></div>
+            <div id="mce-responses" class="clear">
+                <div class="response" id="mce-error-response" style="display: none;"></div>
+                <div class="response" id="mce-success-response" style="display: none;"></div>
+            </div><div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_68887a68081c3fca3f7e8bc07_e616cca7f1" tabindex="-1" value=""></div><div class="clear"><input type="submit" name="subscribe" id="mc-embedded-subscribe" class="button" value="Subscribe"></div>
+        </div>
+    </form>
+    </div>
+    </div>
+    '''
+
+    # Send post request to mailchimp mimicking the form
+    form_data = {
+        "EMAIL": email,
+        "b_68887a68081c3fca3f7e8bc07_e616cca7f1": "",
+        "subscribe": "Subscribe"
+    }
+
+    response = requests.post("https://hmc.us21.list-manage.com/subscribe/post?u=68887a68081c3fca3f7e8bc07&amp;id=e616cca7f1&amp;f_id=004de0e6f0", data=form_data)
+
+    # Check if the request was successful
+    if response.status_code != 200:
+        # There was an error
+        # Return error
+        raise HTTPException(status_code=500, detail="Error subscribing to Mailchimp")
 
     return

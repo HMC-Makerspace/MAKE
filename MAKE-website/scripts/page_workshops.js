@@ -29,6 +29,8 @@ function renderWorkshops() {
         return b.timestamp_start - a.timestamp_start;
     });
 
+    sorted_workshops.reverse();
+
     for (let workshop of sorted_workshops) {
         // if the workshop has past, append it to another element
         // However, add a 24 hour buffer to the date, so that workshops that are
@@ -247,5 +249,46 @@ async function showRSVPList(workshop_uuid) {
 
             el.appendChild(user_el);
         }
+    }
+}
+
+async function signupForMailingList() {
+    /*
+    <div id="mc_embed_shell">
+    <div id="mc_embed_signup">
+        <form action="https://hmc.us21.list-manage.com/subscribe/post?u=68887a68081c3fca3f7e8bc07&amp;id=e616cca7f1&amp;f_id=004de0e6f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_self" novalidate="">
+            <div id="mc_embed_signup_scroll"><h2>Subscribe</h2>
+                <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+                <div class="mc-field-group"><label for="mce-EMAIL">Email Address <span class="asterisk">*</span></label><input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required="" value=""></div>
+    <div hidden=""><input type="hidden" name="tags" value="2962934"></div>
+            <div id="mce-responses" class="clear">
+                <div class="response" id="mce-error-response" style="display: none;"></div>
+                <div class="response" id="mce-success-response" style="display: none;"></div>
+            </div><div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_68887a68081c3fca3f7e8bc07_e616cca7f1" tabindex="-1" value=""></div><div class="clear"><input type="submit" name="subscribe" id="mc-embedded-subscribe" class="button" value="Subscribe"></div>
+        </div>
+    </form>
+    </div>
+    </div>
+    */
+
+    // Get email
+    const email = document.getElementById("mailing-list-email").value;
+
+    // Send request using the post and formdata from above to the mailing list
+    const request = await fetch(`${API}/workshops/subscribe`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            email: email
+        })
+    });
+
+    if (request.status == 201) {
+        alert("Successfully subscribed to mailing list!");
+    } else {
+        const error = await request.json();
+        alert("Error: " + error.detail);
     }
 }
