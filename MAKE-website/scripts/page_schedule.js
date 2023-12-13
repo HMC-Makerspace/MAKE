@@ -35,7 +35,8 @@ function renderSchedule(schedule) {
         num = current_shift.stewards.length;
     }
 
-    num_stewards.innerText = `${num} steward${num == 1 ? "" : "s"}`
+    // num_stewards.innerText = `${num} steward${num == 1 ? "" : "s"}`
+    num_stewards.innerText = `0 stewards`;
     
     removeAllChildren(schedule_table);
     
