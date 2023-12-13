@@ -2122,6 +2122,14 @@ Workshops
   }
 }
 
+#mailing-list-email-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px;
+}
 /*
 
 Student Project Application
@@ -2286,6 +2294,40 @@ STEWARD RESOURCES
   margin-bottom: 40px;
   font-weight: bolder;
   font-size: 1em;
+}
+
+#steward-availability {
+  user-select: none;
+}
+
+#steward-availability tr {
+  height: 50px;
+  font-size: 14px;
+}
+
+#steward-availability th {
+  width: 60px;
+}
+
+.availability-cell {  
+  border: 1px solid #00000000;
+  height: 40px;
+}
+
+td.availability-cell {
+  width: 60px;
+}
+
+.availability-cell:hover {
+  cursor: pointer;
+}
+
+.availability-cell.available {
+  background-color: var(--high-color);
+}
+
+.availability-cell:active {
+  opacity: .7;
 }
 
 /*

@@ -1,3 +1,141 @@
+let mouseDown = false; // Tracks if the mouse is currently down
+let initialState = false; // Tracks the initial state being toggled
+let startCell = null; // Keeps track of where the drag started
+let endCell = null; // Keeps track of the current cell during drag
+let changedCells = []; // Array to keep track of all cell changes
+
+document.addEventListener("mousedown", (e) => {
+    if (!state.user_object.availability) {
+        state.user_object.availability = [];
+    
+        for (let i = 0; i < 7; i++) {
+            state.user_object.availability.push([]);
+    
+            for (let j = 0; j < 24; j++) {
+                state.user_object.availability[i].push(false);
+            }
+        }
+    }
+
+    if (e.target.classList.contains('availability-cell')) {
+        mouseDown = true;
+        initialState = !e.target.classList.contains('available');
+        startCell = getCellIndices(e.target);
+        // Store that the cell state has been toggled without calling the API immediately
+        changedCells.push({ element: e.target, initial: initialState });
+        updateCell(e.target, initialState);
+    }
+}, true);
+
+document.addEventListener("mouseenter", (e) => {
+    if (mouseDown && e.target.classList.contains('availability-cell')) {
+        endCell = getCellIndices(e.target);
+        // Immediately update visual state & store all changed cells, if not already stored
+        updateSelectionRectangle();
+    }
+}, true);
+
+document.addEventListener("mouseleave", (e) => {
+    if (mouseDown && e.target.classList.contains('availability-cell')) {
+        endCell = getCellIndices(e.target);
+        // Immediately update visual state & store all changed cells, if not already stored
+        updateSelectionRectangle();
+    }
+}, true);
+
+document.addEventListener("mouseup", (e) => {
+    mouseDown = false;
+    if (startCell) {
+        if (e.target.classList.contains('availability-cell')) {
+            endCell = getCellIndices(e.target); // New end cell
+        }
+        updateSelectionRectangle(endCell); // Make sure the last cell is also updated, pass `endCell` for explicitness
+        batchUpdateAvailability(changedCells);
+        // Reset for next operation
+        startCell = null;
+        endCell = null;
+        changedCells = [];
+    }
+}, true);
+
+// Helper function to get the day and hour indices of a cell
+function getCellIndices(cellElement) {
+    const idParts = cellElement.id.split('-');
+    return { day: parseInt(idParts[2], 10), hour: parseInt(idParts[3], 10) };
+}
+
+// Helper function to update a single cell's availability
+function updateCell(cellElement, makeAvailable) {
+    cellElement.classList.toggle('available', makeAvailable);
+}
+
+// Helper function to update the cells inside the selection rectangle
+function updateSelectionRectangle(lastUpdateCell) {
+    if (!startCell || !(endCell || lastUpdateCell)) return;
+
+    // If lastUpdateCell is provided, use it over endCell
+    const end = lastUpdateCell || endCell;
+
+    const minDay = Math.min(startCell.day, end.day);
+    const maxDay = Math.max(startCell.day, end.day);
+    const minHour = Math.min(startCell.hour, end.hour);
+    const maxHour = Math.max(startCell.hour, end.hour);
+
+    for (let day = minDay; day <= maxDay; day++) {
+        for (let hour = minHour; hour <= maxHour; hour++) {
+            const cellElement = document.getElementById(`availability-cell-${day}-${hour}`);
+            if (cellElement) {
+                const cellChanged = !cellElement.classList.contains('available') !== initialState;
+                updateCell(cellElement, initialState);
+                if (cellChanged && !changedCells.some(cell => cell.element === cellElement)) {
+                    changedCells.push({ element: cellElement, initial: initialState });
+                }
+            }
+        }
+    }
+}
+
+async function batchUpdateAvailability(cellChanges) {
+    let updates = cellChanges.map(({ element, initial }) => {
+        const { day, hour } = getCellIndices(element);
+        return {
+            day: day,
+            hour: hour,
+            available: initial
+        };
+    });
+
+    let new_user_object = { ...state.user_object};
+
+    new_user_object.availability = applyCellChangesToAvailability(new_user_object.availability, updates);
+
+    const response = await fetch(`${API}/users/update_user_by_uuid`, {
+        method: "POST",
+        body: JSON.stringify(new_user_object)
+    });
+
+    if (response.status == 201) {
+        state.user_object = new_user_object;
+        saveState();
+    } else {
+        // Roll back the DOM to reflect that the updates weren't successful
+        cellChanges.forEach(({ element, initial }) => {
+            element.classList.toggle('available', !initial);
+        });
+        alert('Error updating availability. Please try again.');
+    }
+}
+
+
+function applyCellChangesToAvailability(availability, updates) {
+    for (let { day, hour, available } of updates) {
+        availability[day][hour] = available;
+    }
+    
+    return availability;
+}
+
+
 async function fetchStewardShifts() {
     const response = await fetch(`${API}/shifts/get_shifts_for_steward/${state.user_object.uuid}`, {
         method: "GET",
@@ -67,6 +205,7 @@ async function populateStewardPage() {
         }
         prof_checkbox.id = `edit-user-proficiency-${prof}`;
 
+        prof_checkbox.onchange = updateStewardProficiencies;
         let prof_label = document.createElement("label");
         prof_label.innerText = prof;
         prof_label.htmlFor = `edit-user-proficiency-${prof}`;
@@ -154,6 +293,67 @@ async function populateStewardPage() {
     }
 
     appendChildren(available_shifts, divs);
+
+    // Generate and add availability
+    const availability_table = document.getElementById("steward-availability");
+
+    divs = [];
+
+    // Create header row
+    const header = document.createElement("tr");
+    header.innerHTML = "<th>Time</th>";
+
+    for (let day of DAYS) {
+        const day_header = document.createElement("th");
+        day_header.innerText = day;
+        header.appendChild(day_header);
+    }
+    
+    divs.push(header);
+
+    for (let i = 13; i < 22; i++) {
+        const row = document.createElement("tr");
+
+        const time = document.createElement("th");
+        time.innerText = `${formatHour(i)} - ${formatHour(i + 1)}`;
+        row.appendChild(time);
+
+        for (let j = 0; j < 7; j++) {
+            const cell = document.createElement("td");
+            cell.classList.add("availability-cell");
+            cell.id = `availability-cell-${j}-${i}`;
+
+            if (state.user_object.availability) {
+                if (state.user_object.availability[j][i]) {
+                    cell.classList.add("available");
+                }
+            }
+
+            row.appendChild(cell);
+        }
+
+        divs.push(row);
+    }
+
+    removeAllChildren(availability_table);
+    appendChildren(availability_table, divs);
+}
+
+async function updateStewardAvailability(day, hour, available) {
+    let new_user_object = state.user_object;
+
+    new_user_object.availability[day][hour] = available;
+
+    const response = await fetch(`${API}/users/update_user_by_uuid`, {
+        method: "POST",
+        body: JSON.stringify(new_user_object)
+    });
+
+    if (response.status == 201) {
+        state.user_object = new_user_object;
+
+        saveState();
+    }
 }
 
 async function generateShiftDiv(shift, change=false) {

@@ -193,6 +193,8 @@ async def route_update_user_by_uuid(request: Request):
 
     if "proficiencies" in json:
         user["proficiencies"] = json["proficiencies"]
+    if "availability" in json:
+        user["availability"] = json["availability"]
 
     try :
         user = User(**user)

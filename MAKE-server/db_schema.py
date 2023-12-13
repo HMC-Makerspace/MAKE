@@ -26,6 +26,7 @@ class MongoDB():
         
 schema = [
     'status',
+    'machines',
     'quiz_updates',
     'inventory',
     'restock_requests',
@@ -176,6 +177,7 @@ class User(BaseModel):
     passed_quizzes: Dict[str, str]
     proficiencies: Union[List[str], None]
     files: Union[List[object], None]
+    availability: Union[List[List[bool]], None]
 
     class Config:
         arbitrary_types_allowed = True
