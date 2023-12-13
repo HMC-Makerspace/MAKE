@@ -2298,6 +2298,8 @@ STEWARD RESOURCES
 
 #steward-availability {
   user-select: none;
+  width: fit-content;
+  border-collapse: separate;
 }
 
 #steward-availability tr {
@@ -2305,21 +2307,20 @@ STEWARD RESOURCES
   font-size: 14px;
 }
 
-#steward-availability th {
-  width: 60px;
+#steward-availability th, #steward-availability td, #steward-availability tr {
+  border: 1px solid var(--theme-color-5);
 }
 
 .availability-cell {  
-  border: 1px solid #00000000;
   height: 40px;
 }
 
 td.availability-cell {
-  width: 60px;
+  width: 100px;
 }
 
 .availability-cell:hover {
-  cursor: pointer;
+  cursor: crosshair;
 }
 
 .availability-cell.available {
