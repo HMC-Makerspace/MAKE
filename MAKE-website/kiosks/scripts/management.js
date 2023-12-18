@@ -69,7 +69,7 @@ async function authenticate() {
     await fetchRestockRequests();
 
     for (let key of Object.keys(state.users)) {
-        state.users[key].cx_id_str = state.users[key].cx_id.toString();
+        state.users[key].cx_id_str = `${state.users[key].cx_id}`;
     }
 
     submitUserSearch(editable = true);
@@ -189,12 +189,109 @@ async function fetchRestockRequests() {
 }
 
 function renderAll() {
-    renderStats();
+    renderQuizTotals();
     renderStudentStorage();
     renderScheduleAdmin();
     renderProficiencies();
     renderWorkshopsAdmin();
     renderRestockRequests();
+    renderAvailability();
+    renderStatistics();
+}
+
+function renderAvailability() {
+    const availability_table = document.getElementById("steward-availability");
+
+    divs = [];
+
+    // Create header row
+    const header = document.createElement("tr");
+    header.innerHTML = "<th>Time</th>";
+
+    for (let day of DAYS) {
+        const day_header = document.createElement("th");
+        day_header.innerText = day;
+        header.appendChild(day_header);
+    }
+    
+    divs.push(header);
+
+    const stewards = state.users.filter(user => user.role == "steward" || user.role == "head_steward");
+
+    for (let i = 0; i < 24; i++) {
+        const row = document.createElement("tr");
+
+        const time = document.createElement("th");
+        time.innerText = formatHour(i);
+        row.appendChild(time);
+
+        for (let j = 0; j < 7; j++) {
+            const cell = document.createElement("td");
+            cell.classList.add("availability-cell");
+            cell.id = `availability-cell-${j}-${i}`;
+
+            let total_available = [];
+            let total_filled_out = 0;
+
+            for (let steward of stewards) {
+                if (steward.availability === null) {
+                    continue;
+                }
+
+                if (steward.availability[j][i]) {
+                    total_available.push(steward);
+                }
+
+                total_filled_out++;
+            }
+
+            cell.innerText = `${total_available.length} / ${total_filled_out}`;
+
+            if (total_available != 0) {
+                cell.classList.add("available");
+                cell.onclick = () => {
+                    showAvailabilityPopup(j, i, total_available);
+                }
+            }
+
+            row.appendChild(cell);
+        }
+
+        divs.push(row);
+    }
+
+    removeAllChildren(availability_table);
+    appendChildren(availability_table, divs);
+}
+
+function showAvailabilityPopup(day, hour, available) {
+    const time = document.getElementById("single-availability-popup-time");
+    const steward_table = document.getElementById("single-availability-popup-stewards");
+
+    time.innerText = `${DAYS[day]} ${formatHour(hour)}`;
+
+    removeAllChildren(steward_table);
+    // Add header
+    const header = document.createElement("tr");
+    header.innerHTML = `<th>Name</th><th>Email</th><th>CX ID</th>`;
+    steward_table.appendChild(header);
+
+    for (let steward of available) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${steward.name}</td><td>${steward.email}</td><td>${steward.cx_id}</td>`;
+        steward_table.appendChild(row);
+    }
+
+    document.getElementById("popup-container").classList.remove("hidden");
+    document.getElementById("single-availability-popup").classList.remove("hidden");
+}
+
+
+function renderStatistics() {
+    // Use chart.js to show stats. First, checkout stats:
+    const checkout_stats = document.getElementById("checkout-stats");
+
+    
 }
 
 function renderRestockRequests() {
@@ -445,8 +542,6 @@ function generateWorkshopDivsAdmin() {
                 to_print.emails.push(user.email);
             }
         }
-
-        console.log(to_print);
 
         let div = document.createElement("tr");
         div.classList.add("workshop-admin");
@@ -822,7 +917,7 @@ function generateProficiencyDivs(users) {
     return divs;
 }
 
-function renderStats() {
+function renderQuizTotals() {
     const stats = document.getElementById("stats-info");
 
     removeAllChildren(stats);
@@ -949,7 +1044,7 @@ async function saveUser(uuid) {
         console.log("User updated");
         fetchUsers().then(() => {
             for (let key of Object.keys(state.users)) {
-                state.users[key].cx_id_str = state.users[key].cx_id.toString();
+                state.users[key].cx_id_str = `${state.users[key].cx_id}`;
             }
     
             submitUserSearch(editable = true);
@@ -1030,7 +1125,7 @@ async function massAssignRoles() {
         status.innerText = `${users_to_update.length} users updated`;
         fetchUsers().then(() => {
             for (let key of Object.keys(state.users)) {
-                state.users[key].cx_id_str = state.users[key].cx_id.toString();
+                state.users[key].cx_id_str = `${state.users[key].cx_id}`;
             }
     
             submitUserSearch(editable = true);

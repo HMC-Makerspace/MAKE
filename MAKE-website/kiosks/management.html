@@ -35,9 +35,11 @@
             <button id="home-button" class="set-page active-button" onclick="setPage('home')">Home</button>
             <button id="users-button" class="set-page" onclick="setPage('users')">Users</button>
             <button id="shifts-button" class="set-page" onclick="setPage('shifts')">Shifts</button>
+            <button id="availability-button" class="set-page" onclick="setPage('availability')">Availability</button>
             <button id="proficiencies-button" class="set-page" onclick="setPage('proficiencies')">Proficiencies</button>
             <button id="workshops-button" class="set-page" onclick="setPage('workshops')">Workshops</button>
             <button id="restock-requests-button" class="set-page" onclick="setPage('restock-requests')">Restock Requests</button>
+            <button id="statistics-button" class="set-page" onclick="setPage('statistics')">Statistics</button>
         </div>
 
         <div class="main-content content-container" id="page-home">
@@ -116,6 +118,18 @@
             </div>
         </div>
 
+        <div class="main-content content-container hidden" id="page-availability">
+            <div class="content-header">
+                <p>
+                    View steward availability and create schedules.
+                </p>
+            </div>
+
+            <div class="content-body">
+                <table id="steward-availability"></table>
+            </div>
+        </div>  
+
         <div class="main-content content-container hidden" id="page-proficiencies">
             <div class="content-header">
                 <p>
@@ -165,6 +179,25 @@
                 </table>
             </div>
         </div>
+
+        <div class="main-content content-container hidden" id="page-statistics">
+            <div class="content-header">
+                <p>
+                    View MAKE statistics.
+                </p>
+            </div>
+
+            <div class="content-body">
+                <div id="stats">
+                    <h1>Checkout stats</h1>
+                    <canvas id="checkout-stats"></canvas>
+
+                    <h1>Workshop stats</h1>
+                    <canvas id="workshop-stats"></canvas>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div id="popup-container" class="hidden">
@@ -322,11 +355,24 @@
                     <button id="workshop-signups-cancel" onclick="closePopup()">Close</button>
                 </div>
             </div>
+
+            <div id="single-availability-popup" class="hidden">
+                <h1>Availability</h1>
+                <h3 id="single-availability-popup-time">...</h3>
+
+                <h2>Stewards</h2>
+                <table id="single-availability-popup-stewards"></table>
+
+                <div class="edit-buttons">
+                    <button id="single-availability-popup-cancel" onclick="closePopup()">Close</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="/scripts/libs/fuzzysort.min.js"></script>
     <script src="/scripts/libs/sweetalert.min.js"></script>
+    <script src="/scripts/libs/chart.min.js"></script>
 
     <script src="/scripts/page_inventory.js?v=2.1"></script>
     <script src="/scripts/page_quiz_info.js?v=2.1"></script>
