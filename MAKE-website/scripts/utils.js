@@ -288,7 +288,10 @@ function searchUsers(search) {
 
     const results = fuzzysort.go(search, Object.values(state.users), user_search_options);
 
-    const results_norm = results.sort((a, b) => b.score - a.score);
+    // Sort by name
+    const results_norm = results.sort((a, b) => {
+        return a.obj.name.localeCompare(b.obj.name);
+    });
 
     return results_norm;
 }
