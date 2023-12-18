@@ -110,6 +110,7 @@ CHECKOUT
   width: 100vw;
   height: 100vh;
   color: var(--text-color-main);
+  overflow-x: auto;
 }
 
 #user-info {
@@ -503,6 +504,7 @@ Management Console
   height: 100vh;
   background-color: var(--background-color);
   transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+  overflow-x: auto;
 }
 
 #main-admin-grid >.content-container {
