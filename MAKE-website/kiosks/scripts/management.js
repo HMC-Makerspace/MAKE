@@ -1369,7 +1369,7 @@ function generateShiftChangeList(all_stewards) {
 function generateScheduleDivsAdmin() {
     let divs = [];
 
-    const time_start = 0;
+    const time_start = 12;
     const time_end = 24;
 
     // Append header of days to table
