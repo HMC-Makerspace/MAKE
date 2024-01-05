@@ -621,7 +621,6 @@ Management Console
   display: flex;
   flex-direction: row;
   height: 60vh;
-  width: 1200px;
   padding: 10px;
   column-gap: 10px;
 }
@@ -633,7 +632,8 @@ Management Console
   align-items: flex-start;
   justify-content: flex-start;
   overflow-y: scroll;
-  width: 600px;
+  min-width: 500px;
+  overflow-x: hidden;
 }
 
 .add-remove-steward-info {
@@ -643,6 +643,13 @@ Management Console
   justify-content: flex-start;
   column-gap: 10px;
   width: 100%;
+  cursor: pointer;
+  user-select: none;
+  padding: 5px 8px;
+}
+
+.add-remove-steward-info:nth-child(even) {
+  background-color: var(--theme-color-5);
 }
 
 .add-remove-steward-info.on-shift {

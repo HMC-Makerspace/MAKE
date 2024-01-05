@@ -1471,14 +1471,22 @@ function renderShiftStewards(all_stewards, shift, day, hour) {
         shift_stewards.appendChild(generateEditStewardShiftDiv(user, true, day, hour));
     }
 
-    // "Valid" stewards are stewards who have enough hours to be on shift,
-    // ie they have at least 2 hours
+    // "Valid" stewards are stewards who are available 
     const show_valid_stewards = document.getElementById("show-valid-stewards").checked;
 
     // Then add all stewards not on shift
     for (let user of all_stewards) {
-        if (show_valid_stewards && (stewards_hours[user.uuid] ?? 0) >= 2) {
-            continue;
+        if (show_valid_stewards) {
+            if (user.availability === null) {
+                continue;
+            }
+
+            let int_day = DAYS.indexOf(day);
+
+
+            if (user.availability[int_day][hour] === false) {
+                continue;
+            }
         }
 
         if (!shift.stewards.includes(user.uuid)) {
@@ -1495,28 +1503,19 @@ function generateEditStewardShiftDiv(user, on_shift, day, hour) {
     name.innerText = `${user.name} (${user.email})`;
     user_div.appendChild(name);
 
-    const add_remove_button = document.createElement("button");
-
     if (on_shift) {
         user_div.classList.add("on-shift");
 
-        add_remove_button.innerText = "-";
-        add_remove_button.onclick = () => {
+        user_div.onclick = () => {
             deleteStewardFromShift(user.uuid, day, hour);
         }
 
-        // Add button to right side
-        user_div.appendChild(add_remove_button);
     } else {
         user_div.classList.add("off-shift");
 
-        add_remove_button.innerText = "+";
-        add_remove_button.onclick = () => {
+        user_div.onclick = () => {
             addStewardToShift(user.uuid, day, hour);
         }
-
-        // Add button to left side
-        user_div.insertBefore(add_remove_button, user_div.firstChild);
     }
 
     return user_div;
