@@ -808,13 +808,17 @@ td.workshop-edit button {
 #steward-availability-container {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   gap: 10px;
 }
 
-#steward-availability-list {
-  width: fit-content
+
+#steward-availability-list-container {
+  margin: unset;
+  width: fit-content;
+  max-height: 700px;
+  overflow-y: scroll;
 }
 
 /*

@@ -225,7 +225,7 @@ function renderAvailability() {
 
     const stewards = state.users.filter(user => user.role == "steward" || user.role == "head_steward");
 
-    for (let i = 0; i < 24; i++) {
+    for (let i = 12; i < 24; i++) {
         const row = document.createElement("tr");
 
         const time = document.createElement("th");
@@ -270,9 +270,6 @@ function renderAvailability() {
     removeAllChildren(availability_table);
     appendChildren(availability_table, schedule_divs);
 
-
-
-
     for (let steward of stewards) {
         const row = document.createElement("tr");
         
@@ -300,6 +297,30 @@ function renderAvailability() {
 
 
         row.innerHTML = `<td>${steward.name}</td><td>${steward.cx_id}</td><td>${steward.email}</td><td class='${hours_class}'>${hours_available}</td>`;
+
+        row.onmouseenter = () => {
+            if (steward.availability === null) {
+                return;
+            }
+
+            for (let day = 0; day < 7; day++) {
+                for (let hour = 0; hour < 24; hour++) {
+                    if (steward.availability[day][hour]) {
+                        document.getElementById(`availability-cell-${day}-${hour}`).classList.add("highlight");
+                    }
+                }
+            }
+        };
+
+        row.onmouseleave = () => {
+            let divs = document.getElementsByClassName("availability-cell");
+
+            for (let div of divs) {
+                div.classList.remove("highlight");
+            }
+        };
+
+
         list_divs.push(row);
     }
 
@@ -317,12 +338,12 @@ function showAvailabilityPopup(day, hour, available) {
     removeAllChildren(steward_table);
     // Add header
     const header = document.createElement("tr");
-    header.innerHTML = `<th>Name</th><th>Email</th><th>CX ID</th>`;
+    header.innerHTML = `<th>Name</th><th>CX ID</th><th>Email</th>`;
     steward_table.appendChild(header);
 
     for (let steward of available) {
         const row = document.createElement("tr");
-        row.innerHTML = `<td>${steward.name}</td><td>${steward.email}</td><td>${steward.cx_id}</td>`;
+        row.innerHTML = `<td>${steward.name}</td><td>${steward.cx_id}</td><td>${steward.email}</td>`;
         steward_table.appendChild(row);
     }
 
@@ -669,7 +690,7 @@ function showRSVPListAdmin(uuid) {
         removeAllChildren(rsvp_list);
 
         let header = document.createElement("tr");
-        header.innerHTML = `<th>Name</th><th>Email</th><th>CX ID</th>`;
+        header.innerHTML = `<th>Name</th><th>CX ID</th><th>Email</th>`;
         rsvp_list.appendChild(header);
 
         for (let uuid of workshop.rsvp_list) {
@@ -684,15 +705,15 @@ function showRSVPListAdmin(uuid) {
                 name.innerText = user.name;
                 div.appendChild(name);
 
-                let email = document.createElement("td");
-                email.classList.add("workshop-signup-email");
-                email.innerText = user.email;
-                div.appendChild(email);
-
                 let cx_id = document.createElement("td");
                 cx_id.classList.add("workshop-signup-cx_id");
                 cx_id.innerText = user.cx_id;
                 div.appendChild(cx_id);
+
+                let email = document.createElement("td");
+                email.classList.add("workshop-signup-email");
+                email.innerText = user.email;
+                div.appendChild(email);
 
                 rsvp_list.appendChild(div);
             }
