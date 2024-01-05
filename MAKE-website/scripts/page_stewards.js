@@ -460,8 +460,7 @@ async function dropShift(shift) {
 
     document.getElementById("edit-shift-submit").onclick = () => submitDropShift(shift);
 
-    document.getElementById("drop-shift").classList.remove("hidden");
-    document.getElementById("popup-container").classList.remove("hidden");
+    showPopup("drop-shift");
 }
 
 async function pickUpShift(shift) {
@@ -469,8 +468,7 @@ async function pickUpShift(shift) {
 
     document.getElementById("pickup-shift-submit").onclick = () => submitPickUpShift(shift);
 
-    document.getElementById("pickup-shift").classList.remove("hidden");
-    document.getElementById("popup-container").classList.remove("hidden");
+    showPopup("pickup-shift");
 }
 
 async function submitDropShift(shift) {

@@ -393,6 +393,11 @@ function formatHour(hour_num) {
     }
 }
 
+function showPopup(element_id) {
+    document.getElementById("popup-container").classList.remove("hidden");
+    document.getElementById(element_id).classList.remove("hidden");
+}
+
 function closePopup() {
     document.getElementById("popup-container").classList.add("hidden");
     const content = document.getElementById("popup-content");
@@ -401,10 +406,14 @@ function closePopup() {
         child.classList.add("hidden");
     }
 
-    if (shifts_updated) {
-        renderScheduleAdmin();
-        pushShiftsAdmin();
-        shifts_updated = false;
+    try {
+        if (shifts_updated) {
+            renderScheduleAdmin();
+            pushShiftsAdmin();
+            shifts_updated = false;
+        }
+    } catch (e) {
+        return;
     }
 }
 

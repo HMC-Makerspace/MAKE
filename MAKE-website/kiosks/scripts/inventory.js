@@ -224,8 +224,7 @@ function editInventoryItem(uuid, create_item=false) {
     document.getElementById("edit-item-brand").value = item.brand;
     document.getElementById("edit-item-qr-code").value = item.qr_code;
 
-    edit_div.classList.remove("hidden");
-    document.getElementById("popup-container").classList.remove("hidden");
+    showPopup("edit-item");
 
     document.getElementById("edit-item-save").onclick = () => {
         saveItem(uuid, create_item);
@@ -233,10 +232,7 @@ function editInventoryItem(uuid, create_item=false) {
 }
 
 function showDeleteItemPopup(uuid) {
-    const delete_div = document.getElementById("delete-item");
-
-    delete_div.classList.remove("hidden");
-    document.getElementById("popup-container").classList.remove("hidden");
+    showPopup("delete-item");
 }
 
 async function saveItem(uuid, create_item=false) {

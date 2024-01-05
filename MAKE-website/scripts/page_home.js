@@ -94,8 +94,7 @@ async function getNowPlaying() {
 }
 
 async function openFilesPopup() {
-    document.getElementById("popup-container").classList.remove("hidden");
-    document.getElementById("quick-transfer").classList.remove("hidden");
+    showPopup("quick-transfer");
 
     let request = await fetch(`${API}/users/get_file_list`, {
         method: "POST",

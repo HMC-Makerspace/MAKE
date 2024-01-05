@@ -37,8 +37,7 @@ async function start() {
     document.addEventListener("keydown", function (event) {
         // If user is not focused on an input, and the user presses the k key, show quick-nav
         if (event.key.toLowerCase() === "k" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
-            document.getElementById("quick-nav").classList.remove("hidden");
-            document.getElementById("popup-container").classList.remove("hidden");
+            showPopup("quick-nav");
         }
     })
 

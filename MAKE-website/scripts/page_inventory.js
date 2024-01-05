@@ -349,8 +349,7 @@ function showRestock() {
         return;
     }
 
-    document.getElementById("restock").classList.remove("hidden");
-    document.getElementById("popup-container").classList.remove("hidden");
+    showPopup("restock");
 }
 
 async function submitRestock() {

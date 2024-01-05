@@ -688,15 +688,15 @@ Management Console
   justify-content: space-evenly;
 }
 
-.steward-shift-list-item-shifts.not-enough-hours {
+.not-enough-hours {
   background-color: var(--low-color);
 }
 
-.steward-shift-list-item-shifts.good-hours {
+.good-hours {
   background-color: var(--high-color);
 }
 
-.steward-shift-list-item-shifts.too-many-hours {
+.too-many-hours {
   background-color: var(--medium-color);
 }
 
@@ -795,6 +795,19 @@ td.workshop-edit button {
 
 #workshop-signups {
   width: 900px;
+}
+
+
+#steward-availability-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+#steward-availability-list {
+  width: fit-content
 }
 
 /*

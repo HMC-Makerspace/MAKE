@@ -201,8 +201,10 @@ function renderAll() {
 
 function renderAvailability() {
     const availability_table = document.getElementById("steward-availability");
+    const availability_table_list = document.getElementById("steward-availability-list");
 
-    divs = [];
+    let schedule_divs = [];
+    let list_divs = [];
 
     // Create header row
     const header = document.createElement("tr");
@@ -214,7 +216,12 @@ function renderAvailability() {
         header.appendChild(day_header);
     }
     
-    divs.push(header);
+    schedule_divs.push(header);
+
+    // Create list of stewards
+    let header_list = document.createElement("tr");
+    header_list.innerHTML = `<th>Name</th><th>CX ID</th><th>Email</th><th>Hours Available</th>`;
+    list_divs.push(header_list);
 
     const stewards = state.users.filter(user => user.role == "steward" || user.role == "head_steward");
 
@@ -257,11 +264,48 @@ function renderAvailability() {
             row.appendChild(cell);
         }
 
-        divs.push(row);
+        schedule_divs.push(row);
     }
 
     removeAllChildren(availability_table);
-    appendChildren(availability_table, divs);
+    appendChildren(availability_table, schedule_divs);
+
+
+
+
+    for (let steward of stewards) {
+        const row = document.createElement("tr");
+        
+        let hours_available = 0;
+
+        if (steward.availability !== null) {
+            for (let day of steward.availability) {
+                for (let hour of day) {
+                    if (hour) {
+                        hours_available++;
+                    }
+                }
+            }
+        }
+
+        // not-enough-hours, too-many-hours, good-hours
+        // less then 4 is not enough, more than 12 is too many
+        let hours_class = "good-hours";
+
+        if (hours_available < 4) {
+            hours_class = "not-enough-hours";
+        } else if (hours_available > 12) {
+            hours_class = "too-many-hours";
+        }
+
+
+        row.innerHTML = `<td>${steward.name}</td><td>${steward.cx_id}</td><td>${steward.email}</td><td class='${hours_class}'>${hours_available}</td>`;
+        list_divs.push(row);
+    }
+
+    removeAllChildren(availability_table_list);
+    appendChildren(availability_table_list, list_divs);
+
 }
 
 function showAvailabilityPopup(day, hour, available) {
@@ -282,8 +326,7 @@ function showAvailabilityPopup(day, hour, available) {
         steward_table.appendChild(row);
     }
 
-    document.getElementById("popup-container").classList.remove("hidden");
-    document.getElementById("single-availability-popup").classList.remove("hidden");
+    showPopup("single-availability-popup");
 }
 
 
@@ -399,8 +442,7 @@ function showCompleteRestockRequest(uuid, requested_by_str) {
         completeRestockRequest(uuid, false);
     };
 
-    document.getElementById("popup-container").classList.remove("hidden");
-    document.getElementById("complete-restock-request").classList.remove("hidden");
+    showPopup("complete-restock-request");
 }
 
 async function completeRestockRequest(uuid, is_approved) {
@@ -660,8 +702,7 @@ function showRSVPListAdmin(uuid) {
             sendWorkshopEmail(workshop.uuid);
         };
 
-        document.getElementById("workshop-signups").classList.remove("hidden");
-        document.getElementById("popup-container").classList.remove("hidden");
+        showPopup("workshop-signups");
     } else {
         alert("Error finding workshop with uuid " + uuid);
     }
@@ -748,8 +789,7 @@ function showCreateEditWorkshop(uuid) {
     }
 
     // Open popup
-    document.getElementById("popup-container").classList.remove("hidden");
-    document.getElementById("edit-workshop").classList.remove("hidden");
+    showPopup("edit-workshop");
 }
 
 async function deleteWorkshop(uuid) {
@@ -964,8 +1004,7 @@ function generateStatsDivs(users) {
 function showEditUser(uuid) {
     let user = state.users.find(user => user.uuid === uuid);
 
-    document.getElementById("popup-container").classList.remove("hidden");
-    document.getElementById("edit-user").classList.remove("hidden");
+    showPopup("edit-user");
 
     document.getElementById("edit-user-name").value = user.name;
     document.getElementById("edit-user-email").value = user.email;
@@ -1057,8 +1096,7 @@ async function saveUser(uuid) {
 }
 
 function showMassAssignRoles() {
-    document.getElementById("popup-container").classList.remove("hidden");
-    document.getElementById("mass-assign-roles").classList.remove("hidden");
+    showPopup("mass-assign-roles");
 
     document.getElementById("mass-assign-roles-save").onclick = () => {
         massAssignRoles();
@@ -1390,8 +1428,8 @@ function showEditShift(day, hour) {
         }
     });
 
-    document.getElementById("popup-container").classList.remove("hidden");
-    document.getElementById("edit-shift").classList.remove("hidden");
+    showPopup("edit-shift");
+
     document.getElementById("edit-shift-day-time").innerText = `${day} @ ${formatHour(hour)}`;
     document.getElementById("show-valid-stewards").onchange = () => {
         showEditShift(day, hour);
