@@ -285,16 +285,15 @@ function renderAvailability() {
             }
         }
 
-        // not-enough-hours, too-many-hours, good-hours
-        // less then 4 is not enough, more than 12 is too many
-        let hours_class = "good-hours";
+        let hours_class = "";
 
-        if (hours_available < 4) {
+        if (hours_available < 2) {
             hours_class = "not-enough-hours";
-        } else if (hours_available > 12) {
+        } else if (hours_available < 6) {
             hours_class = "too-many-hours";
+        } else {
+            hours_class = "good-hours";
         }
-
 
         row.innerHTML = `<td>${steward.name}</td><td>${steward.cx_id}</td><td>${steward.email}</td><td class='${hours_class}'>${hours_available}</td>`;
 
@@ -1489,7 +1488,7 @@ function renderShiftStewards(all_stewards, shift, day, hour) {
         // Search though users, not just stewards, in case a steward was demoted
         const user = state.users.find(user => user.uuid === uuid);
 
-        shift_stewards.appendChild(generateEditStewardShiftDiv(user, true, day, hour));
+        shift_stewards.appendChild(generateEditStewardShiftDiv(user, true, day, hour, stewards_hours));
     }
 
     // "Valid" stewards are stewards who are available 
@@ -1511,18 +1510,57 @@ function renderShiftStewards(all_stewards, shift, day, hour) {
         }
 
         if (!shift.stewards.includes(user.uuid)) {
-            other_stewards.appendChild(generateEditStewardShiftDiv(user, false, day, hour));
+            other_stewards.appendChild(generateEditStewardShiftDiv(user, false, day, hour, stewards_hours));
         }
     }
 }
 
-function generateEditStewardShiftDiv(user, on_shift, day, hour) {
+function generateEditStewardShiftDiv(user, on_shift, day, hour, stewards_hours) {
     const user_div = document.createElement("div");
     user_div.classList.add("add-remove-steward-info");
     // Append name and cx_id
+    
+    let hours_available = 0;
+    
+    if (user.availability !== null) {
+        for (let i = 0; i < 7; i++) {
+            for (let j = 12; j < 24; j++) {
+                if (user.availability[i][j] === true) {
+                    hours_available++;
+                }
+            }
+        }
+    }
+
+    let hours_scheduled = stewards_hours[user.uuid] ?? 0;
+
+    const hours_scheduled_div = document.createElement("span");
+    hours_scheduled_div.classList.add("hours-scheduled");
+    hours_scheduled_div.innerText = `${hours_scheduled}S`;
+
+    if (hours_scheduled < 2) {
+        hours_scheduled_div.classList.add("not-enough-hours");
+    } else if (hours_scheduled < 5) {
+        hours_scheduled_div.classList.add("good-hours");
+    }
+    else {
+        hours_scheduled_div.classList.add("too-many-hours");
+    }
+
+    const hours_available_div = document.createElement("span");
+    hours_available_div.classList.add("hours-available");
+    hours_available_div.innerText = `${hours_available}A`;
+
+    if (hours_available < 2) {
+        hours_available_div.classList.add("not-enough-hours");
+    } else if (hours_available < 6) {
+        hours_available_div.classList.add("too-many-hours");
+    } else {
+        hours_available_div.classList.add("good-hours");
+    }
+
     const name = document.createElement("span");
     name.innerText = `${user.name} (${user.email})`;
-    user_div.appendChild(name);
 
     if (on_shift) {
         user_div.classList.add("on-shift");
@@ -1531,12 +1569,21 @@ function generateEditStewardShiftDiv(user, on_shift, day, hour) {
             deleteStewardFromShift(user.uuid, day, hour);
         }
 
+        user_div.append(name);
+        user_div.append(hours_available_div);
+        user_div.append(hours_scheduled_div);
+
     } else {
+        user_div.appendChild(hours_scheduled_div);
+        user_div.appendChild(hours_available_div);
+        user_div.appendChild(name);
+
         user_div.classList.add("off-shift");
 
         user_div.onclick = () => {
             addStewardToShift(user.uuid, day, hour);
         }
+
     }
 
     return user_div;

@@ -255,7 +255,7 @@ p3 {
   z-index: 1000;
   background-color: var(--theme-color-5);
   padding: 40px;
-  max-width: 1000px;
+  max-width: 1500px;
 }
 
 #popup-content >* {

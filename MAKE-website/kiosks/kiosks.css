@@ -632,8 +632,12 @@ Management Console
   align-items: flex-start;
   justify-content: flex-start;
   overflow-y: scroll;
-  min-width: 500px;
+  min-width: 600px;
   overflow-x: hidden;
+}
+
+#edit-shifted-stewards {
+  align-items: flex-end;
 }
 
 .add-remove-steward-info {
@@ -659,6 +663,16 @@ Management Console
 
 .add-remove-steward-info:hover {
   background-color: var(--theme-color-4);
+}
+
+.add-remove-steward-info .hours-scheduled, .add-remove-steward-info .hours-available {
+  width: 35px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
 }
 
 #stewards-list-shifts, #shift-change-list {

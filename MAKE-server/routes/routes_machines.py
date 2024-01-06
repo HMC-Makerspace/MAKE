@@ -32,3 +32,20 @@ async def route_add_filament_log(request: Request, kgs: float):
     await collection.insert_one(to_insert)
 
     return
+
+
+@machines_router.get("/status")
+async def route_get_status(request: Request):
+    # Get the status of all the machines
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Getting machine status...")
+
+    # Get the machines collection
+    db = MongoDB()
+    collection = await db.get_collection("machines")
+
+    # Get the status of all the machines
+    machines = await collection.find().to_list(length=None)
+
+    # Return the status of all the machines
+    return machines
