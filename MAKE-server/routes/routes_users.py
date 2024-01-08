@@ -280,6 +280,9 @@ async def route_upload_file_for_user(request: Request):
     if "files" not in user:
         user["files"] = []
 
+    if type(user["files"]) != list:
+        user["files"] = []
+
     file_data = form["file"].file.read()
 
     # Calculate file size
