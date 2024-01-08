@@ -241,8 +241,6 @@ async def route_get_file_list(request: Request):
     if type(user["files"]) != list:
         return [] 
     
-    print(user["files"])
-    
     # Get the user's files, but exclude the file data
     user_files = await user_files_collection.find({"uuid": {"$in": user["files"]}}).to_list(None)
 
