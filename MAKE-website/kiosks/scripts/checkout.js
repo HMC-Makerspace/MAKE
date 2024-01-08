@@ -177,7 +177,9 @@ function updateCheckoutsHTML() {
 }
 
 async function fetchUserInfo(id_number) {
-    const response = await fetch(`${API}/users/get_user_by_cx_id/${id_number}`);
+    const response = await fetch(`${API}/users/get_user_by_cx_id/${id_number}`, headers={
+        "api-key": api_key,
+    });
 
     if (response.status === 200) {
         const user_info = await response.json();

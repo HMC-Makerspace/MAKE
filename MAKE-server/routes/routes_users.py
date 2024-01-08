@@ -86,6 +86,12 @@ async def route_get_user_by_cx_id(request: Request, cx_id: int):
         # Return error
         raise HTTPException(status_code=404, detail="User does not exist")
     
+
+    # If api-key is present, check if the user is an admin
+    if "api-key" in request.headers:
+        api_key = request.headers["api-key"]
+        is_valid = await validate_api_key(db, api_key, "users")
+    
     # Get IP address
     ip = request.client.host
     logging.info(f"IP address {ip} requested user matching {cx_id}")
@@ -98,10 +104,12 @@ async def route_get_user_by_cx_id(request: Request, cx_id: int):
     # Log the IP address
     await collection.insert_one({"ip": ip, "timestamp": datetime.datetime.now().timestamp(), "user": user["uuid"]})   
 
-    if len(uuids) > 6 and user["uuid"] not in uuids:
-        # The user has made too many requests
-        # Return error
-        raise HTTPException(status_code=429, detail="Too many requests")
+    # If there's a valid API key, don't check the IP address
+    if not is_valid:
+        if len(uuids) > 6 and user["uuid"] not in uuids:
+            # The user has made too many requests
+            # Return error
+            raise HTTPException(status_code=429, detail="Too many requests")
     
     user = User(**user)
     
