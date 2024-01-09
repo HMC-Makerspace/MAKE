@@ -1056,3 +1056,8 @@ button#download {
   margin-top: 20px;
   margin-bottom: 10px;
 }
+
+#completed-restock-requests-list {
+  word-break: break-word;
+  table-layout: fixed;
+}
