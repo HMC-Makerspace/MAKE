@@ -56,6 +56,22 @@ LOCATIONS = {
     "composite": "Composite Room",
 }
 
+RESERVABLE_AREAS = {
+    "loom": {
+        "type": "machine",
+    },
+    "studio": {
+        "type": "location",
+    },
+    "welding": {
+        "type": "location",
+    },
+    "main": {
+        "type": "location",
+    },
+
+}
+
 MACHINES = {
     "flsun": {
         "name": "FLSUN 3D Printers",

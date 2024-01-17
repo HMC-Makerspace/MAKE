@@ -42,7 +42,9 @@ schema = [
     'filament_logs',
     'api_keys',
     'ip_logs',
+    'reservations',
 ]
+
 
 STATUS_TEMPLATE = {
     "motd": "Welcome to make.hmc.edu",

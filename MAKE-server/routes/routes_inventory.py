@@ -28,7 +28,7 @@ async def route_get_inventory():
     inventory_items = await collection.find().to_list(None)
 
     inventory_items = [InventoryItem(**item) for item in inventory_items]
-    
+
     # Return the inventory items
     return inventory_items
 

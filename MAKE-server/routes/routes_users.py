@@ -91,6 +91,8 @@ async def route_get_user_by_cx_id(request: Request, cx_id: int):
     if "api-key" in request.headers:
         api_key = request.headers["api-key"]
         is_valid = await validate_api_key(db, api_key, "users")
+    else:
+        is_valid = False
     
     # Get IP address
     ip = request.client.host

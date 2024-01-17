@@ -107,12 +107,15 @@ function generateWorkshopDiv(workshop, is_past=false) {
     div.appendChild(description);
 
     const capacity = document.createElement("p");
-    capacity.innerHTML = `<b>Signups:</b> ${workshop.signups} / ${workshop.capacity} slots`;
+    capacity.innerHTML = `<b>Capacity: ${workshop.capacity} slots`;
+    console.log(workshop);
 
-    if (workshop.position !== -1) {
-        capacity.innerHTML += `<br> <b>Position:</b> ${workshop.position + 1}`;
-    } else if (workshop.signups >= workshop.capacity) {
-        capacity.innerHTML += `<br> <b>Full, RSVP for waitlist</b>`
+    if (workshop.position !== undefined && workshop.signups !== undefined) {
+        capacity.innerHTML = `<b>Signups: ${workshop.signups} / ${workshop.capacity} slots`;
+
+        if (workshop.position !== -1) {
+            capacity.innerHTML += `<br> <b>Position:</b> ${workshop.position + 1}`;
+        }
     }
 
     // Add rsvp list button if rsvp_list exists

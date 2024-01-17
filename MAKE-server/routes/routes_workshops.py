@@ -46,12 +46,14 @@ async def route_get_workshops(request: Request, user_uuid: str):
 
     # Remove the rsvp_list from each workshop and replace it with the length of the list
     for workshop in workshops:
-        workshop["signups"] = len(workshop["rsvp_list"])
-        workshop["position"] = workshop["rsvp_list"].index(user_uuid) if user_uuid in workshop["rsvp_list"] else -1
 
         # Remove the rsvp_list if a user
         if user["role"] == "user":
             del workshop["rsvp_list"]
+        
+        if user["role"] in ["admin", "head_steward", "steward"]:
+            workshop["signups"] = len(workshop["rsvp_list"])
+            workshop["position"] = workshop["rsvp_list"].index(user_uuid) if user_uuid in workshop["rsvp_list"] else -1
 
     # Return the checkouts
     return workshops
