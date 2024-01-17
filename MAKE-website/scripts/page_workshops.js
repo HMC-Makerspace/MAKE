@@ -108,7 +108,6 @@ function generateWorkshopDiv(workshop, is_past=false) {
 
     const capacity = document.createElement("p");
     capacity.innerHTML = `<b>Capacity: ${workshop.capacity} slots`;
-    console.log(workshop);
 
     if (workshop.position !== undefined && workshop.signups !== undefined) {
         capacity.innerHTML = `<b>Signups: ${workshop.signups} / ${workshop.capacity} slots`;
