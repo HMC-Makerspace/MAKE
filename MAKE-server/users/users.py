@@ -151,6 +151,56 @@ async def create_update_users_from_quizzes():
             # Increment the number of users updated
             num_total_updates += 1
 
+    # Now, go through all users and mark outdated quizzes as invalid
+    # removing it from the user's passed_quizzes field
+    
+    # Make timestamp that quizzes are valid after.
+    # This resets every year on QUIZ_RESET_DAY
+    quizzes_valid_after = 0
+
+    # Get the current date
+    current_date = datetime.now()
+
+    # Get the current year
+    current_year = current_date.year
+
+    # Get day of year
+    day_of_year = current_date.timetuple().tm_yday
+
+    if day_of_year < QUIZ_RESET_DAY:
+        # The quiz date is valid if the quiz timestamp is in the previous year
+        quizzes_valid_after = datetime(current_year - 1, 8, 1).timestamp()
+    else:
+        # The quiz date is valid if the quiz timestamp is in the current year
+        quizzes_valid_after = datetime(current_year, 8, 1).timestamp()
+
+    total_old_quizzes = 0
+    users = await users_collection.find().to_list(None)
+    for user in users:
+        # Get the user's passed quizzes
+        passed_quizzes = user["passed_quizzes"]
+
+        # Get the user's uuid
+        uuid = user["uuid"]
+
+        passed_quizzes = {}
+
+        # Iterate through all quizzes
+        for timestamp, gid in user["passed_quizzes"].items():
+            # Check if the quiz is valid
+            if float(timestamp) >= quizzes_valid_after:
+                # The quiz is valid
+                # Add it to the passed quizzes
+                passed_quizzes[timestamp] = gid
+            else:
+                # The quiz is invalid
+                # Increment the number of old quizzes
+                total_old_quizzes += 1
+
+        if passed_quizzes != user["passed_quizzes"]:
+            # Update the user's passed quizzes
+            users_updates[uuid] = passed_quizzes
+                
     # Run all the updates at once
     if users_updates:
         users_updates = [
@@ -169,6 +219,7 @@ async def create_update_users_from_quizzes():
 
     logging.info(f"Created {num_users_created} users")
     logging.info(f"Updated {num_total_updates} times")
+    logging.info(f"Removed {total_old_quizzes} old quizzes")
 
 
 async def cleanup_user_files():

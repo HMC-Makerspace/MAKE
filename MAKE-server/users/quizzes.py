@@ -22,9 +22,6 @@ GRAD_SCHOOL_EMAIL_DOMAINS = {
     '2': "cgu.edu",
 }
 
-# This should be August 1st of each year
-QUIZ_RESET_DAY = 213
-
 async def scrape_quiz_results():
     # Set logging level
     logging.getLogger().setLevel(logging.INFO)

@@ -10,6 +10,9 @@ USER_STORAGE_LIMIT_BYTES = 2 * 1024 * 1024 * 1024
 # Default is 1 week
 USER_STORAGE_LIMIT_SECONDS = 60 * 60 * 24 * 7 
 
+# This should be August 1st of each year
+QUIZ_RESET_DAY = 213
+
 # Discord Bot Token
 DISCORD_BOT_TOKEN = ""
 
