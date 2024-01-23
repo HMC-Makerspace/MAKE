@@ -114,7 +114,7 @@ async def get_quiz_results(quiz_id):
                 )
 
                 # Check if the quiz date is valid
-                if quiz_response.timestamp < quizzes_valid_after and not extra_validation_access(cx_id):
+                if quiz_response.timestamp < quizzes_valid_after:
                     total_invalid += 1
                     quiz_response.passed = False
                 else:
