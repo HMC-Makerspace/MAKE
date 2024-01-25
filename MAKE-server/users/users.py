@@ -181,7 +181,7 @@ async def create_update_users_from_quizzes():
         passed_quizzes = user["passed_quizzes"]
 
         # Get the user's uuid
-        uuid = user["uuid"]
+        user_uuid = user["uuid"]
 
         passed_quizzes = {}
 
@@ -197,14 +197,22 @@ async def create_update_users_from_quizzes():
                 # Increment the number of old quizzes
                 total_old_quizzes += 1
 
+        # Remove duplicate passed quizzes, keeping the most recent one
+        passed_quizzes = {
+            timestamp: gid
+            for timestamp, gid in sorted(
+                passed_quizzes.items(), key=lambda item: item[0], reverse=True
+            )
+        }
+
         if passed_quizzes != user["passed_quizzes"]:
             # Update the user's passed quizzes
-            users_updates[uuid] = passed_quizzes
+            users_updates[user_uuid] = passed_quizzes
                 
     # Run all the updates at once
     if users_updates:
         users_updates = [
-            {"uuid": uuid, "quizzes": quizzes} for uuid, quizzes in users_updates.items()
+            {"uuid": user_uuid, "quizzes": quizzes} for user_uuid, quizzes in users_updates.items()
         ]
 
         await users_collection.bulk_write(
