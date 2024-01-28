@@ -200,35 +200,38 @@ function timeLeft(date_start, date_end) {
     }
 }
 
-async function fetchAndDownload(uuid) {
-    const request = await fetch(`${API}/users/download_file/${uuid}`);
-    // FastAPI responds with: return FileResponse(file_data, media_type="application/octet-stream", filename=file["name"])
-    // So we can just download the data directly
-
-    const file = await request.blob();
-    // content-disposition
-	// attachment; filename*=utf-8''anya%281%29.jpg
-    let name = request.headers.get("content-disposition").split("filename")[1];
-
-    name = name.replace("*=utf-8''", "");
-    name = name.replace("=", "");
-    name = name.replace("\"", "");
-    name = name.replace("\'", "");
-    name = decodeURI(name);
+async function fetchAndDownload(uuid) { 
+    const request = await fetch(`${API}/users/download_file/${uuid}`); 
+  
+    const file = await request.blob(); 
+    let contentDisposition = request.headers.get("content-disposition");
+    let name = "";
     
-    // Remove the last char if its a _
-    if (name[name.length - 1] === "_") {
-        name = name.slice(0, -1);
+    if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename\*?=['"]*(?:UTF-8'')?([^"';]*)['"]?;?/i);
+        if (fileNameMatch.length > 1) {
+            name = decodeURIComponent(fileNameMatch[1]);
+        }
     }
     
-    const element = document.createElement("a");
-    element.setAttribute("href", URL.createObjectURL(file));
-    element.setAttribute("download", name);
+    // Ensure name is not empty and does not end with an underscore
+    if (name && name.endsWith("_")) { 
+        name = name.slice(0, -1); 
+    } 
+  
+    if(name) {
+        const element = document.createElement("a"); 
+        element.setAttribute("href", URL.createObjectURL(file)); 
+        element.setAttribute("download", name);
 
-    element.style.display = "none";
-    document.body.appendChild(element);
+        element.style.display = "none"; 
+        document.body.appendChild(element); 
 
-    element.click();
+        element.click(); 
+    } else {
+        console.error("Failed to extract filename.");
+        alert("Error: could not retreive filename")
+    }
 }
 
 
