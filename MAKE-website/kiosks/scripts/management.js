@@ -482,7 +482,7 @@ function generateDailyCheckoutTrendsChart(dailyCounts) {
             datasets: [{
                 label: 'Daily Checkouts',
                 data: Object.values(dailyCounts),
-                backgroundColor: 'rgba(100, 99, 180, 0.2)',
+                backgroundColor: 'rgba(100, 150, 100, 0.5)',
             }]
         },
         options: {
