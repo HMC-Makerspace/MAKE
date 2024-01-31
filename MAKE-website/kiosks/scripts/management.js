@@ -590,6 +590,10 @@ function generatePendingRestockRequestDivs() {
         let timestamp_requested = document.createElement("td");
         timestamp_requested.classList.add("restock-request-timestamp_requested");
         timestamp_requested.innerText = new Date(request.timestamp_sent * 1000).toLocaleString();
+
+        // Remove the seconds from the timestamp, but preserve the AM/PM
+        timestamp_requested.innerText = timestamp_requested.innerText.replace(/:\d{2} /, " ");
+
         div.appendChild(timestamp_requested);
 
         let requested_by = document.createElement("td");
@@ -716,6 +720,10 @@ function generateCompletedRestockRequestDivs() {
         let timestamp_requested = document.createElement("td");
         timestamp_requested.classList.add("restock-request-timestamp_requested");
         timestamp_requested.innerText = new Date(request.timestamp_sent * 1000).toLocaleString();
+
+        // Remove the seconds from the timestamp, but preserve the AM/PM
+        timestamp_requested.innerText = timestamp_requested.innerText.replace(/:\d{2} /, " ");
+        
         div.appendChild(timestamp_requested);
 
         let requested_by = document.createElement("td");
