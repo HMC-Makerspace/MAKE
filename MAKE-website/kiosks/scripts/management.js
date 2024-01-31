@@ -433,7 +433,7 @@ function generateCheckoutHeatmap(checkoutCountsByHour) {
             datasets: [{
                 label: 'Checkouts by Hour',
                 data: checkoutCountsByHour,
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
             }]
         },
         options: {
@@ -459,7 +459,7 @@ function generateCheckoutItemsChart(checkoutCountsByItem) {
             datasets: [{
                 label: 'Number of Checkouts',
                 data: itemCounts,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
             }]
         },
         options: {
