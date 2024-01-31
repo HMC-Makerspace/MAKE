@@ -492,9 +492,9 @@ function generateDailyCheckoutTrendsChart(dailyCounts) {
                 x: {
                     type: 'time',
                     time: {
-                        parser: 'yyyy-MM-dd',
+                        parser: 'YYYY-MM-DD',
                         // For Moment.js, you might use format: 'YYYY-MM-DD'
-                        tooltipFormat: 'PPP',
+                        tooltipFormat: 'll',
                         unit: 'day'
                     },
                     title: {
@@ -541,7 +541,7 @@ function generateCheckoutsByUserRoleChart() {
 
     // Generate the chart
     new Chart(ctx, {
-        type: 'polarArea',
+        type: 'pie', // Changed from 'polarArea' to 'pie'
         data: {
             labels: labels,
             datasets: [{
@@ -550,11 +550,6 @@ function generateCheckoutsByUserRoleChart() {
             }],
         },
         options: {
-            scales: {
-                r: {
-                    beginAtZero: true
-                }
-            },
             plugins: {
                 legend: {
                     position: 'top',
