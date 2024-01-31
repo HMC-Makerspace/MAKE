@@ -406,7 +406,7 @@ function generateDailyCountsFromCheckouts() {
         const dateOut = new Date(checkout.timestamp_out * 1000);
 
         // If it was more than 30 days ago, skip it
-        if (dateOut < new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)) {
+        if (dateOut < new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)) {
             return;
         }
 

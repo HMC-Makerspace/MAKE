@@ -547,6 +547,11 @@ Management Console
   color: var(--text-color-main);
   width: 80%;
   margin: 0 auto;
+  gap: 20px;
+}
+
+#stats div {
+  max-height: 500px;
 }
 
 
