@@ -476,15 +476,13 @@ function generateDailyCheckoutTrendsChart(dailyCounts) {
     const ctx = document.getElementById('daily-checkout-trends-chart').getContext('2d');
 
     new Chart(ctx, {
-        type: 'line',
+        type: 'bar',
         data: {
             labels: Object.keys(dailyCounts), // Assuming dates are in 'YYYY-MM-DD' format
             datasets: [{
                 label: 'Daily Checkouts',
                 data: Object.values(dailyCounts),
-                fill: false,
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
+                backgroundColor: 'rgba(100, 99, 180, 0.2)',
             }]
         },
         options: {
