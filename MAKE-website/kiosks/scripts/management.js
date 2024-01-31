@@ -404,7 +404,12 @@ function generateDailyCountsFromCheckouts() {
     state.checkouts.forEach(checkout => {
         // Convert UNIX timestamp to a Date object
         const dateOut = new Date(checkout.timestamp_out * 1000);
-        
+
+        // If it was more than 30 days ago, skip it
+        if (dateOut < new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)) {
+            return;
+        }
+
         // Format the date as YYYY-MM-DD for consistency
         const dateString = dateOut.toISOString().split('T')[0];
 
@@ -469,6 +474,7 @@ function generateCheckoutItemsChart(checkoutCountsByItem) {
 
 function generateDailyCheckoutTrendsChart(dailyCounts) {
     const ctx = document.getElementById('daily-checkout-trends-chart').getContext('2d');
+
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -509,25 +515,51 @@ function generateDailyCheckoutTrendsChart(dailyCounts) {
 }
 
 function generateCheckoutsByUserRoleChart() {
-    const roleCounts = state.users.reduce((acc, user) => {
-        acc[user.role] = (acc[user.role] || 0) + (user.checkoutCount || 0); // Assume `checkoutCount` tracks number of checkouts per user
-        return acc;
-    }, {});
+    // Initialize a role count object
+    const roleCounts = {
+        user: 0,
+        steward: 0,
+        head_steward: 0,
+        admin: 0
+    };
 
+    // Loop through each checkout
+    state.checkouts.forEach(checkout => {
+        // Find the user who checked out the item(s)
+        const user = state.users.find(user => user.uuid === checkout.checked_out_by);
+        if (user && roleCounts.hasOwnProperty(user.role)) {
+            // If the user exists and has a valid role, increment the count for that role
+            roleCounts[user.role]++;
+        }
+    });
+
+    // Prepare for the chart
     const ctx = document.getElementById('checkouts-by-user-role-chart').getContext('2d');
+    const labels = Object.keys(roleCounts);
+    const data = Object.values(roleCounts);
+    const backgroundColors = labels.map(() => `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`);
+
+    // Generate the chart
     new Chart(ctx, {
         type: 'polarArea',
         data: {
-            labels: Object.keys(roleCounts),
+            labels: labels,
             datasets: [{
-                data: Object.values(roleCounts),
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.5)',
-                    'rgba(54, 162, 235, 0.5)',
-                    'rgba(255, 206, 86, 0.5)',
-                    'rgba(75, 192, 192, 0.5)'
-                ],
-            }]
+                data: data,
+                backgroundColor: backgroundColors,
+            }],
+        },
+        options: {
+            scales: {
+                r: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
         }
     });
 }
