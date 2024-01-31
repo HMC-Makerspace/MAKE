@@ -539,15 +539,16 @@ Management Console
 
 #stats {
   grid-area: stats;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   padding: 20px;
   background-color: var(--theme-color-5);
   border-radius: var(--roundness);
   color: var(--text-color-main);
+  width: 80%;
+  margin: 0 auto;
 }
+
 
 #total-count-table {
   width: 100%;
@@ -592,6 +593,11 @@ Management Console
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  width: 90%;
+  margin: 40px auto;
+  border-bottom: 1px solid var(--theme-color-9);
+  padding-bottom: 10px;
+  font-size: 1.5rem;
 }
 
 .user-result.editable {

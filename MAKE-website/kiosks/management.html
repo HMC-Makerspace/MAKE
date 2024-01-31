@@ -54,10 +54,6 @@
             </div>
 
             <div class="content-body">
-                <div id="stats">
-                    <h1>Statistics</h1>
-                    <div id="stats-info"></div>
-                </div>
             </div>
         </div>
 
@@ -97,6 +93,11 @@
                 </p>
             </div>
             <div class="content-body">
+
+                <h1>
+                    Steward Schedule
+                </h1>
+
                 <div class="stewards-legend">
                     <div class="stewards-1 info">One Steward on duty</div>
                     <div class="stewards-2 info">Two Stewards on duty</div>
@@ -196,12 +197,29 @@
             </div>
 
             <div class="content-body">
-                <div id="stats">
-                    <h1>Checkout stats</h1>
-                    <canvas id="checkout-stats"></canvas>
+                <h1>Checkouts</h1>
 
-                    <h1>Workshop stats</h1>
-                    <canvas id="workshop-stats"></canvas>
+                <div id="stats">
+
+                    <div>
+                        <h2>Heatmap</h2>
+                        <canvas id="checkout-heatmap"></canvas>
+                    </div>
+
+                    <div>
+                        <h2>Top Checked Out Items</h2>
+                        <canvas id="checkout-items-chart"></canvas>
+                    </div>
+
+                    <div>
+                        <h2>Daily Checkout Trends</h2>
+                        <canvas id="daily-checkout-trends-chart"></canvas>
+                    </div>
+
+                    <div>
+                        <h2>Checkouts by User Role</h2>
+                        <canvas id="checkouts-by-user-role-chart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -379,17 +397,18 @@
     </div>
 
     <script src="/scripts/libs/fuzzysort.min.js"></script>
-    <script src="/scripts/libs/sweetalert.min.js"></script>
-    <script src="/scripts/libs/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@latest"></script>
 
     <script src="/scripts/page_inventory.js?v=2.3"></script>
     <script src="/scripts/page_quiz_info.js?v=2.3"></script>
     <script src="/scripts/page_checkouts.js?v=2.3"></script>
     <script src="/scripts/page_student_storage.js?v=2.3"></script>
     <script src="/scripts/page_schedule.js?v=2.3"></script>
-    <script src="/scripts/utils.js?v=2.3"></script>
+    <script src="/scripts/utils.js?v=2.4"></script>
 
-    <script src="/kiosks/scripts/management.js?v=2.12"></script>
+    <script src="/kiosks/scripts/management.js?v=2.13"></script>
 </body>
 
 </html>

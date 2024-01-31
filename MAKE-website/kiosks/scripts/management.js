@@ -7,6 +7,7 @@ var state = {
     inventory: null,
     restock_requests: null,
     quizzes: null,
+    checkouts: null,
 };
 
 var shifts_updated = false;
@@ -60,6 +61,7 @@ async function authenticate() {
     setInterval(fetchUsers, 5000);
     setInterval(fetchStudentStorageAdmin, 5000);
 
+    await fetchInventory(kiosk_mode = true);
     await fetchQuizzes();
     await fetchUsers();
     await fetchStudentStorageAdmin();
@@ -67,6 +69,7 @@ async function authenticate() {
     await fetchShiftChangesAdmin();
     await fetchWorkshopsAdmin();
     await fetchRestockRequests();
+    await fetchCheckoutsAdmin();
 
     for (let key of Object.keys(state.users)) {
         state.users[key].cx_id_str = `${state.users[key].cx_id}`;
@@ -86,6 +89,24 @@ async function authenticate() {
 }
 
 authenticate();
+
+async function fetchCheckoutsAdmin() {
+    const response = await fetch(`${API}/checkouts/get_checkouts`,
+        {
+            method: 'GET',
+            headers: {
+                'api-key': api_key
+            }
+        }
+    );
+    const checkouts = await response.json();
+
+    if (checkouts === null) {
+        return null;
+    }
+
+    state.checkouts = checkouts;
+}
 
 async function fetchQuizzes() {
     const response = await fetch(`${API}/misc/get_quizzes`,
@@ -189,7 +210,6 @@ async function fetchRestockRequests() {
 }
 
 function renderAll() {
-    renderQuizTotals();
     renderStudentStorage();
     renderScheduleAdmin();
     renderProficiencies();
@@ -223,7 +243,9 @@ function renderAvailability() {
     header_list.innerHTML = `<th>Name</th><th>CX ID</th><th>Email</th><th>Hours Available</th>`;
     list_divs.push(header_list);
 
-    const stewards = state.users.filter(user => user.role == "steward" || user.role == "head_steward");
+    let stewards = state.users.filter(user => user.role == "steward" || user.role == "head_steward");
+    // Sort by name
+    stewards.sort((a, b) => a.name.localeCompare(b.name));
 
     for (let i = 12; i < 24; i++) {
         const row = document.createElement("tr");
@@ -351,10 +373,163 @@ function showAvailabilityPopup(day, hour, available) {
 
 
 function renderStatistics() {
-    // Use chart.js to show stats. First, checkout stats:
-    const checkout_stats = document.getElementById("checkout-stats");
+    const checkoutCountsByHour = new Array(24).fill(0);
+    const checkoutCountsByItem = {};
+    const dailyCounts = generateDailyCountsFromCheckouts();
 
-    
+    // Process each checkout to tally by hour
+    state.checkouts.forEach(checkout => {
+        const outDate = new Date(checkout.timestamp_out * 1000);
+        checkoutCountsByHour[outDate.getHours()]++;
+
+        // Tally checkouts by item
+        Object.keys(checkout.items).forEach(itemUuid => {
+            const itemCount = checkout.items[itemUuid];
+            const itemName = state.inventory.find(item => item.uuid === itemUuid)?.name || 'Unknown Item';
+            checkoutCountsByItem[itemName] = (checkoutCountsByItem[itemName] || 0) + itemCount;
+        });
+    });
+
+    generateCheckoutHeatmap(checkoutCountsByHour);
+    generateCheckoutItemsChart(checkoutCountsByItem);
+    generateDailyCheckoutTrendsChart(dailyCounts);
+    generateCheckoutsByUserRoleChart();
+}
+
+function generateDailyCountsFromCheckouts() {
+    // Initialize an empty object to hold date: count mappings
+    const dailyCounts = {};
+
+    // Iterate through each checkout in the state.checkouts array
+    state.checkouts.forEach(checkout => {
+        // Convert UNIX timestamp to a Date object
+        const dateOut = new Date(checkout.timestamp_out * 1000);
+        
+        // Format the date as YYYY-MM-DD for consistency
+        const dateString = dateOut.toISOString().split('T')[0];
+
+        // If the date already exists in dailyCounts, increment the count, else initialize it to 1
+        if (dailyCounts[dateString]) {
+            dailyCounts[dateString] += 1;
+        } else {
+            dailyCounts[dateString] = 1;
+        }
+    });
+
+    return dailyCounts;
+}
+
+function generateCheckoutHeatmap(checkoutCountsByHour) {
+    const ctx = document.getElementById('checkout-heatmap');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Array.from({ length: 24 }, (_, i) => `${i}:00`), // `0:00`, `1:00`, ... `23:00
+            datasets: [{
+                label: 'Checkouts by Hour',
+                data: checkoutCountsByHour,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function generateCheckoutItemsChart(checkoutCountsByItem) {
+    const sortedItems = Object.entries(checkoutCountsByItem).sort((a, b) => b[1] - a[1]).slice(0, 10); // top 10 items
+    const itemNames = sortedItems.map(item => item[0]);
+    const itemCounts = sortedItems.map(item => item[1]);
+
+    const ctx = document.getElementById('checkout-items-chart');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: itemNames,
+            datasets: [{
+                label: 'Number of Checkouts',
+                data: itemCounts,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function generateDailyCheckoutTrendsChart(dailyCounts) {
+    const ctx = document.getElementById('daily-checkout-trends-chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Object.keys(dailyCounts), // Assuming dates are in 'YYYY-MM-DD' format
+            datasets: [{
+                label: 'Daily Checkouts',
+                data: Object.values(dailyCounts),
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        parser: 'yyyy-MM-dd',
+                        // For Moment.js, you might use format: 'YYYY-MM-DD'
+                        tooltipFormat: 'PPP',
+                        unit: 'day'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Checkouts'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function generateCheckoutsByUserRoleChart() {
+    const roleCounts = state.users.reduce((acc, user) => {
+        acc[user.role] = (acc[user.role] || 0) + (user.checkoutCount || 0); // Assume `checkoutCount` tracks number of checkouts per user
+        return acc;
+    }, {});
+
+    const ctx = document.getElementById('checkouts-by-user-role-chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'polarArea',
+        data: {
+            labels: Object.keys(roleCounts),
+            datasets: [{
+                data: Object.values(roleCounts),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.5)',
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(255, 206, 86, 0.5)',
+                    'rgba(75, 192, 192, 0.5)'
+                ],
+            }]
+        }
+    });
 }
 
 function renderRestockRequests() {
@@ -975,13 +1150,6 @@ function generateProficiencyDivs(users) {
 
 
     return divs;
-}
-
-function renderQuizTotals() {
-    const stats = document.getElementById("stats-info");
-
-    removeAllChildren(stats);
-    appendChildren(stats, generateStatsDivs(state.users));
 }
 
 function generateStatsDivs(users) {

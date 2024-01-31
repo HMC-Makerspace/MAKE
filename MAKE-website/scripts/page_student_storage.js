@@ -77,16 +77,9 @@ async function renewStudentStorage(slot_id) {
 
         renderStudentStorage();
 
-        Toast.fire({
-            title: 'Renewed storage slot',
-            icon: 'success'
-        });
     } else {
         const reason = await response.text();
-        Toast.fire({
-            title: 'Failed to renew: ' + reason,
-            icon: 'error'
-        });
+
     }
 }
 
