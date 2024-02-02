@@ -58,6 +58,13 @@ async function authenticate() {
     // Save api key to local storage
     localStorage.setItem('admin_api_key', api_key);
 
+    // Register esc to close popup
+    document.addEventListener("keyup", (e) => {
+        if (e.key === "Escape") {
+            closePopup();
+        }
+    });
+
     setInterval(fetchUsers, 5000);
     setInterval(fetchStudentStorageAdmin, 5000);
 
@@ -79,13 +86,6 @@ async function authenticate() {
 
     setInterval(renderAll(), 5000);
     renderAll();
-
-    // Register esc to close popup
-    document.addEventListener("keyup", (e) => {
-        if (e.key === "Escape") {
-            closePopup();
-        }
-    });
 }
 
 authenticate();
@@ -1050,7 +1050,7 @@ function generateRequiredQuizDivs(required_quizzes = []) {
 
     for (let quiz of Object.keys(state.quizzes)) {
         let div = document.createElement("div");
-        div.classList.add("edit-workshop-quiz-container");
+        div.classList.add("checkbox-container");
 
         let checkbox = document.createElement("input");
         checkbox.type = "checkbox";

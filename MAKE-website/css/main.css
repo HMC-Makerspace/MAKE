@@ -667,6 +667,21 @@ a.no-invert:link:hover {
   height: 60px;
 }
 
+.checkbox-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: var(--theme-color-3);
+  border-radius: 2px;
+  padding: 5px;
+  padding-right: 10px;
+  user-select: none;
+  width: fit-content;
+}
+
+
 /*
 
 HOME

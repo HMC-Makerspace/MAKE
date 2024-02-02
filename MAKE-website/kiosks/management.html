@@ -21,8 +21,8 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0" />
 
 
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/kiosks/kiosks.css">
+    <link rel="stylesheet" href="/css/main.css?v=1.1">
+    <link rel="stylesheet" href="/kiosks/kiosks.css?v=1.1">
 </head>
 
 <body>
@@ -300,8 +300,11 @@
             <div id="edit-workshop" class="hidden">
                 <h1>Create/Edit Workshop</h1>
 
-                <label for="edit-workshop-is_live">Live on MAKE</label>
-                <input id="edit-workshop-is_live" type="checkbox">
+                <div class="checkbox-container">
+                    <input id="edit-workshop-is_live" type="checkbox">
+                    <label for="edit-workshop-is_live"><b>Live on MAKE</b></label>
+                </div>
+
 
                 <label for="edit-workshop-title">Title</label>
                 <input id="edit-workshop-title" placeholder="Waterjet a Bottle Opener">
@@ -309,20 +312,22 @@
                 <label for="edit-workshop-description">Description</label>
                 <textarea id="edit-workshop-description" placeholder="Create a bottle opener from scratch with a custom design!"></textarea>
 
-                <label for="edit-workshop-tnstructors">Instructors</label>
-                <input id="edit-workshop-instructors" placeholder="Ethan and Jordan">
+                <div id="edit-workshop-small-options">
+                    <input id="edit-workshop-instructors" placeholder="Instructors">
+                    
+                    <input id="edit-workshop-date" type="date" placeholder="Date">
+    
+                    <label for="edit-workshop-timestamp_start">Start Time</label>
+                    <label for="edit-workshop-timestamp_end">End Time</label>
+                    <label for="edit-workshop-capacity">Capacity</label>
+
+                    <input id="edit-workshop-timestamp_start" type="time" placeholder="Start Time">
+    
+                    <input id="edit-workshop-timestamp_end" type="time" placeholder="End Time">
+    
+                    <input id="edit-workshop-capacity" type="number" placeholder="4">
+                </div>
                 
-                <label>Date</label>
-                <input id="edit-workshop-date" type="date" placeholder="Date">
-
-                <label>Start Time</label>
-                <input id="edit-workshop-timestamp_start" type="time" placeholder="Start Time">
-
-                <label>End Time</label>
-                <input id="edit-workshop-timestamp_end" type="time" placeholder="End Time">
-
-                <label for="edit-workshop-capacity">Capacity</label>
-                <input id="edit-workshop-capacity" type="number" placeholder="4">
 
                 <label>Required Quizzes</label>
                 <div id="edit-workshop-required_quizzes">
@@ -408,7 +413,7 @@
     <script src="/scripts/page_schedule.js?v=2.3"></script>
     <script src="/scripts/utils.js?v=2.4"></script>
 
-    <script src="/kiosks/scripts/management.js?v=2.14"></script>
+    <script src="/kiosks/scripts/management.js?v=2.15"></script>
 </body>
 
 </html>

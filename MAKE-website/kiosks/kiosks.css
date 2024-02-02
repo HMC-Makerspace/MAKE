@@ -798,6 +798,20 @@ td.workshop-edit button {
   height: 100%;
 }
 
+#edit-workshop-small-options {
+  display: grid;
+  grid-template-areas: "instructors instructors date" "label1 label2 label3" "start end capacity";
+  gap: 10px;
+}
+
+#edit-workshop-instructors {
+  grid-area: instructors; 
+}
+
+#edit-workshop-description {
+  height: 60px;
+}
+
 #edit-workshop-required_quizzes {
   display: flex;
   flex-direction: row;
@@ -805,18 +819,6 @@ td.workshop-edit button {
   justify-content: center;
   gap: 10px;
   flex-wrap: wrap;
-}
-
-.edit-workshop-quiz-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  background-color: var(--theme-color-3);
-  border-radius: var(--roundness);
-  padding: 5px;
-  padding-right: 10px;
 }
 
 .workshop-delete, .workshop-edit, .workshop-is_live, .workshop-capacity, .workshop-rsvp_list {
