@@ -791,9 +791,11 @@ function generateWorkshopDivsAdmin() {
     header.innerHTML = `<th>Title</th><th>Description</th><th>Instructors</th><th>Start Time</th><th>Capacity</th><th>Live</th><th>Signups</th><th>Edit</th><th>Delete</th>`;
     divs.push(header);
 
+    let sorted_workshops = state.workshops.sort((a, b) => b.timestamp_start - a.timestamp_start);
+
     // Group workshops by month-year
     let workshopsByMonthYear = {};
-    for (let workshop of state.workshops) {
+    for (let workshop of sorted_workshops) {
         let workshopMonthYear = new Date(workshop.timestamp_start * 1000).toLocaleString('default', { month: 'long', year: 'numeric' });
 
         if (!workshopsByMonthYear[workshopMonthYear]) {
