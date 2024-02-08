@@ -260,8 +260,8 @@ async function uploadFile(event) {
     }
 
     // If the size of the file is larger then 500MB, return
-    if (file.size > 500 * 1024 * 1024) {
-        alert("File size is too large. Please keep it under 500MB.");
+    if (file.size > 1024 * 1024 * 1024) {
+        alert("File size is too large. Please keep it under 1GB.");
         return;
     }
 
