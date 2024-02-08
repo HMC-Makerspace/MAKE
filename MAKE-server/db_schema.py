@@ -32,6 +32,7 @@ schema = [
     'restock_requests',
     'users',
     'user_files',
+    'server_files',
     'quizzes',
     'checkouts',
     'student_storage',
@@ -476,6 +477,7 @@ class Workshop(BaseModel):
     rsvp_list: List[str]
     is_live: bool
     users_notified: Union[List[str], None]
+    photos: Union[List[str], None]
 
     class Config:
         arbitrary_types_allowed = True

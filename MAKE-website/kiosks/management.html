@@ -21,8 +21,8 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0" />
 
 
-    <link rel="stylesheet" href="/css/main.css?v=1.1">
-    <link rel="stylesheet" href="/kiosks/kiosks.css?v=1.1">
+    <link rel="stylesheet" href="/css/main.css?v=1.2">
+    <link rel="stylesheet" href="/kiosks/kiosks.css?v=1.2">
 </head>
 
 <body>
@@ -334,9 +334,11 @@
                     
                 </div>
 
-                <div id="edit-workshop-rsvp_list">
-                </div>  
-                
+                <label for="edit-workshop-photos">Photos</label>
+                <input type="file" id="edit-workshop-photos-input" accept="image/*" multiple onchange="selectWorkshopPhotos(event)">
+
+                <div id="edit-workshop-photos" onclick="openWorkshopPhotos(event)" ondragover="dragOverWorkshopPhotos(event)" ondrop="dropWorkshopPhotos(event)"><span class='material-symbols-outlined'>upload</span></div>
+
                 <div class="edit-buttons">
                     <button id="edit-workshop-save" onclick="saveWorkshop()">Save</button>
                     <button id="edit-workshop-cancel" onclick="closePopup()">Cancel</button>
@@ -411,9 +413,9 @@
     <script src="/scripts/page_checkouts.js?v=2.3"></script>
     <script src="/scripts/page_student_storage.js?v=2.3"></script>
     <script src="/scripts/page_schedule.js?v=2.3"></script>
-    <script src="/scripts/utils.js?v=2.4"></script>
+    <script src="/scripts/utils.js?v=2.5"></script>
 
-    <script src="/kiosks/scripts/management.js?v=2.15"></script>
+    <script src="/kiosks/scripts/management.js?v=2.16"></script>
 </body>
 
 </html>

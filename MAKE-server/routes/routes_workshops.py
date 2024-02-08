@@ -1,5 +1,9 @@
 from datetime import datetime,timedelta, timezone
 import logging
+import os
+import uuid
+
+from fastapi.responses import FileResponse
 from utilities import email_user, format_email_template, validate_api_key
 from db_schema import *
 import requests
@@ -143,8 +147,10 @@ async def route_update_workshop(request: Request):
         # Return error
         raise HTTPException(status_code=400, detail="Workshop does not exist")
     
-    # Save signups
+    # Save signups and photos
     workshop.rsvp_list = existing_workshop["rsvp_list"]
+    if "photos" in existing_workshop:
+        workshop.photos = existing_workshop["photos"]
 
     # Update the workshop
     await collection.replace_one({"uuid": workshop.uuid}, workshop.dict())
@@ -383,5 +389,146 @@ async def route_subscribe(request: Request):
         # There was an error
         # Return error
         raise HTTPException(status_code=500, detail="Error subscribing to Mailchimp")
+
+    return
+
+@workshops_router.post("/add_photo_to_workshop", status_code=201)
+async def route_add_photo_to_workshop(request: Request):
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Adding photo to workshop...")
+
+    # Get the user UUID and role
+    form = await request.form()
+
+    db = MongoDB()
+    api_key = request.headers["api-key"]
+    is_valid = await validate_api_key(db, api_key, "workshops")
+
+    if not is_valid:
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    # Get the workshops collection
+    collection = await db.get_collection("workshops")
+
+    # Get the workshop
+    workshop = await collection.find_one({"uuid": form["workshop_uuid"]})
+
+    if workshop is None:
+        # The workshop does not exist
+        # Return error
+        raise HTTPException(status_code=404, detail="Workshop does not exist")
+
+    # Add the photo to server_files collection
+    server_files_collection = await db.get_collection("server_files")
+
+    if "photos" not in workshop:
+        workshop["photos"] = []
+
+    if type(workshop["photos"]) != list:
+        workshop["photos"] = []
+
+    file_data = form["file"].file.read()
+    file_size_bytes = len(file_data)
+
+    file_uuid = uuid.uuid4().hex
+
+    workshop["photos"].append(file_uuid)
+
+    # Update the workshop
+    await collection.replace_one({"uuid": form["workshop_uuid"]}, workshop)
+
+    # Add the file to the server_files collection
+    await server_files_collection.insert_one({
+        "uuid": file_uuid,
+        "name": form["file"].filename,
+        "timestamp": datetime.now().timestamp(),
+        "size": file_size_bytes
+    })
+
+    # Save the file to the server
+    if not os.path.exists("server_files"):
+        os.makedirs("server_files")
+
+    with open(f"server_files/{file_uuid}", "wb") as f:
+        f.write(file_data)
+
+    return
+
+
+@workshops_router.get("/download_photo/{photo_uuid}")
+async def route_get_photo(photo_uuid: str):
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Getting photo...")
+
+    db = MongoDB()
+
+    # Get the server_files collection
+    collection = await db.get_collection("server_files")
+
+    # Get the file
+    file = await collection.find_one({"uuid": photo_uuid})
+
+    if file is None:
+        # The file does not exist
+        # Return error
+        raise HTTPException(status_code=404, detail="Photo not found")
+
+    # Get the file data from the user_files directory
+    if os.path.exists(f"server_files/{photo_uuid}"):
+        return FileResponse(f"server_files/{photo_uuid}", media_type="application/octet-stream", filename=file["name"])    
+    
+    else :
+        # The file does not exist
+        # Return error
+        raise HTTPException(status_code=404, detail="Photo does not exist")
+
+
+@workshops_router.post("/delete_photo_from_workshop", status_code=201)
+async def route_delete_photo_from_workshop(request: Request):
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Deleting photo from workshop...")
+
+    # Get the request body
+    body = await request.json()
+
+    db = MongoDB()
+    api_key = request.headers["api-key"]
+    is_valid = await validate_api_key(db, api_key, "workshops")
+
+    if not is_valid:
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    # Get the workshops collection
+    collection = await db.get_collection("workshops")
+
+    # Get the workshop
+    workshop = await collection.find_one({"uuid": body["workshop_uuid"]})
+
+    if workshop is None:
+        # The workshop does not exist
+        # Return error
+        raise HTTPException(status_code=404, detail="Workshop does not exist")
+    
+    # Remove the photo from the workshop
+    workshop["photos"].remove(body["photo_uuid"])
+
+    # Update the workshop
+    await collection.replace_one({"uuid": body["workshop_uuid"]}, workshop)
+
+    # Get the server_files collection
+    collection = await db.get_collection("server_files")
+
+    # Get the file
+    file = await collection.find_one({"uuid": body["photo_uuid"]})
+
+    if file is not None:
+        # The file exists
+        # Delete the file
+        os.remove(f"server_files/{body['photo_uuid']}")
+        await collection.delete_one({"uuid": body["photo_uuid"]})
 
     return

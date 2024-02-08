@@ -66,6 +66,63 @@ function generateWorkshopDiv(workshop, is_past=false) {
     title.classList.add("title");
     div.appendChild(title);
 
+    const workshop_photos = document.createElement("div");
+    workshop_photos.classList.add("photo-container");
+
+    if (workshop.photos !== undefined && workshop.photos !== null && workshop.photos.length > 0) {
+        // Create two alternating containers for the fading slideshow of photos
+        // API path is API/workshops/download_photo/{photo_uuid}
+        let photo_index = 0;
+        let photos = workshop.photos;
+        let total_photos = photos.length;
+
+        for (let i = 0; i < total_photos; i++) {
+            let photo_container = document.createElement("div");
+            photo_container.classList.add("photo");
+            photo_container.classList.add("fade");
+
+            let img = document.createElement("img");
+            img.src = `${API}/workshops/download_photo/${photos[i]}`;
+            img.style.width = "100%";
+            img.style.height = "auto";
+            photo_container.appendChild(img);
+
+            workshop_photos.appendChild(photo_container);
+        }
+
+        workshop_photos.children[0].classList.add("active");
+
+        const next = document.createElement("a");
+        next.classList.add("next");
+        next.innerHTML = "<span class=\"material-symbols-outlined\">navigate_next</span>";
+        next.onclick = () => {
+            workshop_photos.children[photo_index].classList.remove("active");
+            photo_index = (photo_index + 1) % total_photos;
+            workshop_photos.children[photo_index].classList.add("active");
+        };
+
+        const prev = document.createElement("a");
+        prev.classList.add("prev");
+        prev.innerHTML = "<span class=\"material-symbols-outlined\">chevron_left</span>";
+        prev.onclick = () => {
+            workshop_photos.children[photo_index].classList.remove("active");
+            photo_index = (photo_index - 1 + total_photos) % total_photos;
+            workshop_photos.children[photo_index].classList.add("active");
+        };
+
+        workshop_photos.appendChild(next);
+        workshop_photos.appendChild(prev);
+
+        // Automatically cycle through photos
+        setInterval(() => {
+            workshop_photos.children[photo_index].classList.remove("active");
+            photo_index = (photo_index + 1) % total_photos;
+            workshop_photos.children[photo_index].classList.add("active");
+        }, 5000); // Change the interval (in milliseconds) as desired
+    }
+
+    div.appendChild(workshop_photos);
+
     const date = document.createElement("p");
     let start_time = new Date(workshop.timestamp_start * 1000);
     let end_time = new Date(workshop.timestamp_end * 1000);
@@ -145,16 +202,23 @@ function generateWorkshopDiv(workshop, is_past=false) {
         signup.classList.add("signup");
         signup.id =`signup-${workshop.uuid}`
 
-        if (workshop.position === -1) {
-            signup.innerText = "RSVP";
+        if (state.user_object === null) {
+            signup.innerText = "Log in to RSVP";
             signup.addEventListener("click", () => {
-                rsvpToWorkshop(workshop.uuid);
+                setPage("home");
             });
         } else {
-            signup.innerText = "Cancel RSVP";
-            signup.addEventListener("click", () => {
-                cancelRsvpToWorkshop(workshop.uuid);
-            });
+            if (workshop.position === -1) {
+                signup.innerText = "RSVP";
+                signup.addEventListener("click", () => {
+                    rsvpToWorkshop(workshop.uuid);
+                });
+            } else {
+                signup.innerText = "Cancel RSVP";
+                signup.addEventListener("click", () => {
+                    cancelRsvpToWorkshop(workshop.uuid);
+                });
+            }
         }
 
         div.appendChild(signup);

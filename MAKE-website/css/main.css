@@ -2065,7 +2065,7 @@ Workshops
 
 .workshop-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: 1fr;
   gap: 20px;
   padding: 20px;
   margin: 0 auto;
@@ -2087,6 +2087,70 @@ Workshops
   grid-template-rows: 80px 50px 50px 190px 50px 40px 40px;
   padding: 20px;
   background: var(--theme-color-2);
+  position: relative;
+}
+
+.workshop .photo-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40%;
+  height: 60%;
+  overflow: hidden;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.workshop .photo-container .photo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.workshop .photo-container .photo.active {
+  opacity: 1;
+}
+
+.workshop img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.workshop .photo-container .next,
+.workshop .photo-container .prev {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  font-size: 24px;
+  text-decoration: none;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 4px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.workshop .photo-container .next {
+  right: 10px;
+}
+
+.workshop .photo-container .prev {
+  left: 10px;
 }
 
 .workshop p {
@@ -2646,5 +2710,30 @@ Mobile Styles
 
   #quick-transfer { 
     min-width: unset;
+  }
+
+  .workshop {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    row-gap: 15px;
+    height: unset;
+  }
+
+  .workshop .photo-container {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    top: unset;
+    right: unset;
+  }
+
+  .workshop .photo-container:empty {
+    display: none;
+  }
+
+  .workshop p {
+    overflow: unset;
   }
 }

@@ -170,7 +170,7 @@ function onHashChange() {
 
 function removeAllChildren(element, keep_first_n = 0) {
     while (element.childNodes.length > keep_first_n) {
-        element.removeChild(element.firstChild);
+        element.removeChild(element.childNodes[keep_first_n]);
     }
 }
 

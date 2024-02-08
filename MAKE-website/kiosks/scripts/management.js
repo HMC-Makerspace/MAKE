@@ -11,6 +11,7 @@ var state = {
 };
 
 var shifts_updated = false;
+var photo_queue = [];
 
 const API = '/api/v2';
 
@@ -786,106 +787,153 @@ function renderWorkshopsAdmin() {
 function generateWorkshopDivsAdmin() {
     let divs = [];
 
-    // Add header
     let header = document.createElement("tr");
     header.innerHTML = `<th>Title</th><th>Description</th><th>Instructors</th><th>Start Time</th><th>Capacity</th><th>Live</th><th>Signups</th><th>Edit</th><th>Delete</th>`;
     divs.push(header);
 
-    let sorted_workshops = state.workshops.sort((a, b) => {
-        return b.timestamp_start - a.timestamp_start;
-    });
+    // Group workshops by month-year
+    let workshopsByMonthYear = {};
+    for (let workshop of state.workshops) {
+        let workshopMonthYear = new Date(workshop.timestamp_start * 1000).toLocaleString('default', { month: 'long', year: 'numeric' });
 
-    for (let workshop of sorted_workshops) {
-        // Print out object with:
-        // Name
-        // List of emails from uuids in RSVP
-
-        let to_print = {
-            title: workshop.title,
-            emails: [],
-        };
-
-        for (let uuid of workshop.rsvp_list) {
-            let user = state.users.find(user => user.uuid === uuid);
-
-            if (user) {
-                to_print.emails.push(user.email);
-            }
+        if (!workshopsByMonthYear[workshopMonthYear]) {
+            workshopsByMonthYear[workshopMonthYear] = [];
         }
 
-        let div = document.createElement("tr");
-        div.classList.add("workshop-admin");
+        workshopsByMonthYear[workshopMonthYear].push(workshop);
+    }
 
-        let title = document.createElement("td");
-        title.classList.add("workshop-title");
-        title.innerText = workshop.title;
-        div.appendChild(title);
+    for (let monthYear in workshopsByMonthYear) {
+        let workshops = workshopsByMonthYear[monthYear];
 
-        let description = document.createElement("td");
-        description.classList.add("workshop-description");
-        description.innerText = workshop.description;
-        div.appendChild(description);
+        let separator = document.createElement("tr");
+        separator.classList.add("workshop-month-separator");
+        let separatorText = document.createElement("td");
+        separatorText.setAttribute("colspan", "9");
+        separatorText.innerText = `${monthYear} (${workshops.length} workshop${workshops.length > 1 ? "s" : ""})`;
+        separator.appendChild(separatorText);
+        divs.push(separator);
 
-        let instructors = document.createElement("td");
-        instructors.classList.add("workshop-instructors");
-        instructors.innerText = workshop.instructors;
-        div.appendChild(instructors);
+        for (let workshop of workshops) {
+            let div = document.createElement("tr");
+            div.classList.add("workshop-admin");
 
-        let timestamp_start = document.createElement("td");
-        timestamp_start.classList.add("workshop-timestamp_start");
-        timestamp_start.innerText = new Date(workshop.timestamp_start * 1000).toLocaleString();
-        div.appendChild(timestamp_start);
+            let title = document.createElement("td");
+            title.classList.add("workshop-title");
+            title.innerText = workshop.title;
+            div.appendChild(title);
 
-        let capacity = document.createElement("td");
-        capacity.classList.add("workshop-capacity");
-        capacity.innerText = `${workshop.rsvp_list.length}/${workshop.capacity}`;
-        div.appendChild(capacity);
+            let description = document.createElement("td");
+            description.classList.add("workshop-description");
+            description.innerText = workshop.description;
+            div.appendChild(description);
 
-        let is_live = document.createElement("td");
-        is_live.classList.add("workshop-is_live");
-        is_live.classList.add(workshop.is_live ? "published" : "unpublished");
-        is_live.innerHTML = workshop.is_live ? "<span class='material-symbols-outlined'>published_with_changes</span>" : "<span class='material-symbols-outlined'>unpublished</span>";
-        div.appendChild(is_live);
+            let instructors = document.createElement("td");
+            instructors.classList.add("workshop-instructors");
+            instructors.innerText = workshop.instructors;
+            div.appendChild(instructors);
 
-        let rsvp_list = document.createElement("td");
-        rsvp_list.classList.add("workshop-rsvp_list");
-        let rsvp_button = document.createElement("button");
-        rsvp_button.innerHTML = "<span class='material-symbols-outlined'>group</span>"
-        rsvp_button.onclick = () => {
-            showRSVPListAdmin(workshop.uuid);
-        };
-        rsvp_list.appendChild(rsvp_button);
-        div.appendChild(rsvp_list);
+            let timestamp_start = document.createElement("td");
+            timestamp_start.classList.add("workshop-timestamp_start");
+            timestamp_start.innerText = new Date(workshop.timestamp_start * 1000).toLocaleString();
+            div.appendChild(timestamp_start);
 
-        let edit_button_container = document.createElement("td");
-        edit_button_container.classList.add("workshop-edit");
-        
-        let edit_button = document.createElement("button");
-        edit_button.innerHTML = "<span class='material-symbols-outlined'>tune</span>"
-        edit_button.onclick = () => {
-            showCreateEditWorkshop(workshop.uuid);
-        };
+            let capacity = document.createElement("td");
+            capacity.classList.add("workshop-capacity");
+            capacity.innerText = `${workshop.rsvp_list.length}/${workshop.capacity}`;
+            div.appendChild(capacity);
 
-        edit_button_container.appendChild(edit_button);
-        div.appendChild(edit_button_container);
+            let is_live = document.createElement("td");
+            is_live.classList.add("workshop-is_live");
+            is_live.classList.add(workshop.is_live ? "published" : "unpublished");
+            is_live.innerHTML = workshop.is_live ? "<span class='material-symbols-outlined'>published_with_changes</span>" : "<span class='material-symbols-outlined'>unpublished</span>";
+            div.appendChild(is_live);
 
-        let delete_button_container = document.createElement("td");
-        delete_button_container.classList.add("workshop-delete");
-        
-        let delete_button = document.createElement("button");
-        delete_button.classList.add("delete");
-        delete_button.innerHTML = "<span class='material-symbols-outlined'>delete</span>"
-        delete_button.onclick = () => {
-            deleteWorkshop(workshop.uuid);
-        };
+            let rsvp_list = document.createElement("td");
+            rsvp_list.classList.add("workshop-rsvp_list");
+            let rsvp_button = document.createElement("button");
+            rsvp_button.innerHTML = "<span class='material-symbols-outlined'>group</span>"
+            rsvp_button.onclick = () => {
+                showRSVPListAdmin(workshop.uuid);
+            };
+            rsvp_list.appendChild(rsvp_button);
+            div.appendChild(rsvp_list);
 
-        delete_button_container.appendChild(delete_button);
-        div.appendChild(delete_button_container);
+            let edit_button_container = document.createElement("td");
+            edit_button_container.classList.add("workshop-edit");
+            
+            let edit_button = document.createElement("button");
+            edit_button.innerHTML = "<span class='material-symbols-outlined'>tune</span>"
+            edit_button.onclick = () => {
+                showCreateEditWorkshop(workshop.uuid);
+            };
 
-        divs.push(div);
+            edit_button_container.appendChild(edit_button);
+            div.appendChild(edit_button_container);
+
+            let delete_button_container = document.createElement("td");
+            delete_button_container.classList.add("workshop-delete");
+            
+            let delete_button = document.createElement("button");
+            delete_button.classList.add("delete");
+            delete_button.innerHTML = "<span class='material-symbols-outlined'>delete</span>"
+            delete_button.onclick = () => {
+                deleteWorkshop(workshop.uuid);
+            };
+
+            delete_button_container.appendChild(delete_button);
+            div.appendChild(delete_button_container);
+
+            divs.push(div);
+        }
     }
 
     return divs;
+}
+
+function openWorkshopPhotos(event) {
+    // ensure that the click was on the div and not a button
+    if (event.target.tagName === "BUTTON") {
+        return;
+    }
+    
+    document.getElementById("edit-workshop-photos-input").click();
+}
+
+function dragOverWorkshopPhotos(event) {
+    event.preventDefault();
+}
+
+function dropWorkshopPhotos(event) {
+    event.preventDefault();
+    let files = event.dataTransfer.files;
+    for (let i = 0; i < files.length; i++) {
+        photo_queue.push(files[i]);
+        addPhotoToQueue(files[i]);
+    }
+}
+
+async function selectWorkshopPhotos(event) {
+    let files = event.target.files;
+    for (let i = 0; i < files.length; i++) {
+        photo_queue.push(files[i]);
+        addPhotoToQueue(files[i]);
+    }
+}
+
+function addPhotoToQueue(file) {
+    const editWorkshopPhotosDiv = document.getElementById("edit-workshop-photos");
+  
+    const photoBox = generateWorkshopPhotoDiv(file, uploaded = false);
+  
+    editWorkshopPhotosDiv.appendChild(photoBox);
+}
+
+function removePhotoFromQueue(file) {
+    const index = photo_queue.indexOf(file);
+    if (index > -1) {
+        photo_queue.splice(index, 1);
+    }
 }
 
 function showRSVPListAdmin(uuid) {
@@ -972,6 +1020,7 @@ async function sendWorkshopEmail(uuid) {
 function showCreateEditWorkshop(uuid) {
     let workshop = state.workshops.find(workshop => workshop.uuid === uuid);
 
+    photo_queue = [];
 
     if (workshop) {
         let pacific_offset = new Date().getTimezoneOffset() * 60 * 1000;
@@ -998,6 +1047,10 @@ function showCreateEditWorkshop(uuid) {
      
         removeAllChildren(required_quizzes);
         appendChildren(required_quizzes, generateRequiredQuizDivs(workshop.required_quizzes));
+
+        const photos = document.getElementById("edit-workshop-photos");
+        removeAllChildren(photos, keep_first_n = 1);
+        appendChildren(photos, generateWorkshopPhotoDivs(workshop));
     } else {
         document.getElementById("edit-workshop-title").value = "";
         document.getElementById("edit-workshop-description").value = "";
@@ -1014,10 +1067,75 @@ function showCreateEditWorkshop(uuid) {
              
         removeAllChildren(required_quizzes);
         appendChildren(required_quizzes, generateRequiredQuizDivs());
+
+        const photos = document.getElementById("edit-workshop-photos");
+        removeAllChildren(photos, keep_first_n = 1);
     }
 
     // Open popup
     showPopup("edit-workshop");
+}
+
+function generateWorkshopPhotoDivs(workshop) {
+    let divs = [];
+
+    if (workshop.photos) {
+        for (let photo of workshop.photos) {
+            divs.push(generateWorkshopPhotoDiv(photo, uploaded = true, workshop = workshop));
+        }
+    }
+
+    return divs;
+}
+    
+function generateWorkshopPhotoDiv(file, uploaded = false, workshop = null) {
+    const photoBox = document.createElement("div");
+    photoBox.classList.add("photo-box");
+  
+    const closeButton = document.createElement("button");
+    closeButton.classList.add("close-button");
+    closeButton.innerText = "X";
+
+    if (uploaded) {
+        closeButton.addEventListener("click", async () => {
+            // call delete photo endpoint
+            let request = await fetch(`${API}/workshops/delete_photo_from_workshop`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "api-key": api_key,
+                    },
+                    body: JSON.stringify({ workshop_uuid: workshop.uuid, photo_uuid: file}),
+                }
+            );
+
+            if (request.status == 201) {
+                workshop.photos = workshop.photos.filter(photo => photo !== file);
+                photoBox.remove();
+            } else {
+                alert("Error deleting photo: " + request.status);
+            }
+        });
+    } else {
+        closeButton.addEventListener("click", () => {
+            removePhotoFromQueue(file);
+            document.getElementById("edit-workshop-photos").removeChild(photoBox);
+        });
+    }
+
+  
+    const photo = document.createElement("img");
+    if (uploaded) {
+        photo.src = `${API}/workshops/download_photo/${file}`;
+    } else {
+        photo.src = URL.createObjectURL(file);
+    }
+  
+    photoBox.appendChild(closeButton);
+    photoBox.appendChild(photo);
+
+    return photoBox;
 }
 
 async function deleteWorkshop(uuid) {
@@ -1074,6 +1192,9 @@ function generateRequiredQuizDivs(required_quizzes = []) {
 }
 
 async function saveWorkshop(uuid = null) {
+    // disable save button
+    document.getElementById("edit-workshop-save").setAttribute("disabled", "disabled");
+
     let create_new = false;
 
     if (uuid === null) {
@@ -1124,16 +1245,47 @@ async function saveWorkshop(uuid = null) {
     );
 
     if (request.status == 201) {
+        if (photo_queue.length > 0) {
+            await uploadWorkshopPhotos(uuid);
+        }
+
         await fetchWorkshopsAdmin();
         renderWorkshopsAdmin();
 
+        // Enable save button
+        document.getElementById("edit-workshop-save").removeAttribute("disabled");
         closePopup();
     } else {
+        document.getElementById("edit-workshop-save").removeAttribute("disabled");
+
         // Alert with details
         const body = await request.json();
         alert("Error saving workshop: " + request.status + "\n" + body.error);
     }
 }
+
+async function uploadWorkshopPhotos(uuid) {
+    for (let photo of photo_queue) {
+        let form = new FormData();
+        form.append("workshop_uuid", uuid);
+        form.append("file", photo);
+
+        let request = await fetch(`${API}/workshops/add_photo_to_workshop`,
+            {
+                method: "POST",
+                headers: {
+                    "api-key": api_key,
+                },
+                body: form,
+            }
+        );
+
+        if (request.status != 201) {
+            alert("Error uploading photo: " + request.status);
+        }
+    }
+}
+
 
 
 function renderProficiencies() {

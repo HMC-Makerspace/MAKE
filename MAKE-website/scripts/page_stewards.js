@@ -5,6 +5,10 @@ let endCell = null; // Keeps track of the current cell during drag
 let changedCells = []; // Array to keep track of all cell changes
 
 document.addEventListener("mousedown", (e) => {
+    if (state.user_object === null) {
+        return;
+    }
+
     if (!state.user_object.availability) {
         state.user_object.availability = [];
     

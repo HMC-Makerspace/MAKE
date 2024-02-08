@@ -821,10 +821,52 @@ td.workshop-edit button {
   flex-wrap: wrap;
 }
 
+#edit-workshop-photos {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+  overflow-x: auto;
+  border: 4px dashed var(--theme-color-9);
+  min-height: 120px;
+  width: 100%;
+  padding: 10px;
+  border-radius: var(--roundness);
+  cursor: pointer;
+}
+
+#edit-workshop-photos span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 30px;
+}
+
+#edit-workshop-photos:hover {
+  background-color: var(--theme-color-2);
+}
+
+#edit-workshop-photos img {
+  max-height: 100px;
+  max-width: 100px;
+  border-radius: var(--roundness);
+  cursor: pointer;
+}
+
 .workshop-delete, .workshop-edit, .workshop-is_live, .workshop-capacity, .workshop-rsvp_list {
   text-align: center;
 }
 
+.workshop-month-separator {
+  font-weight: bold;
+  text-align: center;
+  background-color: var(--theme-color-5) !important;
+  height: 60px;
+  color: white;
+}
 
 
 #workshop-signups {

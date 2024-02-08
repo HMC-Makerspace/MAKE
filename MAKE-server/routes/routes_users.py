@@ -406,7 +406,7 @@ async def route_download_file(request: Request, file_uuid: str):
     if file is None:
         # The file does not exist
         # Return error
-        raise HTTPException(status_code=404, detail="File does not exist")
+        raise HTTPException(status_code=404, detail="File not found")
     
     # Get the file data from the user_files directory
     if os.path.exists(f"user_files/{file_uuid}"):

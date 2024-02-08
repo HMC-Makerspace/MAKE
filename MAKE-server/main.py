@@ -184,6 +184,12 @@ if __name__ == "__main__":
     # Setup logging to display everything to the console
     logging.getLogger().setLevel(logging.INFO)
 
+    if not os.path.exists("server_files"):
+        os.makedirs("server_files")
+
+    if not os.path.exists("user_files"):
+        os.makedirs("user_files")
+        
     logging.info("Starting MAKE server...")
 
     logging.info("Connecting to database...")
