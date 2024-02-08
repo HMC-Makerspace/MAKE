@@ -2172,7 +2172,7 @@ Workshops
 } 
 
 .workshop .description {
-
+  width: 50%;
 }
 
 .workshop .required-quizzes {
