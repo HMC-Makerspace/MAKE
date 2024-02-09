@@ -860,6 +860,19 @@ td.workshop-edit button {
   text-align: center;
 }
 
+.workshop-is_live span {
+  padding: 5px;
+  border-radius: 50%;
+}
+
+.workshop-is_live.published span{
+  background-color: var(--high-color);
+}
+
+.workshop-is_live.unpublished span{
+  color: var(--low-color);
+}
+
 .workshop-month-separator {
   font-weight: bold;
   text-align: center;
