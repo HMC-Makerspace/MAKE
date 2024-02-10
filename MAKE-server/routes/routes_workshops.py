@@ -54,6 +54,7 @@ async def route_get_workshops(request: Request, user_uuid: str):
         # Remove the rsvp_list if a user
         if user["role"] == "user":
             del workshop["rsvp_list"]
+            workshop["position"] = 0 if user_uuid in workshop["rsvp_list"] else -1
         
         if user["role"] in ["admin", "head_steward", "steward"]:
             workshop["signups"] = len(workshop["rsvp_list"])
