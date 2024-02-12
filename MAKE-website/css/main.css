@@ -2069,7 +2069,7 @@ Workshops
   gap: 20px;
   padding: 20px;
   margin: 0 auto;
-  max-width: 1200px;
+  max-width: 1000px;
 }
 
 .workshops-seperator {
@@ -2178,6 +2178,29 @@ Workshops
 
 .workshop .required-quizzes {
   font-size: .8em;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.workshop .required-quizzes span {
+  border-radius: 4px;
+  padding: 2px 4px;
+  background-color: var(--theme-color-2);
+  border: 1px solid var(--theme-color-3);
+}
+
+.workshop .required-quizzes span.passed {
+  background-color: var(--high-color-dark);
+  border: 1px solid var(--high-color);
+}
+
+.workshop .required-quizzes span.failed {
+  background-color: var(--low-color-dark);
+  border: 1px solid var(--low-color);
 }
 
 .workshop .capacity {

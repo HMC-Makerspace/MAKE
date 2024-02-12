@@ -39,6 +39,7 @@ var state = {
     workshops: null,
     current_search_results: null,
     quizzes: null,
+    cached_colors: null,
 }
 
 // Function to load/save state from localstorage
@@ -57,6 +58,7 @@ function loadState() {
 function validateState(new_state) {
     for (let key of Object.keys(state)) {
         if (new_state[key] === undefined) {
+            console.log(`State key ${key} is missing, adding default value`);
             new_state[key] = state[key];
         }
     }
@@ -103,10 +105,14 @@ function displayLoggedOut() {
         el.classList.remove('hidden');
     }
 
-    displayStewardInfo();
-
-    renderQuizInfo();
-    renderCheckouts();
+    try {
+        displayStewardInfo();
+        renderQuizInfo();
+        renderCheckouts();
+        renderWorkshops();
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 async function displayStewardInfo() {
@@ -130,6 +136,9 @@ async function updateUserInfo() {
         return;
     }
 
+    const login_button = document.getElementById('college-id-button');
+    login_button.setAttribute('disabled', 'disabled');
+
     const response = await fetch(`${API}/users/get_user_by_cx_id/${state.cx_id}`);
 
     if (response.status == 200) {
@@ -144,13 +153,18 @@ async function updateUserInfo() {
         fetchStudentStorage();
         renderQuizInfo();
         renderCheckouts();
+        renderWorkshops();
         // End fetches
+
+        login_button.removeAttribute('disabled');
 
         return true;
     } else {
         if (response.status == 429) {
             alert("You have submitted too many login requests. Please wait a few minutes and try again.")
         }
+        
+        login_button.removeAttribute('disabled');
         
         return false;
     }

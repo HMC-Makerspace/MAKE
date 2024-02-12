@@ -29,12 +29,17 @@ function hideLoginError() {
 }
 
 function logout() {
+    const logout_button = document.getElementById('logout-button');
+    logout_button.setAttribute('disabled', 'disabled');
+    
     state.user_object = null;
     state.cx_id = null;
 
     saveState();
 
     displayLoggedOut();
+
+    logout_button.removeAttribute('disabled');
 }
 
 function toggleMobileMenu() {

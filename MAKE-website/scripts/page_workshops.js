@@ -197,7 +197,19 @@ function generateWorkshopDiv(workshop, is_past=false) {
     div.appendChild(capacity);
 
     const required_quizzes = document.createElement("p");
-    required_quizzes.innerHTML = `<b>Required Quizzes:</b> ${workshop.required_quizzes.join(", ")}`;
+    required_quizzes.innerHTML = `<b>Required Quizzes:</b>`;
+    
+
+    for (let quiz of workshop.required_quizzes) {
+        if (state.user_object === null) {
+            required_quizzes.innerHTML += `<span>${quiz}</span>`;
+            continue;
+        }
+        
+        let has_passed = Object.values(state.user_object.passed_quizzes).includes(QUIZ_NAME_TO_ID[quiz]);
+        required_quizzes.innerHTML += `<span class='${has_passed ? "passed" : "failed"}'>${quiz}</span>`;
+    }
+
     required_quizzes.classList.add("required-quizzes");
     div.appendChild(required_quizzes);
 
@@ -240,15 +252,30 @@ function generateWorkshopDiv(workshop, is_past=false) {
 
 async function applyColorToWorkshopDiv(photoContainer, workshopDiv) {
     const img = photoContainer.querySelector("img");
+
+    if (state.cached_colors === null) {
+        state.cached_colors = {};
+    }
+
+    // If the path is in the cache, use the cached color
+    if (state.cached_colors[img.src] !== undefined) {
+        workshopDiv.style.backgroundColor = `rgba(${state.cached_colors[img.src][0]}, ${state.cached_colors[img.src][1]}, ${state.cached_colors[img.src][2]}, 0.6)`;
+        return;
+    }
+
     const colorThief = new ColorThief();
 
     if (img.complete) {
         const colors = await colorThief.getColor(img);
         workshopDiv.style.backgroundColor = `rgba(${colors[0]}, ${colors[1]}, ${colors[2]}, 0.6)`;
+        state.cached_colors[img.src] = colors;
+        saveState();
     } else {
         img.onload = () => {
             const colors = colorThief.getColor(img);
             workshopDiv.style.backgroundColor = `rgba(${colors[0]}, ${colors[1]}, ${colors[2]}, 0.6)`;
+            state.cached_colors[img.src] = colors;
+            saveState();
         };
     
     }
