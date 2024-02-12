@@ -417,3 +417,7 @@ function downloadFile(filename, data) {
 
     document.body.removeChild(element);
 }
+
+async function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}

@@ -99,6 +99,7 @@ function generateWorkshopDiv(workshop, is_past=false) {
             workshop_photos.children[photo_index].classList.remove("active");
             photo_index = (photo_index + 1) % total_photos;
             workshop_photos.children[photo_index].classList.add("active");
+            applyColorToWorkshopDiv(workshop_photos.children[photo_index], div);
         };
 
         const prev = document.createElement("a");
@@ -108,6 +109,7 @@ function generateWorkshopDiv(workshop, is_past=false) {
             workshop_photos.children[photo_index].classList.remove("active");
             photo_index = (photo_index - 1 + total_photos) % total_photos;
             workshop_photos.children[photo_index].classList.add("active");
+            applyColorToWorkshopDiv(workshop_photos.children[photo_index], div);
         };
 
         workshop_photos.appendChild(next);
@@ -118,7 +120,11 @@ function generateWorkshopDiv(workshop, is_past=false) {
             workshop_photos.children[photo_index].classList.remove("active");
             photo_index = (photo_index + 1) % total_photos;
             workshop_photos.children[photo_index].classList.add("active");
+            applyColorToWorkshopDiv(workshop_photos.children[photo_index], div);
         }, 5000); // Change the interval (in milliseconds) as desired
+
+        // Apply initial gradient to the workshop div
+        applyColorToWorkshopDiv(workshop_photos.children[0], div);
     }
 
     div.appendChild(workshop_photos);
@@ -230,6 +236,22 @@ function generateWorkshopDiv(workshop, is_past=false) {
     }
 
     return div;
+}
+
+async function applyColorToWorkshopDiv(photoContainer, workshopDiv) {
+    const img = photoContainer.querySelector("img");
+    const colorThief = new ColorThief();
+
+    if (img.complete) {
+        const colors = await colorThief.getColor(img);
+        workshopDiv.style.backgroundColor = `rgba(${colors[0]}, ${colors[1]}, ${colors[2]}, 0.6)`;
+    } else {
+        img.onload = () => {
+            const colors = colorThief.getColor(img);
+            workshopDiv.style.backgroundColor = `rgba(${colors[0]}, ${colors[1]}, ${colors[2]}, 0.6)`;
+        };
+    
+    }
 }
 
 async function rsvpToWorkshop(workshop_uuid) {

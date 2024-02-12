@@ -2087,6 +2087,7 @@ Workshops
   grid-template-rows: 80px 50px 50px 190px 50px 40px 40px;
   padding: 20px;
   background: var(--theme-color-2);
+  transition: background-color 0.5s ease-in-out;
   position: relative;
 }
 
@@ -2735,5 +2736,9 @@ Mobile Styles
 
   .workshop p {
     overflow: unset;
+  }
+
+  .workshop .description {
+    width: 100%;
   }
 }
