@@ -52,14 +52,6 @@
   --brightness: 0.9;
   --invert: 0%;
 
-  /* Icons */
-  --tool-icon: url(/img/tool-icon.svg);
-  --material-icon: url(/img/material-icon.svg);
-  --checkout-icon: url(/img/checkout-icon.svg);
-  --checkin-icon: url(/img/checkin-icon.svg);
-  --expired-icon: url(/img/expire.svg);
-  --details-icon: url(/img/details.svg);
-
   /* Proficiencies */
   --sewing: #5271ff;
   --dprinting: #ff5757;
@@ -351,8 +343,8 @@ p3 {
   font-size: 12px;
   font-weight: bold;
   width: 100%;
-  height: 6vh;
-  padding-left: 30px;
+  height: 5vh;
+  padding-left: 25px;
   border-radius: unset;
   text-align: left;
   display: flex;
@@ -364,8 +356,8 @@ p3 {
 #left-bar button .material-symbols-outlined {
   transition: background-color 0.2s ease-in-out, opacity 0.2 ease-in-out, color 0.2s ease-in-out;
   color: black;
-  font-size: 25px;
-  margin-right: 10px;
+  font-size: 20px;
+  margin-right: 20px;
 }
 
 
@@ -513,6 +505,15 @@ button.checkbox:hover img {
   filter: invert(var(--invert));
 }
 
+button.only-icon {
+  padding: 0px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color .1s ease-in-out, opacity .1s ease-in-out;
+}
 
 input[type="checkbox"] {
   width: 20px;
@@ -967,16 +968,20 @@ INVENTORY
 
 .inventory-result-show-lower-div {
   height: 40px;
-  background-size: 30px 30px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
   background-color: unset !important;
-  background-repeat: no-repeat;
-  background-position: center;
-  filter: invert(var(--invert));
-  background-image: var(--details-icon);
   transition: transform 0.1s ease-in-out;
   --r: 0deg;
   --s: 1;
   transform: rotate(var(--r)) scale(var(--s));
+  color: var(--text-color-main);
+}
+
+.inventory-result-show-lower-div span {
+  font-size: 26px;
 }
 
 .inventory-result-show-lower-div.grayed-out {
@@ -1053,18 +1058,10 @@ INVENTORY
 
 .inventory-result-tool-material {
   height: 40px;
-  background-repeat: no-repeat;
-  background-position: center;
-  filter: invert(var(--invert));
-  background-size: 30px 30px;
-}
-
-.inventory-result-tool-material.material {
-  background-image: var(--material-icon);
-}
-
-.inventory-result-tool-material.tool {
-  background-image: var(--tool-icon);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;  
 }
 
 .inventory-result-location {
@@ -1082,17 +1079,21 @@ INVENTORY
 
 .inventory-result-location .room {
   background-color: var(--theme-color-3);
+  border-radius: 2px;
 }
 
 .inventory-result-location .area {
   background-color: var(--theme-color-5);
+  border-radius: 2px;
 }
 
 .inventory-result-location .overstock {
+  border-radius: 2px;
   background-color: var(--theme-color-4);
 }
 
 .inventory-result-quantity {
+  border-radius: 2px;
   background-color: var(--theme-color-3);
   color: var(--text-color-main);
   display: flex;
@@ -1382,67 +1383,8 @@ Checkouts
   padding-bottom: 20px;
 }
 
-#checkouts-current,
-#checkouts-history {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--theme-color-2);
-  min-width: 80%;
-  margin-top: 20px;
-  gap: 5px;
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-.checkout-entry {
-  display: grid;
-  grid-template-columns: 150px 150px 400px 1fr;
-  grid-template-rows: auto;
-  background-color: var(--theme-color-2);
-  padding-top: 5px;
-  padding-bottom: 5px;
-  gap: 5px;
-  width: 100%;
-  align-content: center;
-  justify-content: center;
-  place-items: center;
-}
-
-.checkout-entry:nth-child(odd) {
-  background-color: var(--theme-color-9);
-}
-
-.checkout-header {
-  background-color: var(--theme-color-3) !important;
-  font-weight: bolder;
-  position: sticky;
-  top: 0;
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
-}
-
-.checkout-entry.kiosk-mode {
-  grid-template-columns: 150px 150px 400px 1fr 1fr 1fr 1fr;
-}
-
-.checkout-entry.checked-in {
-  grid-template-columns: 150px 150px 400px 1fr 1fr 1fr;
-}
-
-.checkout-header.checked-in {
-  grid-template-columns: 150px 150px 400px 1fr 1fr;
-}
-
-.checkout-header.kiosk-mode.checked-in {
-  grid-template-columns: 150px 150px 400px 1fr 1fr 1fr;
-}
-
-.checkout-entry > * {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+.checkout-table td {
+  text-align: center;
 }
 
 .checkout-entry-items {
@@ -1466,48 +1408,7 @@ Checkouts
   justify-content: center;
   padding: 5px;
   font-size: 0.8em;
-}
-
-.t-out-info,
-.t-in-info {
-  font-family: "JetBrains Mono", monospace;
-  font-weight: 200;
-  font-size: 0.9em;
-}
-
-.t-out,
-.t-in {
-  background-size: 30px 30px;
-  background-repeat: no-repeat;
-  background-position: center;
-  width: 100%;
-  min-height: 30px;
-  min-width: 30px;
-  background-color: unset;
-}
-
-.t-out {
-  background-image: var(--checkout-icon);
-}
-
-.t-in.checked-in {
-  background-image: var(--checkin-icon);
-}
-
-.t-in.checked-out {
-  background-image: var(--expired-icon);
-}
-
-.checkout-entry-times-notified {
-  flex-direction: row;
-  font-size: 0.8em;
-  gap: 10px;
-}
-
-.check-in-button {
-  background-color: var(--theme-color-7);
-  margin-left: 5px;
-  height: 40px;
+  border-radius: 2px;
 }
 
 .checkout-entry.success .check-in-button {
@@ -1856,7 +1757,7 @@ FAQ
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  width: 100%;
+  width: 50%;
   max-width: 600px;
   margin: 10px 0;
 }
@@ -1884,7 +1785,6 @@ FAQ
   border: 1px solid var(--theme-color-3);
   border-radius: 2px;
   gap: 10px;
-  background-color: var(--theme-color-2);
   color: var(--text-color-main);
   cursor: pointer;
   transition: background-color 0.1s ease-in-out;
@@ -1909,6 +1809,7 @@ FAQ
   column-gap: 15px;
   margin: 20px 20px;
   user-select: none;
+  background-color: unset !important;
 }
 
 .faq-question p {
@@ -1928,7 +1829,8 @@ FAQ
 
 #settings-content,
 #values-content,
-#error-content {
+#error-content,
+#about-faq-content {
   display: flex;
   flex-direction: column;
   align-items: center;

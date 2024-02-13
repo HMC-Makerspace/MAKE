@@ -364,8 +364,10 @@ async function generateShiftDiv(shift, change=false) {
     let stewards = [];
 
     for (let steward of shift.stewards) {
-        if (steward == state.user_object.uuid) {
-            continue;
+        if (state.user_object !== null) {
+            if (steward == state.user_object.uuid) {
+                continue;
+            }
         }
 
         let steward_response = await fetch(`${API}/users/get_user/${steward}`);

@@ -1,9 +1,9 @@
 async function start() {
     if (state.cx_id !== null) {
-        displayLoggedIn();
+        displayLoggedIn(start=true);
         await updateUserInfo();
     } else {
-        displayLoggedOut();
+        displayLoggedOut(start=true);
     }
 
     //animateChangeFonts();

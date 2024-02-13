@@ -421,3 +421,15 @@ function downloadFile(filename, data) {
 async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+// Get date as .toLocaleString() but with <br> instead of comma.
+// Then convert a timestamp like 3/25/2023, 12:17:09 PM
+// to 3/25/2023 <br> 12:17 PM
+function checkoutFormatDate(date) {
+    let date_str = date.toLocaleString().replace(", ", "<br>");
+    let date_arr = date_str.split(":");
+
+    let time = date_arr[0] + ":" + date_arr[1] + " " + date_arr[2].split(" ")[1];
+
+    return time;
+}

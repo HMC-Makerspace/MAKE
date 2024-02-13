@@ -83,7 +83,7 @@ function searchInventory(search, filters = null, kiosk_mode = false) {
                 return false;
             }
 
-            if (filters.tool_material && item.is_material !== (filters.tool_material === "M")) {
+            if (filters.tool_material && item.role !== filters.tool_material) {
                 return false;
             }
 
@@ -200,8 +200,15 @@ function generateInventoryDiv(result, kiosk_mode = false) {
     } else {
         const tool_material = document.createElement("div");
         tool_material.classList.add("inventory-result-tool-material");
-        tool_material.classList.add(item.is_material ? "material" : "tool");
-        tool_material.title = item.is_material ? "Material" : "Tool";
+        tool_material.classList.add(item.role === "M" ? "material" : "tool");
+        tool_material.title = item.role === "M" ? "Material" : "Tool";
+        
+        if (item.role === "M") {
+            tool_material.innerHTML = `<span class="material-symbols-outlined">category</span>`;
+        } else {
+            tool_material.innerHTML = `<span class="material-symbols-outlined">build</span>`;
+        }
+
         main_div.appendChild(tool_material);
     }
 
@@ -300,6 +307,7 @@ function generateInventoryDiv(result, kiosk_mode = false) {
     show_lower_div_button.classList.add("grayed-out");
     // Add aria label to button
     show_lower_div_button.setAttribute("aria-label", "Show more information about this item");
+    show_lower_div_button.innerHTML = "<span class='material-symbols-outlined'>expand_more</span>";
 
     if (lower_div.childNodes.length > 0) {
         show_lower_div_button.classList.remove("grayed-out");

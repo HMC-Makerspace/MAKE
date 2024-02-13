@@ -34,7 +34,7 @@ async function authenticate() {
     console.log(`Authenticating with checkout key ${api_key}`);
 
     setInterval(fetchInventory, 100000, kiosk_mode = true);
-    setInterval(fetchCheckouts, 100000);
+    setInterval(fetchCheckoutsAdmin, 100000);
     setInterval(fetchUsers, 100000);
 
     fetchInventory(true).then(() => {
@@ -51,7 +51,7 @@ async function authenticate() {
 
         submitUserSearch();
         document.getElementById("users-search-input").addEventListener("keyup", () => { submitUserSearch(editable = false) });
-        fetchCheckouts();
+        fetchCheckoutsAdmin();
     });
 
     document.addEventListener("keydown", (e) => {
@@ -110,16 +110,9 @@ async function authenticate() {
             createUserInfo(user_info)
         });
     });
-
-
-    document.getElementById("restock-dialog").addEventListener("click", function (event) {
-        if (event.target.id === "restock-dialog") {
-            hideRestock()
-        }
-    });
 }
 
-async function fetchCheckouts() {
+async function fetchCheckoutsAdmin() {
     const response = await fetch(`${API}/checkouts/get_checkouts`,
         {
             method: 'GET',
@@ -135,45 +128,122 @@ async function fetchCheckouts() {
     }
 
     state.checkouts = checkouts;
-    updateCheckoutsHTML();
+    renderCheckoutsAdmin();
 }
 
-function updateCheckoutsHTML() {
-    if (state.checkouts === null) {
-        return;
+function renderCheckoutsAdmin() {
+    const container = document.getElementById("checkouts-page");
+
+    removeAllChildren(container);
+
+    container.appendChild(createAdminCheckoutTable(current = true));
+    container.appendChild(createAdminCheckoutTable(current = false));
+}
+
+function createAdminCheckoutTable(current = true) {
+    let table = document.createElement("table");
+    table.classList.add("checkout-table");
+
+    let out_icon = `<span class="material-symbols-outlined">shopping_cart_checkout</span>`;
+    let in_icon = `<span class="material-symbols-outlined">keyboard_return</span>`;
+    let due_icon = `<span class="material-symbols-outlined">event_upcoming</span>`
+    let emails_icon = `<span class="material-symbols-outlined">forward_to_inbox</span>`;
+    let items_icon = `<span class="material-symbols-outlined">category</span>`;
+
+    let checkouts;
+    let header;
+
+    if (!current) {
+        checkouts = state.checkouts.filter((checkout) => checkout.timestamp_in !== null);
+        header = `<tr><th>${out_icon}</th><th>${in_icon}</th><th>${items_icon}</th><th>${emails_icon}</th><th>Name</th><th>Undo</th></tr>`;
+    } else {
+        checkouts = state.checkouts.filter((checkout) => checkout.timestamp_in === null);
+        header = `<tr><th>${out_icon}</th><th>${due_icon}</th><th>${items_icon}</th><th>${emails_icon}</th><th>Name</th><th>Extend</th><th>Check In</th></tr>`;
     }
 
-    const current = document.getElementById("checkouts-current");
-    const history = document.getElementById("checkouts-history");
+    let header_row = document.createElement("tr");
+    header_row.innerHTML = header;
+    table.appendChild(header_row);
 
-    let current_divs = [];
+    // Reverse the checkouts so that the most recent checkouts are at the top
+    checkouts = checkouts.reverse();
 
-    currently_checked_out = state.checkouts.filter((checkout) => checkout.timestamp_in == null);
-    checkout_history = state.checkouts.filter((checkout) => checkout.timestamp_in != null);
+    for (let checkout of checkouts) {
+        let row = document.createElement("tr");
+        row.id = `checkout-${checkout.uuid}`;
 
-    for (let checkout of currently_checked_out) {
-        current_divs.push(createCheckoutDiv(checkout, kiosk_mode = true));
+        let t_out = document.createElement("td");
+        t_out.innerHTML = checkoutFormatDate(new Date(checkout.timestamp_out * 1000));
+        row.appendChild(t_out);
+
+        let t_due = document.createElement("td");
+        t_due.innerHTML = checkoutFormatDate(new Date(checkout.timestamp_due * 1000));
+        row.appendChild(t_due);
+
+        let items = document.createElement("td");
+        items.classList.add("checkout-entry-items");
+        for (let uuid of Object.keys(checkout.items)) {
+            let item_div = document.createElement("div");
+            item_div.classList.add("checkout-entry-item");
+            let name = (state.inventory.find((item) => item.uuid === uuid) ?? { name: "" }).name;
+
+            item_div.innerHTML = `${checkout.items[uuid]}x ${name ?? `[${uuid}]`}`;
+            items.appendChild(item_div);
+        }
+        row.appendChild(items);
+
+        let times_notified = document.createElement("td");
+        times_notified.innerHTML = checkout.notifications_sent;
+        row.appendChild(times_notified);
+
+        let name = document.createElement("td");
+        if (state.users !== null) {
+            let user = state.users.find((user) => user.uuid === checkout.checked_out_by);
+
+            name.innerHTML = `${user.name ?? checkout.checked_out_by}`;
+        } else {
+            name.innerHTML = `${checkout.checked_out_by}`;
+        }
+
+        row.appendChild(name);
+
+        if (!current) {
+            let undo = document.createElement("td");
+            let undo_button = document.createElement("button");
+            undo_button.innerHTML = `<span class="material-symbols-outlined">undo</span>`;
+            undo_button.onclick = () => {
+                undoCheckout(checkout.uuid);
+            }
+
+            undo.appendChild(undo_button);
+            row.appendChild(undo);
+        } else {
+            let extend = document.createElement("td");
+            let extend_button = document.createElement("button");
+            extend_button.innerHTML = `<span class="material-symbols-outlined">more_time</span>`;
+            extend_button.onclick = () => {
+                extendCheckout(checkout.uuid);
+            }
+
+            extend.appendChild(extend_button);
+            row.appendChild(extend);
+
+            let check_in = document.createElement("td");
+            let check_in_button = document.createElement("button");
+            check_in_button.classList.add("check-in-button");
+            check_in_button.innerHTML = `<span class="material-symbols-outlined">keyboard_return</span>`;
+            check_in_button.onclick = () => {
+                checkIn(checkout.uuid);
+            }
+
+            check_in.appendChild(check_in_button);
+            row.appendChild(check_in);
+        }
+
+        table.appendChild(row);
     }
 
-    current_divs.push(createCheckoutHeader(kiosk_mode=true, timestamp_in=false));
-
-    let history_divs = [];
-    for (let checkout of checkout_history) {
-        history_divs.push(createCheckoutDiv(checkout, kiosk_mode = true));
-    }
-
-    history_divs.push(createCheckoutHeader(kiosk_mode=true, timestamp_in=true));
-
-    // Reverse order of both lists
-    current_divs.reverse();
-    history_divs.reverse();
-
-    removeAllChildren(current);
-    removeAllChildren(history);
-
-    appendChildren(current, current_divs);
-    appendChildren(history, history_divs);
-
+    return table;
 }
 
 async function fetchUserInfo(id_number) {
@@ -490,7 +560,7 @@ async function commitCheckout() {
     }
 
 
-    await fetchCheckouts();
+    await fetchCheckoutsAdmin();
 }
 
 async function commitReservation() {
@@ -549,7 +619,7 @@ async function commitReservation() {
         displayErrorInCart(response);
     }
 
-    await fetchCheckouts();
+    await fetchCheckoutsAdmin();
 }
 
 function displaySuccessInCart() {
@@ -578,60 +648,6 @@ async function displayErrorInCart(err) {
 
 }
 
-async function checkIn(uuid) {
-    const response = await fetch(`${API}/checkouts/check_in_checkout/${uuid}`,
-        {
-            method: "POST",
-            headers: {
-                "api-key": api_key,
-            },
-        }
-    );
-
-    if (response.status === 201) {
-        displaySuccessInCheckout(uuid);
-    } else {
-        displayErrorInCheckout(uuid);
-    }
-
-    setTimeout(() => {
-        const el = document.getElementById(`checkout-${uuid}`);
-
-        if (el.classList.contains("success")) {
-            fetchCheckouts();
-        } else {
-            el.classList.remove("error");
-        }
-    }, 500);
-}
-
-async function renewCheckout(uuid) {
-    const response = await fetch(`${API}/checkouts/renew_checkout/${uuid}`,
-        {
-            method: "POST",
-            headers: {
-                "api-key": api_key,
-            },
-        }
-    );
-
-    if (response.status === 201) {
-        displaySuccessInCheckout(uuid);
-    } else {
-        displayErrorInCheckout(uuid);
-    }
-
-    setTimeout(() => {
-        const el = document.getElementById(`checkout-${uuid}`);
-
-        if (el.classList.contains("success")) {
-            fetchCheckouts();
-        } else {
-            el.classList.remove("error");
-        }
-    }, 500);
-}
-
 function displaySuccessInCheckout(uuid) {
     const el = document.getElementById(`checkout-${uuid}`);
     el.classList.add("success");
@@ -640,6 +656,55 @@ function displaySuccessInCheckout(uuid) {
 function displayErrorInCheckout(uuid) {
     const el = document.getElementById(`checkout-${uuid}`);
     el.classList.add("error");
+}
+
+
+async function checkIn(checkout_uuid) {
+    const response = await fetch(`${API}/checkouts/check_in_checkout/${checkout_uuid}`,
+        {
+            method: "POST",
+            headers: {
+                "api-key": api_key,
+            },
+        }
+    );
+
+    if (response.status === 201) {
+        displaySuccessInCheckout(checkout_uuid);
+    } else {
+        displayErrorInCheckout(checkout_uuid);
+    }
+
+    setTimeout(() => {
+        const el = document.getElementById(`checkout-${checkout_uuid}`);
+
+        if (el.classList.contains("success")) {
+            fetchCheckoutsAdmin();
+        } else {
+            el.classList.remove("error");
+        }
+    }, 500);
+}
+
+async function undoCheckout(checkout_uuid) {
+    let checkout = state.checkouts.find((checkout) => checkout.uuid === checkout_uuid);
+
+    // Set timestamp_in to null
+    checkout.timestamp_in = null;
+
+    const response = await fetch(`${API}/checkouts/update_checkout/${checkout_uuid}`,
+        {
+            method: "POST",
+            headers: {
+                "api-key": api_key,
+            },
+            body: JSON.stringify(checkout)
+        }
+    );
+
+    if (response.status === 200) {
+        await fetchCheckoutsAdmin();
+    }
 }
 
 async function extendCheckout(checkout_uuid) {
@@ -659,12 +724,8 @@ async function extendCheckout(checkout_uuid) {
     );
 
     if (response.status === 200) {
-        await fetchCheckouts();
+        await fetchCheckoutsAdmin();
     }
-}
-
-function editItem(item) {
-
 }
 
 authenticate();

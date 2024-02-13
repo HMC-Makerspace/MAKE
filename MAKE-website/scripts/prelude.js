@@ -71,7 +71,7 @@ function saveState() {
     localStorage.setItem('make-version', VER);
 }
 
-function displayLoggedIn() {
+function displayLoggedIn(start = false) {
     const show_elements = document.getElementsByClassName('id-r');
     const hide_elements = document.getElementsByClassName('id-n');
 
@@ -89,11 +89,19 @@ function displayLoggedIn() {
         name_el.innerText = state.user_object.name;
     }
 
-    displayStewardInfo();
-
+    if (start === false) {
+        try {
+            displayStewardInfo();
+            fetchWorkshops();
+            renderQuizInfo();
+            renderCheckouts();
+        } catch (e) {
+            console.error(e);
+        }
+    }
 }
 
-function displayLoggedOut() {
+function displayLoggedOut(start = false) {
     const hide_elements = document.getElementsByClassName('id-r');
     const show_elements = document.getElementsByClassName('id-n');
 
@@ -105,13 +113,15 @@ function displayLoggedOut() {
         el.classList.remove('hidden');
     }
 
-    try {
-        displayStewardInfo();
-        renderQuizInfo();
-        renderCheckouts();
-        renderWorkshops();
-    } catch (e) {
-        console.error(e);
+    if (start === false) {
+        try {
+            displayStewardInfo();
+            fetchWorkshops();
+            renderQuizInfo();
+            renderCheckouts();
+        } catch (e) {
+            console.error(e);
+        }
     }
 }
 
@@ -153,7 +163,7 @@ async function updateUserInfo() {
         fetchStudentStorage();
         renderQuizInfo();
         renderCheckouts();
-        renderWorkshops();
+        await fetchWorkshops();
         // End fetches
 
         login_button.removeAttribute('disabled');

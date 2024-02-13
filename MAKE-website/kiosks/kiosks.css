@@ -486,6 +486,32 @@ label {
   font-size: 0.8em;
 }
 
+.check-in-button {
+  background-color: var(--theme-color-7);
+  width: 100%;
+  height: 40px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkout-entry.success .check-in-button {
+  background-color: var(--high-color);
+  animation: pulse 0.2s infinite;
+}
+
+.checkout-entry.error .check-in-button {
+  background-color: var(--printer-error);
+  animation: pulse 0.2s infinite;
+}
+
+.success {
+  background-color: var(--high-color);
+  animation: pulse .2s infinite;
+}
+
+
 /*
 
 Management Console
