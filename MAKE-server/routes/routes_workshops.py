@@ -455,6 +455,25 @@ async def route_add_photo_to_workshop(request: Request):
     with open(f"server_files/{file_uuid}", "wb") as f:
         f.write(file_data)
 
+    # Attempt to optimize the image to webp format with ffmpeg
+    # Keep ratio, reduce to 720p, and set quality to lossless
+    # Get status code
+    logging.info(f"Optimizing {file_uuid}...")
+    status_code = os.system(f"ffmpeg -i server_files/{file_uuid} -vf scale=-1:720 -c:v libwebp -lossless 1 server_files/{file_uuid}.webp")
+    
+    if status_code == 0:
+        logging.info(f"Optimized {file_uuid} successfully")
+        # The optimization was successful
+        # Remove the original file
+        os.remove(f"server_files/{file_uuid}")
+
+        # Rename the webp file to the original file
+        os.rename(f"server_files/{file_uuid}.webp", f"server_files/{file_uuid}")
+    else:
+        # The optimization was not successful
+        # Log the error
+        logging.error(f"Error optimizing {file_uuid}")
+
     return
 
 

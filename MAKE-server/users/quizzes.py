@@ -326,8 +326,6 @@ async def fix_broken_cx_ids():
     logging.info(f"Found {len(broken_quiz_results)} broken cx_ids")
 
     for quiz_result in broken_quiz_results:
-        logging.info(
-            f"Attemping to fix broken cx_id for {quiz_result['email']}")
         # Get the user's email address
         email = quiz_result["email"]
 
@@ -346,10 +344,6 @@ async def fix_broken_cx_ids():
                 await collection.update_one({"_id": quiz_result["_id"]}, {"$set": {"cx_id": cx_id}})
 
                 fixed = True
-
-                # Logging
-                logging.info(
-                    f"Updated cx_id for {email} from {quiz_result['cx_id']} to {cx_id}")
 
                 break
 
