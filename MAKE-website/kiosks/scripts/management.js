@@ -1604,6 +1604,23 @@ function renderScheduleAdmin() {
     appendChildren(shift_change_list, generateShiftChangeList(all_stewards));
 }
 
+function updateStewardList() {
+    const steward_list = document.getElementById("stewards-list-shifts");
+
+    let all_stewards = state.users.filter(user => user.role == "steward" || user.role == "head_steward");
+
+    all_stewards.sort((a, b) => {
+        if (a.name < b.name) {
+            return -1;
+        } else {
+            return 1;
+        }
+    });
+
+    removeAllChildren(steward_list);
+    appendChildren(steward_list, generateStewardShiftList(all_stewards));
+}
+
 function generateStewardShiftList(all_stewards) {
     let stewards_hours = {};
     let total_shift_hours = 0;
@@ -1620,49 +1637,108 @@ function generateStewardShiftList(all_stewards) {
         }
     }
 
-    let divs = [];
+    let end_of_pay_period = document.getElementById("steward-list-date").value;
+
+    let pay_period_hours = null;
+
+    // If it's not set, just skip
+    if (end_of_pay_period !== "") {
+        pay_period_hours = {};
+
+        // two weeks of hours
+        for (let steward of all_stewards) {
+            pay_period_hours[steward.uuid] = 2 * (stewards_hours[steward.uuid] ?? 0);
+        }
+
+        let end_date = new Date(end_of_pay_period);
+        let two_weeks_before_end = new Date(end_date - 14 * 24 * 60 * 60 * 1000);
+
+        // Filter out shift changes that are after the end of the pay period
+        // and before two weeks before the end of the pay period
+        let shift_changes_pay_period = state.shift_changes.filter(change => {
+            let change_date = new Date(change.date);
+            return change_date <= end_date && change_date >= two_weeks_before_end;
+        });
+
+        // Now go through the shift changes and add or subtract hours
+        for (let change of shift_changes_pay_period) {
+            let steward = all_stewards.find(steward => steward.uuid === change.steward);
+            if (steward) {
+                if (change.is_drop) {
+                    pay_period_hours[steward.uuid] -= 1;
+                } else {
+                    pay_period_hours[steward.uuid] += 1;
+                }
+            }
+        }
+    }
+
+    let rows = [];
+
+    let thead = document.createElement("thead");
+    let headerRow = document.createElement("tr");
+
+    let headers = ["Name", "CX ID", "Email", "Scheduled Shift Hours", "Pay Period Hours"];
+    for (let header of headers) {
+        let th = document.createElement("th");
+        th.innerText = header;
+        headerRow.appendChild(th);
+    }
+
+    thead.appendChild(headerRow);
+    rows.push(thead);
 
     for (let steward of all_stewards) {
-        let div = document.createElement("div");
-        div.classList.add("steward-shift-list-item");
+        let row = document.createElement("tr");
 
-        let name = document.createElement("div");
-        name.classList.add("steward-shift-list-item-name");
-        name.innerText = steward.name;
-        div.appendChild(name);
+        let nameCell = document.createElement("td");
+        nameCell.innerText = steward.name;
+        row.appendChild(nameCell);
 
-        let cx_id = document.createElement("div");
-        cx_id.classList.add("steward-shift-list-item-cx_id");
-        cx_id.innerText = steward.cx_id;
-        div.appendChild(cx_id);
+        let cxIdCell = document.createElement("td");
+        cxIdCell.innerText = steward.cx_id;
+        row.appendChild(cxIdCell);
 
-        let email = document.createElement("div");
-        email.classList.add("steward-shift-list-item-email");
-        email.innerText = steward.email;
-        div.appendChild(email);
+        let emailCell = document.createElement("td");
+        emailCell.innerText = steward.email;
+        row.appendChild(emailCell);
 
         let hours = stewards_hours[steward.uuid] ?? 0;
 
-        let shifts = document.createElement("div");
-        shifts.classList.add("steward-shift-list-item-shifts");
+        let shiftsCell = document.createElement("td");
+        shiftsCell.innerText = `${hours} shift hours`;
 
         if (hours < 2) {
-            shifts.classList.add("not-enough-hours");
+            shiftsCell.classList.add("not-enough-hours");
         } else if (hours < 5) {
-            shifts.classList.add("good-hours");
+            shiftsCell.classList.add("good-hours");
         } else {
-            shifts.classList.add("too-many-hours");
+            shiftsCell.classList.add("too-many-hours");
         }
 
-        shifts.innerText = `${hours} shift hours`;
-        div.appendChild(shifts);
+        row.appendChild(shiftsCell);
 
-        divs.push(div);
+        let payPeriodCell = document.createElement("td");
+
+        if (pay_period_hours) {
+            let difference = pay_period_hours[steward.uuid] - (2 * stewards_hours[steward.uuid])
+            let plus = difference >= 0 ? "+" : "";
+    
+            payPeriodCell.innerText = `${pay_period_hours[steward.uuid]} (${plus}${difference})`;     
+        } else {
+            payPeriodCell.innerText = "-";
+        }
+
+
+        row.appendChild(payPeriodCell);
+
+        rows.push(row);
     }
-    
+
+
     document.getElementById("total-hours").innerText = total_shift_hours;
-    
-    return divs;
+
+    return rows;
 }
 
 function generateShiftChangeList(all_stewards) {
