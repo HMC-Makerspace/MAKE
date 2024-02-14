@@ -173,12 +173,22 @@ function createAdminCheckoutTable(current = true) {
         row.id = `checkout-${checkout.uuid}`;
 
         let t_out = document.createElement("td");
+        t_out.classList.add("checkout-entry-timestamp");
         t_out.innerHTML = checkoutFormatDate(new Date(checkout.timestamp_out * 1000));
         row.appendChild(t_out);
 
-        let t_due = document.createElement("td");
-        t_due.innerHTML = checkoutFormatDate(new Date(checkout.timestamp_due * 1000));
-        row.appendChild(t_due);
+        if (current) {
+            let t_due = document.createElement("td");
+            t_due.classList.add("checkout-entry-timestamp");
+            t_due.innerHTML = checkoutFormatDate(new Date(checkout.timestamp_due * 1000));
+            row.appendChild(t_due);
+        } else {
+            let t_in = document.createElement("td");
+            t_in.classList.add("checkout-entry-timestamp");
+            t_in.innerHTML = checkout.timestamp_in === null ? "N/A" : checkoutFormatDate(new Date(checkout.timestamp_in * 1000));
+            row.appendChild(t_in);
+        }
+
 
         let items = document.createElement("td");
         items.classList.add("checkout-entry-items");

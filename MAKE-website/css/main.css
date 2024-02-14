@@ -1426,6 +1426,10 @@ Checkouts
   animation: pulse .2s infinite;
 }
 
+.checkout-entry-timestamp {
+  font-size: 12px;
+}
+
 /*
 
 Schedule
