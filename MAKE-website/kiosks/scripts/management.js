@@ -1724,7 +1724,7 @@ function generateStewardShiftList(all_stewards) {
             let difference = pay_period_hours[steward.uuid] - (2 * stewards_hours[steward.uuid])
             let plus = difference >= 0 ? "+" : "";
     
-            payPeriodCell.innerText = `${pay_period_hours[steward.uuid]} (${plus}${difference})`;     
+            payPeriodCell.innerText = `${pay_period_hours[steward.uuid]} worked hours (${plus}${difference})`;     
         } else {
             payPeriodCell.innerText = "-";
         }
