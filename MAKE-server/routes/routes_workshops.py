@@ -456,10 +456,10 @@ async def route_add_photo_to_workshop(request: Request):
         f.write(file_data)
 
     # Attempt to optimize the image to webp format with ffmpeg
-    # Keep ratio, reduce to 720p, and set quality to lossless
+    # Keep ratio, reduce to 480p, and set quality to 95
     # Get status code
     logging.info(f"Optimizing {file_uuid}...")
-    status_code = os.system(f"ffmpeg -i server_files/{file_uuid} -vf scale=-1:720 -c:v libwebp -lossless 1 server_files/{file_uuid}.webp")
+    status_code = os.system(f"ffmpeg -i server_files/{file_uuid} -vf scale=-1:480 -q:v 95 server_files/{file_uuid}.webp")
     
     if status_code == 0:
         logging.info(f"Optimized {file_uuid} successfully")
