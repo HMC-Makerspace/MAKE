@@ -88,10 +88,12 @@ function displayLoggedIn(start = false) {
     if (state.user_object !== null) {
         name_el.innerText = state.user_object.name;
     }
+    
+    // Always try to display steward info
+    displayStewardInfo();
 
     if (start === false) {
         try {
-            displayStewardInfo();
             fetchWorkshops();
             renderQuizInfo();
             renderCheckouts();
