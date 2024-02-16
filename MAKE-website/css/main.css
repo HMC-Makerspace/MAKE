@@ -169,6 +169,7 @@ p3 {
   padding: 20px;
   max-width: 70%;
   background-color: var(--theme-color-2);
+  line-height: 2;
 }
 
 .md h1 {
@@ -193,7 +194,6 @@ p3 {
 
 .md p {
   padding-left: 10px;
-  line-height: 1.5em;
 }
 
 .md img {
