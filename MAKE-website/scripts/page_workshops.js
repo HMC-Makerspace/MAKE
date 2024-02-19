@@ -85,6 +85,7 @@ function generateWorkshopDiv(workshop, is_past=false) {
             img.src = `${API}/workshops/download_photo/${photos[i]}`;
             img.style.width = "100%";
             img.style.height = "auto";
+            img.alt = `${workshop.title} photo ${i + 1} of ${total_photos}`;
             photo_container.appendChild(img);
 
             workshop_photos.appendChild(photo_container);
