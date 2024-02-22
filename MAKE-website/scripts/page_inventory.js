@@ -2,7 +2,7 @@ const search_options = {
     limit: 1000, // don't return more results than you need!
     allowTypo: true, // if you don't care about allowing typos
     threshold: -10000, // don't return bad results
-    keys: ['name', 'specific_name', 'serial_number', 'model_number', 'brand', 'qr_code', 'kit'], // keys to search
+    keys: ['name', 'long_name', 'serial_number'], // keys to search
     all: true,
 }
 
@@ -75,11 +75,17 @@ function searchInventory(search, filters = null, kiosk_mode = false) {
         const results_filtered = results.filter(result => {
             const item = result.obj;
 
-            if (filters.stock && item.quantity == 0) {
+            if (filters.stock && item.quantity_available == 0) {
                 return false;
             }
 
-            if (filters.room && item.location_room !== filters.room) {
+            if (filters.room) {
+                for (let loc of item.locations) {
+                    if (loc.room === filters.room) {
+                        return true;
+                    }
+                }
+
                 return false;
             }
 
@@ -167,7 +173,7 @@ function generateInventoryDiv(result, kiosk_mode = false) {
 
     div.id = `inventory-result-${item.uuid}`;
 
-    if (item.is_kit === true) {
+    if (item.role === "K") {
         div.classList.add("kit");
 
         const kit_div = document.createElement("div");
@@ -187,11 +193,12 @@ function generateInventoryDiv(result, kiosk_mode = false) {
     // Add aria label for name
     div.setAttribute("aria-label", item.name);
 
-    if (item.is_kit === true) {
+    if (item.role === "K") {
         const kit_items = document.createElement("div");
         kit_items.classList.add("kit-items");
-        for (let kit_item of item.kit_items) {
+        for (let kit_item of item.kit_contents) {
             const kit_item_div = document.createElement("div");
+            // TODO: transform uuids into names
             kit_item_div.classList.add("kit-item");
             kit_item_div.innerText = kit_item;
             kit_items.appendChild(kit_item_div);
@@ -212,94 +219,74 @@ function generateInventoryDiv(result, kiosk_mode = false) {
         main_div.appendChild(tool_material);
     }
 
-
-    const location = document.createElement("div");
+    let location = document.createElement("div");
     location.classList.add("inventory-result-location");
-    location.innerHTML = `<span class="room">${item.location_room}</span>`;
 
-    if (item.location_specific !== null && item.location_specific !== "") {
-        location.innerHTML += `<span class="area">${item.location_specific}</span>`;
-    }
+    for (let loc of item.locations) {
+        location.innerHTML += `<span class="room">${loc.room}</span>`;
 
-    if (item.in_overstock === true) {
-        location.innerHTML += `<span class="overstock">In Overstock</span>`;
+        if (loc.container !== null && loc.container !== "") {
+            location.innerHTML += `<span class="container">${loc.container}</span>`;
+        }
+
+        if (loc.specific !== null && loc.specific !== "") {
+            location.innerHTML += `<span class="specific">${loc.specific}</span>`;
+        }
     }
 
     main_div.appendChild(location);
 
 
-    if (item.quantity !== null && item.quantity !== "") {
-        const quantity = document.createElement("div");
-        quantity.classList.add("inventory-result-quantity");
+    const quantity = document.createElement("div");
+    quantity.classList.add("inventory-result-quantity");
 
-        if (item.quantity >= 0) {
-            quantity.classList.add("number");
-            if (item.checked_quantity > 0) {
-                quantity.innerText = `${item.quantity - item.checked_quantity}/${item.quantity}`;
-            } else {
-                quantity.innerText = `${item.quantity}`;
-            }
+    if (item.quantity_total >= 0) {
+        quantity.classList.add("number");
+        if (item.quantity_available !== item.quantity_total) {
+            quantity.innerText = `${item.quantity_available}/${item.quantity_total}`;
         } else {
-            switch (item.quantity) {
-                case "-1":
-                    quantity.classList.add("low");
-                    quantity.innerText += "Low";
-                    break;
-                case "-2":
-                    quantity.classList.add("medium");
-                    quantity.innerText += "Medium";
-                    break;
-                case "-3":
-                    quantity.classList.add("high");
-                    quantity.innerText += "High";
-                    break;
-                default:
-                    quantity.classList.add("unknown");
-                    quantity.innerText += item.quantity;
-                    break;
-            }
+            quantity.innerText = `${item.quantity_total}`;
         }
-        main_div.appendChild(quantity);
+    } else {
+        switch (item.quantity_total) {
+            case -1:
+                quantity.classList.add("low");
+                quantity.innerText += "Low";
+                break;
+            case -2:
+                quantity.classList.add("medium");
+                quantity.innerText += "Medium";
+                break;
+            case -3:
+                quantity.classList.add("high");
+                quantity.innerText += "High";
+                break;
+            default:
+                quantity.classList.add("unknown");
+                quantity.innerText += item.quantity_total;
+                break;
+        }
     }
+
+    main_div.appendChild(quantity);
 
     const lower_div = document.createElement("div");
     lower_div.id = `inventory-result-${item.index}-lower-div`;
     lower_div.classList.add("inventory-result-lower");
     lower_div.classList.add("not-shown");
 
+    if (item.long_name !== null && item.long_name !== "") {
+        const specific_name = document.createElement("div");
+        specific_name.classList.add("inventory-result-lower-detail");
+        specific_name.innerText = `Long Name: ${item.long_name}`;
+        lower_div.appendChild(specific_name);
+    }
+
     if (item.serial_number !== null && item.serial_number !== "") {
         const serial_number = document.createElement("div");
         serial_number.classList.add("inventory-result-lower-detail");
         serial_number.innerText = `Serial Number: ${item.serial_number}`;
         lower_div.appendChild(serial_number);
-    }
-
-    if (item.model_number !== null && item.model_number !== "") {
-        const model_number = document.createElement("div");
-        model_number.classList.add("inventory-result-lower-detail");
-        model_number.innerText = `Model Number: ${item.model_number}`;
-        lower_div.appendChild(model_number);
-    }
-
-    if (item.specific_name !== null && item.specific_name !== "") {
-        const specific_name = document.createElement("div");
-        specific_name.classList.add("inventory-result-lower-detail");
-        specific_name.innerText = `Specific Name: ${item.specific_name}`;
-        lower_div.appendChild(specific_name);
-    }
-
-    if (item.brand !== null && item.brand !== "") {
-        const brand = document.createElement("div");
-        brand.classList.add("inventory-result-lower-detail");
-        brand.innerText = `Brand: ${item.brand}`;
-        lower_div.appendChild(brand);
-    }
-
-    if (item.qr_code !== null && item.qr_code !== "") {
-        const qr_code = document.createElement("div");
-        qr_code.classList.add("inventory-result-lower-detail");
-        qr_code.innerText = `QR Code(s): ${item.qr_code}`;
-        lower_div.appendChild(qr_code);
     }
 
     const show_lower_div_button = document.createElement("button");

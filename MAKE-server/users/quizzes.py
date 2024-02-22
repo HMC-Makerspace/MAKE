@@ -26,20 +26,23 @@ async def scrape_quiz_results():
     # Set logging level
     logging.getLogger().setLevel(logging.INFO)
 
-    # Go through QUIZ_IDS and scrape the quiz results for each quiz
-    for quiz_name, quiz_id in QUIZ_IDS.items():
-        # Log id and name of quiz
-        logging.info(
-            f"Scraping {quiz_name} quiz with ID {process_cx_id(quiz_id)}")
+    # Initialize variables
+    total_responses = 0
+    total_new_responses = 0
 
+    # Go through QUIZ_IDS and scrape the quiz results for each quiz
+    for _, quiz_id in QUIZ_IDS.items():
         # Get the quiz results
         quiz_results = await get_quiz_results(quiz_id)
         # Update the database
         new_responses = await update_quiz_results(quiz_id, quiz_results)
 
-        # Print log message
-        logging.info(
-            f"Scraped {new_responses} quiz results for {quiz_name} quiz for {len(quiz_results)} total responses.")
+        # Update total response counts
+        total_responses += len(quiz_results)
+        total_new_responses += new_responses
+
+    # Print log message
+    logging.info(f"Scraped {total_new_responses} new quiz results for {len(QUIZ_IDS)} quizzes for a total of {total_responses} responses.")
 
     # Attempt to fix broken cx ids by cross-referencing email addresses
     await fix_broken_cx_ids()
@@ -120,10 +123,6 @@ async def get_quiz_results(quiz_id):
                 # Add the quiz response to the list of quiz responses
                 quiz_responses.append(quiz_response)
 
-    logging.info(
-        f"Found {total_valid} valid quiz results and {total_invalid} invalid quiz results for {quiz_id} quiz.")
-
-
     # Return the quiz results
     return quiz_responses
 
@@ -164,9 +163,6 @@ def process_cx_id(cx_id):
     try:
         cx_id = int(cx_id)
     except Exception as e:
-        logging.warn(
-            f"Error converting {original_cx_id} cx_id to integer: {e}")
-
         # cx_id is not an integer
         return 0
 

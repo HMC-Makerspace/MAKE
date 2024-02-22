@@ -96,7 +96,15 @@ async def route_update_inventory_item(request: Request):
     # Update an inventory item
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Updating inventory item...")
-    item = InventoryItem(**await request.json())
+
+    item = None
+    try:
+        item = InventoryItem(**await request.json())
+    except Exception as e:
+        # The request body is invalid
+        # Return error
+        raise HTTPException(
+            status_code=400, detail="Invalid request body: " + str(e))
 
     api_key = request.headers["api-key"]
     db = MongoDB()
@@ -116,23 +124,20 @@ async def route_update_inventory_item(request: Request):
 
     if check is None:
         # The inventory item does not exist
-        # Return error
-        raise HTTPException(
-            status_code=404, detail="Inventory item does not exist")
-
-    # Update the inventory item
-    await collection.replace_one({"uuid": item.uuid}, item.dict())
+        # Insert the inventory item after validating it
+        await collection.insert_one(item.dict())
+    else:
+        await collection.replace_one({"uuid": item.uuid}, item.dict())
 
     # Return the inventory item
     return
 
 
-@inventory_router.post("/delete_inventory_item")
-async def route_delete_inventory_item(request: Request):
+@inventory_router.delete("/delete_inventory_item/{item_uuid}")
+async def route_delete_inventory_item(item_uuid: str, request: Request):
     # Delete an inventory item
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Deleting inventory item...")
-    item_uuid = await request.json()
 
     db = MongoDB()
     api_key = request.headers["api-key"]
@@ -162,35 +167,6 @@ async def route_delete_inventory_item(request: Request):
     return
 
 
-@inventory_router.get("/search/{search_query}")
-async def route_search_inventory(search_query: str):
-    # Search the inventory
-    logging.getLogger().setLevel(logging.INFO)
-    logging.info("Searching inventory...")
-
-    # Get the inventory collection
-    db = MongoDB()
-    collection = await db.get_collection("inventory")
-
-    # Search the inventory by all fields without using $text
-    search_results = await collection.find(
-        {"$or": [
-            {"name": {"$regex": search_query, "$options": "i"}},
-            {"location_room": {"$regex": search_query, "$options": "i"}},
-            {"location_specific": {"$regex": search_query, "$options": "i"}},
-            {"reorder_url": {"$regex": search_query, "$options": "i"}},
-            {"specific_name": {"$regex": search_query, "$options": "i"}},
-            {"serial_number": {"$regex": search_query, "$options": "i"}},
-            {"brand": {"$regex": search_query, "$options": "i"}},
-            {"model_number": {"$regex": search_query, "$options": "i"}},
-            {"kit_ref": {"$regex": search_query, "$options": "i"}},
-            {"kit_contents": {"$regex": search_query, "$options": "i"}},
-        ]}).to_list(None)
-
-    search_results = [InventoryItem(**item) for item in search_results]
-    
-    # Return the search results
-    return search_results
 
 @inventory_router.get("/get_restock_requests")
 async def route_get_restock_requests(request: Request):

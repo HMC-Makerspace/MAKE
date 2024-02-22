@@ -53,7 +53,9 @@ async def route_render_loom_file(request: Request):
     except Exception as e:
         # The loom file could not be rendered
         # Return error
-        print(e)
+        logging.getLogger()
+        logging.error(f"An error occurred while rendering the loom file: {e}")
+
         raise HTTPException(status_code=500, detail="An error occurred while rendering the loom file")
     
     if result is None:
@@ -88,6 +90,87 @@ async def route_validate_api_key(request: Request):
         # The API key is valid
         # Return the API key's scope
         return {"scope": api_key["scope"]}
+    
+@misc_router.post("/get_api_keys")
+async def route_get_api_keys(request: Request):
+    # Get the request body
+    body = await request.json()
+    
+    # Get the API keys
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Getting API keys...")
+
+    db = MongoDB()
+
+    # Validate the API key
+    if not await validate_api_key(db, body["api_key"], "admin"):
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    
+    # Get the API keys
+    api_keys = await db.get_collection("api_keys")
+    all_api_keys = await api_keys.find().to_list(None)
+
+    return all_api_keys
+
+@misc_router.post("/update_api_key")
+async def route_add_api_key(request: Request):
+    # Get the request body
+    body = await request.json()
+    
+    # Add an API key
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Adding API key...")
+
+    db = MongoDB()
+
+    # Validate the API key
+    if not await validate_api_key(db, body["api_key"], "admin"):
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    
+    # Add the API key
+    api_keys = await db.get_collection("api_keys")
+
+    # Find it
+    api_key = await api_keys.find_one({"uuid": body["uuid"]})
+
+    if api_key is None:
+        # The API key does not exist
+        # insert it
+        await api_keys.insert_one(body)
+    else:
+        # The API key exists
+        # Update it
+        await api_keys.update_one({"uuid": body["uuid"]}, {"$set": body})
+
+
+@misc_router.post("/delete_api_key")
+async def route_delete_api_key(request: Request):
+    # Get the request body
+    body = await request.json()
+    
+    # Delete an API key
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Deleting API key...")
+
+    db = MongoDB()
+
+    # Validate the API key
+    if not await validate_api_key(db, body["api_key"], "admin"):
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    
+    # Delete the API key
+    api_keys = await db.get_collection("api_keys")
+
+    # Delete it
+    await api_keys.delete_one({"uuid": body["uuid"]})
+
+
 
 @misc_router.get("/get_quizzes")
 async def route_get_quizzes():

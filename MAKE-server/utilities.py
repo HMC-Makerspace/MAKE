@@ -1,3 +1,5 @@
+import logging
+import os
 from db_schema import *
 from config import *
 
@@ -46,7 +48,12 @@ async def email_user(user_email: str, cc_email: List[str], subject: str, html_bo
     message["From"] = sender_email
     message["To"] = receiver_email
     message["Cc"] = ", ".join(cc_email)
-    
+
+    logging.info(f"Emailing user {user_email} as {sender_email}...")
+    logging.info(f"\tSubject: {subject}")
+    logging.info(f"\tCC: {', '.join(cc_email)}")
+    logging.info(f"\tBody: {html_body}")
+
     # Create
     message.attach(MIMEText(html_body, "html"))
 
@@ -61,3 +68,18 @@ async def email_user(user_email: str, cc_email: List[str], subject: str, html_bo
 
 def url_encode(to_encode: str):
     return urllib.parse.quote(to_encode)
+
+def zip_and_move_log_file():
+    # Zip the log file and move it to the logs directory
+    if not os.path.exists("logs"):
+        os.makedirs("logs")
+
+    # Check if the log file exists
+    if not os.path.exists("make.log"):
+        return
+    
+    # Get the current date and time
+    current_date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+    # Zip the log file
+    os.system(f"zip logs/{current_date}_make_log.zip make.log")

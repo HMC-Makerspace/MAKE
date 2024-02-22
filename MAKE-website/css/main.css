@@ -1078,12 +1078,17 @@ INVENTORY
 }
 
 .inventory-result-location .room {
+  background-color: var(--theme-color-5);
+  border-radius: 2px;
+}
+
+.inventory-result-location .container {
   background-color: var(--theme-color-3);
   border-radius: 2px;
 }
 
-.inventory-result-location .area {
-  background-color: var(--theme-color-5);
+.inventory-result-location .specific {
+  background-color: var(--theme-color-9);
   border-radius: 2px;
 }
 

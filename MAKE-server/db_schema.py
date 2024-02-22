@@ -109,26 +109,10 @@ If the item is a kit, the following fields are stored:
 
 '''
 
-
-class InventoryItem(BaseModel):
-    _id: Optional[PyObjectId] = Field(alias="_id")
-    uuid: str
-    name: str
-    role: Union[str, None]
-    # Quantity can be a number or a string
-    quantity: Union[str, None]
-    in_overstock: Union[bool, None]
-    overstock_quantity: Union[str, None]
-    location_room: Union[str, None]
-    location_specific: Union[str, None]
-    reorder_url: Union[str, None]
-    specific_name: Union[str, None]
-    serial_number: Union[str, None]
-    brand: Union[str, None]
-    model_number: Union[str, None]
-    qr_code: Union[str, None]
-    kit_ref: Union[str, None]
-    kit_contents: Union[List[str], None]
+class Location(BaseModel):
+    room: str
+    container: Union[str, None]
+    specific: Union[str, None]
 
     class Config:
         arbitrary_types_allowed = True
@@ -137,20 +121,82 @@ class InventoryItem(BaseModel):
         }
         schema_extra = {
             "example": {
-                "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "room": "Studio",
+                "specific": "Cabinet A",
+                "container": "Drawer 1"
+            }
+        }
+
+
+class InventoryItem(BaseModel):
+    _id: Optional[PyObjectId] = Field(alias="_id")
+    """
+    Main attributes
+    """
+    uuid: str
+    # Short name of item
+    name: str
+    # Contains brand, exact type, etc.
+    long_name: Union[str, None]
+    # Tool, Material, Kit (T/M/K)
+    role: str
+    # 0: cannot check out, in the space
+    # 1: can check out for use in the space
+    # 2: can check out and take home
+    # 3: can take home without checking out
+    # 4: needs approval to check out (welders, loom computer, cameras, etc.)
+    # 5: staff only use
+    access_type: int
+
+    """
+    Physical Attributes
+    """
+    # Quantity above 0, or -1 for low, -2 for medium, -3 for high
+    quantity_total: int
+    # Updated when checked out, checked in, or restocked
+    # If it's negative, just assign it to the quantity_total
+    quantity_available: int
+    # Location of the item
+    locations: List[Location]
+
+    """
+    Data Attributes
+    """
+    # URL to reorder the item
+    reorder_url: Union[str, None]
+    # Serial Number
+    serial_number: Union[str, None]
+    # Kit Contents, list of uuids of other items in the kit
+    # if the item is a kit (K)
+    kit_contents: Union[List[str], None]
+    # Keywords
+    keywords: Union[List[str], None]
+
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {
+            ObjectId: str
+        }
+        schema_extra = {
+            "example": {
+                "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j8k8l",
                 "name": "Soldering Iron",
-                "role": "Tool",
-                "quantity": "Medium",
-                "location_room": "Cage",
-                "location_specific": "Shelf 1",
-                "reorder_url": "https://www.amazon.com/HiLetgo-Adjustable-Temperature-Soldering-Station/dp/B07B4J2YQY/ref=sr_1_3?dchild=1&keywords=soldering+iron&qid=1610000000&sr=8-3",
-                "specific_name": "HiLetGo Adjustable Soldering Iron",
-                "serial_number": "123456789",
-                "brand": "HiLetGo",
-                "model_number": "123456789",
-                "qr_code": "AUTHENTIC/121313",
-                "kit_ref": "None",
-                "kit_contents": []
+                "long_name": "Weller WES51",
+                "role": "T",
+                "access_type": 0,
+                "quantity_total": 10,
+                "quantity_available": 7,
+                "locations": [
+                    {
+                        "room": "Electronic Benches",
+                        "specific": "Cabinet A",
+                        "container": "Drawer 1"
+                    }
+                ],
+                "reorder_url": "https://www.digikey.com/en/products/detail/weller-tools-inc/WES51/128618",
+                "serial_number": "1234567890",
+                "kit_contents": None
             }
         }
 

@@ -8,19 +8,32 @@ const API = '/api/v2';
 const EMPTY_ITEM = {
     "uuid": null,
     "name": null,
+    "long_name": null,
     "role": null,
-    "quantity": null,
-    "location_room": null,
-    "location_specific": null,
+    "access_type": null,
+    "quantity_total": null,
+    "quantity_available": null,
+    "locations": [],
     "reorder_url": null,
-    "specific_name": null,
     "serial_number": null,
-    "brand": null,
-    "model_number": null,
-    "qr_code": null,
-    "kit_ref": null,
-    "kit_contents": null
+    "kit_contents": null,
+    "keywords": null,
 }
+
+const ROOMS_HTML = (function (value) {return `
+<option ${value === "" ? "selected" : ""} value="">-- Select Room --</option>
+<option ${value === "Main" ? "selected" : ""} value="Main">Main Makerspace</option>
+<option ${value === "Laser3D" ? "selected" : ""} value="Laser3D">3D Printer & Laser Cutter Room</option>
+<option ${value === "Studio" ? "selected" : ""} value="Studio">Studio</option>
+<option ${value === "Cage" ? "selected" : ""} value="Cage">The Cage</option>
+<option ${value === "Welding" ? "selected" : ""} value="Welding">Welding Area</option>
+<option ${value === "Electronics" ? "selected" : ""} value="Electronics">Electronics Benches</option>
+<option ${value === "Composite" ? "selected" : ""} value="Composite">Composite Room</option>
+<option ${value === "Outdoor Storage" ? "selected" : ""} value="Outdoor Storage">Outdoor Storage</option>
+<option ${value === "Overstock" ? "selected" : ""} value="Overstock">Overstock</option>
+<option ${value === "Deep Storage" ? "selected" : ""} value="Deep Storage">Deep Storage</option>
+<option ${value === "Other" ? "selected" : ""} value="Other">Other</option>
+`});
 
 document.documentElement.setAttribute('data-theme', 'dark');
 localStorage.setItem("theme", "dark");
@@ -73,6 +86,9 @@ async function authenticate() {
     });
 }
 
+authenticate();
+
+
 async function fetchEditableInventory() {
     const response = await fetch(`${API}/inventory/get_inventory`);
 
@@ -89,8 +105,6 @@ function submitEditableSearch() {
     const results = document.getElementById("edit-inventory-results");
 
     const items = searchInventory(search, getInventoryFilters(), false);
-
-    console.log(items);
     
     state.current_search_results = [];
     for (let item of items) {
@@ -116,49 +130,109 @@ function generateEditableInventoryDiv(item) {
     
     Item example:
     {
-        "uuid": "90794786-f80b-40a1-830f-b27c99111740",
-        "name": "1000 ft Blue Cable (Thick)",
+        "uuid": "3658b36d-9ba3-4391-ae21-3d9510db2f2d",
+        "name": "Random Robot Kit",
+        "long_name": "",
         "role": "M",
-        "quantity": "-3",
-        "location_room": "Cage",
-        "location_specific": "1b",
-        "reorder_url": null,
-        "specific_name": "CAT6 UTP Cable (4Pair 26AWG 1/0.57mm. CCA PVC Jacket",
-        "serial_number": "618000000000.0",
-        "brand": "Dripstone",
-        "model_number": null,
-        "qr_code": null,
-        "kit_ref": null,
-        "kit_contents": null
+        "access_type": 2,
+        "quantity_total": 1,
+        "quantity_available": 1,
+        "locations": [
+            {
+                "room": "Cage",
+                "container": null,
+                "specific": "1b"
+            }
+        ],
+        "reorder_url": "",
+        "serial_number": "",
+        "kit_contents": [
+            ""
+        ]
     }
     */
 
     const div = document.createElement("div");
     div.classList.add("edit-inventory-item");
+    div.id = `edit-inventory-item-${item.uuid}`;
+    div.addEventListener("click", () => {
+        highlightEditableInventoryItem(item.uuid);
+        editInventoryItem(item.uuid);
+    });
 
     const name = document.createElement("h2");
     name.innerText = item.name;
     div.appendChild(name);
 
     const role = document.createElement("h3");
-    role.innerText = item.role == "M" ? "Material" : "Tool";
+
+    if (item.role == "M") {
+        role.innerText = "Material";
+    } else if (item.role == "T") {
+        role.innerText = "Tool";
+    } else if (item.role == "K"){
+        role.innerText = "Kit";
+    } else {
+        role.innerText = "Unknown";
+    }
+
     div.appendChild(role);
 
     const quantity = document.createElement("h3");
-    quantity.innerText = "Quantity: " + item.quantity;
+    if (item.quantity_available !== item.quantity_total) {
+        quantity.innerText = `Quantity: ${item.quantity_available}/${item.quantity_total}`;
+    } else {
+        if (item.quantity_total < 0) {
+            if (item.quantity_total === -1) {
+                quantity.innerText = "Quantity: Low";
+            } else if (item.quantity_total === -2) {
+                quantity.innerText = "Quantity: Medium";
+            } else if (item.quantity_total === -3) {
+                quantity.innerText = "Quantity: High";
+            }
+        } else {
+            quantity.innerText = `Quantity: ${item.quantity_total}`;
+        }
+    }
     div.appendChild(quantity);
     
     const location = document.createElement("h3");
-    location.innerText = `${item.location_room} ${item.location_specific}`;
+    for (let loc of item.locations) {
+        location.innerText += `${loc.room}${loc.container ? " " + loc.container : ""}${loc.specific ? " " + loc.specific: ""}, `
+    }
+
+    location.innerText = location.innerText.slice(0, -2);
+
     div.appendChild(location);
-    
-    const edit_button = document.createElement("button");
-    edit_button.classList.add("edit");
-    edit_button.innerText = "Edit";
-    edit_button.addEventListener("click", () => {
-        editInventoryItem(item.uuid);
-    });
-    div.appendChild(edit_button);
+
+    const access_type = document.createElement("h3");
+    access_type.classList.add(`access-type-${item.access_type}`);
+    let text = `${item.access_type}: `;
+    switch (item.access_type) {
+        case 0:
+            text += "In the space";
+            break;
+        case 1:
+            text += "Can check out for use in the space";
+            break;
+        case 2:
+            text += "Can check out and take home";
+            break;
+        case 3:
+            text += "Can take home without checking out";
+            break;
+        case 4:
+            text += "Needs approval to check out";
+            break;
+        case 5:
+            text += "Staff only use";
+            break;
+        default:
+            text += "Unknown";
+    }
+
+    access_type.innerText = text;
+    div.appendChild(access_type);
 
     const delete_button = document.createElement("button");
     delete_button.classList.add("delete");
@@ -171,6 +245,39 @@ function generateEditableInventoryDiv(item) {
     return div;
 }
 
+function highlightEditableInventoryItem(uuid) {
+    document.querySelectorAll(".highlight").forEach((el) => {
+        el.classList.remove("highlight");
+    });
+
+    const item = document.getElementById(`edit-inventory-item-${uuid}`);
+    item.classList.add("highlight");
+}
+
+async function showDeleteItemPopup(uuid) {
+    const result = prompt(`Are you sure you want to delete this item? Type "delete" to confirm.`);
+    if (result === "delete") {
+        const response = await fetch(`${API}/inventory/delete_inventory_item/${uuid}`,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "api-key": api_key,
+                },
+                method: "DELETE",
+            }
+        );
+
+        if (response.status == 200) {
+            fetchEditableInventory().then(() => {
+                submitEditableSearch();
+            });
+        }
+    } else {
+        alert("Delete cancelled.");
+    }
+}
+
+
 function createInventoryItem() {
     const uuid = self.crypto.randomUUID();
 
@@ -179,107 +286,227 @@ function createInventoryItem() {
 
 function editInventoryItem(uuid, create_item=false) {
     const item = state.inventory.find((item) => item.uuid == uuid) ?? EMPTY_ITEM;
-
-    const edit_div = document.getElementById("edit-item");
+    item.uuid = uuid;
     /*
-    Target is following div:
-    <div id="edit-item" class="hidden">
-        <h1>Edit Item</h1>
-        
-        <p id="uuid"></p>
-        <input id="edit-item-name">
-        <input id="edit-item-specific-name">
+    class InventoryItem(BaseModel):
+    _id: Optional[PyObjectId] = Field(alias="_id")
+    """
+    Main attributes
+    """
+    uuid: str
+    # Short name of item
+    name: str
+    # Contains brand, exact type, etc.
+    long_name: Union[str, None]
+    # Tool, Material, Kit (T/M/K)
+    role: str
+    # 0: cannot check out, in the space
+    # 1: can check out for use in the space
+    # 2: can check out and take home
+    # 3: can take home without checking out
+    # 4: needs approval to check out (welders, loom computer, cameras, etc.)
+    # 5: staff only use
+    access_type: int
 
-        <select id="edit-item-role">
-            <option value="M">Material</option>
-            <option value="T">Tool</option>
-        </select>
-        
-        <p>Note: Quantities of -1 = Low, -2 = Medium, -3 = High</p>
-        <input id="edit-item-quantity" type="number">
+    """
+    Physical Attributes
+    """
+    # Quantity above 0, or -1 for low, -2 for medium, -3 for high
+    quantity_total: int
+    # Updated when checked out, checked in, or restocked
+    # If it's negative, just assign it to the quantity_total
+    quantity_available: int
+    # Location of the item
+    locations: List[Location]
 
-        <input id="edit-item-location-room">
-        <input id="edit-item-location-specific">
-
-        <input id="edit-item-reorder-url">
-        <input id="edit-item-serial-number">
-        <input id="edit-item-brand">
-        <input id="edit-item-qr-code">
-
-        <div class="edit-buttons">
-            <button id="edit-user-save" onclick="saveUser()">Save</button>
-            <button id="edit-user-cancel" onclick="closePopup()">Cancel</button>
-        </div>
-    </div>
+    """
+    Data Attributes
+    """
+    # URL to reorder the item
+    reorder_url: Union[str, None]
+    # Serial Number
+    serial_number: Union[str, None]
+    # Kit Contents, list of uuids of other items in the kit
+    # if the item is a kit (K)
+    kit_contents: Union[List[str], None]
     */
 
-    document.getElementById("edit-item-name").value = item.name;
-    document.getElementById("edit-item-specific-name").value = item.specific_name;
-    document.getElementById("edit-item-role").value = item.role;
-    document.getElementById("edit-item-quantity").value = item.quantity;
-    document.getElementById("edit-item-location-room").value = item.location_room;
-    document.getElementById("edit-item-location-specific").value = item.location_specific;
-    document.getElementById("edit-item-reorder-url").value = item.reorder_url;
-    document.getElementById("edit-item-serial-number").value = item.serial_number;
-    document.getElementById("edit-item-brand").value = item.brand;
-    document.getElementById("edit-item-qr-code").value = item.qr_code;
+    const container = document.getElementById("edit-inventory-item");
+    container.classList.remove("hidden");
+    
+    const attributes = ["uuid", "name", "long_name", "role", "access_type", "quantity_total", "reorder_url", "serial_number", "kit_contents", "keywords"];
+    for (let attr of attributes) {
+        const input = document.getElementById(`edit-${attr}`);
 
-    showPopup("edit-item");
+        if (input) {
+            input.value = item[attr] ?? "";
+        }
+    }
 
-    document.getElementById("edit-item-save").onclick = () => {
-        saveItem(uuid, create_item);
+    const locations = container.querySelector(".locations")
+    locations.innerHTML = "";
+    for (let i = 0; i < item.locations.length; i++) {
+        const loc_div = createLocationEditor(item.locations[i], i);
+        locations.appendChild(loc_div);
+    }
+    locations.innerHTML += `<div id="button-container"><button class="big" onclick="addLocationEditor()">Add Location</button></div>`;
+
+    // Add event listeners to all inputs and selects
+    const inputs = container.querySelectorAll("input, select");
+    for (let input of inputs) {
+        input.onchange = (e) => {
+            changeEventListener(e, item.uuid);
+        }
     }
 }
 
-function showDeleteItemPopup(uuid) {
-    showPopup("delete-item");
-}
-
-async function saveItem(uuid, create_item=false) {
-    // Gather all the data, null if empty after trim
-    const item = {
-        "uuid": uuid,
-        "name": document.getElementById("edit-item-name").value.trim() || null,
-        "specific_name": document.getElementById("edit-item-specific-name").value.trim() || null,
-        "role": document.getElementById("edit-item-role").value || null,
-        "quantity": document.getElementById("edit-item-quantity").value || null,
-        "location_room": document.getElementById("edit-item-location-room").value.trim() || null,
-        "location_specific": document.getElementById("edit-item-location-specific").value.trim() || null,
-        "reorder_url": document.getElementById("edit-item-reorder-url").value.trim() || null,
-        "serial_number": document.getElementById("edit-item-serial-number").value.trim() || null,
-        "brand": document.getElementById("edit-item-brand").value.trim() || null,
-        "qr_code": document.getElementById("edit-item-qr-code").value.trim() || null,
-    }
-
-    let create_update = "update";
-
-    if (create_item) {
-        create_update = "create";
-    }
-
-    // Send the data to the server
-    const response = await fetch(`${API}/inventory/${create_update}_inventory_item`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "api-key": api_key
-        },
-        body: JSON.stringify(item)
-    });
-
-    if (response.status != 200) {
-        let error = await response.text();
-        alert("Error updating item: " + error);
+function changeEventListener(event, item_uuid) {
+    let input = document.getElementById(event.target.id);
+    // If it's required and empty, return
+    if (input.getAttribute("required") && input.value === "") {
         return;
     }
 
-    // Update the inventory
-    await fetchEditableInventory();
-    submitEditableSearch();
+    // If it's a number and not a number, return
+    if (input.type === "number" && (input.value === "" || isNaN(input.value))) {
+        input.value = 0;
+        return;
+    }
 
+    // Actually edit the item in state.inventory
+    let index = state.inventory.findIndex((i) => i.uuid === item_uuid);
     
-    // Close the popup
-    closePopup();
+    if (index === -1) {
+        index = state.inventory.length;
+        state.inventory.push(EMPTY_ITEM);
+        state.inventory[index].uuid = item_uuid;
+    }
+
+    let attr = input.id.split("-")[1];
+
+    // Determine if parent of parent has class name of location-editor
+    if (input.parentElement.parentElement.className === "location-editor") {
+        const location_index = parseInt(input.id.split("-")[2]);
+        const location_attr = input.id.split("-")[1];
+
+        let loc_total_diff = location_index - (state.inventory[index].locations.length - 1);
+
+        if (loc_total_diff > 0) {
+            for (let i = 0; i < loc_total_diff; i++) {
+                state.inventory[index].locations.push({room: "", container: "", specific: ""});
+            }
+        }
+
+        state.inventory[index].locations[location_index][location_attr] = input.value;
+    } else if (input.id === "role-select") {
+        state.inventory[index].role = input.value;
+    } else if (input.id === "access-type-select") {
+        state.inventory[index].access_type = parseInt(input.value);
+    } else if (input.id === "edit-kit_contents" || input.id === "edit-keywords") {
+        state.inventory[index][attr] = input.value.split(",");
+    } else if (input.type === "number") {
+        state.inventory[index][attr] = parseInt(input.value);
+    } else {
+        state.inventory[index][attr] = input.value;
+    }
+
+    // Save the item
+    debounce(saveInventoryItem, 100)(item_uuid);
 }
 
-authenticate();
+
+async function saveInventoryItem(uuid) {
+    const container = document.getElementById("save-status");
+    const el = document.getElementById("last-saved");
+    el.innerText = "Saving...";
+
+    const item = state.inventory.find((item) => item.uuid === uuid);
+    item.quantity_available = item.quantity_total;
+
+    // Check the four required fields
+    if (item.name === null || item.role === null || item.access_type === null || item.quantity_total === null) {
+        el.innerText = "Missing required fields";
+        container.classList.add("error");
+        container.classList.remove("saved");
+        return;
+    }
+
+
+    const response = await fetch(`${API}/inventory/update_inventory_item`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+            body: JSON.stringify(item),
+            method: "POST",
+        }
+    );
+
+    if (response.status == 200) {
+        setTimeout(() => {
+            el.innerText = `${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
+            container.classList.add("saved");
+            container.classList.remove("error");
+        }, 400);
+    } else {
+        el.innerText = "Error saving";
+        container.classList.add("error");
+        container.classList.remove("saved");
+    }
+
+    fetchEditableInventory().then(() => {
+        submitEditableSearch();
+    });
+}
+
+
+function addLocationEditor() {
+    const container = document.querySelector(".locations");
+    const new_index = container.childElementCount - 1;
+    const new_loc_editor = createLocationEditor({room: "", container: "", specific: ""}, new_index);
+    
+    new_loc_editor.addEventListener("change", (e) => {
+        changeEventListener(e, document.getElementById("edit-uuid").value);
+    });
+
+    container.lastChild.before(new_loc_editor);
+}
+
+function deleteLocationEditor(id) {
+    const uuid = document.getElementById("edit-uuid").value;
+    document.getElementById(id).remove();
+    const index = state.inventory.findIndex((i) => i.uuid === uuid);
+
+    if (index !== -1) {
+        state.inventory[index].locations.splice(parseInt(id.split("-")[2]), 1);
+        editInventoryItem(uuid);
+        debounce(saveInventoryItem, 100)(uuid);
+    }
+}
+
+
+function createLocationEditor(loc, index) {
+    const div = document.createElement("div");
+    div.classList.add("location-editor");
+    div.id = `location-editor-${index}`;
+
+    const room = document.createElement("label");
+    room.innerHTML = `Room: <select id="edit-room-${index}" required>${ROOMS_HTML(loc.room)}</select>`;
+
+    const delete_button = `<button onclick="deleteLocationEditor('${div.id}')"><span class="material-symbols-outlined">delete</span></button>`
+
+    const container = document.createElement("label");
+    container.innerHTML = `Container: <input id="edit-container-${index}" type="text" value="${loc.container ?? ""}">`;
+
+    const specific = document.createElement("label");
+    specific.innerHTML = `Specific: <input id="edit-specific-${index}" type="text" value="${loc.specific ?? ""}">`;
+
+    div.appendChild(room);
+    div.appendChild(container);
+    div.appendChild(specific);
+    div.innerHTML += delete_button;
+
+
+    return div;
+}

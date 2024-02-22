@@ -42,7 +42,7 @@ from users.quizzes import scrape_quiz_results
 from users.users import cleanup_user_files, create_update_users_from_quizzes
 from users.workshops import send_workshop_reminders
 from inventory.checkouts import send_overdue_emails
-from inventory.inventory import update_from_gsheet
+from inventory.inventory import update_inventory_from_checkouts
 
 # SSL certificate paths, on a Debian system
 SSL_CERT_PRIVKEY = "/etc/letsencrypt/live/make.hmc.edu/privkey.pem"
@@ -138,11 +138,11 @@ class BackgroundRunner:
         
         while True:
             try:
+                # Update available inventory from checkouts
+                await update_inventory_from_checkouts()
+
                 # Send emails for checkouts that are overdue
                 await send_overdue_emails()
-
-                # Update inventory from csv
-                await update_from_gsheet()
 
                 # Scrape quiz results
                 await scrape_quiz_results()
@@ -160,12 +160,7 @@ class BackgroundRunner:
 
                 await asyncio.sleep(60)
             except Exception as e:
-                # Save to log file
-                with open("error_log.txt", "a") as f:
-                    f.write(f"{datetime.datetime.now()}: {e}\n")
-
-                # Print to console
-                print(f"{datetime.datetime.now()}: {e}")
+                logging.error(f"An error occurred in the background runner: {e}")
 
                 # Wait 1 minute before trying again
                 await asyncio.sleep(60)
@@ -183,6 +178,15 @@ async def app_startup():
 if __name__ == "__main__":
     # Setup logging to display everything to the console
     logging.getLogger().setLevel(logging.INFO)
+
+    if "--prod" in sys.argv:
+        # Log to file if in production mode
+        # Zip and move old log file
+        utilities.zip_and_move_log_file()
+        
+        logging.basicConfig(filename='make.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s %(message)s')
+    else:
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s %(message)s')
 
     if not os.path.exists("server_files"):
         os.makedirs("server_files")

@@ -953,7 +953,7 @@ INVENTORY
   display: grid;
   grid-template-areas: "header header" "utilities inventory";
   grid-template-rows: 60px 1fr;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: 600px 1fr;
   background-color: var(--theme-color-5);
 }
 
@@ -964,6 +964,7 @@ INVENTORY
   align-items: center;
   justify-content: center;
   column-gap: 20px;
+  background-color: var(--theme-color-2);
 }
 
 #edit-inventory-results {
@@ -1011,7 +1012,7 @@ INVENTORY
 .edit-inventory-item {
   display: grid;
   grid-template-areas: "name role quantity" "location edit delete";
-  grid-template-columns: 3fr 1fr 1fr;
+  grid-template-columns: 3fr 2fr 1fr;
   row-gap: 5px;
   background-color: var(--theme-color-2);
   width: calc(100% - 40px);
@@ -1021,6 +1022,11 @@ INVENTORY
 .edit-inventory-item:nth-child(even) {
   background-color: var(--theme-color-3);
 } 
+
+.edit-inventory-item:hover {
+  background-color: var(--theme-color-4);
+  cursor: pointer;
+}
 
 .edit-inventory-item >* {
   margin: 0;
@@ -1047,6 +1053,80 @@ INVENTORY
 
 .edit-inventory-item .delete {
   grid-area: delete;
+}
+
+#edit-inventory-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+  overflow-y: scroll;
+  padding-top: 20px;
+}
+
+#edit-inventory-item label {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  margin-left: 20px;
+  place-items: baseline;
+}
+
+#edit-inventory-item .locations {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+  gap: 10px;
+}
+
+.location-editor {
+  display: grid;
+  grid-template-areas: "room delete" "container delete" "specific delete";
+  grid-template-columns: 1fr 40px;
+  gap: 5px;
+  justify-content: center;
+  border-left: 5px solid var(--theme-color-1);
+}
+
+.locations #button-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.location-editor button {
+  grid-area: delete;
+  width: 40px;
+  height: 40px;
+}
+
+#save-status {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: var(--theme-color-2);
+  border-radius: var(--roundness);
+  color: var(--text-color-main);
+  width: 300px;
+  border-radius: 4px;
+}
+
+#save-status.saved {
+  background-color: var(--high-color-dark);
+  border: 2px solid var(--high-color);
+}
+
+#save-status.error {
+  background-color: var(--low-color-dark);
+  border: 2px solid var(--low-color);
 }
 
 /*

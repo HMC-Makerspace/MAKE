@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import logging
 import discord
 from discord.ext import tasks, commands
 
@@ -28,14 +29,11 @@ class MakeBot(commands.Bot):
         self.no_steward_message_sent = False
         #self.announcement_channel_id = 857333481474097203
         self.announcement_channel_id = 526941847831183363
-        self.check_shifts.start()
 
     async def on_ready(self):
-        print('Logged on as {0}!'.format(self.user))
-        print('------')
+        logging.getLogger().info(f"Logged in as {self.user.name} ({self.user.id})")
 
 
-    @tasks.loop(seconds=60)
     async def check_shifts(self):
         await asyncio.sleep(1)
         hour = datetime.datetime.now().hour
@@ -60,7 +58,6 @@ class MakeBot(commands.Bot):
 
         shifts = await db.get_collection("shifts")
         
-        print("Checking shifts", hour, "...")
         shift = await shifts.find_one({"timestamp_start": hour})
         if shift is not None:
             # If there's a shift scheduled for this hour, check if theres dropped shifts

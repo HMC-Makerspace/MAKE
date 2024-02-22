@@ -11,6 +11,52 @@ from uuid import uuid4
 SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTzvLVGN2H5mFpQLpstQyT5kgEu1CI8qlhY60j78mO0LQgDnTHs_ZKx39xiIO1h-w09ZXyOZ5GqOf5q/pub?gid=0&single=true&output=csv"
 
 
+async def update_inventory_from_checkouts():
+    # Update the inventory from the checkouts
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Updating inventory from checkouts...")
+
+    # Get the checkouts collection
+    db = MongoDB()
+    collection = await db.get_collection("checkouts")
+    all_checkouts = await collection.find().to_list(None)
+
+    # Get the inventory collection
+    inventory_collection = await db.get_collection("inventory")
+    all_inventory = await inventory_collection.find().to_list(None)
+
+    # Go through the checkouts and update the inventory
+    # Each item has quantity_total and quantity_available
+    # First, just count uuids and subtract from quantity_total to set quantity_available
+    uuid_dict = {}
+    for checkout in all_checkouts:
+        for item in checkout["items"]:
+            if item in uuid_dict:
+                uuid_dict[item] += 1
+            else:
+                uuid_dict[item] = 1
+
+    # Go through the inventory and update the quantity_available
+    for item in all_inventory:
+        if item["quantity_total"] < 0:
+            # If it's negative, just assign it to the quantity_total
+            item["quantity_available"] = item["quantity_total"]
+        else:
+            if item["uuid"] in uuid_dict:
+                item["quantity_available"] = item["quantity_total"] - uuid_dict[item["uuid"]]
+            else:
+                item["quantity_available"] = item["quantity_total"]
+
+        # Update the item
+        await inventory_collection.update_one(
+            {"uuid": item["uuid"]},
+            {"$set": {"quantity_available": item["quantity_available"]}}
+        )
+
+    logging.info("Updated inventory from checkouts")
+
+
+
 async def update_from_gsheet():
     # Update the mongodb database from the google sheet
     logging.getLogger().setLevel(logging.INFO)

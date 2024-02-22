@@ -197,8 +197,6 @@ async def route_delete_workshop(request: Request):
 @workshops_router.post("/rsvp_to_workshop", status_code=201)
 async def route_rsvp_to_workshop(request: Request):
     logging.getLogger().setLevel(logging.INFO)
-    logging.info("RSVPing to workshop...")
-
     # Get the request body
     body = await request.json()
 
@@ -237,6 +235,8 @@ async def route_rsvp_to_workshop(request: Request):
     
     date_start = datetime.fromtimestamp(float(workshop["timestamp_start"]))
     date_end = datetime.fromtimestamp(float(workshop["timestamp_end"]))
+
+    logging.info(f"${user['email']} is RSVPing to {workshop['title']} on {date_start.strftime('%A, %B %d, %Y')} from {date_start.strftime('%I:%M %p')} to {date_end.strftime('%I:%M %p')}")
 
     email_body = format_email_template("workshop_confirmation", {
         "workshop": workshop["title"], 
@@ -290,6 +290,8 @@ async def route_cancel_rsvp_to_workshop(request: Request):
     
     # Remove the user from the workshop's rsvp_list
     workshop["rsvp_list"].remove(body["user_uuid"])
+
+    logging.info(f"Removing {body['user_uuid']} from {workshop['title']}")
 
     # Update the workshop
     await collection.replace_one({"uuid": body["workshop_uuid"]}, workshop)

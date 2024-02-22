@@ -46,7 +46,7 @@ async def send_workshop_reminders():
 
         # Get the users in rsvp_list that have not been notified, up to the capacity of the workshop
         users_to_notify = []
-        for user in rsvp_list[:workshop["capacity"]]:
+        for user in rsvp_list:
             if user not in users_notified:
                 users_to_notify.append(user)
 

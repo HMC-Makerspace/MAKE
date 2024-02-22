@@ -225,10 +225,6 @@ async def create_update_users_from_quizzes():
             ]
         )
 
-    logging.info(f"Created {num_users_created} users")
-    logging.info(f"Updated {num_total_updates} times")
-    logging.info(f"Removed {total_old_quizzes} old quizzes")
-
 
 async def cleanup_user_files():
     '''

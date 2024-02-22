@@ -33,13 +33,7 @@ function renderWorkshops() {
 
     for (let workshop of sorted_workshops) {
         // if the workshop has past, append it to another element
-        // However, add a 24 hour buffer to the date, so that workshops that are
-        // scheduled for the same day as the current date will still be shown
-        // as upcoming
         const parsed_date = new Date(workshop.timestamp_start * 1000);
-
-        // Add 24 hours to the date
-        parsed_date.setDate(parsed_date.getDate() + 1);
 
         if (parsed_date < now) {
             previous_workshops.prepend(generateWorkshopDiv(workshop, true));

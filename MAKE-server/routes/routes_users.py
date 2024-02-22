@@ -144,9 +144,6 @@ async def route_update_user(request: Request):
     json = await request.json()
     user_uuid = json["uuid"]
 
-    print(json["uuid"])
-    print(json["role"])
-
     # Check if the user already exists
     user = await collection.find_one({"uuid": user_uuid})
 
