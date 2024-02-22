@@ -42,7 +42,7 @@ async function authenticate() {
     // Get api keys from url params
     const params = new URLSearchParams(window.location.search);
 
-    api_key = params.get('api_key') ?? localStorage.getItem('admin_api_key');
+    api_key = params.get('api_key') ?? localStorage.getItem('inventory_api_key');
 
     if (api_key === null) {
         alert("No API key provided.");
@@ -64,6 +64,10 @@ async function authenticate() {
 
         if (body.scope == "admin" || body.scope == "inventory") {
             console.log("Authenticated");
+            localStorage.setItem('inventory_api_key', api_key);
+
+            // Remove api key from url, but keep the rest of the url
+            window.history.replaceState({}, document.title, window.location.pathname);
         } else {
             alert("API key does not have proper scope.");
         }
