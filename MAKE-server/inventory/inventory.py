@@ -19,7 +19,8 @@ async def update_inventory_from_checkouts():
     # Get the checkouts collection
     db = MongoDB()
     collection = await db.get_collection("checkouts")
-    all_checkouts = await collection.find().to_list(None)
+    # Only get the checkouts that have not been returned
+    all_checkouts = await collection.find({"timestamp_in": None}).to_list(None)
 
     # Get the inventory collection
     inventory_collection = await db.get_collection("inventory")
