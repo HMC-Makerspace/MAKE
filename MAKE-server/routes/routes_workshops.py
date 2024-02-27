@@ -326,7 +326,7 @@ async def route_sign_in_to_workshop(request: Request):
     collection = await db.get_collection("workshops")
 
     # Get the workshop
-    workshop = await collection.find_one({"workshop_uuid": body["workshop_uuid"]})
+    workshop = await collection.find_one({"uuid": body["workshop_uuid"]})
 
     if workshop is None:
         # The workshop does not exist
