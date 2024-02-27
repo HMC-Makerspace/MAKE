@@ -179,7 +179,7 @@ function generateWorkshopDiv(workshop, is_past=false) {
     if (workshop.rsvp_list) {
         const rsvp_list = document.createElement("button");
         rsvp_list.classList.add("rsvp-list");
-        rsvp_list.innerText = "View RSVP List";
+        rsvp_list.innerText = "View reminder List";
 
         rsvp_list.onclick = () => {
             showRSVPList(workshop.uuid);
