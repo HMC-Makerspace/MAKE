@@ -788,7 +788,7 @@ function generateWorkshopDivsAdmin() {
     let divs = [];
 
     let header = document.createElement("tr");
-    header.innerHTML = `<th>Title</th><th>Description</th><th>Instructors</th><th>Start Time</th><th>Capacity</th><th>Live</th><th>Signups</th><th>Edit</th><th>Delete</th>`;
+    header.innerHTML = `<th>Title</th><th>Description</th><th>Instructors</th><th>Start Time</th><th>Capacity</th><th>Live</th><th>Signups</th><th>Attendees</th><th>Edit</th><th>Delete</th>`;
     divs.push(header);
 
     let sorted_workshops = state.workshops.sort((a, b) => b.timestamp_start - a.timestamp_start);
@@ -842,7 +842,7 @@ function generateWorkshopDivsAdmin() {
 
             let capacity = document.createElement("td");
             capacity.classList.add("workshop-capacity");
-            capacity.innerText = `${workshop.rsvp_list.length}/${workshop.capacity}`;
+            capacity.innerText = `${workshop.capacity}`;
             div.appendChild(capacity);
 
             let is_live = document.createElement("td");
@@ -854,12 +854,24 @@ function generateWorkshopDivsAdmin() {
             let rsvp_list = document.createElement("td");
             rsvp_list.classList.add("workshop-rsvp_list");
             let rsvp_button = document.createElement("button");
-            rsvp_button.innerHTML = "<span class='material-symbols-outlined'>group</span>"
+            let total_rsvps = workshop.rsvp_list ? workshop.rsvp_list.length : 0;
+            rsvp_button.innerHTML = `<span>${total_rsvps}</span><span class='material-symbols-outlined'>group</span>`;
             rsvp_button.onclick = () => {
                 showRSVPListAdmin(workshop.uuid);
             };
             rsvp_list.appendChild(rsvp_button);
             div.appendChild(rsvp_list);
+
+            let attendees = document.createElement("td");
+            attendees.classList.add("workshop-attendees");
+            let attendees_button = document.createElement("button");
+            let total_attendees = workshop.sign_in_list ? workshop.sign_in_list.length : 0;
+            attendees_button.innerHTML = `<span>${total_attendees}</span><span class='material-symbols-outlined'>people</span>`;
+            attendees_button.onclick = () => {
+                showWorkshopAttendees(workshop.uuid);
+            };
+            attendees.appendChild(attendees_button);
+            div.appendChild(attendees);
 
             let edit_button_container = document.createElement("td");
             edit_button_container.classList.add("workshop-edit");
@@ -936,6 +948,62 @@ function removePhotoFromQueue(file) {
     if (index > -1) {
         photo_queue.splice(index, 1);
     }
+}
+
+function showWorkshopAttendees(uuid) {
+    let workshop = state.workshops.find(workshop => workshop.uuid === uuid);
+
+    if (workshop) {
+        const attendees = document.getElementById("attendees-table");
+
+        removeAllChildren(attendees);
+
+        let header = document.createElement("tr");
+        header.innerHTML = `<th>Name</th><th>CX ID</th><th>Email</th>`;
+        attendees.appendChild(header);
+
+        if (!workshop.sign_in_list) {
+            workshop.sign_in_list = [];
+        }   
+
+        if (workshop.sign_in_list.length === 0) {
+            let div = document.createElement("tr");
+            div.classList.add("workshop-attendee");
+            div.innerHTML = "<td colspan='3'>No attendees</td>";
+            attendees.appendChild(div);
+        }
+
+        for (let uuid of workshop.sign_in_list) {
+            let user = state.users.find(user => user.uuid === uuid);
+
+            if (user) {
+                let div = document.createElement("tr");
+                div.classList.add("workshop-attendee");
+            
+                let name = document.createElement("td");
+                name.classList.add("workshop-attendee-name");
+                name.innerText = user.name;
+                div.appendChild(name);
+
+                let cx_id = document.createElement("td");
+                cx_id.classList.add("workshop-attendee-cx_id");
+                cx_id.innerText = user.cx_id;
+                div.appendChild(cx_id);
+
+                let email = document.createElement("td");
+                email.classList.add("workshop-attendee-email");
+                email.innerText = user.email;
+                div.appendChild(email);
+
+                attendees.appendChild(div);
+            }
+        }
+
+        showPopup("workshop-attendees");
+    } else {
+        alert("Error finding workshop with uuid " + uuid);
+    }
+
 }
 
 function showRSVPListAdmin(uuid) {

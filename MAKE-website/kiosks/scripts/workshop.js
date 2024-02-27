@@ -130,7 +130,8 @@ async function login() {
     renderSelectWorkshop(user_info.role === "admin" || user_info.role === "steward" || user_info.role === "head_steward");
 
     document.getElementById("college-id-button").removeAttribute("disabled");
-
+    document.getElementById("id-input").value = "";
+    
     setPage("select-workshop");
 }
 

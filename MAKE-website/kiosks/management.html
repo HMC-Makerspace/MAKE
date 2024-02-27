@@ -22,7 +22,7 @@
 
 
     <link rel="stylesheet" href="/css/main.css?v=1.2">
-    <link rel="stylesheet" href="/kiosks/kiosks.css?v=1.4">
+    <link rel="stylesheet" href="/kiosks/kiosks.css?v=1.5">
 </head>
 
 <body>
@@ -394,6 +394,18 @@
                 </div>
             </div>
 
+            <div id="workshop-attendees" class="hidden">
+                <h2>Workshop Attendees</h2>
+
+                <table id="attendees-table">
+
+                </table>
+
+                <div class="edit-buttons">
+                    <button id="restock-cancel" onclick="closePopup()">Close</button>
+                </div>
+            </div>
+
             <div id="single-availability-popup" class="hidden">
                 <h1>Availability</h1>
                 <h3 id="single-availability-popup-time">...</h3>
@@ -420,7 +432,7 @@
     <script src="/scripts/page_schedule.js?v=2.3"></script>
     <script src="/scripts/utils.js?v=2.5"></script>
 
-    <script src="/kiosks/scripts/management.js?v=2.18"></script>
+    <script src="/kiosks/scripts/management.js?v=2.19"></script>
 </body>
 
 </html>
