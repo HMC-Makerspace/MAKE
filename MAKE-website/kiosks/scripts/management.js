@@ -811,7 +811,7 @@ function generateWorkshopDivsAdmin() {
         let separator = document.createElement("tr");
         separator.classList.add("workshop-month-separator");
         let separatorText = document.createElement("td");
-        separatorText.setAttribute("colspan", "9");
+        separatorText.setAttribute("colspan", "10");
         separatorText.innerText = `${monthYear} (${workshops.length} workshop${workshops.length > 1 ? "s" : ""})`;
         separator.appendChild(separatorText);
         divs.push(separator);
