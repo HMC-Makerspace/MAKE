@@ -216,18 +216,18 @@ function generateWorkshopDiv(workshop, is_past=false) {
         signup.id =`signup-${workshop.uuid}`
 
         if (state.user_object === null) {
-            signup.innerText = "Log in to RSVP";
+            signup.innerText = "Log in to sign up for reminders";
             signup.addEventListener("click", () => {
                 setPage("home");
             });
         } else {
             if (workshop.position === -1) {
-                signup.innerText = "RSVP";
+                signup.innerText = "Sign up for reminders";
                 signup.addEventListener("click", () => {
                     rsvpToWorkshop(workshop.uuid);
                 });
             } else {
-                signup.innerText = "Cancel RSVP";
+                signup.innerText = "Cancel reminders";
                 signup.addEventListener("click", () => {
                     cancelRsvpToWorkshop(workshop.uuid);
                 });
@@ -285,7 +285,7 @@ async function rsvpToWorkshop(workshop_uuid) {
     const signup_button = document.getElementById(`signup-${workshop_uuid}`);
     signup_button.setAttribute("disabled", "disabled");
 
-    const response = await fetch(`${API}/workshops/rsvp_to_workshop`,
+    const response = await fetch(`${API}/workshops/rsvp`,
         {
             method: "POST",
             headers: {
@@ -309,7 +309,7 @@ async function rsvpToWorkshop(workshop_uuid) {
 }
 
 async function cancelRsvpToWorkshop(workshop_uuid) {
-    const response = await fetch(`${API}/workshops/cancel_rsvp_to_workshop`,
+    const response = await fetch(`${API}/workshops/cancel_rsvp`,
         {
             method: "POST",
             headers: {

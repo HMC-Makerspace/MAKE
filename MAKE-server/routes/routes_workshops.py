@@ -150,8 +150,12 @@ async def route_update_workshop(request: Request):
     
     # Save signups and photos
     workshop.rsvp_list = existing_workshop["rsvp_list"]
+    
     if "photos" in existing_workshop:
         workshop.photos = existing_workshop["photos"]
+
+    if "sign_in_list" in existing_workshop:
+        workshop.sign_in_list = existing_workshop["sign_in_list"]
 
     # Update the workshop
     await collection.replace_one({"uuid": workshop.uuid}, workshop.dict())
@@ -194,7 +198,7 @@ async def route_delete_workshop(request: Request):
     return
 
 
-@workshops_router.post("/rsvp_to_workshop", status_code=201)
+@workshops_router.post("/rsvp", status_code=201)
 async def route_rsvp_to_workshop(request: Request):
     logging.getLogger().setLevel(logging.INFO)
     # Get the request body
@@ -244,7 +248,7 @@ async def route_rsvp_to_workshop(request: Request):
         "time": f"{date_start.strftime('%I:%M %p')} - {date_end.strftime('%I:%M %p')}",
     })
 
-    await email_user(user["email"], [], f"RSVP Confirmation: {workshop['title']}", email_body)
+    await email_user(user["email"], [], f"Workshop Reminder Confirmation: {workshop['title']}", email_body)
 
     # Add the user to the workshop's rsvp_list
     workshop["rsvp_list"].append(body["user_uuid"])
@@ -254,7 +258,7 @@ async def route_rsvp_to_workshop(request: Request):
 
     return 
 
-@workshops_router.post("/cancel_rsvp_to_workshop", status_code=201)
+@workshops_router.post("/cancel_rsvp", status_code=201)
 async def route_cancel_rsvp_to_workshop(request: Request):
     logging.getLogger().setLevel(logging.INFO)
     logging.info("RSVPing to workshop...")
@@ -298,6 +302,58 @@ async def route_cancel_rsvp_to_workshop(request: Request):
 
     return
 
+
+@workshops_router.post("/sign_in", status_code=201)
+async def route_sign_in_to_workshop(request: Request):
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Signing into workshop...")
+
+    # Get the request body
+    body = await request.json()
+
+    db = MongoDB()
+
+    # Validate the API key
+    api_key = request.headers["api-key"]
+    is_valid = await validate_api_key(db, api_key, "workshops")
+
+    if not is_valid:
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    # Get the workshops collection
+    collection = await db.get_collection("workshops")
+
+    # Get the workshop
+    workshop = await collection.find_one({"workshop_uuid": body["workshop_uuid"]})
+
+    if workshop is None:
+        # The workshop does not exist
+        # Return error
+        raise HTTPException(status_code=404, detail="Workshop does not exist")
+    
+    if "sign_in_list" not in workshop:
+        workshop["sign_in_list"] = []
+
+    if type(workshop["sign_in_list"]) != list:
+        workshop["sign_in_list"] = []
+    
+    # Check if you're already signed in for the workshop
+    if body["user_uuid"] in workshop["sign_in_list"]:
+        # You're already signed in for the workshop
+        # Return error
+        raise HTTPException(status_code=400, detail="You're already signed in for this workshop")
+    
+    # Add the user to the workshop's sign_in_list
+    workshop["sign_in_list"].append(body["user_uuid"])
+
+    # Update the workshop
+    await collection.replace_one({"uuid": body["workshop_uuid"]}, workshop)
+
+    return
+
+@workshops_router.post("/cancel_sign_in", status_code=201)
 
 @workshops_router.post("/send_custom_workshop_email", status_code=201)
 async def route_send_custom_workshop_email(request: Request):

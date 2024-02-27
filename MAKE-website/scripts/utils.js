@@ -126,6 +126,8 @@ function parseCollegeID(collegeID) {
 }
 
 function setPage(page, create_history = true) {
+    state.page = page;
+    
     const all_pages = document.getElementsByClassName("main-content");
     for (let i = 0; i < all_pages.length; i++) {
         all_pages[i].classList.add("hidden");

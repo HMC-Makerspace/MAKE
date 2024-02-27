@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Workshop Kiosk</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@200;400&family=Righteous&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0" />
+
+
+    <link rel="stylesheet" href="/css/main.css?v=1.2">
+    <link rel="stylesheet" href="/kiosks/kiosks.css?v=1.4">
+</head>
+
+<body>
+    <div id="main-workshop-grid">
+        <div id="page-sign-in" class="main-content" >
+            <div id="workshop-outer">
+                <!-- This div is important! It lets us specify margin-left as percentage later on. -->
+                <div>
+                    <div id="workshop-loop"><div id="workshop-loop-content"><span>Workshops&nbsp;</span></div></div>
+                </div>
+            </div>
+
+            <div id="welcome-banner">
+                <img src="/img/Makerspace Logo V1.svg" alt="Logo" id="logo" width="300px">
+                <h1>Workshop Kiosk</h1>
+                <h3>Please swipe/type your ID to sign in to a Workshop.</h3>
+            </div>
+
+            <div id="college-id-login">
+                <input aria-label="College ID number login" type="tel" id="id-input"
+                placeholder="Enter your college ID number">
+                
+                <button id="college-id-button" class="big" onclick="login()" aria-label="log in">
+                <span class="material-symbols-outlined">
+                    login
+                </span>
+            </button>
+            </div>
+        </div>
+
+        <div id="page-select-workshop" class="main-content hidden">
+            <h1>
+                Select a Workshop
+            </h1>
+            
+            <table id="workshop-table">
+            
+            </table>
+
+            <button id="back-to-sign-in" onclick="setPage('sign-in')">
+                <span class="material-symbols-outlined">
+                    arrow_back
+                </span>
+            </button>
+        </div>
+
+        <div id="page-show-workshop" class="main-content hidden">
+
+        </div>
+    </div>
+
+    <div id="popup-container" class="hidden">
+        <div id="popup-background" onclick="closePopup()"></div>
+        <div id="popup-content">
+            <div id="workshop-attendees" class="hidden">
+                <h2>Attendees</h2>
+
+                <table id="attendees-table">
+
+                </table>
+
+                <div class="edit-buttons">
+                    <button id="restock-cancel" onclick="closePopup()">Close</button>
+                </div>
+            </div>
+        </div>  
+    </div>        
+
+    <script src="/scripts/utils.js?v=2.0"></script>
+    <script src="/kiosks/scripts/workshop.js"></script>
+</body>
+
+</html>

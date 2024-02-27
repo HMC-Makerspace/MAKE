@@ -2089,7 +2089,7 @@ Workshops
   width: 50%;
 }
 
-.workshop .required-quizzes {
+.required-quizzes {
   font-size: .8em;
   display: flex;
   flex-direction: row;
@@ -2099,19 +2099,19 @@ Workshops
   gap: 4px;
 }
 
-.workshop .required-quizzes span {
+.required-quizzes span {
   border-radius: 4px;
   padding: 2px 4px;
   background-color: var(--theme-color-2);
   border: 1px solid var(--theme-color-3);
 }
 
-.workshop .required-quizzes span.passed {
+.required-quizzes span.passed {
   background-color: var(--high-color-dark);
   border: 1px solid var(--high-color);
 }
 
-.workshop .required-quizzes span.failed {
+.required-quizzes span.failed {
   background-color: var(--low-color-dark);
   border: 1px solid var(--low-color);
 }

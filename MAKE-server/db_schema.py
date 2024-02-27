@@ -521,6 +521,7 @@ class Workshop(BaseModel):
     capacity: int
     required_quizzes: List[str]
     rsvp_list: List[str]
+    sign_in_list: Union[List[str], None]
     is_live: bool
     users_notified: Union[List[str], None]
     photos: Union[List[str], None]
