@@ -122,6 +122,10 @@ class RedirectMiddleware:
         if path[0] == "/":
             path = path[1:]
 
+        # Remove the / from the end of the path
+        if path[-1] == "/":
+            path = path[:-1]
+
         # Get the database
         db = MongoDB()
 
