@@ -8,6 +8,7 @@ var state = {
     restock_requests: null,
     quizzes: null,
     checkouts: null,
+    redirects: null,
 };
 
 var shifts_updated = false;
@@ -67,17 +68,16 @@ async function authenticate() {
     });
 
     setInterval(fetchUsers, 5000);
-    setInterval(fetchStudentStorageAdmin, 5000);
 
     await fetchInventory(kiosk_mode = true);
     await fetchQuizzes();
     await fetchUsers();
-    await fetchStudentStorageAdmin();
     await fetchShiftsAdmin();
     await fetchShiftChangesAdmin();
     await fetchWorkshopsAdmin();
     await fetchRestockRequests();
     await fetchCheckoutsAdmin();
+    await fetchRedirectsAdmin();
 
     for (let key of Object.keys(state.users)) {
         state.users[key].cx_id_str = `${state.users[key].cx_id}`;
@@ -90,6 +90,23 @@ async function authenticate() {
 }
 
 authenticate();
+
+async function fetchRedirectsAdmin() {
+    const response = await fetch(`${API}/misc/get_redirects`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+        }
+    );
+
+    if (response.status == 200) {
+        const redirects = await response.json();
+
+        state.redirects = redirects;
+    }
+}
 
 async function fetchCheckoutsAdmin() {
     const response = await fetch(`${API}/checkouts/get_checkouts`,
@@ -211,14 +228,146 @@ async function fetchRestockRequests() {
 }
 
 function renderAll() {
-    renderStudentStorage();
     renderScheduleAdmin();
     renderProficiencies();
     renderWorkshopsAdmin();
     renderRestockRequests();
     renderAvailability();
     renderStatistics();
+    renderRedirects();
 }
+
+function renderRedirects() {
+    const redirects_table = document.getElementById("redirects-table");
+
+    const header = "<tr><th>From</th><th>To</th><th>Clicks</th><th>Edit</th><th>Delete</th></tr>"
+    redirects_table.innerHTML = header;
+
+    for (let redirect of state.redirects) {
+        let row = document.createElement("tr");
+
+        let from = document.createElement("td");
+        from.innerHTML = `make.hmc.edu/<b>${redirect.path}</b>`;
+        row.appendChild(from);
+
+        let to = document.createElement("td");
+        to.innerText = redirect.redirect;
+        row.appendChild(to);
+
+        let clicks = document.createElement("td");
+        clicks.innerText = redirect.logs.length;
+        row.appendChild(clicks);
+
+        let edit_button = document.createElement("td");
+        let edit_button_button = document.createElement("button");
+        edit_button_button.innerHTML = "<span class='material-symbols-outlined'>tune</span>";
+        edit_button_button.onclick = () => {
+            showCreateEditRedirect(redirect.uuid);
+        };
+        edit_button.appendChild(edit_button_button);
+        row.appendChild(edit_button);
+
+        let delete_button = document.createElement("td");
+        let delete_button_button = document.createElement("button");
+        delete_button_button.innerHTML = "<span class='material-symbols-outlined'>delete</span>";
+        delete_button_button.classList.add("delete");
+        delete_button_button.onclick = () => {
+            deleteRedirect(redirect.uuid);
+        };
+        delete_button.appendChild(delete_button_button);
+        row.appendChild(delete_button);
+
+        redirects_table.appendChild(row);
+    }
+}
+
+
+function showCreateEditRedirect(uuid = null) {
+    let redirect = null;
+
+    if (uuid !== null) {
+        redirect = state.redirects.find(redirect => redirect.uuid === uuid);
+    } else {
+        redirect = {
+            uuid: self.crypto.randomUUID(),
+            path: "",
+            redirect: "",
+            logs: [],
+        };  
+    }
+
+    document.getElementById("create-edit-redirect-from").value = redirect.path;
+    document.getElementById("create-edit-redirect-to").value = redirect.redirect;
+
+    document.getElementById("create-edit-redirect-save").onclick = () => {
+        saveRedirect(redirect.uuid);
+    };
+
+    showPopup("create-edit-redirect");
+}
+
+async function saveRedirect(uuid) {
+    let path = document.getElementById("create-edit-redirect-from").value;
+    let redirect = document.getElementById("create-edit-redirect-to").value;
+
+    let request = {
+        uuid: uuid,
+        path: path,
+        redirect: redirect,
+        logs: [],
+    };
+
+    let response = await fetch(`${API}/misc/update_redirect`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+            body: JSON.stringify(request),
+        }
+    );
+
+    if (response.status == 201) {
+        await fetchRedirectsAdmin();
+        renderRedirects();
+    } else {
+        const body = await response.json();
+        alert("Error saving redirect: " + response.status + "\n" + body.detail);
+    }
+
+    closePopup();
+}
+
+async function deleteRedirect(uuid) {
+    let result = prompt("Are you sure you want to delete this redirect? Type 'delete' to confirm.");
+
+    if (result === "delete") {
+        const response = await fetch(`${API}/misc/delete_redirect`,
+            {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "api-key": api_key,
+                },
+                body: JSON.stringify({ uuid: uuid }),
+            }
+        );
+
+        if (response.status == 204) {
+            await fetchRedirectsAdmin();
+            renderRedirects();
+        } else {
+            const body = await response.json();
+            alert("Error deleting redirect: " + response.status + "\n" + body.detail);
+        }
+    }
+}
+
+
+
+
+
 
 function renderAvailability() {
     const availability_table = document.getElementById("steward-availability");

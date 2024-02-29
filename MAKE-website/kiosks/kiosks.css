@@ -811,7 +811,7 @@ table#proficiencies-list td.proficiency-cell {
   text-align: center;
 }
 
-#create-new-workshop-button {
+#create-new-workshop-button, #create-new-redirect-button {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1348,5 +1348,9 @@ WORKSHOPS
 }
 
 #attendees-table {
+  text-align: center;
+}
+
+#redirects-table {
   text-align: center;
 }

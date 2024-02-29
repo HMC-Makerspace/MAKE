@@ -40,6 +40,7 @@
             <button id="workshops-button" class="set-page" onclick="setPage('workshops')">Workshops</button>
             <button id="restock-requests-button" class="set-page" onclick="setPage('restock-requests')">Restock Requests</button>
             <button id="statistics-button" class="set-page" onclick="setPage('statistics')">Statistics</button>
+            <button id="redirects-button" class="set-page" onclick="setPage('redirects')">Redirects</button>
         </div>
 
         <div class="main-content content-container" id="page-home">
@@ -229,6 +230,21 @@
             </div>
         </div>
 
+
+        <div class="main-content content-container hidden" id="page-redirects">
+            <div class="content-header">
+                <p>
+                    View and edit redirects.
+                </p>
+            </div>
+
+            <div class="content-body">
+                <button id="create-new-redirect-button" onclick="showCreateEditRedirect()">Create New Redirect</button>
+
+                <table id="redirects-table">
+
+                </table>
+            </div>
     </div>
 
     <div id="popup-container" class="hidden">
@@ -417,6 +433,20 @@
                     <button id="single-availability-popup-cancel" onclick="closePopup()">Close</button>
                 </div>
             </div>
+
+            <div id="create-edit-redirect" class="hidden">
+                <h1>Create/Edit Redirect</h1>
+
+                <label for="create-edit-redirect-from">From</label>
+                <span>make.hmc.edu/<input id="create-edit-redirect-from" placeholder="short-link"></span>
+
+                <label for="create-edit-redirect-to">To</label>
+                <input id="create-edit-redirect-to" placeholder="https://example.come/long-link-to-something">
+                
+                <div class="edit-buttons">
+                    <button id="create-edit-redirect-save" onclick="saveRedirect()">Save</button>
+                    <button id="create-edit-redirect-cancel" onclick="closePopup()">Cancel</button>
+                </div>
         </div>
     </div>
 
@@ -432,7 +462,7 @@
     <script src="/scripts/page_schedule.js?v=2.3"></script>
     <script src="/scripts/utils.js?v=2.5"></script>
 
-    <script src="/kiosks/scripts/management.js?v=2.19"></script>
+    <script src="/kiosks/scripts/management.js?v=2.20"></script>
 </body>
 
 </html>

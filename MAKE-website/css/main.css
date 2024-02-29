@@ -2677,4 +2677,12 @@ Mobile Styles
   .workshop .description {
     width: 100%;
   }
+
+  #faq-content {
+    display: flex;
+    flex-direction: column;
+  }
+  .faq-category {
+    width: 100%;
+  }
 }

@@ -147,7 +147,7 @@ async def route_add_api_key(request: Request):
         await api_keys.update_one({"uuid": body["uuid"]}, {"$set": body})
 
 
-@misc_router.post("/delete_api_key")
+@misc_router.delete("/delete_api_key")
 async def route_delete_api_key(request: Request):
     # Get the request body
     body = await request.json()
@@ -178,4 +178,96 @@ async def route_get_quizzes():
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Getting quizzes...")
 
-    return QUIZ_IDS
+    return 
+    
+
+@misc_router.get("/get_redirects")
+async def route_get_redirects(request: Request):
+    # Get the request body
+    # Get the redirects
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Getting redirects...")
+
+    db = MongoDB()
+    api_key = request.headers["api-key"]
+
+
+    # Validate the API key
+    if not await validate_api_key(db, api_key, "admin"):
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    
+    # Get the redirects
+    redirects = await db.get_collection("redirects")
+
+    all_redirects = await redirects.find().to_list(None)
+
+    all_redirects = [Redirect(**item) for item in all_redirects]
+    
+    return all_redirects
+
+@misc_router.post("/update_redirect", status_code=201)
+async def route_update_redirect(request: Request):
+    # Update a redirect
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Updating redirect...")
+
+    db = MongoDB()
+    api_key = request.headers["api-key"]
+
+    # Validate the API key
+    if not await validate_api_key(db, api_key, "admin"):
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    
+    redirect = None
+
+    try:
+        redirect = Redirect(**await request.json())
+    except Exception as e:
+        # The redirect is invalid
+        # Return error
+        raise HTTPException(status_code=400, detail="Invalid redirect: " + str(e))
+
+    # Update the redirect
+    redirects = await db.get_collection("redirects")
+
+    # Find it
+    check = await redirects.find_one({"uuid": redirect.uuid})
+
+    if check is None:
+        # The redirect does not exist
+        # insert it
+        await redirects.insert_one(redirect.dict())
+    else:
+        # The redirect exists
+        # Update it, keeping the logs from the server
+        redirect.logs = check["logs"]
+        await redirects.update_one({"uuid": redirect.uuid}, {"$set": redirect.dict()})
+
+@misc_router.delete("/delete_redirect", status_code=204)
+async def route_delete_redirect(request: Request):
+    # Get the request body
+    body = await request.json()
+    
+    # Delete a redirect
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Deleting redirect...")
+
+    db = MongoDB()
+
+    api_key = request.headers["api-key"]
+
+    # Validate the API key
+    if not await validate_api_key(db, api_key, "admin"):
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    
+    # Delete the redirect
+    redirects = await db.get_collection("redirects")
+
+    # Delete it
+    await redirects.delete_one({"uuid": body["uuid"]})

@@ -1,11 +1,13 @@
 import datetime
 import os
+import uuid
 from fastapi import FastAPI
 from fastapi import Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.exceptions import HTTPException
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 
 import asyncio
@@ -96,6 +98,58 @@ app.include_router(misc_router)
 # THE ONLY WAY TO GET ANOTHER ONE IS TO TURN ON
 # COMMUNITY MODE
 app.add_api_route("/discord", lambda: RedirectResponse(url="https://discord.gg/XMJspQp8b4"))
+
+class RedirectMiddleware:
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send):
+
+        if scope["type"] == "http":
+            request = Request(scope)
+            response = await self.redirect(request)
+            if response is not None:
+                await response(scope, receive, send)
+                return
+            
+        await self.app(scope, receive, send)
+    
+    async def redirect(self, request: Request):
+        # Get the path
+        path = request.url.path
+
+        # Remove the / from the beginning of the path
+        if path[0] == "/":
+            path = path[1:]
+
+        # Get the database
+        db = MongoDB()
+
+        # Get the redirects collection
+        collection = await db.get_collection("redirects")
+
+        redirect = await collection.find_one({"path": path})
+
+        if redirect is not None:
+            ip_log = {
+                "uuid": str(uuid.uuid4()),
+                "timestamp": datetime.datetime.now().timestamp(),
+                "ip": request.client.host,
+            }
+            
+            # Add to the logs attribute of the redirect
+            await collection.update_one({"path": path}, {"$push": {"logs": ip_log}})
+
+            # Redirect to the redirect path
+            return RedirectResponse(url=redirect["redirect"])
+        else:
+            return None
+
+app.add_middleware(RedirectMiddleware)
+# Add a function to handle most other paths and redirect using the
+# redirects collection in the database
+
+
 
 # Mount the static files in html mode
 app.mount("/", StaticFiles(directory="../MAKE-website", html=True), name="static")

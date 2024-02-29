@@ -44,6 +44,7 @@ schema = [
     'api_keys',
     'ip_logs',
     'reservations',
+    'redirects',
 ]
 
 
@@ -635,7 +636,6 @@ class IPLog(BaseModel):
     _id: Optional[PyObjectId] = Field(alias="_id")
     uuid: str
     ip: str
-    user: str
     timestamp: str
 
     class Config:
@@ -648,7 +648,34 @@ class IPLog(BaseModel):
                     
                     "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j8k8l",
                     "ip": "192.168.0.1",
-                    "user": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i8j7k8l",
                     "timestamp": "3942102340"
             }    
+        }
+
+
+class Redirect(BaseModel):
+    _id: Optional[PyObjectId] = Field(alias="_id")
+    uuid: str
+    path: str
+    redirect: str
+    logs: List[IPLog]
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {
+            ObjectId: str
+        }
+        schema_extra = {
+            "example": {
+                "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                "path": "apply",
+                "redirect": "https://www.hmc.edu/admission/apply/",
+                "logs": [
+                    {
+                        "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j8k8l",
+                        "ip": "192.168.0.1",
+                        "timestamp": "3942102340"
+                    }
+                ]
+            }
         }
