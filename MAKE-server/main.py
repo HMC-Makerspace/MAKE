@@ -97,7 +97,7 @@ app.include_router(misc_router)
 # NEVER DELETE THIS FROM THE DISCORD SERVER
 # THE ONLY WAY TO GET ANOTHER ONE IS TO TURN ON
 # COMMUNITY MODE
-app.add_api_route("/discord", lambda: RedirectResponse(url="https://discord.gg/XMJspQp8b4"))
+# app.add_api_route("/discord", lambda: RedirectResponse(url="https://discord.gg/XMJspQp8b4"))
 
 class RedirectMiddleware:
     def __init__(self, app):
