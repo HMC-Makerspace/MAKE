@@ -718,8 +718,24 @@ function renderRestockRequests() {
     appendChildren(completed_requests, generateCompletedRestockRequestDivs());
 }
 
-function replaceLinksWithA(str) {
-    return str.replaceAll(/(https?:\/\/[^\s]+)/g, "<a href='$1'>$1</a>");
+function replaceLinksWithA(str, shorten = false) {
+    let matches = str.match(/(https?:\/\/[^\s]+)/g);
+
+    if (matches === null) {
+        return str;
+    }
+
+    for (let match of matches) {
+        let a = document.createElement("a");
+        a.href = match;
+        a.target = "_blank";
+        const base_url = new URL(match).hostname;
+        a.innerText = shorten ? base_url : match;
+
+        str = str.replace(match, a.outerHTML);
+    }
+
+    return str;
 }
 
 function generatePendingRestockRequestDivs() {
@@ -765,7 +781,7 @@ function generatePendingRestockRequestDivs() {
 
         let item = document.createElement("td");
         item.classList.add("restock-request-item");
-        item.innerHTML = replaceLinksWithA(request.item);
+        item.innerHTML = replaceLinksWithA(request.item, shorten=true);
         div.appendChild(item);
 
         let quantity = document.createElement("td");
@@ -800,7 +816,7 @@ function showCompleteRestockRequest(uuid, requested_by_str) {
     let request = state.restock_requests.find(request => request.uuid === uuid);
 
     document.getElementById("complete-restock-request-user").innerText = requested_by_str;
-    document.getElementById("complete-restock-request-item").innerHTML = "Item: " + replaceLinksWithA(request.item);
+    document.getElementById("complete-restock-request-item").innerHTML = "Item: " + replaceLinksWithA(request.item, shorten=true);
     document.getElementById("complete-restock-request-reason").innerText = "Reason: " + request.reason;
     document.getElementById("complete-restock-request-quantity").innerText = "Quantity: " + request.quantity;
     document.getElementById("complete-restock-request-notes").value = "";
@@ -891,7 +907,7 @@ function generateCompletedRestockRequestDivs() {
 
         let item = document.createElement("td");
         item.classList.add("restock-request-item");
-        item.innerHTML = replaceLinksWithA(request.item);
+        item.innerHTML = replaceLinksWithA(request.item, shorten=true);
         div.appendChild(item);
 
         let quantity = document.createElement("td");
