@@ -118,7 +118,7 @@ class RedirectMiddleware:
         # Get the path
         path = request.url.path
 
-        if len(path) == 0:
+        if len(path) < 2:
             return None
 
         # Remove the / from the beginning of the path
