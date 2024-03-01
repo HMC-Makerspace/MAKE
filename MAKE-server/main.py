@@ -118,6 +118,9 @@ class RedirectMiddleware:
         # Get the path
         path = request.url.path
 
+        if len(path) == 0:
+            return None
+
         # Remove the / from the beginning of the path
         if path[0] == "/":
             path = path[1:]
