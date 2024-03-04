@@ -70,7 +70,6 @@ async function authenticate() {
     setInterval(fetchUsers, 5000);
 
     await fetchInventory(kiosk_mode = true);
-    await fetchQuizzes();
     await fetchUsers();
     await fetchShiftsAdmin();
     await fetchShiftChangesAdmin();
@@ -798,7 +797,7 @@ function generatePendingRestockRequestDivs() {
         complete.classList.add("restock-request-complete");
 
         let complete_button = document.createElement("button");
-        complete_button.innerText = "Complete";
+        complete_button.innerHTML = "<span class='material-symbols-outlined'>done</span>";
         complete_button.onclick = () => {
             showCompleteRestockRequest(request.uuid, requested_by_str);
         };
@@ -1401,7 +1400,7 @@ async function deleteWorkshop(uuid) {
 function generateRequiredQuizDivs(required_quizzes = []) {
     let divs = [];
 
-    for (let quiz of Object.keys(state.quizzes)) {
+    for (let quiz of Object.keys(QUIZ_NAME_TO_ID)) {
         let div = document.createElement("div");
         div.classList.add("checkbox-container");
 

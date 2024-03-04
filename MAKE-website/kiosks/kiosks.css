@@ -552,11 +552,20 @@ Management Console
 #admin-header button {
   border: none;
   cursor: pointer;
-  font-size: 1em;
-  width: 170px;
+  font-size: 14px;
+  width: 140px;
   height: 40px;
   font-weight: bolder;
   border-radius: unset;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px
+}
+
+#admin-header button .material-symbols-outlined {
+  font-size: 16px;
 }
 
 #admin-header button:hover, #admin-header button.active-button {
@@ -1336,7 +1345,7 @@ WORKSHOPS
   overflow-y: scroll;
 }
 
-#workshop-table {
+#workshop-table, #pending-restock-requests-list, #completed-restock-requests-list {
   text-align: center;
   max-width: 1000px;
 }
