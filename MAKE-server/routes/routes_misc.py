@@ -270,4 +270,13 @@ async def route_delete_redirect(request: Request):
     redirects = await db.get_collection("redirects")
 
     # Delete it
-    await redirects.delete_one({"uuid": body["uuid"]})
+    await redirects.delete_one({"uuid": body["uuid"]})  
+
+
+@misc_router.get("/get_quizzes")
+async def route_get_quizzes():
+    # Get the quizzes
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Getting quizzes...")
+
+    return QUIZ_IDS
