@@ -1451,12 +1451,12 @@ table {
 
 table td, 
 table th{
-padding: 5px;
+padding: 4px;
 }
 
 table tr:first-child {
   height: 60px;
-  font-size: 16px;
+  font-size: 14px;
   top: 20px;
   position: sticky;
 }

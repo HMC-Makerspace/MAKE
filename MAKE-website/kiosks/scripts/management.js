@@ -952,7 +952,7 @@ function generateWorkshopDivsAdmin() {
     let divs = [];
 
     let header = document.createElement("tr");
-    header.innerHTML = `<th>Title</th><th>Description</th><th>Instructors</th><th>Start Time</th><th>Capacity</th><th>Live</th><th>Signups</th><th>Attendees</th><th>Edit</th><th>Delete</th>`;
+    header.innerHTML = `<th>Title</th><th>Description</th><th>Instructors</th><th>Start Time</th><th>Capacity</th><th>Live</th><th>Signups</th><th>Attendees</th><th>Edit</th><th>Copy</th><th>Delete</th>`;
     divs.push(header);
 
     let sorted_workshops = state.workshops.sort((a, b) => b.timestamp_start - a.timestamp_start);
@@ -975,7 +975,7 @@ function generateWorkshopDivsAdmin() {
         let separator = document.createElement("tr");
         separator.classList.add("workshop-month-separator");
         let separatorText = document.createElement("td");
-        separatorText.setAttribute("colspan", "10");
+        separatorText.setAttribute("colspan", "11");
         separatorText.innerText = `${monthYear} (${workshops.length} workshop${workshops.length > 1 ? "s" : ""})`;
         separator.appendChild(separatorText);
         divs.push(separator);
@@ -1048,6 +1048,18 @@ function generateWorkshopDivsAdmin() {
 
             edit_button_container.appendChild(edit_button);
             div.appendChild(edit_button_container);
+
+            let copy_button_container = document.createElement("td");
+            copy_button_container.classList.add("workshop-copy");
+
+            let copy_button = document.createElement("button");
+            copy_button.innerHTML = "<span class='material-symbols-outlined'>content_copy</span>"
+            copy_button.onclick = () => {
+                copyWorkshop(workshop.uuid);
+            };
+
+            copy_button_container.appendChild(copy_button);
+            div.appendChild(copy_button_container);
 
             let delete_button_container = document.createElement("td");
             delete_button_container.classList.add("workshop-delete");
@@ -1251,6 +1263,23 @@ async function sendWorkshopEmail(uuid) {
     document.getElementById("workshop-signups-send-email").removeAttribute("disabled");
 }
 
+function copyWorkshop(uuid) {
+    let workshop = state.workshops.find(workshop => workshop.uuid === uuid);
+
+    if (workshop) {
+        console.log(workshop);
+        let new_workshop = JSON.parse(JSON.stringify(workshop));
+        new_workshop.title = "Copy of " + new_workshop.title;
+        new_workshop.uuid = self.crypto.randomUUID();
+        new_workshop.is_live = false;
+
+        state.workshops.push(new_workshop);
+        showCreateEditWorkshop(new_workshop.uuid);
+    } else {
+        alert("Error finding workshop with uuid " + uuid);
+    }
+}
+
 function showCreateEditWorkshop(uuid) {
     let workshop = state.workshops.find(workshop => workshop.uuid === uuid);
 
@@ -1333,7 +1362,7 @@ function generateWorkshopPhotoDiv(file, uploaded = false, workshop = null) {
     if (uploaded) {
         closeButton.addEventListener("click", async () => {
             // call delete photo endpoint
-            let request = await fetch(`${API}/workshops/delete_photo_from_workshop`,
+            let request = await fetch(`${API}/workshops/delete_photo`,
                 {
                     method: "POST",
                     headers: {
@@ -1429,11 +1458,12 @@ async function saveWorkshop(uuid = null) {
     // disable save button
     document.getElementById("edit-workshop-save").setAttribute("disabled", "disabled");
 
-    let create_new = false;
+    let workshop = null;
 
     if (uuid === null) {
-        create_new = true;
         uuid = self.crypto.randomUUID();
+    } else {
+        workshop = state.workshops.find(workshop => workshop.uuid === uuid);
     }
 
     const date = document.getElementById("edit-workshop-date").value;
@@ -1448,7 +1478,7 @@ async function saveWorkshop(uuid = null) {
     }
 
 
-    let workshop = {
+    let workshop_obj = {
         uuid: uuid,
         title: document.getElementById("edit-workshop-title").value,
         description: document.getElementById("edit-workshop-description").value,
@@ -1458,23 +1488,18 @@ async function saveWorkshop(uuid = null) {
         capacity: document.getElementById("edit-workshop-capacity").value,
         is_live: document.getElementById("edit-workshop-is_live").checked,
         rsvp_list: [],
-        required_quizzes: required_quizzes
+        required_quizzes: required_quizzes,
+        photos: workshop ? workshop.photos ?? [] : [],
     };  
 
-    let create_update = "update_workshop";
-
-    if (create_new) {
-        create_update = "create_workshop";
-    }
-
-    let request = await fetch(`${API}/workshops/${create_update}`,
+    let request = await fetch(`${API}/workshops/update_workshop`,
         {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "api-key": api_key,
             },
-            body: JSON.stringify(workshop),
+            body: JSON.stringify(workshop_obj),
         }
     );
 
@@ -1494,7 +1519,7 @@ async function saveWorkshop(uuid = null) {
 
         // Alert with details
         const body = await request.json();
-        alert("Error saving workshop: " + request.status + "\n" + body.error);
+        alert("Error saving workshop: " + request.status + "\n" + body.detail);
     }
 }
 
@@ -1504,7 +1529,7 @@ async function uploadWorkshopPhotos(uuid) {
         form.append("workshop_uuid", uuid);
         form.append("file", photo);
 
-        let request = await fetch(`${API}/workshops/add_photo_to_workshop`,
+        let request = await fetch(`${API}/workshops/add_photo`,
             {
                 method: "POST",
                 headers: {

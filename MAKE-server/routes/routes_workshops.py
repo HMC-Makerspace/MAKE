@@ -90,42 +90,11 @@ async def route_get_full_workshops(request: Request):
 
     return workshops
 
-@workshops_router.post("/create_workshop", status_code=201)
-async def route_create_workshop(request: Request):
-    # Create a workshop
-    logging.getLogger().setLevel(logging.INFO)
-    logging.info("Creating workshop...")
-    workshop = Workshop(**await request.json())
-
-    db = MongoDB()
-    api_key = request.headers["api-key"]
-    is_valid = await validate_api_key(db, api_key, "workshops")
-
-    if not is_valid:
-        # The API key is invalid
-        # Return error
-        raise HTTPException(status_code=401, detail="Invalid API key")
-
-    # Get the workshops collection
-    collection = await db.get_collection("workshops")
-
-    # Check if the workshop already exists
-    if await collection.find_one({"uuid": workshop.uuid}) is not None:
-        # The workshop already exists
-        # Return error
-        raise HTTPException(status_code=400, detail="Workshop already exists")
-
-    # Add the workshop to the database
-    await collection.insert_one(workshop.dict())
-
-    # Return the workshop
-    return workshop
-
 @workshops_router.post("/update_workshop", status_code=201)
 async def route_update_workshop(request: Request):
-    # Update a workshop
+    # Update or create a workshop
     logging.getLogger().setLevel(logging.INFO)
-    logging.info("Updating workshop...")
+    logging.info("Updating or creating workshop...")
     workshop = Workshop(**await request.json())
 
     db = MongoDB()
@@ -142,23 +111,23 @@ async def route_update_workshop(request: Request):
 
     existing_workshop = await collection.find_one({"uuid": workshop.uuid})
 
-    # Check if the workshop already exists
     if existing_workshop is None:
         # The workshop does not exist
-        # Return error
-        raise HTTPException(status_code=400, detail="Workshop does not exist")
-    
-    # Save signups and photos
-    workshop.rsvp_list = existing_workshop["rsvp_list"]
-    
-    if "photos" in existing_workshop:
-        workshop.photos = existing_workshop["photos"]
+        # Create a new workshop
+        logging.info("Creating workshop...")
 
-    if "sign_in_list" in existing_workshop:
-        workshop.sign_in_list = existing_workshop["sign_in_list"]
-
-    # Update the workshop
-    await collection.replace_one({"uuid": workshop.uuid}, workshop.dict())
+        await collection.insert_one(workshop.dict())
+    else:
+        # The workshop already exists
+        # Update the workshop
+        logging.info("Updating workshop...")
+        # Save signups and photos
+        workshop.rsvp_list = existing_workshop["rsvp_list"]
+        if "photos" in existing_workshop:
+            workshop.photos = existing_workshop["photos"]
+        if "sign_in_list" in existing_workshop:
+            workshop.sign_in_list = existing_workshop["sign_in_list"]
+        await collection.replace_one({"uuid": workshop.uuid}, workshop.dict())
 
     # Return the workshop
     return workshop
@@ -451,7 +420,7 @@ async def route_subscribe(request: Request):
 
     return
 
-@workshops_router.post("/add_photo_to_workshop", status_code=201)
+@workshops_router.post("/add_photo", status_code=201)
 async def route_add_photo_to_workshop(request: Request):
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Adding photo to workshop...")
@@ -563,7 +532,7 @@ async def route_get_photo(photo_uuid: str):
         raise HTTPException(status_code=404, detail="Photo does not exist")
 
 
-@workshops_router.post("/delete_photo_from_workshop", status_code=201)
+@workshops_router.post("/delete_photo", status_code=201)
 async def route_delete_photo_from_workshop(request: Request):
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Deleting photo from workshop...")
@@ -596,17 +565,5 @@ async def route_delete_photo_from_workshop(request: Request):
 
     # Update the workshop
     await collection.replace_one({"uuid": body["workshop_uuid"]}, workshop)
-
-    # Get the server_files collection
-    collection = await db.get_collection("server_files")
-
-    # Get the file
-    file = await collection.find_one({"uuid": body["photo_uuid"]})
-
-    if file is not None:
-        # The file exists
-        # Delete the file
-        os.remove(f"server_files/{body['photo_uuid']}")
-        await collection.delete_one({"uuid": body["photo_uuid"]})
 
     return

@@ -901,7 +901,7 @@ tr.workshop-admin {
 }
 
 .workshop-admin button {
-  width: 60px;
+  width: 50px;
   font-weight: bold;
   cursor: pointer;
   display: flex;
@@ -909,7 +909,12 @@ tr.workshop-admin {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  margin: 0 auto; 
+  margin: 0 auto;
+  font-size: 12px; 
+}
+
+.workshop-admin button .material-symbols-outlined {
+  font-size: 20px;
 }
 
 .workshop-is_live span {
@@ -1345,15 +1350,11 @@ WORKSHOPS
   overflow-y: scroll;
 }
 
-#workshop-table, #pending-restock-requests-list, #completed-restock-requests-list {
+#workshop-table {
   text-align: center;
   max-width: 1000px;
 }
 
-#attendees-table {
-  text-align: center;
-}
-
-#redirects-table {
+#attendees-table, #redirects-table, #pending-restock-requests-list, #completed-restock-requests-list {
   text-align: center;
 }
