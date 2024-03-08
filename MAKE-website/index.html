@@ -209,7 +209,7 @@
         <section id="page-home" class="main-content">
             <div id="current-announcement">
                 <div id="announcement-text">
-                    Welcome back! Make sure to take the General Safety Quiz!
+                    Have a great spring break! We'll have no Stewards on duty from March 8th at 7pm - March 18th at 2pm. Swipe access will still work during this time.
                 </div>
             </div>
 
@@ -441,14 +441,24 @@
                 </div>
 
                 <div id="workshops-content" class="content-body">
-                    <h2 class="workshops-seperator">Upcoming Workshops</h2>
+                    <div id="featured-workshops">
+                        
+                    </div>
+
+                    <div id="workshops-selector">
+                        <button id="upcoming-workshops-button" class="selected" onclick="showWorkshops('upcoming')">
+                            Upcoming Workshops
+                        </button>
+                        <button id="previous-workshops-button" onclick="showWorkshops('previous')">
+                            Previous Workshops
+                        </button>
+                    </div>
 
                     <div id="upcoming-workshops" class="workshop-container">
                     </div>
 
-                    <h2 class="workshops-seperator">Previous Workshops</h2>
 
-                    <div id="previous-workshops" class="workshop-container">
+                    <div id="previous-workshops" class="workshop-container hidden">
                     </div>
                 </div>
             </div>
