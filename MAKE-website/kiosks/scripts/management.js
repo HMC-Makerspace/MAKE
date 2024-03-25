@@ -232,8 +232,75 @@ function renderAll() {
     renderWorkshopsAdmin();
     renderRestockRequests();
     renderAvailability();
-    renderStatistics();
     renderRedirects();
+    renderApplicants();
+
+    // Stats take a while to load, so we'll render them last
+    renderStatistics();
+}
+
+function renderApplicants() {
+    // Load the applicants state from localstorage
+    let reviews = JSON.parse(localStorage.getItem("reviews")) ?? [];
+
+    const el = document.getElementById("previous-reviews");
+    removeAllChildren(el);
+
+    /* Reviews is a list of objects with the following structure:
+    {
+        name: "Fall 2024",
+        reviewer: "Ethan Vazquez",
+        csv_file: base 64 encoded csv file,
+        scores_key: ["Core Values Alignment", "Teaching Experience", etc],
+        scores_min: 1,
+        scores_max: 5,
+        applications: [
+            {
+                timestamp: "3/23/2024 21:48:06",
+                scores: [5, 4, etc]
+            }
+        ]
+    }
+
+    The following code will just render reviews in a grid,
+    with a buttons to continue, download, and delete the review.
+    */
+    for (let review of reviews) {
+        const reviewDiv = document.createElement("div");
+        reviewDiv.classList.add("previous-review");
+
+        const title = document.createElement("h3");
+        title.innerText = review.name;
+        reviewDiv.appendChild(title);
+
+        const reviewer = document.createElement("p");
+        reviewer.innerText = `Reviewed by ${review.reviewer}`;
+        reviewDiv.appendChild(reviewer);
+
+        const buttons = document.createElement("div");
+        buttons.classList.add("review-buttons");
+
+        const downloadButton = document.createElement("button");
+        downloadButton.className = "with-icon";
+        downloadButton.innerHTML = "<span class='material-symbols'>download</span>Download";
+        downloadButton.onclick = () => downloadReview(review);
+        buttons.appendChild(downloadButton);
+
+        const continueButton = document.createElement("button");
+        continueButton.className = "with-icon";
+        continueButton.innerHTML = "<span class='material-symbols'>arrow_forward</span>Continue";
+        continueButton.onclick = () => continueReview(review);
+        buttons.appendChild(continueButton);
+
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "only-icon";
+        deleteButton.innerHTML = "<span class='material-symbols'>delete</span>";
+        deleteButton.onclick = () => deleteReview(review);
+        buttons.appendChild(deleteButton);
+
+        reviewDiv.appendChild(buttons);
+        el.appendChild(reviewDiv);
+    }
 }
 
 function renderRedirects() {

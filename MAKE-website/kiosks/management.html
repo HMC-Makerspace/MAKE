@@ -86,6 +86,12 @@
                 </span>
                 Statistics
             </button>
+            <button id="applicants-button" class="set-page" onclick="setPage('applicants')">
+                <span class="material-symbols-outlined">
+                    how_to_reg
+                </span>
+                Applicants
+            </button>
         </div>
 
         <div class="main-content content-container" id="page-home">
@@ -290,6 +296,85 @@
 
                 </table>
             </div>
+        </div>
+
+        <div class="main-content content-container hidden" id="page-applicants">
+            <div class="content-header">
+                <p>
+                    Review and combine Steward applications.
+                </p>
+            </div>
+
+            <div id="applicant-reviews-menu" class="content-body">
+                <h1>Reviews</h1>
+
+                <div id="applicant-choices">
+                    <button id="start-new-review" class="big with-icon" onclick="startNewReview()">
+                        <span class="material-symbols-outlined">add</span>
+                        Start New Review
+                    </button>
+
+                    <button id="combine-reviews" class="big with-icon" onclick="combineReviews()">
+                        <span class="material-symbols-outlined">merge_type</span>
+                        Combine Reviews
+                    </button>
+                </div>
+
+                <div id="previous-reviews">
+                </div>
+            </div>
+
+            <div id="applicant-new-review" class="content-body hidden">
+                <h1>Steps</h1>
+
+                <ol>
+                    <li>Download the <b>Form Responses</b> sheet of the current steward application form as a CSV file.</li>
+                    <li>Click "Start New Review" and upload the CSV file here.</li>
+                    <li>Select the columns for <b>Timestamp</b> and <b>Returning Steward?</b></li>
+                    <li>Select the columns containing application <b>questions</b>.</li>
+                    <li>Click "Start Review". Progress is saved automatically.</li>
+                </ol>
+
+                <div id="new-review-upload">
+                    <label for="new-review-upload-input">Upload Form Responses CSV</label>
+                    <input type="file" id="new-review-upload-input" accept=".csv" onchange="uploadNewReview(event)">
+                </div>
+
+                <div id="new-review-form" class="hidden">
+                    <label for="new-review-timestamp">Timestamp Column</label>
+                    <select id="new-review-timestamp"></select>
+
+                    <label for="new-review-returning">Returning Steward Column</label>
+                    <select id="new-review-returning"></select>
+
+                    <label for="new-review-questions">Application Questions</label>
+                    <select id="new-review-questions" multiple></select>
+
+                    <button id="start-review" onclick="startReview()">Start Review</button>
+                </div>
+            </div>
+
+            <div id="applicant-continue-review" class="content-body hidden">
+                <h1>Review</h1>
+
+                <div id="continue-review-progress">
+
+                </div>
+
+                <div id="continue-review-questions">
+                    
+                </div>
+
+                <div id="continue-review-scoring">
+
+                </div>
+
+                <div id="continue-review-buttons">
+                    <button id="review-back" onclick="reviewBack()">Back</button>
+                    <button id="review-next" onclick="reviewNext()">Next</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="popup-container" class="hidden">

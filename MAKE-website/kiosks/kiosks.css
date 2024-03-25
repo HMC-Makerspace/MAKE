@@ -1358,3 +1358,18 @@ WORKSHOPS
 #attendees-table, #redirects-table, #pending-restock-requests-list, #completed-restock-requests-list {
   text-align: center;
 }
+
+/*
+
+APPLICANTS
+
+*/
+
+#applicant-choices {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin: 10px;
+}

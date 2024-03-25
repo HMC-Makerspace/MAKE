@@ -505,6 +505,15 @@ button.checkbox:hover img {
   filter: invert(var(--invert));
 }
 
+button.with-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+
+
 button.only-icon {
   padding: 0px;
   width: 40px;
