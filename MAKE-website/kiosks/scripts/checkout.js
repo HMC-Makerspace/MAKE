@@ -335,13 +335,20 @@ function createUserInfo(user_info) {
 }
 
 function createPassedQuizzes(list) {
+    let added_quizzes = [];
 
     let html = "";
     for (let timestamp of Object.keys(list)) {
         if (determineValidQuizDate(timestamp)) {
             let quiz = QUIZ_ID_TO_NAME[list[timestamp]];
 
+            if (added_quizzes.includes(quiz)) {
+                continue;
+            }
+
             html += `<div>${quiz}</div>`;
+
+            added_quizzes.push(quiz);
         }
     }
 
