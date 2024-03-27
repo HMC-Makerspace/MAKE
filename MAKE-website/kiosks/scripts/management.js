@@ -361,6 +361,12 @@ function renderApplicants() {
 }
 
 function deleteReview(review) {
+    let result = prompt("Are you sure you want to delete this review? Type 'delete' to confirm.");
+
+    if (result !== "delete") {
+        return;
+    }
+
     let reviews = JSON.parse(localStorage.getItem("reviews"));
 
     for (let i = 0; i < reviews.length; i++) {
