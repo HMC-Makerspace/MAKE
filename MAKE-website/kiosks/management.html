@@ -22,7 +22,7 @@
 
 
     <link rel="stylesheet" href="/css/main.css?v=1.3">
-    <link rel="stylesheet" href="/kiosks/kiosks.css?v=1.7">
+    <link rel="stylesheet" href="/kiosks/kiosks.css?v=1.8">
 </head>
 
 <body>
@@ -301,7 +301,7 @@
         <div class="main-content content-container hidden" id="page-applicants">
             <div class="content-header">
                 <p>
-                    Review and combine Steward applications.
+                    Review Steward applications.
                 </p>
             </div>
 
@@ -313,11 +313,6 @@
                         <span class="material-symbols-outlined">add</span>
                         Start New Review
                     </button>
-
-                    <button id="combine-reviews" class="big with-icon" onclick="combineReviews()">
-                        <span class="material-symbols-outlined">merge_type</span>
-                        Combine Reviews
-                    </button>
                 </div>
 
                 <div id="previous-reviews">
@@ -325,6 +320,11 @@
             </div>
 
             <div id="applicant-new-review" class="content-body hidden">
+                <button class="big with-icon" onclick="setApplicantPage('applicant-reviews-menu')">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    Back
+                </button>
+
                 <h1>Steps</h1>
 
                 <ol>
@@ -336,26 +336,64 @@
                 </ol>
 
                 <div id="new-review-upload">
-                    <label for="new-review-upload-input">Upload Form Responses CSV</label>
                     <input type="file" id="new-review-upload-input" accept=".csv" onchange="uploadNewReview(event)">
+                    <button class="big with-icon" onclick="document.getElementById('new-review-upload-input').click()">
+                        <span class="material-symbols-outlined">upload_file</span>
+                        Upload CSV
+                    </button>
                 </div>
 
-                <div id="new-review-form" class="hidden">
-                    <label for="new-review-timestamp">Timestamp Column</label>
-                    <select id="new-review-timestamp"></select>
+                <h1>Review Setup</h1>
 
-                    <label for="new-review-returning">Returning Steward Column</label>
-                    <select id="new-review-returning"></select>
+                <div id="new-review-form">
+                    <label for="new-review-name">
+                        Hiring Season Name
+                        <input id="new-review-name" placeholder="FA 2024">
+                    </label>
 
-                    <label for="new-review-questions">Application Questions</label>
-                    <select id="new-review-questions" multiple></select>
+                    <label for="new-review-reviewer">
+                        Reviewer Name
+                        <input id="new-review-reviewer" placeholder="Your Name">
+                    </label>
 
-                    <button id="start-review" onclick="startReview()">Start Review</button>
+                    <label for="new-review-timestamp">
+                        Timestamp Column
+                        <select id="new-review-timestamp"></select>
+                    </label>
+
+                    <label for="new-review-returning">
+                        Returning Steward Column
+                        <select id="new-review-returning"></select>
+                    </label>
+
+                    <label for="new-review-questions">
+                        Application Questions
+                        <div id="new-review-questions"></div>
+                    </label>
+
+                    <button class="big with-icon" onclick="startReview()">
+                        <span class="material-symbols-outlined">gavel</span>
+                        Start Review
+                    </button>
                 </div>
             </div>
 
             <div id="applicant-continue-review" class="content-body hidden">
-                <h1>Review</h1>
+                <button class="big with-icon" onclick="setApplicantPage('applicant-reviews-menu')">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    Back
+                </button>
+
+                <h1 id="continue-review-name">Review</h1>
+
+                <div class="continue-review-buttons">
+                    <button class="big only-icon" aria-label="back">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                    <button class="big only-icon" aria-label="next">
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                </div>
 
                 <div id="continue-review-progress">
 
@@ -366,12 +404,16 @@
                 </div>
 
                 <div id="continue-review-scoring">
-
+                    
                 </div>
 
-                <div id="continue-review-buttons">
-                    <button id="review-back" onclick="reviewBack()">Back</button>
-                    <button id="review-next" onclick="reviewNext()">Next</button>
+                <div class="continue-review-buttons">
+                    <button class="big only-icon" aria-label="back">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                    <button class="big only-icon" aria-label="next">
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -577,6 +619,7 @@
                     <button id="create-edit-redirect-save" onclick="saveRedirect()">Save</button>
                     <button id="create-edit-redirect-cancel" onclick="closePopup()">Cancel</button>
                 </div>
+            </div>
         </div>
     </div>
 
@@ -584,6 +627,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@latest"></script>
+    <script src="/scripts/libs/papaparse.min.js"></script>
 
     <script src="/scripts/page_inventory.js?v=2.3"></script>
     <script src="/scripts/page_quiz_info.js?v=2.3"></script>
@@ -592,7 +636,7 @@
     <script src="/scripts/page_schedule.js?v=2.3"></script>
     <script src="/scripts/utils.js?v=2.5"></script>
 
-    <script src="/kiosks/scripts/management.js?v=2.23"></script>
+    <script src="/kiosks/scripts/management.js?v=2.24"></script>
 </body>
 
 </html>

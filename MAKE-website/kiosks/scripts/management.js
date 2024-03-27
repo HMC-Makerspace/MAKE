@@ -14,6 +14,61 @@ var state = {
 var shifts_updated = false;
 var photo_queue = [];
 
+const SCORES_MIN = 1;
+const SCORES_MAX = 5;
+const SCORES_KEY = [
+    {
+        name: "Core Values Alignment",
+        info: [
+            "Actively goes against several values",
+            "Does not fit with many or all of the core values",
+            "Fits with the vibe of the core values but not necessarily mentions them",
+            "Mentions at least one core value- has clearly looked at the core values before",
+            "Really leans into multiple of our core values and shows commitment to them",
+        ]
+    },
+    {
+        name: "Teaching Experience",
+        info: [
+            "Has examples in application of bad teaching",
+            "Is uncomfortable teaching or has never taught other groups",
+            "Has some experience with teaching but never taught technically",
+            "Has experience teaching and some experience teaching technical skills",
+            "Has significant experience teaching technical skills",
+        ]
+    },
+    {
+        name: "Excitement for the Makerspace",
+        info: [
+            "Shows a clear lack of enthusiasm for the Makerspace",
+            "Hasn't been to the Makerspace before, and seems unaware of what we do",
+            "Fairly aware of what we do, has been to the Makerspace",
+            "Clearly excited about the Makerspace, has been to the Makerspace",
+            "Cares about what we have to offer and has many ideas for how to improve the space",
+        ]
+    },
+    {
+        name: "Technical Background",
+        info: [
+            "Does not possess any notable technical skills that would be relevant to the Makerspace",
+            "May have limited technical ability in one or two areas",
+            "Technical experience in at least one technical field (3D Printing, Sewing, Welding, etc.)",
+            "Has worked extensively with non relevant trades/arts and/or with one or more machines in the Makerspace",
+            "Robust technical experience in multiple Makerspace-adjacent technical fields",
+        ]
+    },
+    {
+        name: "Passion for Making",
+        info: [
+            "Has never made anything or hates making things",
+            "Has made very few things and does not actively pursue making",
+            "Has considered making but does not actively pursue it",
+            "Making is a significant part of their life. Has shown commitment to working through creative projects",
+            "Outstanding passion for making. Promotes a spirit of making in their relationships / communities",
+        ]
+    }
+]
+
 const API = '/api/v2';
 
 window.onpopstate = onHashChange;
@@ -246,11 +301,13 @@ function renderApplicants() {
     const el = document.getElementById("previous-reviews");
     removeAllChildren(el);
 
+    reviews.reverse();
+
     /* Reviews is a list of objects with the following structure:
     {
         name: "Fall 2024",
         reviewer: "Ethan Vazquez",
-        csv_file: base 64 encoded csv file,
+        csv_file: text of csv file,
         scores_key: ["Core Values Alignment", "Teaching Experience", etc],
         scores_min: 1,
         scores_max: 5,
@@ -280,27 +337,282 @@ function renderApplicants() {
         const buttons = document.createElement("div");
         buttons.classList.add("review-buttons");
 
-        const downloadButton = document.createElement("button");
-        downloadButton.className = "with-icon";
-        downloadButton.innerHTML = "<span class='material-symbols'>download</span>Download";
-        downloadButton.onclick = () => downloadReview(review);
-        buttons.appendChild(downloadButton);
-
         const continueButton = document.createElement("button");
         continueButton.className = "with-icon";
-        continueButton.innerHTML = "<span class='material-symbols'>arrow_forward</span>Continue";
+        continueButton.innerHTML = "<span class='material-symbols-outlined'>arrow_forward</span>Continue";
         continueButton.onclick = () => continueReview(review);
         buttons.appendChild(continueButton);
 
+        const downloadButton = document.createElement("button");
+        downloadButton.className = "only-icon";
+        downloadButton.innerHTML = "<span class='material-symbols-outlined'>download</span>";
+        downloadButton.onclick = () => downloadReview(review);
+        buttons.appendChild(downloadButton);
+
         const deleteButton = document.createElement("button");
         deleteButton.className = "only-icon";
-        deleteButton.innerHTML = "<span class='material-symbols'>delete</span>";
+        deleteButton.innerHTML = "<span class='material-symbols-outlined'>delete</span>";
         deleteButton.onclick = () => deleteReview(review);
         buttons.appendChild(deleteButton);
 
         reviewDiv.appendChild(buttons);
         el.appendChild(reviewDiv);
     }
+}
+
+function deleteReview(review) {
+    let reviews = JSON.parse(localStorage.getItem("reviews"));
+
+    for (let i = 0; i < reviews.length; i++) {
+        if (reviews[i].uuid === review.uuid) {
+            reviews.splice(i, 1);
+            break;
+        }
+    }
+
+    localStorage.setItem("reviews", JSON.stringify(reviews));
+    renderApplicants();
+}
+
+function downloadReview(review) {
+    // Create a csv file from the review, with columns for timestamps and scores
+    let csv = "Timestamp," + SCORES_KEY.map(score => `"${score.name}"`).join(",") + "\n";
+
+    for (let app of review.applications) {
+        let average = app.scores.reduce((a, b) => Number(a) + Number(b), 0) / app.scores.length;
+        csv += `"${app.timestamp}",${app.scores.join(",")},${average}\n`;
+    }
+
+    // Create a blob and download it
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = `${review.name} - ${review.reviewer}.csv`;
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+function setApplicantPage(page) {
+    renderApplicants();
+
+    const pages = document.getElementById("page-applicants").getElementsByClassName("content-body");
+    for (let p of pages) {
+        p.classList.add("hidden");
+    }
+
+    document.getElementById(page).classList.remove("hidden");
+}
+
+function startNewReview() {
+    setApplicantPage("applicant-new-review");
+}
+
+function uploadNewReview(event) {
+    const file = event.target.files[0];
+
+    // Use papaparse to parse the csv file
+    Papa.parse(file, {
+        header: true,
+        complete: function(results) {
+            // Save the results to localstorage
+            localStorage.setItem("temp", JSON.stringify(results));
+
+            let header = results.meta.fields;
+            // Set the select with id "new-review-timestamp" to have the options in the header
+            let timestamp_select = document.getElementById("new-review-timestamp");
+            let returning_select = document.getElementById("new-review-returning");
+            let questions_multiple_div = document.getElementById("new-review-questions");
+
+            removeAllChildren(timestamp_select);
+            removeAllChildren(returning_select);
+            removeAllChildren(questions_multiple_div);
+
+            for (let i = 0; i < header.length; i++) {
+                let option = document.createElement("option");
+                option.value = header[i];
+                option.innerText = header[i].substring(0, 30) + (header[i].length > 30 ? "..." : "");
+                timestamp_select.appendChild(option.cloneNode(true));
+                returning_select.appendChild(option.cloneNode(true));
+
+                let question_option = document.createElement("input");
+                question_option.type = "checkbox";
+                question_option.id = `question-${i}`;
+                question_option.value = header[i];
+                let label = document.createElement("label");
+                label.htmlFor = `question-${i}`;
+                label.innerText = header[i].substring(0, 30) + (header[i].length > 30 ? "..." : "");
+                label.prepend(question_option);
+                questions_multiple_div.appendChild(label);
+            }
+
+        }
+    });
+}
+
+function startReview() {
+    let timestamp_select = document.getElementById("new-review-timestamp");
+    let returning_select = document.getElementById("new-review-returning");
+    let questions_multiple_div = document.getElementById("new-review-questions");
+
+    let timestamp_index = timestamp_select.value;
+    let returning_index = returning_select.value;
+
+    let questions = [];
+    for (let question of questions_multiple_div.getElementsByTagName("input")) {
+        if (question.checked) {
+            questions.push(question.value);
+        }
+    }
+
+    let reviews = JSON.parse(localStorage.getItem("reviews")) ?? [];
+
+    let unscored_apps = [];
+    let empty_score_list = [];
+
+    for (let question of questions_multiple_div.getElementsByTagName("input")) {
+        empty_score_list.push(null);
+    }
+
+    for (let app of JSON.parse(localStorage.getItem("temp")).data) {
+        let application = {
+            timestamp: app[timestamp_index],
+            scores: empty_score_list,
+        }
+
+        unscored_apps.push(application);
+    }
+
+    let review = {
+        uuid: self.crypto.randomUUID(),
+        name: document.getElementById("new-review-name").value,
+        reviewer: document.getElementById("new-review-reviewer").value,
+        csv_file: JSON.parse(localStorage.getItem("temp")),
+        timestamp: timestamp_index,
+        returning: returning_index,
+        questions: questions,
+        scores_key: SCORES_KEY,
+        scores_min: SCORES_MIN,
+        scores_max: SCORES_MAX,
+        resume_index: 0,
+        applications: unscored_apps,
+    };
+
+    reviews.push(review);
+    localStorage.setItem("reviews", JSON.stringify(reviews));
+
+    continueReview(review);
+}
+
+function continueReview(review, applicant_index = null) {
+    if (applicant_index === null) {
+        applicant_index = review.resume_index;
+    } else {
+        review.resume_index = applicant_index;
+    }
+
+    setApplicantPage("applicant-continue-review");
+
+    // Only review applications that answered "No" to the returning question
+    let to_review = review.csv_file.data.filter(app => app[review.returning] === "No");
+
+
+    document.getElementById("continue-review-name").innerText = review.name;
+    document.getElementById("continue-review-progress").innerText = `${applicant_index + 1} / ${to_review.length}`;
+
+    const questions_el = document.getElementById("continue-review-questions");
+    removeAllChildren(questions_el);
+
+    for (let question of review.questions) {
+        let question_div = document.createElement("div");
+        question_div.classList.add("question");
+        question_div.innerText = question;
+
+        let response_div = document.createElement("div");
+        response_div.classList.add("response");
+        let response_text = to_review[applicant_index][question];
+        // Replace urls
+        response_text = replaceLinksWithA(response_text);
+
+        response_div.innerHTML = `${response_text}`;
+
+        questions_el.appendChild(question_div);
+        questions_el.appendChild(response_div);
+    }
+
+    // Now that we've rendered the questions, we need to render the scoring system
+    const scores_el = document.getElementById("continue-review-scoring");
+    removeAllChildren(scores_el);
+
+    for (let i = 0; i < SCORES_KEY.length; i++) {
+        let score_div = document.createElement("div");
+        score_div.classList.add("score");
+
+        let score_name = document.createElement("h3");
+        score_name.innerText = SCORES_KEY[i].name;
+        score_div.appendChild(score_name);
+
+        let score_info = document.createElement("p");
+        score_info.innerText = SCORES_KEY[i].info[0];
+        score_div.appendChild(score_info);
+
+        let score_slider = document.createElement("input");
+        score_slider.type = "range";
+        score_slider.min = SCORES_MIN;
+        score_slider.max = SCORES_MAX;
+        score_slider.value = review.applications[applicant_index].scores[i] ?? SCORES_MIN;
+        score_slider.oninput = () => {
+            score_info.innerText = SCORES_KEY[i].info[score_slider.value - SCORES_MIN];
+            saveReview(review, applicant_index);
+        };
+        score_div.appendChild(score_slider);
+
+        scores_el.appendChild(score_div);
+    }
+
+    // Make the review-back and review-next buttons work
+    const buttons_divs = document.getElementsByClassName("continue-review-buttons");
+
+    for (let div of buttons_divs) {
+        const buttons = div.getElementsByTagName("button");
+        buttons[0].onclick = () => {
+            if (applicant_index > 0) {
+                continueReview(saveReview(review, applicant_index - 1), applicant_index - 1);
+            }
+        }
+        buttons[1].onclick = () => {
+            if (applicant_index < to_review.length - 1) {
+
+                continueReview(saveReview(review, applicant_index + 1), applicant_index + 1);
+            }
+        }
+    }
+}
+
+function saveReview(review, applicant_index) {
+    let scores = [];
+    for (let score of document.getElementById("continue-review-scoring").getElementsByTagName("input")) {
+        scores.push(score.value);
+    }
+
+    review.applications[review.resume_index].scores = scores;
+    review.resume_index = applicant_index;
+
+    let reviews = JSON.parse(localStorage.getItem("reviews"));
+
+    for (let i = 0; i < reviews.length; i++) {
+        if (reviews[i].uuid === review.uuid) {
+            reviews[i] = review;
+            break;
+        }
+    }
+
+    localStorage.setItem("reviews", JSON.stringify(reviews));
+
+    return review;
 }
 
 function renderRedirects() {
