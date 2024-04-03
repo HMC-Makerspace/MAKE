@@ -401,3 +401,16 @@ async function signupForMailingList() {
         alert("Error: " + error.detail);
     }
 }
+
+function showWorkshops(page) {
+    for (let page of document.getElementsByClassName("workshop-container")) {
+        page.classList.add("hidden");
+    } 
+
+    for (let button of document.getElementById("workshops-selector").children) {
+        button.classList.remove("selected");
+    }
+    document.getElementById(`${page}-workshops`).classList.remove("hidden");
+    document.getElementById(`${page}-workshops-button`).classList.add("selected");
+
+}

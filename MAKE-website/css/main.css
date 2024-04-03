@@ -81,7 +81,7 @@
   --theme-color-5: #17151b;
   --theme-color-6: #bdae2e;
   --theme-color-7: #781fa1;
-  --theme-color-8: #1ec2d8;
+  --theme-color-8: #0069bc;
   --theme-color-9: #504d57;
 
   --link-color: #0ad3ee;
@@ -512,8 +512,6 @@ button.with-icon {
   gap: 10px;
 }
 
-
-
 button.only-icon {
   padding: 0px;
   width: 40px;
@@ -522,6 +520,28 @@ button.only-icon {
   align-items: center;
   justify-content: center;
   transition: background-color .1s ease-in-out, opacity .1s ease-in-out;
+}
+
+button.switch {
+
+}
+
+button.switch.selected {
+  background-color: var(--theme-color-8);
+  color: var(--text-color-main);
+}
+
+button.switch.selected:hover {
+  background-color: var(--theme-color-4);
+  color: var(--text-color-main);
+}
+
+button.switch:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+button.switch:last-child {
+  border-radius: 0 4px 4px 0;
 }
 
 input[type="checkbox"] {
@@ -2154,6 +2174,19 @@ Workshops
   justify-content: center;
   gap: 10px;
   margin: 10px;
+}
+
+#workshops-selector {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  margin-top: 20px;
+}
+
+#workshops-selector button {
+  padding: 10px 20px;
 }
 /*
 

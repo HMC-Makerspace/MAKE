@@ -10,7 +10,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>MAKE</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="css/main.css?v=2.4">
+    <link rel="stylesheet" href="css/main.css?v=2.5">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -445,16 +445,20 @@
                         
                     </div>
 
-                    <!--
                     <div id="workshops-selector">
-                        <button id="upcoming-workshops-button" class="selected" onclick="showWorkshops('upcoming')">
+                        <button id="upcoming-workshops-button" class="with-icon switch selected" onclick="showWorkshops('upcoming')">
+                            <span class="material-symbols-outlined">
+                                event_upcoming
+                            </span>
                             Upcoming Workshops
                         </button>
-                        <button id="previous-workshops-button" onclick="showWorkshops('previous')">
+                        <button id="previous-workshops-button" class="with-icon switch" onclick="showWorkshops('previous')">
+                            <span class="material-symbols-outlined">
+                                history
+                            </span>
                             Previous Workshops
                         </button>
                     </div>
-                    -->
 
 
                     <div id="upcoming-workshops" class="workshop-container">
@@ -1017,7 +1021,7 @@
 <script src="scripts/page_quiz_info.js?v=2.3"></script>
 <script src="scripts/page_schedule.js?v=2.7"></script>
 <script src="scripts/page_checkouts.js?v=2.8"></script>
-<script src="scripts/page_workshops.js?v=2.17"></script>
+<script src="scripts/page_workshops.js?v=2.18"></script>
 <!--
 <script src="scripts/page_printers.js"></script>
 -->
