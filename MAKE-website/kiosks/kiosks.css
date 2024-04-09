@@ -152,19 +152,7 @@ CHECKOUT
 #pages-select {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 20px;
   height: 60px;
-}
-
-#pages-select button {
-  background-color: var(--theme-color-1);
-  font-weight: bold;
-  font-size: 1.2em;
-}
-
-#pages-select button.selected {
-  background-color: var(--theme-color-8);
-  transition: background-color 0.05 ease-in-out;
 }
 
 #pages-content {

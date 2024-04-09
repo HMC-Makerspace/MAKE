@@ -10,7 +10,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>MAKE</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="css/main.css?v=2.5">
+    <link rel="stylesheet" href="css/main.css?v=2.6">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -160,6 +160,16 @@
                 </span>
                 <span>Student Project<br>Application</span>
             </button>
+
+            <!--
+            <button id="tour-reservation-button" onclick="setPage('tour-reservation')">
+                <span class="material-symbols-outlined">
+                    event
+                </span>
+                <span>Tours<br>& Reservations</span>
+            </button>
+            -->
+            
             <button id="values-button" onclick="setPage('values')">
                 <span class="material-symbols-outlined">
                     partner_exchange
@@ -340,14 +350,19 @@
                     </div>
 
                     <h3>Your Shifts</h3>
-                    <div id="steward-shifts">
 
-                    </div>
+                    <button id="view-previous-shift-changes" class="big with-icon" onclick="showPreviousShiftChanges(this)">
+                        Previous Shift Changes</button>
+
+
+                    <table id="steward-shifts">
+
+                    </table>
 
                     <h3>Available Shifts</h3>
-                    <div id="steward-available-shifts">
+                    <table id="steward-available-shifts">
 
-                    </div>
+                    </table>
 
                     <h3>Your Proficiencies</h3>
                     <div id="steward-proficiencies">
@@ -648,6 +663,19 @@
 
         <!--
 
+        TOUR RESERVATION PAGE
+
+        -->
+
+        <section id="page-tour-reservation" class="main-content hidden">
+            <div class="content-container">
+                <div id="tour-reservation-content" class="content-body">
+                </div>
+            </div>
+        </section>  
+
+        <!--
+
         INFO & FAQ PAGE
 
         -->
@@ -913,7 +941,7 @@
 
                 <label for="restock-quantity">Quantity</label>
                 <input type="text" id="restock-quantity" name="restock-quantity" aria-label="Quantity"
-                    placeholder="Quantity...">
+                    placeholder="Put ? if not known">
 
                 <p>
                     You will receive an email when your request has been processed.
@@ -1000,10 +1028,21 @@
                 <div class="edit-buttons">
                     <button id="rsvp-list-cancel" onclick="closePopup()">Close</button>
                 </div>
+            </div>
 
+            <div id="previous-shift-changes" class="hidden">
+                <h2>Previous Shift Changes</h2>
+                
+                <div id="previous-shift-changes-container">
+                    <table id="previous-shift-changes-details"></table>
+                </div>
+
+                <div class="edit-buttons">
+                    <button id="previous-shift-changes-cancel" onclick="closePopup()">Close</button>
+                </div>
             </div>
         </div>
-
+    </div>
 </body>
 <script src="scripts/prelude.js?v=2.4"></script>
 
@@ -1015,11 +1054,11 @@
 <script src="scripts/page_settings.js?v=2.2"></script>
 
 <script src="scripts/page_home.js?v=2.8"></script>
-<script src="scripts/page_stewards.js?v=2.8"></script>
+<script src="scripts/page_stewards.js?v=2.9"></script>
 <script src="scripts/page_inventory.js?v=2.4"></script>
 <script src="scripts/page_student_storage.js?v=2.3"></script>
 <script src="scripts/page_quiz_info.js?v=2.3"></script>
-<script src="scripts/page_schedule.js?v=2.7"></script>
+<script src="scripts/page_schedule.js?v=2.8"></script>
 <script src="scripts/page_checkouts.js?v=2.8"></script>
 <script src="scripts/page_workshops.js?v=2.18"></script>
 <!--
@@ -1027,6 +1066,7 @@
 -->
 <script src="scripts/page_faq.js?v=2.3"></script>
 <script src="scripts/page_equipment.js?v=2.4"></script>
+<script src="scripts/page_tour_reservation.js?v=2.0"></script>
 <script src="scripts/page_values.js?v=2.2"></script>
 <script src="scripts/page_error.js?v=2.2"></script>
 

@@ -151,22 +151,29 @@ function generateProficiencyDivs(proficiencies) {
         return a.localeCompare(b);
     });
 
-    for (let proficiency of proficiencies_sorted) {
-        let el = document.createElement("span");
-        el.classList.add("proficiency");
-        el.classList.add("trigger");
+    for (let i = 0; i < 4; i++) {
+        let row = document.createElement("div");
+        row.classList.add("proficiency-row");
 
-        // to lowercase, remove spaces, remove numbers
-        const css_safe_prof = toCSSSafeString(proficiency);
-        el.classList.add(css_safe_prof);
-        el.innerText = proficiency;
+        for (let j = 0; j < 4; j++) {
+            let prof = proficiencies_sorted[i * 4 + j];
 
-        el.addEventListener("click", () => {
-            removeHighlightProficiency();
-            highlightProficiency(proficiency);
-        })
+            let prof_div = document.createElement("button");
+            prof_div.classList.add("switch");
+            prof_div.classList.add("trigger");
+            prof_div.classList.add("proficiency");
+            prof_div.classList.add(toCSSSafeString(prof));
+            prof_div.innerText = prof;
+        
+            prof_div.addEventListener("click", () => {
+                removeHighlightProficiency();
+                highlightProficiency(prof);
+            });
 
-        profs.push(el);
+            row.appendChild(prof_div);
+        }
+
+        profs.push(row);
     }
 
     return profs;

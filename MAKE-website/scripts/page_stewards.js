@@ -223,20 +223,26 @@ async function populateStewardPage() {
     shifts = await shifts;
     let all_changes = await changes;
 
-    let today = new Date();
-    today.setDate(today.getDate() - 1);
+    let now = new Date();
+    now.setDate(now.getDate() - 1);
 
     let my_changed_shifts = all_changes.filter((change) => {
         if (change.is_pickup && change.steward == state.user_object.uuid) {
             // Only return shifts that are today or in the future
             let change_date = new Date(change.date);
 
-            return change_date >= today;
+            return change_date >= now;
         }
     });
 
     let shift_container = document.getElementById("steward-shifts");
     let divs = [];
+    
+    let header = document.createElement("tr");
+    header.innerHTML = "<th>Shift</th><th>Partner</th><th>Drop</th>";
+    
+    divs.push(header);
+
     for (let shift of shifts) {
        divs.push(await generateShiftDiv(shift));
     }
@@ -260,7 +266,7 @@ async function populateStewardPage() {
         // Only show changes that are today or in the future
         let change_date = new Date(change.date);
 
-        return change_date >= today;
+        return change_date >= now;
     });
 
     // Now, hide all shifts that are drops but have a correspoding pickup
@@ -284,7 +290,12 @@ async function populateStewardPage() {
     });
 
     let available_shifts = document.getElementById("steward-available-shifts");
+    header = document.createElement("tr");
+    header.innerHTML = "<th>Shift</th><th>Dropped by</th><th>Pickup</th>";
     divs = [];
+
+    divs.push(header);
+
     for (let change of drop_changes) {
         divs.push(await generateShiftChangeDiv(change));
     }
@@ -304,7 +315,7 @@ async function populateStewardPage() {
     divs = [];
 
     // Create header row
-    const header = document.createElement("tr");
+    header = document.createElement("tr");
     header.innerHTML = "<th>Time</th>";
 
     for (let day of DAYS) {
@@ -377,63 +388,61 @@ async function generateShiftDiv(shift, change=false) {
         }
     }
 
-    let shift_div = document.createElement("div");
-    shift_div.classList.add("steward-shift-container");
+    let shift_div = document.createElement("tr");
 
-    let shift_time_date = document.createElement("div");
-    shift_time_date.classList.add("steward-shift-time-date");
+    let shift_time_date = document.createElement("td");
 
     if (change) {
-        shift_time_date.innerText = `(${shift.date}) `;
+        shift_time_date.innerHTML = `(${shift.date}) <br>`;
     }
-    shift_time_date.innerText += `${shift.day} - ${shift.timestamp_start} to ${shift.timestamp_end}`;
+    shift_time_date.innerHTML += `${shift.day} <br> ${shift.timestamp_start} to ${shift.timestamp_end}`;
 
-    let shift_stewards = document.createElement("div");
-    shift_stewards.classList.add("steward-shift-stewards");
+    let shift_stewards = document.createElement("td");
 
     if (change) {
-        shift_stewards.innerText = `Shift Change: ${shift.is_drop ? "Dropped" : "Picked Up"}`;
+        shift_stewards.innerText = `Shift Change: ${shift.is_drop ? "Drop" : "Pickup"}`;
     } else {
         let s = stewards.length != 1 ? "s" : "";
-        shift_stewards.innerText = `Shift partner${s}: `;
         for (let i = 0; i < stewards.length; i++) {
-            shift_stewards.innerText += `${stewards[i].name} (${stewards[i].email})`;
+            shift_stewards.innerHTML += `${stewards[i].name} (${stewards[i].email})`;
             if (i != stewards.length - 1) {
-                shift_stewards.innerText += ", ";
+                shift_stewards.innerHTML += "<br>";
             }
         }
     }
     
 
+    let shift_drop_container = document.createElement("td");
+
     let shift_drop_button = document.createElement("button");
-    shift_drop_button.classList.add("steward-shift-drop-button");
+    shift_drop_button.classList.add("with-icon");
+
     if (change) {
-        shift_drop_button.innerText = "Cancel Shift Change";
+        shift_drop_button.innerHTML = "<span class='material-symbols-outlined'>undo</span>Cancel";
         shift_drop_button.onclick = async () => cancelShiftChange(shift);
     } else {
-        shift_drop_button.innerText = "Drop A Shift";
+        shift_drop_button.innerHTML = "<span class='material-symbols-outlined'>move_down</span>Drop";
         shift_drop_button.onclick = async () => dropShift(shift);
     }
+    shift_drop_container.appendChild(shift_drop_button);
 
     shift_div.appendChild(shift_time_date);
     shift_div.appendChild(shift_stewards);
-    shift_div.appendChild(shift_drop_button);
+    shift_div.appendChild(shift_drop_container);
 
     return shift_div;
 }
 
 async function generateShiftChangeDiv(change) {
-    let shift_div = document.createElement("div");
-    shift_div.classList.add("shift-change-container");
+    let shift_div = document.createElement("tr");
 
-    let shift_time_date = document.createElement("div");
-    shift_time_date.classList.add("time-date");
+    let shift_time_date = document.createElement("td");
+
     let date = new Date(change.date + "T00:00:00-08:00");
-    shift_time_date.innerText = `(${change.date}) ${DAYS[date.getDay()]} - ${change.timestamp_start} to ${change.timestamp_end}`;
+    shift_time_date.innerHTML = `(${change.date}) <br> ${DAYS[date.getDay()]} <br> ${change.timestamp_start} to ${change.timestamp_end}`;
     shift_div.appendChild(shift_time_date);
 
-    let dropped_by = document.createElement("div");
-    dropped_by.classList.add("dropped-by");
+    let dropped_by = document.createElement("td");
 
     let dropped_by_response = await fetch(`${API}/users/get_user/${change.steward}`);
 
@@ -445,18 +454,209 @@ async function generateShiftChangeDiv(change) {
 
     shift_div.appendChild(dropped_by);
 
+    let shift_change_container = document.createElement("td");
     let shift_change_button = document.createElement("button");
-    shift_change_button.classList.add("pickup-shift-button");
+    shift_change_button.classList.add("with-icon");
 
     if (change.steward === state.user_object.uuid) {
-        shift_change_button.innerText = "Cancel Drop";
+        shift_change_button.innerHTML = "<span class='material-symbols-outlined'>undo</span>Cancel";
         shift_change_button.onclick = async () => cancelShiftChange(change);
     } else {
-        shift_change_button.innerText = "Pick Up Shift";
+        shift_change_button.innerHTML = "<span class='material-symbols-outlined'>move_up</span>Pickup";
         shift_change_button.onclick = async () => pickUpShift(change);
     }
 
-    shift_div.appendChild(shift_change_button);
+    shift_change_container.appendChild(shift_change_button);
+    shift_div.appendChild(shift_change_container);
+
+    return shift_div;
+}
+
+async function showPreviousShiftChanges() {
+    document.getElementById("view-previous-shift-changes").setAttribute("disabled", "disabled");
+
+    const table = document.getElementById("previous-shift-changes-details");
+
+    // Show previous 10 shift changes with button to show more
+    let sorted_shifts = await fetchShiftChanges();
+
+    sorted_shifts.sort((a, b) => {
+        let a_date = new Date(a.date);
+        let b_date = new Date(b.date);
+
+        if (a.date == b.date) {
+            console.log(a, b);
+            // Sort by having drops first
+            if (a.is_drop && !b.is_drop) {
+                return 1;
+            } else if (!a.is_drop && b.is_drop) {
+                return -1;
+            } else {
+                // Sort by time
+                let a_time = new Date(a.date + "T" + a.timestamp_start);
+                let b_time = new Date(b.date + "T" + b.timestamp_start);
+
+                if (a_time < b_time) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }
+        }
+
+        if (a_date < b_date) {
+            return 1;
+        } else {
+            return -1;
+        }
+    });
+
+    let divs = [];
+
+    let header = document.createElement("tr");
+    header.innerHTML = "<th>Shift</th><th>Partner</th><th>Pickup/Drop</th>";
+    divs.push(header);
+
+    for (let i = 0; i < 10; i++) {
+        if (i >= sorted_shifts.length) {
+            break;
+        }
+
+        divs.push(await createShiftChangeDiv(sorted_shifts[i]));
+    }
+
+    // Create button that loads 10 more shifts
+    let button_row = document.createElement("tr");
+    button_row.id = "load-more-shifts";
+
+    let button_container = document.createElement("td");
+    button_container.colSpan = 3;
+    button_container.style.textAlign = "center";
+
+    let button = document.createElement("button");
+    button.classList.add("with-icon");
+    button.innerHTML = "<span class='material-symbols-outlined'>expand_more</span>Load more";
+    button.onclick = async () => {
+        const btn = document.getElementById("load-more-shifts");
+        btn.setAttribute("disabled", "disabled");
+
+        const table = document.getElementById("previous-shift-changes-details");
+
+        // Count number of divs, remove one for header
+        let shifts = table.querySelectorAll("tr").length - 1;
+
+        let divs = [];
+
+        for (let i = shifts; i < shifts + 10; i++) {
+            if (i >= sorted_shifts.length) {
+                break;
+            }
+
+            divs.push(await createShiftChangeDiv(sorted_shifts[i]));
+        }
+
+        appendChildren(table, divs);
+
+        // Move button to the end
+        table.appendChild(btn);
+
+        btn.removeAttribute("disabled");
+    }
+
+    button_container.appendChild(button);
+    button_row.appendChild(button_container);
+    divs.push(button_row);
+
+    removeAllChildren(table);
+    appendChildren(table, divs);
+
+    document.getElementById("view-previous-shift-changes").removeAttribute("disabled");
+
+
+    showPopup("previous-shift-changes");
+}
+
+async function createShiftChangeDiv(shift) {
+    let shift_div = document.createElement("tr");
+
+        /*
+        let div = document.createElement("div");
+        div.classList.add("shift-change-list-item");
+        
+        let date = document.createElement("div");
+        date.classList.add("shift-change-list-item-date");
+        date.innerText = `${change.date} @ ${change.timestamp_start} - ${change.timestamp_end}`;
+        div.appendChild(date);
+
+        let name = document.createElement("div");
+        name.classList.add("name");
+        // Get steward uuid from change and find steward
+        let steward = all_stewards.find(steward => steward.uuid === change.steward) ?? {name: "Unknown steward", email: "Unknown steward", cx_id: "Unknown steward"};
+        name.innerText = steward.name;
+        div.appendChild(name);
+
+        let cx_id = document.createElement("div");
+        cx_id.classList.add("cx_id");
+        cx_id.innerText = steward.cx_id;
+        div.appendChild(cx_id);
+
+        let email = document.createElement("div");
+        email.classList.add("email");
+        email.innerText = steward.email;
+        div.appendChild(email);
+
+        let drop_or_pickup = document.createElement("div");
+        drop_or_pickup.classList.add("drop-or-pickup");
+        drop_or_pickup.classList.add(change.is_drop ? "drop" : "pickup");
+        drop_or_pickup.innerText = change.is_drop ? "Drop" : "Pickup";
+        div.appendChild(drop_or_pickup);
+
+        divs.push(div);
+
+        {
+            date: "2023-09-13"
+​​
+            is_drop: true
+            ​​
+            is_pickup: false
+            ​​
+            steward: "bad6e0b0c37943dc8a7c4e47e6aee1b0"
+            ​​
+            timestamp_end: "3:00 PM"
+            ​​
+            timestamp_start: "2:00 PM"
+            ​​
+            uuid: "b36ff032-3a78-497a-809e-38b45d01e1bf"
+        }
+        */
+
+    let shift_time_date = document.createElement("td");
+    shift_time_date.innerHTML = `(${shift.date}) <br> ${DAYS[new Date(shift.date + "T00:00:00-08:00").getDay()]} <br> ${shift.timestamp_start} to ${shift.timestamp_end}`;
+
+    let shift_steward = document.createElement("td");
+
+    let steward_response = await fetch(`${API}/users/get_user/${shift.steward}`);
+
+    if (steward_response.status == 200) {
+        let steward = await steward_response.json();
+
+        shift_steward.innerText = `${steward.name} (${steward.email})`;
+    } else {
+        shift_steward.innerText = "Unknown steward";
+    }
+    
+
+    let shift_pickup_drop = document.createElement("td");
+
+    if (shift.is_pickup) {
+        shift_pickup_drop.innerText = "Pickup";
+    } else {
+        shift_pickup_drop.innerText = "Drop";
+    }
+
+    shift_div.appendChild(shift_time_date);
+    shift_div.appendChild(shift_steward);
+    shift_div.appendChild(shift_pickup_drop);
 
     return shift_div;
 }

@@ -523,7 +523,9 @@ button.only-icon {
 }
 
 button.switch {
-
+  border-radius: unset;
+  border-left: 1px solid var(--theme-color-5);
+  border-right: 1px solid var(--theme-color-5);
 }
 
 button.switch.selected {
@@ -538,10 +540,12 @@ button.switch.selected:hover {
 
 button.switch:first-child {
   border-radius: 4px 0 0 4px;
+  border-left: unset;
 }
 
 button.switch:last-child {
   border-radius: 0 4px 4px 0;
+  border-right: unset;
 }
 
 input[type="checkbox"] {
@@ -1483,9 +1487,12 @@ table th{
 padding: 4px;
 }
 
+table tr {
+  font-size: 14px;
+}
+
 table tr:first-child {
   height: 60px;
-  font-size: 14px;
   top: 20px;
   position: sticky;
 }
@@ -1496,6 +1503,10 @@ table tr:nth-child(odd) {
 
 table tr:nth-child(even) {
   background-color: var(--theme-color-3);
+}
+
+table tr td button {
+  margin: 0 auto;
 }
 
 #schedule-help {
@@ -1618,20 +1629,10 @@ table tr:nth-child(even) {
   cursor: pointer;
 }
 
-.proficiency {
-}
-
-.proficiency.trigger {
-  user-select: none;
-  cursor: pointer;
-  padding: 8px;
-  background-color: var(--theme-color-4);
-  color: var(--text-color-main);
-}
 
 .highlight {
   background-color: var(--theme-color-8) !important;
-  color: var(--text-color-alt) !important;
+  color: var(--text-color-main) !important;
 
 }
 
@@ -1641,9 +1642,15 @@ table tr:nth-child(even) {
 
 #schedule-info {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr;
   row-gap: 10px;
-  column-gap: 10px;
+}
+
+.proficiency-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  min-height: 40px;
 }
 /* 
 
@@ -1868,7 +1875,8 @@ FAQ
 #settings-content,
 #values-content,
 #error-content,
-#about-faq-content {
+#about-faq-content,
+#tour-reservation-content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2284,10 +2292,11 @@ STEWARD RESOURCES
 }
 
 #steward-resources h3 {
-  font-size: 2em;
+  font-size: 1.5em;
   font-weight: bold;
   width: 100%;
   padding: unset;
+  padding-bottom: 8px;
   border-bottom: solid 2px var(--theme-color-9);
 }
 
@@ -2315,12 +2324,19 @@ STEWARD RESOURCES
 
 }
 
-#steward-shifts {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  row-gap: 20px;
+#steward-shifts, #steward-available-shifts {
+  font-size: 14px;
+}
+
+#steward-shifts button, #steward-available-shifts button {
+  margin: 0 auto;
+  width: 100px;
+  font-size: 12px;
+}
+
+#previous-shift-changes-container {
+  max-height: 50vh;
+  overflow-y: scroll;
 }
 
 .steward-shift-container, .shift-change-container {
@@ -2502,7 +2518,8 @@ Mobile Styles
     overflow-y: scroll;
   }
 
-  .content-header {
+  .content-header p3 {
+    width: 100%;
   }
 
   .content-body {
@@ -2680,11 +2697,7 @@ Mobile Styles
 
   table tr {
     max-width: 90vw;
-  }
-
-  table tr, table td:first-child, table th:first-child {
-    font-size: .8em !important;
-    height: unset !important;
+    font-size: 12px;
   }
 
   #quick-transfer { 

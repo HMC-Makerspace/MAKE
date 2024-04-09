@@ -22,8 +22,8 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0" />
 
-    <link rel="stylesheet" href="/css/main.css?v=2.0">
-    <link rel="stylesheet" href="/kiosks/kiosks.css?v=2.0">
+    <link rel="stylesheet" href="/css/main.css?v=2.1">
+    <link rel="stylesheet" href="/kiosks/kiosks.css?v=2.1">
 </head>
 
 <body>
@@ -51,9 +51,24 @@
 
         <div id="pages">
             <div id="pages-select">
-                <button id="select-inventory-button" class="selected" onclick="setPage('inventory')">Inventory</button>
-                <button id="select-checkout-button" onclick="setPage('checkout')">Checkouts</button>
-                <button id="select-users-button" onclick="setPage('users')">Users</button>
+                <button id="select-inventory-button" class="switch with-icon selected" onclick="setPage('inventory')">
+                    <span class="material-symbols-outlined">
+                        inventory_2
+                    </span>
+                    Inventory
+                </button>
+                <button id="select-checkout-button" class="switch with-icon" onclick="setPage('checkout')">
+                    <span class="material-symbols-outlined">
+                        shopping_cart
+                    </span>
+                    Checkouts
+                </button>
+                <button id="select-users-button" class="switch with-icon" onclick="setPage('users')">
+                    <span class="material-symbols-outlined">
+                        people
+                    </span>
+                    Users
+                </button>
             </div>
 
             <div id="main-content">
@@ -109,6 +124,23 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="popup-container" class="hidden">
+        <div id="popup-background" onclick="closePopup()"></div>
+        <div id="popup-content">
+            <div id="checkout-access-level" class="hidden">
+                <h2>Attendees</h2>
+
+                <table id="attendees-table">
+
+                </table>
+
+                <div class="edit-buttons">
+                    <button id="restock-cancel" onclick="closePopup()">Close</button>
+                </div>
+            </div>
+        </div>  
     </div>
 
     <script src="/scripts/libs/fuzzysort.min.js"></script>
