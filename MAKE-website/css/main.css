@@ -1431,7 +1431,7 @@ Checkouts
   align-items: center;
   justify-content: flex-start;
   width: 400px;
-  gap: 10px;
+  gap: 4px;
   flex-wrap: wrap;
   background-color: unset;
   height: unset;
