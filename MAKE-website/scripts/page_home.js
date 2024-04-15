@@ -140,7 +140,10 @@ async function openFilesPopup() {
         // Use file.timestamp to calculate the expiration date
         let timestamp = new Date(file.timestamp * 1000);
         let expiration_date = new Date(timestamp.getTime() + 7 * 24 * 60 * 60 * 1000);
-        let time_left = timeLeft(timestamp, expiration_date);
+
+        let now = new Date();
+
+        let time_left = timeLeft(now, expiration_date);
 
         date.innerHTML = `${time_left}`;
         div.appendChild(date);
@@ -192,13 +195,13 @@ function timeLeft(date_start, date_end) {
     // Calculate the time left between two dates, either in days, hours, or minutes
     const diff = date_end - date_start;
 
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor(diff / (1000 * 60));
+    const days = Math.round(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.round(diff / (1000 * 60 * 60));
+    const minutes = Math.round(diff / (1000 * 60));
 
-    if (days > 0) {
+    if (days > 1) {
         return `${days} days`;
-    } else if (hours > 0) {
+    } else if (hours > 1) {
         return `${hours} hours`;
     } else {
         return `${minutes} minutes`;
