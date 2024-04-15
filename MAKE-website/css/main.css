@@ -1495,6 +1495,7 @@ table tr:first-child {
   height: 60px;
   top: 20px;
   position: sticky;
+  box-shadow: #00000033 0px 5px 5px;
 }
 
 table tr:nth-child(odd) {

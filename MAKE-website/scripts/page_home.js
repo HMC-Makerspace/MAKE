@@ -206,37 +206,16 @@ function timeLeft(date_start, date_end) {
 }
 
 async function fetchAndDownload(uuid) { 
-    const request = await fetch(`${API}/users/download_file/${uuid}`); 
+    const request_url = `${API}/users/download_file/${uuid}`;
   
-    const file = await request.blob(); 
-    let contentDisposition = request.headers.get("content-disposition");
-    let name = "";
-    
-    if (contentDisposition) {
-        const fileNameMatch = contentDisposition.match(/filename\*?=['"]*(?:UTF-8'')?([^"';]*)['"]?;?/i);
-        if (fileNameMatch.length > 1) {
-            name = decodeURIComponent(fileNameMatch[1]);
-        }
-    }
-    
-    // Ensure name is not empty and does not end with an underscore
-    if (name && name.endsWith("_")) { 
-        name = name.slice(0, -1); 
-    } 
-  
-    if(name) {
-        const element = document.createElement("a"); 
-        element.setAttribute("href", URL.createObjectURL(file)); 
-        element.setAttribute("download", name);
+    const element = document.createElement("a"); 
+    element.setAttribute("href", request_url); 
+    element.setAttribute("download", "");
 
-        element.style.display = "none"; 
-        document.body.appendChild(element); 
+    element.style.display = "none"; 
+    document.body.appendChild(element); 
 
-        element.click(); 
-    } else {
-        console.error("Failed to extract filename.");
-        alert("Error: could not retreive filename")
-    }
+    element.click(); 
 }
 
 
