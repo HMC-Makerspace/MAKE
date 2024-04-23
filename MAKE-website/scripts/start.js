@@ -55,13 +55,13 @@ async function start() {
         }
         removeHighlightProficiency();
     });
-
-    // Await all promises
-    await Promise.all(promises);
-
+        
     // Hide fader
     document.getElementById("fader").classList.add("fade-out");
     document.getElementById("main-title-ani").classList.add("show");
+
+    // Await all promises
+    await Promise.all(promises);
 }
 
 async function fetchQuizzes() {
