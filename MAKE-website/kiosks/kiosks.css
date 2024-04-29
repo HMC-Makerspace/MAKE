@@ -808,7 +808,7 @@ table#proficiencies-list td.proficiency-cell {
   text-align: center;
 }
 
-#create-new-workshop-button, #create-new-redirect-button {
+#create-new-workshop-button, #create-new-redirect-button, #clear-availability-button {
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -214,6 +214,38 @@ async def route_update_user_by_uuid(request: Request):
     # Return success
     return
 
+@user_router.post("/clear_all_availability", status_code=201)
+async def route_clear_all_availability(request: Request):
+    # Update a user's role
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Clearing availability for all users...")
+
+    db = MongoDB()
+
+    # Get the users collection
+    collection = await db.get_collection("users")
+
+    # Get all users
+    users = await collection.find().to_list(None)
+
+    for user in users:
+        if "availability" not in user:
+            continue
+
+        # Delete the availability
+        del user["availability"]
+
+        try :
+            user = User(**user)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail="Invalid user data") from e
+        
+        # Update the user
+        await collection.replace_one({"uuid": user.uuid}, user.dict())
+
+    # Return success
+    return
+
 @user_router.post("/get_file_list", status_code=201)
 async def route_get_file_list(request: Request):
     # Get a user's file list

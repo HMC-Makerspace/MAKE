@@ -1396,8 +1396,16 @@ function generateWorkshopDivsAdmin() {
 
             let is_live = document.createElement("td");
             is_live.classList.add("workshop-is_live");
-            is_live.classList.add(workshop.is_live ? "published" : "unpublished");
-            is_live.innerHTML = workshop.is_live ? "<span class='material-symbols-outlined'>published_with_changes</span>" : "<span class='material-symbols-outlined'>unpublished</span>";
+
+            if (workshop.is_live_timestamp !== null) {
+                // Not live yet, but show the timestamp when it will go live
+                is_live.classList.add("scheduled");
+                is_live.innerText = new Date(workshop.is_live_timestamp * 1000).toLocaleString();
+            } else {
+                is_live.classList.add(workshop.is_live ? "published" : "unpublished");
+                is_live.innerHTML = workshop.is_live ? "<span class='material-symbols-outlined'>published_with_changes</span>" : "<span class='material-symbols-outlined'>unpublished</span>";
+            }
+
             div.appendChild(is_live);
 
             let rsvp_list = document.createElement("td");
@@ -2719,4 +2727,30 @@ function downloadMailchimp() {
 
     // Now download the file
     downloadFile(`${formatted_date}-mailchimp.csv`, csv);
+}
+
+async function clearAvailability() {
+    let result = prompt("Type 'clear' to confirm clearing all availability");
+
+    if (result !== "clear") {
+        return;
+    }
+
+    let request = await fetch(`${API}/users/clear_all_availability`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+        }
+    );
+
+    if (request.status == 201) {
+        fetchUsers().then(() => {
+            submitUserSearch(editable = true);
+        });
+    } else {
+        console.log("Error clearing availability");
+    }
 }

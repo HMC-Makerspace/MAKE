@@ -185,6 +185,8 @@
                 </p>
             </div>
 
+            <button id="clear-availability-button" onclick="clearAvailability()">Clear All Availability</button>
+
             <div class="content-body">
                 <div id="steward-availability-container">
                     <table id="steward-availability"></table>
@@ -496,6 +498,9 @@
                 <div class="checkbox-container">
                     <input id="edit-workshop-is_live" type="checkbox">
                     <label for="edit-workshop-is_live"><b>Live on MAKE</b></label>
+
+                    <input id="edit-workshop-is_live_timestamp" type="datetime">
+                    <label for="edit-workshop-is_live_timestamp">Live Timestamp</label>
                 </div>
 
 
@@ -636,7 +641,7 @@
     <script src="/scripts/page_schedule.js?v=2.3"></script>
     <script src="/scripts/utils.js?v=2.5"></script>
 
-    <script src="/kiosks/scripts/management.js?v=2.25"></script>
+    <script src="/kiosks/scripts/management.js?v=2.26"></script>
 </body>
 
 </html>
