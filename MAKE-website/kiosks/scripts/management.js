@@ -86,6 +86,15 @@ async function authenticate() {
         alert("No API key provided.");
     }
 
+    const page = params.get('p');
+
+    // Remove api key from url, but keep the rest of the url
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+    if (page !== null) {
+        setPage(page);
+    }
+
     // Fetch api scope
     const response = await fetch(`${API}/misc/api_key_scope`,
         {
@@ -109,8 +118,7 @@ async function authenticate() {
         alert("Invalid API key.");
     }
 
-    // Remove api key from url, but keep the rest of the url
-    window.history.replaceState({}, document.title, window.location.pathname);
+
 
     // Save api key to local storage
     localStorage.setItem('admin_api_key', api_key);
