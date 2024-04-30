@@ -7,3 +7,4 @@ levenshtein==0.20.9
 discord.py==2.2.3
 pillow==9.5.0
 python-multipart==0.0.6
+pydantic==1.10.12
