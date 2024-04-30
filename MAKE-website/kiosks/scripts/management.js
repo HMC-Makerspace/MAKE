@@ -131,15 +131,19 @@ async function authenticate() {
     });
 
     setInterval(fetchUsers, 5000);
+    
+    const promises = [
+        fetchInventory(kiosk_mode = true),
+        fetchUsers(),
+        fetchShiftsAdmin(),
+        fetchShiftChangesAdmin(),
+        fetchWorkshopsAdmin(),
+        fetchRestockRequests(),
+        fetchCheckoutsAdmin(),
+        fetchRedirectsAdmin()
+    ];
 
-    await fetchInventory(kiosk_mode = true);
-    await fetchUsers();
-    await fetchShiftsAdmin();
-    await fetchShiftChangesAdmin();
-    await fetchWorkshopsAdmin();
-    await fetchRestockRequests();
-    await fetchCheckoutsAdmin();
-    await fetchRedirectsAdmin();
+    await Promise.all(promises);
 
     for (let key of Object.keys(state.users)) {
         state.users[key].cx_id_str = `${state.users[key].cx_id}`;
