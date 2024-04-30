@@ -524,6 +524,7 @@ class Workshop(BaseModel):
     rsvp_list: List[str]
     sign_in_list: Union[List[str], None]
     is_live: bool
+    is_live_timestamp: Union[str, None]
     users_notified: Union[List[str], None]
     photos: Union[List[str], None]
 

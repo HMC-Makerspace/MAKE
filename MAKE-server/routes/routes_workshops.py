@@ -322,7 +322,6 @@ async def route_sign_in_to_workshop(request: Request):
 
     return
 
-@workshops_router.post("/cancel_sign_in", status_code=201)
 
 @workshops_router.post("/send_custom_workshop_email", status_code=201)
 async def route_send_custom_workshop_email(request: Request):

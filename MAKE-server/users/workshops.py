@@ -82,3 +82,35 @@ async def send_workshop_reminders():
         # Update the workshop
         await collection.replace_one({"uuid": workshop["uuid"]}, workshop)
         
+
+async def update_workshops_live_status():
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Updating workshop live status...")
+
+    # Update workshop live status
+    # Get the workshops collection
+    db = MongoDB()
+
+    # Get the collection
+    collection = await db.get_collection("workshops")
+
+    # Get all workshops that aren't live yet, with a is_live_timestamp not None
+    # and is_live_timestamp < now
+    workshops = await collection.find({
+        "is_live": False,
+        "is_live_timestamp": {"$ne": None},
+    }).to_list(None)
+
+    for workshop in workshops:
+        workshop_live_time = float(workshop["is_live_timestamp"])
+
+        if workshop_live_time < datetime.now().timestamp():
+            # The workshop is now live
+            workshop["is_live"] = True
+            
+            # Set the is_live_timestamp to None
+            workshop["is_live_timestamp"] = None
+
+            # Update the workshop
+            await collection.replace_one({"uuid": workshop["uuid"]}, workshop)
+            logging.info(f"Workshop {workshop['title']} is now live!")

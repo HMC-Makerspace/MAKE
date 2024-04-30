@@ -145,14 +145,15 @@ async function authenticate() {
 
     await Promise.all(promises);
 
+    setInterval(renderAll(), 5000);
+    renderAll();
+
     for (let key of Object.keys(state.users)) {
         state.users[key].cx_id_str = `${state.users[key].cx_id}`;
     }
 
     submitUserSearch(editable = true);
 
-    setInterval(renderAll(), 5000);
-    renderAll();
 }
 
 authenticate();
@@ -1699,6 +1700,14 @@ function showCreateEditWorkshop(uuid) {
         time_start = new Date(time_start).toISOString().split(".")[0];
         time_end = new Date(time_end).toISOString().split(".")[0];
 
+        let is_live_timestamp = workshop.is_live_timestamp;
+        if (is_live_timestamp) {
+            // Offset for Pacific time
+            is_live_timestamp = new Date(is_live_timestamp * 1000) - pacific_offset;
+            document.getElementById("edit-workshop-is_live_timestamp").value = new Date(is_live_timestamp).toISOString().split(".")[0];                        
+        }
+
+
         document.getElementById("edit-workshop-title").value = workshop.title;
         document.getElementById("edit-workshop-description").value = workshop.description;
         document.getElementById("edit-workshop-instructors").value = workshop.instructors;
@@ -1720,6 +1729,7 @@ function showCreateEditWorkshop(uuid) {
         removeAllChildren(photos, keep_first_n = 1);
         appendChildren(photos, generateWorkshopPhotoDivs(workshop));
     } else {
+        document.getElementById("edit-workshop-is_live_timestamp").value = "";
         document.getElementById("edit-workshop-title").value = "";
         document.getElementById("edit-workshop-description").value = "";
         document.getElementById("edit-workshop-instructors").value = "";
@@ -1882,6 +1892,13 @@ async function saveWorkshop(uuid = null) {
         }
     }
 
+    let is_live_timestamp = document.getElementById("edit-workshop-is_live_timestamp").value;
+
+    if (is_live_timestamp) {
+        is_live_timestamp = new Date(is_live_timestamp).getTime() / 1000;
+    } else {
+        is_live_timestamp = null;
+    }
 
     let workshop_obj = {
         uuid: uuid,
@@ -1895,6 +1912,7 @@ async function saveWorkshop(uuid = null) {
         rsvp_list: [],
         required_quizzes: required_quizzes,
         photos: workshop ? workshop.photos ?? [] : [],
+        is_live_timestamp: is_live_timestamp,
     };  
 
     let request = await fetch(`${API}/workshops/update_workshop`,

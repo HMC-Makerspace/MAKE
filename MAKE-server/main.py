@@ -42,7 +42,7 @@ from routes.routes_workshops import workshops_router
 # Import all other files
 from users.quizzes import scrape_quiz_results
 from users.users import cleanup_user_files, create_update_users_from_quizzes
-from users.workshops import send_workshop_reminders
+from users.workshops import send_workshop_reminders, update_workshops_live_status
 from inventory.checkouts import send_overdue_emails
 from inventory.inventory import update_inventory_from_checkouts
 
@@ -214,6 +214,9 @@ class BackgroundRunner:
                 # Send email reminders for workshops
                 await send_workshop_reminders()
 
+                # Check to see if workshops need to go live
+                await update_workshops_live_status()
+
                 # Free up files in user storage
                 await cleanup_user_files()
 
@@ -226,7 +229,6 @@ class BackgroundRunner:
                 # Wait 1 minute before trying again
                 await asyncio.sleep(60)
 
-        
 
 
 runner = BackgroundRunner()
