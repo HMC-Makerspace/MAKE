@@ -8,8 +8,6 @@ from db_schema import MongoDB, QuizResponse, RestockRequest
 from config import *
 from uuid import uuid4
 
-SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTzvLVGN2H5mFpQLpstQyT5kgEu1CI8qlhY60j78mO0LQgDnTHs_ZKx39xiIO1h-w09ZXyOZ5GqOf5q/pub?gid=0&single=true&output=csv"
-
 
 async def update_inventory_from_checkouts():
     # Update the inventory from the checkouts
@@ -44,18 +42,19 @@ async def update_inventory_from_checkouts():
             item["quantity_available"] = item["quantity_total"]
         else:
             if item["uuid"] in uuid_dict:
-                item["quantity_available"] = item["quantity_total"] - uuid_dict[item["uuid"]]
+                item["quantity_available"] = (
+                    item["quantity_total"] - uuid_dict[item["uuid"]]
+                )
             else:
                 item["quantity_available"] = item["quantity_total"]
 
         # Update the item
         await inventory_collection.update_one(
             {"uuid": item["uuid"]},
-            {"$set": {"quantity_available": item["quantity_available"]}}
+            {"$set": {"quantity_available": item["quantity_available"]}},
         )
 
     logging.info("Updated inventory from checkouts")
-
 
 
 async def update_from_gsheet():
@@ -69,7 +68,7 @@ async def update_from_gsheet():
             text = await resp.text()
 
     # Parse the csv
-    csv_reader = csv.reader(text.splitlines(), delimiter=',')
+    csv_reader = csv.reader(text.splitlines(), delimiter=",")
     rows = list(csv_reader)
 
     # Drop the first row
@@ -80,7 +79,7 @@ async def update_from_gsheet():
     collection = await db.get_collection("inventory")
     all_inventory = await collection.find().to_list(None)
 
-    '''
+    """
     class InventoryItem(BaseModel):
         _id: Optional[PyObjectId] = Field(alias="_id")
         uuid: str
@@ -100,7 +99,7 @@ async def update_from_gsheet():
         qr_code: Union[str, None]
         kit_ref: Union[str, None]
         kit_contents: Union[List[str], None]
-    '''
+    """
 
     # Go through the collection and match to a row in the csv by name
     # If the item is not found, create it
@@ -124,10 +123,7 @@ async def update_from_gsheet():
                 new_item = await item_from_row(row, uuid=item["uuid"])
 
                 # Update the item
-                await collection.update_one(
-                    {"uuid": item["uuid"]},
-                    {"$set": new_item}
-                )
+                await collection.update_one({"uuid": item["uuid"]}, {"$set": new_item})
 
                 # Increment the number of items updated
                 num_items_updated += 1
@@ -149,18 +145,14 @@ async def update_from_gsheet():
     logging.info(f"Created {num_items_created} items")
 
 
-            
-
-
-
 async def item_from_row(row: List[str], uuid=None) -> dict:
     # Update the item with all fields that are in the object
-    '''
+    """
     Example first 2 lines:
     Name	Tool / Material (T/M)	Kit Ref.	Quanity (#, Low / Med / High)	Location (room)	Location (specific)	Overstock closet?	Is Numbered?	URL (optional)	Specific Name (optional)	Serial Number (optional)	Brand (optional)	Model Number (optional)	UUID
-    Case, O-Connor Matte Box Kit	T		1	Studio	Studio 5, Shelf 2	FALSE							
-    Case, Shape Matte Box Kit	T	Matte Box Kit, Shape	1	Studio	Studio 5, Shelf 1	FALSE							
-    '''
+    Case, O-Connor Matte Box Kit	T		1	Studio	Studio 5, Shelf 2	FALSE
+    Case, Shape Matte Box Kit	T	Matte Box Kit, Shape	1	Studio	Studio 5, Shelf 1	FALSE
+    """
 
     if uuid is None:
         uuid = uuid4().hex
@@ -210,7 +202,7 @@ async def email_user_restock_request_complete(restock: dict, user: dict):
     logging.info("Sending checkout email...")
     # Get the checkout
     db = MongoDB()
-    
+
     logging.info("Sending restock request complete email to " + user["email"] + "...")
 
     # Use the restock_completion template
@@ -218,26 +210,32 @@ async def email_user_restock_request_complete(restock: dict, user: dict):
     approved_or_denied += ". "
 
     if restock["completion_note"]:
-        approved_or_denied += "Note from manager: <i>" + restock["completion_note"] + "</i>"
+        approved_or_denied += (
+            "Note from manager: <i>" + restock["completion_note"] + "</i>"
+        )
 
     if restock["is_approved"]:
-        approved_or_denied += "<br><br>The item has been ordered and will be restocked soon."
-
+        approved_or_denied += (
+            "<br><br>The item has been ordered and will be restocked soon."
+        )
 
     date = datetime.fromtimestamp(float(restock["timestamp_sent"])).strftime("%m/%d/%Y")
 
-    body = format_email_template("restock_completion", {
-        "name": user["name"],
-        "date": date,
-        "item": restock["item"],
-        "approved_or_denied": approved_or_denied,
-    })
+    body = format_email_template(
+        "restock_completion",
+        {
+            "name": user["name"],
+            "date": date,
+            "item": restock["item"],
+            "approved_or_denied": approved_or_denied,
+        },
+    )
 
-    try :
+    try:
         await email_user(user["email"], [], f"Completed Restock Request ({date})", body)
     except Exception as e:
         # Show warning
-        logging.getLogger().setLevel(logging.WARNING)   
+        logging.getLogger().setLevel(logging.WARNING)
         logging.warning("Failed to send checkout email: " + str(e))
         return False
 
