@@ -831,7 +831,7 @@ function renderAvailability() {
                     showAvailabilityPopup(j, i, total_available);
                 }
 
-                cell.style.opacity = total_available.length / total_filled_out;
+                cell.style.opacity = Math.min((total_available.length / total_filled_out) + .5, 1);
             }
 
             row.appendChild(cell);
