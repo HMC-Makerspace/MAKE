@@ -825,7 +825,7 @@ function renderAvailability() {
 
 
             // Set the opacity
-            if (total_available != 0) {
+            if (total_available.length > 0) {
                 cell.classList.add("available");
                 cell.onclick = () => {
                     showAvailabilityPopup(j, i, total_available);
