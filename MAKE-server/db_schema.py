@@ -6,16 +6,20 @@ from typing import Union
 
 from config import DB_NAME
 
-class MongoDB():
+
+class MongoDB:
     def __init__(self):
         self.client = motor.motor_asyncio.AsyncIOMotorClient(
-            "mongodb://localhost:27017")
+            "mongodb://127.0.0.1:27017"
+        )
         self.db = self.client[DB_NAME]
 
     def __del__(self):
         self.client.close()
 
-    async def get_collection(self, name: str) -> Union[motor.motor_asyncio.AsyncIOMotorCollection, None]:
+    async def get_collection(
+        self, name: str
+    ) -> Union[motor.motor_asyncio.AsyncIOMotorCollection, None]:
         # Get a collection from the database
         # Returns None if the collection does not exist
         collections = await self.db.list_collection_names()
@@ -23,28 +27,29 @@ class MongoDB():
             return self.db[name]
         else:
             return None
-        
+
+
 schema = [
-    'status',
-    'machines',
-    'quiz_updates',
-    'inventory',
-    'restock_requests',
-    'users',
-    'user_files',
-    'server_files',
-    'quizzes',
-    'checkouts',
-    'student_storage',
-    'shifts',
-    'shift_changes',
-    'workshops',
-    'printer_logs',
-    'filament_logs',
-    'api_keys',
-    'ip_logs',
-    'reservations',
-    'redirects',
+    "status",
+    "machines",
+    "quiz_updates",
+    "inventory",
+    "restock_requests",
+    "users",
+    "user_files",
+    "server_files",
+    "quizzes",
+    "checkouts",
+    "student_storage",
+    "shifts",
+    "shift_changes",
+    "workshops",
+    "printer_logs",
+    "filament_logs",
+    "api_keys",
+    "ip_logs",
+    "reservations",
+    "redirects",
 ]
 
 
@@ -72,7 +77,7 @@ class PyObjectId(ObjectId):
         field_schema.update(type="string")
 
 
-'''
+"""
 Define the schema for the database.
  The database should hold these classes:
     last_scrape_update: datetime,
@@ -86,9 +91,9 @@ Define the schema for the database.
     workshops: List[Workshop],
     printer_logs: List[PrinterLog],
     api_keys: List[APIKey],
-'''
+"""
 
-'''
+"""
 The inventory class is used to store information about the items in the inventory.
 The following fields are stored:
 - uuid: The uuid of the item
@@ -108,7 +113,8 @@ The following fields are stored:
 If the item is a kit, the following fields are stored:
 - Kit Contents: A list of the items in the kit
 
-'''
+"""
+
 
 class Location(BaseModel):
     room: str
@@ -117,14 +123,12 @@ class Location(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
                 "room": "Studio",
                 "specific": "Cabinet A",
-                "container": "Drawer 1"
+                "container": "Drawer 1",
             }
         }
 
@@ -173,12 +177,9 @@ class InventoryItem(BaseModel):
     # Keywords
     keywords: Union[List[str], None]
 
-
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
                 "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j8k8l",
@@ -192,17 +193,17 @@ class InventoryItem(BaseModel):
                     {
                         "room": "Electronic Benches",
                         "specific": "Cabinet A",
-                        "container": "Drawer 1"
+                        "container": "Drawer 1",
                     }
                 ],
                 "reorder_url": "https://www.digikey.com/en/products/detail/weller-tools-inc/WES51/128618",
                 "serial_number": "1234567890",
-                "kit_contents": None
+                "kit_contents": None,
             }
         }
 
 
-'''
+"""
 The users class is used to store information about the users of the system.
 The following fields are stored:
 - uuid: The uuid of the user
@@ -214,7 +215,7 @@ The following fields are stored:
 
 If the user is a Steward or Head Steward, the following fields are stored:
 - Proficiencies: A list of the proficiencies that the user has
-'''
+"""
 
 
 class User(BaseModel):
@@ -231,9 +232,7 @@ class User(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
                 "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
@@ -244,7 +243,7 @@ class User(BaseModel):
                 "passed_quizzes": {
                     "431278492": "1231234124",
                 },
-                "proficiencies": ["3D Printing", "Laser Cutting"]
+                "proficiencies": ["3D Printing", "Laser Cutting"],
             }
         }
 
@@ -259,12 +258,10 @@ class UserFile(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
 
 
-'''
+"""
 The restock_requests class is used to store information about the restock requests.
 The following fields are stored:
 - uuid: The uuid of the restock request
@@ -273,7 +270,7 @@ The following fields are stored:
 - Requested By Email: The email of the user who requested the restock
 - Sent: Whether the request has been sent to management
 
-'''
+"""
 
 
 class RestockRequest(BaseModel):
@@ -291,9 +288,7 @@ class RestockRequest(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
                 "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
@@ -305,12 +300,12 @@ class RestockRequest(BaseModel):
                 "timestamp_sent": 1610000000,
                 "timestamp_completed": None,
                 "is_approved": None,
-                "completion_note": None
+                "completion_note": None,
             }
         }
 
 
-'''
+"""
 The quizzes class is used to store information about the quizzes.
 The following fields are stored:
 - GID: The google sheet ID of the quiz
@@ -320,7 +315,7 @@ The following fields are stored:
 - CX ID: The CX ID of the user who took the quiz
 - Score: The score of the quiz
 - Passed: Whether the user passed the quiz
-'''
+"""
 
 
 class QuizResponse(BaseModel):
@@ -335,9 +330,7 @@ class QuizResponse(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
                 "gid": "2100779718",
@@ -346,19 +339,19 @@ class QuizResponse(BaseModel):
                 "timestamp": "2021-01-01 00:00:00",
                 "cx_id": "123456789",
                 "score": "7/7",
-                "passed": True
+                "passed": True,
             }
         }
 
 
-'''
+"""
 The shifts class is used to store information about the shifts.
 The following fields are stored:
 - Timestart: The start time of the shift
 - Timeend: The end time of the shift
 - Day: The day of the shift
 - Stewards: A list of uuids of the stewards working the shift
-'''
+"""
 
 
 class Shift(BaseModel):
@@ -370,15 +363,13 @@ class Shift(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
                 "timestamp_start": "10:00 AM",
                 "timestamp_end": "12:00 PM",
                 "day": "Monday",
-                "stewards": ["d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"]
+                "stewards": ["d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"],
             }
         }
 
@@ -395,9 +386,7 @@ class ShiftChange(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
                 "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
@@ -406,10 +395,12 @@ class ShiftChange(BaseModel):
                 "timestamp_end": "12:00 PM",
                 "is_drop": True,
                 "is_pickup": False,
-                "steward": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"
+                "steward": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
             }
         }
-'''
+
+
+"""
 The checkouts class is used to store information about the checkouts.
 The following fields are stored:
 - uuid: The uuid of the checkout
@@ -420,7 +411,7 @@ The following fields are stored:
 - Timestamp Out: The timestamp of when the items were checked out
 - Timestamp Due: The timestamp of when the items are due
 - Timestamp In: The timestamp of when the items were checked in
-'''
+"""
 
 
 class Checkout(BaseModel):
@@ -436,17 +427,11 @@ class Checkout(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
                 "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                "items": [
-                    {
-                        "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l": 1
-                    }
-                ],
+                "items": [{"d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l": 1}],
                 "checked_out_by": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
                 "timestamp_out": "165231121",
                 "timestamp_due": "165231121",
@@ -457,7 +442,7 @@ class Checkout(BaseModel):
         }
 
 
-'''
+"""
 StudentStorage class is used to store information about the student storage reservations
 The following fields are stored:
 - uuid: The uuid of the reservation
@@ -467,7 +452,7 @@ The following fields are stored:
 - Timestamp Due: The timestamp of when the reservation is due
 - Timestamp In: The timestamp of when the reservation was checked in
 - Renewals Left: The number of times the reservation can be renewed
-'''
+"""
 
 
 class StudentStorage(BaseModel):
@@ -482,9 +467,7 @@ class StudentStorage(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
                 "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
@@ -493,12 +476,12 @@ class StudentStorage(BaseModel):
                 "timestamp": "2021-01-01 00:00:00",
                 "timestamp_due": "2021-01-01 00:00:00",
                 "timestamp_in": "2021-01-01 00:00:00",
-                "renewals_left": 1
+                "renewals_left": 1,
             }
         }
 
 
-'''
+"""
 Workshop class is used to store information about the workshops.
 The following fields are stored:
 - uuid: The uuid of the workshop
@@ -508,7 +491,7 @@ The following fields are stored:
 - Timestamp: The timestamp of when the workshop is scheduled
 - Length: The length of the workshop in minutes
 - Capacity: The capacity of the workshop
-'''
+"""
 
 
 class Workshop(BaseModel):
@@ -530,9 +513,7 @@ class Workshop(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
                 "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
@@ -545,12 +526,15 @@ class Workshop(BaseModel):
                 "required_quizzes": ["123456789"],
                 "rsvp_list": ["d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"],
                 "is_live": True,
-                "users_notified": ["d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l", "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l"]
+                "users_notified": [
+                    "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                    "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+                ],
             }
         }
 
 
-'''
+"""
 Printer log class is used to store information about the printer logs.
 This will serve both 3d printer and large format printer logs.
 The following fields are stored:
@@ -560,7 +544,7 @@ The following fields are stored:
 - File name: The name of the file that was printed
 - Timestamp: The timestamp of when the file was printed
 - Printer data: The data that the printer sent to the server, in JSON format
-'''
+"""
 
 
 class PrinterLog(BaseModel):
@@ -574,21 +558,19 @@ class PrinterLog(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
                 "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
                 "printer": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
                 "file_name": "test.gcode",
                 "timestamp": "2021-01-01 00:00:00",
-                "printer_Data": "{'test': 'test'}"
+                "printer_Data": "{'test': 'test'}",
             }
         }
 
 
-'''
+"""
 API Keys class is used to store information about the API keys.
 The following fields are stored:
 - uuid: The uuid of the API key
@@ -601,7 +583,8 @@ The following fields are stored:
     - studentstorage: Can access student storage endpoints
     - steward: Can access steward-level
     - printer: Can access printer endpoints
-'''
+"""
+
 
 class APIKey(BaseModel):
     _id: Optional[PyObjectId] = Field(alias="_id")
@@ -612,26 +595,25 @@ class APIKey(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
                 "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
                 "name": "API Key",
                 "key": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-                "scope": "admin"
+                "scope": "admin",
             }
         }
 
 
-'''
+"""
 IP Logs class is used to store information about the IP logs.
 The following fields are stored:
 - uuid: The uuid of the IP log
 - ip: The IP address of the user
 - user: The uuid of the user requested
-'''
+"""
+
 
 class IPLog(BaseModel):
     _id: Optional[PyObjectId] = Field(alias="_id")
@@ -641,16 +623,13 @@ class IPLog(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
-                    
-                    "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j8k8l",
-                    "ip": "192.168.0.1",
-                    "timestamp": "3942102340"
-            }    
+                "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j8k8l",
+                "ip": "192.168.0.1",
+                "timestamp": "3942102340",
+            }
         }
 
 
@@ -663,9 +642,7 @@ class Redirect(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
                 "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
@@ -675,8 +652,8 @@ class Redirect(BaseModel):
                     {
                         "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j8k8l",
                         "ip": "192.168.0.1",
-                        "timestamp": "3942102340"
+                        "timestamp": "3942102340",
                     }
-                ]
+                ],
             }
         }
