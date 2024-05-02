@@ -824,14 +824,22 @@ function renderAvailability() {
             cell.innerText = `${total_available.length} / ${total_filled_out}`;
 
 
-            // Set the opacity
             if (total_available.length > 0) {
-                cell.classList.add("available");
                 cell.onclick = () => {
                     showAvailabilityPopup(j, i, total_available);
                 }
 
-                cell.style.opacity = Math.min((total_available.length / total_filled_out) + .2, 1);
+                // If more then 1/3 of stewards are available, add "available"
+                // If less then 1/3 and more than 1/4 of stewards are available, add "medium-available"
+                // If less then 1/4 of stewards are available, add "low-available"
+
+                if (total_available.length / total_filled_out > 1/3) {
+                    cell.classList.add("available");
+                } else if (total_available.length / total_filled_out > 1/4) {
+                    cell.classList.add("medium-available");
+                } else {
+                    cell.classList.add("low-available");
+                }
             }
 
             row.appendChild(cell);

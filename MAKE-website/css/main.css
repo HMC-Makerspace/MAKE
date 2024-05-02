@@ -2402,6 +2402,14 @@ td.availability-cell {
   background-color: var(--high-color);
 }
 
+.availability-cell.medium-available {
+  background-color: var(--medium-color);
+}
+
+.availability-cell.low-available {
+  background-color: var(--low-color);
+}
+
 .availability-cell:active {
   opacity: .7;
 }
