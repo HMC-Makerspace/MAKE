@@ -823,11 +823,15 @@ function renderAvailability() {
 
             cell.innerText = `${total_available.length} / ${total_filled_out}`;
 
+
+            // Set the opacity
             if (total_available != 0) {
                 cell.classList.add("available");
                 cell.onclick = () => {
                     showAvailabilityPopup(j, i, total_available);
                 }
+
+                cell.style.opacity = total_available.length / total_filled_out;
             }
 
             row.appendChild(cell);
