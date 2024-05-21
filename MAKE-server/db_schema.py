@@ -30,7 +30,6 @@ class MongoDB:
         else:
             return None
 
-
 schema = [
     "status",
     "machines",
@@ -58,6 +57,7 @@ schema = [
 STATUS_TEMPLATE = {
     "motd": "Welcome to make.hmc.edu",
     "is_open": False,
+    "stewards_on_duty": False,
 }
 
 # Convert ObjectIds to strings before storing them as the _id.

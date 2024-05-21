@@ -173,11 +173,6 @@ class YearView(discord.ui.View):
     async def staff_faculty(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message('Gained role Staff/Faculty!', ephemeral=True)
         await grant_create_role(interaction.user, "Staff/Faculty", to_remove=["2021", "2022", "2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040"])
-    
-    @discord.ui.button(label='2024', style=discord.ButtonStyle.blurple, custom_id='persistent_view:year:2024')
-    async def year_2021(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message('Gained role 2024!', ephemeral=True)
-        await grant_create_role(interaction.user, "2024", to_remove=["Staff/Faculty", "2025", "2026", "2027", "2028", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040"])
 
     @discord.ui.button(label='2025', style=discord.ButtonStyle.blurple, custom_id='persistent_view:year:2025')
     async def year_2025(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -198,6 +193,11 @@ class YearView(discord.ui.View):
     async def year_2028(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message('Gained role 2028!', ephemeral=True)
         await grant_create_role(interaction.user, "2028", to_remove=["Staff/Faculty", "2024", "2025", "2026", "2027", "2029", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040"])
+
+    @discord.ui.button(label='2029', style=discord.ButtonStyle.blurple, custom_id='persistent_view:year:2029')
+    async def year_2029(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message('Gained role 2029!', ephemeral=True)
+        await grant_create_role(interaction.user, "2029", to_remove=["Staff/Faculty", "2024", "2025", "2026", "2027", "2028", "2030", "2031", "2032", "2033", "2034", "2035", "2036", "2037", "2038", "2039", "2040"])
 
 
 

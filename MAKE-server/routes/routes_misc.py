@@ -1,7 +1,7 @@
 import datetime
 import logging
 
-from config import QUIZ_IDS
+from config import QUIZ_IDS, VERSION
 import utilities
 from utilities import validate_api_key
 from db_schema import *
@@ -35,9 +35,32 @@ async def route_get_status():
         "total_checkouts": await checkouts.count_documents({}), 
         "total_users": await users.count_documents({}),
         "total_items": await inventory.count_documents({}),
-        "version": "2.1.0",
+        "version": VERSION
     }
 
+@misc_router.post("/update_status")
+async def route_update_status(request: Request):
+    # Update the status
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Updating status...")
+
+    db = MongoDB()
+
+    # Get the request body
+    body = await request.json()
+
+    # Validate the API key
+    if not await validate_api_key(db, body["api_key"], "admin"):
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    
+    # Get status from collection
+    status = await db.get_collection("status")
+
+    # Go through each key in the body and update the status
+    for key in body:
+        await status.update_one({"key": key}, {"$set": {"value": body[key]}})
 
 @misc_router.post("/render_loom_file")
 async def route_render_loom_file(request: Request):

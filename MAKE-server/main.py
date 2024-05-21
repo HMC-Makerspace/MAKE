@@ -65,7 +65,7 @@ app = FastAPI(
     The backend database is MongoDB, and the database 
     schema is defined in db_schema.py.
     """,
-    version="2.0.0",
+    version=VERSION,
     docs_url="/api/v2/docs",
     redoc_url="/api/v2/redoc",
     terms_of_service="https://make.hmc.edu/terms",
@@ -178,7 +178,17 @@ async def validate_database_schema(db):
     # Check that there's a single document in the status collection
     # with the name "status"
     status = await db["status"].find_one({"name": "status"})
-    if status is None:
+
+    if status is not None:
+        # Check that the status document has all the required fields
+        for key in STATUS_TEMPLATE:
+            if key not in status:
+                # Insert the key into the status document
+                await db["status"].update_one({"name": "status"}, {"$set": {key: STATUS_TEMPLATE[key]}})
+                # Print log message
+                logging.info(f"Added key {key} to status document in database {db.name}")
+
+    else:
         # Create the status document
         await db["status"].insert_one({"name": "status"})
 

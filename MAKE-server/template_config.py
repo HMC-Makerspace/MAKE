@@ -1,3 +1,5 @@
+VERSION = "2.2.0"
+
 # Database configuration
 DB_NAME = "make"
 DB_USER = ""
