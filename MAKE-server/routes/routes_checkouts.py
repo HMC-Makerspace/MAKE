@@ -66,7 +66,7 @@ async def route_get_checkout_record(request: Request, checkout_uuid: str):
     # Get the API key
     api_key = request.headers["api-key"]
     db = MongoDB()
-    is_valid = validate_api_key(db, api_key, "checkouts")
+    is_valid = await validate_api_key(db, api_key, "checkouts")
 
     # Validate API key
     if not is_valid: 
@@ -102,7 +102,7 @@ async def route_create_new_checkout(request: Request):
     db = MongoDB()
 
     # Validate API key
-    if not validate_api_key(db, api_key, "checkouts"):
+    if not await validate_api_key(db, api_key, "checkouts"):
         # Invalid API key
         # Return error
         raise HTTPException(status_code=401, detail="Invalid API key")
@@ -134,7 +134,7 @@ async def route_update_checkout(request: Request, checkout_uuid: str):
     db = MongoDB()
 
     # Validate API key
-    if not validate_api_key(db, api_key, "checkouts"):
+    if not await validate_api_key(db, api_key, "checkouts"):
         # Invalid API key
         # Return error
         raise HTTPException(status_code=404, detail="Invalid API key")
@@ -159,7 +159,7 @@ async def route_check_in_checkout(request: Request, checkout_uuid: str):
     db = MongoDB()
 
     # Validate API key
-    if not validate_api_key(db, api_key, "checkouts"):
+    if not await validate_api_key(db, api_key, "checkouts"):
         # Invalid API key
         # Return error
         raise HTTPException(status_code=401, detail="Invalid API key")
@@ -184,7 +184,7 @@ async def route_renew_checkout(request: Request, checkout_uuid: str):
     db = MongoDB()
 
     # Validate API key
-    if not validate_api_key(db, api_key, "checkouts"):
+    if not await validate_api_key(db, api_key, "checkouts"):
         # Invalid API key
         # Return error
         raise HTTPException(status_code=401, detail="Invalid API key")
@@ -226,7 +226,7 @@ async def route_delete_checkout(request: Request, checkout_uuid: str):
     db = MongoDB()
 
     # Validate API key
-    if not validate_api_key(db, api_key, "checkouts"):
+    if not await validate_api_key(db, api_key, "checkouts"):
         # Invalid API key
         # Return error
         raise HTTPException(status_code=404, detail="Invalid API key")

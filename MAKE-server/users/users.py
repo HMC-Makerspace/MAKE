@@ -1,7 +1,7 @@
 from datetime import datetime
 import uuid
 import logging
-from fuzzywuzzy import fuzz
+from utilities import levenshtein_ratio_and_distance
 from pymongo import UpdateOne
 from db_schema import MongoDB, User
 from config import *
@@ -91,10 +91,10 @@ async def create_update_users_from_quizzes():
             # by fuzzy matching the emails using fuzzywuzzy
 
             # Get the ratio of similarity between the two emails
-            ratio = fuzz.ratio(email, cx_id_email)
+            ratio = levenshtein_ratio_and_distance(email, cx_id_email)
 
             # If the ratio is greater than 90, we can assume that the emails are the same person
-            if ratio > 90:
+            if ratio > .9:
                 quizzes_to_set.update(cx_id_search["passed_quizzes"])
 
                 user_uuid = cx_id_search["uuid"]

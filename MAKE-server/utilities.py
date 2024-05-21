@@ -36,8 +36,6 @@ def format_email_template(template_name: str, key_values: dict):
     formatted_template = template.format(**key_values)
 
     return str(formatted_template)
-
-
 async def email_user(user_email: str, cc_email: List[str], subject: str, html_body: str):
     # Email a user
     sender_email = f" MAKE <{GMAIL_EMAIL}>"
@@ -83,3 +81,30 @@ def zip_and_move_log_file():
 
     # Zip the log file
     os.system(f"zip logs/{current_date}_make_log.zip make.log")
+
+def levenshtein_ratio_and_distance(s, t):
+
+    """
+    Calculate the Levenshtein similarity ratio between two strings.
+    """
+
+    if len(s) < len(t):
+        return levenshtein_ratio_and_distance(t, s)
+
+    previous_row = range(len(t) + 1)
+
+    for i, c1 in enumerate(s):
+        current_row = [i + 1]
+
+        for j, c2 in enumerate(t):
+            insertions = previous_row[j + 1] + 1
+            deletions = current_row[j] + 1
+            substitutions = previous_row[j] + (c1 != c2)
+            current_row.append(min(insertions, deletions, substitutions))
+
+        previous_row = current_row
+
+    levenshtein_distance = previous_row[-1]
+    ratio = ((len(s) + len(t)) - levenshtein_distance) / (len(s) + len(t))
+
+    return ratio
