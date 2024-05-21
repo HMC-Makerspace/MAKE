@@ -29,10 +29,20 @@ class MakeBot(commands.Bot):
         self.no_steward_message_sent = False
         #self.announcement_channel_id = 857333481474097203
         self.announcement_channel_id = 526941847831183363
+        self.roles_channel_id = 857325041003790346
 
     async def on_ready(self):
         logging.getLogger().info(f"Logged in as {self.user.name} ({self.user.id})")
 
+
+    async def on_member_join(self, member):
+        channel = self.get_channel(self.roles_channel_id)
+
+        if channel:
+            message = (f"Welcome to the HMC Makerspace Discord, {member.mention}!\n\n"
+                       f"Head over to {channel.mention} to select your roles.")
+            
+            await member.send(message)
 
     async def check_shifts(self):
         await asyncio.sleep(1)
