@@ -176,8 +176,8 @@ authenticate();
 
 async function updateStatus() {
     const motd = document.getElementById("update-motd").value;
-    const is_open = document.getElementById("update-is_open").value;
-    const stewards_on_duty = document.getElementById("update-stewards_on_duty").value;
+    const is_open = document.getElementById("update-is_open").checked;
+    const stewards_on_duty = document.getElementById("update-stewards_on_duty").checked;
 
     const response = await fetch(`${API}/misc/update_status`,
         {

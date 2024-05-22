@@ -46,3 +46,8 @@ Finally, start the server by running
 `python main.py` or `python3 main.py`
 
 and navigate to http://127.0.0.1:8080. If you're deploying this in production, make sure to use the `--prod` flag.
+
+## Tips and Tricks
+Before any large change, make sure to use `mongoduump` to backup the database. This can be done by running
+
+`mongodump --uri="mongodb://127.0.0.1:27017" --db make --out make_backup`
