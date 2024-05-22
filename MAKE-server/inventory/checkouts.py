@@ -19,7 +19,7 @@ async def send_checkout_email(checkout_uuid: str):
     checkout = await checkout_collection.find_one({"uuid": checkout_uuid})
 
     if checkout is None:
-        # The checkout does not exist
+        # The checkout does not exist   
         # Return error
         return False
     

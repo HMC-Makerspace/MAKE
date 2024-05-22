@@ -19,10 +19,12 @@ async def validate_api_key(db, api_key_str, scope):
     api_key = await collection.find_one({"key": api_key_str})
 
     if api_key is None:
+        logging.warning("API key not found")
         return False
     
     # Always allow admin scope, otherwise check if the scope is in the API key's scope
     if scope not in api_key["scope"] and "admin" not in api_key["scope"]:
+        logging.warning("Invalid API key scope")
         return False
     
     return True

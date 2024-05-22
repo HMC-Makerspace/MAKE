@@ -118,7 +118,23 @@ async function authenticate() {
         alert("Invalid API key.");
     }
 
+    // Fetch status
+    const status_response = await fetch(`${API}/misc/status`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+        }
+    );
 
+    if (status_response.status == 200) {
+        const status = await status_response.json();
+
+        document.getElementById("update-motd").value = status.motd;
+        document.getElementById("update-is_open").value = status.is_open;
+        document.getElementById("update-stewards_on_duty").value = status.stewards_on_duty;
+    }
 
     // Save api key to local storage
     localStorage.setItem('admin_api_key', api_key);
@@ -157,6 +173,30 @@ async function authenticate() {
 }
 
 authenticate();
+
+async function updateStatus() {
+    const motd = document.getElementById("update-motd").value;
+    const is_open = document.getElementById("update-is_open").value;
+    const stewards_on_duty = document.getElementById("update-stewards_on_duty").value;
+
+    const response = await fetch(`${API}/misc/update_status`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+            body: JSON.stringify({ motd: motd, is_open: is_open, stewards_on_duty: stewards_on_duty }),
+        }
+    );
+
+    if (response.status == 201) {
+        alert("Status updated.");
+    } else {
+        alert("Error updating status.");
+    }
+
+}
 
 async function fetchRedirectsAdmin() {
     const response = await fetch(`${API}/misc/get_redirects`,

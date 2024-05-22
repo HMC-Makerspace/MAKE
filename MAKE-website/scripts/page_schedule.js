@@ -10,33 +10,6 @@ async function fetchSchedule() {
 
 function renderSchedule(schedule) {
     const schedule_table = document.getElementById("schedule-table");
-
-    const num_stewards = document.getElementById("num-stewards");
-
-    // Get current number of stewards
-    let now = new Date();
-
-    let day = now.getDay();
-    // Monday is 0, Sunday is 6
-    if (day == 0) {
-        day = 6;
-    } else {
-        day -= 1;
-    }
-
-    // Get current hour
-    let hour = now.getHours();
-
-    const current_shift = schedule.find((shift) => shift.day == DAYS[day] && formatHour(hour) == shift.timestamp_start);
-
-    let num = 0;
-
-    if (current_shift) {
-        num = current_shift.stewards.length;
-    }
-
-    num_stewards.innerText = `${num} steward${num == 1 ? "" : "s"}`
-    num_stewards.innerText = `0 stewards`;
     
     removeAllChildren(schedule_table);
     

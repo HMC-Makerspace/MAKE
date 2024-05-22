@@ -628,6 +628,16 @@ Management Console
   font-size: 1.5rem;
 }
 
+#update-status-container {
+  width: 60%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
 .user-result.editable {
   grid-template-columns: 2fr 1fr 3fr 1fr 5fr .5fr;
 }

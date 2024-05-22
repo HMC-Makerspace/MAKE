@@ -28,6 +28,10 @@ async def route_get_status():
     users = await db.get_collection("users")
     inventory = await db.get_collection("inventory")
 
+    status = await db.get_collection("status")
+    status = await status.find().to_list(None)
+    status = status[0]
+
     return {
         "status": "alive",
         "last_update": utilities.last_updated_time.timestamp(),
@@ -35,10 +39,13 @@ async def route_get_status():
         "total_checkouts": await checkouts.count_documents({}), 
         "total_users": await users.count_documents({}),
         "total_items": await inventory.count_documents({}),
-        "version": VERSION
+        "version": VERSION,
+        "motd": status["motd"],
+        "is_open": status["is_open"],
+        "stewards_on_duty": status["stewards_on_duty"],
     }
 
-@misc_router.post("/update_status")
+@misc_router.post("/update_status", status_code=201)
 async def route_update_status(request: Request):
     # Update the status
     logging.getLogger().setLevel(logging.INFO)
@@ -50,17 +57,25 @@ async def route_update_status(request: Request):
     body = await request.json()
 
     # Validate the API key
-    if not await validate_api_key(db, body["api_key"], "admin"):
+    api_key = request.headers["api-key"]
+    if not await validate_api_key(db, api_key, "admin"):
         # The API key is invalid
         # Return error
         raise HTTPException(status_code=401, detail="Invalid API key")
     
     # Get status from collection
-    status = await db.get_collection("status")
+    status_collection = await db.get_collection("status")
+    status = await status_collection.find().to_list(None)
+
+    status = status[0]
 
     # Go through each key in the body and update the status
     for key in body:
-        await status.update_one({"key": key}, {"$set": {"value": body[key]}})
+        if key in status:
+            status[key] = body[key]
+
+    # Replace the status, it doesn't have a uuid or key
+    await status_collection.replace_one({}, status)
 
 @misc_router.post("/render_loom_file")
 async def route_render_loom_file(request: Request):
