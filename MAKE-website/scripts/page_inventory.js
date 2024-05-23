@@ -55,6 +55,7 @@ function getInventoryFilters() {
     const filters = {
         stock: false,
         room: document.getElementById("room-select").value,
+        container: document.getElementById("container-input").value,
         tool_material: document.getElementById("tool-material-select").value,
     }
 
