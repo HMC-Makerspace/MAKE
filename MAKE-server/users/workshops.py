@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 import uuid
 import logging
 from utilities import email_user, format_email_template
-from fuzzywuzzy import fuzz
 from pymongo import UpdateOne
 from db_schema import MongoDB, User
 from config import *
