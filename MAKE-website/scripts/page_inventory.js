@@ -94,6 +94,17 @@ function searchInventory(search, filters = null, kiosk_mode = false) {
                 return false;
             }
 
+            if (filters.container) {
+                for (let loc of item.locations) {
+                    const search_str = `${loc.room ?? ""} ${loc.container ?? ""} ${loc.specific ?? ""}`.toLowerCase();
+
+                    if (search_str.includes(filters.container.toLowerCase())) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             return true;
 
         });

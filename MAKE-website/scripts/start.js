@@ -25,6 +25,7 @@ async function start() {
         fetchInventory().then(() => {
             submitSearch();
             document.getElementById("inventory-search-input").addEventListener("keyup", submitSearch);
+            document.getElementById("container-input").addEventListener("keyup", submitSearch);
             document.getElementById("room-select").addEventListener("change", submitSearch);
             document.getElementById("tool-material-select").addEventListener("change", submitSearch);
         }),

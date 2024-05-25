@@ -20,10 +20,12 @@ import utilities
 from db_schema import *
 
 # Import config file
-try: 
+try:
     from config import *
 except ImportError:
-    print("Config file not found. Please copy template_config.py file and rename to config.py.")
+    print(
+        "Config file not found. Please copy template_config.py file and rename to config.py."
+    )
     sys.exit()
 
 # Import discord bot
@@ -78,7 +80,6 @@ app = FastAPI(
         "name": "GNU General Public License v3.0",
         "url": "https://www.gnu.org/licenses/gpl-3.0.en.html",
     },
-
 )
 
 app.add_middleware(GZipMiddleware)
@@ -99,6 +100,7 @@ app.include_router(misc_router)
 # COMMUNITY MODE
 # app.add_api_route("/discord", lambda: RedirectResponse(url="https://discord.gg/XMJspQp8b4"))
 
+
 class RedirectMiddleware:
     def __init__(self, app):
         self.app = app
@@ -111,9 +113,9 @@ class RedirectMiddleware:
             if response is not None:
                 await response(scope, receive, send)
                 return
-            
+
         await self.app(scope, receive, send)
-    
+
     async def redirect(self, request: Request):
         # Get the path
         path = request.url.path
@@ -143,7 +145,7 @@ class RedirectMiddleware:
                 "timestamp": datetime.datetime.now().timestamp(),
                 "ip": request.client.host,
             }
-            
+
             # Add to the logs attribute of the redirect
             await collection.update_one({"path": path}, {"$push": {"logs": ip_log}})
 
@@ -152,14 +154,15 @@ class RedirectMiddleware:
         else:
             return None
 
+
 app.add_middleware(RedirectMiddleware)
 # Add a function to handle most other paths and redirect using the
 # redirects collection in the database
 
 
-
 # Mount the static files in html mode
 app.mount("/", StaticFiles(directory="../MAKE-website", html=True), name="static")
+
 
 async def validate_database_schema(db):
     # Validate the database schema
@@ -184,9 +187,13 @@ async def validate_database_schema(db):
         for key in STATUS_TEMPLATE:
             if key not in status:
                 # Insert the key into the status document
-                await db["status"].update_one({"name": "status"}, {"$set": {key: STATUS_TEMPLATE[key]}})
+                await db["status"].update_one(
+                    {"name": "status"}, {"$set": {key: STATUS_TEMPLATE[key]}}
+                )
                 # Print log message
-                logging.info(f"Added key {key} to status document in database {db.name}")
+                logging.info(
+                    f"Added key {key} to status document in database {db.name}"
+                )
 
     else:
         # Create the status document
@@ -194,7 +201,7 @@ async def validate_database_schema(db):
 
         # Insert the STATUS_TEMPLATE into the status document
         await db["status"].update_one({"name": "status"}, {"$set": STATUS_TEMPLATE})
-        
+
         # Print log message
         logging.info(f"Created status document in database {db.name}")
 
@@ -206,7 +213,7 @@ class BackgroundRunner:
     async def run_main(self):
         # Wait 1 second before starting the background tasks
         await asyncio.sleep(1)
-        
+
         while True:
             try:
                 # Update available inventory from checkouts
@@ -240,13 +247,14 @@ class BackgroundRunner:
                 await asyncio.sleep(60)
 
 
-
 runner = BackgroundRunner()
 
-@app.on_event('startup')
+
+@app.on_event("startup")
 async def app_startup():
     asyncio.create_task(runner.run_main())
     asyncio.create_task(run_discord_bot(DISCORD_BOT_TOKEN))
+
 
 if __name__ == "__main__":
     # Setup logging to display everything to the console
@@ -256,17 +264,23 @@ if __name__ == "__main__":
         # Log to file if in production mode
         # Zip and move old log file
         utilities.zip_and_move_log_file()
-        
-        logging.basicConfig(filename='make.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s %(message)s')
+
+        logging.basicConfig(
+            filename="make.log",
+            level=logging.INFO,
+            format="%(asctime)s %(levelname)s %(name)s %(message)s",
+        )
     else:
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s %(message)s')
+        logging.basicConfig(
+            level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s"
+        )
 
     if not os.path.exists("server_files"):
         os.makedirs("server_files")
 
     if not os.path.exists("user_files"):
         os.makedirs("user_files")
-        
+
     logging.info("Starting MAKE server...")
 
     logging.info("Connecting to database...")
@@ -290,8 +304,11 @@ if __name__ == "__main__":
     if "--prod" in sys.argv:
         logging.info("Started MAKE in production mode!")
         # Production mode
-        uvicorn.run("main:app", host="127.0.0.1", port=8000, log_level="info", reload=False)
+        uvicorn.run(
+            "main:app", host="127.0.0.1", port=8000, log_level="info", reload=False
+        )
     else:
         logging.info("Started MAKE in debug mode!")
-        uvicorn.run("main:app", host="127.0.0.1", port=8080,
-                    log_level="info", reload=False)
+        uvicorn.run(
+            "main:app", host="127.0.0.1", port=8080, log_level="info", reload=False
+        )

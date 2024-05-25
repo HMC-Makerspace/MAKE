@@ -78,6 +78,7 @@ async function authenticate() {
     fetchEditableInventory().then(() => {
         submitEditableSearch();
         document.getElementById("edit-inventory-search-input").addEventListener("keyup", submitEditableSearch);
+        document.getElementById("container-input").addEventListener("keyup", submitEditableSearch);
         document.getElementById("room-select").addEventListener("change", submitEditableSearch);
         document.getElementById("tool-material-select").addEventListener("change", submitEditableSearch);
     });
