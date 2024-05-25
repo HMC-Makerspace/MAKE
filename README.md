@@ -53,6 +53,8 @@ Before any large change, make sure to use `mongoduump` to backup the database. T
 `mongodump --uri="mongodb://127.0.0.1:27017" --db make --out make_backup`
 
 ### Pushing Changes to Server
-After committing your changes to the repo, you can push them to production by first SSHing into the server and navigating to the MAKE directory. Then run `git pull` to pull the changes from the repo. 
+After committing your changes to the repo, you can push them to production by first SSHing into the server using
+`ssh ethan@make.hmc.edu`
+and navigating to the MAKE directory. The password should be known by the Head Steward team. After logging in, run `git pull` to pull the changes from the repo. 
 
-If you've made changes to any Python files, you'll need to restart the server by running `screen -r make` to reattach to the screen first. Then, press `CTRL + A`, let go, and then press `D`, to leave the screen and then run  `python3 main.py --prod` to start the server again. If no changes were made to Python files, the server will automatically restart with the new changes.
+If you've made changes to any Python files, you'll need to restart the server by running `screen -r make` to reattach to the server screen. Then, press `CTRL + A`, let go, and then press `D`, to leave the screen and then run  `python3 main.py --prod` to start the server again. If no changes were made to Python files, the server will automatically restart with the new changes, and this step can be skipped.
