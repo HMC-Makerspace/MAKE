@@ -48,6 +48,11 @@ Finally, start the server by running
 and navigate to http://127.0.0.1:8080. If you're deploying this in production, make sure to use the `--prod` flag.
 
 ## Tips and Tricks
+### Backing Up
 Before any large change, make sure to use `mongoduump` to backup the database. This can be done by running
-
 `mongodump --uri="mongodb://127.0.0.1:27017" --db make --out make_backup`
+
+### Pushing Changes to Server
+After committing your changes to the repo, you can push them to production by first SSHing into the server and navigating to the MAKE directory. Then run `git pull` to pull the changes from the repo. 
+
+If you've made changes to any Python files, you'll need to restart the server by running `screen -r make` to reattach to the screen first. Then, press `CTRL + A`, let go, and then press `D`, to leave the screen and then run  `python3 main.py --prod` to start the server again. If no changes were made to Python files, the server will automatically restart with the new changes.
