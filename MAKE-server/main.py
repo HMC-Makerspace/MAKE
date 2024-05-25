@@ -191,9 +191,7 @@ async def validate_database_schema(db):
                     {"name": "status"}, {"$set": {key: STATUS_TEMPLATE[key]}}
                 )
                 # Print log message
-                logging.info(
-                    f"Added key {key} to status document in database {db.name}"
-                )
+                logging.info(f"Added key {key} to status document in database {db.name}")
 
     else:
         # Create the status document

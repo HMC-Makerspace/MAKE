@@ -4,3 +4,5 @@ MAKE-server/user_files/
 MAKE-server/server_files/
 **/__pycache__/
 .DS_Store
+.prettierignore
+.eslintignore
