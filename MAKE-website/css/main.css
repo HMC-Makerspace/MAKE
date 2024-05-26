@@ -1739,12 +1739,12 @@ table tr td button {
   background-color: var(--high-color-dark);
 }
 
-.bambu-printer .status.online.failed {
+.bambu-printer .status.online.paused {
   border: 2px solid var(--medium-color);
   background-color: var(--medium-color-dark);
 }
 
-.bambu-printer .status.offline {
+.bambu-printer .status.offline, .bambu-printer .status.failed {
   border: 2px solid var(--low-color);
   background-color: var(--low-color-dark);
 }

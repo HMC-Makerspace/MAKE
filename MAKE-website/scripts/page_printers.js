@@ -37,7 +37,7 @@ function generatePrinterDivs(printers) {
 
     for (let name of names) {
         let printer = printers[name];
-        // Can be FINISH, RUNNING, FAILED, IDLE
+        // Can be FINISH, RUNNING, PAUSE, FAILED, IDLE
         let status = printer.printer_json["gcode_state"];
 
         switch (printer.printer_json["gcode_state"]) {
@@ -49,6 +49,9 @@ function generatePrinterDivs(printers) {
                 break;
             case "IDLE":
                 status = "Idle";
+                break;
+            case "PAUSE":
+                status = "Paused";
                 break;
             case "FAILED":
                 status = "Failed";
