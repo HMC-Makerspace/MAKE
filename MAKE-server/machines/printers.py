@@ -7,6 +7,7 @@ import logging
 from config import BAMBULABS_EMAIL, BAMBULABS_PASS
 from db_schema import MongoDB, PrinterLog
 
+import traceback
 import paho.mqtt.client as mqtt
 import asyncio
 
@@ -188,6 +189,8 @@ async def bambu_update(on_refresh = False):
 
 
     except Exception as e:
+        # print traceback
+        logging.error(traceback.format_exc(e))
         if on_refresh:
             logging.error("Failed to refresh bambu token: " + str(e))
             return
@@ -197,6 +200,8 @@ async def bambu_update(on_refresh = False):
         try:
             current_token, current_refresh_token = await get_bambu_tokens()
         except Exception as e_1:
+            logging.error(traceback.format_exc(e_1))
+
             logging.error("Failed to get bambu tokens: " + str(e_1))
             return
         
