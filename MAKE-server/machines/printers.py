@@ -115,7 +115,7 @@ async def bambu_update(on_refresh = False):
         current_logs = []
 
         # Parse the JWT, and get the preferred username from the payload data
-        user_id = jwt.decode(current_token, options={"verify_signature": False})
+        user_id = jwt.decode(current_token, options={"verify_signature": False, "verify_aud": False})
 
         user_id = user_id["preferred_username"]
 
