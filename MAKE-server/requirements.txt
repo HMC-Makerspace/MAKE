@@ -9,3 +9,4 @@ pydantic==2.7
 discord.py==2.2.3
 requests==2.31.0
 paho-mqtt==2.1.0
+pyjwt==2.8.0

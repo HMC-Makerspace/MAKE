@@ -103,6 +103,7 @@ async def bambu_update(on_refresh = False):
     try:
         if current_token is None and on_refresh is False:
             current_token, current_refresh_token = await get_bambu_tokens()
+            logging.info("Got bambu tokens")
         else:
             current_token, current_refresh_token = await refresh_bambu_tokens(current_refresh_token)
 
