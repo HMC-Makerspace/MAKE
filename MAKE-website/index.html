@@ -10,7 +10,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>MAKE</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="css/main.css?v=2.6">
+    <link rel="stylesheet" href="css/main.css?v=2.7">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -142,17 +142,20 @@
                 </span>
                 <span>Inventory</span>
             </button>
+
+            <button id="printers-button" onclick="setPage('printers')">
+                <span class="material-symbols-outlined">
+                    pergola
+                </span>
+                <span>3D Printers</span>
+            </button>
+
             <button id="checkouts-button" onclick="setPage('checkouts')">
                 <span class="material-symbols-outlined">
                     shopping_cart
                 </span>
                 <span>Checkouts</span>
             </button>
-
-            <!--
-            <button id="3d-printers-button" onclick="setPage('3d-printers')"><img class="page-icon"
-                    src="/img/printer-icon.svg" alt=""> <span>3D Printers</span></button>
-                    -->
 
             <button id="student-projects-button" onclick="setPage('student-projects')">
                 <span class="material-symbols-outlined">
@@ -605,31 +608,23 @@
 
         <!--
 
-        3D PRINTERS PAGE
+        PRINTERS PAGE
 
         -->
-        <section id="page-3d-printers" class="main-content hidden">
-
-            <div class="no-id-message id-n">
-                Please enter your college ID number on the home page to view 3D printers
-            </div>
-
-            <div class="content-container id-r">
+        <section id="page-printers" class="main-content hidden">
+            <div class="content-container">
                 <div id="printers-help" class="content-header">
                     <p3>
-                        Here you can view the status of the 3D printers.
+                        The Makerspace has a variety of 3D printers available for use. In addition to the several
+                        Bambu printers you can monitor here, we also have 4 Prusa i3 MK3S printers available for use.
                     </p3>
                 </div>
 
-                <div id="printers-statuses" class="content-body">
-                    <h2>
-                        Status
-                    </h2>
-                    <div id="printers-current">
+                <div id="printers-content" class="content-body">
+                    <div id="printers">
 
                     </div>
                 </div>
-            </div>
         </section>
 
 
@@ -1052,7 +1047,7 @@
 <script src="scripts/libs/showdown.min.js"></script>
 <script src="scripts/libs/color-thief.umd.js"></script>
 
-<script src="scripts/utils.js?v=2.10"></script>
+<script src="scripts/utils.js?v=2.11"></script>
 <script src="scripts/page_settings.js?v=2.3"></script>
 
 <script src="scripts/page_home.js?v=2.9"></script>
@@ -1063,15 +1058,13 @@
 <script src="scripts/page_schedule.js?v=2.10"></script>
 <script src="scripts/page_checkouts.js?v=2.8"></script>
 <script src="scripts/page_workshops.js?v=2.18"></script>
-<!--
-<script src="scripts/page_printers.js"></script>
--->
+<script src="scripts/page_printers.js?v=2.0"></script>
 <script src="scripts/page_faq.js?v=2.3"></script>
 <script src="scripts/page_equipment.js?v=2.4"></script>
 <script src="scripts/page_tour_reservation.js?v=2.0"></script>
 <script src="scripts/page_values.js?v=2.2"></script>
 <script src="scripts/page_error.js?v=2.2"></script>
 
-<script src="scripts/start.js?v=2.4"></script>
+<script src="scripts/start.js?v=2.5"></script>
 
 </html>

@@ -9,7 +9,6 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.exceptions import HTTPException
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-
 import asyncio
 import uvicorn
 import logging
@@ -47,6 +46,7 @@ from users.users import cleanup_user_files, create_update_users_from_quizzes
 from users.workshops import send_workshop_reminders, update_workshops_live_status
 from inventory.checkouts import send_overdue_emails
 from inventory.inventory import update_inventory_from_checkouts
+from machines.printers import bambu_update
 
 # SSL certificate paths, on a Debian system
 SSL_CERT_PRIVKEY = "/etc/letsencrypt/live/make.hmc.edu/privkey.pem"
@@ -214,6 +214,9 @@ class BackgroundRunner:
 
         while True:
             try:
+                # Get printers from Bambu MQTT server
+                await bambu_update()
+
                 # Update available inventory from checkouts
                 await update_inventory_from_checkouts()
 
@@ -237,7 +240,7 @@ class BackgroundRunner:
 
                 utilities.last_updated_time = datetime.datetime.now()
 
-                await asyncio.sleep(60)
+                await asyncio.sleep(1)
             except Exception as e:
                 logging.error(f"An error occurred in the background runner: {e}")
 

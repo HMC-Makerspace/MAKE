@@ -31,9 +31,9 @@ async function start() {
         }),
         fetchSchedule(),
         fetchWorkshops(),
-        fetchCheckouts()
+        fetchCheckouts(),
+        fetchPrinters(),
     ];
-    //fetchPrinters();
 
     document.addEventListener("keydown", function (event) {
         // If user is not focused on an input, and the user presses the k key, show quick-nav

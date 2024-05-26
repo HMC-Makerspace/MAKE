@@ -450,3 +450,15 @@ function debounce(func, wait, immediate) {
         if (callNow) func.apply(context, args);
     };
 }
+
+function determineColorText(background_hex) {
+    background_hex = background_hex.replace("#", "");
+
+    let r = parseInt(background_hex.substring(0, 2), 16);
+    let g = parseInt(background_hex.substring(2, 4), 16);
+    let b = parseInt(background_hex.substring(4, 6), 16);
+
+    let brightness = Math.round(((r * 299) + (g * 587) + (b * 114)) / 1000);
+
+    return brightness > 125 ? "black" : "white";
+}

@@ -33,6 +33,29 @@ async def route_add_filament_log(request: Request, kgs: float):
 
     return
 
+@machines_router.get("/get_printers")
+async def route_get_printers(request: Request):
+    # Get the printers
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Getting printers...")
+
+    # Get the printers collection
+    db = MongoDB()
+    collection = await db.get_collection("printer_logs")
+
+    # Get most recent logs, then sort by time and pick
+    # the most recent log for each printer
+    printers_list = await collection.find().sort("timestamp", -1).to_list(None)
+    printers = {}
+
+    if len(printers_list) > 15:
+        printers_list = printers_list[:15]
+            
+    for printer in printers_list:
+        printers[printer["printer_name"]] = PrinterLog(**printer)
+
+    return printers    
+
 
 @machines_router.get("/status")
 async def route_get_status(request: Request):
