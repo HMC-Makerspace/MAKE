@@ -45,11 +45,11 @@ async def route_get_printers(request: Request):
 
     # Get most recent logs, then sort by time and pick
     # the most recent log for each printer
-    printers_list = await collection.find().sort("timestamp", -1).to_list(None)
+    printers_list = await collection.find().to_list(length=None)
     printers = {}
 
     if len(printers_list) > 15:
-        printers_list = printers_list[:15]
+        printers_list = printers_list[15:]
             
     for printer in printers_list:
         printers[printer["printer_name"]] = PrinterLog(**printer)
