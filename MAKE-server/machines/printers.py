@@ -181,9 +181,9 @@ async def bambu_update(on_refresh = False):
 
             await printer_collection.insert_one(printer_log.model_dump())
 
-        # If more than 10,000 logs, delete the oldest 1000
-        if await printer_collection.count_documents({}) > 10000:
-            oldest_logs = printer_collection.find().sort("timestamp", 1).limit(1000)
+        # If more than 100 logs, delete the oldest 50
+        if await printer_collection.count_documents({}) > 100:
+            oldest_logs = printer_collection.find().sort("timestamp", 1).limit(50)
             async for log in oldest_logs:
                 await printer_collection.delete_one({"uuid": log["uuid"]})
 
