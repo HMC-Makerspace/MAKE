@@ -91,7 +91,13 @@ async def create_update_users_from_quizzes():
             # by fuzzy matching the emails using fuzzywuzzy
 
             # Get the ratio of similarity between the two emails
-            ratio = levenshtein_ratio_and_distance(email, cx_id_email)
+            #ratio = levenshtein_ratio_and_distance(email, cx_id_email)
+
+            ratio = 0
+            if email == cx_id_email:
+                ratio = 1
+            else:
+                ratio = 0
 
             # If the ratio is greater than 90, we can assume that the emails are the same person
             if ratio > .9:

@@ -1667,65 +1667,6 @@ table tr td button {
   padding: 10px;
 }
 
-#printers-statuses {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding-top: 20px;
-  padding-bottom: 20px;
-}
-
-#printers-current {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 20px;
-}
-
-#printers-queue {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--theme-color-2);
-  gap: 10px;
-  padding: 20px;
-  width: 400px;
-}
-
-.printer {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  background-color: var(--theme-color-2);
-  font-weight: bolder;
-  padding: 5px;
-  gap: 20px;
-}
-
-.printer * {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.printer-icon {
-  height: 50px;
-}
-
-.printer-id {
-  font-weight: bold;
-  background-color: var(--text-color-main);
-  color: var(--theme-color-2);
-}
-
-.printer-status {
-  font-weight: bold;
-  border-radius: 20px;
-  color: var(--text-color-main);
-}
 
 .printer-status.Idle {
   background-color: var(--printer-idle);
@@ -1748,42 +1689,132 @@ table tr td button {
   }
 }
 
-.printer-status.Error {
-  background-color: var(--printer-error);
-  animation: pulse 0.5s infinite;
+#printers {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+  margin-bottom: 40px;
+
 }
 
-.printer-status.Paused {
-  background-color: var(--printer-paused);
+.bambu-printer {
+  background-color: var(--theme-color-2);
+  border-radius: 5px;
+  display: grid;
+  grid-template-rows: 20px 20px 25px 10px 20px 30px 1fr;
+  gap: 15px;
+  width: 250px;
+  height: 350px;
+  padding: 15px;
 }
 
-.printer-status.Offline {
-  background-color: var(--printer-offline);
+.bambu-printer .name {
+  font-size: 18px;
+  font-weight: bold;
 }
 
-.printer-current-time-left {
-  background-color: var(--theme-color-3);
-  color: var(--text-color-alt);
-  width: 200px;
+.bambu-printer .status {
+  font-size: 12px;
+  border-radius: 4px;
+  height: 20px;
+  width: fit-content;
+  padding-left: 5px;
+  padding-right: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-#queue-button {
-  width: 100px;
-  height: 50px;
-  background-color: var(--high-color);
+.bambu-printer .status.online {
+  border: 2px solid var(--theme-color-8);
+  background-color: var(--theme-color-4);
 }
 
-#queue-button:hover {
+.bambu-printer .status.online.running {
+  border: 2px solid var(--high-color);
   background-color: var(--high-color-dark);
 }
 
-#queue-button.joined {
-  background-color: var(--low-color);
+.bambu-printer .status.online.paused {
+  border: 2px solid var(--medium-color);
+  background-color: var(--medium-color-dark);
 }
 
-#queue-button.joined:hover {
+.bambu-printer .status.offline, .bambu-printer .status.failed {
+  border: 2px solid var(--low-color);
   background-color: var(--low-color-dark);
 }
+
+.bambu-printer .current-file {
+  font-size: 14px;
+  font-style: italic;
+  color: var(--text-color-light);
+}
+
+.bambu-printer .ams {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 5px;
+}
+
+.bambu-printer .ams .filament {
+  background-color: var(--theme-color-3);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  position: relative;
+}
+
+.bambu-printer .ams .filament .upper-left {
+  font-size: 10px;
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  padding: 2px;
+}
+
+.bambu-printer .progress {
+  background-color: var(--theme-color-4);
+  border-radius: 4px;
+}
+
+.bambu-printer .progress .progress-bar-fill {
+  background-color: var(--theme-color-8);
+  height: 10px;
+  width: 0%;
+  min-width: 5px;
+  border-radius: 4px;
+}
+
+.bambu-printer .progress-bar-text {
+  text-align: center;
+}
+
+.bambu-printer .temp {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  place-items: center;
+  background-color: var(--theme-color-3);
+  border-radius: 4px;
+  height: 30px;
+  font-size: 14px;
+}
+
+.bambu-printer .temp span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 
 /*
 

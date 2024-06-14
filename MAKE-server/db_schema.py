@@ -509,33 +509,19 @@ Printer log class is used to store information about the printer logs.
 This will serve both 3d printer and large format printer logs.
 The following fields are stored:
 - uuid: The uuid of the printer log
-- Printer: The uuid of the printer that the log is for
-- User: The uuid of the user who printed the file
-- File name: The name of the file that was printed
-- Timestamp: The timestamp of when the file was printed
-- Printer data: The data that the printer sent to the server, in JSON format
+- printer_name: The name of the printer
+- printer_online: Boolean value of whether the printer is online
+- printer_json: A dictionary of the printer log
 """
 
 
 class PrinterLog(BaseModel):
     uuid: str
-    printer: str
-    user: str
-    file_name: str
     timestamp: float
-    printer_data: str
-    # TODO[pydantic]: The following keys were removed: `json_encoders`.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
-    model_config = ConfigDict(arbitrary_types_allowed=True, json_encoders={ObjectId: str}, json_schema_extra={
-        "example": {
-            "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-            "printer": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-            "file_name": "test.gcode",
-            "timestamp": "2021-01-01 00:00:00",
-            "printer_Data": "{'test': 'test'}",
-        }
-    })
-
+    printer_name: str
+    printer_online: bool
+    printer_json: Union[Dict[str, Any], None] = None
+    
 
 """
 API Keys class is used to store information about the API keys.

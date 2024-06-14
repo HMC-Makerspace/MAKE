@@ -18,6 +18,10 @@ QUIZ_RESET_DAY = 213
 # Discord Bot Token
 DISCORD_BOT_TOKEN = ""
 
+# BambuLabs Login info
+BAMBULABS_EMAIL = "makerspace-management-l@g.hmc.edu"
+BAMBULABS_PASS = "PASSWORD"
+
 # Misc Emails
 MAKERSPACE_MANAGEMENT_EMAIL = "makerspace-management-l@g.hmc.edu"
 MAKERSPACE_MANAGER_EMAIL = "kneal@g.hmc.edu"
