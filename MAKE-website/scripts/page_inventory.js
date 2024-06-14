@@ -1,5 +1,7 @@
 const search_options = {
-    limit: 1000, // don't return more results than you need!
+    // Previous limit was 1000 and loading times were perfectly fine,
+    // but we only have ~1200 total items so no limit is needed
+    // limit: 1500, 
     allowTypo: true, // if you don't care about allowing typos
     threshold: -10000, // don't return bad results
     keys: ['name', 'long_name', 'serial_number'], // keys to search
