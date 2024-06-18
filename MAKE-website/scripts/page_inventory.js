@@ -4,7 +4,7 @@ const search_options = {
     // limit: 1500, 
     allowTypo: true, // if you don't care about allowing typos
     threshold: -10000, // don't return bad results
-    keys: ['name', 'long_name', 'serial_number'], // keys to search
+    keys: ['name', 'long_name', 'serial_number', 'keywords'], // keys to search
     all: true,
 }
 
@@ -302,6 +302,8 @@ function generateInventoryDiv(result, kiosk_mode = false) {
         serial_number.innerText = `Serial Number: ${item.serial_number}`;
         lower_div.appendChild(serial_number);
     }
+    
+    // Consider appending keywords here
 
     const show_lower_div_button = document.createElement("button");
     show_lower_div_button.classList.add("inventory-result-show-lower-div");
