@@ -153,7 +153,8 @@ function generateEditableInventoryDiv(item) {
         "serial_number": "",
         "kit_contents": [
             ""
-        ]
+        ],
+        "keywords": ""
     }
     */
 
@@ -334,6 +335,8 @@ function editInventoryItem(uuid, create_item=false) {
     # Kit Contents, list of uuids of other items in the kit
     # if the item is a kit (K)
     kit_contents: Union[List[str], None]
+    # Keywords for searching
+    keywords: Union[str, None]
     */
 
     const container = document.getElementById("edit-inventory-item");
@@ -407,11 +410,12 @@ function changeEventListener(event, item_uuid) {
         state.inventory[index].role = input.value;
     } else if (input.id === "access-type-select") {
         state.inventory[index].access_type = parseInt(input.value);
-    } else if (input.id === "edit-kit_contents" || input.id === "edit-keywords") {
+    } else if (input.id === "edit-kit_contents") {
         state.inventory[index][attr] = input.value.split(",");
     } else if (input.type === "number") {
         state.inventory[index][attr] = parseInt(input.value);
     } else {
+        // For name, long_name, reorder_url, serial_number, and keywords
         state.inventory[index][attr] = input.value;
     }
 
