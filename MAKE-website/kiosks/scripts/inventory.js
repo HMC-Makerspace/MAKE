@@ -13,7 +13,7 @@ const EMPTY_ITEM = {
     "access_type": null,
     "quantity_total": null,
     "quantity_available": null,
-    "locations": [],
+    "locations": [{room: "", container: "", specific: ""}],
     "reorder_url": null,
     "serial_number": null,
     "kit_contents": null,
@@ -423,6 +423,45 @@ function changeEventListener(event, item_uuid) {
     debounce(saveInventoryItem, 100)(item_uuid);
 }
 
+/*
+Check if the given InventoryItem is valid.
+After using editInventoryItem, this function should be called to check if the edits
+to the item are valid. If they are not, the inventory editor should show that
+changes are not saved.
+
+The following fields are required:
+- name
+- role
+- access_type
+- quantity_total
+- locations.room for each location
+*/
+function isInventoryItemValid(item) {
+    // Validate name
+    if (item.name === null || item.name === "") {
+        return false;
+    }
+    // Validate role
+    if (item.role === null || item.role === "") {
+        return false;
+    }
+    // Validate access_type
+    if (item.access_type === null || item.access_type === "") {
+        return false;
+    }
+    // Validate quantity_total
+    if (item.quantity_total === null || item.quantity_total === "") {
+        return false;
+    }
+    // Validate that every room has a container
+    for (let loc of item.locations) {
+        if (loc.room === null || loc.room === "") {
+            return false;
+        }
+    }
+    return true;
+}
+
 
 async function saveInventoryItem(uuid) {
     const container = document.getElementById("save-status");
@@ -432,8 +471,8 @@ async function saveInventoryItem(uuid) {
     const item = state.inventory.find((item) => item.uuid === uuid);
     item.quantity_available = item.quantity_total;
 
-    // Check the four required fields
-    if (item.name === null || item.role === null || item.access_type === null || item.quantity_total === null) {
+    // Check if the edits to the item are valid
+    if (!isInventoryItemValid(item)) {
         el.innerText = "Missing required fields";
         container.classList.add("error");
         container.classList.remove("saved");
@@ -501,7 +540,7 @@ function createLocationEditor(loc, index) {
     div.id = `location-editor-${index}`;
 
     const room = document.createElement("label");
-    room.innerHTML = `Room: <select id="edit-room-${index}" required>${ROOMS_HTML(loc.room)}</select>`;
+    room.innerHTML = `Room: * <select id="edit-room-${index}" required>${ROOMS_HTML(loc.room)}</select>`;
 
     const delete_button = `<button onclick="deleteLocationEditor('${div.id}')"><span class="material-symbols-outlined">delete</span></button>`
 
