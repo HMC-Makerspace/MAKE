@@ -959,6 +959,15 @@ tr.workshop-admin {
 }
 
 /*
+Parent div for the count of total users in the statistics page
+*/
+#total-users-parent {
+  display: flex;
+  gap: 0.5rem;
+  flex-direction: row;
+}
+
+/*
 
 INVENTORY
 

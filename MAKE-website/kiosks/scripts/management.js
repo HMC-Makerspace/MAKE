@@ -993,7 +993,81 @@ function renderStatistics() {
     generateCheckoutItemsChart(checkoutCountsByItem);
     generateDailyCheckoutTrendsChart(dailyCounts);
     generateCheckoutsByUserRoleChart();
+
+    // Create a pie chart of users by college
+    generateUsersByCollegeChart();
 }
+
+function generateUsersByCollegeChart() {
+    // Initialize a college count object
+    const collegeCounts = {};
+
+    const email_to_college = {
+        "hmc.edu": "HMC",
+        "g.hmc.edu": "HMC",
+        "scrippscollege.edu": "Scripps",
+        "mymail.pomona.edu": "Pomona",
+        "pomona.edu": "Pomona",
+        "cmc.edu": "CMC",
+        "students.pitzer.edu": "Pitzer",
+        "pitzer.edu": "Pitzer",
+        "cgu.edu": "CGU", 
+    }
+
+    const college_to_color = {
+        "HMC": "rgba(253, 185, 19, 0.5)",
+        "Scripps": "rgba(52, 113, 91, 0.5)",
+        "Pomona": "rgba(0, 87, 184, 0.5)",
+        "CMC": "rgba(152, 26, 49, 0.5)",
+        "Pitzer": "rgba(247, 148, 29, 0.5)",
+        "CGU": "rgba(175, 29, 39, 0.5)",
+        "Other": "rgba(128, 128, 128, 0.5)",
+    }
+
+    // Loop through each user
+    state.users.forEach(user => {
+        // Get the user's college from their email handle
+        const email = user.email.toLowerCase();
+        const domain = email.substring(email.lastIndexOf("@") + 1);
+        const college = email_to_college[domain] || "Other";
+        if (college === "Other") {
+            console.log("Unknown email", email);
+        }
+        // If the user's college is not already in the object, initialize it to 1, else increment it
+        collegeCounts[college] = (collegeCounts[college] || 0) + 1;
+    });
+
+    // Tally the total number of users
+    const total_users = Object.values(collegeCounts).reduce((a, b) => a + b, 0);
+
+    document.getElementById("total-users").innerText = total_users;
+
+    // Prepare for the chart
+    const ctx = document.getElementById('users-by-college-chart').getContext('2d');
+    const labels = Object.keys(collegeCounts);
+    const data = Object.values(collegeCounts);
+    const backgroundColors = labels.map(college => college_to_color[college]);
+
+    // Generate the chart
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: backgroundColors,
+            }],
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
+}
+
 
 function generateDailyCountsFromCheckouts() {
     // Initialize an empty object to hold date: count mappings
