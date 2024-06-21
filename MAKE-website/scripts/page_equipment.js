@@ -4,10 +4,11 @@ const laser3d_equipment = {
             name: "3D Printer Troubleshooting Guide",
             link: "https://docs.google.com/document/d/1a2Q-BonjK_kNOBoaQjxGVQgLC9nilP-8HGqSBOf4ynU/edit"
         },
-        {
-            name: "Protomax Waterjet Cleaning Guide",
-            link: "https://docs.google.com/document/d/1TtskNSlH7_t2M9379B6Hjvi2-OvWMI1bZfx8_gJR5Ig/edit#heading=h.ghupwe3g82ta"
-        },
+        // This link is now steward-only
+        // {
+        //     name: "Protomax Waterjet Cleaning Guide",
+        //     link: "https://docs.google.com/document/d/1TtskNSlH7_t2M9379B6Hjvi2-OvWMI1bZfx8_gJR5Ig/edit#heading=h.ghupwe3g82ta"
+        // },
     ],
     "equipment": [
         {
@@ -28,21 +29,27 @@ const laser3d_equipment = {
             image: "img/equipment/epiloglaser.webp",
             link: "https://docs.google.com/document/d/1JNqDC9X5x_eaMU51Pfan4zC-YUiqhW1XqpONjFzrzyM/edit#heading=h.p54qzrkefqd4"
         },
+        // {
+        //     name: "FLSUN SR 3D Printers",
+        //     description: "Delta FDM 3D printers that excel at printing PLA and ABS quickly, with speeds ranging from 80mm/s to 200mm/s.",
+        //     image: "img/equipment/flsunsr.webp",
+        //     link: "https://docs.google.com/document/d/1gDvmQBr8GSX1x4c6m6gHaMW2nl4jzUDritskwbLwQwI/edit#heading=h.e36rdnc8fyom"
+        // },
         {
-            name: "FLSUN SR 3D Printers",
-            description: "Delta FDM 3D printers that excel at printing PLA and ABS quickly, with speeds ranging from 80mm/s to 200mm/s.",
-            image: "img/equipment/flsunsr.webp",
-            link: "https://docs.google.com/document/d/1gDvmQBr8GSX1x4c6m6gHaMW2nl4jzUDritskwbLwQwI/edit#heading=h.e36rdnc8fyom"
+            name: "Bambu Lab X1-Carbon 3D Printers",
+            description: "Core-XY FDM 3D printers that are some of the best on the market, with automatic flow calibration, bed leveling, and a top print speed of 500mm/s. Checkout the Printers tab to view the current status of all our X1-Carbon printers.",
+            image: "img/equipment/bambuX1C.webp",
+            link: "https://docs.google.com/document/d/1Blw20OA6k90Fj1Fr1DcnzEegb925oTB9Lk1SixmsZko/edit#heading=h.p7o03diqftst"
         },
         {
             name: "Prusa i3 MK3S+ 3D Printers",
-            description: "Cartesian FDM 3D printers that can print PLA, ABS, TPU, and many other materials. Slower than the FLSUN SR 3D printers, but can be tuned for higher quality prints.",
+            description: "Cartesian FDM 3D printers that can print PLA, ABS, TPU, and many other materials. Slower than the Bambu X1C printers, but are often available for large prints.",
             image: "img/equipment/prusa.webp",
             link: "https://docs.google.com/document/d/1gDvmQBr8GSX1x4c6m6gHaMW2nl4jzUDritskwbLwQwI/edit#heading=h.e36rdnc8fyom"
         },
         {
             name: "Markforged Onyx One 3D Printers",
-            description: "Cartesian FDM 3D printers that prints Onyx, a carbon-fiber/nylon composite filament. Onyx filament is micro carbon fiber filled nylon, which produces very strong, very durable, and slightly flexible prints. Filament is charged at-cost to the user.",
+            description: "Cartesian FDM 3D printers that prints Onyx, a micro carbon fiber filled nylon composite filament, which produces very strong, very durable, and slightly flexible prints. Filament is charged at-cost to the user.",
             image: "img/equipment/onyx.webp",
             link: "https://docs.google.com/document/d/1gDvmQBr8GSX1x4c6m6gHaMW2nl4jzUDritskwbLwQwI/edit#heading=h.fx323geph920"
         },
@@ -54,14 +61,14 @@ const laser3d_equipment = {
         },
         {
             name: "Formlabs Fuse SLS & Sifter",
-            description: "SLS 3D printer that prints by fusing nylon powder together. This method allows for extremely intricate parts that don't need supports to be printed. SLS is charged at-cost to the user.",
+            description: "SLS 3D printer that prints by fusing nylon powder together. This method allows for extremely intricate parts that don't need supports to be printed. Powder is charged at-cost to the user.",
             image: "img/equipment/fuse1.webp",
             link: "https://docs.google.com/document/d/1gDvmQBr8GSX1x4c6m6gHaMW2nl4jzUDritskwbLwQwI/edit#heading=h.nldknjybpgtv"
         },
         {
             name: "Protomax Waterjet",
             description: "Waterjet cutter that can cut virtually any material. Uses a high-pressure stream of water to propel abrasive through the material.",
-            image: "img/equipment/protomax.webp",
+            image: "img/equipment/protomax2.webp",
             link: "https://docs.google.com/document/d/1a-hPM5qB79ONJ-7k06pvIZVxz1_ONLAD/edit#heading=h.q03evgbefekk"
         },
         {
@@ -171,9 +178,9 @@ const main_area_equipment = {
             link: "https://docs.google.com/document/d/1G9GU8GuiwsSYijOM1ZvY0uHSs9XidLDGd6vxzkiocqI/edit#heading=h.2oq61rhnhhsl"
         },
         {
-            name: "Embroidery Machines",
+            name: "Embroidery Machines (Brother PE800)",
             description: "The Brother PE800 can automatically embroider designs onto fabric. Embroidery designs can be designed on the machine for simple text and symbols, with more complex designs able to be created on a computer and transferred to the machine.",
-            image: "img/equipment/embroiderymachine.webp",
+            image: "img/equipment/embroiderymachine3.webp",
             link: "https://docs.google.com/document/d/10-NArw55j5zZnTbBB5HI8VhwPEMYRjAXWBKud1ITeVE/edit"
         },
         {
@@ -189,8 +196,8 @@ const main_area_equipment = {
             link: "https://docs.google.com/document/d/1qXLxTUifwV6mHEi45AyhBj6PTZoxPnDWk8Sk9bhQ9p4/edit#heading=h.c4g0pi9dhov7"
         },
         {
-            name: "Cricut Machine",
-            description: "The Cricut Explore Air 2 is a machine that can cut out designs from paper, vinyl, and other materials. It can also be used to draw and write on paper.",
+            name: "Cricut Explore Air 2",
+            description: "The Cricut Explore Air 2 is a machine that can cut out designs from paper, vinyl, cardstock, poster board, and other materials. It can also be used to draw and write on paper.",
             image: "img/equipment/cricut.webp",
             link: "https://docs.google.com/document/d/1Wom5XbKVJKwy3peKGTlM5m1HFji67XZr2B0jyBUi5jk/edit"
         },
@@ -350,6 +357,9 @@ function generateEquipmentDiv(equipment) {
     header_div.appendChild(name_div);
     header_div.appendChild(documents_div);
 
+    const machine_div_container = document.createElement("div");
+    machine_div_container.classList.add("equipment-machines-container");
+
     const machines_div = document.createElement("div");
     machines_div.classList.add("equipment-machines");
 
@@ -358,7 +368,9 @@ function generateEquipmentDiv(equipment) {
     }
 
     equipment_div.appendChild(header_div);
-    equipment_div.appendChild(machines_div);
+
+    machine_div_container.appendChild(machines_div);
+    equipment_div.appendChild(machine_div_container);
 
     return equipment_div;
 }

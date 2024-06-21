@@ -1978,14 +1978,20 @@ Equipment
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: center;
+  align-content: stretch;
+  justify-content: left;
   gap: 20px;
+  margin-left: 7%;
+  margin-right: 7%;
+}
+
+.equipment-machines-container {
+  width: 100%;
 }
 
 .machine {
   display: grid;
-  width: 40%;
+  width: calc(50% - 50px);
   grid-template-areas: "icon name" "icon desc" "icon link";
   grid-template-columns: 1fr 3fr;
   background-color: var(--theme-color-2);
