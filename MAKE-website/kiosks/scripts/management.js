@@ -1281,14 +1281,14 @@ function generateDailyCheckoutTrendsChart(dailyCounts) {
 
 function generateCheckoutsByUserRoleChart(roleCounts) {
     // Prepare for the chart
-    const ctx = document.getElementById('checkouts-by-user-role-chart').getContext('2d');
+    const ctx = document.getElementById('checkouts-by-user-role-chart');
     const labels = Object.keys(roleCounts);
     const data = Object.values(roleCounts);
     const backgroundColors = labels.map(() => `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`);
 
     // Destroy the existing chart if it exists
     if (charts.checkouts_by_user_role) {
-        charts.checkouts_by_user_role.destroy
+        charts.checkouts_by_user_role.destroy()
     }
 
     // Generate the chart
