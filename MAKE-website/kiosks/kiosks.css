@@ -574,7 +574,7 @@ Management Console
 }
 
 #stats div {
-  max-height: 500px;
+  max-height: 700px;
 }
 
 
@@ -959,12 +959,28 @@ tr.workshop-admin {
 }
 
 /*
-Parent div for the count of total users in the statistics page
+Container for the start/end date ranges for the statistics page
 */
-#total-users-parent {
+#statistics-date-range-container {
+  display: flex;
+  gap: 1rem;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+
+/*
+Container for the count of total users in the statistics page
+*/
+#total-users-container {
   display: flex;
   gap: 0.5rem;
   flex-direction: row;
+  align-self: end;
+  margin-left: auto;
+  margin-right: 3rem;
 }
 
 /*

@@ -273,10 +273,23 @@
             </div>
 
             <div class="content-body">
-                <h1>Checkouts</h1>
+                <h1>Statistics</h1>
+                <!-- Consider organizing headers by statistic content (checkouts, users, quizzes, etc.) -->
+                <div id="statistics-date-range-container">
+                    <label for="statistics-date-range-start">Start Date</label>
+                    <input 
+                        type="date"
+                        id="statistics-date-range-start"
+                        onchange="renderStatistics()"
+                        value=""
+                        style="margin-inline-end: 1rem"
+                    >
+                    <label for="statistics-date-range-end">End Date</label>
+                    <input type="date" id="statistics-date-range-end" onchange="renderStatistics()" value="">
+                </div>
 
                 <div id="stats">
-
+                    
                     <div>
                         <h2>Heatmap</h2>
                         <canvas id="checkout-heatmap"></canvas>
@@ -288,22 +301,32 @@
                     </div>
 
                     <div>
-                        <h2>90-Day Checkout Trend</h2>
+                        <h2>Checkout Trend</h2>
                         <canvas id="daily-checkout-trends-chart"></canvas>
                     </div>
 
                     <div>
-                        <h2>Checkouts by User Role</h2>
-                        <canvas id="checkouts-by-user-role-chart"></canvas>
+                        <!--Unfinished, to be a place to list number of quizzes passed-->
+                        <h2>Passed Quizzes</h2>
+                        <canvas id="daily-checkout-trends-chart"></canvas>
+                        <div style="color:slategray; margin: auto; width: fit-content;">Work In Progress</div>
                     </div>
 
                     <div>
-                        <h2>Users by College</h2>
-                        <div id="total-users-parent" style="display: flex; gap: 0.5rem; flex-direction:row;">
-                            <h3>Total Users: </h3>
-                            <h3 id="total-users" aria-label="Total users"></h3>
-                        </div>
-                        <canvas id="users-by-college-chart"></canvas>
+                        <span style="display: flex; flex-direction: row; margin-bottom: 0.5rem;">
+                            <h2>Users by College</h2>
+                            <div id="total-users-container">
+                                <h3 style="margin-bottom: 0;">Total Users: </h3>
+                                <h3 style="margin-bottom: 0;" id="total-users" aria-label="Total users">...</h3>
+                            </div>
+                        </span>
+                        
+                        <canvas style="max-height: 400px;" id="users-by-college-chart"></canvas>
+                    </div>
+
+                    <div>
+                        <h2 style="margin-bottom: 0.5rem;">Checkouts by User Role</h2>
+                        <canvas style="max-height: 400px;" id="checkouts-by-user-role-chart"></canvas>
                     </div>
                 </div>
             </div>

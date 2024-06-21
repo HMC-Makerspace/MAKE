@@ -14,6 +14,14 @@ var state = {
 var shifts_updated = false;
 var photo_queue = [];
 
+var charts = {
+    daily_checkout_trends: null,
+    checkout_items: null,
+    checkout_heatmap: null,
+    checkouts_by_user_role: null,
+    users_by_college: null,
+};
+
 const SCORES_MIN = 1;
 const SCORES_MAX = 5;
 const SCORES_KEY = [
@@ -972,13 +980,51 @@ function showAvailabilityPopup(day, hour, available) {
 
 
 function renderStatistics() {
-    const checkoutCountsByHour = new Array(24).fill(0);
-    const checkoutCountsByItem = {};
-    const dailyCounts = generateDailyCountsFromCheckouts();
+    // Get the start and end dates for the statistics
+    let start_date = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000); // Default to 90 days ago
+    if (document.getElementById("statistics-date-range-start").value) {
+        start_date = new Date(
+            document.getElementById("statistics-date-range-start").value
+        );
+    } else {
+        // Update the date input to reflect the default date
+        document.getElementById("statistics-date-range-start").value = start_date.toISOString().split('T')[0];
+    }
 
-    // Process each checkout to tally by hour
+    let end_date = new Date(new Date()); // Default to today
+    if (document.getElementById("statistics-date-range-end").value) {
+        end_date = new Date(
+            document.getElementById("statistics-date-range-end").value
+        );
+    } else {
+        // Update the date input to reflect the default date
+        document.getElementById("statistics-date-range-end").value = end_date.toISOString().split('T')[0];
+    }
+
+    // Generate daily counts of checkouts
+    const dailyCounts = generateDailyCountsFromCheckouts(start_date, end_date);
+
+    // Initialize an array to hold the number of checkouts per hour
+    const checkoutCountsByHour = new Array(24).fill(0);
+    // Initialize an object to hold the number of checkouts per item
+    const checkoutCountsByItem = {};
+    // Initialize an object to hold the number of checkouts per user role
+    const roleCounts = {
+        user: 0,
+        steward: 0,
+        head_steward: 0,
+        admin: 0
+    };
+
+    // Process each checkout to tally by hour, role, and item
     state.checkouts.forEach(checkout => {
         const outDate = new Date(checkout.timestamp_out * 1000);
+        // Skip checkouts that are outside the specified range
+        if (outDate < start_date || outDate > end_date) {
+            return;
+        }
+
+        // Increment the count for the hour the checkout occurred
         checkoutCountsByHour[outDate.getHours()]++;
 
         // Tally checkouts by item
@@ -987,18 +1033,26 @@ function renderStatistics() {
             const itemName = state.inventory.find(item => item.uuid === itemUuid)?.name || 'Unknown Item';
             checkoutCountsByItem[itemName] = (checkoutCountsByItem[itemName] || 0) + itemCount;
         });
+
+        // Find the user who checked out the item(s)
+        const user = state.users.find(user => user.uuid === checkout.checked_out_by);
+        if (user && roleCounts.hasOwnProperty(user.role)) {
+            // If the user exists and has a valid role, increment the count for that role
+            
+            roleCounts[user.role]++;
+        }
     });
 
     generateCheckoutHeatmap(checkoutCountsByHour);
     generateCheckoutItemsChart(checkoutCountsByItem);
     generateDailyCheckoutTrendsChart(dailyCounts);
-    generateCheckoutsByUserRoleChart();
 
-    // Create a pie chart of users by college
-    generateUsersByCollegeChart();
+    generateUsersByCollegeChart(start_date, end_date);
+    
+    generateCheckoutsByUserRoleChart(roleCounts);
 }
 
-function generateUsersByCollegeChart() {
+function generateUsersByCollegeChart(start_date, end_date) {
     // Initialize a college count object
     const collegeCounts = {};
 
@@ -1014,31 +1068,46 @@ function generateUsersByCollegeChart() {
         "cgu.edu": "CGU", 
     }
 
+    const GENERAL_SAFETY_QUIZ_ID = "66546920"
+
+    // Loop through each user
+    state.users.forEach(user => {
+        // Find all times when the user passed the general safety quiz
+        const quiz_ids = Object.values(user.passed_quizzes)
+        const quiz_times = Object.keys(user.passed_quizzes)
+        for (let i = 0; i < quiz_ids.length; i++) {
+            // If this quiz is the general safety quiz
+            if (quiz_ids[i] === GENERAL_SAFETY_QUIZ_ID) {
+                // Get the date the quiz was taken
+                const quiz_date = new Date(quiz_times[i]*1000)
+                // If the quiz was taken outside the specified range, skip it
+                if (quiz_date < start_date || quiz_date > end_date) {
+                    return;
+                } else {
+                    // Get the user's college from their email handle
+                    const email = user.email.toLowerCase();
+                    const domain = email.substring(email.lastIndexOf("@") + 1);
+                    // If the user's email domain is not from the colleges, default to "Other"
+                    const college = email_to_college[domain] || "Other";
+                    // If the user's college is not already in the object, initialize it to 1, else increment it
+                    collegeCounts[college] = (collegeCounts[college] || 0) + 1;
+                }
+            }
+        }
+    });
+
+    // Tally the total number of users
+    const total_users = Object.values(collegeCounts).reduce((a, b) => a + b, 0);
+
     const college_to_color = {
         "HMC": "rgba(253, 185, 19, 0.5)",
         "Scripps": "rgba(52, 113, 91, 0.5)",
         "Pomona": "rgba(0, 87, 184, 0.5)",
         "CMC": "rgba(152, 26, 49, 0.5)",
         "Pitzer": "rgba(247, 148, 29, 0.5)",
-        "CGU": "rgba(175, 29, 39, 0.5)",
+        "CGU": "rgba(122, 15, 20, 0.5)",
         "Other": "rgba(128, 128, 128, 0.5)",
     }
-
-    // Loop through each user
-    state.users.forEach(user => {
-        // Get the user's college from their email handle
-        const email = user.email.toLowerCase();
-        const domain = email.substring(email.lastIndexOf("@") + 1);
-        const college = email_to_college[domain] || "Other";
-        if (college === "Other") {
-            console.log("Unknown email", email);
-        }
-        // If the user's college is not already in the object, initialize it to 1, else increment it
-        collegeCounts[college] = (collegeCounts[college] || 0) + 1;
-    });
-
-    // Tally the total number of users
-    const total_users = Object.values(collegeCounts).reduce((a, b) => a + b, 0);
 
     document.getElementById("total-users").innerText = total_users;
 
@@ -1048,8 +1117,12 @@ function generateUsersByCollegeChart() {
     const data = Object.values(collegeCounts);
     const backgroundColors = labels.map(college => college_to_color[college]);
 
+    if (charts.users_by_college) {
+        charts.users_by_college.destroy();
+    }
+
     // Generate the chart
-    new Chart(ctx, {
+    const users_by_college = new Chart(ctx, {
         type: 'pie',
         data: {
             labels: labels,
@@ -1063,13 +1136,14 @@ function generateUsersByCollegeChart() {
                 legend: {
                     position: 'top',
                 }
-            }
+            },
         }
     });
+    charts.users_by_college = users_by_college;
 }
 
 
-function generateDailyCountsFromCheckouts() {
+function generateDailyCountsFromCheckouts(start_date, end_date) {
     // Initialize an empty object to hold date: count mappings
     const dailyCounts = {};
 
@@ -1078,8 +1152,8 @@ function generateDailyCountsFromCheckouts() {
         // Convert UNIX timestamp to a Date object
         const dateOut = new Date(checkout.timestamp_out * 1000);
 
-        // If it was more than 30 days ago, skip it
-        if (dateOut < new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)) {
+        // If the date is outside the specified range, skip it
+        if (dateOut < start_date || dateOut > end_date) {
             return;
         }
 
@@ -1099,7 +1173,13 @@ function generateDailyCountsFromCheckouts() {
 
 function generateCheckoutHeatmap(checkoutCountsByHour) {
     const ctx = document.getElementById('checkout-heatmap');
-    new Chart(ctx, {
+
+    // Destroy the existing chart if it exists
+    if (charts.checkout_heatmap) {
+        charts.checkout_heatmap.destroy();
+    }
+
+    const checkout_heatmap = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: Array.from({ length: 24 }, (_, i) => `${i}:00`), // `0:00`, `1:00`, ... `23:00
@@ -1117,6 +1197,7 @@ function generateCheckoutHeatmap(checkoutCountsByHour) {
             }
         }
     });
+    charts.checkout_heatmap = checkout_heatmap;
 }
 
 function generateCheckoutItemsChart(checkoutCountsByItem) {
@@ -1125,7 +1206,13 @@ function generateCheckoutItemsChart(checkoutCountsByItem) {
     const itemCounts = sortedItems.map(item => item[1]);
 
     const ctx = document.getElementById('checkout-items-chart');
-    new Chart(ctx, {
+
+    // Destroy the existing chart if it exists
+    if (charts.checkout_items) {
+        charts.checkout_items.destroy();
+    }
+
+    const checkout_items = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: itemNames,
@@ -1143,12 +1230,18 @@ function generateCheckoutItemsChart(checkoutCountsByItem) {
             }
         }
     });
+    charts.checkout_items = checkout_items;
 }
 
 function generateDailyCheckoutTrendsChart(dailyCounts) {
     const ctx = document.getElementById('daily-checkout-trends-chart').getContext('2d');
 
-    new Chart(ctx, {
+    // Destroy the existing chart if it exists
+    if (charts.daily_checkout_trends) {
+        charts.daily_checkout_trends.destroy();
+    }
+
+    const daily_checkout_trends = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: Object.keys(dailyCounts), // Assuming dates are in 'YYYY-MM-DD' format
@@ -1183,35 +1276,23 @@ function generateDailyCheckoutTrendsChart(dailyCounts) {
             }
         }
     });
+    charts.daily_checkout_trends = daily_checkout_trends;
 }
 
-function generateCheckoutsByUserRoleChart() {
-    // Initialize a role count object
-    const roleCounts = {
-        user: 0,
-        steward: 0,
-        head_steward: 0,
-        admin: 0
-    };
-
-    // Loop through each checkout
-    state.checkouts.forEach(checkout => {
-        // Find the user who checked out the item(s)
-        const user = state.users.find(user => user.uuid === checkout.checked_out_by);
-        if (user && roleCounts.hasOwnProperty(user.role)) {
-            // If the user exists and has a valid role, increment the count for that role
-            roleCounts[user.role]++;
-        }
-    });
-
+function generateCheckoutsByUserRoleChart(roleCounts) {
     // Prepare for the chart
     const ctx = document.getElementById('checkouts-by-user-role-chart').getContext('2d');
     const labels = Object.keys(roleCounts);
     const data = Object.values(roleCounts);
     const backgroundColors = labels.map(() => `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`);
 
+    // Destroy the existing chart if it exists
+    if (charts.checkouts_by_user_role) {
+        charts.checkouts_by_user_role.destroy
+    }
+
     // Generate the chart
-    new Chart(ctx, {
+    checkouts_by_user_role = new Chart(ctx, {
         type: 'pie', // Changed from 'polarArea' to 'pie'
         data: {
             labels: labels,
@@ -1225,9 +1306,11 @@ function generateCheckoutsByUserRoleChart() {
                 legend: {
                     position: 'top',
                 }
-            }
+            },
+            response: false,
         }
     });
+    charts.checkouts_by_user_role = checkouts_by_user_role;
 }
 
 function renderRestockRequests() {
