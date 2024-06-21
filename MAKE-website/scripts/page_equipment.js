@@ -68,7 +68,7 @@ const laser3d_equipment = {
         {
             name: "Protomax Waterjet",
             description: "Waterjet cutter that can cut virtually any material. Uses a high-pressure stream of water to propel abrasive through the material.",
-            image: "img/equipment/protomax2.webp",
+            image: "img/equipment/protomax.webp",
             link: "https://docs.google.com/document/d/1a-hPM5qB79ONJ-7k06pvIZVxz1_ONLAD/edit#heading=h.q03evgbefekk"
         },
         {
@@ -180,7 +180,7 @@ const main_area_equipment = {
         {
             name: "Embroidery Machines (Brother PE800)",
             description: "The Brother PE800 can automatically embroider designs onto fabric. Embroidery designs can be designed on the machine for simple text and symbols, with more complex designs able to be created on a computer and transferred to the machine.",
-            image: "img/equipment/embroiderymachine3.webp",
+            image: "img/equipment/embroiderymachine.webp",
             link: "https://docs.google.com/document/d/10-NArw55j5zZnTbBB5HI8VhwPEMYRjAXWBKud1ITeVE/edit"
         },
         {
