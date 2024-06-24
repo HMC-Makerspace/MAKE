@@ -72,6 +72,11 @@ function searchInventory(search, filters = null, kiosk_mode = false) {
     // If in kiosk mode, sort by number of times checked out
     if (kiosk_mode === true) {
         results.sort((a, b) =>  b.obj.num_times_checked - a.obj.num_times_checked);
+    } 
+
+    // If not in kiosk mode, remove items with access level 5 (staff only)
+    if (kiosk_mode === false) {
+        results = results.filter(inventory_item => inventory_item.obj.access_type !== 5);
     }
 
     if (filters !== null) {
