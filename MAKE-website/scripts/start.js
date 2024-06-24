@@ -23,11 +23,15 @@ async function start() {
 
     const promises = [
         fetchInventory().then(() => {
-            submitSearch();
-            document.getElementById("inventory-search-input").addEventListener("keyup", submitSearch);
-            document.getElementById("container-input").addEventListener("keyup", submitSearch);
-            document.getElementById("room-select").addEventListener("change", submitSearch);
-            document.getElementById("tool-material-select").addEventListener("change", submitSearch);
+            submitSearch(kiosk_mode = false);
+            // While kiosk_mode = false is the default value, we explicitly set it here
+            // to make it clear that we are not in kiosk mode. Further, we can't just use
+            // submitSearch as the callback function because then the keyboard event
+            // is passed to the function, which incorrectly overrides the kiosk_mode value.
+            document.getElementById("inventory-search-input").addEventListener("keyup", () => { submitSearch(kiosk_mode = false) });
+            document.getElementById("container-input").addEventListener("keyup", () => { submitSearch(kiosk_mode = false) });
+            document.getElementById("room-select").addEventListener("change", () => { submitSearch(kiosk_mode = false) });
+            document.getElementById("tool-material-select").addEventListener("change", () => { submitSearch(kiosk_mode = false) });
         }),
         fetchSchedule(),
         fetchWorkshops(),
