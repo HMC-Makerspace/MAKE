@@ -529,13 +529,15 @@ The following fields are stored:
 - uuid: The uuid of the API key
 - Name: The name of the API key
 - Key: The API key
-- Scope: The scope of the API key. Scopes can be:
+- Scopes: The scope of the API key. Scopes can be:
     - admin: Can access all endpoints
     - users: Can access user endpoints
-    - checkout: Can access checkout endpoints
-    - studentstorage: Can access student storage endpoints
-    - steward: Can access steward-level
-    - printer: Can access printer endpoints
+    - checkouts: Can access checkout endpoints (Note, access to the checkout kiosk also needs "users" scopes)
+    - inventory: Can access inventory editor endpoints
+    - workshops: Can access workshops endpoints (Note, access to the workshops kiosk also needs "users" scopes)
+    - studentstorage: Can access student storage endpoints (unused)
+    - steward: Can access steward-level (unused)
+    - printer: Can access printer endpoints (unused)
 """
 
 
@@ -543,7 +545,7 @@ class APIKey(BaseModel):
     uuid: str
     name: str
     key: str
-    scope: str
+    scopes: List[str]
     # TODO[pydantic]: The following keys were removed: `json_encoders`.
     # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
     model_config = ConfigDict(arbitrary_types_allowed=True, json_encoders={ObjectId: str}, json_schema_extra={
@@ -551,7 +553,7 @@ class APIKey(BaseModel):
             "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
             "name": "API Key",
             "key": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-            "scope": "admin",
+            "scopes": ["admin"],
         }
     })
 

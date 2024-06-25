@@ -28,6 +28,30 @@ async function authenticate() {
     // Remove api key from url, but keep the rest of the url
     window.history.replaceState({}, document.title, window.location.pathname);
 
+    // Fetch api scope
+    const response = await fetch(`${API}/misc/get_api_key_scopes`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ api_key: api_key }),
+            method: "POST",
+        }
+    );
+
+    if (response.status == 200) {
+        const body = await response.json();
+
+        if (body.scopes.includes("checkouts")) {
+            console.log("Authenticated with checkout permissions");
+        } else {
+            alert("API key does not have checkout scope.");
+        }
+    } else {
+        console.log(response.status, await response.json())
+        alert("Invalid API key.");
+    }
+
     // Save api key to local storage
     localStorage.setItem('checkout_api_key', api_key);
 
@@ -211,7 +235,7 @@ function createAdminCheckoutTable(current = true) {
         if (state.users !== null) {
             let user = state.users.find((user) => user.uuid === checkout.checked_out_by);
 
-            name.innerHTML = `${user.name ?? checkout.checked_out_by}`;
+            name.innerHTML = `${user ? (user.name ?? checkout.checked_out_by) : checkout.checked_out_by}`;
         } else {
             name.innerHTML = `${checkout.checked_out_by}`;
         }

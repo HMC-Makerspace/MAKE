@@ -818,7 +818,7 @@ table#proficiencies-list td.proficiency-cell {
   text-align: center;
 }
 
-#create-new-workshop-button, #create-new-redirect-button, #clear-availability-button {
+#create-new-workshop-button, #create-new-redirect-button, #clear-availability-button, #create-new-api-key-button {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -982,6 +982,58 @@ Container for the count of total users in the statistics page
   margin-left: auto;
   margin-right: 3rem;
 }
+
+/*
+API KEY EDITOR
+*/
+
+/* -- API Key Table -- */
+
+/* Alternate column colors to allow for better visual distinction */
+table#api-keys-table > tbody > tr > td:nth-child(even) {
+  background-color: var(--theme-color-9);
+}
+/* Add padding to cells */
+table#api-keys-table > tbody > tr > td, table#api-keys-table > tbody > tr > th {
+  padding: 10px;
+}
+
+/* Make button columns small */
+td.edit-api-key-td, td.delete-api-key-td {
+  width: 50px;
+  text-align: center;
+}
+
+/* Separate from a .disabled tag because we don't want the spinner animation*/
+button.delete-api-key-disabled, button.edit-api-key-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  position: relative;
+}
+
+
+
+/* -- Create/Edit API Key Popup -- */
+
+/* Align scopes in a column */
+#create-edit-api-key-scopes {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Align each scope checkbox + label to be centered */
+.scope-checkbox {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  text-align: center;
+}
+
+
+
 
 /*
 

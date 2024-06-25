@@ -80,6 +80,12 @@
                 </span>
                 Redirects
             </button>
+            <button id="api-keys-button" class="set-page" onclick="setPage('api-keys')">
+                <span class="material-symbols-outlined">
+                    key_vertical
+                </span>
+                API Keys
+            </button>
             <button id="statistics-button" class="set-page" onclick="setPage('statistics')">
                 <span class="material-symbols-outlined">
                     query_stats
@@ -344,6 +350,22 @@
                 <button id="create-new-redirect-button" onclick="showCreateEditRedirect()">Create New Redirect</button>
 
                 <table id="redirects-table">
+
+                </table>
+            </div>
+        </div>
+        
+        <div class="main-content content-container hidden" id="page-api-keys">
+            <div class="content-header">
+                <p>
+                    View and edit API keys for MAKE.
+                </p>
+            </div>
+
+            <div class="content-body">
+                <button id="create-new-api-key-button" onclick="showCreateEditAPIKey()">Create New API Key</button>
+
+                <table id="api-keys-table">
 
                 </table>
             </div>
@@ -674,6 +696,23 @@
                     <button id="create-edit-redirect-cancel" onclick="closePopup()">Cancel</button>
                 </div>
             </div>
+            
+            <div id="create-edit-api-key" class="hidden">
+                <h1>Create/Edit API Key</h1>
+                <label for="create-edit-api-name">Name</label>
+                <input id="create-edit-api-key-name" placeholder="Management Key 2">
+
+                <label for="create-edit-api-key-key">Key</label>
+                <input id="create-edit-api-key-key" placeholder="TestKey2">
+
+                <label for="create-edit-api-scopes">Page Scopes</label>
+                <div id="create-edit-api-key-scopes"></div>
+                
+                <div class="edit-buttons">
+                    <button id="create-edit-api-key-save" onclick="saveAPIKey()">Save</button>
+                    <button id="create-edit-api-key-cancel" onclick="closePopup()">Cancel</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -690,7 +729,7 @@
     <script src="/scripts/page_schedule.js?v=2.3"></script>
     <script src="/scripts/utils.js?v=2.5"></script>
 
-    <script src="/kiosks/scripts/management.js?v=2.33"></script>
+    <script src="/kiosks/scripts/management.js?v=2.34"></script>
 </body>
 
 </html>

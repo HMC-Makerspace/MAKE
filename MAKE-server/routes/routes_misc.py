@@ -1,7 +1,7 @@
 import datetime
 import logging
 
-from config import QUIZ_IDS, VERSION
+from config import QUIZ_IDS, VERSION, API_KEY_SCOPES
 import utilities
 from utilities import validate_api_key
 from db_schema import *
@@ -104,14 +104,14 @@ async def route_render_loom_file(request: Request):
     # Return the rendered loom file
     return result
 
-@misc_router.post("/api_key_scope")
-async def route_validate_api_key(request: Request):
+@misc_router.post("/get_api_key_scopes")
+async def route_get_api_key_scopes(request: Request):
     # Get the request body
     body = await request.json()
     
     # Validate the API key
     logging.getLogger().setLevel(logging.INFO)
-    logging.info("Checking API key scope...")
+    logging.info("Checking API key scopes...")
 
     db = MongoDB()
 
@@ -126,22 +126,19 @@ async def route_validate_api_key(request: Request):
         raise HTTPException(status_code=401, detail="Invalid API key")
     else:
         # The API key is valid
-        # Return the API key's scope
-        return {"scope": api_key["scope"]}
+        # Return the API key's scopes
+        return {"scopes": api_key["scopes"]}
     
-@misc_router.post("/get_api_keys")
-async def route_get_api_keys(request: Request):
-    # Get the request body
-    body = await request.json()
-    
+@misc_router.get("/get_api_keys")
+async def route_get_api_keys(request: Request): 
     # Get the API keys
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Getting API keys...")
 
     db = MongoDB()
 
-    # Validate the API key
-    if not await validate_api_key(db, body["api_key"], "admin"):
+    # Verify that the current user has the proper scopes to access all API keys
+    if not await validate_api_key(db, request.headers["api-key"], "admin"):
         # The API key is invalid
         # Return error
         raise HTTPException(status_code=401, detail="Invalid API key")
@@ -150,7 +147,25 @@ async def route_get_api_keys(request: Request):
     api_keys = await db.get_collection("api_keys")
     all_api_keys = await api_keys.find().to_list(None)
 
-    return all_api_keys
+    all_api_keys_formatted = [APIKey(**info) for info in all_api_keys]
+
+    return all_api_keys_formatted
+
+@misc_router.get("/get_all_api_key_scopes")
+async def route_get_all_api_key_scopes(request: Request):    
+    # Get the API keys
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Getting API key scopes...")
+
+    db = MongoDB()
+
+    # Verify that the current user has the proper scopes to access all API key scopes
+    if not await validate_api_key(db, request.headers["api-key"], "admin"):
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    
+    return API_KEY_SCOPES
 
 @misc_router.post("/update_api_key")
 async def route_add_api_key(request: Request):
@@ -163,8 +178,8 @@ async def route_add_api_key(request: Request):
 
     db = MongoDB()
 
-    # Validate the API key
-    if not await validate_api_key(db, body["api_key"], "admin"):
+    # Verify that the current user has the proper scopes to add an API key
+    if not await validate_api_key(db, request.headers["api-key"], "admin"):
         # The API key is invalid
         # Return error
         raise HTTPException(status_code=401, detail="Invalid API key")
@@ -196,8 +211,8 @@ async def route_delete_api_key(request: Request):
 
     db = MongoDB()
 
-    # Validate the API key
-    if not await validate_api_key(db, body["api_key"], "admin"):
+    # Verify that the current user has the proper scopes to delete an API key
+    if not await validate_api_key(db, request.headers["api-key"], "admin"):
         # The API key is invalid
         # Return error
         raise HTTPException(status_code=401, detail="Invalid API key")

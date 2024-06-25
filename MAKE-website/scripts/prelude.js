@@ -162,7 +162,7 @@ async function updateUserInfo() {
 
         // Fetch/render appropriate data
         hideLoginError();
-        fetchStudentStorage();
+        // fetchStudentStorage(); // DEPRECATED
         renderQuizInfo();
         renderCheckouts();
         await fetchWorkshops();

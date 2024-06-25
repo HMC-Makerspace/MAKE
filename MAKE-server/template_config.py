@@ -202,3 +202,14 @@ MACHINES = {
         "note": None,
     },
 }
+
+API_KEY_SCOPES = [
+    "admin",
+    "users",
+    "checkouts",
+    "inventory",
+    "workshops",
+    "studentstorage",
+    "steward",
+    "printer"
+]

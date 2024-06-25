@@ -9,6 +9,8 @@ var state = {
     quizzes: null,
     checkouts: null,
     redirects: null,
+    api_keys: null,
+    all_api_key_scopes: null,
 };
 
 var shifts_updated = false;
@@ -104,7 +106,7 @@ async function authenticate() {
     }
 
     // Fetch api scope
-    const response = await fetch(`${API}/misc/api_key_scope`,
+    const response = await fetch(`${API}/misc/get_api_key_scopes`,
         {
             headers: {
                 "Content-Type": "application/json",
@@ -117,12 +119,13 @@ async function authenticate() {
     if (response.status == 200) {
         const body = await response.json();
 
-        if (body.scope == "admin") {
+        if (body.scopes.includes("admin")) {
             console.log("Authenticated as admin");
         } else {
             alert("API key does not have admin scope.");
         }
     } else {
+        console.log(response.status, await response.json())
         alert("Invalid API key.");
     }
 
@@ -167,7 +170,9 @@ async function authenticate() {
         fetchWorkshopsAdmin(),
         fetchRestockRequests(),
         fetchCheckoutsAdmin(),
-        fetchRedirectsAdmin()
+        fetchRedirectsAdmin(),
+        fetchAPIKeysAdmin(),
+        fetchAllAPIKeyScopesAdmin(),
     ];
 
     await Promise.all(promises);
@@ -223,6 +228,43 @@ async function fetchRedirectsAdmin() {
         const redirects = await response.json();
 
         state.redirects = redirects;
+    }
+}
+
+async function fetchAPIKeysAdmin() {
+    const response = await fetch(`${API}/misc/get_api_keys`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+        }
+    );
+
+    console.log(response.status)
+
+    if (response.status == 200) {
+        const api_keys = await response.json();
+        console.log(api_keys)
+        state.api_keys = api_keys;
+    }
+}
+
+async function fetchAllAPIKeyScopesAdmin() {
+    const response = await fetch(`${API}/misc/get_all_api_key_scopes`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+        }
+    );
+
+    if (response.status == 200) {
+        const all_api_key_scopes = await response.json();
+        console.log(all_api_key_scopes)
+
+        state.all_api_key_scopes = all_api_key_scopes;
     }
 }
 
@@ -294,6 +336,8 @@ async function fetchShiftChangesAdmin() {
     }
 }
 
+/*
+// DEPRECATED
 async function fetchStudentStorageAdmin() {
     const response = await fetch(`${API}/student_storage/get_student_storage`,
         {
@@ -310,6 +354,7 @@ async function fetchStudentStorageAdmin() {
         state.student_storage = student_storage;
     }
 }
+*/
 
 async function fetchWorkshopsAdmin() {
     const response = await fetch(`${API}/workshops/get_workshops`,
@@ -352,6 +397,7 @@ function renderAll() {
     renderRestockRequests();
     renderAvailability();
     renderRedirects();
+    renderAPIKeys();
     renderApplicants();
 
     // Stats take a while to load, so we'll render them last
@@ -808,6 +854,190 @@ async function deleteRedirect(uuid) {
         } else {
             const body = await response.json();
             alert("Error deleting redirect: " + response.status + "\n" + body.detail);
+        }
+    }
+}
+
+
+
+/*
+API KEYS
+*/
+function renderAPIKeys() {
+    const api_keys_table = document.getElementById("api-keys-table");
+    removeAllChildren(api_keys_table);
+
+    const table_body = document.createElement("tbody");
+
+    const header = "<tr><th>Key</th><th>Access</th><th>Description</th><th>Edit</th><th>Delete</th></tr>"
+    table_body.innerHTML = header;
+
+    for (let api_key of state.api_keys) {
+        let row = document.createElement("tr");
+
+        let name = document.createElement("td");
+        name.innerText = api_key.name;
+        row.appendChild(name);
+
+        let key = document.createElement("td");
+        key.innerHTML = api_key.key;
+        row.appendChild(key);
+
+        let scopes = document.createElement("td");
+        scopes.innerText = api_key.scopes.join(", ");
+        row.appendChild(scopes);
+        
+
+        let edit_button = document.createElement("td");
+        edit_button.classList.add("edit-api-key-td");
+        let edit_button_button = document.createElement("button");
+        edit_button_button.innerHTML = "<span class='material-symbols-outlined'>tune</span>";
+        edit_button_button.classList.add("edit-api-key");
+        // Disable delete button if it's the current api key
+        if (api_key.key == localStorage.getItem("admin_api_key")) {
+            edit_button_button.classList.add("edit-api-key-disabled");
+        } else {
+            edit_button_button.onclick = () => {
+                showCreateEditAPIKey(api_key.uuid);
+            };
+        }
+        edit_button.appendChild(edit_button_button);
+        row.appendChild(edit_button);
+
+        let delete_button = document.createElement("td");
+        delete_button.classList.add("delete-api-key-td");
+        let delete_button_button = document.createElement("button");
+        delete_button_button.innerHTML = "<span class='material-symbols-outlined'>delete</span>";
+        delete_button_button.classList.add("delete", "delete-api-key");
+        // Disable delete button if it's the current api key
+        if (api_key.key == localStorage.getItem("admin_api_key")) {
+            delete_button_button.classList.add("delete-api-key-disabled");
+        } else {
+            delete_button_button.onclick = () => {
+                deleteAPIKey(api_key.uuid);
+            };
+        }
+        delete_button.appendChild(delete_button_button);
+        row.appendChild(delete_button);
+
+        table_body.appendChild(row);
+    }
+    api_keys_table.appendChild(table_body);
+}
+
+
+function showCreateEditAPIKey(uuid = null) {
+    console.log("Creating api key", uuid)
+    let api_key = null;
+
+    if (uuid !== null) {
+        api_key = state.api_keys.find(api_key => api_key.uuid === uuid);
+    } else {
+        api_key = {
+            uuid: self.crypto.randomUUID(),
+            name: "",
+            key: "",
+            scopes: [],
+        };  
+    }
+
+    document.getElementById("create-edit-api-key-name").value = api_key.name;
+    document.getElementById("create-edit-api-key-key").value = api_key.key;
+    const scopes_div = document.getElementById("create-edit-api-key-scopes");
+    removeAllChildren(scopes_div);
+    for (let scope of state.all_api_key_scopes) {
+        let parent = document.createElement("div");
+        parent.classList.add("scope-checkbox");
+        let checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `create-edit-api-key-scopes-${scope}`;
+        checkbox.value = scope;
+        checkbox.checked = api_key.scopes.includes(scope);
+        let label = document.createElement("label");
+        label.innerText = scope;
+        parent.appendChild(checkbox);
+        parent.appendChild(label);
+        scopes_div.appendChild(parent);
+    }
+
+    console.log("Here")
+
+    console.log(document.getElementById("create-edit-api-key-save"))
+
+    document.getElementById("create-edit-api-key-save").onclick = () => {
+        saveAPIKey(api_key.uuid);
+    };
+
+
+
+    showPopup("create-edit-api-key");
+}
+
+async function saveAPIKey(uuid) {
+    const admin_api_key = localStorage.getItem("admin_api_key");
+
+    const name = document.getElementById("create-edit-api-key-name").value;
+    const key = document.getElementById("create-edit-api-key-key").value;
+    const scopes = [];
+    for (let kiosk of state.all_api_key_scopes) {
+        if (document.getElementById(`create-edit-api-key-scopes-${kiosk}`).checked) {
+            scopes.push(kiosk);
+        }
+    }
+
+    let new_api_key = {
+        uuid: uuid,
+        name: name,
+        key: key,
+        scopes: scopes,
+    };  
+
+    let response = await fetch(`${API}/misc/update_api_key`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": admin_api_key,
+            },
+            body: JSON.stringify(new_api_key),
+        }
+    );
+
+
+    if (response.status == 200) {
+        await fetchAPIKeysAdmin();
+        renderAPIKeys();
+    } else {
+        const body = await response.json();
+        alert("Error saving API key: " + response.status + "\n" + body);
+    }
+
+    closePopup();
+}
+
+async function deleteAPIKey(uuid) {
+    let result = prompt("Are you sure you want to delete this redirect? Type 'delete' to confirm.");
+
+    if (result === "delete") {
+        const admin_api_key = localStorage.getItem("admin_api_key");
+        const response = await fetch(`${API}/misc/delete_api_key`,
+            {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "api-key": admin_api_key,
+                },
+                body: JSON.stringify({ uuid: uuid }),
+            }
+        );
+
+
+        if (response.status == 200) {
+            await fetchAPIKeysAdmin();
+            renderAPIKeys();
+        } else {
+            const body = await response.json();
+            alert("Error deleting API key: " + response.status + "\n" + body);
         }
     }
 }

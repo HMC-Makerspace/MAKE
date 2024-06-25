@@ -49,7 +49,7 @@ async function authenticate() {
     }
 
     // Fetch api scope
-    const response = await fetch(`${API}/misc/api_key_scope`,
+    const response = await fetch(`${API}/misc/get_api_key_scopes`,
         {
             headers: {
                 "Content-Type": "application/json",
@@ -62,7 +62,7 @@ async function authenticate() {
     if (response.status == 200) {
         const body = await response.json();
 
-        if (body.scope == "admin" || body.scope == "inventory") {
+        if (body.scopes.includes("admin") || body.scopes.includes("inventory")) {
             console.log("Authenticated");
             localStorage.setItem('inventory_api_key', api_key);
 
