@@ -33,16 +33,16 @@ async function authenticate() {
 
     console.log(`Authenticating with checkout key ${api_key}`);
 
-    setInterval(fetchInventory, 100000, kiosk_mode = true);
+    setInterval(fetchInventory, 100000, kiosk_mode = "checkout");
     setInterval(fetchCheckoutsAdmin, 100000);
     setInterval(fetchUsers, 100000);
 
     fetchInventory(true).then(() => {
-        submitSearch(kiosk_mode = true);
-        document.getElementById("inventory-search-input").addEventListener("keyup", () => { submitSearch(kiosk_mode = true) });
-        document.getElementById("container-input").addEventListener("keyup", () => { submitSearch(kiosk_mode = true) });
-        document.getElementById("room-select").addEventListener("change", () => { submitSearch(kiosk_mode = true) });
-        document.getElementById("tool-material-select").addEventListener("change", () => { submitSearch(kiosk_mode = true) });
+        submitSearch(kiosk_mode = "checkout");
+        document.getElementById("inventory-search-input").addEventListener("keyup", () => { submitSearch(kiosk_mode = "checkout") });
+        document.getElementById("container-input").addEventListener("keyup", () => { submitSearch(kiosk_mode = "checkout") });
+        document.getElementById("room-select").addEventListener("change", () => { submitSearch(kiosk_mode = "checkout") });
+        document.getElementById("tool-material-select").addEventListener("change", () => { submitSearch(kiosk_mode = "checkout") });
     });
 
     fetchUsers().then(() => {

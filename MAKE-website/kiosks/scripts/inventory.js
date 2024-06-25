@@ -109,7 +109,9 @@ function submitEditableSearch() {
 
     const results = document.getElementById("edit-inventory-results");
 
-    const items = searchInventory(search, getInventoryFilters(), false);
+    // Filter the inventory based on the inputted search
+    // Kiosk mode is true so that access type level 5 items are still visible
+    const items = searchInventory(search, getInventoryFilters(), kiosk_mode = "inventory_editor");
     
     state.current_search_results = [];
     for (let item of items) {

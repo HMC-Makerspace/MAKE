@@ -8,7 +8,7 @@ const search_options = {
     all: true,
 }
 
-async function fetchInventory(kiosk_mode = false) {
+async function fetchInventory(kiosk_mode = false | "inventory_editor" | "checkout") {
     const response = await fetch(`${API}/inventory/get_inventory`);
 
     if (response.status == 200) {
@@ -20,13 +20,14 @@ async function fetchInventory(kiosk_mode = false) {
             element.index = index;
         });
 
-        if (!kiosk_mode) {
+        // Only save state if not in kiosk mode
+        if (kiosk_mode === false) {
             saveState();
         }
     }
 }
 
-function submitSearch(kiosk_mode = false) {
+function submitSearch(kiosk_mode = false | "inventory_editor" | "checkout") {
     const search = document.getElementById("inventory-search-input").value;
 
     const filters = getInventoryFilters();
@@ -40,7 +41,8 @@ function submitSearch(kiosk_mode = false) {
 
     removeAllChildren(results);
     appendChildren(results, state.current_search_results.slice(0, 20));
-    if (kiosk_mode === true) {
+    // If in the checkout kiosk, update which items are selected for checkout
+    if (kiosk_mode === "checkout") {
         updateSelectedItems();
     }
 
@@ -64,17 +66,17 @@ function getInventoryFilters() {
     return filters;
 }
 
-function searchInventory(search, filters = null, kiosk_mode = false) {
+function searchInventory(search, filters = null, kiosk_mode = false | "inventory_editor" | "checkout") {
     let results = fuzzysort.go(search, state.inventory, search_options);
 
     results.sort((a, b) => b.score - a.score);
 
-    // If in kiosk mode, sort by number of times checked out
-    if (kiosk_mode === true) {
+    // If in checkout kiosk mode, sort by number of times checked out
+    if (kiosk_mode === "checkout") {
         results.sort((a, b) =>  b.obj.num_times_checked - a.obj.num_times_checked);
     } 
 
-    // If not in kiosk mode, remove items with access level 5 (staff only)
+    // If not in any kiosk mode, remove items with access level 5 (staff only)
     if (kiosk_mode === false) {
         results = results.filter(inventory_item => inventory_item.obj.access_type !== 5);
     }
@@ -122,7 +124,7 @@ function searchInventory(search, filters = null, kiosk_mode = false) {
     return results;
 }
 
-function generateInventoryDivs(results, kiosk_mode = false) {
+function generateInventoryDivs(results, kiosk_mode = false | "inventory_editor" | "checkout") {
     const divs = [];
 
     divs.push(generateInventoryHeader(kiosk_mode));
@@ -134,11 +136,12 @@ function generateInventoryDivs(results, kiosk_mode = false) {
     return divs;
 }
 
-function generateInventoryHeader(kiosk_mode = false) {
+function generateInventoryHeader(kiosk_mode = false | "inventory_editor" | "checkout") {
     const div = document.createElement("div");
     div.classList.add("inventory-result");
     div.classList.add("header");
-    if (kiosk_mode === true) {
+    // If in checkout kiosk mode, add the kiosk-mode class
+    if (kiosk_mode === "checkout") {
         div.classList.add("kiosk-mode");
     }
 
@@ -146,7 +149,8 @@ function generateInventoryHeader(kiosk_mode = false) {
     header.classList.add("inventory-result-main");
     header.classList.add("inventory-header");
 
-    if (kiosk_mode === true) {
+    // If in checkout kiosk mode, add the kiosk-mode class
+    if (kiosk_mode === "checkout") {
         header.classList.add("kiosk-mode");
     }
 
@@ -180,11 +184,12 @@ function generateInventoryHeader(kiosk_mode = false) {
     return div;
 }
 
-function generateInventoryDiv(result, kiosk_mode = false) {
+function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | "checkout") {
     let div = document.createElement("div");
     div.classList.add("inventory-result");
 
-    if (kiosk_mode === true) {
+    // If in checkout kiosk mode, add the kiosk-mode class
+    if (kiosk_mode === "checkout") {
         div.classList.add("kiosk-mode");
     }
 
@@ -328,7 +333,8 @@ function generateInventoryDiv(result, kiosk_mode = false) {
 
     main_div.appendChild(show_lower_div_button);
 
-    if (kiosk_mode === true) {
+    // If in checkout kiosk mode, add a button to checkout the item
+    if (kiosk_mode === "checkout") {
         // Add checkout button
         const checkout_buttons = document.createElement("div");
         checkout_buttons.classList.add("inventory-result-checkout-container");

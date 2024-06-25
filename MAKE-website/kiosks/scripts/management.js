@@ -157,7 +157,10 @@ async function authenticate() {
     setInterval(fetchUsers, 5000);
     
     const promises = [
-        fetchInventory(kiosk_mode = true),
+        // While the management page isn't the inventory editor kiosk,
+        // we're only using inventory for statistics, so fetching using
+        // the standard inventory editor route is fine. 
+        fetchInventory(kiosk_mode = "inventory_editor"),
         fetchUsers(),
         fetchShiftsAdmin(),
         fetchShiftChangesAdmin(),
