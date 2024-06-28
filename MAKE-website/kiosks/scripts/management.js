@@ -869,7 +869,7 @@ function renderAPIKeys() {
 
     const table_body = document.createElement("tbody");
 
-    const header = "<tr><th>Key</th><th>Access</th><th>Description</th><th>Edit</th><th>Delete</th></tr>"
+    const header = "<tr><th>Name</th><th>Key</th><th>Access</th><th>Edit</th><th>Delete</th></tr>"
     table_body.innerHTML = header;
 
     for (let api_key of state.api_keys) {
@@ -879,9 +879,29 @@ function renderAPIKeys() {
         name.innerText = api_key.name;
         row.appendChild(name);
 
-        let key = document.createElement("td");
-        key.innerHTML = api_key.key;
-        row.appendChild(key);
+        // Create a span with the key, and a button to reveal it
+        let key_td = document.createElement("td");
+        key_td.classList.add("api-key-key-td");
+        let key = document.createElement("span");
+        key.innerHTML = "Click to reveal key";
+        key.style.width = "100%";
+        let reveal_key = document.createElement("button");
+        reveal_key.innerHTML = "<span class='material-symbols-outlined'>visibility_off</span>";
+        // Add a click event to reveal the key and change the button icon
+        reveal_key.onclick = () => {
+            if (key.innerText === "Click to reveal key") {
+                reveal_key.innerHTML = "<span class='material-symbols-outlined'>visibility</span>";
+                key.innerText = api_key.key;
+            } else {
+                reveal_key.innerHTML = "<span class='material-symbols-outlined'>visibility_off</span>";
+                key.innerText = "Click to reveal key";
+            }
+        };
+        key_td.appendChild(reveal_key);
+        key_td.appendChild(key);
+    
+
+        row.appendChild(key_td);
 
         let scopes = document.createElement("td");
         scopes.innerText = api_key.scopes.join(", ");

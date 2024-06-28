@@ -1004,6 +1004,15 @@ td.edit-api-key-td, td.delete-api-key-td {
   text-align: center;
 }
 
+td.api-key-key-td {
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 1;
+  align-items: center;
+  justify-content: left;
+  gap: 10px;
+}
+
 /* Separate from a .disabled tag because we don't want the spinner animation*/
 button.delete-api-key-disabled, button.edit-api-key-disabled {
   opacity: 0.5;
