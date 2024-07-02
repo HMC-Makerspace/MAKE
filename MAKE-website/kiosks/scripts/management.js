@@ -1314,7 +1314,7 @@ function renderStatistics() {
         }
         // If the user is valid, add one to their engagement count
         if (user) {
-            checkoutCountsByUser[user.cx_id] = (checkoutCountsByUser[user.cx_id] || 0) + 1;
+            checkoutCountsByUser[user.cx_id] = (checkoutCountsByUser[user.cx_id] || 0) + Object.values(checkout.items).length;
         }
     });
 
