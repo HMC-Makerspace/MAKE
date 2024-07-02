@@ -24,6 +24,7 @@ var charts = {
     checkouts_by_user_role: null,
     users_by_college: null,
     passed_quizzes: null,
+    user_engagement: null,
 };
 
 const SCORES_MIN = 1;
@@ -1307,6 +1308,10 @@ function renderStatistics() {
             // If the user exists and has a valid role, increment the count for that role
             roleCounts[user.role]++;
         }
+        // If the user is valid, add one to their engagement count
+        if (user) {
+            checkoutCountsByUser[user.cx_id] = (checkoutCountsByUser[user.cx_id] || 0) + 1;
+        }
     });
 
     generateCheckoutHeatmap(checkoutCountsByHour);
@@ -1317,9 +1322,41 @@ function renderStatistics() {
     
     generateCheckoutsByUserRoleChart(roleCounts);
     generatePassedQuizzesChart(start_date, end_date);
+    // TODO: Add engagement based on workshop attendance
+    generateUserEngagementChart(checkoutCountsByUser);
 }
 
-async function generatePassedQuizzesChart(start_date, end_date) {
+function generateUserEngagementChart(engagementsByUserID) {
+    console.log(engagementsByUserID);
+    const ctx = document.getElementById('user-engagement-chart');
+
+    // Destroy the existing chart if it exists
+    if (charts.user_engagement) {
+        charts.user_engagement.destroy();
+    }
+
+    const user_engagement = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(engagementsByUserID),
+            datasets: [{
+                label: 'Engagement',
+                data: Object.values(engagementsByUserID),
+                backgroundColor: 'rgba(0, 123, 255, 0.5)',
+            }],
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    charts.user_engagement = user_engagement;
+}
+
+function generatePassedQuizzesChart(start_date, end_date) {
     // Initialize an object to hold the number of passed and failed quizzes for each quiz
     const passedQuizzes = {};
     const failedQuizzes = {};
@@ -1356,9 +1393,9 @@ async function generatePassedQuizzesChart(start_date, end_date) {
     }
 
     // Create a list of quiz names sorted by the number of times the quiz was passed
-    const sorted_quiz_names = Object.values(quizIDtoName)
-    .sort((a, b) => passedQuizzes[b] - passedQuizzes[a]);
-    console.log(sorted_quiz_names)
+    const sorted_quiz_names = Object.values(quizIDtoName).sort(
+        (a, b) => passedQuizzes[b] - passedQuizzes[a]
+    );
 
     const passed_quizzes = new Chart(ctx, {
         type: 'bar',
