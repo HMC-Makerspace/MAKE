@@ -222,16 +222,6 @@ async def route_delete_api_key(request: Request):
 
     # Delete it
     await api_keys.delete_one({"uuid": body["uuid"]})
-
-
-
-@misc_router.get("/get_quizzes")
-async def route_get_quizzes():
-    # Get the quizzes
-    logging.getLogger().setLevel(logging.INFO)
-    logging.info("Getting quizzes...")
-
-    return 
     
 
 @misc_router.get("/get_redirects")
@@ -326,10 +316,35 @@ async def route_delete_redirect(request: Request):
     await redirects.delete_one({"uuid": body["uuid"]})  
 
 
-@misc_router.get("/get_quizzes")
-async def route_get_quizzes():
+@misc_router.get("/get_quiz_ids")
+async def route_get_quiz_ids():
     # Get the quizzes
     logging.getLogger().setLevel(logging.INFO)
-    logging.info("Getting quizzes...")
+    logging.info("Getting quizzes ids...")
 
     return QUIZ_IDS
+
+@misc_router.get("/get_quiz_results")
+async def route_get_quiz_results(request: Request):
+    # Get the quizzes
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Getting all quiz results...")
+
+    db = MongoDB()
+    api_key = request.headers["api-key"]
+
+    # Validate the API key
+    if not await validate_api_key(db, api_key, "admin"):
+        # The API key is invalid
+        # Return error
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    # Get the collection
+    collection = await db.get_collection("quizzes")
+
+    # Get all quiz results
+    quiz_data = await collection.find().to_list(None)
+
+    quizzes = [QuizResponse(**attempt) for attempt in quiz_data]
+
+    return quizzes

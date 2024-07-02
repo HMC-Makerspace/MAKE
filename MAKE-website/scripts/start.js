@@ -19,7 +19,7 @@ async function start() {
         setPage(page);
     }
 
-    await fetchQuizzes();
+    await fetchQuizIDs();
 
     const promises = [
         fetchInventory().then(() => {
@@ -69,13 +69,13 @@ async function start() {
     await Promise.all(promises);
 }
 
-async function fetchQuizzes() {
-    const response = await fetch(`${API}/misc/get_quizzes`);
+async function fetchQuizIDs() {
+    const response = await fetch(`${API}/misc/get_quiz_ids`);
 
     if (response.status == 200) {
-        const quizzes = await response.json();
+        const quiz_ids = await response.json();
 
-        state.quizzes = quizzes;
+        state.quiz_ids = quiz_ids;
 
         saveState();
     } else {

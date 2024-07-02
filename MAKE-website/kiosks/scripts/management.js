@@ -6,7 +6,8 @@ var state = {
     shift_changes: null,
     inventory: null,
     restock_requests: null,
-    quizzes: null,
+    quiz_ids: null,
+    quiz_results: null,
     checkouts: null,
     redirects: null,
     api_keys: null,
@@ -22,6 +23,7 @@ var charts = {
     checkout_heatmap: null,
     checkouts_by_user_role: null,
     users_by_college: null,
+    passed_quizzes: null,
 };
 
 const SCORES_MIN = 1;
@@ -165,6 +167,8 @@ async function authenticate() {
         // the standard inventory editor route is fine. 
         fetchInventory(kiosk_mode = "inventory_editor"),
         fetchUsers(),
+        fetchQuizIDs(),
+        fetchQuizResults(),
         fetchShiftsAdmin(),
         fetchShiftChangesAdmin(),
         fetchWorkshopsAdmin(),
@@ -241,11 +245,8 @@ async function fetchAPIKeysAdmin() {
         }
     );
 
-    console.log(response.status)
-
     if (response.status == 200) {
         const api_keys = await response.json();
-        console.log(api_keys)
         state.api_keys = api_keys;
     }
 }
@@ -262,8 +263,6 @@ async function fetchAllAPIKeyScopesAdmin() {
 
     if (response.status == 200) {
         const all_api_key_scopes = await response.json();
-        console.log(all_api_key_scopes)
-
         state.all_api_key_scopes = all_api_key_scopes;
     }
 }
@@ -286,8 +285,8 @@ async function fetchCheckoutsAdmin() {
     state.checkouts = checkouts;
 }
 
-async function fetchQuizzes() {
-    const response = await fetch(`${API}/misc/get_quizzes`,
+async function fetchQuizIDs() {
+    const response = await fetch(`${API}/misc/get_quiz_ids`,
         {
             headers: {
                 "Content-Type": "application/json",
@@ -296,9 +295,26 @@ async function fetchQuizzes() {
     );
 
     if (response.status == 200) {
-        const quizzes = await response.json();
+        const quiz_ids = await response.json();
 
-        state.quizzes = quizzes;
+        state.quiz_ids = quiz_ids;
+    }
+}
+
+async function fetchQuizResults() {
+    const response = await fetch(`${API}/misc/get_quiz_results`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+        }
+    );
+
+    if (response.status == 200) {
+        const quiz_results = await response.json();
+
+        state.quiz_results = quiz_results;
     }
 }
 
@@ -980,10 +996,6 @@ function showCreateEditAPIKey(uuid = null) {
         scopes_div.appendChild(parent);
     }
 
-    console.log("Here")
-
-    console.log(document.getElementById("create-edit-api-key-save"))
-
     document.getElementById("create-edit-api-key-save").onclick = () => {
         saveAPIKey(api_key.uuid);
     };
@@ -1268,8 +1280,10 @@ function renderStatistics() {
         head_steward: 0,
         admin: 0
     };
+    //
+    const checkoutCountsByUser = {};
 
-    // Process each checkout to tally by hour, role, and item
+    // Process each checkout to tally by hour, role, item, and user
     state.checkouts.forEach(checkout => {
         const outDate = new Date(checkout.timestamp_out * 1000);
         // Skip checkouts that are outside the specified range
@@ -1291,7 +1305,6 @@ function renderStatistics() {
         const user = state.users.find(user => user.uuid === checkout.checked_out_by);
         if (user && roleCounts.hasOwnProperty(user.role)) {
             // If the user exists and has a valid role, increment the count for that role
-            
             roleCounts[user.role]++;
         }
     });
@@ -1303,6 +1316,73 @@ function renderStatistics() {
     generateUsersByCollegeChart(start_date, end_date);
     
     generateCheckoutsByUserRoleChart(roleCounts);
+    generatePassedQuizzesChart(start_date, end_date);
+}
+
+async function generatePassedQuizzesChart(start_date, end_date) {
+    // Initialize an object to hold the number of passed and failed quizzes for each quiz
+    const passedQuizzes = {};
+    const failedQuizzes = {};
+    // Create a mapping from quiz ID to quiz name
+    const quizIDtoName = Object.entries(state.quiz_ids).reduce((acc, [name, id]) => {
+        acc[id] = name;
+        return acc;
+    }, {});
+
+    // Calculate the total number of passes and fails for each quiz
+    for (let quiz of state.quiz_results) {
+        const quiz_date = new Date(quiz.timestamp * 1000);
+        const quiz_name = quizIDtoName[quiz.gid];
+        // If the quiz was taken outside the specified range, skip it
+        if (quiz_date < start_date || quiz_date > end_date) {
+            continue;
+        }
+        const score = quiz.score.split("/")[0].trim();
+        const outOf = quiz.score.split("/")[1].trim();
+        if (score == outOf) {
+            // Passed quiz
+            passedQuizzes[quiz_name] = (passedQuizzes[quiz_name] || 0) + 1;
+        } else {
+            // Failed quiz
+            failedQuizzes[quiz_name] = (failedQuizzes[quiz_name] || 0) + 1;
+        }
+    }
+
+    const ctx = document.getElementById('passed-quizzes-chart');
+
+    // Destroy the existing chart if it exists
+    if (charts.passed_quizzes) {
+        charts.passed_quizzes.destroy();
+    }
+
+    // Create a list of quiz names sorted by the number of times the quiz was passed
+    const sorted_quiz_names = Object.values(quizIDtoName)
+    .sort((a, b) => passedQuizzes[b] - passedQuizzes[a]);
+    console.log(sorted_quiz_names)
+
+    const passed_quizzes = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sorted_quiz_names,
+            datasets: [{
+                label: 'Passed',
+                data: passedQuizzes,
+                backgroundColor: 'rgba(80, 173, 59, 0.5)',
+            }, {
+                label: 'Failed',
+                data: failedQuizzes,
+                backgroundColor: 'rgba(209, 50, 79, 0.5)',
+            }],
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    charts.passed_quizzes = passed_quizzes;
 }
 
 function generateUsersByCollegeChart(start_date, end_date) {
