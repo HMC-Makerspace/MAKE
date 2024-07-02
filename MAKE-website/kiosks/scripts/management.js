@@ -1312,7 +1312,7 @@ function renderStatistics() {
             // If the user exists and has a valid role, increment the count for that role
             roleCounts[user.role]++;
         }
-        // If the user is valid, add one to their engagement count
+        // If the user is valid, add to their engagement count based on the number of items checked out
         if (user) {
             checkoutCountsByUser[user.cx_id] = (checkoutCountsByUser[user.cx_id] || 0) + Object.values(checkout.items).length;
         }
