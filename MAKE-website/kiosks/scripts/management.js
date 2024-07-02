@@ -1298,10 +1298,13 @@ function renderStatistics() {
         // Tally checkouts by item
         Object.keys(checkout.items).forEach(itemUuid => {
             const itemCount = checkout.items[itemUuid];
-            const itemName = state.inventory.find(item => item.uuid === itemUuid)?.name || null;
+            let itemName = state.inventory.find(item => item.uuid === itemUuid)?.name || null;
             // Skip items that are no longer in the inventory
             if (!itemName) {
                 return;
+            }
+            if (itemName.match(/^(Baby Lock|Brother|Singer) Sewing Machine/g)) {
+                itemName = "Sewing Machine";
             }
             checkoutCountsByItem[itemName] = (checkoutCountsByItem[itemName] || 0) + itemCount;
         });
