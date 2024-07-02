@@ -1461,6 +1461,8 @@ function generateUsersByCollegeChart(start_date, end_date) {
                     const college = email_to_college[domain] || "Other";
                     // If the user's college is not already in the object, initialize it to 1, else increment it
                     collegeCounts[college] = (collegeCounts[college] || 0) + 1;
+                    // If we find a valid quiz, break out of the loop so we don't double count this user
+                    break;
                 }
             }
         }
