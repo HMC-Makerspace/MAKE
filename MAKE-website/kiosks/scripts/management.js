@@ -1298,7 +1298,11 @@ function renderStatistics() {
         // Tally checkouts by item
         Object.keys(checkout.items).forEach(itemUuid => {
             const itemCount = checkout.items[itemUuid];
-            const itemName = state.inventory.find(item => item.uuid === itemUuid)?.name || 'Unknown Item';
+            const itemName = state.inventory.find(item => item.uuid === itemUuid)?.name || null;
+            // Skip items that are no longer in the inventory
+            if (!itemName) {
+                return;
+            }
             checkoutCountsByItem[itemName] = (checkoutCountsByItem[itemName] || 0) + itemCount;
         });
 
@@ -1314,14 +1318,74 @@ function renderStatistics() {
         }
     });
 
+
+    const email_to_college = {
+        "hmc.edu": "HMC",
+        "g.hmc.edu": "HMC",
+        "scrippscollege.edu": "Scripps",
+        "mymail.pomona.edu": "Pomona",
+        "pomona.edu": "Pomona",
+        "cmc.edu": "CMC",
+        "students.pitzer.edu": "Pitzer",
+        "pitzer.edu": "Pitzer",
+        "cgu.edu": "CGU", 
+    }
+
+    // Initialize objects to hold the number of passes and fails for each quiz
+    const passedQuizzes = {};
+    const failedQuizzes = {};
+    // Initialize an array to hold the user IDs of those who passed the general safety quiz
+    const generalSafetyQuizPassIDs = [];
+    // Initialize an object to hold the number of users by college who have passed the general safety quiz
+    const collegeCounts = {}
+    
+    // Create a mapping from quiz ID to quiz name
+    const quizIDtoName = Object.entries(state.quiz_ids).reduce((acc, [name, id]) => {
+        acc[id] = name;
+        return acc;
+    }, {});
+
+    // Calculate the total number of passes and fails for each quiz and the number of
+    // users by college who have passed the general safety quiz
+    for (let quiz of state.quiz_results) {
+        const quiz_date = new Date(quiz.timestamp * 1000);
+        const quiz_name = quizIDtoName[quiz.gid];
+        // If the quiz was taken outside the specified range, skip it
+        if (quiz_date < start_date || quiz_date > end_date) {
+            continue;
+        }
+        // Calculate the score as the number of correct answers.
+        // Note, we cannot use the `passed` field as that signifies whether
+        // the user passed the quiz in this academic year.
+        const score = quiz.score.split("/")[0].trim();
+        const outOf = quiz.score.split("/")[1].trim();
+        if (score == outOf) {
+            // Passed quiz
+            passedQuizzes[quiz_name] = (passedQuizzes[quiz_name] || 0) + 1;
+            if (quiz.gid === state.quiz_ids["General"] && !generalSafetyQuizPassIDs.includes(quiz.cx_id)) {
+                generalSafetyQuizPassIDs.push(quiz.cx_id);
+                // Get the user's college from their email handle
+                const email = quiz.email.toLowerCase();
+                const domain = email.substring(email.lastIndexOf("@") + 1);
+                // If the user's email domain is not from the colleges, default to "Other"
+                const college = email_to_college[domain] || "Other";
+                // If the user's college is not already in the object, initialize it to 1, else increment it
+                collegeCounts[college] = (collegeCounts[college] || 0) + 1;
+            }
+        } else {
+            // Failed quiz
+            failedQuizzes[quiz_name] = (failedQuizzes[quiz_name] || 0) + 1;
+        }
+    }
+
     generateCheckoutHeatmap(checkoutCountsByHour);
     generateCheckoutItemsChart(checkoutCountsByItem);
     generateDailyCheckoutTrendsChart(dailyCounts);
 
-    generateUsersByCollegeChart(start_date, end_date);
+    generateUsersByCollegeChart(collegeCounts);
     
     generateCheckoutsByUserRoleChart(roleCounts);
-    generatePassedQuizzesChart(start_date, end_date);
+    generatePassedQuizzesChart(passedQuizzes, failedQuizzes, quizIDtoName);
     // TODO: Add engagement based on workshop attendance
     generateUserEngagementChart(checkoutCountsByUser);
 }
@@ -1335,13 +1399,17 @@ function generateUserEngagementChart(engagementsByUserID) {
         charts.user_engagement.destroy();
     }
 
+    const sorted_engagements = Object.keys(engagementsByUserID).sort(
+        (a, b) => engagementsByUserID[b] - engagementsByUserID[a]
+    );
+
     const user_engagement = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: Object.keys(engagementsByUserID),
+            labels: sorted_engagements,
             datasets: [{
                 label: 'Engagement',
-                data: Object.values(engagementsByUserID),
+                data: engagementsByUserID,
                 backgroundColor: 'rgba(0, 123, 255, 0.5)',
             }],
         },
@@ -1356,34 +1424,7 @@ function generateUserEngagementChart(engagementsByUserID) {
     charts.user_engagement = user_engagement;
 }
 
-function generatePassedQuizzesChart(start_date, end_date) {
-    // Initialize an object to hold the number of passed and failed quizzes for each quiz
-    const passedQuizzes = {};
-    const failedQuizzes = {};
-    // Create a mapping from quiz ID to quiz name
-    const quizIDtoName = Object.entries(state.quiz_ids).reduce((acc, [name, id]) => {
-        acc[id] = name;
-        return acc;
-    }, {});
-
-    // Calculate the total number of passes and fails for each quiz
-    for (let quiz of state.quiz_results) {
-        const quiz_date = new Date(quiz.timestamp * 1000);
-        const quiz_name = quizIDtoName[quiz.gid];
-        // If the quiz was taken outside the specified range, skip it
-        if (quiz_date < start_date || quiz_date > end_date) {
-            continue;
-        }
-        const score = quiz.score.split("/")[0].trim();
-        const outOf = quiz.score.split("/")[1].trim();
-        if (score == outOf) {
-            // Passed quiz
-            passedQuizzes[quiz_name] = (passedQuizzes[quiz_name] || 0) + 1;
-        } else {
-            // Failed quiz
-            failedQuizzes[quiz_name] = (failedQuizzes[quiz_name] || 0) + 1;
-        }
-    }
+function generatePassedQuizzesChart(passedQuizzes, failedQuizzes, quizIDtoName) {
 
     const ctx = document.getElementById('passed-quizzes-chart');
 
@@ -1422,51 +1463,7 @@ function generatePassedQuizzesChart(start_date, end_date) {
     charts.passed_quizzes = passed_quizzes;
 }
 
-function generateUsersByCollegeChart(start_date, end_date) {
-    // Initialize a college count object
-    const collegeCounts = {};
-
-    const email_to_college = {
-        "hmc.edu": "HMC",
-        "g.hmc.edu": "HMC",
-        "scrippscollege.edu": "Scripps",
-        "mymail.pomona.edu": "Pomona",
-        "pomona.edu": "Pomona",
-        "cmc.edu": "CMC",
-        "students.pitzer.edu": "Pitzer",
-        "pitzer.edu": "Pitzer",
-        "cgu.edu": "CGU", 
-    }
-
-    const GENERAL_SAFETY_QUIZ_ID = "66546920"
-
-    // Loop through each user
-    state.users.forEach(user => {
-        // Find all times when the user passed the general safety quiz
-        const quiz_ids = Object.values(user.passed_quizzes)
-        const quiz_times = Object.keys(user.passed_quizzes)
-        for (let i = 0; i < quiz_ids.length; i++) {
-            // If this quiz is the general safety quiz
-            if (quiz_ids[i] === GENERAL_SAFETY_QUIZ_ID) {
-                // Get the date the quiz was taken
-                const quiz_date = new Date(quiz_times[i]*1000)
-                // If the quiz was taken outside the specified range, skip it
-                if (quiz_date < start_date || quiz_date > end_date) {
-                    return;
-                } else {
-                    // Get the user's college from their email handle
-                    const email = user.email.toLowerCase();
-                    const domain = email.substring(email.lastIndexOf("@") + 1);
-                    // If the user's email domain is not from the colleges, default to "Other"
-                    const college = email_to_college[domain] || "Other";
-                    // If the user's college is not already in the object, initialize it to 1, else increment it
-                    collegeCounts[college] = (collegeCounts[college] || 0) + 1;
-                    // If we find a valid quiz, break out of the loop so we don't double count this user
-                    break;
-                }
-            }
-        }
-    });
+function generateUsersByCollegeChart(collegeCounts) {
 
     // Tally the total number of users
     const total_users = Object.values(collegeCounts).reduce((a, b) => a + b, 0);
