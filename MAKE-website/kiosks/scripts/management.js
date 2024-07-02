@@ -1347,12 +1347,13 @@ function renderStatistics() {
 
     // Calculate the total number of passes and fails for each quiz and the number of
     // users by college who have passed the general safety quiz
-    for (let quiz of state.quiz_results) {
+    state.quiz_results.forEach(quiz => {
         const quiz_date = new Date(quiz.timestamp * 1000);
         const quiz_name = quizIDtoName[quiz.gid];
+
         // If the quiz was taken outside the specified range, skip it
         if (quiz_date < start_date || quiz_date > end_date) {
-            continue;
+            return;
         }
         // Calculate the score as the number of correct answers.
         // Note, we cannot use the `passed` field as that signifies whether
@@ -1376,7 +1377,7 @@ function renderStatistics() {
             // Failed quiz
             failedQuizzes[quiz_name] = (failedQuizzes[quiz_name] || 0) + 1;
         }
-    }
+    });
 
     generateCheckoutHeatmap(checkoutCountsByHour);
     generateCheckoutItemsChart(checkoutCountsByItem);
@@ -1391,7 +1392,6 @@ function renderStatistics() {
 }
 
 function generateUserEngagementChart(engagementsByUserID) {
-    console.log(engagementsByUserID);
     const ctx = document.getElementById('user-engagement-chart');
 
     // Destroy the existing chart if it exists
