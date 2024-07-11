@@ -47,7 +47,9 @@ async function authenticate() {
             alert("API key does not have proper scope.");
         }
     } else {
+        // If API key is invalid, alert the user and redirect to the home page.
         alert("Invalid API key.");
+        window.location.href = "/";
     }
 
     // Get workshops

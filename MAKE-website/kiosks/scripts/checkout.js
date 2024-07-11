@@ -48,8 +48,9 @@ async function authenticate() {
             alert("API key does not have checkout scope.");
         }
     } else {
-        console.log(response.status, await response.json())
+        // If API key is invalid, alert the user and redirect to the home page.
         alert("Invalid API key.");
+        window.location.href = "/";
     }
 
     // Save api key to local storage
