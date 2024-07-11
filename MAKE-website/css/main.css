@@ -2339,27 +2339,27 @@ STEWARD RESOURCES
 }
 
 .steward-resource {
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
+  width: 80%;
+  display: grid;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  row-gap: 10px;
+  row-gap: 20px;
+  column-gap: 40px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 #steward-quick-links button {
-  font-size: .8em;
+  font-size: 1.2em;
   font-weight: bold;
-  width: 240px;
-  height: 60px;
-  margin-right: 10px;
-  margin-left: 10px;
+  height: 80px;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   gap: 10px;
-
+  flex-grow: 1;
+  border-radius: 0.25em;
 }
 
 #steward-shifts, #steward-available-shifts {
@@ -2785,5 +2785,10 @@ Mobile Styles
   }
   .faq-category {
     width: 100%;
+  }
+
+  /* Steward Resources Tab */
+  .steward-resource {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
   }
 }
