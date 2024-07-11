@@ -42,7 +42,7 @@ async function authenticate() {
     if (response.status == 200) {
         const body = await response.json();
 
-        if (body.scopes.includes("checkouts")) {
+        if (body.scopes.includes("admin") || body.scopes.includes("checkouts")) {
             console.log("Authenticated with checkout permissions");
         } else {
             alert("API key does not have checkout scope.");
