@@ -897,6 +897,18 @@ input[type="file"] {
   margin-left: -10px;
 }
 
+#k-button {
+  border-radius: 0;
+  /* We want the button to be invisible */
+  opacity: 0%;
+  /* Exact positioning to have the button completely cover the K in MAKE*/
+  position: absolute;
+  width: 98px;
+  height: 117px;
+  right: 107px;
+  bottom: 39px;
+}
+
 /*
 
 INVENTORY
