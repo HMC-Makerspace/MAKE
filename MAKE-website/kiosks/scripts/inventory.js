@@ -30,7 +30,7 @@ const ROOMS_HTML = (function (value) {return `
 <option ${value === "Electronics" ? "selected" : ""} value="Electronics">Electronics Benches</option>
 <option ${value === "Composite" ? "selected" : ""} value="Composite">Composite Room</option>
 <option ${value === "Outdoor Storage" ? "selected" : ""} value="Outdoor Storage">Outdoor Storage</option>
-<option ${value === "Overstock" ? "selected" : ""} value="Overstock">Overstock</option>
+<option ${value === "Backstock" ? "selected" : ""} value="Backstock">Backstock</option>
 <option ${value === "Deep Storage" ? "selected" : ""} value="Deep Storage">Deep Storage</option>
 <option ${value === "Other" ? "selected" : ""} value="Other">Other</option>
 `});
