@@ -1137,7 +1137,7 @@ INVENTORY
   border-radius: 2px;
 }
 
-.inventory-result-location .overstock {
+.inventory-result-location .backstock {
   border-radius: 2px;
   background-color: var(--theme-color-4);
 }

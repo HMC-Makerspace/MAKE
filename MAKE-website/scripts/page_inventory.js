@@ -76,9 +76,23 @@ function searchInventory(search, filters = null, kiosk_mode = false | "inventory
         results.sort((a, b) =>  b.obj.num_times_checked - a.obj.num_times_checked);
     } 
 
-    // If not in any kiosk mode, remove items with access level 5 (staff only)
+    // If not in any kiosk mode, filter out steward-only items
     if (kiosk_mode === false) {
-        results = results.filter(inventory_item => inventory_item.obj.access_type !== 5);
+        results = results.filter(inventory_item => {
+            // Exclude items with access type 5 (steward-only)
+            if (inventory_item.obj.access_type === 5
+                // Exclude items that only have a location in Backstock or Cage 5
+                || (inventory_item.obj.locations.length === 1
+                    && inventory_item.obj.locations[0].room === "Backstock")
+                || (inventory_item.obj.locations.length === 1
+                    && inventory_item.obj.locations[0].room === "Cage"
+                    && inventory_item.obj.locations[0].container
+                    && inventory_item.obj.locations[0].container.includes("5"))
+                ) {
+                return false;
+            }
+            return true;
+        });
     }
 
     if (filters !== null) {
@@ -105,6 +119,16 @@ function searchInventory(search, filters = null, kiosk_mode = false | "inventory
 
             if (filters.container) {
                 for (let loc of item.locations) {
+                    // If not in kiosk mode, don't show items as being in Backstock or Cage 5
+                    if (kiosk_mode === false
+                        && (loc.room === "Backstock"
+                            || (loc.room === "Cage"
+                                && loc.container
+                                && loc.container.includes("5")
+                            ))
+                        ) {
+                        continue;
+                    }
                     const search_str = `${loc.room ?? ""} ${loc.container ?? ""} ${loc.specific ?? ""}`.toLowerCase();
 
                     if (search_str.includes(filters.container.toLowerCase())) {
@@ -247,6 +271,16 @@ function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | 
     location.classList.add("inventory-result-location");
 
     for (let loc of item.locations) {
+        // If not in kiosk mode, don't show items as being in Backstock or Cage 5
+        if (kiosk_mode === false
+            && (loc.room === "Backstock"
+                || (loc.room === "Cage"
+                    && loc.container
+                    && loc.container.includes("5")
+                ))
+            ) {
+            continue;
+        }
         location.innerHTML += `<span class="room">${loc.room}</span>`;
 
         if (loc.container !== null && loc.container !== "") {
