@@ -6,14 +6,6 @@ const school_names = {
     5: "Pitzer"
 };
 
-const school_pops = {
-    1: 1747,
-    2: 958,
-    3: 1262,
-    4: 905,
-    5: 922,
-}
-
 const QUIZ_NAME_TO_ID = {
     "General": "66546920",
     "3D": "577888883",

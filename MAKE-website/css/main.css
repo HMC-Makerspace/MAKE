@@ -1346,6 +1346,23 @@ Quizzes & Information
   padding: 20px;
 }
 
+/* Container for only the General safety quiz, which
+displays larger and at the top of all the other quizzes */
+#general-quiz-container {
+  width: 90%;
+  margin: 10px auto;
+}
+
+#general-quiz-container > div > p {
+  font-size: medium;
+  align-self: center;
+}
+
+#general-quiz-container > div > button {
+  font-size: large;
+  height: 60px;
+}
+
 #quiz-list-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

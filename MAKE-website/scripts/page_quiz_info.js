@@ -1,3 +1,27 @@
+/*
+Quizzes are stored in the following format:
+- name: The unique name identifier for the quiz, which is shown in the checkouts page
+- description: A brief description of the quiz shown on the quizzes page
+- icon: The icon to display next to the quiz name on the quizzes page
+- reference: A link to the manual for the quiz
+- form: The form id for the quiz, found in the url of the prefilled form after "/d/e/"
+- autofills: An array of the autofill ids for the quiz, found in the url of the prefilled form after "entry."
+
+The steps for getting autofill information are:
+- Go to the google form that you want to autofill
+- Go to options in the top right and click "Get pre-filled link"
+- Fill out the form with unique answers for each question you want
+  to autofill.
+- Click "Get link" and copy the link
+- Find the id of the different questions by looking for the answers in the url. It should look like this:
+  https://docs.google.com/forms/d/e/1FAIpQLSfJpCxhjoVcismSm_ZekKre-7-FCYPVt7Z6RMTrxb-Oe30cVQ/viewform?usp=pp_url&entry.382887588=My+Name&entry.1395074003=7777&entry.1482318217=test_email@gmail.com
+
+The id's are the numbers after "entry." in the url. In this case, the form questions ask for
+name first, then college id, then email, so 382887588 is the id for name, 1395074003 for college id, and 1482318217 for email.
+
+The correct link for the form (after "/d/e/") can also be found in this url, which is different
+from the normal edit link in the url bar when editing the form.
+*/
 const quizzes = [
     {
         name: "General",
@@ -7,12 +31,28 @@ const quizzes = [
         form: "1FAIpQLSfW3l2cxem3JwKqX3RJjjhJXKzAdwY9x4dYeXvOATGA-dhWzA",
         autofills: [382887588, 1395074003, 1482318217]
     },
+    // Old 3d printer/laser cutter quiz
+    // {
+    //     name: "Laser3D",
+    //     description: "Provides access to the 3D printer / laser cutter room.",
+    //     icon: "stylus_laser_pointer",
+    //     reference: "https://docs.google.com/document/d/1gDvmQBr8GSX1x4c6m6gHaMW2nl4jzUDritskwbLwQwI/edit",
+    //     form: "1FAIpQLSfAZHwVpaI91oPq2PcDnUJt4yjPbwLznU41mMfjJJzyyZ9T7A",
+    //     autofills: [382887588, 1395074003, 1482318217]
+    // },
     {
-        name: "Laser3D",
-        description: "Provides access to the 3D printer / laser cutter room.",
+        name: "3D",
+        description: "Must be completed before gaining access to the 3D Printer/Laser Cutter room.",
+        icon: "view_in_ar",
+        reference: "https://docs.google.com/document/d/1P8ANYjpi3USbBGqlTxAZjM13yGebQL4fTTedh64FtQI/edit",
+        form: "1FAIpQLSfkiVD2PfOYFThht0YOeV7-qUoR_Ot7sU75BUK2EwwOUaFKVA",
+        autofills: [382887588, 1395074003, 1482318217]
+    },{
+        name: "Laser",
+        description: "Must be completed before gaining access to the 3D Printer/Laser Cutter room.",
         icon: "stylus_laser_pointer",
-        reference: "https://docs.google.com/document/d/1gDvmQBr8GSX1x4c6m6gHaMW2nl4jzUDritskwbLwQwI/edit",
-        form: "1FAIpQLSfAZHwVpaI91oPq2PcDnUJt4yjPbwLznU41mMfjJJzyyZ9T7A",
+        reference: "https://docs.google.com/document/d/1-MjMIR0GWLGws6HAIEd_lilhaoMGJicK_Rhr4bm6DUQ/edit",
+        form: "1FAIpQLSfJpCxhjoVcismSm_ZekKre-7-FCYPVt7Z6RMTrxb-Oe30cVQ",
         autofills: [382887588, 1395074003, 1482318217]
     },
     {
@@ -67,11 +107,21 @@ const quizzes = [
 
 function renderQuizInfo() {
     const quiz_container = document.getElementById("quiz-list-container");
+    const general_quiz_container = document.getElementById("general-quiz-container");
 
     let divs = [];
 
     for (let quiz of quizzes) {
-        divs.push(generateQuizDiv(quiz));
+        let quiz_div = generateQuizDiv(quiz);
+        // Add the general quiz to the general quiz container
+        // so it is always at the top and is larger
+        if (quiz.name === "General") {
+            removeAllChildren(general_quiz_container);
+            general_quiz_container.appendChild(quiz_div);
+        // Add all other quizzes to the normal quiz-list-container
+        } else {
+            divs.push(quiz_div);
+        }
     }
 
     removeAllChildren(quiz_container);
