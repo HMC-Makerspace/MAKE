@@ -34,13 +34,15 @@ GMAIL_PASS = "PASSWORD"
 # Quiz ID dictionary
 QUIZ_IDS = {
     "General": "66546920",
-    "Laser3D": "1524924728",
+    # "Laser3D": "1524924728", # OLD 3D/LASER CUTTER QUIZ
     "SprayPaint": "1841312496",
     "Composite": "913890505",
     "Welding": "482685426",
     "Studio": "2079405017",
     "Waterjet": "2100779718",
     "Loom": "1235553349",
+    "Laser": "677552423",
+    "3D": "577888883",
 }
 
 # Student Storage Structure
