@@ -111,17 +111,22 @@ function renderQuizInfo() {
 
     let divs = [];
 
+    // Add the general quiz to the general quiz container
+    // so it is always at the top and appears larger
+    let general_quiz = quizzes.find(quiz => quiz.name === "General");
+    if (general_quiz !== undefined) {
+        removeAllChildren(general_quiz_container);
+        general_quiz_container.appendChild(generateQuizDiv(general_quiz));
+    }
+
+
+
     for (let quiz of quizzes) {
-        let quiz_div = generateQuizDiv(quiz);
-        // Add the general quiz to the general quiz container
-        // so it is always at the top and is larger
         if (quiz.name === "General") {
-            removeAllChildren(general_quiz_container);
-            general_quiz_container.appendChild(quiz_div);
-        // Add all other quizzes to the normal quiz-list-container
-        } else {
-            divs.push(quiz_div);
+            continue;
         }
+        // Add all quizzes except General to the normal quiz-list-container
+        divs.push(generateQuizDiv(quiz));
     }
 
     removeAllChildren(quiz_container);
