@@ -6,17 +6,11 @@ const school_names = {
     5: "Pitzer"
 };
 
-const school_pops = {
-    1: 1747,
-    2: 958,
-    3: 1262,
-    4: 905,
-    5: 922,
-}
-
 const QUIZ_NAME_TO_ID = {
     "General": "66546920",
-    "Laser3D": "1524924728",
+    "3D": "577888883",
+    "Laser": "677552423",
+    // "Laser3D": "1524924728", // Old 3D/Laser quiz
     "SprayPaint": "1841312496",
     "Composite": "913890505",
     "Welding": "482685426",
@@ -27,7 +21,9 @@ const QUIZ_NAME_TO_ID = {
 
 const QUIZ_ID_TO_NAME = {
     "66546920": "General",
-    "1524924728": "Laser3D",
+    "577888883": "3D",
+    "677552423": "Laser",
+    // "1524924728": "Laser3D", // Old 3D/Laser quiz
     "1841312496": "SprayPaint",
     "913890505": "Composite",
     "482685426": "Welding",
@@ -38,7 +34,9 @@ const QUIZ_ID_TO_NAME = {
 
 const QUIZ_NAME_TO_READABLE = {
     "General": "General Safety Quiz",
-    "Laser3D": "3D Printer & Laser Cutter Safety Quiz",
+    "3D": "3D Printer Safety Quiz",
+    "Laser": "Laser Cutter Safety Quiz",
+    // "Laser3D": "3D Printer & Laser Cutter Safety Quiz", // Old 3D/Laser quiz
     "SprayPaint": "Spray Paint Booth Safety Quiz",
     "Composite": "Composite Room Safety Quiz",
     "Welding": "Welding Area Safety Quiz",
@@ -49,7 +47,9 @@ const QUIZ_NAME_TO_READABLE = {
 
 const QUIZ_ID_TO_READABLE = {
     "66546920": "General Safety Quiz",
-    "1524924728": "3D Printer & Laser Cutter Safety Quiz",
+    "577888883": "3D Printer Safety Quiz",
+    "677552423": "Laser Cutter Safety Quiz",
+    // "1524924728": "3D Printer & Laser Cutter Safety Quiz", // Old 3D/Laser quiz
     "1841312496": "Spray Paint Booth Safety Quiz",
     "913890505": "Composite Room Safety Quiz",
     "482685426": "Welding Area Safety Quiz",
