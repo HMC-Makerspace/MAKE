@@ -44,7 +44,7 @@ function generateScheduleDivs(schedule) {
 
     divs.push(header);
 
-    for (let i = time_start; i < time_end; i++) {
+    for (let i = time_start; i <= time_end; i++) {
         const row = document.createElement("tr");
 
         const time = document.createElement("th");
