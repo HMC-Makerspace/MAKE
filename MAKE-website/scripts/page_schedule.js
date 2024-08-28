@@ -26,7 +26,7 @@ function generateScheduleDivs(schedule) {
     let divs = [];
 
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const time_start = 13;
+    const time_start = 14;
     const time_end = 23;
 
     // Append header of days to table
@@ -44,7 +44,7 @@ function generateScheduleDivs(schedule) {
 
     divs.push(header);
 
-    for (let i = time_start; i <= time_end; i++) {
+    for (let i = time_start; i < time_end; i++) {
         const row = document.createElement("tr");
 
         const time = document.createElement("th");
