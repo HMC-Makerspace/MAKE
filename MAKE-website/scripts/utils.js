@@ -383,6 +383,25 @@ function formatHour(hour_num) {
     }
 }
 
+function unformatHour(hour_str) {
+    let hour = parseInt(hour_str.split(":")[0]);
+    let am_pm = hour_str.split(" ")[1];
+    
+    if (am_pm === "PM" && hour !== 12) {
+        hour += 12;
+    }
+
+    if (am_pm === "AM" && hour === 12) {
+        hour = 0;
+    }
+
+    if (hour === 24) {
+        hour = 0;
+    }
+
+    return hour;
+}
+
 function showPopup(element_id) {
     document.getElementById("popup-container").classList.remove("hidden");
     document.getElementById(element_id).classList.remove("hidden");
