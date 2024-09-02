@@ -66,7 +66,7 @@ function generatePrinterDivs(printers) {
 
         let ams_filaments = [null, null, null, null];
 
-        if (printer.printer_json["ams"] && printer.printer_json["ams"]["ams"]) {
+        if (printer.printer_json["ams"] && printer.printer_json["ams"]["ams"] && printer.printer_json["ams"]["ams"].length > 0) {
             for (let i = 0; i < printer.printer_json["ams"]["ams"][0]["tray"].length; i++) {
                 let tray = printer.printer_json["ams"]["ams"][0]["tray"][i];
 
