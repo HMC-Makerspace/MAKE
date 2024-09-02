@@ -85,6 +85,18 @@
     </script>
 </head>
 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5HDX43SP5K"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-5HDX43SP5K');
+</script>
+
+
 <div id="fader">
     <img id="fader-img" src="/android-chrome-256x256.png" alt="">
 </div>
@@ -172,7 +184,7 @@
                 <span>Tours<br>& Reservations</span>
             </button>
             -->
-            
+
             <button id="values-button" onclick="setPage('values')">
                 <span class="material-symbols-outlined">
                     partner_exchange
@@ -193,11 +205,12 @@
             </button>
 
             <div class="hmc-content">
-                <a class="no-invert" href="https://www.hmc.edu/makerspace" >
+                <a class="no-invert" href="https://www.hmc.edu/makerspace">
                     <img src="/img/hmc.webp" alt="Harvey Mudd College Logo">
                 </a>
-                
-                <a href="https://www.hmc.edu/website-accessibility/" aria-label="Harvey Mudd Accessibility Guidelines/Complaints">Accessibility</a>
+
+                <a href="https://www.hmc.edu/website-accessibility/"
+                    aria-label="Harvey Mudd Accessibility Guidelines/Complaints">Accessibility</a>
             </div>
         </nav>
 
@@ -364,7 +377,8 @@
 
                     <h3>Your Shifts</h3>
 
-                    <button id="view-previous-shift-changes" class="big with-icon" onclick="showPreviousShiftChanges(this)">
+                    <button id="view-previous-shift-changes" class="big with-icon"
+                        onclick="showPreviousShiftChanges(this)">
                         Previous Shift Changes</button>
 
 
@@ -461,7 +475,7 @@
             <div class="content-container">
                 <div id="workshops-header" class="content-header">
                     <p3>
-                        Workshops are held in the Main Makerspace area, unless otherwise noted. 
+                        Workshops are held in the Main Makerspace area, unless otherwise noted.
                         Please arrive on time!
                     </p3>
 
@@ -472,17 +486,19 @@
 
                 <div id="workshops-content" class="content-body">
                     <div id="featured-workshops">
-                        
+
                     </div>
 
                     <div id="workshops-selector">
-                        <button id="upcoming-workshops-button" class="with-icon switch selected" onclick="showWorkshops('upcoming')">
+                        <button id="upcoming-workshops-button" class="with-icon switch selected"
+                            onclick="showWorkshops('upcoming')">
                             <span class="material-symbols-outlined">
                                 event_upcoming
                             </span>
                             Upcoming Workshops
                         </button>
-                        <button id="previous-workshops-button" class="with-icon switch" onclick="showWorkshops('previous')">
+                        <button id="previous-workshops-button" class="with-icon switch"
+                            onclick="showWorkshops('previous')">
                             <span class="material-symbols-outlined">
                                 history
                             </span>
@@ -577,7 +593,7 @@
                         <h3>This page shows the current steward schedule for this week.</h3>
                         Click on a skill proficiency above to see when a steward that has that proficiency is on duty.
                         <br>
-                        Click on a shift to see what skill proficiencies the stewards on duty have. 
+                        Click on a shift to see what skill proficiencies the stewards on duty have.
                         <br>
                         <!-- TODO: Update later to be dynamic? -->
                         <h3>For the Fall semester, the Makerspace will open on September 3rd, 2024!</h3>
@@ -684,7 +700,7 @@
                 <div id="tour-reservation-content" class="content-body">
                 </div>
             </div>
-        </section>  
+        </section>
 
         <!--
 
@@ -693,37 +709,53 @@
         -->
         <section id="page-faq" class="main-content hidden">
             <div class="content-container">
-                <div id="about-faq-content" class="content-body">        
+                <div id="about-faq-content" class="content-body">
 
                     <div id="about-content" class="md">
                         <h1>About & FAQ</h1>
 
                         <h2>About</h2>
                         <p>
-                            The Harvey Mudd Makerspace is an 8,000 sq. ft., student-run facility for providing access to tools, resources, space, and storage to work on personal and academic projects for 7C students, faculty and staff. We are dedicated to making this a space where everyone feels comfortable working on a variety of projects, from electronics to sewing or artistic endeavors. The Makerspace helps Harvey Mudd further its work toward fostering inclusive excellence on campus while also creating new educational and community engagement opportunities for the students and faculty of all 7Cs.
+                            The Harvey Mudd Makerspace is an 8,000 sq. ft., student-run facility for providing access to
+                            tools, resources, space, and storage to work on personal and academic projects for 7C
+                            students, faculty and staff. We are dedicated to making this a space where everyone feels
+                            comfortable working on a variety of projects, from electronics to sewing or artistic
+                            endeavors. The Makerspace helps Harvey Mudd further its work toward fostering inclusive
+                            excellence on campus while also creating new educational and community engagement
+                            opportunities for the students and faculty of all 7Cs.
                         </p>
 
                         <p>
-                            Located on the first floor of the Scott A. McGregor Computer Science Center at the corner of Platt and Dartmouth, the Makerspace is also connected to the Libra Complex just south of the machine and wood shops.
+                            Located on the first floor of the Scott A. McGregor Computer Science Center at the corner of
+                            Platt and Dartmouth, the Makerspace is also connected to the Libra Complex just south of the
+                            machine and wood shops.
                         </p>
-                        
+
                         <h2>Hours & Stewards</h2>
                         <p>
-                           Open 24/7 to 7C students, faculty, and staff, the Makerspace is staffed by student Stewards who are trained to help users with tools and equipment, and to provide assistance with projects. Stewards are on duty from 2-10PM from Monday-Thursday, 2-7PM on Friday and Saturday, and 2-9PM on Sunday. The Makerspace is also home to a variety of workshops and events.
+                            Open 24/7 to 7C students, faculty, and staff, the Makerspace is staffed by student Stewards
+                            who are trained to help users with tools and equipment, and to provide assistance with
+                            projects. Stewards are on duty from 2-10PM from Monday-Thursday, 2-7PM on Friday and
+                            Saturday, and 2-9PM on Sunday. The Makerspace is also home to a variety of workshops and
+                            events.
                         </p>
 
                         <h2>Management Team</h2>
                         <p>
-                            The Makerspace is managed by a team of six student Head Stewards, alongside Kim Neal, the Makerspace Manager, and Professor Spencer, the Makerspace Director. The team is responsible for managing the Makerspace, including training Stewards, maintaining equipment, and ensuring the space is safe and accessible to all users. Additional, each Head Steward runs one of the six Makerspace departments:
+                            The Makerspace is managed by a team of six student Head Stewards, alongside Kim Neal, the
+                            Makerspace Manager, and Professor Spencer, the Makerspace Director. The team is responsible
+                            for managing the Makerspace, including training Stewards, maintaining equipment, and
+                            ensuring the space is safe and accessible to all users. Additional, each Head Steward runs
+                            one of the six Makerspace departments:
 
-                            <ul>
-                                <li>IT & Website</li>
-                                <li>Outreach & Events</li>
-                                <li>Repair</li>
-                                <li>Workshops</li>
-                                <li>Logistics</li>
-                                <li>Inventory</li>
-                            </ul>
+                        <ul>
+                            <li>IT & Website</li>
+                            <li>Outreach & Events</li>
+                            <li>Repair</li>
+                            <li>Workshops</li>
+                            <li>Logistics</li>
+                            <li>Inventory</li>
+                        </ul>
                         </p>
 
                         <h2>FAQ</h2>
@@ -732,47 +764,57 @@
                     <div id="faq-content" class="md">
                         <div class="faq-category">
                             <h2>General Information</h2>
-    
+
                             <div class="faq-question">
                                 <h3>What are the operating hours for the Makerspace?</h3>
                                 <p>
-                                    Makerspace is accessible to 7C students, faculty, and staff 24/7. Stewards are available
+                                    Makerspace is accessible to 7C students, faculty, and staff 24/7. Stewards are
+                                    available
                                     from 2-10PM from Monday-Thursday, 2-7PM on Friday and Saturday, and 2-9PM on Sunday.
-                                    They can help with checking out tools or equipment and providing assistance. Questions
-                                    can also be asked on the <a href="https://make.hmc.edu/discord">Makerspace Discord</a>.
+                                    They can help with checking out tools or equipment and providing assistance.
+                                    Questions
+                                    can also be asked on the <a href="https://make.hmc.edu/discord">Makerspace
+                                        Discord</a>.
                                 </p>
                             </div>
-    
+
                             <div class="faq-question">
                                 <h3>Who can access the Makerspace?</h3>
-                                <p>The Makerspace is accessible to all 7C students, faculty, and staff. Visit F&M, located next to Jay's Place, to get swipe access after passing the General Safety Quiz.</p>
+                                <p>The Makerspace is accessible to all 7C students, faculty, and staff. Visit F&M,
+                                    located next to Jay's Place, to get swipe access after passing the General Safety
+                                    Quiz.</p>
                             </div>
-    
+
                             <div class="faq-question">
                                 <h3>Where is the Makerspace located?</h3>
                                 <p>
-                                    The Makerspace is on the ground floor of the McGregor Computer Science Center, at the
+                                    The Makerspace is on the ground floor of the McGregor Computer Science Center, at
+                                    the
                                     corner of Platt and Dartmouth.
                                 </p>
                             </div>
-    
+
                             <div class="faq-question">
                                 <h3>Where can I do metal/woodworking?</h3>
                                 <p>
-                                    Visit the HMC Machine Shop! The shop caters to heavy-duty machining and is only open during proctor
-                                    hours. Visit their website for more information: <a href="https://sites.google.com/g.hmc.edu/hmc-machine-shop/home">HMC Machine Shop</a>.
+                                    Visit the HMC Machine Shop! The shop caters to heavy-duty machining and is only open
+                                    during proctor
+                                    hours. Visit their website for more information: <a
+                                        href="https://sites.google.com/g.hmc.edu/hmc-machine-shop/home">HMC Machine
+                                        Shop</a>.
                                 </p>
                             </div>
-    
+
                             <div class="faq-question">
                                 <h3>How is the Makerspace managed?</h3>
                                 <p>
                                     A team of six student head stewards and the Makerspace Manager, Kim Neal, manage the
-                                    Makerspace. Around ~40 student stewards assist users and manage the Makerspace during
+                                    Makerspace. Around ~40 student stewards assist users and manage the Makerspace
+                                    during
                                     their <a href="/?p=schedule">shift hours</a>.
                                 </p>
                             </div>
-    
+
                             <div class="faq-question">
                                 <h3>How to change my display name or email on MAKE?</h3>
                                 <p>Contact Makerspace management at <a
@@ -780,102 +822,116 @@
                                     to update your information.</p>
                             </div>
                         </div>
-    
-    
+
+
                         <div class="faq-category">
                             <h2>Training, Tools & Materials</h2>
-    
+
                             <div class="faq-question">
                                 <h3>What are the required quizzes?</h3>
                                 <p>
                                     All users must pass the general safety quiz. Additional quizzes are necessary to use
-                                    specific rooms or machines. Visit F&M, located next to Jay's Place, to get swipe access.
+                                    specific rooms or machines. Visit F&M, located next to Jay's Place, to get swipe
+                                    access.
                                     Place.
                                 </p>
                             </div>
-    
+
                             <div class="faq-question">
                                 <h3>How do I obtain swipe access to different rooms?</h3>
                                 <p>
-                                    Swipe access can be obtained by passing quizzes and visiting F&M, located next to Jay's
+                                    Swipe access can be obtained by passing quizzes and visiting F&M, located next to
+                                    Jay's
                                     Place. Specific quizzes grant access to corresponding areas.
                                 </p>
                             </div>
-    
+
                             <div class="faq-question">
                                 <h3>How can I receive welding training?</h3>
                                 <p>
-                                    Pass the welding quiz and attend bi-weekly welding training sessions on Fridays at 4 PM. Join the <a href="https://make.hmc.edu/discord">Makerspace Discord</a> for more information and updates!
+                                    Pass the welding quiz and attend bi-weekly welding training sessions on Fridays at 4
+                                    PM. Join the <a href="https://make.hmc.edu/discord">Makerspace Discord</a> for more
+                                    information and updates!
                                 </p>
                             </div>
-    
+
                             <div class="faq-question">
                                 <h3>How can I receive printing press training?</h3>
                                 <p>
-                                    Join the <a href="https://make.hmc.edu/discord">Makerspace Discord</a> and ask for a training session! You can also view our schedule to see when a steward with printing press proficiency is on duty.
+                                    Join the <a href="https://make.hmc.edu/discord">Makerspace Discord</a> and ask for a
+                                    training session! You can also view our schedule to see when a steward with printing
+                                    press proficiency is on duty.
                                 </p>
                             </div>
-    
+
                             <div class="faq-question">
                                 <h3>Can the materials in the Makerspace be used freely?</h3>
                                 <p>
-                                    Yes, all floor materials are available for use. However, class, club, or group projects
-                                    with funding must use their own materials. Additionally, users may not use materials to make
+                                    Yes, all floor materials are available for use. However, class, club, or group
+                                    projects
+                                    with funding must use their own materials. Additionally, users may not use materials
+                                    to make
                                     items for sale.
                                 </p>
                             </div>
-    
+
                             <div class="faq-question">
                                 <h3>Why are some tools locked up?</h3>
                                 <p>
-                                    The lock-up system allows Makerspace to host expensive or dangerous machines. For safety
-                                    reasons, users may not access these tools after regular hours but can request a steward
+                                    The lock-up system allows Makerspace to host expensive or dangerous machines. For
+                                    safety
+                                    reasons, users may not access these tools after regular hours but can request a
+                                    steward
                                     for overnight checkout.
                                 </p>
                             </div>
-    
+
                             <div class="faq-question">
                                 <h3>What are the charges for 3D printing?</h3>
                                 <p>
-                                    All FDM (filament) printing expenses are covered for personal use. Users may be charged
+                                    All FDM (filament) printing expenses are covered for personal use. Users may be
+                                    charged
                                     cost for filament or asked to provide their own for research or club prints. The
                                     Markforged, SLA (Resin), or SLS (powder) printers cost extra, charging as per the
                                     material used.
                                 </p>
                             </div>
                         </div>
-    
+
                         <div class="faq-category">
                             <h2>Stewards</h2>
-    
+
                             <div class="faq-question">
                                 <h3>What help is available from stewards?</h3>
                                 <p>
-                                    Stewards can assist with project questions, safety quizzes, tool check-outs and provide
+                                    Stewards can assist with project questions, safety quizzes, tool check-outs and
+                                    provide
                                     training on using different tools and machines during their shift hours.
                                 </p>
                             </div>
-    
+
                             <div class="faq-question">
                                 <h3>How does one apply to be a steward?</h3>
                                 <p>
                                     Stewards are hired each semester! Fill out an <a
-                                        href="https://forms.gle/YhVQA59cuWytMw559">interest form here</a> or watch for our
+                                        href="https://forms.gle/YhVQA59cuWytMw559">interest form here</a> or watch for
+                                    our
                                     in-Makerspace announcements when applications open.
                                 </p>
                             </div>
                         </div>
-    
+
                         <div class="faq-category">
                             <h2>Workshops, Clubs, & Events</h2>
-    
+
                             <div class="faq-question">
                                 <h3>How does one learn about workshops?</h3>
                                 <p>
-                                    Workshops are announced weekly on our mailing list and on the <a href="/?p=workshops">workshops page</a>.
+                                    Workshops are announced weekly on our mailing list and on the <a
+                                        href="/?p=workshops">workshops page</a>.
                                 </p>
                             </div>
-    
+
                             <div class="faq-question">
                                 <h3>Can clubs meet at the Makerspace?</h3>
                                 <p>
@@ -885,14 +941,16 @@
                                 </p>
                             </div>
                         </div>
-    
+
                         <div class="faq-category">
                             <h2>Projects & Funding</h2>
-    
+
                             <div class="faq-question">
                                 <h3>How can I obtain funding for a project?</h3>
                                 <p>
-                                    All 7C students may apply for $50 per semester of project funding. Through the Braun grant, Harvey Mudd students may receive up to $200. Apply via the Student Project Application tab!
+                                    All 7C students may apply for $50 per semester of project funding. Through the Braun
+                                    grant, Harvey Mudd students may receive up to $200. Apply via the Student Project
+                                    Application tab!
                                 </p>
                             </div>
                         </div>
@@ -1044,7 +1102,7 @@
 
             <div id="previous-shift-changes" class="hidden">
                 <h2>Previous Shift Changes</h2>
-                
+
                 <div id="previous-shift-changes-container">
                     <table id="previous-shift-changes-details"></table>
                 </div>
