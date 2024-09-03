@@ -217,7 +217,7 @@ async def route_rsvp_to_workshop(request: Request):
         "time": f"{date_start.strftime('%I:%M %p')} - {date_end.strftime('%I:%M %p')}",
     })
 
-    await email_user(user["email"], [], f"Workshop Reminder Confirmation: {workshop['title']}", email_body)
+    await email_user(user["email"], [], f"Workshop RSVP: {workshop['title']}", email_body)
 
     # Add the user to the workshop's rsvp_list
     workshop["rsvp_list"].append(body["user_uuid"])
