@@ -216,18 +216,23 @@ function generateWorkshopDiv(workshop, is_past=false) {
         signup.id =`signup-${workshop.uuid}`
 
         if (state.user_object === null) {
-            signup.innerText = "Log in to sign up for reminders";
+            signup.innerText = "Log in to RSVP";
             signup.addEventListener("click", () => {
                 setPage("home");
             });
         } else {
             if (workshop.position === -1) {
-                signup.innerText = "Sign up for reminders";
+                if (workshop.signups >= workshop.capacity) {
+                    signup.innerText = "RSVP Waitlist";
+                } else {
+                    signup.innerText = "RSVP";
+                }
+
                 signup.addEventListener("click", () => {
                     rsvpToWorkshop(workshop.uuid);
                 });
             } else {
-                signup.innerText = "Cancel reminders";
+                signup.innerText = "Cancel RSVP";
                 signup.addEventListener("click", () => {
                     cancelRsvpToWorkshop(workshop.uuid);
                 });
