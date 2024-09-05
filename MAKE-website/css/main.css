@@ -1773,9 +1773,14 @@ table tr td button {
   background-color: var(--medium-color-dark);
 }
 
-.bambu-printer .status.offline, .bambu-printer .status.failed {
+.bambu-printer .status.failed {
   border: 2px solid var(--low-color);
   background-color: var(--low-color-dark);
+}
+
+.bambu-printer .status.offline {
+  border: 2px solid var(--theme-color-3);
+  background-color: var(--theme-color-3);
 }
 
 .bambu-printer .current-file {
