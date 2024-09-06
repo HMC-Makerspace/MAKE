@@ -1213,6 +1213,12 @@ z-index: -1;
   padding: 10px;
 }
 
+.restock-request-requested_by-steward {
+  font-weight: bold;
+  color: var(--make-color);
+}
+
+
 .error{
   background-color: var(--printer-error) !important;
   animation: pulse .5s infinite;
