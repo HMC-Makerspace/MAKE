@@ -15,7 +15,7 @@ const laser3d_equipment = {
             name: "Full Spectrum PS48 Laser Cutter",
             description: "Massive CO2 laser cutter that can cut & engrave on a variety of materials, such as wood, acrylic, and cardboard.",
             image: "img/equipment/fslaser.webp",
-            link: "https://docs.google.com/document/d/1JNqDC9X5x_eaMU51Pfan4zC-YUiqhW1XqpONjFzrzyM/edit#heading=h.skjsghxs3yl6"
+            link: "https://docs.google.com/document/d/1fHWPPc3BSSeuUOwUsIpDweEYLTbMBKAYw6iWeDml5qg/edit#heading=h.n01b46lm0fpk"
         },
         {
             name: "Glowforge Laser Cutter",
@@ -25,7 +25,7 @@ const laser3d_equipment = {
         },
         {
             name: "Epilog Laser Cutter",
-            description: "Smaller laser cutter, faster and more accurate then the full spectrum laser cutter, but with reduced cutting area.",
+            description: "Smaller laser cutter, faster and more accurate then the Full Spectrum laser cutter, but with reduced cutting area.",
             image: "img/equipment/epiloglaser.webp",
             link: "https://docs.google.com/document/d/1JNqDC9X5x_eaMU51Pfan4zC-YUiqhW1XqpONjFzrzyM/edit#heading=h.p54qzrkefqd4"
         },
