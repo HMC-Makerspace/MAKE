@@ -1766,9 +1766,13 @@ function generatePendingRestockRequestDivs() {
 
             if (user) {
                 requested_by_str = user.name + " (" + user.email + ")";
+                if (user.role === "steward" || user.role === "head_steward") {
+                    requested_by.classList.add("restock-request-requested_by-steward");
+                }
             }
         } else {
             requested_by_str = "Checkout Computer";
+            requested_by.classList.add("restock-request-requested_by-steward");
         }
 
         requested_by.innerText = requested_by_str;
@@ -1894,9 +1898,13 @@ function generateCompletedRestockRequestDivs() {
 
             if (user) {
                 requested_by.innerText = user.name + " (" + user.email + ")";
+                if (user.role === "steward" || user.role === "head_steward") {
+                    requested_by.classList.add("restock-request-requested_by-steward");
+                }
             }
         } else {
             requested_by.innerText = "Checkout Computer";
+            requested_by.classList.add("restock-request-requested_by-steward");
         }
         div.appendChild(requested_by);
 
