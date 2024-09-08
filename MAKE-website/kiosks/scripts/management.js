@@ -163,8 +163,8 @@ async function authenticate() {
         const status = await status_response.json();
 
         document.getElementById("update-motd").value = status.motd;
-        document.getElementById("update-is_open").value = status.is_open;
-        document.getElementById("update-stewards_on_duty").value = status.stewards_on_duty;
+        document.getElementById("update-is_open").checked = status.is_open;
+        document.getElementById("update-stewards_on_duty").checked = status.stewards_on_duty;
     }
 
     // Save api key to local storage
@@ -2668,7 +2668,7 @@ function showEditUser(uuid) {
         let new_steward_checkbox = document.createElement("input");
         new_steward_checkbox.type = "checkbox";
         console.log(`${user.name} is a new steward? ${user.new_steward}`);
-        
+
         new_steward_checkbox.checked = user.new_steward ?? false;
         new_steward_checkbox.id = "edit-user-new-steward-input";
 
