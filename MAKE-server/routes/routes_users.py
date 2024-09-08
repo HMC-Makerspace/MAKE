@@ -159,6 +159,10 @@ async def route_update_user(request: Request):
 
     if "proficiencies" in json:
         user["proficiencies"] = json["proficiencies"]
+    if "availability" in json:
+        user["availability"] = json["availability"]
+    if "new_steward" in json:
+        user["new_steward"] = json["new_steward"]
 
     try :
         user = User(**user)
@@ -202,6 +206,8 @@ async def route_update_user_by_uuid(request: Request):
         user["proficiencies"] = json["proficiencies"]
     if "availability" in json:
         user["availability"] = json["availability"]
+    if "new_steward" in json:
+        user["new_steward"] = json["new_steward"]
 
     try :
         user = User(**user)

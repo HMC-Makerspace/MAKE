@@ -649,6 +649,11 @@ Management Console
   justify-content: center;
 }
 
+#edit-user-proficiencies {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
 #schedule-table tr {
   height: 40px;
 }
