@@ -163,8 +163,8 @@ async function authenticate() {
         const status = await status_response.json();
 
         document.getElementById("update-motd").value = status.motd;
-        document.getElementById("update-is_open").value = status.is_open;
-        document.getElementById("update-stewards_on_duty").value = status.stewards_on_duty;
+        document.getElementById("update-is_open").checked = status.is_open;
+        document.getElementById("update-stewards_on_duty").checked = status.stewards_on_duty;
     }
 
     // Save api key to local storage
@@ -2635,6 +2635,7 @@ function showEditUser(uuid) {
     document.getElementById("edit-user-role").value = user.role;
 
     document.getElementById("edit-user-proficiencies").innerHTML = "";
+    document.getElementById("edit-user-new-steward").innerHTML = "";
 
     if (user.role == "steward" || user.role == "head_steward") {
         for (let prof of PROFICIENCIES) {
@@ -2659,6 +2660,26 @@ function showEditUser(uuid) {
 
             document.getElementById("edit-user-proficiencies").appendChild(prof_div);
         }
+
+        // Create checkbox set to user.new_steward
+        let new_steward_div = document.createElement("div");
+        new_steward_div.classList.add("edit-proficiency-container");
+
+        let new_steward_checkbox = document.createElement("input");
+        new_steward_checkbox.type = "checkbox";
+        console.log(`${user.name} is a new steward? ${user.new_steward}`);
+
+        new_steward_checkbox.checked = user.new_steward ?? false;
+        new_steward_checkbox.id = "edit-user-new-steward-input";
+
+        let new_steward_label = document.createElement("label");
+        new_steward_label.innerText = "New Steward";
+        new_steward_label.htmlFor = "edit-user-new-steward-input";
+
+        new_steward_div.appendChild(new_steward_checkbox);
+        new_steward_div.appendChild(new_steward_label);
+
+        document.getElementById("edit-user-new-steward").appendChild(new_steward_div);
     }
 
 
@@ -2688,6 +2709,10 @@ async function saveUser(uuid) {
         }
 
         user.proficiencies = profs;
+
+        user.new_steward = document.getElementById("edit-user-new-steward-input").checked;
+
+        console.log(user);
     }
 
 
