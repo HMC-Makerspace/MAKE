@@ -213,7 +213,7 @@ async def route_rsvp_to_workshop(request: Request):
 
     # If the workshop is full, add the user to the waitlist
     rsvp_or_waitlist = "have RSVPed to"
-    if len(workshop["rsvp_list"]) >= workshop["max_capacity"]:
+    if len(workshop["rsvp_list"]) >= workshop["capacity"]:
         rsvp_or_waitlist = "are on the waitlist for"
 
     email_body = format_email_template("workshop_confirmation", {
