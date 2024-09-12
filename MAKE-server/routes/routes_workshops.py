@@ -211,8 +211,14 @@ async def route_rsvp_to_workshop(request: Request):
 
     logging.info(f"${user['email']} is RSVPing to {workshop['title']} on {date_start.strftime('%A, %B %d, %Y')} from {date_start.strftime('%I:%M %p')} to {date_end.strftime('%I:%M %p')}")
 
+    # If the workshop is full, add the user to the waitlist
+    rsvp_or_waitlist = "have RSVPed to"
+    if len(workshop["rsvp_list"]) >= workshop["max_capacity"]:
+        rsvp_or_waitlist = "are on the waitlist for"
+
     email_body = format_email_template("workshop_confirmation", {
-        "workshop": workshop["title"], 
+        "workshop": workshop["title"],
+        "rsvp_or_waitlist": rsvp_or_waitlist,
         "date": date_start.strftime("%A, %B %d, %Y"),
         "time": f"{date_start.strftime('%I:%M %p')} - {date_end.strftime('%I:%M %p')}",
     })

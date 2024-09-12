@@ -223,7 +223,7 @@ function generateWorkshopDiv(workshop, is_past=false) {
         } else {
             if (workshop.position === -1) {
                 if (workshop.signups >= workshop.capacity) {
-                    signup.innerText = "RSVP Waitlist";
+                    signup.innerText = "Join Waitlist";
                 } else {
                     signup.innerText = "RSVP";
                 }
@@ -232,7 +232,12 @@ function generateWorkshopDiv(workshop, is_past=false) {
                     rsvpToWorkshop(workshop.uuid);
                 });
             } else {
-                signup.innerText = "Cancel RSVP";
+                if (workshop.position >= workshop.capacity) {
+                    signup.innerText = "Cancel Waitlist";
+                } else {
+                    signup.innerText = "Cancel RSVP";
+                }
+                
                 signup.addEventListener("click", () => {
                     cancelRsvpToWorkshop(workshop.uuid);
                 });
