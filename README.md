@@ -21,7 +21,8 @@ To get started developing MAKE, you'll need git, python3, and a local MongoDB in
 
 - Git can be downloaded from [this page](https://git-scm.com/downloads) or by using brew for MacOS.
 - Python can be downloaded from [this page](https://www.python.org/downloads/) or by using brew for MacOS.
-- MongoDB can be downloaded from [this page](https://www.mongodb.com/try/download/community), but make sure *NOT* to install mongodb-atlas, which is their cloud version of mongodb.
+- MongoDB Community can be downloaded from [this page](https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-os-x/#std-label-install-mdb-community-macos), but make sure *NOT* to install mongodb-atlas, which is their cloud version of mongodb.
+- MongoDB Compass is the GUI for MongoDB, and can be downloaded from [this page](https://www.mongodb.com/try/download/compass).
 
 Once you've installed these tools, clone this repo by running 
 
