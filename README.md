@@ -58,6 +58,4 @@ After committing your changes to the repo, you can push them to production by fi
 `ssh ethan@make.hmc.edu`
 and navigating to the MAKE directory. The password should be known by the Head Steward team. After logging in, run `git pull` to pull the changes from the repo. 
 
-Hello :D
-
 If you've made changes to any Python files, you'll need to restart the server by running `screen -r make` to reattach to the server screen. Run  `python3 main.py --prod` to start the server again, then press `CTRL + A`, let go, and then press `D`, to leave the screen running in the background. If no changes were made to Python files, the server will automatically restart with the new changes, and this step can be skipped.
