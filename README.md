@@ -26,11 +26,15 @@ To get started developing MAKE, you'll need git, python3, and a local MongoDB in
 
 Once you've installed these tools, clone this repo by running 
 
-```git clone https://github.com/HMC-Makerspace/MAKE.git```
+```
+git clone https://github.com/HMC-Makerspace/MAKE.git
+```
 
 Navigate into the server by running 
 
-```cd MAKE/MAKE-server```
+```
+cd MAKE/MAKE-server
+```
 
 Then install the requirements by running
 
