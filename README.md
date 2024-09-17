@@ -53,8 +53,10 @@ Nothing needs to be filled out in the config file unless you're testing emailing
 Finally, start the server by running
 
 ```
-python main.py` or `python3 main.py
+python main.py 
 ```
+or 
+```python3 main.py```
 
 and navigate to http://127.0.0.1:8080. If you're deploying this in production, make sure to use the `--prod` flag.
 
