@@ -26,7 +26,7 @@ To get started developing MAKE, you'll need git, python3, and a local MongoDB in
 
 Once you've installed these tools, clone this repo by running 
 
-`git clone https://github.com/HMC-Makerspace/MAKE.git`
+```git clone https://github.com/HMC-Makerspace/MAKE.git```
 
 Navigate into the server by running 
 
@@ -34,7 +34,7 @@ Navigate into the server by running
 
 Then install the requirements by running
 
-`pip install -r requirements.txt` or `pip3 install -r requirements.txt`
+```pip install -r requirements.txt` or `pip3 install -r requirements.txt```
 
 Copy over the template config file
 
