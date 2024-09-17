@@ -30,7 +30,7 @@ Once you've installed these tools, clone this repo by running
 
 Navigate into the server by running 
 
-`cd MAKE/MAKE-server`
+```cd MAKE/MAKE-server```
 
 Then install the requirements by running
 
