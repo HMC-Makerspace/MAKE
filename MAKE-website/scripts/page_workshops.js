@@ -340,22 +340,49 @@ async function cancelRsvpToWorkshop(workshop_uuid) {
 async function showRSVPList(workshop_uuid) {
     const workshop = state.workshops.find((workshop) => workshop.uuid == workshop_uuid);
 
-    const el = document.getElementById("rsvp-list-details");
+    // Get the table elements for both the rsvp list and the wait list
+    const rsvp_table = document.getElementById("rsvp-list-details");
+    const wait_list_table = document.getElementById("wait-list-details");
 
-    removeAllChildren(el);
+    // Clear past elements
+    removeAllChildren(rsvp_table);
+    removeAllChildren(wait_list_table);
     
-    let header = document.createElement("tr");
-    header.innerHTML = `<th>Name</th><th>Email</th>`;
-    el.appendChild(header);
+    // Create a header for the RSVP list
+    let rsvp_header = document.createElement("tr");
+    rsvp_header.innerHTML = `<th colspan="2">RSVP List</th>`;
+    rsvp_table.appendChild(rsvp_header);
+
+    // Create a header for the waitlist
+    let wait_list_header = document.createElement("tr");
+    wait_list_header.innerHTML = `<th colspan="2">Wait List</th>`;
+    wait_list_table.appendChild(wait_list_header);
+
+    // Create sub headers for email and name in both lists
+    let rsvp_sub_header = document.createElement("tr");
+    rsvp_sub_header.innerHTML = `<th>Name</th><th>Email</th>`;
+    rsvp_table.appendChild(rsvp_sub_header);
+
+    let wait_list_sub_header = document.createElement("tr");
+    wait_list_sub_header.innerHTML = `<th>Name</th><th>Email</th>`;
+    wait_list_table.appendChild(wait_list_sub_header);
 
     showPopup("rsvp-list");
+
+    // Loop through the rsvp list and add each user to the rsvp table
+    // If the workshop hits capacity, add the rest to the wait list
+    let attendee_count = 0;
 
     for (let user_uuid of workshop.rsvp_list) {
         let request = await fetch(`${API}/users/get_user/${user_uuid}`);
 
+        console.log("Workshop get uuid request", request);
+
+        // Only add the user to the table if they have a valid uuid
         if (request.status == 200) {
             let user = await request.json();
 
+            // Create a table row representing the user's name and email
             let user_el = document.createElement("tr");
 
             let name_el = document.createElement("td");
@@ -366,7 +393,15 @@ async function showRSVPList(workshop_uuid) {
             email_el.innerText = user.email;
             user_el.appendChild(email_el);
 
-            el.appendChild(user_el);
+            // If the workshop is not at capacity, add the user to the rsvp list.
+            // Otherwise, add them to the wait list.
+            if (attendee_count < workshop.capacity) {
+                rsvp_table.appendChild(user_el);
+            } else {
+                wait_list_table.appendChild(user_el);
+            }
+            // Add to the count of attendees
+            ++attendee_count;
         }
     }
 }
