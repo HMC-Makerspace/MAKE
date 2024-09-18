@@ -69,12 +69,16 @@ function getInventoryFilters() {
 function searchInventory(search, filters = null, kiosk_mode = false | "inventory_editor" | "checkout") {
     let results = fuzzysort.go(search, state.inventory, search_options);
 
-    results.sort((a, b) => b.score - a.score);
+    // Scores are all undefined, so this sorting is irrelevant
+    // results.sort((a, b) => b.score - a.score);
 
-    // If in checkout kiosk mode, sort by number of times checked out
-    if (kiosk_mode === "checkout") {
-        results.sort((a, b) =>  b.obj.num_times_checked - a.obj.num_times_checked);
-    } 
+    // Sort by the room, container, and specific of the first location, followed by name
+    results.sort((a, b) =>  {
+        return ((a.obj.locations[0] && b.obj.locations[0]) ? (a.obj.locations[0].room || "").localeCompare(b.obj.locations[0].room  || "") ||
+            (a.obj.locations[0].container  || "").localeCompare(b.obj.locations[0].container  || "") ||
+            (a.obj.locations[0].specific  || "").localeCompare(b.obj.locations[0].specific  || "") : 0) ||
+            a.obj.name.localeCompare(b.obj.name);
+    });
 
     // If not in any kiosk mode, filter out steward-only items
     if (kiosk_mode === false) {
@@ -281,6 +285,16 @@ function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | 
             ) {
             continue;
         }
+        
+        // If the location is Cage Shelf 5, show it as Overstock
+        if (loc.room && loc.room == "Cage" && loc.container && loc.container.includes("5")) {
+            location.innerHTML += `<span class="room">Cage</span>`;
+            location.innerHTML += `<span class="container">Overstock (${loc.container})</span>`;
+            location.innerHTML += `<span class="specific">${loc.specific}</span>`;
+            continue;
+        }
+
+        // All locations must have a room
         location.innerHTML += `<span class="room">${loc.room}</span>`;
 
         if (loc.container !== null && loc.container !== "") {
