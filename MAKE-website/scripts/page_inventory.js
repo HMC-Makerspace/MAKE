@@ -8,7 +8,7 @@ const search_options = {
     all: true,
 }
 
-async function fetchInventory(kiosk_mode = false | "inventory_editor" | "checkout") {
+async function fetchInventory(kiosk_mode = false | "inventory_editor" | "checkout" | "steward") {
     const response = await fetch(`${API}/inventory/get_inventory`);
 
     if (response.status == 200) {
@@ -28,6 +28,19 @@ async function fetchInventory(kiosk_mode = false | "inventory_editor" | "checkou
 }
 
 function submitSearch(kiosk_mode = false | "inventory_editor" | "checkout") {
+    // If the current user is a steward, update the kiosk_mode to steward
+    if (
+        state.user_object
+        && (state.user_object.role === "steward"
+            || state.user_object.role === "head_steward"
+            || state.user_object.role === "admin")
+    ) {
+        // Steward kiosk mode is used to show all items, including steward-only items,
+        // items in Backstock, and items in Cage Shelf 5. 
+        // It should only be enabled if search is submitted when a steward is logged in.
+        kiosk_mode = "steward";
+    }
+
     const search = document.getElementById("inventory-search-input").value;
 
     const filters = getInventoryFilters();
@@ -66,7 +79,7 @@ function getInventoryFilters() {
     return filters;
 }
 
-function searchInventory(search, filters = null, kiosk_mode = false | "inventory_editor" | "checkout") {
+function searchInventory(search, filters = null, kiosk_mode = false | "inventory_editor" | "checkout" | "steward") {
     let results = fuzzysort.go(search, state.inventory, search_options);
 
     // Scores are all undefined, so this sorting is irrelevant
@@ -80,9 +93,23 @@ function searchInventory(search, filters = null, kiosk_mode = false | "inventory
             a.obj.name.localeCompare(b.obj.name);
     });
 
-    // If not in any kiosk mode, remove items with access level 5 (staff only)
+    // If not in any kiosk mode, filter out steward-only items
     if (kiosk_mode === false) {
-        results = results.filter(inventory_item => inventory_item.obj.access_type !== 5);
+        results = results.filter(inventory_item => {
+            // Exclude items with access type 5 (steward-only)
+            if (inventory_item.obj.access_type === 5
+                // Exclude items that only have a location in Backstock or Cage 5
+                || (inventory_item.obj.locations.length === 1
+                    && inventory_item.obj.locations[0].room === "Backstock")
+                || (inventory_item.obj.locations.length === 1
+                    && inventory_item.obj.locations[0].room === "Cage"
+                    && inventory_item.obj.locations[0].container
+                    && inventory_item.obj.locations[0].container.includes("5"))
+                ) {
+                return false;
+            }
+            return true;
+        });
     }
 
     if (filters !== null) {
@@ -109,6 +136,16 @@ function searchInventory(search, filters = null, kiosk_mode = false | "inventory
 
             if (filters.container) {
                 for (let loc of item.locations) {
+                    // If not in kiosk mode, don't show items as being in Backstock or Cage 5
+                    if (kiosk_mode === false
+                        && (loc.room === "Backstock"
+                            || (loc.room === "Cage"
+                                && loc.container
+                                && loc.container.includes("5")
+                            ))
+                        ) {
+                        continue;
+                    }
                     const search_str = `${loc.room ?? ""} ${loc.container ?? ""} ${loc.specific ?? ""}`.toLowerCase();
 
                     if (search_str.includes(filters.container.toLowerCase())) {
@@ -128,7 +165,7 @@ function searchInventory(search, filters = null, kiosk_mode = false | "inventory
     return results;
 }
 
-function generateInventoryDivs(results, kiosk_mode = false | "inventory_editor" | "checkout") {
+function generateInventoryDivs(results, kiosk_mode = false | "inventory_editor" | "checkout" | "steward") {
     const divs = [];
 
     divs.push(generateInventoryHeader(kiosk_mode));
@@ -140,7 +177,7 @@ function generateInventoryDivs(results, kiosk_mode = false | "inventory_editor" 
     return divs;
 }
 
-function generateInventoryHeader(kiosk_mode = false | "inventory_editor" | "checkout") {
+function generateInventoryHeader(kiosk_mode = false | "inventory_editor" | "checkout" | "steward") {
     const div = document.createElement("div");
     div.classList.add("inventory-result");
     div.classList.add("header");
@@ -188,7 +225,7 @@ function generateInventoryHeader(kiosk_mode = false | "inventory_editor" | "chec
     return div;
 }
 
-function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | "checkout") {
+function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | "checkout" | "steward") {
     let div = document.createElement("div");
     div.classList.add("inventory-result");
 
@@ -251,6 +288,26 @@ function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | 
     location.classList.add("inventory-result-location");
 
     for (let loc of item.locations) {
+        // If not in kiosk mode, don't show items as being in Backstock or Cage 5
+        if (kiosk_mode === false
+            && (loc.room === "Backstock"
+                || (loc.room === "Cage"
+                    && loc.container
+                    && loc.container.includes("5")
+                ))
+            ) {
+            continue;
+        }
+        
+        // If the location is Cage Shelf 5, show it as Overstock
+        if (loc.room && loc.room == "Cage" && loc.container && loc.container.includes("5")) {
+            location.innerHTML += `<span class="room">Cage</span>`;
+            location.innerHTML += `<span class="container">Overstock (${loc.container})</span>`;
+            location.innerHTML += `<span class="specific">${loc.specific}</span>`;
+            continue;
+        }
+
+        // All locations must have a room
         location.innerHTML += `<span class="room">${loc.room}</span>`;
 
         if (loc.container !== null && loc.container !== "") {
