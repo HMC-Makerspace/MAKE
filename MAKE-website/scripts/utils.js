@@ -68,24 +68,24 @@ const ROLE_TO_READABLE = {
 const PROFICIENCIES = [
     "3D Printing",
     "Advanced 3D Printing",
+    "Analog Loom",
+    "Cricut",
+    "Digital Loom",
+    "Embroidery",
     "Large Format Printer",
     "Laser Cutter",
     "Leather Sewing Machine",
-    "Analog Loom",
-    "Digital Loom",
     "Oscilloscopes",
     "Printing Press",
     "Sergers",
     "Sewing",
-    "Embroidery",
     "Soldering",
     "Spray Paint",
     "Studio (Audio)",
     "Studio (Video)",
     "Waterjet",
     "Welding",
-    "Cricut"
-];
+].sort();
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 

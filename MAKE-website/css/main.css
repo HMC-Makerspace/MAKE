@@ -1594,6 +1594,15 @@ table tr td button {
   font-size: 0.7em;
 }
 
+.edit-proficiency-container {
+  align-items: center;
+  display: flex;
+}
+
+.edit-proficiency-container div {
+  padding-left: 10px;
+}
+
 .stewards-1 {
   background-color: var(--shift-1);
 }
@@ -1684,7 +1693,8 @@ table tr td button {
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr;
   row-gap: 5px;
-  width: 90%;
+  width: 80%;
+  padding-top: 15px
 }
 
 #schedule-info > button:nth-child(7n) {
@@ -2438,7 +2448,7 @@ STEWARD RESOURCES
 
 #steward-proficiencies {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   align-items: center;
   justify-content: flex-start;
   row-gap: 10px;
