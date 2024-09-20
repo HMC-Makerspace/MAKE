@@ -8,7 +8,7 @@ const search_options = {
     all: true,
 }
 
-async function fetchInventory(kiosk_mode = false | "inventory_editor" | "checkout") {
+async function fetchInventory(kiosk_mode = false | "inventory_editor" | "checkout" | "steward") {
     const response = await fetch(`${API}/inventory/get_inventory`);
 
     if (response.status == 200) {
@@ -28,6 +28,19 @@ async function fetchInventory(kiosk_mode = false | "inventory_editor" | "checkou
 }
 
 function submitSearch(kiosk_mode = false | "inventory_editor" | "checkout") {
+    // If the current user is a steward, update the kiosk_mode to steward
+    if (
+        state.user_object
+        && (state.user_object.role === "steward"
+            || state.user_object.role === "head_steward"
+            || state.user_object.role === "admin")
+    ) {
+        // Steward kiosk mode is used to show all items, including steward-only items,
+        // items in Backstock, and items in Cage Shelf 5. 
+        // It should only be enabled if search is submitted when a steward is logged in.
+        kiosk_mode = "steward";
+    }
+
     const search = document.getElementById("inventory-search-input").value;
 
     const filters = getInventoryFilters();
@@ -66,7 +79,7 @@ function getInventoryFilters() {
     return filters;
 }
 
-function searchInventory(search, filters = null, kiosk_mode = false | "inventory_editor" | "checkout") {
+function searchInventory(search, filters = null, kiosk_mode = false | "inventory_editor" | "checkout" | "steward") {
     let results = fuzzysort.go(search, state.inventory, search_options);
 
     // Scores are all undefined, so this sorting is irrelevant
@@ -152,7 +165,7 @@ function searchInventory(search, filters = null, kiosk_mode = false | "inventory
     return results;
 }
 
-function generateInventoryDivs(results, kiosk_mode = false | "inventory_editor" | "checkout") {
+function generateInventoryDivs(results, kiosk_mode = false | "inventory_editor" | "checkout" | "steward") {
     const divs = [];
 
     divs.push(generateInventoryHeader(kiosk_mode));
@@ -164,7 +177,7 @@ function generateInventoryDivs(results, kiosk_mode = false | "inventory_editor" 
     return divs;
 }
 
-function generateInventoryHeader(kiosk_mode = false | "inventory_editor" | "checkout") {
+function generateInventoryHeader(kiosk_mode = false | "inventory_editor" | "checkout" | "steward") {
     const div = document.createElement("div");
     div.classList.add("inventory-result");
     div.classList.add("header");
@@ -212,7 +225,7 @@ function generateInventoryHeader(kiosk_mode = false | "inventory_editor" | "chec
     return div;
 }
 
-function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | "checkout") {
+function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | "checkout" | "steward") {
     let div = document.createElement("div");
     div.classList.add("inventory-result");
 
