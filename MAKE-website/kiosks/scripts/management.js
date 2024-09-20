@@ -348,7 +348,7 @@ async function fetchShiftsAdmin() {
 
     if (response.status == 200) {
         const shifts = await response.json();
-
+        console.log(shifts)
         state.shifts = shifts;
     }
 }
@@ -540,6 +540,53 @@ function downloadReview(review) {
 
     a.href = url;
     a.download = `${review.name} - ${review.reviewer}.csv`;
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+function downloadSchedule() {
+    // find earliest time and wi
+    // Create a csv file of the shifts scheduled
+    const times = state.shifts.map(shift => moment(shift.timestamp_start.split("-")[0], 'h:mm A').toDate())
+    let csv = DAYS + "\n";
+    const now = moment();
+    // const time_start = 12;
+    // const time_end = 24;
+    console.log("dogs", times, state.shifts)
+
+    // for (let i = time_start; i < time_end; i++) {
+        // const time = `${formatHour(i)} - ${formatHour(i + 1)}`;
+        // console.log("chicken", times)
+        // console.log(time.split("-")[0])
+        // console.log(time.split("-")[0])
+    // }
+
+    HOURS = ["10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM"]
+    for (let i = 0; i < state.shifts.length; i++) {
+        for (let day of DAYS) {
+            for (let hour of HOURS){
+
+                console.log("shift", state.shifts[i],  "day", day, "hour", hour)
+                console.log( "day equation", day == state.shifts[i].day, "hour equation", hour == state.shifts[i].timestamp_begin)
+
+                if (state.shifts[i].day == day && state.shifts[i].timestamp_begin == hour) {
+                    console.log('true')
+                    csv += `${state.shifts.stewards},`;
+                    }
+                }
+                csv += '\n'
+            }    
+        }
+
+    // Create a blob and download it
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = `shift_schedule_${now.format('MM-DD-YYYY')}.csv`;
 
     document.body.appendChild(a);
     a.click();
