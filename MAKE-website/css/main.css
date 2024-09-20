@@ -54,6 +54,7 @@
 
   /* Proficiencies */
   --sewing: #5271ff;
+  --embroidery: #55f0f0;
   --dprinting: #ff5757;
   --lasercutter: #ff914d;
   --soldering: #cbcbc9;
@@ -63,12 +64,14 @@
   --studiovideo: #737373;
   --studioaudio: #737373;
   --sergers: #5271ff;
-  --loom: #ff66c4;
+  --analogloom: #69401d;
+  --digitalloom: #ff66c4;
   --leathersewingmachine: #5271ff;
   --printingpress: #00c2cb;
   --spraypaint: #fd3c65;
   --oscilloscopes: #cbcbc9;
   --largeformatprinter: #cb6ce6;
+  --cricut: #129645;
 }
 
 [data-theme="dark"] {
@@ -1547,7 +1550,7 @@ table tr td button {
 
 #schedule-help {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 10px;
@@ -1678,16 +1681,20 @@ table tr td button {
 
 #schedule-info {
   display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr;
-  row-gap: 10px;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  row-gap: 5px;
+  width: 90%;
 }
 
-.proficiency-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  min-height: 40px;
+#schedule-info > button:nth-child(7n) {
+  border-radius: 0 4px 4px 0;
 }
+
+#schedule-info > button:nth-child(7n+1) {
+  border-radius: 4px 0 0 4px;
+}
+
 /* 
 
 3D Printers

@@ -71,17 +71,20 @@ const PROFICIENCIES = [
     "Large Format Printer",
     "Laser Cutter",
     "Leather Sewing Machine",
-    "Loom",
+    "Analog Loom",
+    "Digital Loom",
     "Oscilloscopes",
     "Printing Press",
     "Sergers",
     "Sewing",
+    "Embroidery",
     "Soldering",
     "Spray Paint",
     "Studio (Audio)",
     "Studio (Video)",
     "Waterjet",
-    "Welding"
+    "Welding",
+    "Cricut"
 ];
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];

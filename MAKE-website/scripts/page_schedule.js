@@ -124,31 +124,21 @@ function generateProficiencyDivs(proficiencies) {
         return a.localeCompare(b);
     });
 
-    for (let i = 0; i < 4; i++) {
-        let row = document.createElement("div");
-        row.classList.add("proficiency-row");
-
-        for (let j = 0; j < 4; j++) {
-            let prof = proficiencies_sorted[i * 4 + j];
-
-            let prof_div = document.createElement("button");
-            prof_div.classList.add("switch");
-            prof_div.classList.add("trigger");
-            prof_div.classList.add("proficiency");
-            prof_div.classList.add(toCSSSafeString(prof));
-            prof_div.innerText = prof;
+    for (const prof of proficiencies_sorted) {
+        let prof_div = document.createElement("button");
+        prof_div.classList.add("switch");
+        prof_div.classList.add("trigger");
+        prof_div.classList.add("proficiency");
+        prof_div.classList.add(toCSSSafeString(prof));
+        prof_div.innerText = prof;
         
-            prof_div.addEventListener("click", () => {
-                removeHighlightProficiency();
-                highlightProficiency(prof);
-            });
+        prof_div.addEventListener("click", () => {
+            removeHighlightProficiency();
+            highlightProficiency(prof);
+        });
 
-            row.appendChild(prof_div);
-        }
-
-        profs.push(row);
+        profs.push(prof_div);
     }
-
     return profs;
 }
 
