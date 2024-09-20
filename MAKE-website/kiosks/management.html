@@ -21,8 +21,8 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0" />
 
 
-    <link rel="stylesheet" href="/css/main.css?v=1.3">
-    <link rel="stylesheet" href="/kiosks/kiosks.css?v=1.8">
+    <link rel="stylesheet" href="/css/main.css?v=2.10">
+    <link rel="stylesheet" href="/kiosks/kiosks.css?v=1.9">
 </head>
 
 <body>
@@ -105,7 +105,7 @@
                 <h1>MAKE Management Console</h1>
                 <p>
                     <br>
-                    Welcome to the MAKE Management Console. 
+                    Welcome to the MAKE Management Console.
                     <br>
                     Changes made here will be updated in real time.
                 </p>
@@ -121,12 +121,12 @@
                         <input type="checkbox" id="update-is_open">
                         Makerspace Open?
                     </label>
-    
+
                     <label for="update-stewards_on_duty">
                         <input type="checkbox" id="update-stewards_on_duty">
                         Stewards on Duty?
                     </label>
-    
+
                     <button id="update-status-button" onclick="updateStatus()">Update</button>
                 </div>
             </div>
@@ -138,15 +138,16 @@
                     View and edit student storage assignments.
                 </p>
             </div>
-            
+
             <div id="overall-student-storage" class="content-body" style="overflow: unset;">
 
             </div>
-        </div>  
+        </div>
 
         <div class="main-content content-container hidden" id="page-users">
             <div id="users-search" class="content-header">
-                <input type="text" id="users-search-input" placeholder="Search by name, email, or ID number..." onkeyup="submitUserSearch(editable = true)">
+                <input type="text" id="users-search-input" placeholder="Search by name, email, or ID number..."
+                    onkeyup="submitUserSearch(editable = true)">
 
                 <button id="open-mass-assign-roles" onclick="showMassAssignRoles()">Mass Role Assignment</button>
 
@@ -161,9 +162,13 @@
         <div class="main-content content-container hidden" id="page-shifts">
             <div class="content-header">
                 <p>
-                    Schedule shifts by clicking on a cell. Changes are saved automatically.
-                </p>
-                <p>
+                    <span>This page shows the current standard steward schedule for the semester, which excludes
+                        individually added and dropped shifts.</span>
+                    <br>
+                    <br>
+                    <span>Schedule shifts by clicking on a cell. Changes are saved automatically.</span>
+                    <br>
+                    <br>
                     <b>Total scheduled shift hours: <span id="total-hours">...</span></b>
                 </p>
             </div>
@@ -173,12 +178,14 @@
                     Steward Schedule
                 </h1>
 
+                <table id="schedule-audit"></table>
+
                 <div class="stewards-legend">
                     <div class="stewards-1 info">One Steward on duty</div>
                     <div class="stewards-2 info">Two Stewards on duty</div>
                     <div class="head-steward info">Head Steward Office hours</div>
                 </div>
-    
+
                 <table id="schedule-table"></table>
 
                 <h1>
@@ -202,8 +209,8 @@
         <div class="main-content content-container hidden" id="page-availability">
             <div class="content-header">
                 <p>
-                    View steward availability and create schedules. 
-                    Hover over a steward's name to their availability. 
+                    View steward availability and create schedules.
+                    Hover over a steward's name to their availability.
                     Click on an availability cell to see who is available at that time.
                 </p>
             </div>
@@ -219,7 +226,7 @@
                     </div>
                 </div>
             </div>
-        </div>  
+        </div>
 
         <div class="main-content content-container hidden" id="page-proficiencies">
             <div class="content-header">
@@ -254,7 +261,16 @@
         <div class="main-content content-container hidden" id="page-restock-requests">
             <div class="content-header">
                 <p>
-                    View, approve, and deny restock requests.
+                    View, approve, and deny restock requests. Requests from Stewards are in
+                    <!-- Font size styling is to remove the gap between "bold orange" and the period -->
+                    <span style="font-size: 0;">
+                        <span style="
+                        font-weight: bold;
+                        font-size: medium;
+                        color: var(--make-color);
+                    ">bold orange</span>
+                    <span style="font-size: medium;">.</span>
+                    </span>
                 </p>
             </div>
 
@@ -283,13 +299,8 @@
                 <!-- Consider organizing headers by statistic content (checkouts, users, quizzes, etc.) -->
                 <div id="statistics-date-range-container">
                     <label for="statistics-date-range-start">Start Date</label>
-                    <input 
-                        type="date"
-                        id="statistics-date-range-start"
-                        onchange="renderStatistics()"
-                        value=""
-                        style="margin-inline-end: 1rem"
-                    >
+                    <input type="date" id="statistics-date-range-start" onchange="renderStatistics()" value=""
+                        style="margin-inline-end: 1rem">
                     <label for="statistics-date-range-end">End Date</label>
                     <input type="date" id="statistics-date-range-end" onchange="renderStatistics()" value="">
                 </div>
@@ -336,7 +347,7 @@
                                 <h3 style="margin-bottom: 0;" id="total-users" aria-label="Total users">...</h3>
                             </div>
                         </span>
-                        
+
                         <canvas style="max-height: 400px;" id="users-by-college-chart"></canvas>
                     </div>
 
@@ -364,15 +375,15 @@
                 </table>
             </div>
         </div>
-        
+
         <div class="main-content content-container hidden" id="page-api-keys">
             <div class="content-header">
                 <p>
-                    <div>View and edit API keys for MAKE.</div>
+                <div>View and edit API keys for MAKE.</div>
 
-                    <div>Note, the admin key currently used to access this page cannot be edited.</div>
+                <div>Note, the admin key currently used to access this page cannot be edited.</div>
 
-                    <div>To do so, create an alternate admin key first and use it to authenticate.</div>
+                <div>To do so, create an alternate admin key first and use it to authenticate.</div>
                 </p>
             </div>
 
@@ -415,7 +426,8 @@
                 <h1>Steps</h1>
 
                 <ol>
-                    <li>Download the <b>Form Responses</b> sheet of the current steward application form as a CSV file.</li>
+                    <li>Download the <b>Form Responses</b> sheet of the current steward application form as a CSV file.
+                    </li>
                     <li>Click "Start New Review" and upload the CSV file here.</li>
                     <li>Select the columns for <b>Timestamp</b> and <b>Returning Steward?</b></li>
                     <li>Select the columns containing application <b>questions</b>.</li>
@@ -487,11 +499,11 @@
                 </div>
 
                 <div id="continue-review-questions">
-                    
+
                 </div>
 
                 <div id="continue-review-scoring">
-                    
+
                 </div>
 
                 <div class="continue-review-buttons">
@@ -515,7 +527,7 @@
                 <input id="edit-user-name">
                 <input id="edit-user-email">
                 <input type="number" id="edit-user-cx_id">
-                
+
                 <select id="edit-user-role">
                     <option value="user">User</option>
                     <option value="steward">Steward</option>
@@ -523,7 +535,12 @@
                     <option value="admin">Admin</option>
                 </select>
 
+                <h2>Proficiencies</h2>
                 <div id="edit-user-proficiencies">
+                </div>
+
+                <h2>Misc.</h2>
+                <div id="edit-user-new-steward">
                 </div>
 
                 <div class="edit-buttons">
@@ -534,7 +551,7 @@
 
             <div id="edit-shift" class="hidden">
                 <h1>Edit Shift</h1>
-                
+
                 <div id="edit-shift-day-time"></div>
 
                 <div id="edit-shift-options">
@@ -547,19 +564,20 @@
                     </div>
 
                     <div id="edit-unshifted-stewards">
-                    
+
                     </div>
                 </div>
 
                 <div class="edit-buttons">
                     <button id="edit-shift-cancel" onclick="closePopup()">Close</button>
-                </div> 
+                </div>
             </div>
 
             <div id="mass-assign-roles" class="hidden">
                 <h1>Mass Assign Roles</h1>
-                
-                <textarea id="mass-assign-roles-text" placeholder="Enter a list of CX IDs, emails, or UUIDs, one per line."></textarea>
+
+                <textarea id="mass-assign-roles-text"
+                    placeholder="Enter a list of CX IDs, emails, or UUIDs, one per line."></textarea>
 
                 <select id="mass-assign-roles-selection">
                     <option value="user">User</option>
@@ -593,34 +611,38 @@
                 <input id="edit-workshop-title" placeholder="Waterjet a Bottle Opener">
 
                 <label for="edit-workshop-description">Description</label>
-                <textarea id="edit-workshop-description" placeholder="Create a bottle opener from scratch with a custom design!"></textarea>
+                <textarea id="edit-workshop-description"
+                    placeholder="Create a bottle opener from scratch with a custom design!"></textarea>
 
                 <div id="edit-workshop-small-options">
                     <input id="edit-workshop-instructors" placeholder="Instructors">
-                    
+
                     <input id="edit-workshop-date" type="date" placeholder="Date">
-    
+
                     <label for="edit-workshop-timestamp_start">Start Time</label>
                     <label for="edit-workshop-timestamp_end">End Time</label>
                     <label for="edit-workshop-capacity">Capacity</label>
 
                     <input id="edit-workshop-timestamp_start" type="time" placeholder="Start Time">
-    
+
                     <input id="edit-workshop-timestamp_end" type="time" placeholder="End Time">
-    
+
                     <input id="edit-workshop-capacity" type="number" placeholder="4">
                 </div>
-                
+
 
                 <label>Required Quizzes</label>
                 <div id="edit-workshop-required_quizzes">
-                    
+
                 </div>
 
                 <label for="edit-workshop-photos">Photos</label>
-                <input type="file" id="edit-workshop-photos-input" accept="image/*" multiple onchange="selectWorkshopPhotos(event)">
+                <input type="file" id="edit-workshop-photos-input" accept="image/*" multiple
+                    onchange="selectWorkshopPhotos(event)">
 
-                <div id="edit-workshop-photos" onclick="openWorkshopPhotos(event)" ondragover="dragOverWorkshopPhotos(event)" ondrop="dropWorkshopPhotos(event)"><span class='material-symbols-outlined'>upload</span></div>
+                <div id="edit-workshop-photos" onclick="openWorkshopPhotos(event)"
+                    ondragover="dragOverWorkshopPhotos(event)" ondrop="dropWorkshopPhotos(event)"><span
+                        class='material-symbols-outlined'>upload</span></div>
 
                 <div class="edit-buttons">
                     <button id="edit-workshop-save" onclick="saveWorkshop()">Save</button>
@@ -642,13 +664,15 @@
                 <textarea id="complete-restock-request-notes" placeholder="Notes..."></textarea>
 
                 <div class="edit-buttons">
-                    <button id="complete-restock-request-approve" class="big" onclick="completeRestockRequest()">Approve</button>
-                    <button id="complete-restock-request-deny" class="big" onclick="completeRestockRequest()">Deny</button>
+                    <button id="complete-restock-request-approve" class="big"
+                        onclick="completeRestockRequest()">Approve</button>
+                    <button id="complete-restock-request-deny" class="big"
+                        onclick="completeRestockRequest()">Deny</button>
                 </div>
-                
+
                 <div class="edit-buttons">
                     <button id="complete-restock-request-cancel" onclick="closePopup()">Cancel</button>
-                </div> 
+                </div>
             </div>
 
             <div id="workshop-signups" class="hidden">
@@ -704,13 +728,13 @@
 
                 <label for="create-edit-redirect-to">To</label>
                 <input id="create-edit-redirect-to" placeholder="https://example.come/long-link-to-something">
-                
+
                 <div class="edit-buttons">
                     <button id="create-edit-redirect-save" onclick="saveRedirect()">Save</button>
                     <button id="create-edit-redirect-cancel" onclick="closePopup()">Cancel</button>
                 </div>
             </div>
-            
+
             <div id="create-edit-api-key" class="hidden">
                 <h1>Create/Edit API Key</h1>
                 <label for="create-edit-api-name">Name</label>
@@ -721,7 +745,7 @@
 
                 <label for="create-edit-api-scopes">Page Scopes</label>
                 <div id="create-edit-api-key-scopes"></div>
-                
+
                 <div class="edit-buttons">
                     <button id="create-edit-api-key-save" onclick="saveAPIKey()">Save</button>
                     <button id="create-edit-api-key-cancel" onclick="closePopup()">Cancel</button>
@@ -736,14 +760,14 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@latest"></script>
     <script src="/scripts/libs/papaparse.min.js"></script>
 
-    <script src="/scripts/page_inventory.js?v=2.12"></script>
-    <script src="/scripts/page_quiz_info.js?v=2.3"></script>
+    <script src="/scripts/page_inventory.js?v=2.11"></script>
+    <script src="/scripts/page_quiz_info.js?v=2.4"></script>
     <script src="/scripts/page_checkouts.js?v=2.3"></script>
     <script src="/scripts/page_student_storage.js?v=2.3"></script>
-    <script src="/scripts/page_schedule.js?v=2.3"></script>
-    <script src="/scripts/utils.js?v=2.5"></script>
+    <script src="/scripts/page_schedule.js?v=2.11"></script>
+    <script src="/scripts/utils.js?v=2.13"></script>
 
-    <script src="/kiosks/scripts/management.js?v=2.39"></script>
+    <script src="/kiosks/scripts/management.js?v=2.42"></script>
 </body>
 
 </html>

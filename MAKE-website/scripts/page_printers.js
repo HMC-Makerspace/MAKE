@@ -30,57 +30,67 @@ function renderPrinters() {
 
 function generatePrinterDivs(printers) {
     let divs = [];
- 
+
     let names = Object.keys(printers);
     // Sort them alphabetically
     names.sort();
 
     for (let name of names) {
         let printer = printers[name];
-        // Can be FINISH, RUNNING, PAUSE, FAILED, IDLE
-        let status = printer.printer_json["gcode_state"];
-
-        switch (printer.printer_json["gcode_state"]) {
-            case "FINISH":
-                status = "Finished";
-                break;
-            case "RUNNING":
-                status = "Running";
-                break;
-            case "IDLE":
-                status = "Idle";
-                break;
-            case "PAUSE":
-                status = "Paused";
-                break;
-            case "FAILED":
-                status = "Failed";
-                break;
-            default:
-                break;
-        }
 
         let is_online = printer.printer_online;
-        
-        let current_file = printer.printer_json["subtask_name"];
 
+        let status = "N/A";
+        let current_file = "";
         let ams_filaments = [null, null, null, null];
+        let hotend_temp = "N/A";
+        let bed_temp = "N/A";
 
-        if (printer.printer_json["ams"] && printer.printer_json["ams"]["ams"]) {
-            for (let i = 0; i < printer.printer_json["ams"]["ams"][0]["tray"].length; i++) {
-                let tray = printer.printer_json["ams"]["ams"][0]["tray"][i];
+        if (is_online) {
+            // Can be FINISH, RUNNING, PAUSE, FAILED, IDLE
+            status = printer.printer_json["gcode_state"];
 
-                if (tray["tray_color"] && tray["tray_type"]) {
-                    ams_filaments[i] = {
-                        color: tray["tray_color"],
-                        type: tray["tray_type"]
-                    };
+            switch (printer.printer_json["gcode_state"]) {
+                case "FINISH":
+                    status = "Finished";
+                    break;
+                case "RUNNING":
+                    status = "Running";
+                    break;
+                case "IDLE":
+                    status = "Idle";
+                    break;
+                case "PAUSE":
+                    status = "Paused";
+                    break;
+                case "FAILED":
+                    status = "Failed";
+                    break;
+                default:
+                    break;
+            }
+
+            current_file = printer.printer_json["subtask_name"];
+            ams_filaments = [null, null, null, null];
+
+            if (printer.printer_json["ams"] && printer.printer_json["ams"]["ams"] && printer.printer_json["ams"]["ams"].length > 0) {
+                for (let i = 0; i < printer.printer_json["ams"]["ams"][0]["tray"].length; i++) {
+                    let tray = printer.printer_json["ams"]["ams"][0]["tray"][i];
+
+                    if (tray["tray_color"] && tray["tray_type"]) {
+                        ams_filaments[i] = {
+                            color: tray["tray_color"],
+                            type: tray["tray_type"]
+                        };
+                    }
                 }
             }
+
+            hotend_temp = printer.printer_json["nozzle_temper"];
+            bed_temp = printer.printer_json["bed_temper"];
         }
 
-        let hotend_temp = printer.printer_json["nozzle_temper"];
-        let bed_temp = printer.printer_json["bed_temper"];
+
 
         let div = document.createElement("div");
         div.classList.add("bambu-printer");
@@ -99,10 +109,8 @@ function generatePrinterDivs(printers) {
         current_file_div.classList.add("current-file");
         current_file_div.innerText = `${current_file ?? "No active print"}`;
 
-        let layer_num = printer.printer_json["layer_num"];
-        let total_layer_num = printer.printer_json["total_layer_num"];
-        let progress = Math.floor(printer.printer_json["mc_percent"]);
-        let remaining_time_mins = printer.printer_json["mc_remaining_time"];
+        let progress = Math.floor(is_online ? printer.printer_json["mc_percent"] : 0);
+        let remaining_time_mins = is_online ? printer.printer_json["mc_remaining_time"] : 0;
 
         let progress_div = document.createElement("div");
         progress_div.classList.add("progress");
@@ -134,7 +142,7 @@ function generatePrinterDivs(printers) {
         ams_div.classList.add("ams");
 
         let number = 1;
-        
+
         for (let filament of ams_filaments) {
             let filament_div = document.createElement("div");
             filament_div.classList.add("filament");

@@ -27,6 +27,22 @@ var charts = {
     user_engagement: null,
 };
 
+const DINNER_START = 17;
+const DINNER_END = 19;
+
+const TRAINING_TIMES = [
+    {
+        "day": 5,
+        "start": 10,
+        "end": 12,
+    },
+    {
+        "day": 5,
+        "start": 16,
+        "end": 18,
+    }
+]
+
 const SCORES_MIN = 1;
 const SCORES_MAX = 5;
 const SCORES_KEY = [
@@ -147,8 +163,8 @@ async function authenticate() {
         const status = await status_response.json();
 
         document.getElementById("update-motd").value = status.motd;
-        document.getElementById("update-is_open").value = status.is_open;
-        document.getElementById("update-stewards_on_duty").value = status.stewards_on_duty;
+        document.getElementById("update-is_open").checked = status.is_open;
+        document.getElementById("update-stewards_on_duty").checked = status.stewards_on_duty;
     }
 
     // Save api key to local storage
@@ -162,7 +178,7 @@ async function authenticate() {
     });
 
     setInterval(fetchUsers, 5000);
-    
+
     const promises = [
         // While the management page isn't the inventory editor kiosk,
         // we're only using inventory for statistics, so fetching using
@@ -551,7 +567,7 @@ function uploadNewReview(event) {
     // Use papaparse to parse the csv file
     Papa.parse(file, {
         header: true,
-        complete: function(results) {
+        complete: function (results) {
             // Save the results to localstorage
             localStorage.setItem("temp", JSON.stringify(results));
 
@@ -805,7 +821,7 @@ function showCreateEditRedirect(uuid = null) {
             path: "",
             redirect: "",
             logs: [],
-        };  
+        };
     }
 
     document.getElementById("create-edit-redirect-from").value = redirect.path;
@@ -917,14 +933,14 @@ function renderAPIKeys() {
         };
         key_td.appendChild(reveal_key);
         key_td.appendChild(key);
-    
+
 
         row.appendChild(key_td);
 
         let scopes = document.createElement("td");
         scopes.innerText = api_key.scopes.join(", ");
         row.appendChild(scopes);
-        
+
 
         let edit_button = document.createElement("td");
         edit_button.classList.add("edit-api-key-td");
@@ -976,7 +992,7 @@ function showCreateEditAPIKey(uuid = null) {
             name: "",
             key: "",
             scopes: [],
-        };  
+        };
     }
 
     document.getElementById("create-edit-api-key-name").value = api_key.name;
@@ -1024,7 +1040,7 @@ async function saveAPIKey(uuid) {
         name: name,
         key: key,
         scopes: scopes,
-    };  
+    };
 
     let response = await fetch(`${API}/misc/update_api_key`,
         {
@@ -1097,7 +1113,7 @@ function renderAvailability() {
         day_header.innerText = day;
         header.appendChild(day_header);
     }
-    
+
     schedule_divs.push(header);
 
     // Create list of stewards
@@ -1148,9 +1164,9 @@ function renderAvailability() {
                 // If less then 1/3 and more than 1/4 of stewards are available, add "medium-available"
                 // If less then 1/4 of stewards are available, add "low-available"
 
-                if (total_available.length / total_filled_out > 1/3) {
+                if (total_available.length / total_filled_out > 1 / 3) {
                     cell.classList.add("available");
-                } else if (total_available.length / total_filled_out > 1/4) {
+                } else if (total_available.length / total_filled_out > 1 / 4) {
                     cell.classList.add("medium-available");
                 } else {
                     cell.classList.add("low-available");
@@ -1168,7 +1184,7 @@ function renderAvailability() {
 
     for (let steward of stewards) {
         const row = document.createElement("tr");
-        
+
         let hours_available = 0;
 
         if (steward.availability !== null) {
@@ -1332,7 +1348,7 @@ function renderStatistics() {
         "cmc.edu": "CMC",
         "students.pitzer.edu": "Pitzer",
         "pitzer.edu": "Pitzer",
-        "cgu.edu": "CGU", 
+        "cgu.edu": "CGU",
     }
 
     // Initialize objects to hold the number of passes and fails for each quiz
@@ -1342,7 +1358,7 @@ function renderStatistics() {
     const generalSafetyQuizPassIDs = [];
     // Initialize an object to hold the number of users by college who have passed the general safety quiz
     const collegeCounts = {}
-    
+
     // Create a mapping from quiz ID to quiz name
     const quizIDtoName = Object.entries(state.quiz_ids).reduce((acc, [name, id]) => {
         acc[id] = name;
@@ -1388,7 +1404,7 @@ function renderStatistics() {
     generateDailyCheckoutTrendsChart(dailyCounts);
 
     generateUsersByCollegeChart(collegeCounts);
-    
+
     generateCheckoutsByUserRoleChart(roleCounts);
     generatePassedQuizzesChart(passedQuizzes, failedQuizzes, quizIDtoName);
     // TODO: Add engagement based on workshop attendance
@@ -1689,7 +1705,7 @@ function generateCheckoutsByUserRoleChart(roleCounts) {
 function renderRestockRequests() {
     const pending_requests = document.getElementById("pending-restock-requests-list");
     const completed_requests = document.getElementById("completed-restock-requests-list");
-    
+
     removeAllChildren(pending_requests);
     appendChildren(pending_requests, generatePendingRestockRequestDivs());
 
@@ -1750,9 +1766,13 @@ function generatePendingRestockRequestDivs() {
 
             if (user) {
                 requested_by_str = user.name + " (" + user.email + ")";
+                if (user.role === "steward" || user.role === "head_steward") {
+                    requested_by.classList.add("restock-request-requested_by-steward");
+                }
             }
         } else {
             requested_by_str = "Checkout Computer";
+            requested_by.classList.add("restock-request-requested_by-steward");
         }
 
         requested_by.innerText = requested_by_str;
@@ -1760,7 +1780,7 @@ function generatePendingRestockRequestDivs() {
 
         let item = document.createElement("td");
         item.classList.add("restock-request-item");
-        item.innerHTML = replaceLinksWithA(request.item, shorten=true);
+        item.innerHTML = replaceLinksWithA(request.item, shorten = true);
         div.appendChild(item);
 
         let quantity = document.createElement("td");
@@ -1795,7 +1815,7 @@ function showCompleteRestockRequest(uuid, requested_by_str) {
     let request = state.restock_requests.find(request => request.uuid === uuid);
 
     document.getElementById("complete-restock-request-user").innerText = requested_by_str;
-    document.getElementById("complete-restock-request-item").innerHTML = "Item: " + replaceLinksWithA(request.item, shorten=true);
+    document.getElementById("complete-restock-request-item").innerHTML = "Item: " + replaceLinksWithA(request.item, shorten = true);
     document.getElementById("complete-restock-request-reason").innerText = "Reason: " + request.reason;
     document.getElementById("complete-restock-request-quantity").innerText = "Quantity: " + request.quantity;
     document.getElementById("complete-restock-request-notes").value = "";
@@ -1868,7 +1888,7 @@ function generateCompletedRestockRequestDivs() {
 
         // Remove the seconds from the timestamp, but preserve the AM/PM
         timestamp_requested.innerText = timestamp_requested.innerText.replace(/:\d{2} /, " ");
-        
+
         div.appendChild(timestamp_requested);
 
         let requested_by = document.createElement("td");
@@ -1878,15 +1898,19 @@ function generateCompletedRestockRequestDivs() {
 
             if (user) {
                 requested_by.innerText = user.name + " (" + user.email + ")";
+                if (user.role === "steward" || user.role === "head_steward") {
+                    requested_by.classList.add("restock-request-requested_by-steward");
+                }
             }
         } else {
             requested_by.innerText = "Checkout Computer";
+            requested_by.classList.add("restock-request-requested_by-steward");
         }
         div.appendChild(requested_by);
 
         let item = document.createElement("td");
         item.classList.add("restock-request-item");
-        item.innerHTML = replaceLinksWithA(request.item, shorten=true);
+        item.innerHTML = replaceLinksWithA(request.item, shorten = true);
         div.appendChild(item);
 
         let quantity = document.createElement("td");
@@ -2027,7 +2051,7 @@ function generateWorkshopDivsAdmin() {
 
             let edit_button_container = document.createElement("td");
             edit_button_container.classList.add("workshop-edit");
-            
+
             let edit_button = document.createElement("button");
             edit_button.innerHTML = "<span class='material-symbols-outlined'>tune</span>"
             edit_button.onclick = () => {
@@ -2051,7 +2075,7 @@ function generateWorkshopDivsAdmin() {
 
             let delete_button_container = document.createElement("td");
             delete_button_container.classList.add("workshop-delete");
-            
+
             let delete_button = document.createElement("button");
             delete_button.classList.add("delete");
             delete_button.innerHTML = "<span class='material-symbols-outlined'>delete</span>"
@@ -2074,7 +2098,7 @@ function openWorkshopPhotos(event) {
     if (event.target.tagName === "BUTTON") {
         return;
     }
-    
+
     document.getElementById("edit-workshop-photos-input").click();
 }
 
@@ -2101,9 +2125,9 @@ async function selectWorkshopPhotos(event) {
 
 function addPhotoToQueue(file) {
     const editWorkshopPhotosDiv = document.getElementById("edit-workshop-photos");
-  
+
     const photoBox = generateWorkshopPhotoDiv(file, uploaded = false);
-  
+
     editWorkshopPhotosDiv.appendChild(photoBox);
 }
 
@@ -2128,7 +2152,7 @@ function showWorkshopAttendees(uuid) {
 
         if (!workshop.sign_in_list) {
             workshop.sign_in_list = [];
-        }   
+        }
 
         if (workshop.sign_in_list.length === 0) {
             let div = document.createElement("tr");
@@ -2143,7 +2167,7 @@ function showWorkshopAttendees(uuid) {
             if (user) {
                 let div = document.createElement("tr");
                 div.classList.add("workshop-attendee");
-            
+
                 let name = document.createElement("td");
                 name.classList.add("workshop-attendee-name");
                 name.innerText = user.name;
@@ -2188,7 +2212,7 @@ function showRSVPListAdmin(uuid) {
             if (user) {
                 let div = document.createElement("tr");
                 div.classList.add("workshop-signup");
-            
+
                 let name = document.createElement("td");
                 name.classList.add("workshop-signup-name");
                 name.innerText = user.name;
@@ -2255,7 +2279,6 @@ function copyWorkshop(uuid) {
     let workshop = state.workshops.find(workshop => workshop.uuid === uuid);
 
     if (workshop) {
-        console.log(workshop);
         let new_workshop = JSON.parse(JSON.stringify(workshop));
         new_workshop.title = "Copy of " + new_workshop.title;
         new_workshop.uuid = self.crypto.randomUUID();
@@ -2277,7 +2300,7 @@ function showCreateEditWorkshop(uuid) {
         let pacific_offset = new Date().getTimezoneOffset() * 60 * 1000;
         let time_start = new Date(workshop.timestamp_start * 1000) - pacific_offset;
         let time_end = new Date(workshop.timestamp_end * 1000) - pacific_offset;
-    
+
         // Get ISO timestamp for Pacific time
         time_start = new Date(time_start).toISOString().split(".")[0];
         time_end = new Date(time_end).toISOString().split(".")[0];
@@ -2286,7 +2309,7 @@ function showCreateEditWorkshop(uuid) {
         if (is_live_timestamp) {
             // Offset for Pacific time
             is_live_timestamp = new Date(is_live_timestamp * 1000) - pacific_offset;
-            document.getElementById("edit-workshop-is_live_timestamp").value = new Date(is_live_timestamp).toISOString().split(".")[0];                        
+            document.getElementById("edit-workshop-is_live_timestamp").value = new Date(is_live_timestamp).toISOString().split(".")[0];
         }
 
 
@@ -2303,7 +2326,7 @@ function showCreateEditWorkshop(uuid) {
         };
 
         const required_quizzes = document.getElementById("edit-workshop-required_quizzes");
-     
+
         removeAllChildren(required_quizzes);
         appendChildren(required_quizzes, generateRequiredQuizDivs(workshop.required_quizzes));
 
@@ -2324,7 +2347,7 @@ function showCreateEditWorkshop(uuid) {
         };
 
         const required_quizzes = document.getElementById("edit-workshop-required_quizzes");
-             
+
         removeAllChildren(required_quizzes);
         appendChildren(required_quizzes, generateRequiredQuizDivs());
 
@@ -2347,11 +2370,11 @@ function generateWorkshopPhotoDivs(workshop) {
 
     return divs;
 }
-    
+
 function generateWorkshopPhotoDiv(file, uploaded = false, workshop = null) {
     const photoBox = document.createElement("div");
     photoBox.classList.add("photo-box");
-  
+
     const closeButton = document.createElement("button");
     closeButton.classList.add("close-button");
     closeButton.innerText = "X";
@@ -2366,7 +2389,7 @@ function generateWorkshopPhotoDiv(file, uploaded = false, workshop = null) {
                         "Content-Type": "application/json",
                         "api-key": api_key,
                     },
-                    body: JSON.stringify({ workshop_uuid: workshop.uuid, photo_uuid: file}),
+                    body: JSON.stringify({ workshop_uuid: workshop.uuid, photo_uuid: file }),
                 }
             );
 
@@ -2384,14 +2407,14 @@ function generateWorkshopPhotoDiv(file, uploaded = false, workshop = null) {
         });
     }
 
-  
+
     const photo = document.createElement("img");
     if (uploaded) {
         photo.src = `${API}/workshops/download_photo/${file}`;
     } else {
         photo.src = URL.createObjectURL(file);
     }
-  
+
     photoBox.appendChild(closeButton);
     photoBox.appendChild(photo);
 
@@ -2495,7 +2518,7 @@ async function saveWorkshop(uuid = null) {
         required_quizzes: required_quizzes,
         photos: workshop ? workshop.photos ?? [] : [],
         is_live_timestamp: is_live_timestamp,
-    };  
+    };
 
     let request = await fetch(`${API}/workshops/update_workshop`,
         {
@@ -2601,43 +2624,6 @@ function generateProficiencyDivs(users) {
     return divs;
 }
 
-function generateStatsDivs(users) {
-    const divs = [];
-
-    // First, total quiz stats
-    const total_div = document.createElement("h2");
-    total_div.innerText = `Total Unique Quiz Takers`;
-    divs.push(total_div);
-    const total_count = document.createElement("table");
-    total_count.id = "total-count-table";
-
-    const total_count_header = document.createElement("tr");
-    total_count_header.innerHTML = `<th>School</th><th>Count</th><th>Percent of school</th>`;
-    total_count.appendChild(total_count_header);
-
-    const all_count = document.createElement("tr");
-    const all_count_users = Object.keys(state.users).length;
-    const total_pops = Object.values(school_pops).reduce((acc, cur) => acc + cur, 0);
-    const all_count_percent = Math.round((all_count_users / total_pops) * 100);
-
-    all_count.innerHTML = `<td>All</td><td>${all_count_users}</td><td>${all_count_percent}%</td>`;
-    total_count.appendChild(all_count);
-        
-    for (let school_id of Object.keys(school_names)) {
-        const count = document.createElement("tr");
-        const school_count = Object.values(state.users).filter(user => `${user.cx_id}`.startsWith(school_id)).length;
-        const school_perc = Math.round((school_count / school_pops[school_id]) * 100);
-
-        count.innerHTML = `<td>${school_names[school_id]}</td><td>${school_count}</td><td>${school_perc}%</td>`;
-
-        total_count.appendChild(count);
-    }
-
-    divs.push(total_count);
-
-    return divs;
-}
-
 function showEditUser(uuid) {
     let user = state.users.find(user => user.uuid === uuid);
 
@@ -2649,6 +2635,7 @@ function showEditUser(uuid) {
     document.getElementById("edit-user-role").value = user.role;
 
     document.getElementById("edit-user-proficiencies").innerHTML = "";
+    document.getElementById("edit-user-new-steward").innerHTML = "";
 
     if (user.role == "steward" || user.role == "head_steward") {
         for (let prof of PROFICIENCIES) {
@@ -2673,8 +2660,28 @@ function showEditUser(uuid) {
 
             document.getElementById("edit-user-proficiencies").appendChild(prof_div);
         }
+
+        // Create checkbox set to user.new_steward
+        let new_steward_div = document.createElement("div");
+        new_steward_div.classList.add("edit-proficiency-container");
+
+        let new_steward_checkbox = document.createElement("input");
+        new_steward_checkbox.type = "checkbox";
+        console.log(`${user.name} is a new steward? ${user.new_steward}`);
+
+        new_steward_checkbox.checked = user.new_steward ?? false;
+        new_steward_checkbox.id = "edit-user-new-steward-input";
+
+        let new_steward_label = document.createElement("label");
+        new_steward_label.innerText = "New Steward";
+        new_steward_label.htmlFor = "edit-user-new-steward-input";
+
+        new_steward_div.appendChild(new_steward_checkbox);
+        new_steward_div.appendChild(new_steward_label);
+
+        document.getElementById("edit-user-new-steward").appendChild(new_steward_div);
     }
-        
+
 
     document.getElementById("edit-user-save").onclick = () => {
         saveUser(uuid);
@@ -2702,6 +2709,10 @@ async function saveUser(uuid) {
         }
 
         user.proficiencies = profs;
+
+        user.new_steward = document.getElementById("edit-user-new-steward-input").checked;
+
+        console.log(user);
     }
 
 
@@ -2722,7 +2733,7 @@ async function saveUser(uuid) {
             for (let key of Object.keys(state.users)) {
                 state.users[key].cx_id_str = `${state.users[key].cx_id}`;
             }
-    
+
             submitUserSearch(editable = true);
         });
 
@@ -2754,7 +2765,7 @@ function toggleOnlyStewards() {
 
 async function massAssignRoles() {
     let users_to_update = [];
-    
+
     const role = document.getElementById("mass-assign-roles-selection").value;
     const identifiers = document.getElementById("mass-assign-roles-text").value.split("\n");
     let errors = [];
@@ -2770,7 +2781,7 @@ async function massAssignRoles() {
                 identifier: identifier,
                 error: "User not found"
             });
-        }   
+        }
     }
 
 
@@ -2781,10 +2792,10 @@ async function massAssignRoles() {
                 headers: {
                     "Content-Type": "application/json",
                     "api-key": api_key,
-                    },
-                    body: JSON.stringify(user)
-                }
-            );
+                },
+                body: JSON.stringify(user)
+            }
+        );
 
         if (request.status != 200) {
             errors.push({
@@ -2792,7 +2803,7 @@ async function massAssignRoles() {
                 error: "Error updating user: " + request.status
             });
         }
-    } 
+    }
 
     const status = document.getElementById("mass-assign-roles-status");
 
@@ -2802,7 +2813,7 @@ async function massAssignRoles() {
             for (let key of Object.keys(state.users)) {
                 state.users[key].cx_id_str = `${state.users[key].cx_id}`;
             }
-    
+
             submitUserSearch(editable = true);
         });
     }
@@ -2849,7 +2860,12 @@ function renderScheduleAdmin() {
             return 1;
         }
     });
-    
+
+    const schedule_audit = document.getElementById("schedule-audit");
+
+    removeAllChildren(schedule_audit);
+    appendChildren(schedule_audit, generateScheduleAuditDivs());
+
     const schedule = document.getElementById("schedule-table");
 
     removeAllChildren(schedule);
@@ -2864,6 +2880,151 @@ function renderScheduleAdmin() {
 
     removeAllChildren(shift_change_list);
     appendChildren(shift_change_list, generateShiftChangeList(all_stewards));
+}
+
+function generateScheduleAuditDivs() {
+    /*
+
+    This function checks the schedule to "audit" it. It looks for the following issues:
+    - Stewards working for only one hour at a time
+    - Working continuously between 5-7, as they need to eat
+    - Working during both training shifts
+    - Working outside of their availability
+    
+    */
+
+    let issues = [];
+
+    // Check for stewards working for only one hour at a time
+    const stewards = state.users.filter(user => user.role == "steward" || user.role == "head_steward");
+
+    const shifts = state.shifts;
+
+    for (let steward of stewards) {
+        const steward_shifts = shifts.filter(shift => shift.stewards.includes(steward.uuid));
+
+        issues = [...issues, ...checkForOneHourShifts(steward, steward_shifts)];
+        issues = [...issues, ...checkForDinnerShifts(steward, steward_shifts)];
+        issues = [...issues, ...checkForAvailability(steward, steward_shifts)];
+        issues = [...issues, ...checkForTrainingShifts(steward, steward_shifts)];
+    }
+
+    const header = document.createElement("tr");
+    header.innerHTML = `<th>Steward</th><th>Shift</th><th>Issue</th>`;
+    const divs = [header];
+
+    for (let issue of issues) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${issue.steward.name}</td><td>${issue.shift.day}, ${issue.shift.timestamp_start}-${issue.shift.timestamp_end}</td><td>${issue.issue}</td>`;
+        divs.push(row);
+    }
+
+    if (issues.length == 0) {
+        const row = document.createElement("tr");
+        row.innerHTML = "<td colspan='3'>No issues found</td>";
+        divs.push(row);
+    }
+
+    return divs;
+}
+
+function checkForOneHourShifts(steward, shifts) {
+    let issues = [];
+
+    for (let shift of shifts) {
+        if (!shifts.find(other_shift =>
+            other_shift.timestamp_start == shift.timestamp_end || other_shift.timestamp_end == shift.timestamp_start
+        )) {
+            issues.push({
+                steward: steward,
+                shift: shift,
+                issue: "Steward working for only one hour"
+            });
+        }
+    }
+
+    return issues;
+}
+
+function checkForDinnerShifts(steward, shifts) {
+    let issues = [];
+
+    for (let day of DAYS) {
+        let num_shifts = 0;
+        let dinner_shift = null;
+
+        for (let hour = 0; hour < DINNER_END - DINNER_START; hour++) {
+            dinner_shift = shifts.find(shift => shift.day == day && shift.timestamp_start == formatHour(hour + DINNER_START));
+
+            if (dinner_shift) {
+                num_shifts += 1;
+            }
+        }
+
+        if (num_shifts >= DINNER_END - DINNER_START) {
+            issues.push({
+                steward: steward,
+                shift: dinner_shift,
+                issue: "Steward working continuously during dinner"
+            });
+        }
+    }
+
+    return issues;
+}
+
+function checkForTrainingShifts(steward, shifts) {
+    let issues = [];
+
+    let training_shifts = 0;
+
+    let shift_to_return = null;
+
+    for (let training of TRAINING_TIMES) {
+        let during_training = false;
+        
+        for (let time = 0; time < training.end - training.start; time++) {
+            let found_shift = shifts.find(shift => shift.day == training.day && shift.timestamp_start == formatHour(time + training.start));
+
+            if (found_shift) {
+                during_training = true;
+                shift_to_return = found_shift;
+                break;
+            }
+        }
+
+        if (during_training) {
+            training_shifts += 1;
+        }
+    }
+
+    if (training_shifts >= TRAINING_TIMES.length) {
+        issues.push({
+            steward: steward,
+            shift: shift_to_return,
+            issue: "Steward working during both training shifts"
+        });
+    }
+
+    return issues;
+}
+
+function checkForAvailability(steward, shifts) {
+    let issues = [];
+
+    for (let shift of shifts) {
+        if (steward.availability) {
+            if (!steward.availability[DAYS.indexOf(shift.day)][unformatHour(shift.timestamp_start)]) {
+                issues.push({
+                    steward: steward,
+                    shift: shift,
+                    issue: "Steward working outside of their availability"
+                });
+            }
+        }
+    }
+
+    return issues;
 }
 
 function updateStewardList() {
@@ -2910,7 +3071,7 @@ function generateStewardShiftList(all_stewards) {
         // two weeks of hours
         for (let steward of all_stewards) {
             pay_period_hours[steward.uuid] = 2 * (stewards_hours[steward.uuid] ?? 0);
-        }
+        }f
 
         let end_date = new Date(end_of_pay_period);
         let two_weeks_before_end = new Date(end_date - 14 * 24 * 60 * 60 * 1000);
@@ -2985,8 +3146,8 @@ function generateStewardShiftList(all_stewards) {
         if (pay_period_hours) {
             let difference = pay_period_hours[steward.uuid] - (2 * stewards_hours[steward.uuid])
             let plus = difference >= 0 ? "+" : "";
-    
-            payPeriodCell.innerText = `${pay_period_hours[steward.uuid]} worked hours (${plus}${difference})`;     
+
+            payPeriodCell.innerText = `${pay_period_hours[steward.uuid]} worked hours (${plus}${difference})`;
         } else {
             payPeriodCell.innerText = "-";
         }
@@ -3023,7 +3184,7 @@ function generateShiftChangeList(all_stewards) {
     for (let change of sorted_shifts) {
         let div = document.createElement("div");
         div.classList.add("shift-change-list-item");
-        
+
         let date = document.createElement("div");
         date.classList.add("shift-change-list-item-date");
         date.innerText = `${change.date} @ ${change.timestamp_start} - ${change.timestamp_end}`;
@@ -3032,7 +3193,7 @@ function generateShiftChangeList(all_stewards) {
         let name = document.createElement("div");
         name.classList.add("name");
         // Get steward uuid from change and find steward
-        let steward = all_stewards.find(steward => steward.uuid === change.steward) ?? {name: "Unknown steward", email: "Unknown steward", cx_id: "Unknown steward"};
+        let steward = all_stewards.find(steward => steward.uuid === change.steward) ?? { name: "Unknown steward", email: "Unknown steward", cx_id: "Unknown steward" };
         name.innerText = steward.name;
         div.appendChild(name);
 
@@ -3123,7 +3284,7 @@ function generateScheduleDivsAdmin() {
 
         divs.push(row);
     }
-    
+
     return divs;
 }
 
@@ -3160,7 +3321,7 @@ function renderShiftStewards(all_stewards, shift, day, hour) {
             stewards: [],
         };
     }
-    
+
     let stewards_hours = {};
 
     for (let shift of state.shifts) {
@@ -3212,9 +3373,9 @@ function generateEditStewardShiftDiv(user, on_shift, day, hour, stewards_hours) 
     const user_div = document.createElement("div");
     user_div.classList.add("add-remove-steward-info");
     // Append name and cx_id
-    
+
     let hours_available = 0;
-    
+
     if (user.availability !== null) {
         for (let i = 0; i < 7; i++) {
             for (let j = 12; j < 24; j++) {

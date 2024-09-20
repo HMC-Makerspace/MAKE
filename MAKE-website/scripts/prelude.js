@@ -5,17 +5,7 @@ Constants
 */
 
 const API = '/api/v2';
-const VER = "2.0.0"
-const QUIZ_TO_NAME = {
-    "General": "General Safety Quiz",
-    "Laser3D": "3D Printer & Laser Cutter Quiz",
-    "SprayPaint": "Spray Paint Quiz",
-    "Composite": "Composite Room Quiz",
-    "Welding": "Welding Quiz",
-    "Studio": "Studio Quiz",
-    "Waterjet": "Waterjet Quiz",
-    "Loom": "Loom Quiz",
-}
+const VER = "2.0.0";
 
 /*
 

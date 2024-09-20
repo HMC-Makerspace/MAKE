@@ -326,7 +326,7 @@ async function populateStewardPage() {
     
     divs.push(header);
 
-    for (let i = 14; i < 22; i++) {
+    for (let i = 14; i < 23; i++) {
         const row = document.createElement("tr");
 
         const time = document.createElement("th");

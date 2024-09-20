@@ -1042,8 +1042,8 @@ INVENTORY
   --r: 180deg;
 }
 
-.inventory-result-show-lower-div:hover:not(.grayed-out).flipped {
-}
+/* .inventory-result-show-lower-div:hover:not(.grayed-out).flipped {
+} */
 
 .kit-div {
   height: 50px;
@@ -1213,6 +1213,12 @@ z-index: -1;
   padding: 10px;
 }
 
+.restock-request-requested_by-steward {
+  font-weight: bold;
+  color: var(--make-color);
+}
+
+
 .error{
   background-color: var(--printer-error) !important;
   animation: pulse .5s infinite;
@@ -1346,6 +1352,23 @@ Quizzes & Information
   padding: 20px;
 }
 
+/* Container for only the General safety quiz, which
+displays larger and at the top of all the other quizzes */
+#general-quiz-container {
+  width: 90%;
+  margin: 10px auto;
+}
+
+#general-quiz-container > div > p {
+  font-size: medium;
+  align-self: center;
+}
+
+#general-quiz-container > div > button {
+  font-size: large;
+  height: 60px;
+}
+
 #quiz-list-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -1388,14 +1411,14 @@ Quizzes & Information
   color: var(--text-color-light);
 }
 
-.quiz-div .quiz-reference,
+/* .quiz-div .quiz-reference,
 .quiz-div .quiz-take {
 
 }
 
 .quiz-div .quiz-reference:hover,
 .quiz-div .quiz-take:hover {
-}
+} */
 
 .quiz-div.quiz-passed {
   border: 2px solid var(--high-color);
@@ -1619,8 +1642,8 @@ table tr td button {
   margin-top: 10px;
 }
 
-#schedule-table .stewards {
-}
+/* #schedule-table .stewards {
+} */
 
 #schedule-table .proficiencies {
   color: var(--white);
@@ -1756,9 +1779,14 @@ table tr td button {
   background-color: var(--medium-color-dark);
 }
 
-.bambu-printer .status.offline, .bambu-printer .status.failed {
+.bambu-printer .status.failed {
   border: 2px solid var(--low-color);
   background-color: var(--low-color-dark);
+}
+
+.bambu-printer .status.offline {
+  border: 2px solid var(--theme-color-3);
+  background-color: var(--theme-color-3);
 }
 
 .bambu-printer .current-file {
@@ -2164,13 +2192,13 @@ Workshops
   font-size: 1.5em;
 }
 
-.workshop .instructor {
+/* .workshop .instructor {
 
 }
 
 .workshop .date {
 
-} 
+}  */
 
 .workshop .description {
   width: 50%;
@@ -2203,9 +2231,9 @@ Workshops
   border: 1px solid var(--low-color);
 }
 
-.workshop .capacity {
+/* .workshop .capacity {
 
-}
+} */
 
 .workshop button.signup {
   padding: 10px 20px;
@@ -2585,8 +2613,8 @@ Mobile Styles
     padding-bottom: 200px;
   }
 
-  .quiz-info-storage-help {
-  }
+  /* .quiz-info-storage-help {
+  } */
 
   .quiz-status-item {
     height: 110px;
