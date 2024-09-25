@@ -1607,7 +1607,7 @@ table tr td button {
   background-color: var(--shift-1);
 }
 
-.highlight-1 {
+.stewards-1.highlight-1 {
   background-color: var(--shift-1) !important;
 }
 
@@ -1615,21 +1615,29 @@ table tr td button {
   background-color: var(--shift-2);
 }
 
-.highlight-2 {
-  background-color: var(--shift-2) !important;
+.stewards-2.highlight-2 {
+  background-color: var(--shift-2);
 }
 
 .stewards-3 {
   background-color: var(--shift-3);
 }
 
-.highlight-3 {
-  background-color: var(--shift-3) !important;
+.stewards-3.highlight-3 {
+  background-color: var(--shift-3);
 }
 
 .head-steward {
   background-color: var(--theme-color-1);
   color: var(--black);
+}
+
+.head-steward.highlight-1 {
+  background-color: var(--alt-make-color);
+}
+
+.head-steward.highlight-2 .head-steward.highlight-3 {
+  background-color: var(--make-color);
 }
 
 .stewards-legend {
