@@ -68,10 +68,13 @@ const ROLE_TO_READABLE = {
 const PROFICIENCIES = [
     "3D Printing",
     "Advanced 3D Printing",
+    "Analog Loom",
+    "Cricut",
+    "Digital Loom",
+    "Embroidery",
     "Large Format Printer",
     "Laser Cutter",
     "Leather Sewing Machine",
-    "Loom",
     "Oscilloscopes",
     "Printing Press",
     "Sergers",
@@ -81,8 +84,8 @@ const PROFICIENCIES = [
     "Studio (Audio)",
     "Studio (Video)",
     "Waterjet",
-    "Welding"
-];
+    "Welding",
+] // Keep this sorted
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 

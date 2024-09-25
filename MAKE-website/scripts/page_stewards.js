@@ -210,9 +210,8 @@ async function populateStewardPage() {
         prof_checkbox.id = `edit-user-proficiency-${prof}`;
 
         prof_checkbox.onchange = updateStewardProficiencies;
-        let prof_label = document.createElement("label");
+        let prof_label = document.createElement("div");
         prof_label.innerText = prof;
-        prof_label.htmlFor = `edit-user-proficiency-${prof}`;
 
         prof_div.appendChild(prof_checkbox);
         prof_div.appendChild(prof_label);
