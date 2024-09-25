@@ -85,7 +85,7 @@ const PROFICIENCIES = [
     "Studio (Video)",
     "Waterjet",
     "Welding",
-].sort();
+] // Keep this sorted
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
