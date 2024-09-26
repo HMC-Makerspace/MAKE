@@ -547,50 +547,36 @@ function downloadReview(review) {
 }
 
 function downloadSchedule() {
-    // find earliest time and wi
-    // Create a csv file of the shifts scheduled
-    const times = state.shifts.map(shift => moment(shift.timestamp_start.split("-")[0], 'h:mm A').toDate())
+
+    const validShifts = state.shifts.filter(shift => shift.stewards && shift.stewards.length > 0)
+    const hours = validShifts.map(shift => moment(shift.timestamp_start.split("-")[0], 'h:mm A').hour())
+    const uniqueHours = [...new Set(hours)].sort()
     let csv = DAYS + "\n";
+
     const now = moment();
-    // const time_start = 12;
-    // const time_end = 24;
-    console.log("dogs", times, state.shifts)
 
-    // for (let i = time_start; i < time_end; i++) {
-        // const time = `${formatHour(i)} - ${formatHour(i + 1)}`;
-        // console.log("chicken", times)
-        // console.log(time.split("-")[0])
-        // console.log(time.split("-")[0])
-    // }
+    let csvArray = [[" "].concat(DAYS)];
 
-    HOURS = ["10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM"]
-    for (let i = 0; i < state.shifts.length; i++) {
-        for (let day of DAYS) {
-            for (let hour of HOURS){
-
-                console.log("shift", state.shifts[i],  "day", day, "hour", hour)
-                console.log( "day equation", day == state.shifts[i].day, "hour equation", hour == state.shifts[i].timestamp_begin)
-
-                if (state.shifts[i].day == day && state.shifts[i].timestamp_begin == hour) {
-                    console.log('true')
-                    csv += `${state.shifts.stewards},`;
-                    }
-                }
-                csv += '\n'
-            }    
+    for (let i = 1; i < uniqueHours.length + 1; i++) {
+        csvArray[i] = [];
+        for (let j = 0; j < 8; j++) {
+            csvArray[i][j] = null;
         }
+    }
+    console.log('arrayarray', csvArray)
 
-    // Create a blob and download it
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    //will move this to resources
+    const daysToIndex = {"Sunday": 1, "Monday": 2, "Tuesday": 3, "Wednesday": 4, "Thursday": 5, "Friday": 6, "Saturday": 7}
+    let hoursToIndex = {};
+    uniqueHours.forEach((hour, index) => {
+        hoursToIndex[hour] = index + 1;
+      })
 
-    a.href = url;
-    a.download = `shift_schedule_${now.format('MM-DD-YYYY')}.csv`;
-
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    console.log("chirst", hoursToIndex, uniqueHours)
+    for (let shift of validShifts) {
+        csvArray[hoursToIndex[moment(shift.timestamp_start.split("-")[0], 'h:mm A').hour()]][daysToIndex[shift.day]] = shift.stewards
+    }
+    console.log("csvList",csvArray)
 }
 
 function setApplicantPage(page) {
