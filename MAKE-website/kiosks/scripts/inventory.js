@@ -98,16 +98,6 @@ async function authenticate() {
 
 authenticate();
 
-async function fetchCertifications() {
-    const response = await fetch(`${API}/certifications/`);
-
-    if (response.status == 200) {
-        const certifications = await response.json();
-
-        state.certifications = certifications;
-    }
-}
-
 async function fetchEditableInventory() {
     const response = await fetch(`${API}/inventory/get_inventory`);
 

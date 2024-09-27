@@ -828,7 +828,7 @@ table#proficiencies-list td.proficiency-cell {
   text-align: center;
 }
 
-#create-new-workshop-button, #create-new-redirect-button, #clear-availability-button, #create-new-api-key-button {
+#create-new-workshop-button, #create-new-redirect-button, #clear-availability-button, #create-new-api-key-button, #create-new-certification-button {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1009,7 +1009,7 @@ table#api-keys-table > tbody > tr > td, table#api-keys-table > tbody > tr > th {
 }
 
 /* Make button columns small */
-td.edit-api-key-td, td.delete-api-key-td {
+td.table-btn {
   width: 50px;
   text-align: center;
 }

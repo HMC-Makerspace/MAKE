@@ -32,7 +32,7 @@ async def get_all_certifications(request: Request):
 
     return certs
 
-@cert_router.post("/certification")
+@cert_router.post("/certification", status_code=201)
 async def add_certification(request: Request):
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Add certification...")
@@ -56,7 +56,7 @@ async def add_certification(request: Request):
     json = await request.json()
 
     try :
-        cert = User(**json)
+        cert = Certification(**json)
     except Exception as e:
         raise HTTPException(status_code=400, detail="Invalid certification data") from e
 
@@ -72,7 +72,7 @@ async def add_certification(request: Request):
         await certifications.insert_one(cert.model_dump())
 
 
-@cert_router.delete("/certification")
+@cert_router.delete("/certification", status_code=204)
 async def delete_certification(request: Request):
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Delete certification...")

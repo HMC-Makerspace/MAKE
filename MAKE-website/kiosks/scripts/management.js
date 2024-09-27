@@ -12,6 +12,7 @@ var state = {
     redirects: null,
     api_keys: null,
     all_api_key_scopes: null,
+    certifications: null,
 };
 
 var shifts_updated = false;
@@ -193,6 +194,7 @@ async function authenticate() {
         fetchRestockRequests(),
         fetchCheckoutsAdmin(),
         fetchRedirectsAdmin(),
+        fetchCertifications(),
         fetchAPIKeysAdmin(),
         fetchAllAPIKeyScopesAdmin(),
     ];
@@ -433,10 +435,176 @@ function renderAll() {
     renderRedirects();
     renderAPIKeys();
     renderApplicants();
+    renderCertifications();
 
     // Stats take a while to load, so we'll render them last
     renderStatistics();
 }
+
+function renderCertifications() {
+    const certifications_table = document.getElementById("certifications-table");
+    removeAllChildren(certifications_table);
+
+    const cert_header = "<tr><th>Name</th><th>Description</th><th>Valid For</th><th># Certified</th><th>Edit</th><th>Delete</th></tr>";
+    certifications_table.innerHTML = cert_header;
+
+    const certs = []
+
+    for (let cert of state.certifications) {
+        let row = document.createElement("tr");
+
+        let name = document.createElement("td");
+        name.innerText = cert.name;
+        row.appendChild(name);
+
+        let description = document.createElement("td");
+        description.innerText = cert.description;
+        row.appendChild(description);
+
+        let valid_for = document.createElement("td");
+        if (cert.seconds_valid_for >= 365 * 24 * 60 * 60) {
+            valid_for.innerText = `${cert.seconds_valid_for / (60 * 60 * 24 * 365)} years`;
+        } else {
+            valid_for.innerText = `${cert.seconds_valid_for / (60 * 60 * 24)} days`;
+        }
+        row.appendChild(valid_for);
+
+
+        let count = document.createElement("td");
+        let count_num = 0;
+        for (let user of state.users) {
+            if (user.certifications) {
+                if (user.certifications.includes(cert.uuid)) {
+                    count_num++;
+                }
+            }
+        }
+
+        count.innerText = count_num;
+        row.appendChild(count);
+
+        let edit_button = document.createElement("td");
+        edit_button.classList.add("table-btn");
+        let edit_button_button = document.createElement("button");
+        edit_button_button.innerHTML = "<span class='material-symbols-outlined'>tune</span>";
+        edit_button_button.onclick = () => {
+            showCreateEditCertification(cert.uuid);
+        };
+        edit_button.appendChild(edit_button_button);
+
+        row.appendChild(edit_button);
+        
+        let delete_button = document.createElement("td");
+        delete_button.classList.add("table-btn");
+        let delete_button_button = document.createElement("button");
+        delete_button_button.innerHTML = "<span class='material-symbols-outlined'>delete</span>";
+
+        delete_button_button.onclick = () => {
+            deleteCertification(cert.uuid);
+        };
+        delete_button.appendChild(delete_button_button);
+        
+        row.appendChild(delete_button);
+
+        certs.push(row);
+    }
+
+    appendChildren(certifications_table, certs);
+}
+
+function showCreateEditCertification(uuid = null) {
+    let cert = null;
+
+    if (uuid !== null) {
+        cert = state.certifications.find(cert => cert.uuid === uuid);
+    } else {
+        cert = {
+            uuid: self.crypto.randomUUID(),
+            name: "",
+            description: "",
+            seconds_valid_for: 60 * 60 * 24 * 365,
+        };
+    }
+
+    document.getElementById("create-edit-certification-name").value = cert.name;
+    document.getElementById("create-edit-certification-description").value = cert.description;
+    const valid_for_selection = document.getElementById('create-edit-certification-valid-for');
+
+    for (let i = 0; i < valid_for_selection.options.length; i++) {
+        if (Number(valid_for_selection.options[i].value) == cert.seconds_valid_for / (60 * 60 * 24)) {
+            valid_for_selection.selectedIndex = i;
+            break;
+        }
+    }
+
+    document.getElementById("create-edit-certification-save").onclick = () => {
+        saveCertification(cert.uuid);
+    };
+
+    showPopup("create-edit-certification");
+}
+
+async function saveCertification(uuid) {
+    let name = document.getElementById("create-edit-certification-name").value;
+
+    let description = document.getElementById("create-edit-certification-description").value;
+
+    let seconds_valid_for = Number(document.getElementById("create-edit-certification-valid-for").value) * 60 * 60 * 24;
+
+    let request = {
+        uuid: uuid,
+        name: name,
+        description: description,
+        seconds_valid_for: seconds_valid_for,
+    };
+
+    let response = await fetch(`${API}/certifications/certification`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+            body: JSON.stringify(request),
+        }
+    );
+
+    if (response.status == 201) {
+        await fetchCertifications();
+        renderCertifications();
+    } else {
+        const body = await response.json();
+        alert("Error saving certification: " + response.status + "\n" + body.detail);
+    }
+
+    closePopup();
+}
+
+async function deleteCertification(uuid) {
+    let result = prompt("Are you sure you want to delete this certification? Type 'delete' to confirm.");
+
+    if (result === "delete") {
+        const response = await fetch(`${API}/certifications/certification`,
+            {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "api-key": api_key,
+                },
+                body: JSON.stringify({ uuid: uuid }),
+            }
+        );
+
+        if (response.status == 204) {
+            await fetchCertifications();
+            renderCertifications();
+        } else {
+            const body = await response.json();
+            alert("Error deleting certification: " + response.status + "\n" + body.detail);
+        }
+    }
+}
+
 
 function renderApplicants() {
     // Load the applicants state from localstorage
@@ -943,7 +1111,7 @@ function renderAPIKeys() {
 
 
         let edit_button = document.createElement("td");
-        edit_button.classList.add("edit-api-key-td");
+        edit_button.classList.add("table-btn");
         let edit_button_button = document.createElement("button");
         edit_button_button.innerHTML = "<span class='material-symbols-outlined'>tune</span>";
         edit_button_button.classList.add("edit-api-key");
@@ -959,7 +1127,7 @@ function renderAPIKeys() {
         row.appendChild(edit_button);
 
         let delete_button = document.createElement("td");
-        delete_button.classList.add("delete-api-key-td");
+        delete_button.classList.add("table-btn");
         let delete_button_button = document.createElement("button");
         delete_button_button.innerHTML = "<span class='material-symbols-outlined'>delete</span>";
         delete_button_button.classList.add("delete", "delete-api-key");
