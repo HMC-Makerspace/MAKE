@@ -6,6 +6,7 @@ var state = {
     cart: {},
     current_cx_id: 0,
     current_user_info: null,
+    certifications: null,
 }
 
 document.documentElement.setAttribute('data-theme', 'dark');
@@ -61,6 +62,9 @@ async function authenticate() {
     setInterval(fetchInventory, 100000, kiosk_mode = "checkout");
     setInterval(fetchCheckoutsAdmin, 100000);
     setInterval(fetchUsers, 100000);
+    setInterval(fetchCertifications, 100000);
+
+    await fetchCertifications();
 
     fetchInventory(true).then(() => {
         submitSearch(kiosk_mode = "checkout");
@@ -437,6 +441,32 @@ function updatePage() {
 function addToCart(uuid) {
     if (state.current_cx_id === 0) {
         return;
+    }
+
+    // Check if the item has certs required to check out
+    // If there are multiple listed, then all must be passed
+    const item = state.inventory.find((item) => item.uuid === uuid);
+
+    if (item.certifications) {
+        let needed_certs = item.certifications.map((x) => state.certifications.find((cert) => cert.uuid === x));
+
+        if (!state.current_user_info.certifications) {
+            // User does not have any certifications
+            alert(`User needs all certifications: ${needed_certs.map((x) => x.name).join(", ")}`); 
+        }
+
+        let passed = true;
+
+        for (let cert of item.certifications) {
+            if (!Object.keys(state.current_user_info.certifications).includes(cert)) {
+                passed = false;
+            }
+        }
+
+        if (!passed) {
+            alert(`User needs all certifications: ${needed_certs.map((x) => x.name).join(", ")}`); 
+            return;
+        }
     }
 
     if (state.cart[uuid] === undefined) {

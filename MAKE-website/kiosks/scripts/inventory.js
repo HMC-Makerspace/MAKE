@@ -379,16 +379,21 @@ function editInventoryItem(uuid, create_item=false) {
     certifications.innerHTML = "";
 
     for (let cert of state.certifications) {
+        const div = document.createElement("div");
+        div.classList.add("edit-proficiency-container")
         const label = document.createElement("label");
         label.innerText = cert.name;
 
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.id = `edit-cert-${cert.uuid}`;
-        checkbox.checked = item.certifications?.hasOwnProperty(cert.uuid) ?? false;
+        console.log(item.certifications);
+        checkbox.checked = item.certifications && item.certifications.includes(cert.uuid);
 
-        label.appendChild(checkbox);
-        certifications.appendChild(label);
+        div.appendChild(checkbox);
+        div.appendChild(label);
+
+        certifications.appendChild(div);
     }
 
     const locations = container.querySelector(".locations")
@@ -452,15 +457,21 @@ function changeEventListener(event, item_uuid) {
         state.inventory[index].access_type = parseInt(input.value);
     } else if (input.id === "edit-kit_contents") {
         state.inventory[index][attr] = input.value.split(",");
-    } else if (input.id === "edit-certifications") {
-        const cert_uuid = input.id.split("-")[2];
+    } else if (input.id.startsWith("edit-cert-")) {
+        const cert_uuid = input.id.replace("edit-cert-", "");
+        console.log(`Cert uuid: ${cert_uuid}`);
         if (input.checked) {
             if (!state.inventory[index].certifications) {
                 state.inventory[index].certifications = [];
             }
-            state.inventory[index].certifications.push(cert_uuid);
+
+            if (!state.inventory[index].certifications.includes(cert_uuid)) {
+                state.inventory[index].certifications.push(cert_uuid);
+            }
         } else {
-            state.inventory[index].certifications = state.inventory[index].certifications.filter((c) => c !== cert_uuid);
+            if (state.inventory[index].certifications && state.inventory[index].certifications.includes(cert_uuid)) {
+                state.inventory[index].certifications = state.inventory[index].certifications.filter((c) => c !== cert_uuid);
+            }
         }
     } else if (input.type === "number") {
         state.inventory[index][attr] = parseInt(input.value);
