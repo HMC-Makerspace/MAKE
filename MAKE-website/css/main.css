@@ -1608,7 +1608,7 @@ table tr td button {
 }
 
 .highlight-1 {
-  background-color: var(--shift-1) !important;
+  background-color: var(--shift-1);
 }
 
 .stewards-2 {
@@ -1616,7 +1616,7 @@ table tr td button {
 }
 
 .highlight-2 {
-  background-color: var(--shift-2) !important;
+  background-color: var(--shift-2);
 }
 
 .stewards-3 {
@@ -1624,12 +1624,24 @@ table tr td button {
 }
 
 .highlight-3 {
-  background-color: var(--shift-3) !important;
+  background-color: var(--shift-3);
 }
 
 .head-steward {
   background-color: var(--theme-color-1);
   color: var(--black);
+}
+
+.head-steward.highlight-1 {
+  background-color: var(--alt-make-color);
+}
+
+.head-steward.highlight-2,.head-steward.highlight-3 {
+  background-color: var(--make-color);
+}
+
+.head-steward.grayed-out {
+  color: var(--make-color);
 }
 
 .stewards-legend {
