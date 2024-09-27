@@ -495,7 +495,7 @@ function renderCertifications() {
         edit_button.appendChild(edit_button_button);
 
         row.appendChild(edit_button);
-        
+
         let delete_button = document.createElement("td");
         delete_button.classList.add("table-btn");
         let delete_button_button = document.createElement("button");
@@ -505,7 +505,7 @@ function renderCertifications() {
             deleteCertification(cert.uuid);
         };
         delete_button.appendChild(delete_button_button);
-        
+
         row.appendChild(delete_button);
 
         certs.push(row);
@@ -723,7 +723,7 @@ async function downloadSchedule() {
     const validShifts = state.shifts.filter(shift => shift.stewards && shift.stewards.length > 0)
 
     for (let shift of validShifts) {
-        for (let i = 0; i < shift.stewards.length; i++){
+        for (let i = 0; i < shift.stewards.length; i++) {
             let steward_response = await fetch(`${API}/users/get_user/${shift.stewards[i]}`);
             const response = await steward_response.json()
 
@@ -740,15 +740,15 @@ async function downloadSchedule() {
     let hoursToIndex = {};
     uniqueHours.forEach((hour, index) => {
         hoursToIndex[hour] = index + 1;
-      })
-    
+    })
+
     let csvArray = [[" "].concat(DAYS)];
 
     for (let i = 1; i < uniqueHours.length + 1; i++) {
         csvArray[i] = [];
         for (let j = 0; j < 8; j++) {
             if (j == 0) {
-                csvArray[i][j] = TWENTY_FOUR_HOURS_TO_STRING[uniqueHours[i-1]]
+                csvArray[i][j] = TWENTY_FOUR_HOURS_TO_STRING[uniqueHours[i - 1]]
             } else {
                 csvArray[i][j] = "";
             }
@@ -758,9 +758,9 @@ async function downloadSchedule() {
         csvArray[hoursToIndex[moment(shift.timestamp_start.split("-")[0], 'h:mm A').hour()]][DAYS_TO_INDEX[shift.day]] = shift.stewards.join(" | ")
     }
 
-    const csv = csvArray.map(row => 
+    const csv = csvArray.map(row =>
         row.map(item => `${item}`).join(',')
-      ).join('\n');
+    ).join('\n');
 
     // Create a blob and download it
     const blob = new Blob([csv], { type: "text/csv" });
@@ -2866,6 +2866,26 @@ function showEditUser(uuid) {
 
     document.getElementById("edit-user-proficiencies").innerHTML = "";
     document.getElementById("edit-user-new-steward").innerHTML = "";
+    document.getElementById("edit-user-certifications").innerHTML = "";
+
+    // Create certification checkboxes
+    for (let cert of state.certifications) {
+        const cert_div = document.createElement("div");
+        cert_div.classList.add("edit-proficiency-container");
+
+        const label = document.createElement("label");
+        label.innerText = cert.name;
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `edit-cert-${cert.uuid}`;
+        checkbox.checked = user.certifications?.hasOwnProperty(cert.uuid) ?? false;
+
+        cert_div.appendChild(checkbox);
+        cert_div.appendChild(label);
+
+        document.getElementById("edit-user-certifications").appendChild(cert_div);
+    }
 
     if (user.role == "steward" || user.role == "head_steward") {
         for (let prof of PROFICIENCIES) {
@@ -2945,6 +2965,25 @@ async function saveUser(uuid) {
         console.log(user);
     }
 
+    let timestamp_now = new Date().getTime() / 1000;
+
+    if (!user.certifications) {
+        user.certifications = {};
+    }
+
+    for (let cert of state.certifications) {
+        if (document.getElementById(`edit-cert-${cert.uuid}`).checked) {
+            // Only update timestamp if it doesn't exist
+            // We don't want to constantly refresh a user's cert
+            if (!user.certifications[cert.uuid]) {
+                user.certifications[cert.uuid] = timestamp_now;
+            }
+        } else {
+            if (user.certifications[cert.uuid]) {
+                delete user.certifications[cert.uuid];
+            }
+        }
+    }
 
     let request = await fetch(`${API}/users/update_user`,
         {
@@ -3212,7 +3251,7 @@ function checkForTrainingShifts(steward, shifts) {
 
     for (let training of TRAINING_TIMES) {
         let during_training = false;
-        
+
         for (let time = 0; time < training.end - training.start; time++) {
             let found_shift = shifts.find(shift => shift.day == training.day && shift.timestamp_start == formatHour(time + training.start));
 
@@ -3301,7 +3340,7 @@ function generateStewardShiftList(all_stewards) {
         // two weeks of hours
         for (let steward of all_stewards) {
             pay_period_hours[steward.uuid] = 2 * (stewards_hours[steward.uuid] ?? 0);
-        }f
+        } f
 
         let end_date = new Date(end_of_pay_period);
         let two_weeks_before_end = new Date(end_date - 14 * 24 * 60 * 60 * 1000);
@@ -3490,7 +3529,7 @@ function generateScheduleDivsAdmin() {
                 inner_div.classList.add(`stewards-${shift.stewards.length}`);
                 for (let uuid of shift.stewards) {
                     const user = state.users.find(user => user.uuid === uuid);
-                    
+
                     if (!user) {
                         console.log(`Scheduled steward with uuid ${uuid} not found`);
                         continue;

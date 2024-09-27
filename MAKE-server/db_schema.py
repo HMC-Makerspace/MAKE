@@ -229,7 +229,7 @@ class User(BaseModel):
     files: Union[List[object], None] = None
     availability: Union[List[List[bool]], None] = None
     new_steward: Union[bool, None] = None
-    certifications: Union[Dict[str, int], None] = None
+    certifications: Union[Dict[str, float], None] = None
     # TODO[pydantic]: The following keys were removed: `json_encoders`.
     # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
     model_config = ConfigDict(arbitrary_types_allowed=True, json_encoders={ObjectId: str}, json_schema_extra={
@@ -254,7 +254,7 @@ class Certification(BaseModel):
     uuid: str
     name: str
     description: str
-    seconds_valid_for: int
+    seconds_valid_for: float
 
 class UserFile(BaseModel):
     uuid: str
