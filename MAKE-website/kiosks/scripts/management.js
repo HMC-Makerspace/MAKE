@@ -546,9 +546,22 @@ function downloadReview(review) {
     document.body.removeChild(a);
 }
 
-function downloadSchedule() {
+async function downloadSchedule() {
 
     const validShifts = state.shifts.filter(shift => shift.stewards && shift.stewards.length > 0)
+
+    for (let shift of validShifts) {
+        for (let i = 0; i < shift.stewards.length; i++){
+            let steward_response = await fetch(`${API}/users/get_user/${shift.stewards[i]}`);
+            const response = await steward_response.json()
+            console.log(response.name)
+
+            if (steward_response.status == 200) {
+                shift.stewards[i] = response.name
+            }
+        }
+    }
+
     const hours = validShifts.map(shift => moment(shift.timestamp_start.split("-")[0], 'h:mm A').hour())
     const uniqueHours = [...new Set(hours)].sort()
     const now = moment();
@@ -586,7 +599,7 @@ function downloadSchedule() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `shift_schedule_${now.format('MM-DD-YYYY')}.csv`;
+    a.download = `shift-schedule-${now.format('MM-DD-YYYY')}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
