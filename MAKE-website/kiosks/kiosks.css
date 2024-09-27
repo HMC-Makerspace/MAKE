@@ -763,6 +763,11 @@ Management Console
   background-color: var(--theme-color-3);
 }
 
+#download-schedule-button {
+  padding: 15px;
+  font-size: 1em;
+}
+
 .steward-shift-list-item-shifts {
   width: 100%;
   height: 100%;

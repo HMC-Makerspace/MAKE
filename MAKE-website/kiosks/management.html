@@ -20,9 +20,8 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0" />
 
-
     <link rel="stylesheet" href="/css/main.css?v=2.13">
-    <link rel="stylesheet" href="/kiosks/kiosks.css?v=1.9">
+    <link rel="stylesheet" href="/kiosks/kiosks.css?v=2.2">
 </head>
 
 <body>
@@ -170,6 +169,13 @@
                     <br>
                     <br>
                     <b>Total scheduled shift hours: <span id="total-hours">...</span></b>
+                    <br>
+                    <br>
+                    <div>
+                        <button disabled id="download-schedule-button" onclick="downloadSchedule()">
+                            Download Schedule as CSV
+                        </button>
+                    </div>
                 </p>
             </div>
             <div class="content-body">
