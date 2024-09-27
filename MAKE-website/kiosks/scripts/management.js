@@ -3260,6 +3260,11 @@ function generateScheduleDivsAdmin() {
                 inner_div.classList.add(`stewards-${shift.stewards.length}`);
                 for (let uuid of shift.stewards) {
                     const user = state.users.find(user => user.uuid === uuid);
+                    
+                    if (!user) {
+                        console.log(`Scheduled steward with uuid ${uuid} not found`);
+                        continue;
+                    }
 
                     if (user.role == "head_steward") {
                         inner_div.classList.add("head-steward");
