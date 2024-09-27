@@ -175,6 +175,9 @@ class InventoryItem(BaseModel):
     kit_contents: Union[List[str], None] = None
     # Keywords
     keywords: Union[str, None] = None
+    # Certifications required to use the item
+    certifications: Union[List[str], None] = None
+    
     # TODO[pydantic]: The following keys were removed: `json_encoders`.
     # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
     model_config = ConfigDict(arbitrary_types_allowed=True, json_encoders={ObjectId: str}, json_schema_extra={
@@ -226,7 +229,7 @@ class User(BaseModel):
     files: Union[List[object], None] = None
     availability: Union[List[List[bool]], None] = None
     new_steward: Union[bool, None] = None
-    certifications: Union[List[str], None] = None
+    certifications: Union[Dict[str, int], None] = None
     # TODO[pydantic]: The following keys were removed: `json_encoders`.
     # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
     model_config = ConfigDict(arbitrary_types_allowed=True, json_encoders={ObjectId: str}, json_schema_extra={
@@ -240,9 +243,18 @@ class User(BaseModel):
                 "431278492": "1231234124",
             },
             "proficiencies": ["3D Printing", "Laser Cutting"],
+            "new_steward": False,
+            "certifications": {
+                "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l": 1610000000,
+            },
         }
     })
 
+class Certification(BaseModel):
+    uuid: str
+    name: str
+    description: str
+    seconds_valid_for: int
 
 class UserFile(BaseModel):
     uuid: str

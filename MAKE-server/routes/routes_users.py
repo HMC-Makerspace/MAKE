@@ -157,15 +157,12 @@ async def route_update_user(request: Request):
     user["name"] = json["name"]
     user["email"] = json["email"]
 
-    if "proficiencies" in json:
-        user["proficiencies"] = json["proficiencies"]
-    if "availability" in json:
-        user["availability"] = json["availability"]
-    if "new_steward" in json:
-        user["new_steward"] = json["new_steward"]
-    if "certifications" in json:
-        user["certifications"] = json["certifications"]
+    # Attempt to assign other fields
+    other_fields = ["proficiencies", "availability", "new_steward", "certifications"]
 
+    for field in other_fields:
+        if field in json:
+            user[field] = json[field]
     try :
         user = User(**user)
     except Exception as e:
