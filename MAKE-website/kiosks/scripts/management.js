@@ -579,16 +579,16 @@ async function downloadSchedule() {
             if (j == 0) {
                 csvArray[i][j] = TWENTY_FOUR_HOURS_TO_STRING[uniqueHours[i-1]]
             } else {
-                csvArray[i][j] = null;
+                csvArray[i][j] = "";
             }
         }
     }
     for (let shift of validShifts) {
-        csvArray[hoursToIndex[moment(shift.timestamp_start.split("-")[0], 'h:mm A').hour()]][DAYS_TO_INDEX[shift.day]] = shift.stewards
+        csvArray[hoursToIndex[moment(shift.timestamp_start.split("-")[0], 'h:mm A').hour()]][DAYS_TO_INDEX[shift.day]] = shift.stewards.join(" | ")
     }
-    console.log('csvarray', csvArray)
+
     const csv = csvArray.map(row => 
-        row.map(item => `"${item}"`).join(',')
+        row.map(item => `${item}`).join(',')
       ).join('\n');
 
     // Create a blob and download it

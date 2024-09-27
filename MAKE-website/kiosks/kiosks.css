@@ -764,11 +764,9 @@ Management Console
 }
 .download-schedule-button {
   width: 200px;
-  height: 200px,
+  height: 50px;
 }
-.download-schedule-button-container {
-  height: 200px,
-}
+
 .steward-shift-list-item-shifts {
   width: 100%;
   height: 100%;
