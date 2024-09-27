@@ -348,8 +348,10 @@ async function fetchShiftsAdmin() {
 
     if (response.status == 200) {
         const shifts = await response.json();
-        console.log(shifts)
         state.shifts = shifts;
+        // Enable the download shifts button.
+        const downloadButton = document.getElementById("download-schedule-button");
+        downloadButton.removeAttribute("disabled");
     }
 }
 
@@ -547,6 +549,8 @@ function downloadReview(review) {
 }
 
 async function downloadSchedule() {
+    const downloadButton = document.getElementById("download-schedule-button");
+    downloadButton.setAttribute("disabled", "disabled");
 
     const validShifts = state.shifts.filter(shift => shift.stewards && shift.stewards.length > 0)
 
@@ -554,7 +558,6 @@ async function downloadSchedule() {
         for (let i = 0; i < shift.stewards.length; i++){
             let steward_response = await fetch(`${API}/users/get_user/${shift.stewards[i]}`);
             const response = await steward_response.json()
-            console.log(response.name)
 
             if (steward_response.status == 200) {
                 shift.stewards[i] = response.name
@@ -598,6 +601,9 @@ async function downloadSchedule() {
     a.href = url;
     a.download = `shift-schedule-${now.format('MM-DD-YYYY')}.csv`;
     document.body.appendChild(a);
+
+    downloadButton.removeAttribute("disabled");
+
     a.click();
     document.body.removeChild(a);
 }

@@ -762,9 +762,10 @@ Management Console
 .steward-shift-list-item:nth-child(even), .shift-change-list-item:nth-child(even) {
   background-color: var(--theme-color-3);
 }
-.download-schedule-button {
-  width: 200px;
-  height: 50px;
+
+#download-schedule-button {
+  padding: 15px;
+  font-size: 1em;
 }
 
 .steward-shift-list-item-shifts {
