@@ -1,6 +1,7 @@
 var state = {
     inventory: null,
     current_search_results: null,
+    certifications: null,
 }
 
 const API = '/api/v2';
@@ -76,6 +77,8 @@ async function authenticate() {
         alert("Invalid API key.");
         window.location.href = "/";
     }
+
+    await fetchCertifications();
     
     fetchEditableInventory().then(() => {
         submitEditableSearch();
@@ -95,6 +98,15 @@ async function authenticate() {
 
 authenticate();
 
+async function fetchCertifications() {
+    const response = await fetch(`${API}/certifications/`);
+
+    if (response.status == 200) {
+        const certifications = await response.json();
+
+        state.certifications = certifications;
+    }
+}
 
 async function fetchEditableInventory() {
     const response = await fetch(`${API}/inventory/get_inventory`);
@@ -159,6 +171,9 @@ function generateEditableInventoryDiv(item) {
             ""
         ],
         "keywords": ""
+        "certifications": {
+            "uuid of cert": timestamp_added,
+        }
     }
     */
 
@@ -243,6 +258,19 @@ function generateEditableInventoryDiv(item) {
 
     access_type.innerText = text;
     div.appendChild(access_type);
+
+    const certifications = document.createElement("h3");
+    certifications.classList.add("certifications");
+    if (item.certifications) {
+        for (let cert of Object.keys(item.certifications)) {
+            const cert_name = state.certifications.find((c) => c.uuid === cert)?.name ?? "Unknown";
+            certifications.innerText += `${cert_name}, `;
+        }
+        certifications.innerText = certifications.innerText.slice(0, -2);
+    } else {
+        certifications.innerText = "N/A";
+    }
+    div.appendChild(certifications);
 
     const delete_button = document.createElement("button");
     delete_button.classList.add("delete");
@@ -341,6 +369,8 @@ function editInventoryItem(uuid, create_item=false) {
     kit_contents: Union[List[str], None]
     # Keywords for searching
     keywords: Union[str, None]
+    # Certifications required to use the item
+    certifications: Union[List[str], None] = None
     */
 
     const container = document.getElementById("edit-inventory-item");
@@ -353,6 +383,22 @@ function editInventoryItem(uuid, create_item=false) {
         if (input) {
             input.value = item[attr] ?? "";
         }
+    }
+
+    const certifications = document.getElementById("edit-certifications");
+    certifications.innerHTML = "";
+
+    for (let cert of state.certifications) {
+        const label = document.createElement("label");
+        label.innerText = cert.name;
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `edit-cert-${cert.uuid}`;
+        checkbox.checked = item.certifications?.hasOwnProperty(cert.uuid) ?? false;
+
+        label.appendChild(checkbox);
+        certifications.appendChild(label);
     }
 
     const locations = container.querySelector(".locations")
@@ -416,6 +462,16 @@ function changeEventListener(event, item_uuid) {
         state.inventory[index].access_type = parseInt(input.value);
     } else if (input.id === "edit-kit_contents") {
         state.inventory[index][attr] = input.value.split(",");
+    } else if (input.id === "edit-certifications") {
+        const cert_uuid = input.id.split("-")[2];
+        if (input.checked) {
+            if (!state.inventory[index].certifications) {
+                state.inventory[index].certifications = [];
+            }
+            state.inventory[index].certifications.push(cert_uuid);
+        } else {
+            state.inventory[index].certifications = state.inventory[index].certifications.filter((c) => c !== cert_uuid);
+        }
     } else if (input.type === "number") {
         state.inventory[index][attr] = parseInt(input.value);
     } else {
