@@ -350,8 +350,10 @@ async function fetchShiftsAdmin() {
 
     if (response.status == 200) {
         const shifts = await response.json();
-
         state.shifts = shifts;
+        // Enable the download shifts button.
+        const downloadButton = document.getElementById("download-schedule-button");
+        downloadButton.removeAttribute("disabled");
     }
 }
 
@@ -710,6 +712,66 @@ function downloadReview(review) {
     a.download = `${review.name} - ${review.reviewer}.csv`;
 
     document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+async function downloadSchedule() {
+    const downloadButton = document.getElementById("download-schedule-button");
+    downloadButton.setAttribute("disabled", "disabled");
+
+    const validShifts = state.shifts.filter(shift => shift.stewards && shift.stewards.length > 0)
+
+    for (let shift of validShifts) {
+        for (let i = 0; i < shift.stewards.length; i++){
+            let steward_response = await fetch(`${API}/users/get_user/${shift.stewards[i]}`);
+            const response = await steward_response.json()
+
+            if (steward_response.status == 200) {
+                shift.stewards[i] = response.name
+            }
+        }
+    }
+
+    const hours = validShifts.map(shift => moment(shift.timestamp_start.split("-")[0], 'h:mm A').hour())
+    const uniqueHours = [...new Set(hours)].sort()
+    const now = moment();
+
+    let hoursToIndex = {};
+    uniqueHours.forEach((hour, index) => {
+        hoursToIndex[hour] = index + 1;
+      })
+    
+    let csvArray = [[" "].concat(DAYS)];
+
+    for (let i = 1; i < uniqueHours.length + 1; i++) {
+        csvArray[i] = [];
+        for (let j = 0; j < 8; j++) {
+            if (j == 0) {
+                csvArray[i][j] = TWENTY_FOUR_HOURS_TO_STRING[uniqueHours[i-1]]
+            } else {
+                csvArray[i][j] = "";
+            }
+        }
+    }
+    for (let shift of validShifts) {
+        csvArray[hoursToIndex[moment(shift.timestamp_start.split("-")[0], 'h:mm A').hour()]][DAYS_TO_INDEX[shift.day]] = shift.stewards.join(" | ")
+    }
+
+    const csv = csvArray.map(row => 
+        row.map(item => `${item}`).join(',')
+      ).join('\n');
+
+    // Create a blob and download it
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `shift-schedule-${now.format('MM-DD-YYYY')}.csv`;
+    document.body.appendChild(a);
+
+    downloadButton.removeAttribute("disabled");
+
     a.click();
     document.body.removeChild(a);
 }
