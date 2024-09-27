@@ -163,6 +163,8 @@ async def route_update_user(request: Request):
         user["availability"] = json["availability"]
     if "new_steward" in json:
         user["new_steward"] = json["new_steward"]
+    if "certifications" in json:
+        user["certifications"] = json["certifications"]
 
     try :
         user = User(**user)
@@ -198,10 +200,6 @@ async def route_update_user_by_uuid(request: Request):
         # Return error
         raise HTTPException(status_code=404, detail="User does not exist")
     
-    user["cx_id"] = json["cx_id"]
-    user["name"] = json["name"]
-    user["email"] = json["email"]
-
     if "proficiencies" in json:
         user["proficiencies"] = json["proficiencies"]
     if "availability" in json:
