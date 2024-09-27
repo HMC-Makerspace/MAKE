@@ -566,9 +566,6 @@ async function downloadSchedule() {
     const uniqueHours = [...new Set(hours)].sort()
     const now = moment();
 
-    //will move this to resources
-    const twentyFourHourToString = {0: "12:00 AM",  1: "1:00 AM", 2: "2:00 AM", 3: "3:00 AM",  4: "4:00 AM", 5: "5:00 AM", 6: "6:00 AM", 7: "7:00 AM",  8: "8:00 AM",  9: "9:00 AM", 10: "10:00 AM", 11: "11:00 AM",  12: "12:00 PM", 13: "1:00 PM", 14: "2:00 PM", 15: "3:00 PM", 16: "4:00 PM", 17: "5:00 PM", 18: "6:00 PM", 19: "7:00 PM", 20: "8:00 PM", 21: "9:00 PM", 22: "10:00 PM", 23: "11:00 PM" }
-    const daysToIndex = {"Sunday": 1, "Monday": 2, "Tuesday": 3, "Wednesday": 4, "Thursday": 5, "Friday": 6, "Saturday": 7}
     let hoursToIndex = {};
     uniqueHours.forEach((hour, index) => {
         hoursToIndex[hour] = index + 1;
@@ -580,14 +577,14 @@ async function downloadSchedule() {
         csvArray[i] = [];
         for (let j = 0; j < 8; j++) {
             if (j == 0) {
-                csvArray[i][j] = twentyFourHourToString[uniqueHours[i-1]]
+                csvArray[i][j] = TWENTY_FOUR_HOURS_TO_STRING[uniqueHours[i-1]]
             } else {
                 csvArray[i][j] = null;
             }
         }
     }
     for (let shift of validShifts) {
-        csvArray[hoursToIndex[moment(shift.timestamp_start.split("-")[0], 'h:mm A').hour()]][daysToIndex[shift.day]] = shift.stewards
+        csvArray[hoursToIndex[moment(shift.timestamp_start.split("-")[0], 'h:mm A').hour()]][DAYS_TO_INDEX[shift.day]] = shift.stewards
     }
     console.log('csvarray', csvArray)
     const csv = csvArray.map(row => 
