@@ -224,7 +224,7 @@ CHECKOUT
     "email email auth"
     "pending-check pending-check all-check"
     "passed-quizzes passed-quizzes passed-quizzes"
-    "passed-quizzes passed-quizzes passed-quizzes"
+    "certifications certifications certifications"    
     "cart cart cart"
     "cart cart cart"
     "cart cart cart"
@@ -291,6 +291,24 @@ CHECKOUT
   align-items: center;
   justify-content: center;
   padding: 5px;
+}
+
+#user-info-certifications {
+  grid-area: certifications;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  gap: 10px;
+}
+
+#user-info-certifications > * {
+  background-color: var(--theme-color-3);
+  border-radius: var(--roundness);
+  color: var(--text-color-main);
+  padding: 10px;
 }
 
 #user-info-cart {
@@ -395,6 +413,7 @@ label {
   align-items: center;
   justify-content: center;
   gap: 10px;
+  min-height: 50px;
   grid-area: commit;
 }
 

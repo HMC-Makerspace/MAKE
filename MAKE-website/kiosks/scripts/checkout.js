@@ -335,6 +335,7 @@ function createUserInfo(user_info) {
             <div id="user-info-pending-checkouts">Overdue Checkouts: ${total_overdue}</div>
             <div id="user-info-all-checkouts">All Checkouts: ${checkouts.length}</div>
             <div id="user-info-passed-quizzes">${createPassedQuizzes(user_info.passed_quizzes)}</div>
+            <div id="user-info-certifications">${createCertifications(user_info.certifications ?? {})}</div>
             <div id="user-info-cart"><b>Cart</b><div id="cart-content"></div></div>
             <div id="time-length-radio">
                 <div>
@@ -384,6 +385,37 @@ function createPassedQuizzes(list) {
 
     if (html === "") {
         html = "No quizzes passed";
+    }
+
+    return html;
+}
+
+function createCertifications(dict) {
+    // Dict has keys as certification uuids and values as timestamps of when the certification was passed
+    let html = "";
+
+    console.log(dict);
+
+    for (let cert of Object.keys(dict)) {
+        let certification = state.certifications.find((c) => c.uuid === cert);
+
+        if (certification !== undefined) {
+            let valid_until = certification.seconds_valid_for + dict[cert];
+            valid_until = new Date(valid_until * 1000);
+
+            
+            if (valid_until >= new Date()) {
+                html += `<div>${certification.name}: valid until ${valid_until.toLocaleDateString()}</div>`;
+            } else {
+                html += `<div class="error">${certification.name}: expired</div>`;
+            }
+        } else {
+            console.warn(`Certification ${cert} not found`);
+        }
+    }
+
+    if (html === "") {
+        html = "No certifications";
     }
 
     return html;

@@ -387,7 +387,6 @@ function editInventoryItem(uuid, create_item=false) {
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.id = `edit-cert-${cert.uuid}`;
-        console.log(item.certifications);
         checkbox.checked = item.certifications && item.certifications.includes(cert.uuid);
 
         div.appendChild(checkbox);
@@ -459,7 +458,6 @@ function changeEventListener(event, item_uuid) {
         state.inventory[index][attr] = input.value.split(",");
     } else if (input.id.startsWith("edit-cert-")) {
         const cert_uuid = input.id.replace("edit-cert-", "");
-        console.log(`Cert uuid: ${cert_uuid}`);
         if (input.checked) {
             if (!state.inventory[index].certifications) {
                 state.inventory[index].certifications = [];
