@@ -513,6 +513,7 @@ button.with-icon {
   align-items: center;
   justify-content: center;
   gap: 10px;
+  min-height: 40px;
 }
 
 button.only-icon {

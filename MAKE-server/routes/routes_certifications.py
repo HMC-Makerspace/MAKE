@@ -43,7 +43,7 @@ async def add_certification(request: Request):
     db = MongoDB()
 
     # Check if the API key is valid
-    is_valid = await validate_api_key(db, api_key, "admin")
+    is_valid = await validate_api_key(db, api_key, "checkout")
 
     if not is_valid:
         # The API key is not valid

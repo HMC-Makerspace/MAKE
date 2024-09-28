@@ -63,6 +63,7 @@ async function authenticate() {
     setInterval(fetchCheckoutsAdmin, 100000);
     setInterval(fetchUsers, 100000);
     setInterval(fetchCertifications, 100000);
+    setInterval(generateCertificationTable, 100000);
 
     await fetchCertifications();
 
@@ -82,6 +83,7 @@ async function authenticate() {
         submitUserSearch();
         document.getElementById("users-search-input").addEventListener("keyup", () => { submitUserSearch(editable = false) });
         fetchCheckoutsAdmin();
+        generateCertificationTable();
     });
 
     document.addEventListener("keydown", (e) => {
@@ -362,6 +364,8 @@ function createUserInfo(user_info) {
         if (total_overdue > 0) {
             document.getElementById("user-info-pending-checkouts").classList.add("error");
         }
+
+        generateCertificationUserInfo();
     }
 }
 
@@ -441,18 +445,22 @@ function updatePage() {
     const i_button = document.getElementById("select-inventory-button");
     const c_button = document.getElementById("select-checkout-button");
     const u_button = document.getElementById("select-users-button");
+    const cert_button = document.getElementById("select-certifications-button");
 
     i_button.classList.remove("selected");
     c_button.classList.remove("selected");
     u_button.classList.remove("selected");
+    cert_button.classList.remove("selected");
 
     const i_page = document.getElementById("inventory-page");
     const c_page = document.getElementById("checkouts-page");
     const u_page = document.getElementById("users-page");
+    const cert_page = document.getElementById("certifications-page");
 
     i_page.classList.add("hidden");
     c_page.classList.add("hidden");
     u_page.classList.add("hidden");
+    cert_page.classList.add("hidden");
 
     if (state.page === "inventory") {
         i_button.classList.add("selected");
@@ -467,6 +475,9 @@ function updatePage() {
         u_page.classList.remove("hidden");
         document.getElementById("users-search-input").focus();
         document.getElementById("users-search-input").select();
+    } else if (state.page === "certifications") {
+        cert_button.classList.add("selected");
+        cert_page.classList.remove("hidden");
     }
 }
 
@@ -830,6 +841,161 @@ async function extendCheckout(checkout_uuid) {
 
     if (response.status === 200) {
         await fetchCheckoutsAdmin();
+    }
+}
+
+function generateCertificationTable() {
+    const table = document.getElementById("certifications-table");
+
+    removeAllChildren(table);
+
+    const header = "<tr><th>Name</th><th>Email</th><th>Date Added</th><th>Date Expires</th></tr>";
+
+    let header_row = document.createElement("tr");
+    header_row.innerHTML = header;
+    table.appendChild(header_row);
+
+    for (let cert of state.certifications) {
+        let row = document.createElement("tr");
+        // First, append the name of the cert with a full row span
+        let name = document.createElement("td");
+        name.innerHTML = cert.name;
+        name.colSpan = 4;
+        name.style.textAlign = "center";
+        name.style.backgroundColor = "var(--theme-color-5)";
+        name.style.fontWeight = "bold";
+        row.appendChild(name);
+
+        table.appendChild(row);
+
+        // Now, go through all users and find the ones that have this cert
+        // Do not add people with expired certs
+
+        for (let user of state.users) {
+            if (user.certifications && user.certifications[cert.uuid] !== undefined) {
+                if ((user.certifications[cert.uuid] + cert.seconds_valid_for) * 1000 <= new Date()) {
+                    continue;
+                }
+
+                let row = document.createElement("tr");
+
+                let user_name = document.createElement("td");
+                user_name.innerHTML = user.name;
+                row.appendChild(user_name);
+
+                let user_email = document.createElement("td");
+                user_email.innerHTML = user.email;
+                row.appendChild(user_email);
+
+                let date_added = document.createElement("td");
+                date_added.innerHTML = new Date(user.certifications[cert.uuid] * 1000).toLocaleDateString();
+                row.appendChild(date_added);
+
+                let date_expires = document.createElement("td");
+                date_expires.innerHTML = new Date((user.certifications[cert.uuid] + cert.seconds_valid_for) * 1000).toLocaleDateString();
+                row.appendChild(date_expires);
+
+                table.appendChild(row);
+            }
+        }
+    }
+}
+
+function generateCertificationUserInfo() {
+    const info = document.getElementById("user-certifications-info");
+    info.innerHTML = "";
+
+    for (let cert of state.certifications) {
+            // Now, add buttons to add / remove this cert from the person,
+        // along with info about if they have the cert, if it's expired, etc.
+        // Add this to the user-certifications-info div
+        let user_cert_info = "";
+
+        if (state.current_user_info !== null) {
+            let user_cert = state.current_user_info.certifications[cert.uuid];
+
+            if (user_cert !== undefined) {
+                if ((user_cert + cert.seconds_valid_for) * 1000 <= new Date()) {
+                    user_cert_info = `<div><b>Expired</b></div>`;
+                } else {
+                    user_cert_info = `<div><b>Valid</b> until ${new Date((user_cert + cert.seconds_valid_for) * 1000).toLocaleDateString()}</div>`;
+                }
+            } else {
+                user_cert_info = `<div><b>Not held</b></div>`;
+            }
+        }
+
+        let cert_info = document.createElement("div");
+        cert_info.classList.add("cert-info");
+        cert_info.innerHTML = `
+            <div class="cert-info-name">${cert.name}</div>
+            <div class="cert-info-desc">${cert.description}</div>
+            <div class="cert-info-user-info">
+                ${user_cert_info}
+            </div>
+            <div class="cert-info-buttons">
+                <button class="with-icon" onclick="addCertification('${cert.uuid}')">
+                    <span class="material-symbols-outlined">add_task</span>
+                    Certify
+                </button>
+                <button class="only-icon delete" onclick="removeCertification('${cert.uuid}')">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+            </div>
+        `;
+        info.appendChild(cert_info);
+    }
+}
+
+async function addCertification(cert_uuid) {
+    if (state.current_user_info === null) {
+        return;
+    }
+
+    if (state.current_user_info.certifications === undefined) {
+        state.current_user_info.certifications = {};
+    }
+
+    state.current_user_info.certifications[cert_uuid] = Math.floor(new Date().getTime() / 1000);
+
+    const response = await fetch(`${API}/users/update_user`,
+        {
+            method: "POST",
+            headers: {
+                "api-key": api_key,
+            },
+            body: JSON.stringify(state.current_user_info)
+        }
+    );
+
+    if (response.status === 200) {
+        generateCertificationUserInfo();
+    }
+}
+
+async function removeCertification(cert_uuid) {
+    if (state.current_user_info === null) {
+        return;
+    }
+
+    if (state.current_user_info.certifications === undefined) {
+        return;
+    }
+
+    delete state.current_user_info.certifications[cert_uuid];
+
+    const response = await fetch(`${API}/users/update_user`,
+        {
+            method: "POST",
+            headers: {
+                "api-key": api_key,
+            },
+            body: JSON.stringify(state.current_user_info)
+        }
+    );
+
+    if (response.status === 200) {
+        generateCertificationUserInfo();
     }
 }
 

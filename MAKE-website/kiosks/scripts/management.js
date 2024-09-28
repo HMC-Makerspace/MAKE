@@ -498,6 +498,7 @@ function renderCertifications() {
 
         let delete_button = document.createElement("td");
         delete_button.classList.add("table-btn");
+        delete_button.classList.add("delete");
         let delete_button_button = document.createElement("button");
         delete_button_button.innerHTML = "<span class='material-symbols-outlined'>delete</span>";
 

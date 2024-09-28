@@ -151,7 +151,7 @@ CHECKOUT
 
 #pages-select {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   height: 60px;
 }
 
@@ -309,6 +309,82 @@ CHECKOUT
   border-radius: var(--roundness);
   color: var(--text-color-main);
   padding: 10px;
+}
+
+/*
+        if (state.current_user_info !== null) {
+            let user_cert = state.current_user_info.certifications[cert.uuid];
+
+            if (user_cert !== undefined) {
+                if ((user_cert + cert.seconds_valid_for) * 1000 <= new Date()) {
+                    user_cert_info = `<div>${cert.name}: expired</div>`;
+                } else {
+                    user_cert_info = `<div>${cert.name}: valid until ${new Date((user_cert + cert.seconds_valid_for) * 1000).toLocaleDateString()}</div>`;
+                }
+            } else {
+                user_cert_info = `<div>${cert.name}: not held</div>`;
+            }
+        }
+
+        let cert_info = document.createElement("div");
+        cert_info.classList.add("cert-info");
+        cert_info.innerHTML = `
+            <div class="cert-info-name">${cert.name}</div>
+            <div class="cert-info-desc">${cert.description}</div>
+            <div class="cert-info-user-info">
+                ${user_cert_info}
+            </div>
+            <div class="cert-info-buttons">
+                <button onclick="addCertification('${cert.uuid}')">Add Certification</button>
+                <button onclick="removeCertification('${cert.uuid}')">Remove Certification</button>
+            </div>
+        `;
+        info.appendChild(cert_info);
+*/
+
+#add-remove-cert p {
+  margin: 0 auto;
+  margin-bottom: 20px;
+  text-align: center;
+  padding: 10px;
+  background-color: var(--theme-color-2)
+}
+
+#user-certifications-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+#user-certifications-info .cert-info {
+  display: grid;
+  grid-template-areas: "name name" "desc desc" "user-info user-info" "buttons buttons";
+  grid-template-columns: 1fr 1fr;
+  background-color: var(--theme-color-3);
+  gap: 10px;
+  padding: 10px;
+}
+
+#user-certifications-info .cert-info-name {
+  grid-area: name;
+  font-weight: bold;
+}
+
+#user-certifications-info .cert-info-desc {
+  grid-area: desc;
+}
+
+#user-certifications-info .cert-info-user-info {
+  grid-area: user-info;
+}
+
+#user-certifications-info .cert-info-buttons {
+  grid-area: buttons;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 #user-info-cart {
