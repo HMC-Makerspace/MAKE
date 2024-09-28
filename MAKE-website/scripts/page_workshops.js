@@ -202,7 +202,9 @@ function generateWorkshopDiv(workshop, is_past=false) {
         }
         
         let has_passed = Object.values(state.user_object.passed_quizzes).includes(QUIZ_NAME_TO_ID[quiz]);
-        required_quizzes.innerHTML += `<span class='${has_passed ? "passed" : "failed"}'>${quiz}</span>`;
+        required_quizzes.innerHTML += has_passed 
+            ? `<span class='passed'>${quiz}</span>` 
+            : `<button onclick="openQuizByName('${quiz}');" class='failed'>${quiz}</button>`;
     }
 
     required_quizzes.classList.add("required-quizzes");

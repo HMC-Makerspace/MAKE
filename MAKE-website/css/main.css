@@ -2243,7 +2243,7 @@ Workshops
   gap: 4px;
 }
 
-.required-quizzes span {
+.required-quizzes span,.required-quizzes button {
   border-radius: 4px;
   padding: 2px 4px;
   background-color: var(--theme-color-2);
@@ -2255,14 +2255,28 @@ Workshops
   border: 1px solid var(--high-color);
 }
 
-.required-quizzes span.failed {
+.required-quizzes button.failed {
   background-color: var(--low-color-dark);
   border: 1px solid var(--low-color);
+  color: white;
+  font-weight: normal;
+  transition: background-color 0.25s ease-in-out;
+  background-size: 200% 200%;
 }
 
-/* .workshop .capacity {
+.required-quizzes button.failed:hover {
+  background-color: var(--low-color);
+  /* animation: rainbowMove 1s linear infinite; */
+}
 
-} */
+@keyframes rainbowMove {
+  0% { background-color: var(--low-color-dark);}
+  25% { background-color: orange;}
+  50% { background-color: green;}
+  75% { background-color: blue;}
+  100% { background-color: violet;}
+  /*Scrolls through the rainbow background*/
+}
 
 .workshop button.signup {
   padding: 10px 20px;
