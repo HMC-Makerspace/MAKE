@@ -476,7 +476,7 @@ function renderCertifications() {
         let count_num = 0;
         for (let user of state.users) {
             if (user.certifications) {
-                if (user.certifications.includes(cert.uuid)) {
+                if (Object.keys(user.certifications).includes(cert.uuid)) {
                     count_num++;
                 }
             }
