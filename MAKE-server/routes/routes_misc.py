@@ -1,7 +1,7 @@
 import datetime
 import logging
 
-from config import QUIZ_IDS, VERSION, API_KEY_SCOPES
+from config import QUIZ_IDS, VERSION, API_KEY_SCOPES, WEBMASTER_EMAIL, MAKERSPACE_MANAGEMENT_EMAIL
 import utilities
 from utilities import validate_api_key
 from db_schema import *
@@ -348,3 +348,17 @@ async def route_get_quiz_results(request: Request):
     quizzes = [QuizResponse(**attempt) for attempt in quiz_data]
 
     return quizzes
+
+@misc_router.get("/get_webmaster_email")
+async def route_get_webmaster_email():
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Getting Webmaster email...")
+
+    return WEBMASTER_EMAIL
+
+@misc_router.get("/get_makerspace_management_email")
+async def route_get_makerspace_management_email():
+    logging.getLogger().setLevel(logging.INFO)
+    logging.info("Getting Makerspace Management email...")
+
+    return MAKERSPACE_MANAGEMENT_EMAIL
