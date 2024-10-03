@@ -1,7 +1,25 @@
+// Render the settings.md page as html
 renderMD("md/settings.md", "settings").then(() => {
     setTimeout(() => {
         fetchStatus();
     }, 100);
+
+    // After the html has loaded, fetch the Makerspace Management and Webmaster
+    // emails from the config and replace their respective placeholders.
+    fetch(`${API}/misc/get_makerspace_management_email`, {
+        method: "GET",
+    }).then(async (response) => {
+        const email = await response.json();
+        const settingsDiv = document.getElementById(`settings-content`);
+        settingsDiv.innerHTML = settingsDiv.innerHTML.replace(/{{MANAGEMENT_EMAIL}}/g, email);
+    });
+    fetch(`${API}/misc/get_webmaster_email`, {
+        method: "GET",
+    }).then(async (response) => {
+        const email = await response.json();
+        const settingsDiv = document.getElementById(`settings-content`);
+        settingsDiv.innerHTML = settingsDiv.innerHTML.replace(/{{WEBMASTER_EMAIL}}/g, email);
+    });
 });
 
 async function fetchStatus() {
