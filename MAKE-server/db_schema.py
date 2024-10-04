@@ -116,6 +116,8 @@ If the item is a kit, the following fields are stored:
 
 
 class Location(BaseModel):
+    # Quantity above 0, or -1 for low, -2 for medium, -3 for high
+    quantity: int
     room: str
     container: Union[str, None] = None
     specific: Union[str, None] = None
@@ -154,11 +156,9 @@ class InventoryItem(BaseModel):
     Physical Attributes
     """
 
-    # Quantity above 0, or -1 for low, -2 for medium, -3 for high
-    quantity_total: int
     # Updated when checked out, checked in, or restocked
     # If it's negative, just assign it to the quantity_total
-    quantity_available: int
+    quantity_checked_out: int
     # Location of the item
     locations: List[Location]
 
@@ -183,10 +183,16 @@ class InventoryItem(BaseModel):
             "long_name": "Weller WES51",
             "role": "T",
             "access_type": 0,
-            "quantity_total": 10,
-            "quantity_available": 7,
+            "quantity_checked_out": 7,
             "locations": [
                 {
+                    "quantity": 5,
+                    "room": "Electronic Benches",
+                    "specific": "Cabinet A",
+                    "container": "Drawer 1",
+                },
+                {
+                    "quantity": 5,
                     "room": "Electronic Benches",
                     "specific": "Cabinet A",
                     "container": "Drawer 1",
