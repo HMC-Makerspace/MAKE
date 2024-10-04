@@ -181,6 +181,20 @@ async def route_check_in_checkout(request: Request, checkout_uuid: str):
     # Get the checkouts collection
     collection = await db.get_collection("checkouts")
 
+    inventory_collection = await db.get_collection("inventory")
+    inventory_data = await inventory_collection.find({
+        "uuid": {
+            "$in":checkout.items.keys()
+        }
+    }).to_list(None)
+
+    for uuid in checkout.items.keys():
+        new_quantity_checked_out = inventory_data[uuid]["quantity_checked_out"] - checkout.items[uuid]
+        inventory_collection.update_one(
+            {"uuid": uuid},
+            {"$set": {"quantity_checked_out": new_quantity_checked_out}},
+        )
+
     # Check in the checkout
     await collection.update_one({"uuid": checkout_uuid}, {"$set": {"timestamp_in": datetime.now().timestamp()}})
 
