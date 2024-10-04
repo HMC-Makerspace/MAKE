@@ -546,6 +546,9 @@ function createLocationEditor(loc, index) {
     const room = document.createElement("label");
     room.innerHTML = `Room: * <select id="edit-room-${index}" required>${ROOMS_HTML(loc.room)}</select>`;
 
+    const quantity = document.createElement("label");
+    quantity.innerHTML = `Quantity: <input id="edit-quantity-${index}" type="number" value="${loc.quantity ?? ""}">`;
+
     const delete_button = `<button onclick="deleteLocationEditor('${div.id}')"><span class="material-symbols-outlined">delete</span></button>`
 
     const container = document.createElement("label");
@@ -555,6 +558,7 @@ function createLocationEditor(loc, index) {
     specific.innerHTML = `Specific: <input id="edit-specific-${index}" type="text" value="${loc.specific ?? ""}">`;
 
     div.appendChild(room);
+    div.appendChild(quantity);
     div.appendChild(container);
     div.appendChild(specific);
     div.innerHTML += delete_button;

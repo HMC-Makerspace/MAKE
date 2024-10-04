@@ -157,7 +157,6 @@ class InventoryItem(BaseModel):
     """
 
     # Updated when checked out, checked in, or restocked
-    # If it's negative, just assign it to the quantity_total
     quantity_checked_out: int
     # Location of the item
     locations: List[Location]
