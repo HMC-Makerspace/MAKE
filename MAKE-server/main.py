@@ -45,7 +45,7 @@ from users.quizzes import scrape_quiz_results
 from users.users import cleanup_user_files, create_update_users_from_quizzes
 from users.workshops import send_workshop_reminders, update_workshops_live_status
 from inventory.checkouts import send_overdue_emails
-from inventory.inventory import update_inventory_from_checkouts
+# from inventory.inventory import update_inventory_from_checkouts
 from machines.printers import bambu_update
 
 # SSL certificate paths, on a Debian system
@@ -217,8 +217,8 @@ class BackgroundRunner:
                 # Get printers from Bambu MQTT server
                 await bambu_update()
 
-                # Update available inventory from checkouts
-                await update_inventory_from_checkouts()
+                # # Update available inventory from checkouts
+                # await update_inventory_from_checkouts()
 
                 # Send emails for checkouts that are overdue
                 await send_overdue_emails()

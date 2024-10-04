@@ -110,12 +110,26 @@ async def route_create_new_checkout(request: Request):
     # Get the checkouts collection
     collection = await db.get_collection("checkouts")
 
+    inventory_collection = await db.get_collection("inventory")
+    inventory_data = await inventory_collection.find({
+        "uuid": {
+            "$in":checkout.items.keys()
+        }
+    }).to_list(None)
+
     # Ensure that there's more then 0 items
     if len(checkout.items) == 0:
         # No items
         # Return error
         raise HTTPException(status_code=400, detail="No items")
-    
+
+    for uuid in checkout.items.keys():
+        new_quantity_checked_out = inventory_data[uuid]["quantity_checked_out"] + checkout.items[uuid]
+        inventory_collection.update_one(
+            {"uuid": uuid},
+            {"$set": {"quantity_checked_out": new_quantity_checked_out}},
+        )
+
     # Insert the checkout
     await collection.insert_one(checkout.dict())
 
