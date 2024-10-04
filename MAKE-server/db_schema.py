@@ -46,6 +46,7 @@ schema = [
     "shift_changes",
     "workshops",
     "printer_logs",
+    "printer_long_term_logs",
     "filament_logs",
     "api_keys",
     "ip_logs",
@@ -89,6 +90,7 @@ Define the schema for the database.
     shifts: List[Shift],
     workshops: List[Workshop],
     printer_logs: List[PrinterLog],
+    printer_long_term_logs: List[PrinterLog],
     api_keys: List[APIKey],
 """
 
