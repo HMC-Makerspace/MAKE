@@ -398,8 +398,6 @@ function createCertifications(dict) {
     // Dict has keys as certification uuids and values as timestamps of when the certification was passed
     let html = "";
 
-    console.log(dict);
-
     for (let cert of Object.keys(dict)) {
         let certification = state.certifications.find((c) => c.uuid === cert);
 

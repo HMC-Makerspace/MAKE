@@ -437,13 +437,13 @@ function renderAll() {
     renderRedirects();
     renderAPIKeys();
     renderApplicants();
-    renderCertifications();
+    renderCertificationsAdmin();
 
     // Stats take a while to load, so we'll render them last
     renderStatistics();
 }
 
-function renderCertifications() {
+function renderCertificationsAdmin() {
     const certifications_table = document.getElementById("certifications-table");
     removeAllChildren(certifications_table);
 

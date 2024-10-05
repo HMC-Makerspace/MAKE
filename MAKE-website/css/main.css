@@ -672,6 +672,7 @@ a.no-invert:link:hover {
   background-color: var(--theme-color-5);
   flex-grow: 1;
   overflow-y: auto;
+  padding-bottom: 300px !important;
 }
 
 .hmc-content {
@@ -794,7 +795,7 @@ HOME
   align-items: center;
   justify-content: center;
   min-height: 150px;
-  padding: 10px;
+  padding: 10px !important;
 }
 
 #college-id-login {
@@ -1524,6 +1525,16 @@ table {
 table td, 
 table th{
 padding: 4px;
+}
+
+table.padded td,
+table.padded th {
+  padding: 10px;
+}
+
+table.centered td,
+table.centered th {
+  text-align: center;
 }
 
 table tr {
