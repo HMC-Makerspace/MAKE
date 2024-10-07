@@ -69,6 +69,12 @@
                     </span>
                     Users
                 </button>
+                <button id="select-certifications-button" class="switch with-icon" onclick="setPage('certifications')">
+                    <span class="material-symbols-outlined">
+                        verified
+                    </span>
+                    Certifications
+                </button>
             </div>
 
             <div id="main-content">
@@ -123,6 +129,23 @@
                     <div id="users-results" class="content-body">
 
                     </div>
+                </div>
+
+                <div id="certifications-page" class="content-container hidden">
+                    <div id="add-remove-cert">
+                        <p>
+                            Tap, swipe, or type ID to add / remove certifications.
+                            <br>
+                            Only authorized Stewards may add / remove certifications from users.
+                        </p>
+
+                        <div id="user-certifications-info">
+
+                        </div>
+                    </div>
+
+                    <table id="certifications-table">
+                    </table>
                 </div>
             </div>
         </div>
