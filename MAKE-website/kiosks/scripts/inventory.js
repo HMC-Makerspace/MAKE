@@ -252,7 +252,7 @@ function generateEditableInventoryDiv(item) {
     const certifications = document.createElement("h3");
     certifications.classList.add("certifications");
     if (item.certifications) {
-        for (let cert of Object.keys(item.certifications)) {
+        for (let cert of item.certifications) {
             const cert_name = state.certifications.find((c) => c.uuid === cert)?.name ?? "Unknown";
             certifications.innerText += `${cert_name}, `;
         }
