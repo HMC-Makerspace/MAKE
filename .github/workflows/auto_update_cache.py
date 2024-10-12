@@ -1,14 +1,11 @@
 from sys import argv
 from os import getcwd
-from glob import glob
 import re
 
 directory = getcwd()
 
-script_files = (
-    glob("MAKE-website\\*.html", recursive=True) + 
-    glob("MAKE-website\\kiosks\\*.html", recursive=True)
-)
+updated_file_args = argv[:argv.index("-f")]
+script_files = argv[argv.index("-f")+1:]
 
 updated_file_names = list(map(
     lambda name: name
@@ -16,7 +13,7 @@ updated_file_names = list(map(
         .replace("MAKE-website\\", "")
         .replace("MAKE-server/","")
         .replace("MAKE-website/", ""),
-    argv[1:]
+    updated_file_args
 ))
 
 print(f"Running auto_update_cache.py in {directory} on files {', '.join(updated_file_names)} over {script_files}\n")
