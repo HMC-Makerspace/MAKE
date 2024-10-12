@@ -246,6 +246,7 @@ function setPage(page, create_history = true) {
 function onHashChange() {
     const url = new URL(window.location.href);
     const page = url.searchParams.get("p");
+    
     if (page) {
         setPage(page, false);
     } else {
