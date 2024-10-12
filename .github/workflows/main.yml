@@ -1,15 +1,15 @@
 name: Auto Cache Update
 run-name: Automatically updating file caches...
 on:
-  pull_request:
-    types:
-      - closed
+  push:
+    branches:
+      - main
 jobs:
    # -------------------------------------------------------------
   # Event `pull_request`: Updates cache of all modified files
   # --------------------------------------------------------------
   changed_files:
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     # NOTE:
     # - This is limited to pull_request* events and would raise an error for other events.
     # - A maximum of 3000 files can be returned.
@@ -32,25 +32,25 @@ jobs:
         run: |
           python ./.github/workflows/auto_update_cache.py ${ALL_CHANGED_FILES}
   
-  commit_changes:
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest  # windows-latest || macos-latest
-    name: Push changes
+#  commit_changes:
+#    if: github.event.pull_request.merged == true
+#    runs-on: ubuntu-latest  # windows-latest || macos-latest
+#    name: Push changes
 
-    needs: changed_files
-    steps:
-      - uses: actions/checkout@v4
-      - name: Update Github config
-        run: |
-          git config --global user.name "git-wil"
-          git config --global user.email "wil@gmx.com"
-      - name: check for changes
-        run: git status
-      - name: stage changed files
-        run: git add .
-      - name: commit changed files
-        run: git commit -m "Auto updating caches"
-      - name: fetch
-        run: git fetch
-      - name: push code to main
-        run: git push
+#    needs: changed_files
+#    steps:
+#      - uses: actions/checkout@v4
+#      - name: Update Github config
+#        run: |
+#          git config --global user.name "git-wil"
+#          git config --global user.email "wil@gmx.com"
+#      - name: check for changes
+#        run: git status
+#      - name: stage changed files
+#        run: git add .
+#      - name: commit changed files
+#        run: git commit -m "Auto updating caches"
+#      - name: fetch
+#        run: git fetch
+#      - name: push code to main
+#        run: git push
