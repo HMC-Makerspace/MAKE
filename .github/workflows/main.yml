@@ -30,7 +30,7 @@ jobs:
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: |
-          python ./.github/workflows/auto_update_cache.py ${ALL_CHANGED_FILES}
+          python ./.github/workflows/auto_update_cache.py ${ALL_CHANGED_FILES} -f $(find . -type f | grep -E '\.html$')
   
 #  commit_changes:
 #    if: github.event.pull_request.merged == true
