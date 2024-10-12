@@ -256,39 +256,64 @@ function generateWorkshopDiv(workshop, is_past=false) {
 }
 
 async function applyColorToWorkshopDiv(photoContainer, workshopDiv) {
-    const img = photoContainer.querySelector("img");
+    try {
+        const img = photoContainer.querySelector("img");
 
-    if (state.cached_colors === null) {
-        state.cached_colors = {};
-    }
+        if (state.cached_colors === null) {
+            state.cached_colors = {};
+        }
 
-    // If the path is in the cache, use the cached color
-    if (state.cached_colors[img.src] !== undefined) {
-        workshopDiv.style.backgroundColor = `rgba(${state.cached_colors[img.src][0]}, ${state.cached_colors[img.src][1]}, ${state.cached_colors[img.src][2]}, 0.6)`;
-        return;
-    }
+        // If the path is in the cache, use the cached color
+        if (state.cached_colors[img.src] !== undefined) {
+            workshopDiv.style.backgroundColor = `rgba(${state.cached_colors[img.src][0]}, ${state.cached_colors[img.src][1]}, ${state.cached_colors[img.src][2]}, 0.6)`;
+            return;
+        }
 
-    const colorThief = new ColorThief();
+        const colorThief = new ColorThief();
 
-    if (img.complete) {
-        const colors = await colorThief.getColor(img);
-        workshopDiv.style.backgroundColor = `rgba(${colors[0]}, ${colors[1]}, ${colors[2]}, 0.6)`;
-        state.cached_colors[img.src] = colors;
-        saveState();
-    } else {
-        img.onload = () => {
-            const colors = colorThief.getColor(img);
+        if (img.complete) {
+            const colors = await colorThief.getColor(img);
             workshopDiv.style.backgroundColor = `rgba(${colors[0]}, ${colors[1]}, ${colors[2]}, 0.6)`;
             state.cached_colors[img.src] = colors;
             saveState();
-        };
-    
+        } else {
+            img.onload = () => {
+                const colors = colorThief.getColor(img);
+                workshopDiv.style.backgroundColor = `rgba(${colors[0]}, ${colors[1]}, ${colors[2]}, 0.6)`;
+                state.cached_colors[img.src] = colors;
+                saveState();
+            };
+        
+        }
+    } catch (e) {
+        // do nothing, just suppress colorThief errors
     }
 }
 
 async function rsvpToWorkshop(workshop_uuid) {
     if (state.user_object === null) {
         alert("You must be logged in to RSVP to a workshop!");
+        return;
+    }   
+
+    // Check that the user has passed the required quizzes
+    const workshop = state.workshops.find((w) => w.uuid === workshop_uuid);
+    const non_passed_quizzes = [];
+    for (const quiz_name of workshop.required_quizzes) {
+        if (!hasCurrentUserPassedQuizByName(quiz_name)) {
+            non_passed_quizzes.push(quiz_name);
+        }
+    }
+    if (non_passed_quizzes.length != 0) {
+        let error_string;
+        if (non_passed_quizzes.length == 1) {
+            error_string = non_passed_quizzes[0] + " safety quiz";
+        } else if (non_passed_quizzes.length == 2) {
+            error_string = non_passed_quizzes.join(" and ") + " safety quizzes";
+        } else if (non_passed_quizzes.length > 2) {
+            error_string = non_passed_quizzes.slice(0,-1).join(", ") + ", and " + non_passed_quizzes.slice(-1)  + " safety quizzes";
+        }
+        alert("You must pass the " + error_string + " before RSVPing!\nClick on the red required quiz buttons to go directly to the form.");
         return;
     }
 
