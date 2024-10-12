@@ -39,6 +39,7 @@ jobs:
 
     needs: changed_files
     steps:
+      - uses: actions/checkout@v4
       - name: Update Github config
         run: |
           git config --global user.name "git-wil"
