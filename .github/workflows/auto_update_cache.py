@@ -3,8 +3,6 @@ from os import getcwd
 from glob import glob
 import re
 
-print("Running auto_update_cache.py")
-
 directory = getcwd()
 
 script_files = (
@@ -20,6 +18,8 @@ updated_file_names = map(
         .replace("MAKE-website/", ""),
     argv[1:]
 )
+
+print(f"Running auto_update_cache.py in {directory} on files {", ".join(updated_file_names)}")
 
 for file in script_files:
     with open(file, "r") as fr:
