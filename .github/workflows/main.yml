@@ -32,9 +32,10 @@ jobs:
         run: |
           python ./.github/workflows/auto_update_cache.py ${ALL_CHANGED_FILES}
 
-      - name: switching from HTTPS to SSH
-        run: git remote set-url origin ${{ secrets.ssh }}
-
+      - name: Update Github config
+        run: |
+          git config --global user.name "git-wil"
+          git config --global user.email "wil@gmx.com"
       - name: check for changes
         run: git status
       - name: stage changed files
