@@ -22,6 +22,7 @@ updated_file_names = list(map(
 print(f"Running auto_update_cache.py in {directory} on files {', '.join(updated_file_names)}\n")
 
 for file in script_files:
+    print("Found file", file)
     with open(file, "r") as fr:
         contents = fr.read()
         for updated_file_name in updated_file_names:
