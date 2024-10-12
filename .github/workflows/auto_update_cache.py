@@ -3,6 +3,8 @@ from os import getcwd
 from glob import glob
 import re
 
+print("Running auto_update_cache.py")
+
 directory = getcwd()
 
 script_files = (

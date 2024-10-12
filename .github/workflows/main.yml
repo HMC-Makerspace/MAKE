@@ -16,7 +16,7 @@ jobs:
     # - For more flexibility and no limitations see "Using local .git directory" above.
 
     runs-on: ubuntu-latest  # windows-latest || macos-latest
-    name: Test changed-files
+    name: Modify cached files
     permissions:
       pull-requests: read
 
@@ -31,7 +31,14 @@ jobs:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: |
           python ./.github/workflows/auto_update_cache.py ${ALL_CHANGED_FILES}
+  
+  commit_changes:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest  # windows-latest || macos-latest
+    name: Push changes
 
+    needs: changed_files
+    steps:
       - name: Update Github config
         run: |
           git config --global user.name "git-wil"
