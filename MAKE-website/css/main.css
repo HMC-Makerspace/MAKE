@@ -2260,22 +2260,11 @@ Workshops
   border: 1px solid var(--low-color);
   color: white;
   font-weight: normal;
-  transition: background-color 0.25s ease-in-out;
-  background-size: 200% 200%;
+  transition: background-color 0.250s ease-in-out;
 }
 
 .required-quizzes button.failed:hover {
   background-color: var(--low-color);
-  /* animation: rainbowMove 1s linear infinite; */
-}
-
-@keyframes rainbowMove {
-  0% { background-color: var(--low-color-dark);}
-  25% { background-color: orange;}
-  50% { background-color: green;}
-  75% { background-color: blue;}
-  100% { background-color: violet;}
-  /*Scrolls through the rainbow background*/
 }
 
 .workshop button.signup {
