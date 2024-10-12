@@ -431,7 +431,7 @@ const user_search_options = {
     limit: 100, // don't return more results than you need!
     allowTypo: true, // if you don't care about allowing typos
     threshold: -10000, // don't return bad results
-    keys: ['name', 'cx_id_str', 'email', 'role'], // keys to search
+    keys: ['name', obj=>obj.cx_id.toString(), 'email', 'role'], // keys to search - passes ids as a string
     all: true,
 }
 
