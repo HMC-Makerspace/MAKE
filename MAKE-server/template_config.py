@@ -25,7 +25,7 @@ BAMBULABS_PASS = "PASSWORD"
 # Misc Emails
 MAKERSPACE_MANAGEMENT_EMAIL = "makerspace-management-l@g.hmc.edu"
 MAKERSPACE_MANAGER_EMAIL = "kneal@g.hmc.edu"
-WEBMASTER_EMAIL = "evazquez@g.hmc.edu"
+WEBMASTER_EMAIL = "wkirkland@g.hmc.edu"
 
 # Email passwords and secrets
 GMAIL_EMAIL = "EMAIL"
