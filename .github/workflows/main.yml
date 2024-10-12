@@ -2,13 +2,14 @@ name: Auto Cache Update
 run-name: Automatically updating file caches...
 on:
   pull_request:
-    branches:
-      - main
+    types:
+      - closed
 jobs:
    # -------------------------------------------------------------
   # Event `pull_request`: Updates cache of all modified files
   # --------------------------------------------------------------
   changed_files:
+    if: github.event.pull_request.merged == true
     # NOTE:
     # - This is limited to pull_request* events and would raise an error for other events.
     # - A maximum of 3000 files can be returned.
@@ -20,6 +21,7 @@ jobs:
       pull-requests: read
 
     steps:
+      - uses: actions/checkout@v4
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v45
@@ -28,4 +30,18 @@ jobs:
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: |
-          echo ${ALL_CHANGED_FILES}
+          python ./.github/workflows/auto_update_cache.py ${ALL_CHANGED_FILES}
+
+      - name: switching from HTTPS to SSH
+        run: git remote set-url origin ${{ secrets.ssh }}
+
+      - name: check for changes
+        run: git status
+      - name: stage changed files
+        run: git add .
+      - name: commit changed files
+        run: git commit -m "Auto updating caches"
+      - name: fetch
+        run: git fetch
+      - name: push code to main
+        run: git push
