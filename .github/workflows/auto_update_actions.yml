@@ -17,6 +17,8 @@ jobs:
 
     runs-on: ubuntu-latest  # windows-latest || macos-latest
     name: Modify cached files
+    concurrency:
+      group: auto-cache
     permissions:
       pull-requests: read
 
@@ -36,8 +38,10 @@ jobs:
     # if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest  # windows-latest || macos-latest
     name: Push changes
-
     needs: changed_files
+    concurrency:
+      group: auto-cache
+    
     steps:
       - uses: actions/checkout@v4
       - name: Update Github config
