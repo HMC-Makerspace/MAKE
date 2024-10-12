@@ -1,4 +1,3 @@
-
 const school_names = {
     1: "Pomona",
     2: "Scripps",
