@@ -51,6 +51,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add .
           git commit -m "Auto update caches"
+          exit 0
       # Push changes (if applicable)
       - name: Check for changes
         id: cache
