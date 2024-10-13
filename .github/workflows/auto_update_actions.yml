@@ -22,7 +22,8 @@ jobs:
     permissions:
       pull-requests: read
       contents: write
-
+    outputs:
+      output1: ${{ steps.changed_files.outputs.updated }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -43,8 +44,24 @@ jobs:
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git commit -a -m "Auto updating caches"
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+      - name: Update Github config
+        run: |
+          git config --global user.name "git-wil"
+          git config --global user.email "wil@gmx.com"
+      - name: check for changes
+        run: |
+          if [[ `git status` == *"up to date"* ]]; then
+            echo "updated=true" >> $GITHUB_OUTPUT
+          fi
+      - name: stage changed files
+        if: ${{ steps.changed_files.outputs.updated  == 'true' }}
+        run: git add .
+      - name: commit changed files
+        if: ${{ steps.changed_files.outputs.updated  == 'true' }}
+        run: git commit -m "Auto updating caches"
+      - name: fetch
+        if: ${{ steps.changed_files.outputs.updated  == 'true' }}
+        run: git fetch
+      - name: push code to main
+        if: ${{ steps.changed_files.outputs.updated  == 'true' }}
+        run: git push
