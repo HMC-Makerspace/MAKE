@@ -193,6 +193,30 @@ function determineValidQuizDate(quiz_timestamp) {
     return false;
 }
 
+/**
+ * Determine if the current user has passed a given quiz by name.
+ * @param {string} quiz_name The string name of the quiz, first letter capitalized
+ * @returns true if the current user has passed the quiz, false otherwise.
+ */
+function hasCurrentUserPassedQuizByName(quiz_name) {
+    // We must have a current user
+    if (!state.user_object) {
+        return false;
+    }
+    // Find the id of the given quiz
+    const quiz_id = QUIZ_NAME_TO_ID[quiz_name];
+    // Find the timestamp the user passed the given quiz
+    const date_passed = Object.keys(state.user_object.passed_quizzes).find(
+        (key) => state.user_object.passed_quizzes[key] == quiz_id
+    );
+    // If no timestamp is found, the user hasn't passed the quiz
+    if (!date_passed) {
+        return false;
+    }
+    // Otherwise, check if the quiz was passed recently
+    return determineValidQuizDate(date_passed);
+}
+
 function parseCollegeID(collegeID) {
     collegeID = collegeID.trim();
 
