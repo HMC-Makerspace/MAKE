@@ -34,16 +34,6 @@ jobs:
         run: |
           python ./.github/workflows/auto_update_cache.py ${ALL_CHANGED_FILES} -f $(find . -type f | grep -E '\.html$')
   
-  commit_changes:
-    # if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest  # windows-latest || macos-latest
-    name: Push changes
-    needs: changed_files
-    concurrency:
-      group: auto-cache
-    
-    steps:
-      - uses: actions/checkout@v4
       - name: Update Github config
         run: |
           git config --global user.name "git-wil"
