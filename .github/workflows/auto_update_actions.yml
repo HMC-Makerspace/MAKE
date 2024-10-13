@@ -58,7 +58,7 @@ jobs:
         # set our `updated` variable to true
         run: |
           git status
-          if [[ `git status` != *"Changes to be committed:"* ]]; then
+          if [[ `git status` == *"Changes to be committed:"* ]]; then
             echo "Pushing cache changes..."
             git commit -m "Auto update caches"
             echo "updated=true" >> "$GITHUB_OUTPUT"
