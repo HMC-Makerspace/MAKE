@@ -17,13 +17,12 @@ jobs:
 
     runs-on: ubuntu-latest  # windows-latest || macos-latest
     name: Modify cached files
-    concurrency:
-      group: auto-cache
     permissions:
       pull-requests: read
       contents: write
     outputs:
-      output1: ${{ steps.changed_files.outputs.updated }}
+      output2: ${{ steps.changed-files.outputs.all_changed_files }}
+      output1: ${{ steps.changed-files.outputs.updated }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -43,12 +42,7 @@ jobs:
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git commit -a -m "Auto updating caches"
-      - name: Update Github config
-        run: |
-          git config --global user.name "git-wil"
-          git config --global user.email "wil@gmx.com"
-      - name: check for changes
+      - name: Check for changes
         run: |
           if [[ `git status` == *"up to date"* ]]; then
             echo "updated=true" >> $GITHUB_OUTPUT
