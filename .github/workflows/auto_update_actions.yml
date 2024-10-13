@@ -22,7 +22,7 @@ jobs:
       contents: write
     outputs:
       all_changed_files: ${{ steps.changed-files.outputs.all_changed_files }}
-      updated: ${{ steps.changed-files.outputs.updated }}
+      updated: ${{ steps.cache.outputs.updated }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,6 +45,7 @@ jobs:
           git add .
           git commit -m "Auto updating caches."
       - name: Check for changes
+        id: cache
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
@@ -54,7 +55,7 @@ jobs:
             echo "updated=true" >> "$GITHUB_OUTPUT"
           fi
       - name: fetch
-        if: ${{ steps.changed-files.outputs.updated  == 'true' }}
+        if: ${{ steps.cache.outputs.updated  == 'true' }}
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
