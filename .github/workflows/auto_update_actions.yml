@@ -5,9 +5,9 @@ on:
     branches:
       - main
 jobs:
-   # -------------------------------------------------------------
-  # Event `pull_request`: Updates cache of all modified files
-  # --------------------------------------------------------------
+  # -----------------------------------------------------------------
+  # Event `pull_request`: Updates version cache of all modified files
+  # -----------------------------------------------------------------
   changed_files:
     # if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest 
