@@ -48,12 +48,8 @@ jobs:
         run: |
           git status
           if [[ `git status` != *"up to date"* ]]; then
+            echo "Pushing cache updates..."
+            git fetch
+            git push
             echo "File caches have been updated!"
-            echo "updated=true" >> $GITHUB_OUTPUT
           fi
-      - name: fetch
-        if: ${{ steps.changed-files.outputs.updated  == 'true' }}
-        run: git fetch
-      - name: push code to main
-        if: ${{ steps.changed-files.outputs.updated  == 'true' }}
-        run: git push
