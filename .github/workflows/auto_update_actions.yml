@@ -38,7 +38,7 @@ jobs:
         run: |
           python ./.github/workflows/auto_update_cache.py ${ALL_CHANGED_FILES} -f $(find . -type f | grep -E '\.html$')
 
-      - name: Setup config + add files
+      - name: Setup config + add files if necessary
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
@@ -46,6 +46,8 @@ jobs:
           git commit -m "Auto updating caches."
       - name: Check for changes
         run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git status
           if [[ `git status` != *"up to date"* ]]; then
             echo "Pushing cache updates..."
