@@ -38,10 +38,11 @@ jobs:
         run: |
           python ./.github/workflows/auto_update_cache.py ${ALL_CHANGED_FILES} -f $(find . -type f | grep -E '\.html$')
 
-      - name: Commit files
+      - name: Setup config + add files
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+          git add .
       - name: Check for changes
         run: |
           git status
@@ -49,9 +50,6 @@ jobs:
             echo "File caches have been updated!"
             echo "updated=true" >> $GITHUB_OUTPUT
           fi
-      - name: stage changed files
-        if: ${{ steps.changed_files.outputs.updated  == 'true' }}
-        run: git add .
       - name: commit changed files
         if: ${{ steps.changed_files.outputs.updated  == 'true' }}
         run: git commit -m "Auto updating caches"
