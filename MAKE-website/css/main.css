@@ -2243,7 +2243,7 @@ Workshops
   gap: 4px;
 }
 
-.required-quizzes span {
+.required-quizzes span,.required-quizzes button {
   border-radius: 4px;
   padding: 2px 4px;
   background-color: var(--theme-color-2);
@@ -2255,14 +2255,17 @@ Workshops
   border: 1px solid var(--high-color);
 }
 
-.required-quizzes span.failed {
+.required-quizzes button.failed {
   background-color: var(--low-color-dark);
   border: 1px solid var(--low-color);
+  color: white;
+  font-weight: normal;
+  transition: background-color 0.250s ease-in-out;
 }
 
-/* .workshop .capacity {
-
-} */
+.required-quizzes button.failed:hover {
+  background-color: var(--low-color);
+}
 
 .workshop button.signup {
   padding: 10px 20px;
