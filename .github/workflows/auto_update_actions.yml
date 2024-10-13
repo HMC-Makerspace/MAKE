@@ -21,6 +21,7 @@ jobs:
       group: auto-cache
     permissions:
       pull-requests: read
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
