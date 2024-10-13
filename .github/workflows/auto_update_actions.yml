@@ -50,8 +50,12 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git status
           if [[ `git status` != *"up to date"* ]]; then
-            echo "Pushing cache updates..."
-            git fetch
-            git push
-            echo "File caches have been updated!"
+            echo "Pushing cache changes..."
+            echo "updated=true" >> $GITHUB_OUTPUT
           fi
+      - name: fetch
+        if: ${{ steps.changed-files.outputs.updated  == 'true' }}
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
