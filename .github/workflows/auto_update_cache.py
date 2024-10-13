@@ -24,6 +24,7 @@ for file in script_files:
         contents = fr.read()
         for updated_file_name in updated_file_names:
             pattern = rf'<script src="/?{updated_file_name}\?v=([\d\.]+)"><\/script>'
+            print(f"Matching for pattern {pattern} in {file}.")
             if m := re.search(pattern, contents):
                 print(f"Matched {updated_file_name} in {file}!")
                 version_string = m.group(1)
