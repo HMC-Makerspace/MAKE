@@ -16,7 +16,7 @@ updated_file_names = list(map(
     updated_file_args
 ))
 
-print(f"Running auto_update_cache.py in {directory} on files {', '.join(updated_file_names)} over {script_files}\n")
+print(f"Running auto_update_cache.py in {directory} on files {updated_file_names} over {script_files}\n")
 
 for file in script_files:
     print("Found file", file)
