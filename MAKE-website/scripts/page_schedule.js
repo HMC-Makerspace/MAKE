@@ -8,6 +8,7 @@ async function fetchSchedule() {
     }
 }
 
+
 function renderSchedule(schedule) {
     const schedule_table = document.getElementById("schedule-table");
     
