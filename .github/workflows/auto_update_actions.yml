@@ -44,7 +44,9 @@ jobs:
           git config --local user.name "github-actions[bot]"
       - name: Check for changes
         run: |
-          if [[ `git status` == *"up to date"* ]]; then
+          git status
+          if [[ `git status` != *"up to date"* ]]; then
+            echo "File caches have been updated!"
             echo "updated=true" >> $GITHUB_OUTPUT
           fi
       - name: stage changed files
