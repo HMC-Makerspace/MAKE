@@ -43,6 +43,7 @@ jobs:
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add .
+          git commit -m "Auto updating caches."
       - name: Check for changes
         run: |
           git status
@@ -50,9 +51,6 @@ jobs:
             echo "File caches have been updated!"
             echo "updated=true" >> $GITHUB_OUTPUT
           fi
-      - name: commit changed files
-        if: ${{ steps.changed_files.outputs.updated  == 'true' }}
-        run: git commit -m "Auto updating caches"
       - name: fetch
         if: ${{ steps.changed_files.outputs.updated  == 'true' }}
         run: git fetch
