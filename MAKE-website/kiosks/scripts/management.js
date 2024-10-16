@@ -574,7 +574,7 @@ async function saveCertification(uuid) {
 
     if (response.status == 201) {
         await fetchCertifications();
-        renderCertifications();
+        renderCertificationsAdmin();
     } else {
         const body = await response.json();
         alert("Error saving certification: " + response.status + "\n" + body.detail);
@@ -600,7 +600,7 @@ async function deleteCertification(uuid) {
 
         if (response.status == 204) {
             await fetchCertifications();
-            renderCertifications();
+            renderCertificationsAdmin();
         } else {
             const body = await response.json();
             alert("Error deleting certification: " + response.status + "\n" + body.detail);
