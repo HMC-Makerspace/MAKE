@@ -16,7 +16,7 @@
 </div>
 
 ## Contact
-Email Ethan Vazquez (<a href="mailto:evazquez@g.hmc.edu">evazquez@g.hmc.edu</a>) for any questions or concerns about this website.
+For any questions or concerns about this website, please email the Makerspace Webmaster directly at <a href="mailto:{{WEBMASTER_EMAIL}}">{{WEBMASTER_EMAIL}}</a>.
 If you find a bug, please include a screenshot and/or a brief description on how to reproduce the bug.
 
-For anything else, please contact us at <a href="mailto:makerspace-management-l@g.hmc.edu">makerspace-management-l@g.hmc.edu</a>.
+For other questions about the Makerspace, please contact Makerspace Management at <a href="mailto:{{MANAGEMENT_EMAIL}}">{{MANAGEMENT_EMAIL}}</a>.
