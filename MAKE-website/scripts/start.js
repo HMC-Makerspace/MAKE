@@ -8,6 +8,7 @@ async function start() {
 
     //animateChangeFonts();
 
+    
     renderQuizInfo();
     renderCheckouts();
     renderEquipment();

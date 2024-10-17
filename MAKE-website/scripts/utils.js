@@ -136,6 +136,8 @@ const QUIZ_ID_TO_OBJECT = {
     }
 }
 
+
+
 const ROLE_TO_READABLE = {
     "admin": "Admin",
     "user": "User",
@@ -297,7 +299,6 @@ function timestampToDate(timestamp) {
 function secondsToHoursMinutes(seconds) {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-
     return `${hours}h ${minutes}m`;
 }
 
