@@ -904,12 +904,12 @@ function generateCertificationUserInfo() {
     info.innerHTML = "";
 
     for (let cert of state.certifications) {
-            // Now, add buttons to add / remove this cert from the person,
+        // Now, add buttons to add / remove this cert from the person,
         // along with info about if they have the cert, if it's expired, etc.
         // Add this to the user-certifications-info div
         let user_cert_info = "";
 
-        if (state.current_user_info !== null) {
+        if (state.current_user_info !== null && state.current_user_info.certifications) {
             let user_cert = state.current_user_info.certifications[cert.uuid];
 
             if (user_cert !== undefined) {
@@ -946,11 +946,12 @@ function generateCertificationUserInfo() {
 }
 
 async function addCertification(cert_uuid) {
+    console.log("Add cert user info:", state.current_user_info)
     if (state.current_user_info === null) {
         return;
     }
 
-    if (state.current_user_info.certifications === undefined) {
+    if (state.current_user_info.certifications == undefined) { // might equal undefined or null
         state.current_user_info.certifications = {};
     }
 
