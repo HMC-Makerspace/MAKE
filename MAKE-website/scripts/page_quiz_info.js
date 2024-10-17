@@ -50,6 +50,44 @@ function renderQuizInfo() {
     appendChildren(quiz_container, divs);
 }
 
+function renderCertifications() {
+    const table = document.getElementById("certifications-info-table");
+
+    const header = "<tr><th>Certification</th><th>Valid?</th></tr>";
+
+    table.innerHTML = header;
+
+    let rows = [];
+    for (let cert of state.certifications) {
+        let row = document.createElement("tr");
+        let name = document.createElement("td");
+        name.innerText = cert.name;
+        row.appendChild(name);
+
+        let valid = "No";
+        if (state.user_object !== null) {
+            if (state.user_object.certifications) {
+                if (state.user_object.certifications[cert.uuid] !== undefined) {
+                    let valid_until = cert.seconds_valid_for + state.user_object.certifications[cert.uuid];
+                    valid_until = new Date(valid_until * 1000);
+
+                    if (valid_until >= new Date()) {
+                        valid = `Valid until ${valid_until.toLocaleDateString()}`;
+                    }
+                }
+            }
+        }
+
+        let valid_td = document.createElement("td");
+        valid_td.innerText = valid;
+        row.appendChild(valid_td);
+
+        rows.push(row);
+    }
+    
+    appendChildren(table, rows);
+}
+
 function generateQuizDiv(quiz) {
     let div = document.createElement("div");
     div.classList.add("quiz-div");
