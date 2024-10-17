@@ -1,16 +1,16 @@
 name: Auto Cache Update
 run-name: Automatically updating file caches...
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types:
+      - closed
 jobs:
   # -----------------------------------------------------------------
   # Event `pull_request`: Updates version cache of all modified files
   # -----------------------------------------------------------------
   changed_files:
-    # if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest 
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
     name: Modify cached files
     permissions:
       pull-requests: read
@@ -43,7 +43,7 @@ jobs:
         # files in the ALL_CHANGED_FILES list, and increment version numbers accordingly.
         run: |
           python ./.github/workflows/auto_update_cache.py ${ALL_CHANGED_FILES} -f $(find . -type f | grep -E '\.html$')
-      # Commit files to 
+      # Commit files to
       - name: Setup config + add files if necessary
         # Use Github Actions bot as commit user
         run: |
