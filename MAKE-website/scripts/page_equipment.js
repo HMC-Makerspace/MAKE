@@ -27,7 +27,7 @@ const laser3d_equipment = {
             name: "Epilog Laser Cutter",
             description: "Smaller laser cutter, faster and more accurate then the Full Spectrum laser cutter, but with reduced cutting area.",
             image: "img/equipment/epiloglaser.webp",
-            link: "https://docs.google.com/document/d/1JNqDC9X5x_eaMU51Pfan4zC-YUiqhW1XqpONjFzrzyM/edit#heading=h.p54qzrkefqd4"
+            // link: "https://docs.google.com/document/d/1JNqDC9X5x_eaMU51Pfan4zC-YUiqhW1XqpONjFzrzyM/edit#heading=h.p54qzrkefqd4" // Epilog no longer in use
         },
         // {
         //     name: "FLSUN SR 3D Printers",
@@ -45,7 +45,7 @@ const laser3d_equipment = {
             name: "Prusa i3 MK3S+ 3D Printers",
             description: "Cartesian FDM 3D printers that can print PLA, ABS, TPU, and many other materials. Slower than the Bambu X1C printers, but are often available for large prints.",
             image: "img/equipment/prusa.webp",
-            link: "https://docs.google.com/document/d/1gDvmQBr8GSX1x4c6m6gHaMW2nl4jzUDritskwbLwQwI/edit#heading=h.e36rdnc8fyom"
+            link: "https://docs.google.com/document/d/1STAzSvGJrHs1faPCegaM8OGfoyxEVAlYl83vfPQiPkM/edit#heading=h.p7o03diqftst"
         },
         {
             name: "Markforged Onyx One 3D Printers",
