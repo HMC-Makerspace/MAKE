@@ -11,9 +11,9 @@ const EMPTY_ITEM = {
     "long_name": null,
     "role": null,
     "access_type": null,
-    "quantity_total": null,
+    "quantity_checked_out": null,
     "quantity_available": null,
-    "locations": [{room: "", container: "", specific: ""}],
+    "locations": [{room: "", quantity: null, container: "", specific: ""}],
     "reorder_url": null,
     "serial_number": null,
     "kit_contents": null,
@@ -189,19 +189,28 @@ function generateEditableInventoryDiv(item) {
     div.appendChild(role);
 
     const quantity = document.createElement("h3");
+
+    let quantity_total = 0
+
+    item.locations.forEach(location => {
+        quantity_total += location.quantity;
+      })
+
+    let quantity_available = quantity_total - item.quantity_checked_out
+
     if (item.quantity_available !== item.quantity_total) {
-        quantity.innerText = `Quantity: ${item.quantity_available}/${item.quantity_total}`;
+        quantity.innerText = `Quantity: ${quantity_available}/${quantity_total}`;
     } else {
-        if (item.quantity_total < 0) {
-            if (item.quantity_total === -1) {
+        if (quantity_total < 0) {
+            if (quantity_total === -1) {
                 quantity.innerText = "Quantity: Low";
-            } else if (item.quantity_total === -2) {
+            } else if (quantity_total === -2) {
                 quantity.innerText = "Quantity: Medium";
-            } else if (item.quantity_total === -3) {
+            } else if (quantity_total === -3) {
                 quantity.innerText = "Quantity: High";
             }
         } else {
-            quantity.innerText = `Quantity: ${item.quantity_total}`;
+            quantity.innerText = `Quantity: ${quantity_total}`;
         }
     }
     div.appendChild(quantity);
@@ -346,7 +355,7 @@ function editInventoryItem(uuid, create_item=false) {
     const container = document.getElementById("edit-inventory-item");
     container.classList.remove("hidden");
     
-    const attributes = ["uuid", "name", "long_name", "role", "access_type", "quantity_total", "reorder_url", "serial_number", "kit_contents", "keywords"];
+    const attributes = ["uuid", "name", "long_name", "role", "access_type", "quantity_checked_out", "reorder_url", "serial_number", "kit_contents", "keywords"];
     for (let attr of attributes) {
         const input = document.getElementById(`edit-${attr}`);
 
@@ -454,12 +463,15 @@ function isInventoryItemValid(item) {
         return false;
     }
     // Validate quantity_total
-    if (item.quantity_total === null || item.quantity_total === "") {
+    if (item.quantity_checked_out === null || item.quantity_checked_out === "") {
         return false;
     }
     // Validate that every room has a container
     for (let loc of item.locations) {
         if (loc.room === null || loc.room === "") {
+            return false;
+        }
+        if (loc.quantity === null || loc.quantity === "") {
             return false;
         }
     }

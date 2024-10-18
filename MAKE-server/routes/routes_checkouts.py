@@ -95,7 +95,10 @@ async def route_create_new_checkout(request: Request):
     # Create a checkout
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Creating checkout...")
-    checkout = Checkout(** await request.json())
+    blah = await request.json()
+    # data type of checkout 
+    logging.info("\n\n\n" + str(blah) + "\n\n\n")
+    checkout = Checkout(** blah)
 
     # Get the API key
     api_key = request.headers["api-key"]
@@ -124,6 +127,7 @@ async def route_create_new_checkout(request: Request):
         raise HTTPException(status_code=400, detail="No items")
 
     for uuid in checkout.items.keys():
+        logging.info("\n\n\n" + inventory_data[uuid]["quantity_checked_out"], checkout.items[uuid]+ "\n\n\n")
         new_quantity_checked_out = inventory_data[uuid]["quantity_checked_out"] + checkout.items[uuid]
         inventory_collection.update_one(
             {"uuid": uuid},

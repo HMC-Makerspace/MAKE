@@ -325,15 +325,24 @@ function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | 
     const quantity = document.createElement("div");
     quantity.classList.add("inventory-result-quantity");
 
-    if (item.quantity_total >= 0) {
+    let quantity_available = 0
+
+    item.locations.forEach(location => {
+        quantity_available += location.quantity;
+      })
+
+    let quantity_total = quantity_available - item.quantity_checked_out
+
+
+    if (quantity_total >= 0) {
         quantity.classList.add("number");
-        if (item.quantity_available !== item.quantity_total) {
-            quantity.innerText = `${item.quantity_available}/${item.quantity_total}`;
+        if (quantity_available !== quantity_total) {
+            quantity.innerText = `${quantity_available}/${quantity_total}`;
         } else {
-            quantity.innerText = `${item.quantity_total}`;
+            quantity.innerText = `${quantity_total}`;
         }
     } else {
-        switch (item.quantity_total) {
+        switch (quantity_total) {
             case -1:
                 quantity.classList.add("low");
                 quantity.innerText += "Low";
@@ -348,7 +357,7 @@ function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | 
                 break;
             default:
                 quantity.classList.add("unknown");
-                quantity.innerText += item.quantity_total;
+                quantity.innerText += quantity_total;
                 break;
         }
     }
