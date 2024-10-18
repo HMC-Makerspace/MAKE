@@ -58,6 +58,9 @@ function renderCertifications() {
     table.innerHTML = header;
 
     let rows = [];
+    if (!state.certifications) {
+        return;
+    }
     for (let cert of state.certifications) {
         let row = document.createElement("tr");
         let name = document.createElement("td");
