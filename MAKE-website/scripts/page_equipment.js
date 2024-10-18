@@ -27,7 +27,7 @@ const laser3d_equipment = {
             name: "Epilog Laser Cutter",
             description: "Smaller laser cutter, faster and more accurate then the Full Spectrum laser cutter, but with reduced cutting area.",
             image: "img/equipment/epiloglaser.webp",
-            // link: "https://docs.google.com/document/d/1JNqDC9X5x_eaMU51Pfan4zC-YUiqhW1XqpONjFzrzyM/edit#heading=h.p54qzrkefqd4" // Epilog no longer in use
+            link: "" // "https://docs.google.com/document/d/1JNqDC9X5x_eaMU51Pfan4zC-YUiqhW1XqpONjFzrzyM/edit#heading=h.p54qzrkefqd4" // Epilog no longer in use
         },
         // {
         //     name: "FLSUN SR 3D Printers",
@@ -404,7 +404,7 @@ function generateMachineDiv(machine) {
     machine_div.appendChild(name_div);
     machine_div.appendChild(description_div);
 
-    if (machine.link != "") {
+    if (!machine.link) {
         const manual_link_div = document.createElement("div");
         manual_link_div.classList.add("machine-manual");
         manual_link_div.innerHTML = `<button onclick="openInNewTab('${machine.link}')">Open Manual</button>`;
