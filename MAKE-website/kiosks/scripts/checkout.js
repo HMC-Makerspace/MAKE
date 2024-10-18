@@ -6,7 +6,7 @@ var state = {
     cart: {},
     current_cx_id: 0,
     current_user_info: null,
-    certifications: null,
+    certifications: [],
 }
 
 document.documentElement.setAttribute('data-theme', 'dark');
