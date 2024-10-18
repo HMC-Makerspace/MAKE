@@ -584,6 +584,7 @@ Management Console
   background-color: var(--theme-color-1);
   border-radius: var(--roundness);
   color: var(--text-color-main);
+  overflow-x: auto;
 }
 
 #admin-header button {
