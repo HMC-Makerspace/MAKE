@@ -413,5 +413,4 @@ function generateMachineDiv(machine) {
     }
 
     return machine_div;
-
 }
