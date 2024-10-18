@@ -8,6 +8,7 @@ const search_options = {
     all: true,
 }
 
+
 async function fetchInventory(kiosk_mode = false | "inventory_editor" | "checkout" | "steward") {
     const response = await fetch(`${API}/inventory/get_inventory`);
 

@@ -19,91 +19,8 @@ The steps for getting autofill information are:
 The id's are the numbers after "entry." in the url. In this case, the form questions ask for
 name first, then college id, then email, so 382887588 is the id for name, 1395074003 for college id, and 1482318217 for email.
 
-The correct link for the form (after "/d/e/") can also be found in this url, which is different
-from the normal edit link in the url bar when editing the form.
 */
-const quizzes = [
-    {
-        name: "General",
-        description: "Provides building and student storage access, permission to work in the Makerspace, and tool checkout ability.",
-        icon: "tools_power_drill",
-        reference: "https://docs.google.com/document/d/1-pycsGqeUptorvEH-Ti66ssmvKLrtopvLRZ9YNMSMKo/edit",
-        form: "1FAIpQLSfW3l2cxem3JwKqX3RJjjhJXKzAdwY9x4dYeXvOATGA-dhWzA",
-        autofills: [382887588, 1395074003, 1482318217]
-    },
-    // Old 3d printer/laser cutter quiz
-    // {
-    //     name: "Laser3D",
-    //     description: "Provides access to the 3D printer / laser cutter room.",
-    //     icon: "stylus_laser_pointer",
-    //     reference: "https://docs.google.com/document/d/1gDvmQBr8GSX1x4c6m6gHaMW2nl4jzUDritskwbLwQwI/edit",
-    //     form: "1FAIpQLSfAZHwVpaI91oPq2PcDnUJt4yjPbwLznU41mMfjJJzyyZ9T7A",
-    //     autofills: [382887588, 1395074003, 1482318217]
-    // },
-    {
-        name: "3D",
-        description: "Must be completed before gaining access to the 3D Printer/Laser Cutter room.",
-        icon: "view_in_ar",
-        reference: "https://docs.google.com/document/d/1P8ANYjpi3USbBGqlTxAZjM13yGebQL4fTTedh64FtQI/edit",
-        form: "1FAIpQLSfkiVD2PfOYFThht0YOeV7-qUoR_Ot7sU75BUK2EwwOUaFKVA",
-        autofills: [382887588, 1395074003, 1482318217]
-    },{
-        name: "Laser",
-        description: "Must be completed before gaining access to the 3D Printer/Laser Cutter room.",
-        icon: "stylus_laser_pointer",
-        reference: "https://docs.google.com/document/d/1-MjMIR0GWLGws6HAIEd_lilhaoMGJicK_Rhr4bm6DUQ/edit",
-        form: "1FAIpQLSfJpCxhjoVcismSm_ZekKre-7-FCYPVt7Z6RMTrxb-Oe30cVQ",
-        autofills: [382887588, 1395074003, 1482318217]
-    },
-    {
-        name: "SprayPaint",
-        description: "Provides access to the spray paint booth.",
-        icon: "colors",
-        reference: "https://docs.google.com/document/d/1rWhhCfDzNkxNpQC1f5lGxxvZ7KNCTyGIw4CS1ixTPic/edit",
-        form: "1FAIpQLScjlDfT9sXZzq_IbqKTrjn3H2H81B5c7uL9aucRB_rEOLbGMg",
-        autofills: [382887588, 1395074003, 1482318217]
-    },
-    {
-        name: "Composite",
-        description: "Provides access to the composite room.",
-        icon: "layers",
-        reference: "https://docs.google.com/document/d/1vf5Pw24-stQF0I0EhXi-4wItHGNquIOZGPalTngE7B8/edit",
-        form: "1FAIpQLSfJTAr-E4TT-wYCfgvDqTYdssBY7ZfSLGBOv0oTtZBl_H_PJw",
-        autofills: [382887588, 1395074003, 1482318217]
-    },
-    {
-        name: "Welding",
-        icon: "bolt",
-        description: "Prerequisite to in-person welding training, which is required to use the welding area.",
-        reference: "https://docs.google.com/document/d/13k30JUPOOKK707lYuoaa8Pd3ICvUOBFMly4v8zQqU-Y/edit",
-        form: "1FAIpQLSet-S7ZIHVRydmc-J_zXSV4knCr50AryDbq0aUv1s5FB2ZGmg",
-        autofills: [382887588, 1395074003, 1482318217]
-    },
-    {
-        name: "Studio",
-        description: "Provides access to the studio.",
-        icon: "camera",
-        reference: "https://docs.google.com/document/d/1pqknkaGRO2VQL6vkdeRkVYewqo_WKNh6-tpEloCPW5c/edit",
-        form: "1FAIpQLSdikBUUUXV2RMTD1LGdGHcSzVXgzokmguET0vedSR8JqNGm0Q",
-        autofills: [382887588, 1395074003, 1482318217]
-    },
-    {
-        name: "Waterjet",
-        description: "Required to use the waterjet cutter, located in the 3D printer / laser cutter room.",
-        icon: "water_pump",
-        reference: "https://docs.google.com/document/d/1a-hPM5qB79ONJ-7k06pvIZVxz1_ONLAD/edit",
-        form: "1FAIpQLSev6cU296gQyqFxOxi2LFmJPCDthz_QBMYkP52AbKcr-7HFFg",
-        autofills: [382887588, 1395074003, 1482318217]
-    },
-    {
-        name: "Loom",
-        description: "Required to use the digital jacquard loom.",
-        icon: "view_quilt",
-        reference: "https://docs.google.com/document/d/1T7UWdbl9iEGJ31fNZpCOMRPS3_PBd1ioztRqxQduCKY/edit",
-        form: "1FAIpQLSdbzUnLeSloX5LDFGJP0tg-8oK3MadUkEaeKOtBy2AZ918g2Q",
-        autofills: [1421487221, 216407767, 1881621455]
-    }
-]
+// const quizzes moved to utils.js
 
 function renderQuizInfo() {
     const quiz_container = document.getElementById("quiz-list-container");
@@ -113,7 +30,7 @@ function renderQuizInfo() {
 
     // Add the general quiz to the general quiz container
     // so it is always at the top and appears larger
-    let general_quiz = quizzes.find(quiz => quiz.name === "General");
+    let general_quiz = QUIZ_ID_TO_OBJECT[QUIZ_NAME_TO_ID["General"]];
     if (general_quiz !== undefined) {
         removeAllChildren(general_quiz_container);
         general_quiz_container.appendChild(generateQuizDiv(general_quiz));
@@ -121,7 +38,7 @@ function renderQuizInfo() {
 
 
 
-    for (let quiz of quizzes) {
+    for (let quiz of Object.values(QUIZ_ID_TO_OBJECT)) {
         if (quiz.name === "General") {
             continue;
         }
@@ -242,4 +159,9 @@ function openQuiz(quiz) {
     }
     
     window.open(encodeURI(quiz_link), "_blank");        
+}
+
+function openQuizByName(quiz_name) {
+    const quiz = QUIZ_ID_TO_OBJECT[QUIZ_NAME_TO_ID[quiz_name]];
+    openQuiz(quiz);
 }

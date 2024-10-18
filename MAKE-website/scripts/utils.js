@@ -57,6 +57,86 @@ const QUIZ_ID_TO_READABLE = {
     "2100779718": "Waterjet Safety Quiz",
     "1235553349": "Loom Safety Quiz",
 }
+/*
+The correct link for the form (after "/d/e/") can also be found in this url, which is different
+from the normal edit link in the url bar when editing the form.
+*/
+const QUIZ_ID_TO_OBJECT = {
+    "66546920": {
+        name: "General",
+        description: "Provides building and student storage access, permission to work in the Makerspace, and tool checkout ability.",
+        icon: "tools_power_drill",
+        reference: "https://docs.google.com/document/d/1-pycsGqeUptorvEH-Ti66ssmvKLrtopvLRZ9YNMSMKo/edit",
+        form: "1FAIpQLSfW3l2cxem3JwKqX3RJjjhJXKzAdwY9x4dYeXvOATGA-dhWzA",
+        autofills: [382887588, 1395074003, 1482318217]
+    },
+    "577888883": {
+        name: "3D",
+        description: "Must be completed before gaining access to the 3D Printer/Laser Cutter room.",
+        icon: "view_in_ar",
+        reference: "https://docs.google.com/document/d/1P8ANYjpi3USbBGqlTxAZjM13yGebQL4fTTedh64FtQI/edit",
+        form: "1FAIpQLSfkiVD2PfOYFThht0YOeV7-qUoR_Ot7sU75BUK2EwwOUaFKVA",
+        autofills: [382887588, 1395074003, 1482318217]
+    },
+    "677552423": {
+        name: "Laser",
+        description: "Must be completed before gaining access to the 3D Printer/Laser Cutter room.",
+        icon: "stylus_laser_pointer",
+        reference: "https://docs.google.com/document/d/1-MjMIR0GWLGws6HAIEd_lilhaoMGJicK_Rhr4bm6DUQ/edit",
+        form: "1FAIpQLSfJpCxhjoVcismSm_ZekKre-7-FCYPVt7Z6RMTrxb-Oe30cVQ",
+        autofills: [382887588, 1395074003, 1482318217]
+    },
+    "1841312496": {
+        name: "SprayPaint",
+        description: "Provides access to the spray paint booth.",
+        icon: "colors",
+        reference: "https://docs.google.com/document/d/1rWhhCfDzNkxNpQC1f5lGxxvZ7KNCTyGIw4CS1ixTPic/edit",
+        form: "1FAIpQLScjlDfT9sXZzq_IbqKTrjn3H2H81B5c7uL9aucRB_rEOLbGMg",
+        autofills: [382887588, 1395074003, 1482318217]
+    },
+    "913890505": {
+        name: "Composite",
+        description: "Provides access to the composite room.",
+        icon: "layers",
+        reference: "https://docs.google.com/document/d/1vf5Pw24-stQF0I0EhXi-4wItHGNquIOZGPalTngE7B8/edit",
+        form: "1FAIpQLSfJTAr-E4TT-wYCfgvDqTYdssBY7ZfSLGBOv0oTtZBl_H_PJw",
+        autofills: [382887588, 1395074003, 1482318217]
+    },
+    "482685426": {
+        name: "Welding",
+        icon: "bolt",
+        description: "Prerequisite to in-person welding training, which is required to use the welding area.",
+        reference: "https://docs.google.com/document/d/13k30JUPOOKK707lYuoaa8Pd3ICvUOBFMly4v8zQqU-Y/edit",
+        form: "1FAIpQLSet-S7ZIHVRydmc-J_zXSV4knCr50AryDbq0aUv1s5FB2ZGmg",
+        autofills: [382887588, 1395074003, 1482318217]
+    },
+    "2079405017": {
+        name: "Studio",
+        description: "Provides access to the studio.",
+        icon: "camera",
+        reference: "https://docs.google.com/document/d/1pqknkaGRO2VQL6vkdeRkVYewqo_WKNh6-tpEloCPW5c/edit",
+        form: "1FAIpQLSdikBUUUXV2RMTD1LGdGHcSzVXgzokmguET0vedSR8JqNGm0Q",
+        autofills: [382887588, 1395074003, 1482318217]
+    },
+    "2100779718": {
+        name: "Waterjet",
+        description: "Required to use the waterjet cutter, located in the 3D printer / laser cutter room.",
+        icon: "water_pump",
+        reference: "https://docs.google.com/document/d/1a-hPM5qB79ONJ-7k06pvIZVxz1_ONLAD/edit",
+        form: "1FAIpQLSev6cU296gQyqFxOxi2LFmJPCDthz_QBMYkP52AbKcr-7HFFg",
+        autofills: [382887588, 1395074003, 1482318217]
+    },
+    "1235553349": {
+        name: "Loom",
+        description: "Required to use the digital jacquard loom.",
+        icon: "view_quilt",
+        reference: "https://docs.google.com/document/d/1T7UWdbl9iEGJ31fNZpCOMRPS3_PBd1ioztRqxQduCKY/edit",
+        form: "1FAIpQLSdbzUnLeSloX5LDFGJP0tg-8oK3MadUkEaeKOtBy2AZ918g2Q",
+        autofills: [1421487221, 216407767, 1881621455]
+    }
+}
+
+
 
 const ROLE_TO_READABLE = {
     "admin": "Admin",
@@ -115,6 +195,30 @@ function determineValidQuizDate(quiz_timestamp) {
     return false;
 }
 
+/**
+ * Determine if the current user has passed a given quiz by name.
+ * @param {string} quiz_name The string name of the quiz, first letter capitalized
+ * @returns true if the current user has passed the quiz, false otherwise.
+ */
+function hasCurrentUserPassedQuizByName(quiz_name) {
+    // We must have a current user
+    if (!state.user_object) {
+        return false;
+    }
+    // Find the id of the given quiz
+    const quiz_id = QUIZ_NAME_TO_ID[quiz_name];
+    // Find the timestamp the user passed the given quiz
+    const date_passed = Object.keys(state.user_object.passed_quizzes).find(
+        (key) => state.user_object.passed_quizzes[key] == quiz_id
+    );
+    // If no timestamp is found, the user hasn't passed the quiz
+    if (!date_passed) {
+        return false;
+    }
+    // Otherwise, check if the quiz was passed recently
+    return determineValidQuizDate(date_passed);
+}
+
 function parseCollegeID(collegeID) {
     collegeID = collegeID.trim();
 
@@ -168,7 +272,6 @@ function setPage(page, create_history = true) {
 function onHashChange() {
     const url = new URL(window.location.href);
     const page = url.searchParams.get("p");
-
     if (page) {
         setPage(page, false);
     } else {
@@ -196,7 +299,6 @@ function timestampToDate(timestamp) {
 function secondsToHoursMinutes(seconds) {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-
     return `${hours}h ${minutes}m`;
 }
 
@@ -353,7 +455,7 @@ const user_search_options = {
     limit: 100, // don't return more results than you need!
     allowTypo: true, // if you don't care about allowing typos
     threshold: -10000, // don't return bad results
-    keys: ['name', 'cx_id_str', 'email', 'role'], // keys to search
+    keys: ['name', obj=>obj.cx_id.toString(), 'email', 'role'], // keys to search - passes ids as a string
     all: true,
 }
 

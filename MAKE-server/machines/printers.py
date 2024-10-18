@@ -146,6 +146,11 @@ async def bambu_update(on_refresh = False):
         # And save it to the database
         db = MongoDB()
         printer_collection = await db.get_collection("printer_logs")
+        long_term_logs_collection = await db.get_collection("printer_long_term_logs")
+
+        last_printer_logs_cursor = printer_collection.find({})
+        last_printer_logs_list = await last_printer_logs_cursor.to_list(length=None)
+        last_printer_logs = {log["printer_name"]:log for log in last_printer_logs_list}
 
         for device in devices["devices"]:
             device_id = device["dev_id"]
@@ -177,16 +182,48 @@ async def bambu_update(on_refresh = False):
                     break
                 
             
-            printer_log = PrinterLog(**printer_log)
+            printer_log_object = PrinterLog(**printer_log)
 
-            await printer_collection.insert_one(printer_log.model_dump())
+            # We only want to store one log per printer, so we will perform an
+            # upsert=True operation querying by printer name
+            await printer_collection.update_one(
+                # Update the printer by this name
+                {"printer_name": printer_log_object.printer_name},
+                # Update with all printer_log data
+                {"$set": printer_log_object.model_dump()},
+                # upsert = True, which will modify the existing log instead of
+                # adding a new one to the collection
+                True
+            )
 
-        # If more than 100 logs, delete the oldest 50
-        if await printer_collection.count_documents({}) > 100:
-            oldest_logs = printer_collection.find().sort("timestamp", 1).limit(50)
-            async for log in oldest_logs:
-                await printer_collection.delete_one({"uuid": log["uuid"]})
+            # -- LONG TERM PRINT LOGS ---
 
+            # Only add to long term logs if the following fields are valid:
+            # 1. This print log has a printer name
+            if not printer_log["printer_name"]:
+                continue
+            # 2. This print log has a printer json
+            if not printer_log["printer_json"]:
+                continue
+            # 3. This print log has a gcode state
+            if not printer_log["printer_json"]["gcode_state"]:
+                continue
+            # 4. The last stored print log exists for this printer name
+            if not last_printer_logs[printer_log["printer_name"]]:
+                continue
+            # 5. The last stored print log for this printer name has a printer json
+            if not last_printer_logs[printer_log["printer_name"]]["printer_json"]:
+                continue
+            # 6. The last stored print log for this printer name has a gcode state
+            if not last_printer_logs[printer_log["printer_name"]]["printer_json"]["gcode_state"]:
+                continue
+            # If all fields are valid, find the last and current gcode state
+            last_gcode_state = last_printer_logs[printer_log["printer_name"]]["printer_json"]["gcode_state"]
+            current_gcode_state = printer_log["printer_json"]["gcode_state"]
+
+            # If the gcode state has changed, add the printer log to the long-term logs
+            if (last_gcode_state != current_gcode_state):
+                await long_term_logs_collection.insert_one(printer_log_object.model_dump())
 
     except Exception as e:
         # print traceback
