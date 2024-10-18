@@ -20,6 +20,7 @@ jobs:
       all_changed_files: ${{ steps.changed-files.outputs.all_changed_files }}
       # True if file caches have been updated
       updated: ${{ steps.cache.outputs.updated }}
+      token: ${{ steps.generate-token.outputs.token }}
     steps:
       # Clone the repo
       - uses: actions/checkout@v4
@@ -63,11 +64,22 @@ jobs:
             git commit -m "Auto update caches"
             echo "updated=true" >> "$GITHUB_OUTPUT"
           fi
+      - name: Generate a token if needed
+        # Check if the git status indicated that we need to push changes
+        if: ${{ steps.cache.outputs.updated  == 'true' }}
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          # Defined in repository variables
+          app-id: ${{ vars.CACHE_APP_ID }}
+          # Defined in repository secrets
+          private-key: ${{ secrets.CACHE_APP_PRIVATE_KEY }}
       - name: Push changes if needed
         # Check if the git status indicated that we need to push changes
         if: ${{ steps.cache.outputs.updated  == 'true' }}
         # If so, use the Github Push Action from ad-m
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ steps.generate-token.outputs.token }}
           branch: ${{ github.ref }}
+          force: true
