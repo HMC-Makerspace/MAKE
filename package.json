@@ -1,0 +1,27 @@
+{
+  "name": "mos",
+  "module": "server/server.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/compression": "^1.7.5",
+    "@types/express": "^5.0.0",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-scripts": "^5.0.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "bun-plugin-html": "^2.0.0",
+    "compression": "^1.7.4",
+    "express": "^5.0.1",
+    "mongoose": "^8.7.2"
+  },
+  "scripts": {
+    "start": "bun run server/server.ts --watch",
+    "build": "bun build website/index.tsx --outdir website/build"
+  }
+}

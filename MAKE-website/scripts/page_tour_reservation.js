@@ -1,1 +1,0 @@
-renderMD("md/tour-reservation.md", "tour-reservation");
