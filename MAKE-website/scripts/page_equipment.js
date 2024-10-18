@@ -29,6 +29,7 @@ const laser3d_equipment = {
             image: "img/equipment/epiloglaser.webp",
             link: "" // "https://docs.google.com/document/d/1JNqDC9X5x_eaMU51Pfan4zC-YUiqhW1XqpONjFzrzyM/edit#heading=h.p54qzrkefqd4" // Epilog no longer in use
         },
+        // FLSun no longer in use
         // {
         //     name: "FLSUN SR 3D Printers",
         //     description: "Delta FDM 3D printers that excel at printing PLA and ABS quickly, with speeds ranging from 80mm/s to 200mm/s.",
