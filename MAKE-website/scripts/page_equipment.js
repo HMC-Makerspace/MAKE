@@ -23,12 +23,13 @@ const laser3d_equipment = {
             image: "img/equipment/glowforge.webp",
             link: "https://docs.google.com/document/d/1YLAlbvcPb3p04SeVqwvQ-6_EGABFlFwP_2Nr1nNKf3A/edit#heading=h.n01b46lm0fpk"
         },
-        {
-            name: "Epilog Laser Cutter",
-            description: "Smaller laser cutter, faster and more accurate then the Full Spectrum laser cutter, but with reduced cutting area.",
-            image: "img/equipment/epiloglaser.webp",
-            link: "" // "https://docs.google.com/document/d/1JNqDC9X5x_eaMU51Pfan4zC-YUiqhW1XqpONjFzrzyM/edit#heading=h.p54qzrkefqd4" // Epilog no longer in use
-        },
+        // Epilog no longer in use
+        // {
+        //     name: "Epilog Laser Cutter",
+        //     description: "Smaller laser cutter, faster and more accurate then the Full Spectrum laser cutter, but with reduced cutting area.",
+        //     image: "img/equipment/epiloglaser.webp",
+        //     link: "https://docs.google.com/document/d/1JNqDC9X5x_eaMU51Pfan4zC-YUiqhW1XqpONjFzrzyM/edit#heading=h.p54qzrkefqd4"
+        // },
         // FLSun no longer in use
         // {
         //     name: "FLSUN SR 3D Printers",
@@ -52,19 +53,19 @@ const laser3d_equipment = {
             name: "Markforged Onyx One 3D Printers",
             description: "Cartesian FDM 3D printers that prints Onyx, a micro carbon fiber filled nylon composite filament, which produces very strong, very durable, and slightly flexible prints. Filament is charged at-cost to the user.",
             image: "img/equipment/onyx.webp",
-            link: "https://docs.google.com/document/d/1gDvmQBr8GSX1x4c6m6gHaMW2nl4jzUDritskwbLwQwI/edit#heading=h.fx323geph920"
+            link: "https://docs.google.com/document/d/1bNBJGLvWBgnjCmkjbbjZslC3fXmHV9QjtxO2fhKQfKg/edit#heading=h.pf3kaqagdejg"
         },
         {
             name: "Formlabs Form 2 SLA",
             description: "SLA 3D printer that prints using a clear resin, allowing for extremely accurate, production-quality prints. Prints need to be washed in isopropal alcohol after printing. Resin is charged at-cost to the user.",
             image: "img/equipment/form2.webp",
-            link: "https://docs.google.com/document/d/1gDvmQBr8GSX1x4c6m6gHaMW2nl4jzUDritskwbLwQwI/edit#heading=h.vyczjolvr77i"
+            link: "https://docs.google.com/document/d/1TA1uxGkrk1R-q-v4arVlhNY-NBDHwhxkKsnsIF6eBWk/edit#heading=h.sc48cqt5txrn"
         },
         {
             name: "Formlabs Fuse SLS & Sifter",
             description: "SLS 3D printer that prints by fusing nylon powder together. This method allows for extremely intricate parts that don't need supports to be printed. Powder is charged at-cost to the user.",
             image: "img/equipment/fuse1.webp",
-            link: "https://docs.google.com/document/d/1gDvmQBr8GSX1x4c6m6gHaMW2nl4jzUDritskwbLwQwI/edit#heading=h.nldknjybpgtv"
+            link: "https://docs.google.com/document/d/1I5CBg8iUVe6F1J03jEuAeo-FFyPUYaI-94uqpvG5uFQ/edit#heading=h.6ribmumif1y0"
         },
         {
             name: "Protomax Waterjet",
@@ -176,7 +177,7 @@ const main_area_equipment = {
             name: "Sewing Machines",
             description: "Various models of sewing machines are available for use, alongside a wide selection of thread colors, needles, and other sewing supplies.",
             image: "img/equipment/sewingmachine.webp",
-            link: "https://docs.google.com/document/d/1G9GU8GuiwsSYijOM1ZvY0uHSs9XidLDGd6vxzkiocqI/edit#heading=h.2oq61rhnhhsl"
+            link: "https://docs.google.com/document/d/1wH7oWiFiDLL111HBBpve7nnWGWPHuj7CcmmNPPsf8Sg/edit#heading=h.n01b46lm0fpk"
         },
         {
             name: "Embroidery Machines (Brother PE800)",
