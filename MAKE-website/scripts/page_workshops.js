@@ -315,7 +315,9 @@ async function rsvpToWorkshop(workshop_uuid) {
         } else if (non_passed_quizzes.length > 2) {
             error_string = non_passed_quizzes.slice(0,-1).join(", ") + ", and " + non_passed_quizzes.slice(-1)  + " safety quizzes";
         }
-        alert("You must pass the " + error_string + " before RSVPing!\nClick on the red required quiz buttons to go directly to the form.");
+        alert("You must pass the " + error_string + " before RSVPing!\n" +
+            "Click on the red required quiz buttons to go directly to the form.\n" +
+            "Note: The website may take up to 5 minutes to load updated quiz results.");
         return;
     }
 
