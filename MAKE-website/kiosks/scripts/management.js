@@ -725,12 +725,7 @@ async function downloadSchedule() {
 
     for (let shift of validShifts) {
         for (let i = 0; i < shift.stewards.length; i++) {
-            let steward_response = await fetch(`${API}/users/get_user/${shift.stewards[i]}`);
-            const response = await steward_response.json()
-
-            if (steward_response.status == 200) {
-                shift.stewards[i] = response.name
-            }
+            shift.stewards[i] = state.users.find(user => user.uuid === shift.stewards[i]).name
         }
     }
 
