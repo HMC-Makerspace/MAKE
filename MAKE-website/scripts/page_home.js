@@ -249,7 +249,6 @@ async function uploadFiles(event) {
     let formData = new FormData();
     const files = event.target.files;
     for (const file of files) {
-        console.log(file);
         if (file === undefined) {
             return;
         }
@@ -266,7 +265,6 @@ async function uploadFiles(event) {
         formData.append("name", file.name);
         formData.append("user_uuid", state.user_object.uuid);
 
-        console.log("Uploading", formData);
         await fetch(`${API}/users/upload_file`, {
             method: "POST",
             body: formData
@@ -296,7 +294,6 @@ function dropHandler(event) {
     if (noUpload) {
         return;
     }
-    console.log("Dropped");
     const files = event.dataTransfer.files;
     handleFiles(files);
     noUpload = true;
