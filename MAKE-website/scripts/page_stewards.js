@@ -764,3 +764,30 @@ async function cancelShiftChange(shift) {
         alert("Error canceling shift change: " + error.detail);
     }
 }
+
+
+function inventoryActionGetFilters() {
+    const filters = {
+        room: document.getElementById("action-inventory-room-select").value,
+        container: document.getElementById("action-inventory-container-input").value,
+        tool_material: document.getElementById("action-inventory-tool-material-select").value,
+    }
+
+    return filters;
+}
+
+
+// STEWARD ACTION POPUP
+function inventoryAction() {
+    // Populate the action body with the inventory search
+
+    // Start by removing any existing body elements
+    action_body = document.getElementById("action-body");
+    removeAllChildren(action_body);
+
+    // Append the search item header
+    
+
+
+    showPopup('steward-action');
+}

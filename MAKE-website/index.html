@@ -244,7 +244,7 @@
                 <div style="position: relative;">
                     <h1 class="title-font" id="main-title-ani">MAKE</h1>
                     <!-- Make the K clickable to access the kiosks popup -->
-                    <button id="k-button" onclick="showPopup('quick-nav')"></button>
+                    <button id="k-button" onclick="showPopup('quick-nav')" aria-label="Kiosks"></button>
                 </div>
                 <h2>
                     Website for Harvey Mudd College's Makerspace
@@ -330,6 +330,13 @@
                 <div class="content-body" id="steward-resources">
                     <h3>Quick Info</h3>
                     <div id="steward-quick-links" class="steward-resource">
+                        <button onclick="inventoryAction()"
+                            class="big-steward-quick-link">
+                            <span class="material-symbols-outlined">
+                                inventory
+                            </span>
+                            <span>Inventory Restock</span>
+                        </button>
                         <button onclick="openInNewTab('https://drive.google.com/drive/folders/0AH0hueN2V6xzUk9PVA')">
                             <span class="material-symbols-outlined">
                                 smb_share
@@ -689,7 +696,9 @@
                 <div class="content-body">
                     <iframe
                         src="https://make.hmc.edu/student-project-application/"
-                        width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+                        width="100%" height="100%"
+                        frameborder="0" marginheight="0" marginwidth="0"
+                        aria-label="Student Project Application Form">Loading…</iframe>
                 </div>
             </div>
         </section>
@@ -1053,6 +1062,22 @@
 
                 <div class="edit-buttons">
                     <button id="edit-shift-cancel" onclick="closePopup()">Close</button>
+                </div>
+            </div>
+
+
+            <!-- Popup for Steward Actions -->
+            <div id="steward-action" class="hidden">
+                <h2>Steward Action Portal</h2>
+
+                <div id="action-type-container">
+                    <span id="action-type-header">Action Type</span>
+                    <select id="action-type" name="action-type" aria-label="Action Type" disabled>
+                        <option value="Inventory Restock">Inventory Restock</option>
+                    </select>
+                </div>
+                <div id="action-body">
+
                 </div>
             </div>
 

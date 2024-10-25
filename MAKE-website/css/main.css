@@ -2446,6 +2446,31 @@ STEWARD RESOURCES
   border-radius: 0.25em;
 }
 
+button.big-steward-quick-link {
+  /* Span all 3 columns, extra wide */
+  grid-column: span 3 / span 3;
+}
+
+
+/* Styles for Steward Action popup */
+#action-type-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+#action-type-header {
+  margin-left: 10px;
+}
+
+#action-type {
+  flex-grow: 1;
+}
+
+
+
+
 #steward-shifts, #steward-available-shifts {
   font-size: 14px;
 }
