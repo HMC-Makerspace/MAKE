@@ -115,7 +115,7 @@ async function openFilesPopup() {
     for (let file of files) {
         total_size += file.size;
     }
-    usage.innerHTML = `Log into MAKE on any computer to quickly transfer files.<br>Files will be deleted after 7 days.<br><br><b>${bytesToReadable(total_size)} / ${bytesToReadable(2 * 1024 * 1024 * 1024)}</b>`;
+    usage.innerHTML = `Log into MAKE on any computer to quickly transfer files.<br>Files will be deleted after 7 days.<br>Drag and Drop!!!!<br><br><b>${bytesToReadable(total_size)} / ${bytesToReadable(2 * 1024 * 1024 * 1024)}</b>`;
 
     const files_list = document.getElementById("quick-transfer-list");
 
@@ -123,6 +123,12 @@ async function openFilesPopup() {
     let header = document.createElement("tr");
     header.innerHTML = "<th>Name</th><th>Size</th><th>Time Left</th><th></th><th></th>";
     divs.push(header);
+
+    // Event listeners to see when user is hovering over the quick transfer div
+    const quickTransferDiv = document.getElementById("quick-transfer");
+    quickTransferDiv.addEventListener("drop", dropHandler);
+    quickTransferDiv.addEventListener("dragover", dragOverHandler);
+    quickTransferDiv.addEventListener("dragleave", dragLeaveHandler);
 
     for (let file of files) {
         let div = document.createElement("tr");
@@ -238,34 +244,37 @@ function openFile() {
     document.getElementById("quick-transfer-upload").click();
 }
 
-async function uploadFile(event) {
+async function uploadFiles(event) {
     // open file dialog then upload
-    const file = event.target.files[0];
-
-    if (file === undefined) {
-        return;
-    }
-
-    // If the size of the file is larger then 500MB, return
-    if (file.size > 1024 * 1024 * 1024) {
-        alert("File size is too large. Please keep it under 1GB.");
-        return;
-    }
-
-    document.getElementById("quick-transfer-upload-button").setAttribute("disabled", "disabled");
-
     let formData = new FormData();
-    formData.append("file", file);
-    formData.append("name", file.name);
-    formData.append("user_uuid", state.user_object.uuid);
+    const files = event.target.files;
+    for (const file of files) {
+        console.log(file);
+        if (file === undefined) {
+            return;
+        }
 
-    await fetch(`${API}/users/upload_file`, {
-        method: "POST",
-        body: formData
-    });
+        // If the size of the file is larger then 1GB, don't allow the upload
+        if (file.size > 1024 * 1024 * 1024) {
+            alert("File size is too large. Please keep it under 1GB.");
+            return;
+        }
 
-    openFilesPopup();
-    document.getElementById("quick-transfer-upload-button").removeAttribute("disabled");
+        document.getElementById("quick-transfer-upload-button").setAttribute("disabled", "disabled");
+
+        formData.append("file", file);
+        formData.append("name", file.name);
+        formData.append("user_uuid", state.user_object.uuid);
+
+        console.log("Uploading", formData);
+        await fetch(`${API}/users/upload_file`, {
+            method: "POST",
+            body: formData
+        });
+
+        openFilesPopup();
+        document.getElementById("quick-transfer-upload-button").removeAttribute("disabled");
+    }
 }
 
 async function deleteFile(uuid) {
@@ -278,4 +287,37 @@ async function deleteFile(uuid) {
     });
 
     openFilesPopup();
+}
+
+let noUpload = false;
+
+function dropHandler(event) {
+    event.preventDefault();
+    if (noUpload) {
+        return;
+    }
+    console.log("Dropped");
+    const files = event.dataTransfer.files;
+    handleFiles(files);
+    noUpload = true;
+
+    setTimeout(() => {
+        noUpload = false;
+    }, 500); // Adjust the delay as needed
+}
+
+// should probably do like a hover state
+function dragOverHandler(event) {
+    event.preventDefault();
+}
+
+// should probably like do a hover state
+function dragLeaveHandler(event) {
+    event.preventDefault();
+}
+
+function handleFiles(files) {
+    if (files.length > 0) {
+        uploadFiles({ target: { files } });
+    }
 }
