@@ -8,6 +8,7 @@ async function start() {
 
     //animateChangeFonts();
 
+    
     renderQuizInfo();
     renderCheckouts();
     renderEquipment();
@@ -20,6 +21,9 @@ async function start() {
     }
 
     await fetchQuizIDs();
+    await fetchCertifications();
+
+    renderCertifications();
 
     const promises = [
         fetchInventory().then(() => {

@@ -102,7 +102,7 @@ CHECKOUT
   background-color: var(--theme-color-2);
   display: grid;
   grid-template-areas: "left inventory";
-  grid-template-columns: 500px minmax(0, 1fr);
+  grid-template-columns: 1fr 3fr;
   grid-template-rows: minmax(0, 1fr);
   position: fixed;
   top: 0;
@@ -122,6 +122,7 @@ CHECKOUT
   gap: 20px;
   padding: 20px;
   margin: 10px;
+  min-width: 425px;
 }
 
 #user-info-header {
@@ -151,7 +152,7 @@ CHECKOUT
 
 #pages-select {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   height: 60px;
 }
 
@@ -218,23 +219,30 @@ CHECKOUT
 }
 
 #user-info-content {
-  display: grid;
-  grid-template-areas:
-    "name name id"
-    "email email auth"
-    "pending-check pending-check all-check"
-    "passed-quizzes passed-quizzes passed-quizzes"
-    "passed-quizzes passed-quizzes passed-quizzes"
-    "cart cart cart"
-    "cart cart cart"
-    "cart cart cart"
-    "cart cart cart"
-    "cart cart cart"
-    "time time time"
-    "commit commit commit";
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   height: 100%;
   width: 100%;
+}
+
+#user-info-content > .two-three-split {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  background-color: inherit;
+  align-items: center;
+  justify-items: center;
+  gap: 10px;
+}
+
+#user-info-content > .two-three-split > * {
+  background-color: var(--theme-color-2);
+  border-radius: var(--roundness);
+  color: var(--text-color-main);
+  height: 40px;
+  width: 100%;
+  align-content: center;
+  text-align: center;
 }
 
 #user-info-content > * {
@@ -247,32 +255,7 @@ CHECKOUT
   justify-content: center;
 }
 
-#user-info-name {
-  grid-area: name;
-}
-
-#user-info-id {
-  grid-area: id;
-}
-
-#user-info-email {
-  grid-area: email;
-}
-
-#user-info-auth {
-  grid-area: auth;
-}
-
-#user-info-pending-checkouts {
-  grid-area: pending-check;
-}
-
-#user-info-all-checkouts {
-  grid-area: all-check;
-}
-
 #user-info-passed-quizzes {
-  grid-area: passed-quizzes;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr;
@@ -293,14 +276,78 @@ CHECKOUT
   padding: 5px;
 }
 
+#user-info-certifications {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(1fr);
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  gap: 10px;
+}
+
+#user-info-certifications > * {
+  background-color: var(--theme-color-3);
+  border-radius: var(--roundness);
+  color: var(--text-color-main);
+  padding: 10px;
+}
+
+#add-remove-cert p {
+  margin: 0 auto;
+  margin-bottom: 20px;
+  text-align: center;
+  padding: 10px;
+  background-color: var(--theme-color-2)
+}
+
+#user-certifications-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+#user-certifications-info .cert-info {
+  display: grid;
+  grid-template-areas: "name name" "desc desc" "user-info user-info" "buttons buttons";
+  grid-template-columns: 1fr 1fr;
+  background-color: var(--theme-color-3);
+  gap: 10px;
+  padding: 10px;
+}
+
+#user-certifications-info .cert-info-name {
+  grid-area: name;
+  font-weight: bold;
+}
+
+#user-certifications-info .cert-info-desc {
+  grid-area: desc;
+}
+
+#user-certifications-info .cert-info-user-info {
+  grid-area: user-info;
+}
+
+#user-certifications-info .cert-info-buttons {
+  grid-area: buttons;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
 #user-info-cart {
-  grid-area: cart;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
   font-size: 1.2em;
   justify-content: flex-start;
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-bottom: 10px;
 }
 
 #user-info-cart b {
@@ -308,10 +355,28 @@ CHECKOUT
 }
 
 #time-length-radio {
-  grid-area: time;
   gap: 10px;
   padding: 5px;
   font-weight: bold;
+}
+
+#bottom-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 50px;
+}
+
+#bottom-buttons * {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: unset;
+  width: 100%;
 }
 
 label {
@@ -336,7 +401,6 @@ label {
 }
 
 #cart-content {
-  height: 400px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -344,6 +408,11 @@ label {
   justify-content: flex-start;
   overflow-y: scroll;
   gap: 5px;
+  flex: 1 1 0;
+  width: 90%;
+  background-color: var(--theme-color-3);
+  padding: 10px;
+  border-radius: 10px;
 }
 
 .cart-item {
@@ -358,7 +427,6 @@ label {
   position: relative;
   text-overflow: ellipsis;
   padding: 5px 10px;
-  width: 92%;
 }
 
 .cart-item-name {
@@ -387,25 +455,6 @@ label {
 
 #checkouts-page {
   overflow-y: scroll;
-}
-
-#bottom-buttons {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  grid-area: commit;
-}
-
-#bottom-buttons * {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: unset;
-  width: 100%;
 }
 
 #id-error {
@@ -535,6 +584,7 @@ Management Console
   background-color: var(--theme-color-1);
   border-radius: var(--roundness);
   color: var(--text-color-main);
+  overflow-x: auto;
 }
 
 #admin-header button {
@@ -833,7 +883,7 @@ table#proficiencies-list td.proficiency-cell {
   text-align: center;
 }
 
-#create-new-workshop-button, #create-new-redirect-button, #clear-availability-button, #create-new-api-key-button {
+#create-new-workshop-button, #create-new-redirect-button, #clear-availability-button, #create-new-api-key-button, #create-new-certification-button {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1014,7 +1064,7 @@ table#api-keys-table > tbody > tr > td, table#api-keys-table > tbody > tr > th {
 }
 
 /* Make button columns small */
-td.edit-api-key-td, td.delete-api-key-td {
+td.table-btn {
   width: 50px;
   text-align: center;
 }

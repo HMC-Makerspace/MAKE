@@ -12,6 +12,7 @@ var state = {
     redirects: null,
     api_keys: null,
     all_api_key_scopes: null,
+    certifications: null,
 };
 
 var shifts_updated = false;
@@ -193,6 +194,7 @@ async function authenticate() {
         fetchRestockRequests(),
         fetchCheckoutsAdmin(),
         fetchRedirectsAdmin(),
+        fetchCertifications(),
         fetchAPIKeysAdmin(),
         fetchAllAPIKeyScopesAdmin(),
     ];
@@ -435,10 +437,177 @@ function renderAll() {
     renderRedirects();
     renderAPIKeys();
     renderApplicants();
+    renderCertificationsAdmin();
 
     // Stats take a while to load, so we'll render them last
     renderStatistics();
 }
+
+function renderCertificationsAdmin() {
+    const certifications_table = document.getElementById("certifications-table");
+    removeAllChildren(certifications_table);
+
+    const cert_header = "<tr><th>Name</th><th>Description</th><th>Valid For</th><th># Certified</th><th>Edit</th><th>Delete</th></tr>";
+    certifications_table.innerHTML = cert_header;
+
+    const certs = []
+
+    for (let cert of state.certifications) {
+        let row = document.createElement("tr");
+
+        let name = document.createElement("td");
+        name.innerText = cert.name;
+        row.appendChild(name);
+
+        let description = document.createElement("td");
+        description.innerText = cert.description;
+        row.appendChild(description);
+
+        let valid_for = document.createElement("td");
+        if (cert.seconds_valid_for >= 365 * 24 * 60 * 60) {
+            valid_for.innerText = `${cert.seconds_valid_for / (60 * 60 * 24 * 365)} years`;
+        } else {
+            valid_for.innerText = `${cert.seconds_valid_for / (60 * 60 * 24)} days`;
+        }
+        row.appendChild(valid_for);
+
+
+        let count = document.createElement("td");
+        let count_num = 0;
+        for (let user of state.users) {
+            if (user.certifications) {
+                if (Object.keys(user.certifications).includes(cert.uuid)) {
+                    count_num++;
+                }
+            }
+        }
+
+        count.innerText = count_num;
+        row.appendChild(count);
+
+        let edit_button = document.createElement("td");
+        edit_button.classList.add("table-btn");
+        let edit_button_button = document.createElement("button");
+        edit_button_button.innerHTML = "<span class='material-symbols-outlined'>tune</span>";
+        edit_button_button.onclick = () => {
+            showCreateEditCertification(cert.uuid);
+        };
+        edit_button.appendChild(edit_button_button);
+
+        row.appendChild(edit_button);
+
+        let delete_button = document.createElement("td");
+        delete_button.classList.add("table-btn");
+        delete_button.classList.add("delete");
+        let delete_button_button = document.createElement("button");
+        delete_button_button.innerHTML = "<span class='material-symbols-outlined'>delete</span>";
+
+        delete_button_button.onclick = () => {
+            deleteCertification(cert.uuid);
+        };
+        delete_button.appendChild(delete_button_button);
+
+        row.appendChild(delete_button);
+
+        certs.push(row);
+    }
+
+    appendChildren(certifications_table, certs);
+}
+
+function showCreateEditCertification(uuid = null) {
+    let cert = null;
+
+    if (uuid !== null) {
+        cert = state.certifications.find(cert => cert.uuid === uuid);
+    } else {
+        cert = {
+            uuid: self.crypto.randomUUID(),
+            name: "",
+            description: "",
+            seconds_valid_for: 60 * 60 * 24 * 365,
+        };
+    }
+
+    document.getElementById("create-edit-certification-name").value = cert.name;
+    document.getElementById("create-edit-certification-description").value = cert.description;
+    const valid_for_selection = document.getElementById('create-edit-certification-valid-for');
+
+    for (let i = 0; i < valid_for_selection.options.length; i++) {
+        if (Number(valid_for_selection.options[i].value) == cert.seconds_valid_for / (60 * 60 * 24)) {
+            valid_for_selection.selectedIndex = i;
+            break;
+        }
+    }
+
+    document.getElementById("create-edit-certification-save").onclick = () => {
+        saveCertification(cert.uuid);
+    };
+
+    showPopup("create-edit-certification");
+}
+
+async function saveCertification(uuid) {
+    let name = document.getElementById("create-edit-certification-name").value;
+
+    let description = document.getElementById("create-edit-certification-description").value;
+
+    let seconds_valid_for = Number(document.getElementById("create-edit-certification-valid-for").value) * 60 * 60 * 24;
+
+    let request = {
+        uuid: uuid,
+        name: name,
+        description: description,
+        seconds_valid_for: seconds_valid_for,
+    };
+
+    let response = await fetch(`${API}/certifications/certification`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+            body: JSON.stringify(request),
+        }
+    );
+
+    if (response.status == 201) {
+        await fetchCertifications();
+        renderCertificationsAdmin();
+    } else {
+        const body = await response.json();
+        alert("Error saving certification: " + response.status + "\n" + body.detail);
+    }
+
+    closePopup();
+}
+
+async function deleteCertification(uuid) {
+    let result = prompt("Are you sure you want to delete this certification? Type 'delete' to confirm.");
+
+    if (result === "delete") {
+        const response = await fetch(`${API}/certifications/certification`,
+            {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "api-key": api_key,
+                },
+                body: JSON.stringify({ uuid: uuid }),
+            }
+        );
+
+        if (response.status == 204) {
+            await fetchCertifications();
+            renderCertificationsAdmin();
+        } else {
+            const body = await response.json();
+            alert("Error deleting certification: " + response.status + "\n" + body.detail);
+        }
+    }
+}
+
 
 function renderApplicants() {
     // Load the applicants state from localstorage
@@ -555,13 +724,8 @@ async function downloadSchedule() {
     const validShifts = state.shifts.filter(shift => shift.stewards && shift.stewards.length > 0)
 
     for (let shift of validShifts) {
-        for (let i = 0; i < shift.stewards.length; i++){
-            let steward_response = await fetch(`${API}/users/get_user/${shift.stewards[i]}`);
-            const response = await steward_response.json()
-
-            if (steward_response.status == 200) {
-                shift.stewards[i] = response.name
-            }
+        for (let i = 0; i < shift.stewards.length; i++) {
+            shift.stewards[i] = state.users.find(user => user.uuid === shift.stewards[i]).name
         }
     }
 
@@ -572,15 +736,15 @@ async function downloadSchedule() {
     let hoursToIndex = {};
     uniqueHours.forEach((hour, index) => {
         hoursToIndex[hour] = index + 1;
-      })
-    
+    })
+
     let csvArray = [[" "].concat(DAYS)];
 
     for (let i = 1; i < uniqueHours.length + 1; i++) {
         csvArray[i] = [];
         for (let j = 0; j < 8; j++) {
             if (j == 0) {
-                csvArray[i][j] = TWENTY_FOUR_HOURS_TO_STRING[uniqueHours[i-1]]
+                csvArray[i][j] = TWENTY_FOUR_HOURS_TO_STRING[uniqueHours[i - 1]]
             } else {
                 csvArray[i][j] = "";
             }
@@ -590,9 +754,9 @@ async function downloadSchedule() {
         csvArray[hoursToIndex[moment(shift.timestamp_start.split("-")[0], 'h:mm A').hour()]][DAYS_TO_INDEX[shift.day]] = shift.stewards.join(" | ")
     }
 
-    const csv = csvArray.map(row => 
+    const csv = csvArray.map(row =>
         row.map(item => `${item}`).join(',')
-      ).join('\n');
+    ).join('\n');
 
     // Create a blob and download it
     const blob = new Blob([csv], { type: "text/csv" });
@@ -1005,7 +1169,7 @@ function renderAPIKeys() {
 
 
         let edit_button = document.createElement("td");
-        edit_button.classList.add("edit-api-key-td");
+        edit_button.classList.add("table-btn");
         let edit_button_button = document.createElement("button");
         edit_button_button.innerHTML = "<span class='material-symbols-outlined'>tune</span>";
         edit_button_button.classList.add("edit-api-key");
@@ -1021,7 +1185,7 @@ function renderAPIKeys() {
         row.appendChild(edit_button);
 
         let delete_button = document.createElement("td");
-        delete_button.classList.add("delete-api-key-td");
+        delete_button.classList.add("table-btn");
         let delete_button_button = document.createElement("button");
         delete_button_button.innerHTML = "<span class='material-symbols-outlined'>delete</span>";
         delete_button_button.classList.add("delete", "delete-api-key");
@@ -2698,6 +2862,26 @@ function showEditUser(uuid) {
 
     document.getElementById("edit-user-proficiencies").innerHTML = "";
     document.getElementById("edit-user-new-steward").innerHTML = "";
+    document.getElementById("edit-user-certifications").innerHTML = "";
+
+    // Create certification checkboxes
+    for (let cert of state.certifications) {
+        const cert_div = document.createElement("div");
+        cert_div.classList.add("edit-proficiency-container");
+
+        const label = document.createElement("label");
+        label.innerText = cert.name;
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `edit-cert-${cert.uuid}`;
+        checkbox.checked = user.certifications?.hasOwnProperty(cert.uuid) ?? false;
+
+        cert_div.appendChild(checkbox);
+        cert_div.appendChild(label);
+
+        document.getElementById("edit-user-certifications").appendChild(cert_div);
+    }
 
     if (user.role == "steward" || user.role == "head_steward") {
         for (let prof of PROFICIENCIES) {
@@ -2777,6 +2961,25 @@ async function saveUser(uuid) {
         console.log(user);
     }
 
+    let timestamp_now = new Date().getTime() / 1000;
+
+    if (!user.certifications) {
+        user.certifications = {};
+    }
+
+    for (let cert of state.certifications) {
+        if (document.getElementById(`edit-cert-${cert.uuid}`).checked) {
+            // Only update timestamp if it doesn't exist
+            // We don't want to constantly refresh a user's cert
+            if (!user.certifications[cert.uuid]) {
+                user.certifications[cert.uuid] = timestamp_now;
+            }
+        } else {
+            if (user.certifications[cert.uuid]) {
+                delete user.certifications[cert.uuid];
+            }
+        }
+    }
 
     let request = await fetch(`${API}/users/update_user`,
         {
@@ -3044,7 +3247,7 @@ function checkForTrainingShifts(steward, shifts) {
 
     for (let training of TRAINING_TIMES) {
         let during_training = false;
-        
+
         for (let time = 0; time < training.end - training.start; time++) {
             let found_shift = shifts.find(shift => shift.day == training.day && shift.timestamp_start == formatHour(time + training.start));
 
@@ -3133,7 +3336,7 @@ function generateStewardShiftList(all_stewards) {
         // two weeks of hours
         for (let steward of all_stewards) {
             pay_period_hours[steward.uuid] = 2 * (stewards_hours[steward.uuid] ?? 0);
-        }f
+        } f
 
         let end_date = new Date(end_of_pay_period);
         let two_weeks_before_end = new Date(end_date - 14 * 24 * 60 * 60 * 1000);
@@ -3322,7 +3525,7 @@ function generateScheduleDivsAdmin() {
                 inner_div.classList.add(`stewards-${shift.stewards.length}`);
                 for (let uuid of shift.stewards) {
                     const user = state.users.find(user => user.uuid === uuid);
-                    
+
                     if (!user) {
                         console.log(`Scheduled steward with uuid ${uuid} not found`);
                         continue;

@@ -21,7 +21,7 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0" />
 
     <link rel="stylesheet" href="/css/main.css?v=2.14">
-    <link rel="stylesheet" href="/kiosks/kiosks.css?v=2.2">
+    <link rel="stylesheet" href="/kiosks/kiosks.css?v=2.3">
 </head>
 
 <body>
@@ -85,18 +85,23 @@
                 </span>
                 API Keys
             </button>
-            <button id="statistics-button" class="set-page" onclick="setPage('statistics')">
+            <button id="certifications-button" class="set-page" onclick="setPage('certifications')">
                 <span class="material-symbols-outlined">
-                    query_stats
+                    verified
                 </span>
-                Statistics
-            </button>
-            <button id="applicants-button" class="set-page" onclick="setPage('applicants')">
-                <span class="material-symbols-outlined">
-                    how_to_reg
-                </span>
-                Applicants
-            </button>
+                Certifications
+                <button id="statistics-button" class="set-page" onclick="setPage('statistics')">
+                    <span class="material-symbols-outlined">
+                        query_stats
+                    </span>
+                    Statistics
+                </button>
+                <button id="applicants-button" class="set-page" onclick="setPage('applicants')">
+                    <span class="material-symbols-outlined">
+                        how_to_reg
+                    </span>
+                    Applicants
+                </button>
         </div>
 
         <div class="main-content content-container" id="page-home">
@@ -275,7 +280,7 @@
                         font-size: medium;
                         color: var(--make-color);
                     ">bold orange</span>
-                    <span style="font-size: medium;">.</span>
+                        <span style="font-size: medium;">.</span>
                     </span>
                 </p>
             </div>
@@ -397,6 +402,24 @@
                 <button id="create-new-api-key-button" onclick="showCreateEditAPIKey()">Create New API Key</button>
 
                 <table id="api-keys-table">
+
+                </table>
+            </div>
+        </div>
+
+        <div class="main-content content-container hidden" id="page-certifications">
+            <div class="content-header">
+                <p>
+                    View and edit certifications.
+                </p>
+            </div>
+
+            <div class="content-body">
+                <button id="create-new-certification-button" onclick="showCreateEditCertification()">
+                    Create New Certification
+                </button>
+
+                <table id="certifications-table">
 
                 </table>
             </div>
@@ -540,6 +563,10 @@
                     <option value="head_steward">Head Steward</option>
                     <option value="admin">Admin</option>
                 </select>
+
+                <h2>Certifications</h2>
+                <div id="edit-user-certifications">
+                </div>
 
                 <h2>Proficiencies</h2>
                 <div id="edit-user-proficiencies">
@@ -757,6 +784,30 @@
                     <button id="create-edit-api-key-cancel" onclick="closePopup()">Cancel</button>
                 </div>
             </div>
+
+            <div id="create-edit-certification" class="hidden">
+                <h1>Create/Edit Certification</h1>
+                <label for="create-edit-certification-name">Name</label>
+                <input id="create-edit-certification-name" placeholder="Welding">
+
+                <label for="create-edit-certification-description">Description</label>
+                <textarea id="create-edit-certification-description"
+                    placeholder="Certification to weld."></textarea>
+
+                <label for="create-edit-certificaiton-valid-for">Valid For</label>
+                <select id="create-edit-certification-valid-for" aria-label="Certification Valid For">
+                    <option value="7">1 Week</option>
+                    <option value="30">1 Month</option>
+                    <option selected value="365">1 Year</option>
+                    <option value="730">2 Years</option>
+                    <option value="1095">3 Years</option>
+                    <option value="1460">4 Years</option>
+                </select>
+
+                <div class="edit-buttons">
+                    <button id="create-edit-certification-save" onclick="saveCertification()">Save</button>
+                    <button id="create-edit-certification-cancel" onclick="closePopup()">Cancel</button>
+                </div>
         </div>
     </div>
 
@@ -771,9 +822,9 @@
     <script src="/scripts/page_checkouts.js?v=2.3"></script>
     <script src="/scripts/page_student_storage.js?v=2.3"></script>
     <script src="/scripts/page_schedule.js?v=2.11"></script>
-    <script src="/scripts/utils.js?v=2.15"></script>
+    <script src="/scripts/utils.js?v=2.17"></script>
 
-    <script src="/kiosks/scripts/management.js?v=2.43"></script>
+    <script src="/kiosks/scripts/management.js?v=2.46"></script>
 </body>
 
 </html>

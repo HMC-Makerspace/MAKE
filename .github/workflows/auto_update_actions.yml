@@ -1,0 +1,85 @@
+name: Auto Cache Update
+run-name: Automatically updating file caches...
+on:
+  pull_request:
+    types:
+      - closed
+jobs:
+  # -----------------------------------------------------------------
+  # Event `pull_request`: Updates version cache of all modified files
+  # -----------------------------------------------------------------
+  changed_files:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    name: Modify cached files
+    permissions:
+      pull-requests: read
+      contents: write
+    outputs:
+      # List of files modified in this PR
+      all_changed_files: ${{ steps.changed-files.outputs.all_changed_files }}
+      # True if file caches have been updated
+      updated: ${{ steps.cache.outputs.updated }}
+      token: ${{ steps.generate-token.outputs.token }}
+    steps:
+      # Clone the repo
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
+          fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
+      # Get files modified in this PR
+      - name: Get changed files
+        id: changed-files
+        # NOTE:
+        # - This is limited to pull_request* events and would raise an error for other events.
+        # - A maximum of 3000 files can be returned.
+        # - For more flexibility and no limitations see "Using local .git directory" above.
+        uses: tj-actions/changed-files@v45
+      # Update caches in files
+      - name: List all changed files
+        # Get all changed files from the previous step and use as an environment variable
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        # Search through all .html file and determine if they contain any links to the
+        # files in the ALL_CHANGED_FILES list, and increment version numbers accordingly.
+        run: |
+          python ./.github/workflows/auto_update_cache.py ${ALL_CHANGED_FILES} -f $(find . -type f | grep -E '\.html$')
+      # Commit files to
+      - name: Setup config + add files if necessary
+        # Use Github Actions bot as commit user
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+      # Push changes (if applicable)
+      - name: Check for changes
+        id: cache
+        # Output the git status (for visual reference)
+        # If the git status indicates that the there are changes to be commited,
+        # set our `updated` variable to true
+        run: |
+          git status
+          if [[ `git status` == *"Changes to be committed:"* ]]; then
+            echo "Pushing cache changes..."
+            git commit -m "Auto update caches"
+            echo "updated=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Generate a token if needed
+        # Check if the git status indicated that we need to push changes
+        if: ${{ steps.cache.outputs.updated  == 'true' }}
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          # Defined in repository variables
+          app-id: ${{ vars.CACHE_APP_ID }}
+          # Defined in repository secrets
+          private-key: ${{ secrets.CACHE_APP_PRIVATE_KEY }}
+      - name: Push changes if needed
+        # Check if the git status indicated that we need to push changes
+        if: ${{ steps.cache.outputs.updated  == 'true' }}
+        # If so, use the Github Push Action from ad-m
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ steps.generate-token.outputs.token }}
+          branch: ${{ github.ref }}
+          force: true
