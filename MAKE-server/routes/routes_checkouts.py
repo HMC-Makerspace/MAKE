@@ -94,8 +94,10 @@ async def route_get_checkout_record(request: Request, checkout_uuid: str):
 async def route_create_new_checkout(request: Request):
     # Create a checkout
     logging.getLogger().setLevel(logging.INFO)
+    blah = await request.json()
     logging.info("Creating checkout...")
-    checkout = Checkout(** await request.json())
+    logging.info("\n\n\n" + str(blah) + "\n\n\n")
+    checkout = Checkout(** blah)
 
     # Get the API key
     api_key = request.headers["api-key"]

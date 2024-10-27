@@ -1005,6 +1005,10 @@ INVENTORY
   grid-template-columns: 1fr 2fr 2fr 0.5fr 0.3fr;
 }
 
+.inventory-result.add-steward-restock-column .inventory-result-main {
+  grid-template-columns: 2fr 0.5fr 2fr 0.5fr 0.5fr 0.4fr;
+}
+
 .inventory-result-main.inventory-header {
   padding: 10px;
   padding-bottom: 8px;
@@ -1168,6 +1172,10 @@ INVENTORY
 
 .inventory-result-quantity.high {
   background-color: var(--high-color);
+}
+
+.inventory-result-restock-button {
+  height: 100%;
 }
 
 #restock-button {
@@ -2453,18 +2461,18 @@ button.big-steward-quick-link {
 
 
 /* Styles for Steward Action popup */
-#action-type-container {
+.action-container {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
-#action-type-header {
+.action-header {
   margin-left: 10px;
 }
 
-#action-type {
+.action-input {
   flex-grow: 1;
 }
 

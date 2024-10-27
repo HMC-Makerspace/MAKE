@@ -148,7 +148,7 @@
                 </span>
                 <span>Workshops</span>
             </button>
-            <button id="inventory-button" onclick="setPage('inventory')">
+            <button id="inventory-button" onclick="openInventoryPage()">
                 <span class="material-symbols-outlined">
                     inventory_2
                 </span>
@@ -330,13 +330,6 @@
                 <div class="content-body" id="steward-resources">
                     <h3>Quick Info</h3>
                     <div id="steward-quick-links" class="steward-resource">
-                        <button onclick="inventoryAction()"
-                            class="big-steward-quick-link">
-                            <span class="material-symbols-outlined">
-                                inventory
-                            </span>
-                            <span>Inventory Restock</span>
-                        </button>
                         <button onclick="openInNewTab('https://drive.google.com/drive/folders/0AH0hueN2V6xzUk9PVA')">
                             <span class="material-symbols-outlined">
                                 smb_share
@@ -1070,14 +1063,24 @@
             <div id="steward-action" class="hidden">
                 <h2>Steward Action Portal</h2>
 
-                <div id="action-type-container">
-                    <span id="action-type-header">Action Type</span>
-                    <select id="action-type" name="action-type" aria-label="Action Type" disabled>
+                <div id="action-type-container" class="action-container">
+                    <span id="action-type-header" class="action-header">Action Type</span>
+                    <select
+                        id="action-type"
+                        name="action-type"
+                        class="action-input"
+                        aria-label="Action Type"
+                        disabled
+                    >
                         <option value="Inventory Restock">Inventory Restock</option>
                     </select>
                 </div>
                 <div id="action-body">
 
+                </div>
+                <div class="edit-buttons">
+                    <button id="steward-action-submit" onclick="submitStewardRestock()">Submit</button>
+                    <button id="steward-action-cancel" onclick="closePopup()">Cancel</button>
                 </div>
             </div>
 

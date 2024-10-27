@@ -182,18 +182,26 @@ function generateInventoryHeader(kiosk_mode = false | "inventory_editor" | "chec
     const div = document.createElement("div");
     div.classList.add("inventory-result");
     div.classList.add("header");
-    // If in checkout kiosk mode, add the kiosk-mode class
+    // If in checkout kiosk mode, add the kiosk-mode class to the base to
+    // account for the add/remove item from cart buttons.
     if (kiosk_mode === "checkout") {
         div.classList.add("kiosk-mode");
+    // If viewing inventory as a steward, add the restock button column
+    } else if (kiosk_mode === "steward") {
+        div.classList.add("add-steward-restock-column")
     }
 
     const header = document.createElement("div");
     header.classList.add("inventory-result-main");
     header.classList.add("inventory-header");
 
-    // If in checkout kiosk mode, add the kiosk-mode class
-    if (kiosk_mode === "checkout") {
+    // If in checkout kiosk mode, add the kiosk-mode class to the header to
+    // account for the add/remove item from cart buttons.
+    if (kiosk_mode === "checkout" || kiosk_mode === "steward") {
         header.classList.add("kiosk-mode");
+    // If viewing inventory as a steward, add the restock button column
+    } else if (kiosk_mode === "steward") {
+        header.classList.add("add-steward-restock-column")
     }
 
     const name = document.createElement("div");
@@ -230,9 +238,13 @@ function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | 
     let div = document.createElement("div");
     div.classList.add("inventory-result");
 
-    // If in checkout kiosk mode, add the kiosk-mode class
+    // If in checkout kiosk mode, add the kiosk-mode class to include the
+    // add/remove item from cart buttons.
     if (kiosk_mode === "checkout") {
         div.classList.add("kiosk-mode");
+    // If viewing inventory as a steward, add the restock button column.
+    } else if (kiosk_mode === "steward") {
+        div.classList.add("add-steward-restock-column")
     }
 
     const item = result.obj;
@@ -420,6 +432,19 @@ function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | 
 
         main_div.appendChild(checkout_buttons);
     }
+    
+    // If in steward mode, add a button to restock the item
+    if (kiosk_mode === "steward") {
+        // Add restock button
+        const restock_button = document.createElement("button");
+        restock_button.classList.add("inventory-result-restock-button");
+        restock_button.innerText = "Restock";
+        restock_button.addEventListener("click", () => {
+            showStewardRestock(item);
+        });
+
+        main_div.appendChild(restock_button);
+    }
 
     div.appendChild(main_div);
     div.appendChild(lower_div);
@@ -478,4 +503,91 @@ async function submitRestock() {
     } else {
         alert("Error submitting restock request: " + response.status);
     }
+}
+
+async function showStewardRestock(item) {
+    console.log(item);
+    // Populate the steward action popup body with the item
+
+    // Start by removing any existing body elements
+    const action_body = document.getElementById("action-body");
+    removeAllChildren(action_body);
+
+    // TODO: MAKE BUTTON BE FOR UPDATE QUANTITY AND HAVE OPTION OF RESTOCK AS FINAL BUTTON
+
+    // Create a hidden value for the uuid
+    const item_uuid = document.createElement("div");
+    item_uuid.hidden = true;
+    item_uuid.innerText = item.uuid;
+    action_body.appendChild(item_uuid)
+
+    // Create a (currently non-editable) place to show the selected item's name
+    const item_name = document.createElement("div");
+    item_name.innerHTML = `
+    <div id="action-body-item-container" class="action-container">
+        <span id="action-body-item-header" class="action-header">Item</span>
+        <select
+            id = "action-body-item"
+            name = "action-body-item"
+            aria-label = "Inventory Item"
+            disabled
+            class = "action-input"
+        >
+            <option value="item">${item.name}</option>
+        </select>
+    </div>`
+    action_body.appendChild(item_name)
+
+    // Create an editable input to adjust the item's quantity
+    const item_quantity = document.createElement("div");
+    item_name.innerHTML = `
+    <div id="action-body-item-container" class="action-container">
+        <span id="action-body-item-header" class="action-header">Item</span>
+        <select
+            id = "action-body-item"
+            name = "action-body-item"
+            aria-label = "Inventory Item"
+            disabled
+            class = "action-input"
+        >
+            <option value="item">${item.name}</option>
+        </select>
+    </div>`
+    action_body.appendChild(item_name)
+
+    showPopup('steward-action');
+}
+
+async function submitStewardRestock() {
+    console.log("Submitted steward restock");
+    
+
+
+    const body = JSON.stringify({
+        user_uuid: state.user_object.uuid,
+        reason: reason,
+        quantity: quantity,
+        item: item,
+    });
+    
+    const response = await fetch(`${API}/inventory/add_restock_request`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: body
+    });
+
+    if (response.status == 201) {
+        alert("Restock request submitted!");
+        closePopup();
+    } else {
+        alert("Error submitting restock request: " + response.status);
+    }
+    closePopup();
+}
+
+async function openInventoryPage() {
+    submitSearch(kiosk_mode = false);
+    setPage("inventory");
 }
