@@ -59,13 +59,13 @@ async function authenticate() {
 
     console.log(`Authenticating with checkout key ${api_key}`);
 
+    await fetchCertifications();
+
     setInterval(fetchInventory, 100000, kiosk_mode = "checkout");
     setInterval(fetchCheckoutsAdmin, 100000);
     setInterval(fetchUsers, 100000);
     setInterval(fetchCertifications, 100000);
     setInterval(generateCertificationTable, 100000);
-
-    await fetchCertifications();
 
     fetchInventory(true).then(() => {
         submitSearch(kiosk_mode = "checkout");
@@ -350,13 +350,13 @@ function createUserInfo(user_info) {
                     <input id="time-close" type="radio" name="time-length" value="1" checked><label for="time-close">Until Close</label>
                 </div>
                 <div>
-                    <input id="time-24-hours" type="radio" name="time-length" value="2"><label for="time-24-hours">24 Hours</label>
+                    <input id="time-tomorrow" type="radio" name="time-length" value="2"><label for="time-tomorrow">Tomorrow</label>
                 </div>
                 <div>
                     <input id="time-3-days" type="radio" name="time-length" value="3"><label for="time-3-days">3 Days</label>
                 </div>
                 <div>
-                    <input id="time-break" type="radio" name="time-length" value="4"><label for="time-break">For Break</label>
+                    <input id="time-for-break" type="radio" name="time-length" value="4"><label for="time-for-break">For Break</label>
                 </div>
             </div>
 
@@ -591,8 +591,18 @@ function updateCartQuantity(uuid) {
     updateSelectedItems();
 }
 
-// Sun, Mon, Tue, Wed, Thu, Fri, Sat
-const close_key = [21, 22, 22, 22, 22, 19, 19];
+function getSecondsUntilClose(incrementDay=0) {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+
+    const day = (now.getDay() + incrementDay) % 7;
+    const close_hour = WORKING_HOURS[DAYS[day]].end;
+    const seconds_until_close = (close_hour - hours) * 3600 + (0 - minutes) * 60 + (0 - seconds) + (incrementDay * 24 * 3600);
+
+    return seconds_until_close;
+}
 
 function getCheckoutLength() {
     const radio = document.getElementsByName("time-length");
@@ -604,34 +614,28 @@ function getCheckoutLength() {
         }
     }
 
+    let day, close_hour, seconds_until_close;
+
     switch (selection) {
         case "1":
-            // Find number of seconds between now and 11pm
-            const day_of_week = new Date().getDay();
-            const now = new Date();
-            const hours = now.getHours();
-            const minutes = now.getMinutes();
-            const seconds = now.getSeconds();
-
-            const close_hour = close_key[day_of_week];
-
-            const seconds_until_close = (close_hour - hours) * 3600 + (0 - minutes) * 60 + (0 - seconds);
-
+            seconds_until_close = getSecondsUntilClose();
             if (seconds_until_close < 0) {
-                // If it's past the closing time, add 24 hours
-                return seconds_until_close + 3600 * 24;
+                // If it's past the closing time, then set the checkout to be until close for next day
+                return getSecondsUntilClose(1);
             } else {
                 return seconds_until_close;
             }
         case "2":
-            return 24 * 3600;
+            // 1 Day
+            return getSecondsUntilClose(1);
         case "3":
-            return 3 * 24 * 3600;
+            // 3 Days
+            return getSecondsUntilClose(3);
         case "4":
             // This is a checkout for breaks specifically, so it should 
             // check out the item until 11:59pm on the next upcoming
             // monday
-            const day = new Date().getDay();
+            day = new Date().getDay();
 
             const days_until_monday = (day === 0) ? 1 : (day === 6) ? 2 : 8 - day;
 
