@@ -95,15 +95,12 @@ async def route_create_new_checkout(request: Request):
     # Create a checkout
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Creating checkout...")
-    blah = await request.json()
     # data type of checkout 
-    logging.info("\n\n\n" + str(blah) + "\n\n\n")
-    checkout = Checkout(** blah)
+    checkout = Checkout(** await request.json())
 
     # Get the API key
     api_key = request.headers["api-key"]
     db = MongoDB()
-
     # Validate API key
     if not await validate_api_key(db, api_key, "checkouts"):
         # Invalid API key
@@ -113,12 +110,12 @@ async def route_create_new_checkout(request: Request):
     # Get the checkouts collection
     collection = await db.get_collection("checkouts")
 
-    inventory_collection = await db.get_collection("inventory")
-    inventory_data = await inventory_collection.find({
-        "uuid": {
-            "$in":checkout.items.keys()
-        }
-    }).to_list(None)
+    # inventory_collection = await db.get_collection("inventory")
+    # inventory_data = await inventory_collection.find({
+    #     "uuid": {
+    #         "$in":checkout.items.keys()
+    #     }
+    # }).to_list(None)
 
     # Ensure that there's more then 0 items
     if len(checkout.items) == 0:
@@ -126,14 +123,14 @@ async def route_create_new_checkout(request: Request):
         # Return error
         raise HTTPException(status_code=400, detail="No items")
 
-    for uuid in checkout.items.keys():
-        logging.info("\n\n\n" + inventory_data[uuid]["quantity_checked_out"], checkout.items[uuid]+ "\n\n\n")
-        new_quantity_checked_out = inventory_data[uuid]["quantity_checked_out"] + checkout.items[uuid]
-        inventory_collection.update_one(
-            {"uuid": uuid},
-            {"$set": {"quantity_checked_out": new_quantity_checked_out}},
-        )
-
+    # for uuid in checkout.items.keys():
+    #     logging.info("\n\n\n" + inventory_data[uuid]["quantity_checked_out"], checkout.items[uuid]+ "\n\n\n")
+    #     new_quantity_checked_out = inventory_data[uuid]["quantity_checked_out"] + checkout.items[uuid]
+    #     inventory_collection.update_one(
+    #         {"uuid": uuid},
+    #         {"$set": {"quantity_checked_out": new_quantity_checked_out}},
+    #     )
+    #update_inventory_from_checkouts()
     # Insert the checkout
     await collection.insert_one(checkout.dict())
 
@@ -184,21 +181,7 @@ async def route_check_in_checkout(request: Request, checkout_uuid: str):
 
     # Get the checkouts collection
     collection = await db.get_collection("checkouts")
-
-    inventory_collection = await db.get_collection("inventory")
-    inventory_data = await inventory_collection.find({
-        "uuid": {
-            "$in":checkout.items.keys()
-        }
-    }).to_list(None)
-
-    for uuid in checkout.items.keys():
-        new_quantity_checked_out = inventory_data[uuid]["quantity_checked_out"] - checkout.items[uuid]
-        inventory_collection.update_one(
-            {"uuid": uuid},
-            {"$set": {"quantity_checked_out": new_quantity_checked_out}},
-        )
-
+    
     # Check in the checkout
     await collection.update_one({"uuid": checkout_uuid}, {"$set": {"timestamp_in": datetime.now().timestamp()}})
 

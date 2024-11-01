@@ -325,14 +325,13 @@ function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | 
     const quantity = document.createElement("div");
     quantity.classList.add("inventory-result-quantity");
 
-    let quantity_available = 0
+    let quantity_total = 0
 
     item.locations.forEach(location => {
-        quantity_available += location.quantity;
+        quantity_total += location.quantity;
       })
 
-    let quantity_total = quantity_available - item.quantity_checked_out
-
+    let quantity_available = quantity_total - item.quantity_checked_out
 
     if (quantity_total >= 0) {
         quantity.classList.add("number");

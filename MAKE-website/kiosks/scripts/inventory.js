@@ -462,10 +462,6 @@ function isInventoryItemValid(item) {
     if (item.access_type === null || item.access_type === "") {
         return false;
     }
-    // Validate quantity_total
-    if (item.quantity_checked_out === null || item.quantity_checked_out === "") {
-        return false;
-    }
     // Validate that every room has a container
     for (let loc of item.locations) {
         if (loc.room === null || loc.room === "") {
@@ -485,7 +481,8 @@ async function saveInventoryItem(uuid) {
     el.innerText = "Saving...";
 
     const item = state.inventory.find((item) => item.uuid === uuid);
-    item.quantity_available = item.quantity_total;
+    
+    item.quantity_checked_out = 0;
 
     // Check if the edits to the item are valid
     if (!isInventoryItemValid(item)) {
@@ -559,7 +556,7 @@ function createLocationEditor(loc, index) {
     room.innerHTML = `Room: * <select id="edit-room-${index}" required>${ROOMS_HTML(loc.room)}</select>`;
 
     const quantity = document.createElement("label");
-    quantity.innerHTML = `Quantity: <input id="edit-quantity-${index}" type="number" value="${loc.quantity ?? ""}">`;
+    quantity.innerHTML = `Quantity: * <input id="edit-quantity-${index}" type="number" value="${loc.quantity ?? ""}">`;
 
     const delete_button = `<button onclick="deleteLocationEditor('${div.id}')"><span class="material-symbols-outlined">delete</span></button>`
 
