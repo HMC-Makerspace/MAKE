@@ -1061,25 +1061,29 @@
 
             <!-- Popup for Steward Actions -->
             <div id="steward-action" class="hidden">
-                <h2>Steward Action Portal</h2>
+                <h2 class="action-portal-header">Steward Action Portal (WIP)</h2>
 
-                <div id="action-type-container" class="action-container">
-                    <span id="action-type-header" class="action-header">Action Type</span>
-                    <select
-                        id="action-type"
-                        name="action-type"
-                        class="action-input"
-                        aria-label="Action Type"
-                        disabled
-                    >
-                        <option value="Inventory Restock">Inventory Restock</option>
-                    </select>
+                <div class="action-portal-container">
+                    <div id="action-type-container" class="action-container">
+                        <span id="action-type-header" class="action-header">Action Type</span>
+                        <select
+                            id="action-type"
+                            name="action-type"
+                            class="action-input"
+                            aria-label="Action Type"
+                            disabled
+                        >
+                            <option value="Inventory Update">Inventory Update</option>
+                        </select>
+                    </div>
+                    <div id="action-body"></div>
                 </div>
-                <div id="action-body">
 
-                </div>
                 <div class="edit-buttons">
-                    <button id="steward-action-submit" onclick="submitStewardRestock()">Submit</button>
+                    <button id="steward-action-update" onclick="updateItemStewardAction()">Update Quantity</button>
+                    <button id="steward-action-restock-needed" onclick="promptStewardRestock()">Needs Restock</button>
+
+                    <button id="steward-action-submit-restock" onclick="submitStewardRestock()" hidden>Submit Restock</button>
                     <button id="steward-action-cancel" onclick="closePopup()">Cancel</button>
                 </div>
             </div>

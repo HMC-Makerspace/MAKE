@@ -437,10 +437,10 @@ function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | 
     if (kiosk_mode === "steward") {
         // Add restock button
         const restock_button = document.createElement("button");
-        restock_button.classList.add("inventory-result-restock-button");
-        restock_button.innerText = "Restock";
+        restock_button.classList.add("inventory-steward-update-button");
+        restock_button.innerText = "Update";
         restock_button.addEventListener("click", () => {
-            showStewardRestock(item);
+            showStewardUpdateItemPopup(item);
         });
 
         main_div.appendChild(restock_button);
@@ -505,7 +505,7 @@ async function submitRestock() {
     }
 }
 
-async function showStewardRestock(item) {
+async function showStewardUpdateItemPopup(item) {
     console.log(item);
     // Populate the steward action popup body with the item
 
@@ -516,15 +516,17 @@ async function showStewardRestock(item) {
     // TODO: MAKE BUTTON BE FOR UPDATE QUANTITY AND HAVE OPTION OF RESTOCK AS FINAL BUTTON
 
     // Create a hidden value for the uuid
-    const item_uuid = document.createElement("div");
+    const item_uuid = document.createElement("input");
     item_uuid.hidden = true;
-    item_uuid.innerText = item.uuid;
-    action_body.appendChild(item_uuid)
+    item_uuid.id = "action-body-item-uuid";
+    item_uuid.value = item.uuid;
+    action_body.appendChild(item_uuid);
 
     // Create a (currently non-editable) place to show the selected item's name
-    const item_name = document.createElement("div");
-    item_name.innerHTML = `
-    <div id="action-body-item-container" class="action-container">
+    const item_name_container = document.createElement("div");
+    item_name_container.classList.add("action-container");
+    item_name_container.id = "action-body-item-container";
+    item_name_container.innerHTML = `
         <span id="action-body-item-header" class="action-header">Item</span>
         <select
             id = "action-body-item"
@@ -534,26 +536,25 @@ async function showStewardRestock(item) {
             class = "action-input"
         >
             <option value="item">${item.name}</option>
-        </select>
-    </div>`
-    action_body.appendChild(item_name)
+        </select>`
+    action_body.appendChild(item_name_container);
 
     // Create an editable input to adjust the item's quantity
-    const item_quantity = document.createElement("div");
-    item_name.innerHTML = `
-    <div id="action-body-item-container" class="action-container">
-        <span id="action-body-item-header" class="action-header">Item</span>
-        <select
-            id = "action-body-item"
-            name = "action-body-item"
-            aria-label = "Inventory Item"
-            disabled
+    const item_quantity_container = document.createElement("div");
+    item_quantity_container.classList.add("action-container");
+    item_quantity_container.id = "action-body-item-quantity-container";
+    item_quantity_container.innerHTML = `
+        <span id="action-body-item-quantity-header" class="action-header">Quantity</span>
+        <input
+            type = "number"
+            id = "action-body-item-quantity"
+            name = "action-body-item-quantity"
+            aria-label = "Item Quantity"
             class = "action-input"
-        >
-            <option value="item">${item.name}</option>
-        </select>
-    </div>`
-    action_body.appendChild(item_name)
+            value = "${item.quantity_total}"
+            placeholder = "A number, or -3 for high, -2 for medium, -1 for low."
+        >`
+    action_body.appendChild(item_quantity_container);
 
     showPopup('steward-action');
 }
@@ -587,7 +588,42 @@ async function submitStewardRestock() {
     closePopup();
 }
 
+async function updateItemStewardAction() {
+    const item_uuid = document.getElementById("action-body-item-uuid").value;
+    const item_quantity = document.getElementById("action-body-item-quantity").value;
+
+    // Get the item's information from the state
+    const item = state.inventory.find((item) => item.uuid === item_uuid);
+    // Create a deep copy of the item
+    const itemCopy = JSON.parse(JSON.stringify(item));
+    // Update the copied item's quantity to post to the DB
+    itemCopy.quantity_total = item_quantity
+
+    
+
+    const response = await fetch(`${API}/inventory/update_inventory_item`,
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": api_key,
+            },
+            body: JSON.stringify(itemCopy),
+            method: "POST",
+        }
+    );
+
+    // If the update was successful, also update the local copy of the item
+    // and refresh the search view
+    if (response.status == 200) {
+        item.quantity_total = quantity;
+        submitSearch(kiosk_mode = false);
+    } else {
+        alert("Error updating inventory item");
+    }
+}
+
 async function openInventoryPage() {
+    // Resubmit the current search to update items
     submitSearch(kiosk_mode = false);
     setPage("inventory");
 }
