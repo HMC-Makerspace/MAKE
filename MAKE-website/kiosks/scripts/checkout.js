@@ -197,8 +197,15 @@ function createAdminCheckoutTable(current = true) {
     header_row.innerHTML = header;
     table.appendChild(header_row);
 
-    // Reverse the checkouts so that the most recent checkouts are at the top
-    checkouts = checkouts.reverse();
+    // If we are creating a table for current checkouts, sort them in reverse
+    // order, which will be by timestamp out/due
+    if (current === true) {
+        checkouts = checkouts.reverse();
+    // Otherwise, sort by timestamp in
+    } else {
+        checkouts = checkouts.sort((a, b) => b.timestamp_in - a.timestamp_in);
+    }
+    
 
     for (let checkout of checkouts) {
         let row = document.createElement("tr");
