@@ -2861,6 +2861,7 @@ Mobile Styles
 
   .workshop .description {
     width: 100%;
+    overflow-y: auto;
   }
 
   #faq-content {
