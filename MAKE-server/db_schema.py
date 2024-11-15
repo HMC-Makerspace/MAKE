@@ -426,13 +426,32 @@ class Checkout(BaseModel):
             "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
             "items": [{"d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l": 1}],
             "checked_out_by": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
-            "timestamp_out": "165231121",
-            "timestamp_due": "165231121",
+            "timestamp_out": 1124780701,
+            "timestamp_due": 1124780701,
             "timestamp_in": None,
             "notifications_sent": 2,
             "renewals_left": 3,
         }
     })
+
+class Reservation(BaseModel):
+    uuid: str
+    items: Dict[str, int] #Dictionary of item's uuid and quantity
+    reserved_by: str
+    timestamp_created: float
+    timestamp_start: float
+    timestamp_end: float
+    model_config = ConfigDict(arbitrary_types_allowed=True, json_encoders={ObjectId: str}, json_schema_extra={
+        "example": {
+            "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+            "items": [{"d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l": 1}],
+            "reserved_by": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
+            "timestamp_created": 1124780701,
+            "timestamp_start": 1124780701,
+            "timestamp_end": 1124780701,
+        }
+    })
+
 
 
 """

@@ -152,7 +152,7 @@ CHECKOUT
 
 #pages-select {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   height: 60px;
 }
 
@@ -453,6 +453,49 @@ label {
   padding: 5px;
 }
 
+.input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* Space between input groups */
+  padding: 1rem;
+  background-color: #1c1c1c; /* Black background */
+  border-radius: 8px;
+  max-width: 100%; /* Ensures it fits within the popup */
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+label {
+  color: #ffffff; /* White text */
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+  width: 100%; /* Full width to align with input */
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.date-time-input {
+  width: 100%; /* Full width to align with label */
+  padding: 0.5rem;
+  font-size: 1rem;
+  color: #1c1c1c; /* Black text */
+  background-color: #f5f5f5; /* Light background */
+  border: 2px solid #ffa500; /* Orange border */
+  border-radius: 4px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.date-time-input:focus {
+  border-color: #ff8c00; /* Darker orange on focus */
+  outline: none;
+}
+
 #checkouts-page {
   overflow-y: scroll;
 }
@@ -492,7 +535,7 @@ label {
 
 .user-result {
   display: grid;
-  grid-template-columns: 2fr 1fr 3fr 1fr 5fr;
+  grid-template-columns: 2fr 1.5fr 4fr 1fr 3fr;
   background-color: var(--theme-color-3);
   border-radius: var(--roundness);
   color: var(--text-color-main);

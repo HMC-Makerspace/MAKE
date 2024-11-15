@@ -40,6 +40,7 @@ from routes.routes_student_storage import student_storage_router
 from routes.routes_machines import machines_router
 from routes.routes_workshops import workshops_router
 from routes.routes_certifications import cert_router
+from routes.routes_reservations import reservations_router
 
 # Import all other files
 from users.quizzes import scrape_quiz_results
@@ -94,6 +95,7 @@ app.include_router(machines_router)
 app.include_router(workshops_router)
 app.include_router(cert_router)
 app.include_router(misc_router)
+app.include_router(reservations_router)
 
 # Add /discord to redirect to grandfathered, permanament discord invite
 # of https://discord.gg/XMJspQp8b4

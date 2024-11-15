@@ -7,6 +7,7 @@ var state = {
     current_cx_id: 0,
     current_user_info: null,
     certifications: [],
+    reservations: [],
 }
 
 document.documentElement.setAttribute('data-theme', 'dark');
@@ -63,6 +64,7 @@ async function authenticate() {
 
     setInterval(fetchInventory, 100000, kiosk_mode = "checkout");
     setInterval(fetchCheckoutsAdmin, 100000);
+    setInterval(fetchReservationsAdmin, 100000);
     setInterval(fetchUsers, 100000);
     setInterval(fetchCertifications, 100000);
     setInterval(generateCertificationTable, 100000);
@@ -83,6 +85,7 @@ async function authenticate() {
         submitUserSearch();
         document.getElementById("users-search-input").addEventListener("keyup", () => { submitUserSearch(editable = false) });
         fetchCheckoutsAdmin();
+        fetchReservationsAdmin();
         generateCertificationTable();
     });
 
@@ -362,8 +365,7 @@ function createUserInfo(user_info) {
 
             <div id="bottom-buttons">
                 <button id="commit-checkout" onclick="commitCheckout()">Add Checkout</button>
-                <button id="commit-reserve" onclick="commitReservation()">Add Reservation</button>
-                <input id="reserve-date" type="date">
+                <button id="commit-reserve" onclick="openReservationPopup()">Add Reservation</button>
             </div>
         `;
 
@@ -448,21 +450,25 @@ function setPage(page) {
 function updatePage() {
     const i_button = document.getElementById("select-inventory-button");
     const c_button = document.getElementById("select-checkout-button");
+    const r_button = document.getElementById("select-reservation-button")
     const u_button = document.getElementById("select-users-button");
     const cert_button = document.getElementById("select-certifications-button");
 
     i_button.classList.remove("selected");
     c_button.classList.remove("selected");
+    r_button.classList.remove("selected");
     u_button.classList.remove("selected");
     cert_button.classList.remove("selected");
 
     const i_page = document.getElementById("inventory-page");
     const c_page = document.getElementById("checkouts-page");
+    const r_page = document.getElementById("reservations-page")
     const u_page = document.getElementById("users-page");
     const cert_page = document.getElementById("certifications-page");
 
     i_page.classList.add("hidden");
     c_page.classList.add("hidden");
+    r_page.classList.add("hidden");
     u_page.classList.add("hidden");
     cert_page.classList.add("hidden");
 
@@ -474,6 +480,9 @@ function updatePage() {
     } else if (state.page === "checkout") {
         c_button.classList.add("selected");
         c_page.classList.remove("hidden");
+    } else if (state.page === "reservation") {
+        r_button.classList.add("selected");
+        r_page.classList.remove("hidden");
     } else if (state.page === "users") {
         u_button.classList.add("selected");
         u_page.classList.remove("hidden");
@@ -644,12 +653,14 @@ function getCheckoutLength() {
 }
 
 async function commitCheckout() {
-    if (state.cart.length === 0) {
-        return;
-    }
-
     // Get the length
     let sec_length = getCheckoutLength();
+    if(!checkIfItemAvaliable(new Date().getTime() / 1000, (new Date().getTime() / 1000) + sec_length)) {
+        displayErrorInCart();
+        document.getElementById("id-error").innerHTML = `Error: Item is reserved.`;
+        document.getElementById("id-error").classList.remove("hidden");
+        return
+    }
 
     // Generate new uuid
     const uuid = self.crypto.randomUUID();
@@ -687,65 +698,6 @@ async function commitCheckout() {
     await fetchCheckoutsAdmin();
 }
 
-async function commitReservation() {
-    if (state.cart.length === 0) {
-        return;
-    }
-
-    // Get the length
-    let sec_length = getCheckoutLength();
-
-    // Get the date to start from
-    const date_el = document.getElementById("reserve-date");
-    const date = date_el.value;
-
-    if (date === "") {
-        date_el.classList.add("error");
-        return;
-    }
-
-    const date_parts = date.split("-");
-    const year = date_parts[0];
-    const month = date_parts[1];
-    const day = date_parts[2];
-    const start_date = new Date(year, month - 1, day);
-
-    const start_date_unix = start_date.getTime() / 1000;
-
-    const uuid = self.crypto.randomUUID();
-
-    const response = await fetch(`${API}/checkouts/create_new_checkout`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "api-key": api_key,
-        },
-        body: JSON.stringify({
-            uuid: uuid,
-            items: state.cart,
-            timestamp_out: start_date_unix,
-            timestamp_in: null,
-            timestamp_due: ((new Date().getTime())) / 1000 + sec_length,
-            checked_out_by: state.current_user_info.uuid,
-            notifications_sent: 0,
-        })
-    });
-
-    if (response.status === 201) {
-        displaySuccessInCart();
-
-        // Clear the cart
-        setTimeout(() => {
-            clearUser();
-            updateSelectedItems();
-        }, 100);
-    } else {
-        displayErrorInCart(response);
-    }
-
-    await fetchCheckoutsAdmin();
-}
-
 function displaySuccessInCart() {
     const els = document.getElementsByClassName("cart-item");
     for (let item of els) {
@@ -759,16 +711,18 @@ async function displayErrorInCart(err) {
         item.classList.add("error");
     }
 
-    // Try to get detail from body
-    let body = await err.json();
+    if (err) {
+        // Try to get detail from body
+        let body = await err.json();
 
-    if (body.detail !== undefined) {
-        document.getElementById("id-error").innerHTML = `Error: ${body.detail}`;
-    } else {
-        document.getElementById("id-error").innerHTML = `Error: ${err.status} ${err.statusText}`;
+        if (body.detail !== undefined) {
+            document.getElementById("id-error").innerHTML = `Error: ${body.detail}`;
+        } else {
+            document.getElementById("id-error").innerHTML = `Error: ${err.status} ${err.statusText}`;
+        }
+
+        document.getElementById("id-error").classList.remove("hidden");
     }
-
-    document.getElementById("id-error").classList.remove("hidden");
 
 }
 
