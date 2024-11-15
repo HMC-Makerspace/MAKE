@@ -13,7 +13,7 @@ const EMPTY_ITEM = {
     "access_type": null,
     "quantity_checked_out": null,
     "quantity_available": null,
-    "locations": [{room: "", quantity: null, container: "", specific: ""}],
+    "locations": [{room: "", quantity: 0, container: "", specific: ""}],
     "reorder_url": null,
     "serial_number": null,
     "kit_contents": null,
@@ -193,7 +193,11 @@ function generateEditableInventoryDiv(item) {
     let quantity_total = 0
 
     item.locations.forEach(location => {
-        quantity_total += location.quantity;
+        if (location.quantity < 0) {
+            if (quantity_total >= location.quantity) {
+                quantity_total = location.quantity
+            }
+        } else {quantity_total += location.quantity}
       })
 
     let quantity_available = quantity_total - item.quantity_checked_out
@@ -414,7 +418,7 @@ function changeEventListener(event, item_uuid) {
 
         if (loc_total_diff > 0) {
             for (let i = 0; i < loc_total_diff; i++) {
-                state.inventory[index].locations.push({room: "", container: "", specific: ""});
+                state.inventory[index].locations.push({room: "", container: "", specific: "", quantity: 0});
             }
         }
 
@@ -450,6 +454,7 @@ The following fields are required:
 - locations.room for each location
 */
 function isInventoryItemValid(item) {
+    console.log(item)
     // Validate name
     if (item.name === null || item.name === "") {
         return false;
@@ -462,7 +467,7 @@ function isInventoryItemValid(item) {
     if (item.access_type === null || item.access_type === "") {
         return false;
     }
-    // Validate that every room has a container
+    // Validate that every room has a container and quantity 
     for (let loc of item.locations) {
         if (loc.room === null || loc.room === "") {
             return false;
@@ -492,7 +497,7 @@ async function saveInventoryItem(uuid) {
         return;
     }
 
-
+    console.log("saveInventoryItem",  JSON.stringify(item))
     const response = await fetch(`${API}/inventory/update_inventory_item`,
         {
             headers: {
@@ -525,7 +530,7 @@ async function saveInventoryItem(uuid) {
 function addLocationEditor() {
     const container = document.querySelector(".locations");
     const new_index = container.childElementCount - 1;
-    const new_loc_editor = createLocationEditor({room: "", container: "", specific: ""}, new_index);
+    const new_loc_editor = createLocationEditor({room: "", quantity: 0, container: "", specific: ""}, new_index);
     
     new_loc_editor.addEventListener("change", (e) => {
         changeEventListener(e, document.getElementById("edit-uuid").value);
@@ -556,7 +561,7 @@ function createLocationEditor(loc, index) {
     room.innerHTML = `Room: * <select id="edit-room-${index}" required>${ROOMS_HTML(loc.room)}</select>`;
 
     const quantity = document.createElement("label");
-    quantity.innerHTML = `Quantity: * <input id="edit-quantity-${index}" type="number" value="${loc.quantity ?? ""}">`;
+    quantity.innerHTML = `Quantity: * <input id="edit-quantity-${index}" type="number" value="${loc.quantity ?? 0}" required>`;
 
     const delete_button = `<button onclick="deleteLocationEditor('${div.id}')"><span class="material-symbols-outlined">delete</span></button>`
 

@@ -328,7 +328,11 @@ function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | 
     let quantity_total = 0
 
     item.locations.forEach(location => {
-        quantity_total += location.quantity;
+        if (location.quantity < 0) {
+            if (quantity_total >= location.quantity) {
+                quantity_total = location.quantity
+            }
+        } else {quantity_total += location.quantity}
       })
 
     let quantity_available = quantity_total - item.quantity_checked_out
