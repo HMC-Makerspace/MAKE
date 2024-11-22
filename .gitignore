@@ -3,3 +3,4 @@
 .eslintignore
 website/build
 node_modules
+.vscode/
