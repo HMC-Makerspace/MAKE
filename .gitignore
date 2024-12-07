@@ -1,6 +1,9 @@
 .DS_Store
 .prettierignore
+.prettierrc
 .eslintignore
+.env
 website/build
 node_modules
 .vscode/
+bun.lockb
