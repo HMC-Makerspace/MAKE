@@ -317,6 +317,13 @@ function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | 
         if (loc.specific !== null && loc.specific !== "") {
             location.innerHTML += `<span class="specific">${loc.specific}</span>`;
         }
+
+        if (item.locations.filter((loc) =>( !(loc.room == "Backstock"
+        || (loc.room === "Cage"
+            && loc.container
+            && loc.container.includes("5")
+        )))).length > 1 && loc.quantity >= 0){
+            location.innerHTML += `<span class="quantity">${loc.quantity}</span>`;}
     }
 
     main_div.appendChild(location);
