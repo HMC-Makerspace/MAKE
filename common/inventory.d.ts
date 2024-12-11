@@ -1,21 +1,29 @@
-import { UUID } from "./global"
+import { UUID } from "./global";
 
-/** 
- * Location - Location of an inventory item
+/**
+ * ITEM_RELATIVE_QUANTITY - The relative (high/low) of an item
+ */
+enum ITEM_RELATIVE_QUANTITY {
+    LOW = -1,
+    HIGH = -2,
+}
+
+/**
+ * TLocation - Location of an inventory item
  * @property room - in which item is stored
  * @property quantity - of item stored in this location
  * @property container - (optional) subsection of room
  * @property specific - specific section of container
-*/
-export type Location = {
-    room: string,
-    quantity: number,
-    container?: string,
-    specific?:string,
-}
+ */
+export type TLocation = {
+    room: string;
+    quantity: ITEM_RELATIVE_QUANTITY | number;
+    container?: string;
+    specific?: string;
+};
 
 /**
- * Item Role - describes if item is tool, material, or kit
+ * ITEM_ROLE - describes if item is tool, material, or kit
  * @member Tool - scissors, pens, etc.
  * @member Material - paper, cloth, etc.
  * @member Kit - a collection of multiple items
@@ -23,11 +31,12 @@ export type Location = {
 export enum ITEM_ROLE {
     TOOL = "T",
     MATERIAL = "M",
-    KIT = "K"
+    KIT = "K",
 }
 
 /**
- * Item Access Type - describes use capability (inside or outside of the makerspace, checkout needed or no checkout needed)
+ * ITEM_ACCESS_TYPE - describes use capability (inside or outside of the makerspace,
+ *                    checkout needed or no checkout needed)
  * @member USE_IN_SPACE - cannot check out, use in the makerspace
  * @member CHECKOUT_IN_SPACE - can check out, use in the makerspace
  * @member CHECKOUT_TAKE_HOME - can check out and take home
@@ -41,64 +50,60 @@ export enum ITEM_ACCESS_TYPE {
     CHECKOUT_TAKE_HOME,
     TAKE_HOME,
     CERT_REQUIRED,
-    STAFF_ONLY
+    STAFF_ONLY,
 }
 
-/** 
- * InventoryItem - Unique object for item
+/**
+ * TInventoryItem - Unique object for item
  * @property uuid - unique id
- * @property name - short name
- * @property long_name - (optional) contains brand, exact type, etc. 
- * @property role - tool, material, or kit
- * @property access_type - see access type documentation
- * @property locations - see location documentation
+ * @property name - short name of the item
+ * @property long_name - (optional) contains brand, exact type, etc.
+ * @property role - One of T (for Tool), M (for Material), or K (for Kit)
+ * @property access_type - See {@link ITEM_ACCESS_TYPE} documentation
+ * @property locations - See {@link TLocation} documentation
  * @property reorder_url - (optional) url for reordering item
  * @property serial_number - (optional) serial number of item
- * @property kit_contents - (optional) if kit, lists all components of kit
+ * @property kit_contents - (optional) if kit, lists all item UUIDs in this kit
  * @property keywords - (optional) keywords associated with item
- * @property certifications - (optional) certifications required to use item
-*/
-export type InventoryItem = {
-    uuid: UUID,
-    name: string,
-    long_name?: string,
-    role: ITEM_ROLE, 
-    access_type: ITEM_ACCESS_TYPE,
-    locations: Location[],
-    reorder_url?: string,
-    serial_number?: string,
-    kit_contents?: string[]
-    keywords?: string,
-    certifications?: string[]
-}
+ * @property certifications - (optional) UUIDs of certs required to use item
+ */
+export type TInventoryItem = {
+    uuid: UUID;
+    name: string;
+    long_name?: string;
+    role: ITEM_ROLE;
+    access_type: ITEM_ACCESS_TYPE;
+    locations: TLocation[];
+    reorder_url?: string;
+    serial_number?: string;
+    kit_contents?: UUID[];
+    keywords?: string;
+    certifications?: string[];
+};
 
-    
-/** 
- * RestockRequest - object with details of restock request
+/**
+ * TRestockRequest - object with details of restock request
  * @property uuid - unique id of item requested for restock
  * @property item - item's short name
- * @property quantity - quantity requested to order 
+ * @property quantity - quantity requested to order
  * @property reason - person's reason for reorder request
  * @property user_uuid - (optional) the uuid of user requesting restock
- * @property authorized_request - if request is authorized -----> not sure about this one
- * @property timestamp_sent - timestamp at time of restock request submission
- * @property timestamp_completed - (optional) timestamp at time of restock request completion
+ * @property authorized_request - if request is from an authorized source
+ *                                (e.g. checkout computer)
+ * @property timestamp_sent - UNIX timestamp of when request was submitted
+ * @property timestamp_completed - (optional) UNIX timestamp of completion
  * @property is_approved - (optional) if restock request is approved
- * @property completion_note - (optional) note regarding the completion of the restock
-*/
-export type RestockRequest = {
-    uuid: UUID,
-    item: InventoryItem["name"], //-----> not sure about this, maybe should just be string
-    quantity: string,
-    reason: string,
-    user_uuid?: UUID,
-    authorized_request: Boolean,
-    timestamp_sent: number,
-    timestamp_completed?: number,
-    is_approved?: Boolean,
-    completion_note?: string,
-}
-
-
-
-    
+ * @property completion_note - (optional) Note about completion of the restock
+ */
+export type TRestockRequestOLD = {
+    uuid: UUID;
+    item: string;
+    quantity: string;
+    reason: string;
+    user_uuid?: UUID;
+    authorized_request: boolean;
+    timestamp_sent: number;
+    timestamp_completed?: number;
+    is_approved?: boolean;
+    completion_note?: string;
+};

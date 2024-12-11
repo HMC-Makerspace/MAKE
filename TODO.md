@@ -11,6 +11,14 @@
 		- [ ] https://medium.com/@it.ermias.asmare/part-one-setting-up-express-typescript-mongodb-b77ed847b094
 		- [ ] https://www.mongodb.com/resources/languages/mongodb-with-nodejs
 	- [ ] Redux is setup using https://redux.js.org/usage/configuring-your-store, which is based off of this introduction https://redux.js.org/tutorials/fundamentals/part-5-ui-react
-	- [ ] Tailwind has a lot of config options that can be setup to define theme colors, which is something we care about being modifiable for this project
+- [ ] Tailwind has a lot of config options that can be setup to define theme colors, which is something we care about being modifiable for this project
 		- [ ] https://tailwindcss.com/docs/configuration
 	- [ ] NextUI is a configurable library based on Framer Motion and Tailwind, installation found here: https://nextui.org/docs/guide/installation
+
+
+### DB Schema DIFF:
+- Items:
+  - Store quantity as number >=0 or LOW (-1) or HIGH (-2), **no medium**
+- User:
+  - rename cx_id -> college_id
+  - 

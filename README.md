@@ -1,4 +1,4 @@
-# MAKE - Unified managment application for HMC's Makerspace 
+# MAKE v3 - Unified managment application for HMC's Makerspace 
 
 **Live at [make.hmc.edu](https://make.hmc.edu)**
 
