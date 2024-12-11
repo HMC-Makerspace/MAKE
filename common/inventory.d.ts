@@ -98,7 +98,3 @@ export type RestockRequest = {
     is_approved?: Boolean,
     completion_note?: string,
 }
-
-
-
-    

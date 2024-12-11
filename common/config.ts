@@ -1,3 +1,6 @@
+/**
+ * Dictionary of all Google Form IDs
+*/
 export const QUIZ_IDS = [
     66546920, // General
     577888883, // 3D
