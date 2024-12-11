@@ -25,6 +25,7 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "include": ["server/**/*"],
+  // Include server files and common types
+  "include": ["server/**/*", "common/**/*"],
   "exclude": ["dist", "node_modules"]
 }
