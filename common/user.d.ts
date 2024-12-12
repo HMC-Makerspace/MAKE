@@ -1,4 +1,6 @@
 import { QUIZ_IDS, PROFICIENCIES } from "./config";
+import { UnixTimestamp } from "./global";
+import { PROFICIENCY_LEVEL } from "./proficiency";
 
 /**
  * USER_ROLE - A given Makerspace user's role
@@ -44,7 +46,7 @@ export type TUserFile = Object;
  * @prop uuid - The user's unique identifier for the database
  * @prop name - The user's preferred name
  * @prop email - The user's student email
- * @prop cx_id - The user's student ID number
+ * @prop college_id - The user's student ID number
  * @prop role - The user's role at the Makerspace
  * @prop passed_quizzes - The dictionary of passed user quizzes, which maps
  *  Google Form quiz ids to UNIX timestamps
@@ -58,15 +60,19 @@ export type TUser = {
     uuid: string;
     name: string;
     email: string;
-    cx_id: number;
+    college_id: number;
     role: USER_ROLE;
     department: USER_DEPARTMENT;
     passed_quizzes: {
-        [quiz_id in (typeof QUIZ_IDS)[number]]: number;
+        [quiz_id: UUID]: UnixTimestamp;
     };
-    proficiencies?: (typeof PROFICIENCIES)[number][];
+    proficiencies?: {
+        [prof_id: UUID]: PROFICIENCY_LEVEL;
+    };
     files?: TUserFile[];
     availability?: boolean[][];
-    certifications?: { [key: string]: number };
+    certifications?: {
+        [cert_id: UUID]: UnixTimestamp;
+    };
     new_steward?: boolean;
 };

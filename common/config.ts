@@ -1,36 +1,36 @@
 /**
- * Dictionary of all Google Form IDs
-*/
-export const QUIZ_IDS = [
-    66546920, // General
-    577888883, // 3D
-    677552423, // Laser
-    2100779718, // Waterjet
-    2079405017, // Studio
-    1841312496, // Spraypaint
-    1235553349, // Loom
-    482685426, // Welding
-    913890505, // Composite
-] as const; // as const allows the keys of this object to be used as types
+ * Enum of all Google Form Quiz IDs
+ */
+export enum QUIZ_IDS {
+    GENERAL = 66546920,
+    THREE_D = 577888883,
+    LASER_CUTTER = 677552423,
+    WATERJET = 2100779718,
+    STUDIO = 2079405017,
+    SPRAY_PAINT = 1841312496,
+    LOOM = 1235553349,
+    WELDING = 482685426,
+    COMPOSITE = 913890505,
+}
 
-export const PROFICIENCIES = [
-    "3D Printing",
-    "Advanced 3D Printing",
-    "Analog Loom",
-    "Cricut",
-    "Digital Loom",
-    "Embroidery",
-    "Large Format Printer",
-    "Laser Cutter",
-    "Leather Sewing Machine",
-    "Oscilloscopes",
-    "Printing Press",
-    "Sergers",
-    "Sewing",
-    "Soldering",
-    "Spray Paint",
-    "Studio (Audio)",
-    "Studio (Video)",
-    "Waterjet",
-    "Welding",
-] as const; // Keep this sorted
+export enum PROFICIENCIES {
+    THREE_D_PRINTING = "3D Printing",
+    ADVANCED_THREE_D = "Advanced 3D Printing",
+    ANALOG_LOOM = "Analog Loom",
+    CRICUT = "Cricut",
+    DIGITAL_LOOM = "Digital Loom",
+    EMBROIDERY = "Embroidery",
+    LFP = "Large Format Printer",
+    LASER_CUTTER = "Laser Cutter",
+    LSM = "Leather Sewing Machine",
+    OSCILLOSCOPE = "Oscilloscopes",
+    PRINTING_PRESS = "Printing Press",
+    SERGER = "Sergers",
+    SEWING = "Sewing",
+    SOLDERING = "Soldering",
+    SPRAY_PAINT = "Spray Paint",
+    AUDIO = "Studio (Audio)",
+    VIDEO = "Studio (Video)",
+    WATERJET = "Waterjet",
+    WELDING = "Welding",
+}

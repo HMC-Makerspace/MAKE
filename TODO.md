@@ -20,5 +20,12 @@
 - Items:
   - Store quantity as number >=0 or LOW (-1) or HIGH (-2), **no medium**
 - User:
-  - rename cx_id -> college_id
+  - rename `cx_id` -> `college_id`
+  - add `department` - a new optional string datapoint that states what department the user works for
+  - modify `passed_quizzes`
+    - Quizzes are now stored like certifications in the database, to be more customizable
+    - So, users now store a dictionary of quiz DB UUIDs (which will still be GIDs) to the timestamp it was completed
+  - modify `proficiencies`
+    - Proficiencies are also now stored like certifications in the DB
+    - Users store a dictionary of proficiency UUIDs to a Proficiency Level (1 - basic, or 2 - highly proficient)
   - 
