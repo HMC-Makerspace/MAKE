@@ -1,4 +1,5 @@
 import { QUIZ_IDS } from "./config"
+import { UnixTimestamp } from "./global";
 
 /** 
  * QuizResponse - Object for a user's quiz result
@@ -14,7 +15,7 @@ export type QuizResponse = {
     gid: (typeof QUIZ_IDS)[number],
     name: string;
     email: string;
-    timestamp: number;
+    timestamp: UnixTimestamp;
     cx_id: number;
     score: number;
     passed: boolean;

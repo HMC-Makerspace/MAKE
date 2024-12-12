@@ -1,3 +1,3 @@
 export type UUID = string;
 
-export type UNIX_TIMESTAMP = number;
+export type UnixTimestamp = number;

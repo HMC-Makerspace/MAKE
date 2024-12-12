@@ -1,4 +1,4 @@
-import { UUID } from "./global";
+import { UnixTimestamp, UUID } from "./global";
 
 /**
  * ITEM_RELATIVE_QUANTITY - The relative (high/low) of an item
@@ -102,8 +102,8 @@ export type TRestockRequestOLD = {
     reason: string;
     user_uuid?: UUID;
     authorized_request: boolean;
-    timestamp_sent: number;
-    timestamp_completed?: number;
+    timestamp_sent: UnixTimestamp;
+    timestamp_completed?: UnixTimestamp;
     is_approved?: boolean;
     completion_note?: string;
 };
