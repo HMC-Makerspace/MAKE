@@ -66,14 +66,14 @@
   - add `default`, an optional boolean to indicate that this is a default alert
     - If there is no active alert (no timestamps with an end time before the current time), a randomly selected alert with the `default` tag will be shown
 
-- [ ] Modify `Shift`:
+- [x] Modify `Shift`:
   - modify `timestamp_start` to be `ms_start` - the number of milliseconds after midnight that this shift starts
   - modify `timestamp_end` to be `ms_end` - the number of milliseconds after midnight that this shift ends
   - modify `day` to be `day_index` - the 0-indexed day that this shift occurs (0 = Sunday)
   - modify `stewards` to be `assignee` - the UUID of a single steward that is on this shift (there could be multiple shift objects with the same `ms_start` and `ms_end` but different assignees)
-  - add `history` - A list of `ShiftEven` objects for this shift
+  - add `history` - A list of `ShiftEvent` objects for this shift
 
-- [ ] \* Modify `ShiftChange` to be `ShiftEvent` (stored in a specific `Shift`):
+- [x] \* Modify `ShiftChange` to be `ShiftEvent` (stored in a specific `Shift`):
   - change `is_drop` and `is_pickup` to a `type` variable with enum options of `DROP`. `PICKUP`, and `CHECKIN`
 
 - [ ] Add `Machine`:
