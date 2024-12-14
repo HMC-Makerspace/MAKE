@@ -1,5 +1,5 @@
 import mongoose, { mongo, SchemaType } from "mongoose";
-import { TUser } from "../../common/user";
+import type { TUser } from "common/user";
 
 // uuid: str
 // name: str
@@ -13,21 +13,17 @@ import { TUser } from "../../common/user";
 // new_steward: Union[bool, None] = None
 // certifications: Union[Dict[str, float], None] = None
 
-const User = new mongoose.Schema<TUser>({
+/**
+ * See {@link TUser} documentation for type information.
+ */
+export const User = new mongoose.Schema<TUser>({
     name: { type: String, required: true },
     email: { type: String, required: true },
-    cx_id: { type: Number, required: true },
+    college_id: { type: Number, required: true },
     role: { type: String, required: true },
-    passed_quizzes: {
+    certifications: {
         type: Map, // Maps strings to
         of: Number,
         required: true,
     },
-    proficiencies: {
-        type: [String],
-        required: false,
-    },
-    files: {
-        type: 
-    }
 });
