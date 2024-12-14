@@ -2,14 +2,16 @@ import { UnixTimestamp } from "./global";
 
 /**
  * Shift - Object to store information about all shifts
- * @property timestamp_start - the start time of a shift
- * @property timestamp_end - the end time of the shift
- * @property email - the weekday of the shift
- * @property stewards - the stewards working that shift (contained in a list)
+ * @property ms_start - the number of milliseconds after midnight that this shift ends
+ * @property ms_end - the number of milliseconds after midnight that this shift ends
+ * @property day - the 0-indexed day that this shift occurs (0 = Sunday)
+ * @property stewards - the UUID of a single steward that is on this shift (there could be multiple shift objects with the same `ms_start` and `ms_end` but different assignees)
+ * @property history - A list of `ShiftEven` objects for this shift
  */
 export type TShift = {
-    timestamp_start: UnixTimestamp;
-    timestamo_end: UnixTimestamp;
-    email: string;
-    timestamp: number;
+    ms_start: number;
+    ms_end: number;
+    day: number;
+    stewards: number;
+    history
 };

@@ -83,7 +83,7 @@
   - image
   - count
   - online
-  - manual
+  - manualLink
 
 - Add `Area`
   - uuid
