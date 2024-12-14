@@ -45,7 +45,7 @@ export enum ITEM_ROLE {
  * @member STAFF_ONLY - only staff can use
  */
 export enum ITEM_ACCESS_TYPE {
-    USE_IN_SPACE,
+    USE_IN_SPACE = 0,
     CHECKOUT_IN_SPACE,
     CHECKOUT_TAKE_HOME,
     TAKE_HOME,
