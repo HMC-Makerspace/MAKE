@@ -78,7 +78,7 @@ export type TInventoryItem = {
     serial_number?: string;
     kit_contents?: UUID[];
     keywords?: string;
-    certifications?: string[];
+    certs_required?: UUID[];
 };
 
 /**
