@@ -1,4 +1,4 @@
-import mongoose, { mongo, SchemaType } from "mongoose";
+import mongoose from "mongoose";
 import type { TUser } from "common/user";
 
 // uuid: str

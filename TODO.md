@@ -76,21 +76,21 @@
 - [ ] \* Modify `ShiftChange` to be `ShiftEvent` (stored in a specific `Shift`):
   - change `is_drop` and `is_pickup` to a `type` variable with enum options of `DROP`. `PICKUP`, and `CHECKIN`
 
-- [ ] Add `Machine`:
+- [x] Add `Machine`:
   - uuid
   - name
   - description
   - image
   - count
   - online
-  - manual
+  - manual_link
 
-- [ ] Add `Area`
+- [x] Add `Area`
   - uuid
   - name: string
-  - description: string
-  - documents: { name: string, link: string }
-  - equipment: Machine[]
+  - description?: string
+  - documents?: { name: string, link: string }
+  - equipment?: machine uuids[]
 
 - [ ] Add `Reservation`
   - `uuid`
