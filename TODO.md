@@ -75,6 +75,10 @@
 
 - [x] \* Modify `ShiftChange` to be `ShiftEvent` (stored in a specific `Shift`):
   - change `is_drop` and `is_pickup` to a `type` variable with enum options of `DROP`. `PICKUP`, and `CHECKIN`
+  - change `date`, `timestamp_start`, and `timestamp_end` to be:
+    - `timestamp` - The timestamp this shift event was triggered
+    - `shift_date` - The date (timestamp) of the shift that this event occurred on
+  - Rename `steward` to `initiator`
 
 - [x] Add `Machine`:
   - uuid
@@ -92,7 +96,7 @@
   - documents?: { name: string, link: string }
   - equipment?: machine uuids[]
 
-- [ ] Add `Reservation`
+- [x] Add `Reservation`
   - `uuid`
   - `type` - one of `ITEM`, `MACHINE`, or `LOCATION`
   - `reserved_uuid` - UUID of the item, machine, or location being reserved
