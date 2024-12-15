@@ -13,7 +13,7 @@ export type TShift = {
     ms_end: number;
     day: number;
     stewards: UUID;
-    history: ShiftEvent;
+    history: TShiftEvent;
 };
 
 /**

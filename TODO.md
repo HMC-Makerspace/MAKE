@@ -52,13 +52,13 @@
   - add `description` - The description of how this role works
   - add `color` - A color to display for this role
 
-- [ ] Add `Schedule`: An object that stores all shifts for a certain timeframe
+- [x] Add `Schedule`: An object that stores all shifts for a certain timeframe
   - add `timestamp_start` - A unix timestamp for when this schedule becomes active
   - add `timestamp_end` - A unix timestamp for when this schedule becomes inactive
   - add `shifts` - A list of Shift objects for this schedule
   - add `alerts` - A list of Alert objects that occurred during this schedule
 
-- [ ] \* Change `Status` to `Alert` (now stored in Schedule):
+- [x] \* Change `Status` to `Alert` (now stored in Schedule):
   - add `timestamp_start`, the time to start showing this motd
   - add `timestamp_end`, the time to 
   - add `header`, a string that is a header for the alert message
