@@ -39,7 +39,13 @@ cd MAKE/MAKE-server
 Then install the requirements by running
 
 ```
-pip install -r requirements.txt` or `pip3 install -r requirements.txt
+pip install -r requirements.txt
+```
+
+or
+
+```
+pip3 install -r requirements.txt
 ```
 
 Copy over the template config file
