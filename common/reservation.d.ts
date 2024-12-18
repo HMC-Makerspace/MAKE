@@ -18,6 +18,13 @@ export enum RESERVATION_TYPE {
  * @property user_uuid - The UUID of the user who is making this reservation
  * @property timestamp_start - The UNIX timestamp that the reservation starts
  * @property timestamp_end - The UNIX timestamp that the reservation ends
+ * @property seconds_recurring - (optional) The number of seconds between
+ *      recurrences of this reservation. If not present, this reservation does
+ *      not recur.
+ * @property num_recurrences - (optional) The number of times this event
+ *      recurs. Ignored unless `seconds_recurring` is also defined. If
+ *      `seconds_recurring` is defined and `num_recurrences` is not, the
+ *      reservation recurs indefinitely.
  * @property purpose - (optional) An description of the purpose for this reservation
  */
 export type TReservation = {
@@ -27,5 +34,7 @@ export type TReservation = {
     user_uuid: UserUUID;
     timestamp_start: UnixTimestamp;
     timestamp_end: UnixTimestamp;
+    seconds_recurring?: number;
+    num_recurrences?: number;
     purpose?: string;
 };

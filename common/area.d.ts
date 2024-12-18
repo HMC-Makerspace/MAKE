@@ -1,5 +1,5 @@
 import type { FileUUID, TFile } from "./file";
-import type { UUID } from "./global";
+import type { UnixTimestamp, UUID } from "./global";
 
 export type MachineUUID = UUID;
 
@@ -16,14 +16,38 @@ export type TDocument = {
 };
 
 /**
- * TMachine - Information about a machine in the space
+ * TMachineStatus - The status of a single machine in the space
+ * @property online - Whether the machine is currently operational
+ * @property available - Whether the machine is currently available (not reserved)
+ * @property message - (optional) A message about the status of the machine
+ */
+export type TMachineStatus = {
+    online: boolean;
+    available: boolean;
+    message?: string;
+};
+
+/**
+ * TMachineStatusLog - A log about a change in status for type of machine
+ * @property timestamp - The timestamp this log occurred
+ * @property statuses - The status of each of the machines
+ */
+export type TMachineStatusLog = {
+    timestamp: UnixTimestamp;
+    statuses: TMachineStatus[];
+};
+
+/**
+ * TMachine - Information about a type of machine in the space
  * @property uuid - A unique id
  * @property name - The name of the machine
  * @property description - (optional) A longer description of the machine
  * @property images - A list of UUIDs of {@link TFile | File} objects that are
  *      images of this machine
  * @property count - The quantity of this machine available in the space
- * @property online - (optional) The total number of working machines of this type
+ * @property current_statuses - A list of status objects indicating the current
+ *      status of each of the `count` machines in the space
+ * @property status_logs - A list of changes in status logged by timestamp
  * @property documents - (optional) A list of {@link TDocument | Document} objects
  *      about this machine (manuals, data sheets, how-to videos, etc.)
  */
@@ -33,8 +57,29 @@ export type TMachine = {
     description?: string;
     images: FileUUID[];
     count: number;
-    online?: number;
+    current_statuses: TMachineStatus[];
+    status_logs: TMachineStatusLog[];
     documents?: TDocument[];
+};
+
+/**
+ * TAreaStatus - A status about an area in the space
+ * @property available - Whether the space is currently available for use
+ * @property message - (optional) A status message about the state of the area
+ */
+export type TAreaStatus = {
+    available: boolean;
+    message?: string;
+};
+
+/**
+ * TAreaStatusLog - A log about a change in status for an area in the space
+ * @property timestamp - The timestamp this log occurred
+ * @property status - The new status of the area
+ */
+export type TAreaStatusLog = {
+    timestamp: UnixTimestamp;
+    status: TAreaStatus;
 };
 
 /**
@@ -47,6 +92,9 @@ export type TMachine = {
  *      information about the area
  * @property equipment - (optional) A list of {@link TMachine | machine } UUIDs
  *      that are available in this area
+ * @property current_statuses - A list of status objects indicating the current
+ *      status of each of the `count` machines in the space
+ * @property status_logs - A list of changes in status logged by timestamp
  */
 export type TArea = {
     uuid: AreaUUID;
@@ -54,4 +102,6 @@ export type TArea = {
     description?: string;
     documents?: TDocument[];
     equipment?: MachineUUID[];
+    current_status: TAreaStatus;
+    status_logs: TAreaStatusLog[];
 };

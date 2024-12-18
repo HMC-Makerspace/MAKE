@@ -17,8 +17,8 @@ import { FileUUID } from "./file";
  *      teach. If not listed, has no max capacity
  * @property required_certs - the UUIDs of {@link TCertification | Certifications}
  *      needed to participate in the workshop
- * @property rsvp_list - a list of user's unique identifier who are RSVP'd for
- *      the workshop
+ * @property rsvp_list - a map of RSVP'd user UUIDs to the timestamp that they
+ *      signed up for the workshop
  * @property users_notified - a list of users who have been notified about the
  *      workshop
  * @property photos - (optional) a list UUIDs of {@link TFile | image Files} to
@@ -33,8 +33,11 @@ export type TWorkshop = {
     timestamp_start: UnixTimestamp;
     timestamp_end: UnixTimestamp;
     timestamp_public: UnixTimestamp;
-    required_certs?: CertificationUUID[];
-    rsvp_list: UserUUID[];
+    required_certifications?: CertificationUUID[];
+    rsvp_list: {
+        [user: UserUUID]: UnixTimestamp;
+    };
     users_notified: UserUUID[];
+    sign_in_list: UserUUID[];
     photos?: FileUUID[];
 };

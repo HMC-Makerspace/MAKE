@@ -28,21 +28,41 @@
   - name
   - link
 
-- [x] Add `Machine`:
-  - uuid
-  - name
-  - description?:
-  - images
-  - count
-  - online?:
-  - documents?:
+- [x] \* Add `MachineStatus` - The status of an individual machine of a certain type
+  - `online` - A boolean for whether the individual machine is online
+  - `available` - A boolean for whether the individual machine is available (not reserved)
+  - `message` - An optional string describing the current status
 
-- [x] Add `Area`
-  - uuid
-  - name: string
-  - description?: string
-  - documents?:  Document[]
-  - equipment?: MachineUUID[]
+- [x] \* Add `MachineStatusLog` - A log of the current statuses of all machines for a given type
+  - `timestamp` - The timestamp of the log
+  - `statuses` - A list of `MachineStatus`
+
+- [x] Add `Machine` - A type of machine in an area
+  - `uuid` - a unique identifier
+  - `name` - The name of the machine
+  - `description` - An optional string describing the machine
+  - `images` - File UUIDs of images of this machine
+  - `count` - the total number of this machine in the area
+  - `current_statuses` - a list of `MachineStatus` that is the current status of all individual machines of this type
+  - `status_logs` - a list of `MachineStatusLog` that contains the history of all status changes to the machines of this type
+  - `documents` - an optional list of `Document` for manuals/policies about the machine
+
+- [x] \* Add `AreaStatus` - The status of an area
+  - `available` - A boolean for whether the area is available (not reserved)
+  - `message` - An optional string describing the current status of the area
+
+- [x] \* Add `AreaStatusLog` - A log of the current status of the area
+  - `timestamp` - The timestamp of the log
+  - `status` - An instance of `AreaStatus`
+
+- [ ] Add `Area`
+  - `uuid` - a unique identifier
+  - `name` - the name of the area
+  - `description` - An optional string description of what the area is for or contains
+  - `documents` - an optional list of `Document` for policies/information about the area
+  - `equipment` - an optional list of `Machine` uuids that are in this area
+  - `current_status` - An `AreaStatus` indicating the current availability of the area
+  - `status_logs` - A list of `AreaStatusLog` that contains the history of availability for the given area.
 
 ### Certification
 - [x] Add `CertificationType`
@@ -109,6 +129,8 @@
   - `user_uuid` - UUID of the user reserving
   - `timestamp_start`
   - `timestamp_end`
+  - `seconds_recurring` - An optional number of seconds between recurrences of this reservation. If not present, the reservation does not recur.
+  - `num_recurrences` - An optional number of times for this reservation to recur. If `seconds_recurring` is not defined, this property is ignored. If `seconds_recurring` is defined but `num_recurrences` is not, the reservation recurs indefinitely.
   - `purpose` - optional string description of the purpose for/person reserving
 
 ### Schedule
@@ -143,7 +165,7 @@
   
 
 ### User
-- [ ] Add `UserRole`: A specific user role
+- [x] Add `UserRole`: A specific user role
   - add `uuid` - The uuid of this user role
   - add `title` - The title of this role
   - add `description` - The optional description of how this role works
@@ -160,7 +182,7 @@
   - `day` - the 0 indexed day
   - `availability` - A list of objects containing `ms_start` and a `ms_end` properties that are pairs of start and end times (in milliseconds after midnight) that this user is available on this day
 
-- [ ] Modify `User`:
+- [x] Modify `User`:
   - rename `cx_id` -> `college_id`
   - remove `role` in favor of:
     - `active_roles` - A list of `UserRoleLogs` that the user current has
@@ -169,3 +191,14 @@
     - Stored as a list of `Certificate` objects
   - modify `files` to be a list of File UUIDs
   - modify `availability` to be a list of `UserAvailability` objects.
+
+### Workshop
+- [x] Modify `Workshop`
+  - modify `instructors` to be a list of User UUIDs instead of a string name
+  - remove `is_live`
+  - rename `is_live_timestamp` to `timestamp_public`
+  - modify `required_quizzes` to be `required_certifications`, a list of Certification UUIDs that are required to attend this workshop
+  - make `capacity` optional, if not present has no capacity (like a public event)
+  - modify `rsvp_list` to be a dictionary of User UUIDs to the timestamp they RSVP'd for the workshop
+  - make `photos` a list of `File` uuids (though it might have been this already)
+  - make `description` optional
