@@ -16,13 +16,24 @@ export type TDocument = {
 };
 
 /**
+ * MACHINE_STATUS_TYPE - Possible statuses for a machine
+ */
+export enum MACHINE_STATUS_TYPE {
+    OFFLINE = 0,
+    ONLINE,
+    FLAGGED_FOR_REPAIR,
+    IN_REPAIR,
+}
+
+/**
  * TMachineStatus - The status of a single machine in the space
- * @property online - Whether the machine is currently operational
+ * @property status - The current status of the machine, as described by
+ *      {@link MACHINE_STATUS_TYPE}
  * @property available - Whether the machine is currently available (not reserved)
  * @property message - (optional) A message about the status of the machine
  */
 export type TMachineStatus = {
-    online: boolean;
+    status: MACHINE_STATUS_TYPE;
     available: boolean;
     message?: string;
 };

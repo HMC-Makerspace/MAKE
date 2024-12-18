@@ -10,6 +10,8 @@ import { FileUUID } from "./file";
  * @property description (optional) - description of the workshop's activity
  * @property instructors - the list of instructors teaching the workshop, as
  *      user UUIDs
+ * @property support_instructors - (optional) the list additional workers
+ *      facilitating this workshop, as User UUIDs
  * @property timestamp_start - the time that the workshop starts
  * @property timestamp_end - the time that the workshop ends
  * @property timestamp_public - the time this workshop becomes publicly visible
@@ -29,6 +31,7 @@ export type TWorkshop = {
     title: string;
     description?: string;
     instructors: UserUUID[];
+    support_instructors?: UserUUID[];
     capacity?: number;
     timestamp_start: UnixTimestamp;
     timestamp_end: UnixTimestamp;

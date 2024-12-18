@@ -29,7 +29,7 @@
   - link
 
 - [x] \* Add `MachineStatus` - The status of an individual machine of a certain type
-  - `online` - A boolean for whether the individual machine is online
+  - `status` - the current status of the machine, one of `OFFLINE`, `ONLINE`, `FLAGGED_FOR_REPAIR`, or `IN_REPAIR` (members of the `MACHINE_STATUS_TYPE` enum)
   - `available` - A boolean for whether the individual machine is available (not reserved)
   - `message` - An optional string describing the current status
 
@@ -114,6 +114,20 @@
   - add `required_roles` - An optional list of UserRole UUIds who are allowed to checkout this item. If not present, anyone can checkout the item
   - Remove access type levels 4 and 5 in favor of `required_certifications` and `required_roles`
 
+- [x] \* Add `RestockRequestStatusLog`
+  - `timestamp` - the timestamp of the log
+  - `status` - the new status of the request, one of `PENDING_APPROVAL`, `DENIED`, `APPROVED_WAITING`, `APPROVED_ORDERED`, or `RESTOCKED`,
+  - `message` - An optional string message describing the updated status
+
+- [x] Modify `RestockRequest`
+  - replace `item` with `item_uuid`, the uuid of the item being requested
+  - replace `quantity` with `quantity_requested`, an optional number of the item requested to purchase
+  - add `current_quantity`, an automatically assigned quantity of the item at the time the request was submitted
+  - rename `user_uuid` to `requesting_user`
+  - remove `timestamp_sent`, `timestamp_completed`, `is_approved`, and `completion_note` in favor of:
+    - `current_status`, the current status of the request, one of `PENDING_APPROVAL`, `DENIED`, `APPROVED_WAITING`, `APPROVED_ORDERED`, or `RESTOCKED`,
+    - `status_logs`, a list of `RestockRequestStatusLog` that contains the history of all status updates for this request.
+
 ### IPLog
 - [x] Modify `IPLog`
   - add `request`, the HTTP request object associated with this site call
@@ -195,6 +209,7 @@
 ### Workshop
 - [x] Modify `Workshop`
   - modify `instructors` to be a list of User UUIDs instead of a string name
+  - add `support_instructors`, an optional list of user UUIDs who are facilitating the instructors with the workshop
   - remove `is_live`
   - rename `is_live_timestamp` to `timestamp_public`
   - modify `required_quizzes` to be `required_certifications`, a list of Certification UUIDs that are required to attend this workshop

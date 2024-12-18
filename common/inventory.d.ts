@@ -86,6 +86,17 @@ export type TInventoryItem = {
     required_roles?: UserRoleUUID[];
 };
 
+/**
+ * RESTOCK_REQUEST_STATUS - The status of an individual restock request
+ * @member PENDING_APPROVAL - the request has been submitted but not yet seen
+ *      for approval
+ * @member DENIED - the request has been denied
+ * @member APPROVED_WAITING - The request has been approved but not yet
+ *      purchased (do to being out of stock, or otherwise)
+ * @member APPROVED_ORDERED - The request has been approved and the item has
+ *      been ordered but has not yet arrived
+ * @member RESTOCKED - The item has arrived and been restocked
+ */
 export enum RESTOCK_REQUEST_STATUS {
     PENDING_APPROVAL,
     DENIED,
@@ -101,8 +112,8 @@ export enum RESTOCK_REQUEST_STATUS {
  * @property message - (optional) A message to display to the requesting user
  */
 export type TRestockRequestStatusLog = {
-    status: RESTOCK_REQUEST_STATUS;
     timestamp: UnixTimestamp;
+    status: RESTOCK_REQUEST_STATUS;
     message?: string;
 };
 
