@@ -46,6 +46,8 @@
   - `current_statuses` - a list of `MachineStatus` that is the current status of all individual machines of this type
   - `status_logs` - a list of `MachineStatusLog` that contains the history of all status changes to the machines of this type
   - `documents` - an optional list of `Document` for manuals/policies about the machine
+  - `required_certifications` - an optional list of certs required to reserve this machine
+  - `required_roles` - An optional list of UserRole UUIDs who are allowed to reserve this machine. If not present, anyone can reserve
 
 - [x] \* Add `AreaStatus` - The status of an area
   - `available` - A boolean for whether the area is available (not reserved)
@@ -63,6 +65,8 @@
   - `equipment` - an optional list of `Machine` uuids that are in this area
   - `current_status` - An `AreaStatus` indicating the current availability of the area
   - `status_logs` - A list of `AreaStatusLog` that contains the history of availability for the given area.
+  - `required_certifications` - an optional list of certs required to reserve this area
+  - `required_roles` - An optional list of UserRole UUIDs who are allowed to reserve this area. If not present, anyone can reserve
 
 ### Certification
 - [x] Add `CertificationType`

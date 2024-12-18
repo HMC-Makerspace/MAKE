@@ -1,7 +1,7 @@
 import type { UnixTimestamp } from "./global";
 import type { CertificationUUID, TCertification } from "./certification";
 import type { UserUUID } from "./user";
-import { FileUUID } from "./file";
+import type { FileUUID } from "./file";
 
 /**
  * Workshop - Object to store information about all workshops

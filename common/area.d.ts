@@ -1,5 +1,7 @@
+import type { CertificationUUID } from "./certification";
 import type { FileUUID, TFile } from "./file";
 import type { UnixTimestamp, UUID } from "./global";
+import type { UserRoleUUID } from "./user";
 
 export type MachineUUID = UUID;
 
@@ -61,6 +63,11 @@ export type TMachineStatusLog = {
  * @property status_logs - A list of changes in status logged by timestamp
  * @property documents - (optional) A list of {@link TDocument | Document} objects
  *      about this machine (manuals, data sheets, how-to videos, etc.)
+ * @property required_certs - UUIDs of certs required to use/reserve the machine
+ * @property required_roles - (optional) A list of UserRole UUIDs that are
+ *      allowed to use this machine. A user must have at least one of these
+ *      roles to reserve the given machine. If not present, any user may
+ *      use/reserve this machine.
  */
 export type TMachine = {
     uuid: MachineUUID;
@@ -71,6 +78,8 @@ export type TMachine = {
     current_statuses: TMachineStatus[];
     status_logs: TMachineStatusLog[];
     documents?: TDocument[];
+    required_certifications?: CertificationUUID[];
+    required_roles?: UserRoleUUID[];
 };
 
 /**
@@ -106,6 +115,11 @@ export type TAreaStatusLog = {
  * @property current_statuses - A list of status objects indicating the current
  *      status of each of the `count` machines in the space
  * @property status_logs - A list of changes in status logged by timestamp
+ * @property required_certs - UUIDs of certs required to use/reserve the area
+ * @property required_roles - (optional) A list of UserRole UUIDs that are
+ *      allowed to use this area. A user must have at least one of these
+ *      roles to reserve the given area. If not present, any user may
+ *      use/reserve this area.
  */
 export type TArea = {
     uuid: AreaUUID;
@@ -115,4 +129,6 @@ export type TArea = {
     equipment?: MachineUUID[];
     current_status: TAreaStatus;
     status_logs: TAreaStatusLog[];
+    required_certifications?: CertificationUUID[];
+    required_roles?: UserRoleUUID[];
 };

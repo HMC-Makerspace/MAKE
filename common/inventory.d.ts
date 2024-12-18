@@ -67,7 +67,7 @@ export enum ITEM_ACCESS_TYPE {
  * @property keywords - (optional) keywords associated with item
  * @property required_certs - UUIDs of certs required to use item
  * @property required_roles - (optional) A list of UserRole UUIDs that are
- *      allowed to use this item. This list is A user must have at least one of
+ *      allowed to use this item. A user must have at least one of
  *      these roles to checkout the given item. If not present, any user may
  *      checkout this item.
  */
