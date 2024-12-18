@@ -1,78 +1,87 @@
-import { QUIZ_IDS, PROFICIENCIES } from "./config";
-import { UnixTimestamp } from "./global";
-import { PROFICIENCY_LEVEL } from "./proficiency";
+import type { TCertificate } from "./certification";
+import type { FileUUID, TFile } from "./file";
+import type { API_SCOPES, UnixTimestamp, UUID } from "./global";
+import type { SHIFT_DAY } from "./shift";
+
+export type UserUUID = UUID;
+
+export type UserRoleUUID = UUID;
 
 /**
- * USER_ROLE - A given Makerspace user's role
- * @member USER - A standard user
- * @member STEWARD - A Makerspace steward
- * @member HEAD_STEWARD - A head Makerspace steward
- * @member ADMIN - A Makerspace admin (manager or director)
+ * TUserRole - A role category for users
+ * @property uuid - The unique identifier for this user role
+ * @property title - The title of this user role
+ * @property description - (optional) A description of what this role is
+ * @property color - A hex color code that can be used to display this role
+ * @property scopes - A list of {@link API_SCOPES} that users with this role
+ *      are allowed to access. Note, users can have multiple roles
+ * @property default - A flag for if this is a default role to apply to all
+ *      new users
  */
-export enum USER_ROLE {
-    USER = "user",
-    STEWARD = "steward",
-    HEAD_STEWARD = "head_steward",
-    ADMIN = "admin",
-}
+export type TUserRole = {
+    uuid: UserRoleUUID;
+    title: string;
+    description?: string;
+    color: string;
+    scopes: API_SCOPES[];
+    default: boolean;
+};
 
 /**
- * USER_DEPARTMENT - The given user's departmental association
- * @member WEBSITE - A website/IT developer
- * @member REPAIR - A repair/maintenance steward
- * @member WORKSHOPS - A workshops liaison
- * @member OUTREACH - An outreach lead
- * @member LOGISTICS - A coordination/logistics steward
- * @member INVENTORY - An inventory management steward
- * @member GRANT - A grant coordination steward
- * @member LOOM - A loom training/maintenance steward
+ * TUserRoleLog - A log of when user acquired/lost a {@link TUserRole | UserRole}
+ * @property role_uuid - The UUID of a {@link TUserRole | UserRole} that the
+ *      user received
+ * @property timestamp_gained - the timestamp of when the user gained this role
+ * @property timestamp_revoked - (optional) the timestamp of when the user lost
+ *      this role. If not present, the user actively has this role.
  */
-export enum USER_DEPARTMENT {
-    WEBSITE = "website",
-    REPAIR = "repair",
-    WORKSHOPS = "workshops",
-    OUTREACH = "outreach",
-    LOGISTICS = "logistics",
-    INVENTORY = "inventory",
-    GRANT = "grant",
-    LOOM = "loom",
-}
-
-// TODO: Setup with real user file information
-export type TUserFile = Object;
+export type TUserRoleLog = {
+    role_uuid: UserRoleUUID;
+    timestamp_gained: UnixTimestamp;
+    timestamp_revoked?: UnixTimestamp;
+};
 
 /**
- * All relevant user information
- * @prop uuid - The user's unique identifier for the database
- * @prop name - The user's preferred name
- * @prop email - The user's student email
- * @prop college_id - The user's student ID number
- * @prop role - The user's role at the Makerspace
- * @prop passed_quizzes - The dictionary of passed user quizzes, which maps
- *  Google Form quiz ids to UNIX timestamps
- * @prop proficiencies - The list of proficiencies that this user has, which is
- *                       a list of strings in the {@link PROFICIENCIES} dict.
- * @prop files - The current list of the user's uploaded {@link TUserFile}
- * @prop availability - A 2D array of this steward's availability
- * @prop
+ * TUserAvailability - The availability of a User, used for scheduling
+ * @property day - The 0-indexed day associated with this availability,
+ *      according to {@link SHIFT_DAY}
+ * @property availability - A list of pairs of start and end times (in
+ *      milliseconds after midnight) that this user is available on this day
+ */
+export type TUserAvailability = {
+    day: SHIFT_DAY;
+    availability: {
+        ms_start: number;
+        ms_end: number;
+    }[];
+};
+
+/**
+ * TUser - Information about a user of the space
+ * @property uuid - The user's unique identifier for the database
+ * @property name - The user's preferred name
+ * @property email - The user's student email
+ * @property college_id - The user's student ID number
+ * @property active_roles - A list of {@link TUserRoleLog | UserRole logs} that
+ *      indicates currently active roles for this user
+ * @property past_roles - A list of {@link TUserRoleLog | UserRole logs} that
+ *      indicates past roles that this user had
+ * @property certificates - A list of {@link TCertificate | Certificates} that
+ *      this user holds.
+ * @property files - The UUIDs of the user's currently uploaded
+ *      {@link TFile | Files}
+ * @property availability - (optional) A list of availabilities for each day
+ *      that the space is open. Only used for hiring. If the user has never
+ *      been a worker at the space, this property will not be present
  */
 export type TUser = {
-    uuid: string;
+    uuid: UserUUID;
     name: string;
     email: string;
     college_id: number;
-    role: USER_ROLE;
-    department: USER_DEPARTMENT;
-    passed_quizzes: {
-        [quiz_id: UUID]: UnixTimestamp;
-    };
-    proficiencies?: {
-        [prof_id: UUID]: PROFICIENCY_LEVEL;
-    };
-    files?: TUserFile[];
-    availability?: boolean[][];
-    certifications?: {
-        [cert_id: UUID]: UnixTimestamp;
-    };
-    new_steward?: boolean;
+    active_roles: TUserRoleLog[];
+    past_roles: TUserRoleLog[];
+    certificates?: TCertificate;
+    files?: FileUUID[];
+    availability?: TUserAvailability[];
 };

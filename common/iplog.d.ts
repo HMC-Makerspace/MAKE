@@ -1,15 +1,16 @@
-import { UnixTimestamp } from "./global";
+import type { Http2ServerRequest } from "http2";
+import type { UnixTimestamp } from "./global";
 
 /**
  * IPlog - Object to store information about the IP logs
  * @property uuid - the unique identifier for the IP log
- * @property ip - the IP address of the user
+ * @property ip - the IP address of the request origin
  * @property timestamp - when it was logged
- * @property user - the uuid of the user requested
+ * @property request - The HTTP request object for this call
  */
 export type TIPlog = {
     uuid: UUID;
     ip: string;
     timestamp: UnixTimestamp;
-    //user: UUID; // do we include this? it looks like we wanted this but it wasn't actually stored in the db
+    request: Http2ServerRequest;
 };

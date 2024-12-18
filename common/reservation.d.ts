@@ -1,4 +1,8 @@
-import { UnixTimestamp, UUID } from "./global";
+import type { AreaUUID } from "./area";
+import type { UnixTimestamp, UUID } from "./global";
+import type { InventoryItemUUID } from "./inventory";
+import type { MachineUUID } from "./machine";
+import type { UserUUID } from "./user";
 
 export enum RESERVATION_TYPE {
     ITEM = "item",
@@ -8,17 +12,19 @@ export enum RESERVATION_TYPE {
 
 /**
  * TReservation - A reservation for an item, machine, or area in the space
- * @prop uuid - A unique id
- * @prop type - The type of reservation, either item, machine, or area
- * @prop reserved_uuid - The UUID of the item/machine/area being reserved
- * @prop timestamp_start - The UNIX timestamp that the reservation starts
- * @prop timestamp_end - The UNIX timestamp that the reservation ends
- * @prop purpose - An optional description of the purpose of this reservation
+ * @property uuid - A unique id for this reservation
+ * @property type - The type of reservation, either item, machine, or area
+ * @property reserved_uuid - The UUID of the item/machine/area being reserved
+ * @property user_uuid - The UUID of the user who is making this reservation
+ * @property timestamp_start - The UNIX timestamp that the reservation starts
+ * @property timestamp_end - The UNIX timestamp that the reservation ends
+ * @property purpose - (optional) An description of the purpose for this reservation
  */
 export type TReservation = {
     uuid: UUID;
     type: RESERVATION_TYPE;
-    reserved_uuid: UUID;
+    reserved_uuid: InventoryItemUUID | MachineUUID | AreaUUID;
+    user_uuid: UserUUID;
     timestamp_start: UnixTimestamp;
     timestamp_end: UnixTimestamp;
     purpose?: string;

@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import type { TArea, TAreaDocument } from "common/area";
+import type { TArea, TDocument } from "common/area";
 
 /**
- * See {@link TAreaDocument} documentation for type information.
+ * See {@link TDocument} documentation for type information.
  */
-export const AreaDocument = new mongoose.Schema<TAreaDocument>({
+export const AreaDocument = new mongoose.Schema<TDocument>({
     name: { type: String, required: true },
     link: { type: String, required: true },
 });

@@ -1,4 +1,8 @@
-import { UnixTimestamp, UUID } from "./global";
+import type { CertificationUUID } from "./certification";
+import type { UnixTimestamp, UUID } from "./global";
+import type { UserRoleUUID, UserUUID } from "./user";
+
+export type InventoryItemUUID = UUID;
 
 /**
  * ITEM_RELATIVE_QUANTITY - The relative (high/low) of an item
@@ -15,11 +19,11 @@ enum ITEM_RELATIVE_QUANTITY {
  * @property container - (optional) subsection of room
  * @property specific - specific section of container
  */
-export type TLocation = {
+export type TInventoryItemLocation = {
     room: string;
-    quantity: ITEM_RELATIVE_QUANTITY | number;
     container?: string;
     specific?: string;
+    quantity: ITEM_RELATIVE_QUANTITY | number;
 };
 
 /**
@@ -35,22 +39,18 @@ export enum ITEM_ROLE {
 }
 
 /**
- * ITEM_ACCESS_TYPE - describes use capability (inside or outside of the makerspace,
+ * ITEM_ACCESS_TYPE - describes use capability (use inside or outside of the space,
  *                    checkout needed or no checkout needed)
- * @member USE_IN_SPACE - cannot check out, use in the makerspace
- * @member CHECKOUT_IN_SPACE - can check out, use in the makerspace
+ * @member USE_IN_SPACE - can use in the space without checkout
+ * @member CHECKOUT_IN_SPACE - can check out, use in the space
  * @member CHECKOUT_TAKE_HOME - can check out and take home
- * @member TAKE_HOME - can take home
- * @member CERT_REQUIRED - needs approval to check out (welders, loom computer, cameras, etc.)
- * @member STAFF_ONLY - only staff can use
+ * @member TAKE_HOME - can take home freely without needing to checkout
  */
 export enum ITEM_ACCESS_TYPE {
     USE_IN_SPACE = 0,
     CHECKOUT_IN_SPACE,
     CHECKOUT_TAKE_HOME,
     TAKE_HOME,
-    CERT_REQUIRED,
-    STAFF_ONLY,
 }
 
 /**
@@ -65,10 +65,14 @@ export enum ITEM_ACCESS_TYPE {
  * @property serial_number - (optional) serial number of item
  * @property kit_contents - (optional) if kit, lists all item UUIDs in this kit
  * @property keywords - (optional) keywords associated with item
- * @property certifications - (optional) UUIDs of certs required to use item
+ * @property required_certs - UUIDs of certs required to use item
+ * @property required_roles - (optional) A list of UserRole UUIDs that are
+ *      allowed to use this item. This list is A user must have at least one of
+ *      these roles to checkout the given item. If not present, any user may
+ *      checkout this item.
  */
 export type TInventoryItem = {
-    uuid: UUID;
+    uuid: InventoryItemUUID;
     name: string;
     long_name?: string;
     role: ITEM_ROLE;
@@ -76,34 +80,54 @@ export type TInventoryItem = {
     locations: TLocation[];
     reorder_url?: string;
     serial_number?: string;
-    kit_contents?: UUID[];
+    kit_contents?: InventoryItemUUID[];
     keywords?: string;
-    certs_required?: UUID[];
+    required_certifications?: CertificationUUID[];
+    required_roles?: UserRoleUUID[];
+};
+
+export enum RESTOCK_REQUEST_STATUS {
+    PENDING_APPROVAL,
+    DENIED,
+    APPROVED_WAITING,
+    APPROVED_ORDERED,
+    RESTOCKED,
+}
+
+/**
+ * TRestockRequestStatusLog - A log of info about a restock request's status
+ * @property status - The updated status of the restock request
+ * @property timestamp - The timestamp this update was logged
+ * @property message - (optional) A message to display to the requesting user
+ */
+export type TRestockRequestStatusLog = {
+    status: RESTOCK_REQUEST_STATUS;
+    timestamp: UnixTimestamp;
+    message?: string;
 };
 
 /**
- * TRestockRequest - object with details of restock request
- * @property uuid - unique id of item requested for restock
- * @property item - item's short name
- * @property quantity - quantity requested to order
- * @property reason - person's reason for reorder request
- * @property user_uuid - (optional) the uuid of user requesting restock
- * @property authorized_request - if request is from an authorized source
- *                                (e.g. checkout computer)
- * @property timestamp_sent - UNIX timestamp of when request was submitted
- * @property timestamp_completed - (optional) UNIX timestamp of completion
- * @property is_approved - (optional) if restock request is approved
- * @property completion_note - (optional) Note about completion of the restock
+ * TRestockRequest - A request to restock a given item
+ * @property uuid - a unique identifier for this request
+ * @property item - a UUID of the item to be restocked
+ * @property current_quantity - The current quantity of the item when the
+ *      request was submitted
+ * @property quantity_requested - (optional) The requested quantity to purchase
+ * @property reason - (optional) A description for why this item needs to
+ *      be restocked
+ * @property requesting_user - The UUID of the user who created this request
+ * @property current_status - The current status of this request, as described
+ *      by {@link RESTOCK_REQUEST_STATUS}
+ * @property status_logs - A list of status logs for this request, as a list
+ *      of {@link TRestockRequestStatusLog | `RestockRequestStatusLog`}
  */
-export type TRestockRequestOLD = {
+export type TRestockRequest = {
     uuid: UUID;
-    item: string;
-    quantity: string;
-    reason: string;
-    user_uuid?: UUID;
-    authorized_request: boolean;
-    timestamp_sent: UnixTimestamp;
-    timestamp_completed?: UnixTimestamp;
-    is_approved?: boolean;
-    completion_note?: string;
+    item_uuid: InventoryItemUUID;
+    current_quantity: ITEM_RELATIVE_QUANTITY | number;
+    quantity_requested?: number;
+    reason?: string;
+    requesting_user: UserUUID;
+    current_status: RESTOCK_REQUEST_STATUS;
+    status_logs: TRestockRequestStatusLog[];
 };

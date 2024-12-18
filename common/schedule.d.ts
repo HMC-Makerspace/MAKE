@@ -1,19 +1,5 @@
-import { UnixTimestamp } from "./global";
-import { TShift } from "./shift";
-
-/**
- * Schedule - Object to store information about the schedule
- * @property timestamp_start -  A unix timestamp for when this schedule becomes active
- * @property timestamp_end - A unix timestamp for when this schedule becomes inactive
- * @property shifts - A list of Shift objects (from shift.d.ts) for this schedule
- * @property alerts - A list of Alert objects that occurred during this schedule
- */
-export type TSchedule = {
-    timestamp_start: UnixTimestamp;
-    timestamp_end: UnixTimestamp;
-    shifts: TShift[];
-    alerts: TAlert[];
-};
+import type { UnixTimestamp } from "./global";
+import type { TShift } from "./shift";
 
 /**
  * Schedule - Object to store information about the schedule
@@ -21,13 +7,33 @@ export type TSchedule = {
  * @property timestamp_end - A unix timestamp for when this was alert was handled
  * @property header - The header message (subject) of the alert message
  * @property message - The actual, detailed alert message
- * @property default - Optional boolean if this is or isn't a default alert
- *                     If there is no active alert (no timestamps with an end time before the current time), a randomly selected alert with the `default` tag will be shown
+ * @property default - A flag indicating that this alert is a
+ *      default alert. If there is no active alert (no timestamps with an end
+ *      time before the current time), a randomly selected alert with the
+ *      `default` flag will be shown
  */
 export type TAlert = {
     timestamp_start: UnixTimestamp;
     timestamp_end: UnixTimestamp;
     header: string;
     message: string;
-    default?: Boolean
-}
+    default: boolean;
+};
+
+/**
+ * Schedule - Object to store information about the schedule
+ * @property timestamp_start -  A unix timestamp for when this schedule
+ *      becomes active
+ * @property timestamp_end - A unix timestamp for when this schedule
+ *      becomes inactive
+ * @property shifts - A list of {@link TShift | Shift} objects for this
+ *      schedule
+ * @property alerts - A list of {@link TAlert | Alert} objects that occurred
+ *      during this schedule
+ */
+export type TSchedule = {
+    timestamp_start: UnixTimestamp;
+    timestamp_end: UnixTimestamp;
+    shifts: TShift[];
+    alerts: TAlert[];
+};

@@ -1,5 +1,6 @@
 # v3 TODO:
-### Basic Setup
+---
+## Basic Setup
 - [ ] Install TS, React, Express, CORS, MongoDB, Pino, Jest, Redux, Tailwind, and NextUI
 	- [ ] TSconfig needs to be setup properly for compiling to function well
 		- [ ] https://www.typescriptlang.org/tsconfig/#outFile
@@ -16,42 +17,101 @@
 - [ ] NextUI is a configurable library based on Framer Motion and Tailwind, installation found here: https://nextui.org/docs/guide/installation
 
 
-### DB Schema DIFF:
+## DB Schema DIFF:
 \* = types that are not actually stored in the db as a unique collection but are subparts of other objects
-- [ ] `ApiKey`, `UserFile`, and `ServerFile` are still a WIP, and both `UserRole` and ``CertificationType` are subject to change soon
 
-- [x] Modify `InventoryItem`:
-  - Store quantity as number >=0 or LOW (-1) or HIGH (-2), **no more medium**
+### APIKeys
+- [x] Remove `APIKeys` in favor of user roles with API scopes
 
-- [ ] Modify `User`:
-  - rename `cx_id` -> `college_id`
-  - modify `role` to be an index of a specific `UserRole`
-  - modify `passed_quizzes`, `proficiencies`, and `certifications` to be just `certifications`
-    - Stored as a list of `Certificate` objects
+### Area
+- [x] \* Add `Document` - An informational document (manual, policy, etc)
+  - name
+  - link
 
-- [ ] \* Add `Certificate` (stored in each `User`)
-  - add `cert_uuid` - The uuid of a `Certification` object stored in the DB that stores info about this certificate
-  - add `level` - The level of proficiency this user has in the given certification
-  - add `timestamp_granted` - The timestamp this certificate was granted to the user
-  - add `timestamp_expires` - The timestamp this certificate expires
+- [x] Add `Machine`:
+  - uuid
+  - name
+  - description?:
+  - images
+  - count
+  - online?:
+  - documents?:
 
-- [ ] Modify `Certification` (which also now encompasses proficiencies and quizzes):
-  - add `min_level` - A number for the minimum level of this certification
+- [x] Add `Area`
+  - uuid
+  - name: string
+  - description?: string
+  - documents?:  Document[]
+  - equipment?: MachineUUID[]
+
+### Certification
+- [x] Add `CertificationType`
+  - add `uuid` - The uuid of this certification type
+  - add `name` - The name of this given certification type (quiz, proficiency, etc.)
+  - add `description` - The optional description of what this certification type is
+
+- [x] Modify `Certification` (which also now encompasses proficiencies and quizzes):
   - add `max_level` - A number for the maximum level of this certification
   - add `color` - A color that this certification can be displayed as
-  - add `type` - An index of a certification type stored in the DB
+  - add `type` - A uuid of a certification type stored in the DB
+  - modify `description` to be an optional string
+  - keep `uuid`, `name`, and `seconds_valid_for`
 
-- [ ] Add `CertificationType`
-  - add `index` - The index of this certification type (auto incremented)
-  - add `name` - The name of this given certification type (quiz, proficiency, etc.)
-  - add `description` - The description of what this certification type describes
 
-- [ ] Add `UserRole`: A specific user role
-  - add `index` - The index of this user role (automatically generated in order)
-  - add `title` - The title of this role
-  - add `description` - The description of how this role works
-  - add `color` - A color to display for this role
+- [x] \* Add `Certificate` (stored in each `User`)
+  - add `certification_uuid` - The uuid of a `Certification` object in the DB that stores info about this certificate
+  - add `level` - The level of proficiency this user has in the given certification
+  - add `timestamp_granted` - The timestamp this certificate was granted to the user
+  - add `timestamp_expires` - The timestamp this certificate expires, calculated as `timestamp_granted + (parent certification).seconds_valid_for`
 
+### Checkout
+- [x] \* Add `CheckoutItem` - A single item in a checkout
+  - `item_uuid`
+  - `quantity`
+  - `location_index` - An index of which location of the InventoryItem this checkout was taken from.
+
+- [x] Modify `Checkout`
+  - [ ] Change `items` to instead be a list of `CheckoutItem`
+  - [ ] remove `renewals_left`
+
+### Config
+- [x] Add `Config`, a configuration object for generally modifiable states for the entire site
+
+### File
+- [x] Combine `UserFile` and `ServerFile` into a unified `File`
+  - `uuid`
+  - `name`
+  - `path`
+  - `timestamp_upload`
+  - `timestamp_expires`?
+  - `size`
+  - `user_uuid`?
+
+### Inventory
+- [x] Modify `InventoryItem`:
+  - Store quantity as number >=0 or LOW (-1) or HIGH (-2), **no more medium**
+  - rename `certifications` to `required_certifications`
+  - add `required_roles` - An optional list of UserRole UUIds who are allowed to checkout this item. If not present, anyone can checkout the item
+  - Remove access type levels 4 and 5 in favor of `required_certifications` and `required_roles`
+
+### IPLog
+- [x] Modify `IPLog`
+  - add `request`, the HTTP request object associated with this site call
+
+### Redirect
+- [x] Since `IPLog` got modified, redirect did too, since it contains a list of `IPLog` objects
+
+### Reservation
+- [x] Add `Reservation`
+  - `uuid`
+  - `type` - one of `ITEM`, `MACHINE`, or `LOCATION`
+  - `reserved_uuid` - UUID of the item, machine, or location being reserved
+  - `user_uuid` - UUID of the user reserving
+  - `timestamp_start`
+  - `timestamp_end`
+  - `purpose` - optional string description of the purpose for/person reserving
+
+### Schedule
 - [x] Add `Schedule`: An object that stores all shifts for a certain timeframe
   - add `timestamp_start` - A unix timestamp for when this schedule becomes active
   - add `timestamp_end` - A unix timestamp for when this schedule becomes inactive
@@ -66,6 +126,7 @@
   - add `default`, an optional boolean to indicate that this is a default alert
     - If there is no active alert (no timestamps with an end time before the current time), a randomly selected alert with the `default` tag will be shown
 
+### Shift
 - [x] Modify `Shift`:
   - modify `timestamp_start` to be `ms_start` - the number of milliseconds after midnight that this shift starts
   - modify `timestamp_end` to be `ms_end` - the number of milliseconds after midnight that this shift ends
@@ -79,27 +140,32 @@
     - `timestamp` - The timestamp this shift event was triggered
     - `shift_date` - The date (timestamp) of the shift that this event occurred on
   - Rename `steward` to `initiator`
+  
 
-- [x] Add `Machine`:
-  - uuid
-  - name
-  - description
-  - image
-  - count
-  - online
-  - manual_link
+### User
+- [ ] Add `UserRole`: A specific user role
+  - add `uuid` - The uuid of this user role
+  - add `title` - The title of this role
+  - add `description` - The optional description of how this role works
+  - add `color` - A color to display for this role
+  - add `scope` - A list of API scopes that users with this role can access
+  - add `default` - A boolean for whether the given role is a default role to apply to all new users
 
-- [x] Add `Area`
-  - uuid
-  - name: string
-  - description?: string
-  - documents?: { name: string, link: string }
-  - equipment?: machine uuids[]
+- [x] \* Add `UserRoleLog`
+  - `role_uuid` - The uuid of a `UserRole`
+  - `timestamp_gained` - The timestamp the user gained this UserRole
+  - `timestamp_revoked` - The optional timestamp of when the user lost this role. If not present, the user actively has this role.
 
-- [x] Add `Reservation`
-  - `uuid`
-  - `type` - one of `ITEM`, `MACHINE`, or `LOCATION`
-  - `reserved_uuid` - UUID of the item, machine, or location being reserved
-  - `timestamp_start`
-  - `timestamp_end`
-  - `purpose` - optional string description of the purpose for/person reserving
+- [x] \* Add `UserAvailability` - a single day of availability for a user
+  - `day` - the 0 indexed day
+  - `availability` - A list of objects containing `ms_start` and a `ms_end` properties that are pairs of start and end times (in milliseconds after midnight) that this user is available on this day
+
+- [ ] Modify `User`:
+  - rename `cx_id` -> `college_id`
+  - remove `role` in favor of:
+    - `active_roles` - A list of `UserRoleLogs` that the user current has
+    - `past_roles` - A list of past roles the user no longer has
+  - modify `passed_quizzes`, `proficiencies`, and `certifications` to be just `certificates`
+    - Stored as a list of `Certificate` objects
+  - modify `files` to be a list of File UUIDs
+  - modify `availability` to be a list of `UserAvailability` objects.

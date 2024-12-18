@@ -1,29 +1,40 @@
-import { UnixTimestamp } from "./global";
+import type { UnixTimestamp } from "./global";
+import type { CertificationUUID, TCertification } from "./certification";
+import type { UserUUID } from "./user";
+import { FileUUID } from "./file";
 
 /**
  * Workshop - Object to store information about all workshops
  * @property uuid - the unique identifier of the workshop
  * @property title - the name of the workshop
- * @property description - description of the workshop will be teaching
- * @property instructors - the list of instuctors teaching the workshop
+ * @property description (optional) - description of the workshop's activity
+ * @property instructors - the list of instructors teaching the workshop, as
+ *      user UUIDs
  * @property timestamp_start - the time that the workshop starts
  * @property timestamp_end - the time that the workshop ends
- * @property capacity - the number of users the instructors can teach
- * @property required_certs - the google form identifier for quizzes that give the certifications needed to participate in the workshop
- * @property rsvp_list - a list of user's unique identifier who are rsvp'd for the workshop
- * @property users_notified - a list of rsvp'd users who has been emailed by MAKE-bot;
- * @property photos - a list of links to the photos taken during the workshop
+ * @property timestamp_public - the time this workshop becomes publicly visible
+ * @property capacity (optional) - the number of users the instructors can
+ *      teach. If not listed, has no max capacity
+ * @property required_certs - the UUIDs of {@link TCertification | Certifications}
+ *      needed to participate in the workshop
+ * @property rsvp_list - a list of user's unique identifier who are RSVP'd for
+ *      the workshop
+ * @property users_notified - a list of users who have been notified about the
+ *      workshop
+ * @property photos - (optional) a list UUIDs of {@link TFile | image Files} to
+ *      display for this workshop
  */
 export type TWorkshop = {
     uuid: UUID;
     title: string;
-    description: string;
-    instructors: string;
+    description?: string;
+    instructors: UserUUID[];
+    capacity?: number;
     timestamp_start: UnixTimestamp;
     timestamp_end: UnixTimestamp;
-    capacity: number;
-    required_certs: gid[];
-    rsvp_list: UUID[];
-    users_notified: UUID[];
-    photos: string[];
+    timestamp_public: UnixTimestamp;
+    required_certs?: CertificationUUID[];
+    rsvp_list: UserUUID[];
+    users_notified: UserUUID[];
+    photos?: FileUUID[];
 };
