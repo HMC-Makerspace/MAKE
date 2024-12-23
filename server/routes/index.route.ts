@@ -1,9 +1,9 @@
-import { Request, Response, Router } from 'express';
+import { Request, Response, Router } from "express";
 
 const router = Router();
 
-router.get('/', (req: Request, res: Response) => {
-  res.sendFile('../../website/build/index.html');
+router.get("/", (req: Request, res: Response) => {
+    res.send("<p>test</p>");
 });
 
 export default router;

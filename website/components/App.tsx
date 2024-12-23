@@ -1,14 +1,17 @@
 import React from 'react';
+import { NextUIProvider } from '@nextui-org/react';
+import { Router } from './Router';
 
-const App: React.FC = () => {
-    const mobile = window.matchMedia('(max-width: 768px)').matches;
-
+/**
+ * Create the web app housing, with all necessary providers.
+ * @returns An HTML element containing the entire web app
+ */
+export default function App() {
     return (
-        <>
-            <SideBar />
-            <MainContent />
-        </>
+        // Provide functionality for NextUI components and serve the site
+        // router
+        <NextUIProvider>
+            <Router />
+        </NextUIProvider>
     );
 };
-
-export default App;

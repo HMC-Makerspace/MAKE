@@ -12,7 +12,8 @@
     // Pathing for bun
     "baseUrl": "server",
     "paths": {
-      "common/*": ["../common/*"]
+      "common/*": ["../common/*"],
+      "components/*": ["../website/components/*"]
     },
 
     // Bundler mode
@@ -31,7 +32,7 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  // Include server files and common types
-  "include": ["server/**/*", "common/**/*"],
-  "exclude": ["dist", "node_modules"],
+  // Include server files, website files, and common types 
+  "include": ["server/**/*", "website/**/*", "common/**/*"],
+  "exclude": ["website/build", "node_modules"],
 }

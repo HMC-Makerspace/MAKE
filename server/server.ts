@@ -12,9 +12,6 @@ await Bun.build({
     plugins: [html()],
 });
 
-// Import frontend
-import * as frontend from "../website/index";
-
 // Routes
 import indexRoutes from "./routes/index.route";
 import userRoutes from "./routes/user.route";
@@ -29,9 +26,9 @@ app.use(express.json(), compression());
 
 // API Routes
 app.use("/api/v3", indexRoutes);
-app.use("/api/v3", userRoutes);
+app.use("/api/v3/user", userRoutes);
 
-// Frontend, in website/public/index.html
+// Frontend, in website/build/index.html
 app.use(express.static(path.join(__dirname, "../website/build")));
 
 if (process.env.NODE_ENV === "production") {

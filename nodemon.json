@@ -1,0 +1,5 @@
+{
+    "watch": ["website/build/index.js"],
+    
+    "exec": "bun run --watch server/server.ts"
+}
