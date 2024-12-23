@@ -1,5 +1,5 @@
 {
     "watch": ["website/build/index.js"],
     
-    "exec": "bun run --watch server/server.ts"
+    "exec": "bun tailwindcss -i ./website/main.css -o ./website/build/output.css && bun run --watch server/server.ts"
 }
