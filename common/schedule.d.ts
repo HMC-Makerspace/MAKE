@@ -1,4 +1,4 @@
-import type { UnixTimestamp } from "./global";
+import type { UnixTimestamp, UUID } from "./global";
 import type { TShift } from "./shift";
 
 /**
@@ -32,6 +32,7 @@ export type TAlert = {
  *      during this schedule
  */
 export type TSchedule = {
+    uuid: UUID;
     timestamp_start: UnixTimestamp;
     timestamp_end: UnixTimestamp;
     shifts: TShift[];

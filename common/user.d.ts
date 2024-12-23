@@ -42,6 +42,18 @@ export type TUserRoleLog = {
 };
 
 /**
+ * TUserAvailabilityTimeSlot - An individual time slot of a user's availability
+ * @property ms_start - The time (in milliseconds after midnight) this time
+ *      slot starts.
+ * @property ms_end - The time (in milliseconds after midnight) this time
+ *      slot ends.
+ */
+export type TUserAvailabilityTime = {
+    ms_start: number;
+    ms_end: number;
+};
+
+/**
  * TUserAvailability - The availability of a User, used for scheduling
  * @property day - The 0-indexed day associated with this availability,
  *      according to {@link SHIFT_DAY}
@@ -50,10 +62,7 @@ export type TUserRoleLog = {
  */
 export type TUserAvailability = {
     day: SHIFT_DAY;
-    availability: {
-        ms_start: number;
-        ms_end: number;
-    }[];
+    availability: TUserAvailabilityTime[];
 };
 
 /**
@@ -61,7 +70,7 @@ export type TUserAvailability = {
  * @property uuid - The user's unique identifier for the database
  * @property name - The user's preferred name
  * @property email - The user's student email
- * @property college_id - The user's student ID number
+ * @property college_id - The user's student ID number as a string
  * @property active_roles - A list of {@link TUserRoleLog | UserRole logs} that
  *      indicates currently active roles for this user
  * @property past_roles - A list of {@link TUserRoleLog | UserRole logs} that
@@ -78,10 +87,10 @@ export type TUser = {
     uuid: UserUUID;
     name: string;
     email: string;
-    college_id: number;
+    college_id: string;
     active_roles: TUserRoleLog[];
     past_roles: TUserRoleLog[];
-    certificates?: TCertificate;
+    certificates?: TCertificate[];
     files?: FileUUID[];
     availability?: TUserAvailability[];
 };

@@ -98,7 +98,7 @@ export type TInventoryItem = {
  * @member RESTOCKED - The item has arrived and been restocked
  */
 export enum RESTOCK_REQUEST_STATUS {
-    PENDING_APPROVAL,
+    PENDING_APPROVAL = 0,
     DENIED,
     APPROVED_WAITING,
     APPROVED_ORDERED,
@@ -111,7 +111,7 @@ export enum RESTOCK_REQUEST_STATUS {
  * @property timestamp - The timestamp this update was logged
  * @property message - (optional) A message to display to the requesting user
  */
-export type TRestockRequestStatusLog = {
+export type TRestockRequestLog = {
     timestamp: UnixTimestamp;
     status: RESTOCK_REQUEST_STATUS;
     message?: string;
@@ -130,7 +130,7 @@ export type TRestockRequestStatusLog = {
  * @property current_status - The current status of this request, as described
  *      by {@link RESTOCK_REQUEST_STATUS}
  * @property status_logs - A list of status logs for this request, as a list
- *      of {@link TRestockRequestStatusLog | `RestockRequestStatusLog`}
+ *      of {@link TRestockRequestLog | `RestockRequestStatusLog`}
  */
 export type TRestockRequest = {
     uuid: UUID;
@@ -140,5 +140,5 @@ export type TRestockRequest = {
     reason?: string;
     requesting_user: UserUUID;
     current_status: RESTOCK_REQUEST_STATUS;
-    status_logs: TRestockRequestStatusLog[];
+    status_logs: TRestockRequestLog[];
 };

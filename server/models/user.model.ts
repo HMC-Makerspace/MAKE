@@ -1,29 +1,60 @@
 import mongoose from "mongoose";
-import type { TUser } from "common/user";
+import type {
+    TUser,
+    TUserAvailability,
+    TUserAvailabilityTime,
+    TUserRole,
+    TUserRoleLog,
+} from "common/user";
+import { Certificate } from "./certification.model";
 
-// uuid: str
-// name: str
-// email: str
-// cx_id: int
-// role: str
-// passed_quizzes: Dict[str, str]
-// proficiencies: Union[List[str], None] = None
-// files: Union[List[object], None] = None
-// availability: Union[List[List[bool]], None] = None
-// new_steward: Union[bool, None] = None
-// certifications: Union[Dict[str, float], None] = None
+/**
+ * See {@link TUserRole} documentation for type information.
+ */
+export const UserRole = new mongoose.Schema<TUserRole>({
+    uuid: { type: String, required: true },
+    title: { type: String, required: true },
+    description: { type: String, required: false },
+    color: { type: String, required: true },
+    scopes: { type: [String], required: true },
+    default: { type: Boolean, required: true },
+});
+
+/**
+ * See {@link TUserRoleLog} documentation for type information.
+ * Stored as children of {@link User}.
+ */
+const UserRoleLog = new mongoose.Schema<TUserRoleLog>({
+    role_uuid: { type: String, required: true },
+    timestamp_gained: { type: Number, required: true },
+    timestamp_revoked: { type: Number, required: false },
+});
+
+const UserAvailabilityTime = new mongoose.Schema<TUserAvailabilityTime>({
+    ms_start: { type: Number, required: true },
+    ms_end: { type: Number, required: true },
+});
+
+/**
+ * See {@link TUserAvailability} documentation for type information.
+ * Stored as children of {@link User}.
+ */
+export const UserAvailability = new mongoose.Schema<TUserAvailability>({
+    day: { type: Number, required: true },
+    availability: { type: [UserAvailabilityTime], required: true },
+});
 
 /**
  * See {@link TUser} documentation for type information.
  */
 export const User = new mongoose.Schema<TUser>({
+    uuid: { type: String, required: true },
     name: { type: String, required: true },
     email: { type: String, required: true },
-    college_id: { type: Number, required: true },
-    role: { type: String, required: true },
-    certifications: {
-        type: Map, // Maps strings to
-        of: Number,
-        required: true,
-    },
+    college_id: { type: String, required: true },
+    active_roles: { type: [UserRoleLog], required: true },
+    past_roles: { type: [UserRoleLog], required: true },
+    certificates: { type: [Certificate], required: false },
+    files: { type: [String], required: false },
+    availability: { type: [UserAvailability], required: false },
 });

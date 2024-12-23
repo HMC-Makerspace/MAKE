@@ -118,7 +118,7 @@
   - add `required_roles` - An optional list of UserRole UUIds who are allowed to checkout this item. If not present, anyone can checkout the item
   - Remove access type levels 4 and 5 in favor of `required_certifications` and `required_roles`
 
-- [x] \* Add `RestockRequestStatusLog`
+- [x] \* Add `RestockRequestLog`
   - `timestamp` - the timestamp of the log
   - `status` - the new status of the request, one of `PENDING_APPROVAL`, `DENIED`, `APPROVED_WAITING`, `APPROVED_ORDERED`, or `RESTOCKED`,
   - `message` - An optional string message describing the updated status
@@ -130,7 +130,7 @@
   - rename `user_uuid` to `requesting_user`
   - remove `timestamp_sent`, `timestamp_completed`, `is_approved`, and `completion_note` in favor of:
     - `current_status`, the current status of the request, one of `PENDING_APPROVAL`, `DENIED`, `APPROVED_WAITING`, `APPROVED_ORDERED`, or `RESTOCKED`,
-    - `status_logs`, a list of `RestockRequestStatusLog` that contains the history of all status updates for this request.
+    - `status_logs`, a list of `RestockRequestLog` that contains the history of all status updates for this request.
 
 ### IPLog
 - [x] Modify `IPLog`
@@ -153,6 +153,7 @@
 
 ### Schedule
 - [x] Add `Schedule`: An object that stores all shifts for a certain timeframe
+  - add `uuid`
   - add `timestamp_start` - A unix timestamp for when this schedule becomes active
   - add `timestamp_end` - A unix timestamp for when this schedule becomes inactive
   - add `shifts` - A list of Shift objects for this schedule
@@ -201,7 +202,7 @@
   - `availability` - A list of objects containing `ms_start` and a `ms_end` properties that are pairs of start and end times (in milliseconds after midnight) that this user is available on this day
 
 - [x] Modify `User`:
-  - rename `cx_id` -> `college_id`
+  - rename `cx_id` -> `college_id` and store it as a string (if it wasn't already)
   - remove `role` in favor of:
     - `active_roles` - A list of `UserRoleLogs` that the user current has
     - `past_roles` - A list of past roles the user no longer has
