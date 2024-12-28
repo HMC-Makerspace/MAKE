@@ -1,0 +1,39 @@
+// TODO: overhaul this
+const WorkshopConfirmationTemplate = (
+    rsvp_or_waitlist: string,
+    workshop: string,
+    date: string,
+    time: string,
+) => {
+    return (
+        <>
+            <h1>Workshop RSVP</h1>
+            <p>
+                Hello,
+                <br />
+                <br />
+                <b>
+                    You {rsvp_or_waitlist} {workshop}.
+                </b>
+                <br />
+                <br />
+                The workshop will be held on {date} at {time}! Please arrive on
+                time, and <b>sign into the Workshop Kiosk Computer</b>. If
+                you're on the waitlist, we will allocate spots on a first-come
+                first-serve basis. Please show up on time to increase your
+                chances of getting in! We most likely will have some spots open
+                up.
+                <br />
+                <br />
+                If you are unable to attend, please cancel on{" "}
+                <a href="https://make.hmc.edu?p=workshop">make.hmc.edu</a>.
+            </p>
+
+            <footer>
+                <i>This email was sent automatically by MAKE</i>
+            </footer>
+        </>
+    );
+};
+
+export default WorkshopConfirmationTemplate;

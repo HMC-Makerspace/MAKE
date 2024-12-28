@@ -3,14 +3,13 @@
   "module": "server/server.ts",
   "type": "module",
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/nodemailer": "^6.4.17",
     "@types/bun": "latest",
     "@types/compression": "^1.7.5",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
-    "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "@types/nodemailer": "^6.4.17",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
     "react-scripts": "^5.0.1"
   },
   "peerDependencies": {
@@ -25,7 +24,9 @@
     "mongoose": "^8.7.2",
     "nodemailer": "^6.9.16",
     "pino": "^9.5.0",
-    "pino-http": "^10.3.0"
+    "pino-http": "^10.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "scripts": {
     "start": "bun run --watch server/server.ts",
