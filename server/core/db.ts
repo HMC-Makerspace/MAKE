@@ -1,14 +1,15 @@
 import mongoose from "mongoose";
+import type { Logger } from "pino";
 
-const connectDB = async () => {
+const connectDB = async (logger: Logger) => {
     try {
         const conn = await mongoose.connect(process.env.MONGO_URI);
 
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
+        logger.info(`MongoDB Connected: ${conn.connection.host}`);
 
         return conn;
     } catch (error) {
-        console.error(`Error: ${(error as Error).message}`);
+        logger.error("Error connecting to MongDB", error);
         process.exit(1);
     }
 };

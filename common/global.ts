@@ -17,4 +17,5 @@ export enum API_SCOPES {
     PRINTER = "3dprinter",
     INVENTORY = "inventory",
     INVENTORY_EDITOR = "inventory_editor",
+    ALL_USERS = "users",
 }
