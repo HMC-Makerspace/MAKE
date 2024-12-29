@@ -1,4 +1,4 @@
-# MAKE v3 - Unified managment application for HMC's Makerspace 
+# MAKE v3 - Unified management application for HMC's Makerspace 
 
 **Live at [make.hmc.edu](https://make.hmc.edu)**
 
@@ -12,16 +12,25 @@
 - Restock requests and fulfillment
 
 ## What is in each folder?
-`./MAKE-server` contains the server files for MAKE, written in Python with FastAPI as a framework.
+`./server` contains the server files for MAKE, which uses an [ExpressJS](https://expressjs.com/) backend with a [MongoDB](https://www.mongodb.com/) database, [Pino](https://github.com/pinojs/pino) for logging, [Jest](https://jestjs.io/) for testing, and [Bun] as a package manager. The server is broken up into several sections:
+- `./server/core`, which contains information relevant to the setup of the server itself
+- `./server/models`, which contains the data models for the MongoDB database
+- `./server/routes`, which contains the API routes for communicating with the database
+- `./server/controllers`, which contains the logic for the API routes
+- `./server/email_templates`, which contains email templates that can be quickly reused
 
-`./MAKE-website` contains the website files for MAKE. These are served by the MAKE server as static resource files.
+`./common` contains data types for all the various information stored in the MongoDB database. These types are shared across the server and website.
+
+`./website` contains the website files for MAKE. These are served by the MAKE server as static resource files. The frontend website is built using [React](https://react.dev/), [TailwindCSS](https://tailwindcss.com/), [NextUI](https://nextui.org/), and [Redux](https://redux.js.org/). The website is also broken up into several sections:
+- `./website/components`, which contains the React components for the website
+- `./website/build`, which contains the build files for the website
 
 ## Development setup
-To get started developing MAKE, you'll need git, python3, and a local MongoDB installation.
+To get started developing MAKE, you'll need git, Bun, and a local MongoDB installation.
 
 - Git can be downloaded from [this page](https://git-scm.com/downloads) or by using brew for MacOS.
-- Python can be downloaded from [this page](https://www.python.org/downloads/) or by using brew for MacOS.
-- MongoDB Community can be downloaded from [this page](https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-os-x/#std-label-install-mdb-community-macos), but make sure *NOT* to install mongodb-atlas, which is their cloud version of mongodb.
+- Bun can be downloaded from [this page](https://bun.sh/).
+- MongoDB Community can be downloaded from [this page](https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-os-x/#std-label-install-mdb-community-macos) or [this page](https://www.mongodb.com/try/download/community), but make sure *NOT* to install mongodb-atlas, which is their cloud version of mongodb.
 - MongoDB Compass is the GUI for MongoDB, and can be downloaded from [this page](https://www.mongodb.com/try/download/compass).
 
 Once you've installed these tools, clone this repo by running 
@@ -30,37 +39,39 @@ Once you've installed these tools, clone this repo by running
 git clone https://github.com/HMC-Makerspace/MAKE.git
 ```
 
-Navigate into the server by running 
+Navigate into the folder by running 
 
 ```
-cd MAKE/MAKE-server
+cd MAKE
 ```
 
 Then install the requirements by running
 
 ```
-pip install -r requirements.txt` or `pip3 install -r requirements.txt
+bun install
 ```
 
-Copy over the template config file
+Copy over the `template.env` file to create your own local `.env` configuration file by running
 
 ```
-cp template_config.py config.py
+cp template.env .env
 ```
 
-Nothing needs to be filled out in the config file unless you're testing emailing or the Discord bot.
+Filled out in the config file as needed for your installation.
 
-Finally, start the server by running
+Finally, build the frontend code by running
 
 ```
-python main.py 
-```
-or 
-```
-python3 main.py
+bun dev
 ```
 
-and navigate to http://127.0.0.1:8080. If you're deploying this in production, make sure to use the `--prod` flag.
+and start the server by running
+
+```
+bun start
+```
+
+and navigate to http://127.0.0.1:3000. If you're deploying this in production, make sure to change the `NODE_ENV` variable in the `.env` file to `production`.
 
 ## Tips and Tricks
 ### Backing Up
@@ -76,4 +87,4 @@ ssh ethan@make.hmc.edu
 ```
 and navigating to the MAKE directory. The password should be known by the Head Steward team. After logging in, run `git pull` to pull the changes from the repo. 
 
-If you've made changes to any Python files, you'll need to restart the server by running ```screen -r make``` to reattach to the server screen. Run  ```python3 main.py --prod``` to start the server again, then press `CTRL + A`, let go, and then press `D`, to leave the screen running in the background. If no changes were made to Python files, the server will automatically restart with the new changes, and this step can be skipped.
+If you've made changes to any Python files, you'll need to restart the server by running ```screen -r make``` to reattach to the server screen. Run the build and start commands to reboot the server, then press `CTRL + A`, let go, and then press `D`, to leave the screen running in the background. In the future, `nodemon` should be used to automatically restart the server when changes are made.
