@@ -9,7 +9,14 @@ import {
 import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
-import { VerifyRequestHeader } from "common/verify";
+import {
+    PROTECTED_ERROR,
+    UNAUTHORIZED_ERROR,
+    VerifyRequestHeader,
+} from "common/verify";
+import { TCheckout } from "common/checkout";
+
+type CheckoutRequest = Request<{}, {}, { checkout_obj: TCheckout }>;
 
 const router = Router();
 
@@ -26,7 +33,9 @@ router.get("/", async (req: Request, res: Response) => {
     });
     // If no requesting checkout uuid is provided, the call is not authorized
     if (!requesting_uuid) {
-        req.log.warn("No requesting_uuid was provided while getting all checkouts");
+        req.log.warn(
+            "No requesting_uuid was provided while getting all checkouts",
+        );
         res.status(StatusCodes.UNAUTHORIZED).json({
             error:
                 "This is a protected route, and no requesting checkout UUID " +
@@ -58,24 +67,21 @@ router.get("/", async (req: Request, res: Response) => {
  * Get a specific checkout by UUID,
  * A protected route
  */
-router.get("/get_checkout", async (req: Request, res: Response) => {
+router.get("/:UUID", async (req: Request<{ UUID: string }>, res: Response) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
-    const checkout_uuid: string = req.params.UUID;
+    const requesting_uuid = headers.requesting_uuid;
+    const checkout_uuid = req.params.UUID;
     req.log.debug({
-        msg: "Getting a checkout by uuid ${checkout_uuid}",
+        msg: `Getting a checkout by uuid ${checkout_uuid}`,
         requesting_uuid: requesting_uuid,
     });
 
     // If no requesting checkout uuid is provided, the call is not authorized
     if (!requesting_uuid) {
-        req.log.warn("No requesting_uuid was provided while getting all checkouts");
-        res.status(StatusCodes.UNAUTHORIZED).json({
-            error:
-                "This is a protected route, and no requesting checkout UUID " +
-                "was provided. Add `requesting_uuid` as a header with a " +
-                "checkout to make this request.",
-        });
+        req.log.warn(
+            "No requesting_uuid was provided while getting all checkouts",
+        );
+        res.status(StatusCodes.UNAUTHORIZED).json(PROTECTED_ERROR);
         return;
     }
     // If the user is authorized, get a checkout's information
@@ -100,30 +106,29 @@ router.get("/get_checkout", async (req: Request, res: Response) => {
             requesting_uuid: requesting_uuid,
         });
         // If the user is not authorized, provide a status error
-        res.status(StatusCodes.UNAUTHORIZED).json({
-            error:
-                "This is a protected call, and the requesting checkout UUID " +
-                "does not have the proper API scopes required.",
-        });
+        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
     }
 });
 
 /**
- * Update a specific checkout by 
+ * Update a specific checkout by
  * A protected route
  */
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", async (req: CheckoutRequest, res: Response) => {
     const headers = req.headers as VerifyRequestHeader;
     const requesting_uuid: string = headers.requesting_uuid;
-    const checkout_uuid = req.body();
+    const checkout_obj = req.body.checkout_obj;
+    const checkout_uuid = checkout_obj.uuid;
     req.log.debug({
-        msg: "Deleting a checkout by uuid ${checkout_uuid}",
+        msg: `Deleting a checkout by uuid ${checkout_uuid}`,
         requesting_uuid: requesting_uuid,
     });
 
     // If no requesting checkout uuid is provided, the call is not authorized
     if (!requesting_uuid) {
-        req.log.warn("No requesting_uuid was provided while getting all checkouts");
+        req.log.warn(
+            "No requesting_uuid was provided while getting all checkouts",
+        );
         res.status(StatusCodes.UNAUTHORIZED).json({
             error:
                 "This is a protected route, and no requesting checkout UUID " +
@@ -136,7 +141,7 @@ router.post("/", async (req: Request, res: Response) => {
     // If the user is authorized, update a checkout's information
     if (await verifyRequest(requesting_uuid, API_SCOPES.GET_ALL_CHECKOUTS)) {
         req.log.debug("Returned checkout ${checkout_uuid}");
-        const checkout = await getCheckout(checkout_uuid);
+        const checkout = await updateCheckout(checkout_obj);
         if (!checkout) {
             req.log.warn(`Checkout not found by uuid ${checkout_uuid}`);
             res.status(StatusCodes.NOT_FOUND).json({
@@ -148,7 +153,6 @@ router.post("/", async (req: Request, res: Response) => {
             msg: `Found checkout by uuid ${checkout_uuid}`,
             checkout: checkout,
         });
-        updateCheckout(checkout) //updates??
         res.status(StatusCodes.OK).json(checkout);
     } else {
         req.log.warn({
@@ -178,7 +182,9 @@ router.delete("/:UUID", async (req: Request, res: Response) => {
 
     // If no requesting checkout uuid is provided, the call is not authorized
     if (!requesting_uuid) {
-        req.log.warn("No requesting_uuid was provided while getting all checkouts");
+        req.log.warn(
+            "No requesting_uuid was provided while getting all checkouts",
+        );
         res.status(StatusCodes.UNAUTHORIZED).json({
             error:
                 "This is a protected route, and no requesting checkout UUID " +
@@ -203,7 +209,7 @@ router.delete("/:UUID", async (req: Request, res: Response) => {
             msg: `Found checkout by uuid ${checkout_uuid}`,
             checkout: checkout,
         });
-        deleteCheckout(checkout)
+        deleteCheckout(checkout);
         res.status(StatusCodes.OK).json(checkout);
     } else {
         req.log.warn({

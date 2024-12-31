@@ -103,7 +103,7 @@ export async function getUserRole(
 }
 
 /**
- * Update a user role with a new TUserRole object
+ * Update a user role with a new TUserRole object, and return the updated object.
  * @param role_obj The new user role object
  */
 export async function updateUserRole(
@@ -116,7 +116,7 @@ export async function updateUserRole(
 }
 
 /**
- * Create a new user role in the database
+ * Create a new user role in the database, and return the created object.
  * @param role_obj The user role's complete information
  */
 export async function createUserRole(
