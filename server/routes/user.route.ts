@@ -47,6 +47,7 @@ router.get("/", async (req: UserRequest, res: UsersResponse) => {
         msg: "Getting all users",
         requesting_uuid: requesting_uuid,
     });
+    
     // If no requesting user_uuid is provided, the call is not authorized
     if (!requesting_uuid) {
         req.log.warn("No requesting_uuid was provided while getting all users");
