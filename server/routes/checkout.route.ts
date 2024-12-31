@@ -1,14 +1,19 @@
 import { API_SCOPES } from "common/global";
 import {
-    getUser,
-    getUserByCollegeID,
-    getUserByEmail,
-    getUsers,
-} from "controllers/user.controller";
+    getCheckouts,
+    getCheckout,
+    createCheckout,
+    deleteCheckout,
+} from "controllers/checkout.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import { VerifyRequestHeader } from "common/verify";
+import {
+    getUser,
+    getUserByEmail,
+    getUserByCollegeID,
+} from "controllers/user.controller";
 
 const router = Router();
 
@@ -35,9 +40,9 @@ router.get("/", async (req: Request, res: Response) => {
         return;
     }
     // If the user is authorized, get all user information
-    if (await verifyRequest(requesting_uuid, API_SCOPES.GET_ALL_USERS)) {
-        req.log.debug("Returned all users");
-        const users = await getUsers();
+    if (await verifyRequest(requesting_uuid, API_SCOPES.GET_ALL_CHECKOUTS)) {
+        req.log.debug("Returned all checkouts");
+        const users = await getCheckouts();
         res.status(StatusCodes.OK).json(users);
     } else {
         req.log.warn({

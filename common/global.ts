@@ -13,9 +13,10 @@ export type UnixTimestamp = number;
  */
 export enum API_SCOPES {
     ADMIN = "admin",
-    CHECKOUT = "checkout",
+    GET_ALL_CHECKOUTS = "checkout",
     PRINTER = "3dprinter",
     INVENTORY = "inventory",
     INVENTORY_EDITOR = "inventory_editor",
-    ALL_USERS = "users",
+    GET_ALL_USERS = "get_users",
+    UPDATE_USERS = "update_users",
 }

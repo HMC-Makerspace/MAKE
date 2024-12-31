@@ -8,7 +8,7 @@ import mongoose from "mongoose";
  * @returns A promise to list of TUser objects representing all users in the db
  */
 export async function getUsers(): Promise<TUser[]> {
-    const Users = mongoose.model("User", User);
+    const Users = mongoose.model("User", User, "users");
     return Users.find();
 }
 
@@ -18,7 +18,7 @@ export async function getUsers(): Promise<TUser[]> {
  * @returns A promise to a TUser object, or null if no user has the given UUID
  */
 export async function getUser(uuid: UserUUID): Promise<TUser | null> {
-    const Users = mongoose.model("User", User);
+    const Users = mongoose.model("User", User, "users");
     return Users.findOne({ uuid: uuid });
 }
 
@@ -43,7 +43,7 @@ export async function getUserByCollegeID(id: string): Promise<TUser | null> {
  */
 export async function getUserByEmail(email: string): Promise<TUser | null> {
     const Users = mongoose.model("User", User, "users");
-    return Users.findOne({ college_id: email });
+    return Users.findOne({ email: email });
 }
 
 /**
@@ -54,7 +54,17 @@ export async function getUserByEmail(email: string): Promise<TUser | null> {
 export async function updateUser(user_obj: TUser) {
     const Users = mongoose.model("User", User, "users");
     // Update the given user with a new user_obj, searching by uuid
-    Users.updateOne({ uuid: user_obj.uuid }, user_obj);
+    Users.replaceOne({ uuid: user_obj.uuid }, user_obj);
+}
+
+/**
+ * Create a new user in the database
+ * @param user_obj The user's complete information
+ */
+export async function createUser(user_obj: TUser) {
+    const Users = mongoose.model("User", User, "users");
+    const newUser = new Users(user_obj);
+    newUser.save();
 }
 
 /**
