@@ -26,13 +26,13 @@ export const InventoryItem = new mongoose.Schema<TInventoryItem>({
     long_name: { type: String, required: false },
     role: { type: String, required: true },
     access_type: { type: Number, required: true },
-    locations: { type: [Location], required: true },
+    locations: { type: [InventoryItemLocation], required: true },
     reorder_url: { type: String, required: false },
     serial_number: { type: String, required: false },
     kit_contents: { type: [String], required: false },
-    keywords: { type: String, required: false },
+    keywords: { type: [String], required: false },
     required_certifications: { type: [String], required: false },
-    required_roles: { type: [String], required: false },
+    authorized_roles: { type: [String], required: false },
 });
 
 /**

@@ -54,6 +54,16 @@ export enum ITEM_ACCESS_TYPE {
 }
 
 /**
+ * TItemCertificate: The specification for a certification required to use an item
+ * @property certification_uuid - The UUID of the required certification
+ * @property required_level - The minimum cert level needed to use this item
+ */
+export type TItemCertificate = {
+    certification_uuid: CertificationUUID;
+    required_level: number;
+};
+
+/**
  * TInventoryItem - Unique object for item
  * @property uuid - unique id
  * @property name - short name of the item
@@ -81,9 +91,9 @@ export type TInventoryItem = {
     reorder_url?: string;
     serial_number?: string;
     kit_contents?: InventoryItemUUID[];
-    keywords?: string;
-    required_certifications?: CertificationUUID[];
-    required_roles?: UserRoleUUID[];
+    keywords?: string[];
+    required_certifications?: TItemCertificate[];
+    authorized_roles?: UserRoleUUID[];
 };
 
 /**

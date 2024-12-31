@@ -66,7 +66,10 @@
   - `current_status` - An `AreaStatus` indicating the current availability of the area
   - `status_logs` - A list of `AreaStatusLog` that contains the history of availability for the given area.
   - `required_certifications` - an optional list of certs required to reserve this area
-  - `required_roles` - An optional list of UserRole UUIDs who are allowed to reserve this area. If not present, anyone can reserve
+  - `authorized_roles` - An optional list of UserRole UUIDs who are allowed to reserve this area. If not present, anyone can reserve
+  - `hidden` - An optional boolean for whether this area is hidden from the public
+    - Hidden areas are not shown in the public area list, but can still be viewed and reserved by users with an authorized role
+    - Hidden areas can still be selected as the location for an inventory item, and items in that location will only be visible if the user can view the area
 
 ### Certification
 - [x] Add `CertificationType`
@@ -112,11 +115,16 @@
   - `user_uuid`?
 
 ### Inventory
+- [x] Add `ItemCertificate` - A certification required to checkout an item
+  - `certification_uuid` - The uuid of a `Certification` object in the DB that stores info about this certificate
+  - `required_level` - The minimum level of proficiency this user needs in the given certification to be allowed to check out this item
+
 - [x] Modify `InventoryItem`:
   - Store quantity as number >=0 or LOW (-1) or HIGH (-2), **no more medium**
-  - rename `certifications` to `required_certifications`
-  - add `required_roles` - An optional list of UserRole UUIds who are allowed to checkout this item. If not present, anyone can checkout the item
-  - Remove access type levels 4 and 5 in favor of `required_certifications` and `required_roles`
+  - rename `certifications` to `required_certifications`, and instead of storing just a list of certification uuids, store a list of `ItemCertificate` objects
+  - add `authorized_roles` - An optional list of UserRole UUIds who are allowed to checkout this item. If not present, anyone can checkout the item. If a user does not have at least one of the authorized roles, they will not be able to check out the item, and the item will not be visible to them in the inventory search.
+  - Remove access type levels 4 and 5 in favor of `required_certifications` and `authorized_roles`
+  - change `keywords` to be a list of strings instead of a single string
 
 - [x] \* Add `RestockRequestLog`
   - `timestamp` - the timestamp of the log

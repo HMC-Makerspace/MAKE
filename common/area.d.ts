@@ -115,11 +115,15 @@ export type TAreaStatusLog = {
  * @property current_statuses - A list of status objects indicating the current
  *      status of each of the `count` machines in the space
  * @property status_logs - A list of changes in status logged by timestamp
- * @property required_certs - UUIDs of certs required to use/reserve the area
- * @property required_roles - (optional) A list of UserRole UUIDs that are
+ * @property required_certifications - UUIDs of certs required to use/reserve
+ *      the area
+ * @property authorized_roles - (optional) A list of UserRole UUIDs that are
  *      allowed to use this area. A user must have at least one of these
  *      roles to reserve the given area. If not present, any user may
  *      use/reserve this area.
+ * @property hidden - (optional) Whether this area should be hidden from the
+ *     public. If true, only users with an authorized role may see this area.
+ *     Defaults to false if not present.
  */
 export type TArea = {
     uuid: AreaUUID;
@@ -130,5 +134,6 @@ export type TArea = {
     current_status: TAreaStatus;
     status_logs: TAreaStatusLog[];
     required_certifications?: CertificationUUID[];
-    required_roles?: UserRoleUUID[];
+    authorized_roles?: UserRoleUUID[];
+    hidden?: boolean;
 };
