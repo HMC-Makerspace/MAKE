@@ -4,208 +4,104 @@ import {
     getCheckout,
     createCheckout,
     deleteCheckout,
+    updateCheckout,
 } from "controllers/checkout.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import { VerifyRequestHeader } from "common/verify";
-import {
-    getUser,
-    getUserByEmail,
-    getUserByCollegeID,
-} from "controllers/user.controller";
 
 const router = Router();
 
 /**
- * Get all users. This is a protected route, and a `requesting_uuid` header
+ * Get all checkouts. This is a protected route, and a `requesting_uuid` header
  * is required to call it.
  */
 router.get("/", async (req: Request, res: Response) => {
     const headers = req.headers as VerifyRequestHeader;
     const requesting_uuid: string = headers.requesting_uuid;
     req.log.debug({
-        msg: "Getting all users",
+        msg: "Getting all checkouts",
         requesting_uuid: requesting_uuid,
     });
-    // If no requesting user_uuid is provided, the call is not authorized
+    // If no requesting checkout_uuid is provided, the call is not authorized
     if (!requesting_uuid) {
-        req.log.warn("No requesting_uuid was provided while getting all users");
+        req.log.warn("No requesting_uuid was provided while getting all checkouts");
         res.status(StatusCodes.UNAUTHORIZED).json({
             error:
-                "This is a protected route, and no requesting user UUID was " +
-                "provided. Add `requesting_uuid` as a header with a user's " +
-                "to make this request.",
+                "This is a protected route, and no requesting checkout UUID " +
+                "was provided. Add `requesting_uuid` as a header with a " +
+                "checkout's to make this request.",
         });
         return;
     }
-    // If the user is authorized, get all user information
+    // If the user is authorized, get all checkout information
     if (await verifyRequest(requesting_uuid, API_SCOPES.GET_ALL_CHECKOUTS)) {
         req.log.debug("Returned all checkouts");
-        const users = await getCheckouts();
-        res.status(StatusCodes.OK).json(users);
+        const checkouts = await getCheckouts();
+        res.status(StatusCodes.OK).json(checkouts);
     } else {
         req.log.warn({
-            msg: "Unauthorized user attempted to get all users",
+            msg: "Unauthorized user attempted to get all checkouts",
             requesting_uuid: requesting_uuid,
         });
         // If the user is not authorized, provide a status error
         res.status(StatusCodes.UNAUTHORIZED).json({
             error:
-                "This is a protected call, and the requesting user UUID " +
+                "This is a protected call, and the requesting checkout UUID " +
                 "does not have the proper API scopes required.",
         });
     }
 });
 
 /**
- * Get a specific user by UUID
+ * Get a specific checkout by UUID
  */
 router.get("/:UUID", async (req: Request, res: Response) => {
-    const user_uuid: string = req.params.UUID;
-    req.log.debug(`Getting user by uuid ${user_uuid}`);
+    const checkout_uuid: string = req.params.UUID;
+    req.log.debug(`Getting checkout by uuid ${checkout_uuid}`);
 
-    const user = await getUser(user_uuid);
+    const checkout = await getCheckout(checkout_uuid);
 
-    if (!user) {
-        req.log.warn(`User not found by uuid ${user_uuid}`);
+    if (!checkout) {
+        req.log.warn(`Checkout not found by uuid ${checkout_uuid}`);
         res.status(StatusCodes.NOT_FOUND).json({
-            error: `No user found with uuid \`${user_uuid}\`.`,
+            error: `No checkout found with uuid \`${checkout_uuid}\`.`,
         });
         return;
     }
 
     req.log.debug({
-        msg: `Found user by uuid ${user_uuid}`,
-        user: user,
+        msg: `Found checkout by uuid ${checkout_uuid}`,
+        checkout: checkout,
     });
 
-    res.status(StatusCodes.OK).json(user);
+    res.status(StatusCodes.OK).json(checkout);
 });
 
 /**
- * Get a specific user by email
- */
-router.get("/by/email/:email", async (req: Request, res: Response) => {
-    const user_email: string = req.params.email;
-    req.log.debug(`Getting user by email ${user_email}`);
-
-    const user = await getUserByEmail(user_email);
-
-    if (!user) {
-        req.log.warn(`User not found by email ${user_email}`);
-        res.status(StatusCodes.NOT_FOUND).json({
-            error: `No user found with email \`${user_email}\`.`,
-        });
-        return;
-    }
-
-    req.log.debug({
-        msg: `Found user by email ${user_email}`,
-        user: user,
-    });
-
-    res.status(StatusCodes.OK).json(user);
-});
-
-/**
- * Get a specific user by college id
- */
-router.get("/by/id/:id", async (req: Request, res: Response) => {
-    const user_id: string = req.params.id;
-    req.log.debug(`Getting user by college id ${user_id}`);
-
-    const user = await getUserByCollegeID(user_id);
-
-    if (!user) {
-        req.log.warn(`User not found by college id ${user_id}`);
-        res.status(StatusCodes.NOT_FOUND).json({
-            error: `No user found with college id \`${user_id}\`.`,
-        });
-        return;
-    }
-
-    req.log.debug({
-        msg: `Found user by college id ${user_id}`,
-        user: user,
-    });
-
-    res.status(StatusCodes.OK).json(user);
-});
-
-/**
- * Update a specific user by UUID
+ * Update a specific checkout by UUID
  */
 router.post("/:UUID", async (req: Request, res: Response) => {
-    const user_uuid = req.body();
-    req.log.debug(`Updating user by uuid ${user_uuid}`);
+    const checkout_uuid = req.body();
+    req.log.debug(`Updating checkout by uuid ${checkout_uuid}`);
 
-    const user = await getUser(user_uuid);
+    const checkout = await getCheckout(checkout_uuid);
 
-    if (!user) {
-        req.log.warn(`User not found by uuid ${user_uuid}`);
+    if (!checkout) {
+        req.log.warn(`Checkout not found by uuid ${checkout_uuid}`);
         res.status(StatusCodes.NOT_FOUND).json({
-            error: `No user found with uuid \`${user_uuid}\`.`,
+            error: `No checkout found with uuid \`${checkout_uuid}\`.`,
         });
         return;
     }
 
     req.log.debug({
-        msg: `Found user by uuid ${user_uuid}`,
-        user: user,
+        msg: `Found checkout by uuid ${checkout_uuid}`,
+        checkout: checkout,
     });
 
-    res.status(StatusCodes.OK).json(user);
-});
-
-/**
- * Get a specific user by email
- */
-router.get("/by/email/:email", async (req: Request, res: Response) => {
-    const user_email: string = req.params.email;
-    req.log.debug(`Getting user by email ${user_email}`);
-
-    const user = await getUserByEmail(user_email);
-
-    if (!user) {
-        req.log.warn(`User not found by email ${user_email}`);
-        res.status(StatusCodes.NOT_FOUND).json({
-            error: `No user found with email \`${user_email}\`.`,
-        });
-        return;
-    }
-
-    req.log.debug({
-        msg: `Found user by email ${user_email}`,
-        user: user,
-    });
-
-    res.status(StatusCodes.OK).json(user);
-});
-
-/**
- * Get a specific user by college id
- */
-router.get("/by/id/:id", async (req: Request, res: Response) => {
-    const user_id: string = req.params.id;
-    req.log.debug(`Getting user by college id ${user_id}`);
-
-    const user = await getUserByCollegeID(user_id);
-
-    if (!user) {
-        req.log.warn(`User not found by college id ${user_id}`);
-        res.status(StatusCodes.NOT_FOUND).json({
-            error: `No user found with college id \`${user_id}\`.`,
-        });
-        return;
-    }
-
-    req.log.debug({
-        msg: `Found user by college id ${user_id}`,
-        user: user,
-    });
-
-    res.status(StatusCodes.OK).json(user);
+    res.status(StatusCodes.OK).json(checkout);
 });
 
 export default router;
