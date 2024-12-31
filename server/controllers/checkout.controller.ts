@@ -40,7 +40,13 @@ export async function createCheckout(checkout_obj: TCheckout) {
 export async function updateCheckout(checkout_obj: TCheckout) {
     const Checkouts = mongoose.model("Checkout", Checkout, "checkouts");
     // Update the given user with a new user_obj, searching by uuid
-    Checkouts.updateOne({ uuid: checkout_obj.uuid }, checkout_obj);
+    return Checkouts.findOneAndReplace(
+        { uuid: checkout_obj.uuid },
+        checkout_obj,
+        {
+            returnDocument: "after",
+        },
+    );
 }
 
 /**
@@ -49,5 +55,5 @@ export async function updateCheckout(checkout_obj: TCheckout) {
  */
 export async function deleteCheckout(checkout_obj: TCheckout) {
     const Checkouts = mongoose.model("Checkouts", Checkout, "checkouts");
-    Checkouts.deleteOne({ uuid: checkout_obj.uuid }, checkout_obj);
+    return Checkouts.findOneAndDelete({ uuid: checkout_obj.uuid });
 }

@@ -22,4 +22,7 @@ export enum API_SCOPES {
     UPDATE_USER_SELF = "update_self",
     DELETE_USER = "delete_user",
     DELETE_USER_SELF = "delete_self",
+    GET_ALL_ROLES = "get_roles",
+    UPDATE_ROLE = "update_role",
+    DELETE_ROLE = "delete_role",
 }

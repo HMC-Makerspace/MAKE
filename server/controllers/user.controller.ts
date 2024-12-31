@@ -51,7 +51,7 @@ export async function getUserByEmail(email: string): Promise<TUser | null> {
  * by UUID.
  * @param user_obj The user's complete and updated information
  */
-export async function updateUser(user_obj: TUser) {
+export async function updateUser(user_obj: TUser): Promise<TUser | null> {
     const Users = mongoose.model("User", User, "users");
     // Update the given user with a new user_obj, searching by uuid
     // and return the new user object
@@ -64,10 +64,10 @@ export async function updateUser(user_obj: TUser) {
  * Create a new user in the database
  * @param user_obj The user's complete information
  */
-export async function createUser(user_obj: TUser) {
+export async function createUser(user_obj: TUser): Promise<TUser | null> {
     const Users = mongoose.model("User", User, "users");
     const newUser = new Users(user_obj);
-    newUser.save();
+    return newUser.save();
 }
 
 /**
@@ -75,7 +75,7 @@ export async function createUser(user_obj: TUser) {
  * null if no user was found with the given UUID.
  * @param uuid The user's UUID
  */
-export async function deleteUser(uuid: UserUUID) {
+export async function deleteUser(uuid: UserUUID): Promise<TUser | null> {
     const Users = mongoose.model("User", User, "users");
     return Users.findOneAndDelete({ uuid: uuid });
 }
@@ -100,6 +100,43 @@ export async function getUserRole(
 ): Promise<TUserRole | null> {
     const UserRoles = mongoose.model("UserRole", UserRole, "user_roles");
     return UserRoles.findOne({ uuid: role_uuid });
+}
+
+/**
+ * Update a user role with a new TUserRole object, and return the updated object.
+ * @param role_obj The new user role object
+ */
+export async function updateUserRole(
+    role_obj: TUserRole,
+): Promise<TUserRole | null> {
+    const UserRoles = mongoose.model("UserRole", UserRole, "user_roles");
+    return UserRoles.findOneAndReplace({ uuid: role_obj.uuid }, role_obj, {
+        returnDocument: "after",
+    });
+}
+
+/**
+ * Create a new user role in the database, and return the created object.
+ * @param role_obj The user role's complete information
+ */
+export async function createUserRole(
+    role_obj: TUserRole,
+): Promise<TUserRole | null> {
+    const UserRoles = mongoose.model("UserRole", UserRole, "user_roles");
+    const newRole = new UserRoles(role_obj);
+    return newRole.save();
+}
+
+/**
+ * Delete a user role by UUID. This function will return the deleted user role
+ * object, or null if no user role was found with the given UUID.
+ * @param role_uuid The UUID of the user role to delete
+ */
+export async function deleteUserRole(
+    role_uuid: UserRoleUUID,
+): Promise<TUserRole | null> {
+    const UserRoles = mongoose.model("UserRole", UserRole, "user_roles");
+    return UserRoles.findOneAndDelete({ uuid: role_uuid });
 }
 
 /**
