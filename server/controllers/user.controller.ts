@@ -54,7 +54,10 @@ export async function getUserByEmail(email: string): Promise<TUser | null> {
 export async function updateUser(user_obj: TUser) {
     const Users = mongoose.model("User", User, "users");
     // Update the given user with a new user_obj, searching by uuid
-    Users.replaceOne({ uuid: user_obj.uuid }, user_obj);
+    // and return the new user object
+    return Users.findOneAndReplace({ uuid: user_obj.uuid }, user_obj, {
+        returnDocument: "after",
+    });
 }
 
 /**
@@ -65,6 +68,16 @@ export async function createUser(user_obj: TUser) {
     const Users = mongoose.model("User", User, "users");
     const newUser = new Users(user_obj);
     newUser.save();
+}
+
+/**
+ * Delete a user by UUID. This function will return the deleted user object, or
+ * null if no user was found with the given UUID.
+ * @param uuid The user's UUID
+ */
+export async function deleteUser(uuid: UserUUID) {
+    const Users = mongoose.model("User", User, "users");
+    return Users.findOneAndDelete({ uuid: uuid });
 }
 
 /**
