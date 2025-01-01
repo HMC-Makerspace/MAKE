@@ -9,11 +9,11 @@ import pino from "pino";
 import loggerMiddleware from "pino-http";
 import cors from "cors";
 
-await Bun.build({
-    entrypoints: ["website/index.html"],
-    outdir: "website/build",
-    plugins: [html()],
-});
+// await Bun.build({
+//     entrypoints: ["index.html"],
+//     outdir: "website/build",
+//     plugins: [html()],
+// });
 
 // Import frontend
 import * as frontend from "../website/index";
@@ -49,7 +49,8 @@ app.use(express.json(), compression(), loggerMiddleware(logger), cors(options));
 app.use("/api/v3/user", userRoutes);
 
 // Frontend, in website/public/index.html
-app.use(express.static(path.join(__dirname, "../website/build")));
+// TODO: Need to figure out how to serve the frontend in production
+// app.use(express.static(path.join(__dirname, "../website/build")));
 
 if (process.env.NODE_ENV === "production") {
     const options = {
