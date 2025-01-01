@@ -21,6 +21,10 @@ export const Workshop = new mongoose.Schema<TWorkshop>({
         required: true,
     },
     users_notified: { type: [String], required: true },
-    sign_in_list: { type: [String], required: true },
+    sign_in_list: {
+        type: Map, // All Maps have strings as keys
+        of: Number, // Numbers as values
+        required: true,
+    },
     photos: { type: [String], required: false },
 });

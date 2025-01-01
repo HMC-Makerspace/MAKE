@@ -23,6 +23,8 @@ import type { FileUUID } from "./file";
  *      signed up for the workshop
  * @property users_notified - a list of users who have been notified about the
  *      workshop
+ * @property sign_in_list - a map of user UUIDs to the timestamp that they
+ *     signed in to the workshop
  * @property photos - (optional) a list UUIDs of {@link TFile | image Files} to
  *      display for this workshop
  */
@@ -41,6 +43,8 @@ export type TWorkshop = {
         [user: UserUUID]: UnixTimestamp;
     };
     users_notified: UserUUID[];
-    sign_in_list: UserUUID[];
+    sign_in_list: {
+        [user: UserUUID]: UnixTimestamp;
+    };
     photos?: FileUUID[];
 };
