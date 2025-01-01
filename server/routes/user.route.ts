@@ -1,4 +1,4 @@
-import { API_SCOPES } from "common/global";
+import { API_SCOPE } from "common/global";
 import {
     createUser,
     createUserRole,
@@ -13,7 +13,10 @@ import {
     updateUser,
     updateUserRole,
 } from "controllers/user.controller";
-import { verifyRequest } from "controllers/verify.controller";
+import {
+    isUserRequestValid,
+    verifyRequest,
+} from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -41,7 +44,7 @@ const router = Router();
 /**
  * Get all users. This is a protected route, and a `requesting_uuid` header
  * is required to call it. The user must have the
- * {@link API_SCOPES.GET_ALL_USERS} scope.
+ * {@link API_SCOPE.GET_ALL_USERS} scope.
  */
 router.get("/", async (req: UserRequest, res: UsersResponse) => {
     const headers = req.headers as VerifyRequestHeader;
@@ -58,7 +61,7 @@ router.get("/", async (req: UserRequest, res: UsersResponse) => {
     });
 
     // If the user is authorized, get all user information
-    if (await verifyRequest(requesting_uuid, API_SCOPES.GET_ALL_USERS)) {
+    if (await verifyRequest(requesting_uuid, API_SCOPE.GET_ALL_USERS)) {
         const users = await getUsers();
         if (!users) {
             req.log.error("No users found in the database");
@@ -166,8 +169,8 @@ router.get(
 /**
  * Update a specific user by UUID. Does not allow creating new users.
  * This is a protected route, and a `requesting_uuid` header is required to
- * call it. The user must have the {@link API_SCOPES.UPDATE_USER} scope to
- * update any user, or the {@link API_SCOPES.UPDATE_USER_SELF} scope to update
+ * call it. The user must have the {@link API_SCOPE.UPDATE_USER} scope to
+ * update any user, or the {@link API_SCOPE.UPDATE_USER_SELF} scope to update
  * their own information. If the user is not authorized, a status error is
  * returned. If the user is authorized, the updated user object is returned.
  */
@@ -200,17 +203,16 @@ router.put("/", async (req: UserRequest, res: UserResponse) => {
     });
 
     // An update request is valid if the requesting user can update any user,
-    // or if the requesting user is allowed to update their own information
-    const isValid =
-        (await verifyRequest(requesting_uuid, API_SCOPES.UPDATE_USER)) ||
-        (requesting_uuid === uuid &&
-            (await verifyRequest(
-                requesting_uuid,
-                API_SCOPES.UPDATE_USER_SELF,
-            )));
-
-    // If the user is authorized, perform the update
-    if (isValid) {
+    // or if the requesting user is allowed to update their own information.
+    if (
+        await isUserRequestValid(
+            requesting_uuid,
+            uuid,
+            API_SCOPE.UPDATE_USER,
+            API_SCOPE.UPDATE_USER_SELF,
+        )
+    ) {
+        // If the user is authorized, perform the update.
         const user = await updateUser(user_obj);
         if (!user) {
             req.log.warn(`User not found to update with uuid ${uuid}`);
@@ -235,7 +237,7 @@ router.put("/", async (req: UserRequest, res: UserResponse) => {
 /**
  * Create a new user.
  * This is a protected route, and a `requesting_uuid` header is required to
- * call it. The user must have the {@link API_SCOPES.CREATE_USER} scope If the
+ * call it. The user must have the {@link API_SCOPE.CREATE_USER} scope If the
  * user is not authorized, a status error is returned. If the user is
  * authorized, the new user object is returned.
  */
@@ -268,7 +270,7 @@ router.post("/", async (req: UserRequest, res: UserResponse) => {
     });
 
     // If the user is authorized, perform the creation
-    if (await verifyRequest(requesting_uuid, API_SCOPES.CREATE_USER)) {
+    if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_USER)) {
         const user = await createUser(user_obj);
         if (!user) {
             req.log.warn(
@@ -296,8 +298,8 @@ router.post("/", async (req: UserRequest, res: UserResponse) => {
 /**
  * Delete a specific user by UUID
  * This is a protected route, and a `requesting_uuid` header is required to
- * call it. The user must have the {@link API_SCOPES.DELETE_USER} scope to
- * delete any user, or the {@link API_SCOPES.DELETE_USER_SELF} scope to delete
+ * call it. The user must have the {@link API_SCOPE.DELETE_USER} scope to
+ * delete any user, or the {@link API_SCOPE.DELETE_USER_SELF} scope to delete
  * their own information. If the user is not authorized, a status error is
  * returned. If the user is authorized, a status ok is returned.
  */
@@ -322,17 +324,15 @@ router.delete(
 
         // A delete request is valid if the requesting user can delete any user,
         // or if the requesting user is allowed to delete their own information
-        const isValid =
-            (await verifyRequest(requesting_uuid, API_SCOPES.DELETE_USER)) ||
-            (requesting_uuid === user_uuid &&
-                (await verifyRequest(
-                    requesting_uuid,
-                    API_SCOPES.DELETE_USER_SELF,
-                )));
-
-        // If the user is authorized, perform the deletion
-        if (isValid) {
-            // Delete the user
+        if (
+            await isUserRequestValid(
+                requesting_uuid,
+                user_uuid,
+                API_SCOPE.DELETE_USER,
+                API_SCOPE.DELETE_USER_SELF,
+            )
+        ) {
+            // If the user is authorized, perform the deletion
             const deleted_user = await deleteUser(user_uuid);
             if (!deleted_user) {
                 req.log.warn(`No user found to delete with uuid ${user_uuid}`);
@@ -361,7 +361,7 @@ router.delete(
 /**
  * Get all user roles. This is a protected route, and a `requesting_uuid`
  * header is required to call it. The user must have the
- * {@link API_SCOPES.GET_ALL_USER_ROLES} scope.
+ * {@link API_SCOPE.GET_ALL_USER_ROLES} scope.
  */
 router.get("/role/", async (req: Request, res: UserRolesResponse) => {
     const headers = req.headers as VerifyRequestHeader;
@@ -380,7 +380,7 @@ router.get("/role/", async (req: Request, res: UserRolesResponse) => {
     });
 
     // If the user is authorized, get all user role information
-    if (await verifyRequest(requesting_uuid, API_SCOPES.GET_ALL_ROLES)) {
+    if (await verifyRequest(requesting_uuid, API_SCOPE.GET_ALL_ROLES)) {
         const user_roles = await getUserRoles();
         if (!user_roles) {
             req.log.error("No user roles found in the database");
@@ -433,7 +433,7 @@ router.get(
  * Update a single user role by UUID. This will not create the user if the UUID
  * does not already exist. This is a protected route, and a
  * `requesting_uuid` header is required to call it. The user must have the
- * {@link API_SCOPES.UPDATE_ROLE} scope to update any user role. If the user is
+ * {@link API_SCOPE.UPDATE_ROLE} scope to update any user role. If the user is
  * not authorized, a status error is returned. If the user is authorized, the
  * updated user role object is returned.
  */
@@ -457,7 +457,7 @@ router.put("/role/", async (req: UserRoleRequest, res: UserRoleResponse) => {
     });
 
     // If the user is authorized, get all user role information
-    if (await verifyRequest(requesting_uuid, API_SCOPES.UPDATE_ROLE)) {
+    if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_ROLE)) {
         const user_role = await updateUserRole(role_obj);
         if (!user_role) {
             req.log.warn(`No user role found with uuid ${role_uuid}`);
@@ -481,7 +481,7 @@ router.put("/role/", async (req: UserRoleRequest, res: UserRoleResponse) => {
 /**
  * Create a single user role by UUID. This is a protected route, and a
  * `requesting_uuid` header is required to call it. The user must have the
- * {@link API_SCOPES.UPDATE_ROLE} scope to update any user role. If the user is
+ * {@link API_SCOPE.UPDATE_ROLE} scope to update any user role. If the user is
  * not authorized, a status error is returned. If the user is authorized, the
  * updated user role object is returned.
  */
@@ -505,7 +505,7 @@ router.post("/role/", async (req: UserRoleRequest, res: UserRoleResponse) => {
     });
 
     // If the user is authorized, get all user role information
-    if (await verifyRequest(requesting_uuid, API_SCOPES.CREATE_ROLE)) {
+    if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_ROLE)) {
         const user_role = await createUserRole(role_obj);
         if (!user_role) {
             req.log.warn(
@@ -532,7 +532,7 @@ router.post("/role/", async (req: UserRoleRequest, res: UserRoleResponse) => {
 /**
  * Delete a single user role by UUID. This is a protected route, and a
  * `requesting_uuid` header is required to call it. The user must have the
- * {@link API_SCOPES.DELETE_ROLE} scope to delete any user role. If the user is
+ * {@link API_SCOPE.DELETE_ROLE} scope to delete any user role. If the user is
  * not authorized, a status error is returned. If the user is authorized, the
  * user role object is deleted and a status ok is returned.
  */
@@ -556,7 +556,7 @@ router.delete(
             return;
         }
         // If the user is authorized, get all user role information
-        if (await verifyRequest(requesting_uuid, API_SCOPES.DELETE_ROLE)) {
+        if (await verifyRequest(requesting_uuid, API_SCOPE.DELETE_ROLE)) {
             const user_role = await deleteUserRole(role_uuid);
             if (!user_role) {
                 req.log.error(`No user role found with uuid ${role_uuid}`);

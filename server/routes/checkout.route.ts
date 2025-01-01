@@ -1,4 +1,4 @@
-import { API_SCOPES } from "common/global";
+import { API_SCOPE } from "common/global";
 import {
     getCheckouts,
     getCheckout,
@@ -7,8 +7,12 @@ import {
     updateCheckout,
     checkInCheckout,
     extendCheckout,
+    getCheckoutsByUser,
 } from "controllers/checkout.controller";
-import { verifyRequest } from "controllers/verify.controller";
+import {
+    isUserRequestValid,
+    verifyRequest,
+} from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -21,7 +25,8 @@ import { TCheckout } from "common/checkout";
 
 // --- Request and Response Types ---
 type CheckoutRequest = Request<{}, {}, { checkout_obj: TCheckout }>;
-type CheckoutResponse = Response<TCheckout | TCheckout[] | ErrorResponse>;
+type CheckoutResponse = Response<TCheckout | ErrorResponse>;
+type CheckoutsResponse = Response<TCheckout[] | ErrorResponse>;
 
 const router = Router();
 
@@ -30,13 +35,13 @@ const router = Router();
 /**
  * Get all checkouts. This is a protected route, and a `requesting_uuid` header
  * is required to call it. The user must have the
- * {@link API_SCOPES.GET_ALL_CHECKOUTS} scope.
+ * {@link API_SCOPE.GET_ALL_CHECKOUTS} scope.
  */
-router.get("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
+router.get("/", async (req: CheckoutRequest, res: CheckoutsResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid = headers.requesting_uuid;
 
-    // If no requesting checkout uuid is provided, the call is not authorized
+    // If no requesting user uuid is provided, the call is not authorized
     if (!requesting_uuid) {
         req.log.warn(
             "No requesting_uuid was provided while getting all checkouts",
@@ -51,7 +56,7 @@ router.get("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
     });
 
     // If the user is authorized, get all checkout information
-    if (await verifyRequest(requesting_uuid, API_SCOPES.GET_ALL_CHECKOUTS)) {
+    if (await verifyRequest(requesting_uuid, API_SCOPE.GET_ALL_CHECKOUTS)) {
         const checkouts = await getCheckouts();
         if (!checkouts) {
             req.log.error("No checkouts found in the database.");
@@ -75,16 +80,16 @@ router.get("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
 /**
  * Get a specific checkout. This is a protected route, and a `requesting_uuid`
  * header is required to call it. The user must have the
- * {@link API_SCOPES.GET_ONE_CHECKOUT} scope.
+ * {@link API_SCOPE.GET_ONE_CHECKOUT} scope.
  */
 router.get(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: CheckoutResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = headers.requesting_uuid;
-        const checkout_uuid = req.body;
+        const checkout_uuid = req.params.UUID;
 
-        // If no requesting checkout uuid is provided, the call is not authorized
+        // If no requesting user uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
                 "No requesting_uuid was provided while getting a checkout",
@@ -99,7 +104,7 @@ router.get(
         });
 
         // If the user is authorized, get a checkout's information
-        if (await verifyRequest(requesting_uuid, API_SCOPES.GET_ONE_CHECKOUT)) {
+        if (await verifyRequest(requesting_uuid, API_SCOPE.GET_ONE_CHECKOUT)) {
             const checkout = await getCheckout(checkout_uuid);
             if (!checkout) {
                 req.log.warn(`Checkout not found by uuid ${checkout_uuid}`);
@@ -122,9 +127,64 @@ router.get(
 );
 
 /**
+ * Get all checkouts made by a specific user. This is a protected route, and a
+ * `requesting_uuid` header is required to call it. The user must have the
+ * {@link API_SCOPE.GET_CHECKOUTS_FOR_USER} scope. If the requesting user is
+ * the same as the user being queried, the {@link API_SCOPE.GET_OWN_CHECKOUTS}
+ * scope is allowed instead. This route will return a list of checkouts made by
+ * the user, or a 403 error if the user is not authorized to view the checkouts.
+ */
+router.get(
+    "/by/user/:user_uuid",
+    async (req: Request<{ user_uuid: string }>, res: CheckoutsResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = headers.requesting_uuid;
+        const user_uuid = req.params.user_uuid;
+
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while getting a user's checkouts",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+
+        req.log.debug({
+            msg: `Getting checkouts for user ${user_uuid}`,
+            requesting_uuid: requesting_uuid,
+        });
+
+        // A get checkouts by user request is valid if the requesting user can
+        // get checkouts for any user, or if the requesting user is allowed to
+        // get their own checkouts
+        if (
+            await isUserRequestValid(
+                requesting_uuid,
+                user_uuid,
+                API_SCOPE.GET_CHECKOUTS_FOR_USER,
+                API_SCOPE.GET_OWN_CHECKOUTS,
+            )
+        ) {
+            // If authorized, get the user's checkout information
+            const checkouts = await getCheckoutsByUser(user_uuid);
+            req.log.debug("Returned user's checkouts.");
+            res.status(StatusCodes.OK).json(checkouts);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to get a user's checkouts",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
+
+/**
  * Creates a new checkout. This is a protected route, and a 'requesting_uuid'
  * header is required to call it. The user must have the
- * {@link API_SCOPES.CREATE_CHECKOUT} scope.
+ * {@link API_SCOPE.CREATE_CHECKOUT} scope.
  */
 router.post("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
     const headers = req.headers as VerifyRequestHeader;
@@ -132,7 +192,7 @@ router.post("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
     const checkout_obj = req.body.checkout_obj;
     const checkout_uuid = checkout_obj.uuid;
 
-    // If no requesting checkout uuid is provided, the call is not authorized
+    // If no requesting user uuid is provided, the call is not authorized
     if (!requesting_uuid) {
         req.log.warn(
             "No requesting_uuid was provided while creating a checkout",
@@ -147,7 +207,7 @@ router.post("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
     });
 
     // If the user is authorized, create a checkout
-    if (await verifyRequest(requesting_uuid, API_SCOPES.CREATE_CHECKOUT)) {
+    if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_CHECKOUT)) {
         const checkout = await createCheckout(checkout_obj);
         if (!checkout) {
             req.log.warn(
@@ -173,10 +233,9 @@ router.post("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
 
 /**
  * Update a specific checkout. This route will not create a new checkout if the
- * UUID does not exist. Instead, it will return a 404 error.
- * This is a protected route, and a `requesting_uuid`
- * header is required to call it. The user must have the
- * {@link API_SCOPES.UPDATE_CHECKOUT} scope.
+ * UUID does not exist. Instead, it will return a 404 error. This is a
+ * protected route, and a `requesting_uuid` header is required to call it.
+ * The user must have the {@link API_SCOPE.UPDATE_CHECKOUT} scope.
  */
 router.put("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
     const headers = req.headers as VerifyRequestHeader;
@@ -184,7 +243,7 @@ router.put("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
     const checkout_obj = req.body.checkout_obj;
     const checkout_uuid = checkout_obj.uuid;
 
-    // If no requesting checkout uuid is provided, the call is not authorized
+    // If no requesting user uuid is provided, the call is not authorized
     if (!requesting_uuid) {
         req.log.warn(
             "No requesting_uuid was provided while updating a checkout",
@@ -199,12 +258,17 @@ router.put("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
     });
 
     // If the user is authorized, update a checkout's information
-    if (await verifyRequest(requesting_uuid, API_SCOPES.UPDATE_CHECKOUT)) {
+    if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_CHECKOUT)) {
         const checkout = await updateCheckout(checkout_obj);
         if (!checkout) {
-            req.log.warn(`Checkout ${checkout_uuid} failed to update`);
+            req.log.warn(
+                `Could not update checkout with uuid ${checkout_uuid} ` +
+                    `because it was not found.`,
+            );
             res.status(StatusCodes.NOT_FOUND).json({
-                error: `Checkout \`${checkout_uuid}\` failed to update.`,
+                error:
+                    `Could not update checkout with uuid ` +
+                    `\`${checkout_uuid}\` because it was not found.`,
             });
             return;
         }
@@ -223,7 +287,7 @@ router.put("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
 /**
  * Check in a specific checkout. This is a protected route, and a
  * `requesting_uuid` header is required to call it. The user must have the
- * {@link API_SCOPES.UPDATE_CHECKOUT} scope. This route will return the updated
+ * {@link API_SCOPE.UPDATE_CHECKOUT} scope. This route will return the updated
  * checkout object, or a 404 error if the checkout UUID is not found.
  * @example
  * ```ts
@@ -243,7 +307,7 @@ router.patch(
         const requesting_uuid: string = headers.requesting_uuid;
         const checkout_uuid = req.params.UUID;
 
-        // If no requesting checkout uuid is provided, the call is not authorized
+        // If no requesting user uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
                 "No requesting_uuid was provided while checking in a checkout",
@@ -258,7 +322,7 @@ router.patch(
         });
 
         // If the user is authorized, update a checkout's information
-        if (await verifyRequest(requesting_uuid, API_SCOPES.UPDATE_CHECKOUT)) {
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_CHECKOUT)) {
             const checkout = await checkInCheckout(checkout_uuid);
             if (!checkout) {
                 req.log.warn(
@@ -285,7 +349,7 @@ router.patch(
 /**
  * Extend a specific checkout to a new due date. This is a protected route, and
  * a `requesting_uuid` header is required to call it. The user must have the
- * {@link API_SCOPES.UPDATE_CHECKOUT} scope.
+ * {@link API_SCOPE.UPDATE_CHECKOUT} scope.
  * The body of the request should contain a `new_timestamp_due` field with the
  * new due date in milliseconds since the Unix epoch.
  * @example
@@ -315,7 +379,7 @@ router.patch(
         const checkout_uuid = req.params.UUID;
         const new_timestamp_due = req.body.new_timestamp_due;
 
-        // If no requesting checkout uuid is provided, the call is not authorized
+        // If no requesting user uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
                 "No requesting_uuid was provided while extending a checkout",
@@ -325,12 +389,14 @@ router.patch(
         }
 
         req.log.debug({
-            msg: `Extending a checkout by uuid ${checkout_uuid}`,
+            msg:
+                `Extending a checkout by uuid ${checkout_uuid} until ` +
+                new Date(new_timestamp_due).toISOString(),
             requesting_uuid: requesting_uuid,
         });
 
         // If the user is authorized, update a checkout's information
-        if (await verifyRequest(requesting_uuid, API_SCOPES.UPDATE_CHECKOUT)) {
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_CHECKOUT)) {
             const checkout = await extendCheckout(
                 checkout_uuid,
                 new_timestamp_due,
@@ -360,16 +426,16 @@ router.patch(
 /**
  * Delete a specific checkout. This is a protected route, and a
  * `requesting_uuid` header is required to call it. The user must have the
- * {@link API_SCOPES.DELETE_CHECKOUT} scope.
+ * {@link API_SCOPE.DELETE_CHECKOUT} scope.
  */
 router.delete(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: CheckoutResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid = headers.requesting_uuid;
         const checkout_uuid = req.params.UUID;
 
-        // If no requesting checkout uuid is provided, the call is not authorized
+        // If no requesting user uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
                 "No requesting_uuid was provided while deleting a checkout",
@@ -384,12 +450,17 @@ router.delete(
         });
 
         // If the user is authorized, delete a checkout object
-        if (await verifyRequest(requesting_uuid, API_SCOPES.DELETE_CHECKOUT)) {
+        if (await verifyRequest(requesting_uuid, API_SCOPE.DELETE_CHECKOUT)) {
             const checkout = await deleteCheckout(checkout_uuid);
             if (!checkout) {
-                req.log.warn(`Failed to delete checkout ${checkout_uuid}`);
+                req.log.warn(
+                    `Checkout with uuid ${checkout_uuid} could not be ` +
+                        `deleted because it was not found.`,
+                );
                 res.status(StatusCodes.NOT_FOUND).json({
-                    error: `Failed to delete checkout \`${checkout_uuid}\`.`,
+                    error:
+                        `Checkout with uuid ${checkout_uuid} could not be ` +
+                        `deleted because it was not found.`,
                 });
                 return;
             }

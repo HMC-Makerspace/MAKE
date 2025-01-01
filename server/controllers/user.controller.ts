@@ -1,4 +1,4 @@
-import { API_SCOPES } from "common/global";
+import { API_SCOPE } from "common/global";
 import { TUser, TUserRole, UserRoleUUID, UserUUID } from "common/user";
 import { User, UserRole } from "models/user.model";
 import mongoose from "mongoose";
@@ -158,11 +158,11 @@ export async function deleteUserRole(
 /**
  * Get all API scopes for a given user, searching by UUID
  * @param uuid The UUID of the user to use
- * @returns A list of {@link API_SCOPES} that the user has
+ * @returns A list of {@link API_SCOPE} that the user has
  */
-export async function getUserScopes(uuid: UserUUID): Promise<API_SCOPES[]> {
+export async function getUserScopes(uuid: UserUUID): Promise<API_SCOPE[]> {
     const user = await getUser(uuid);
-    let scopes: API_SCOPES[] = [];
+    let scopes: API_SCOPE[] = [];
     // If the user doesn't exist, they have no scopes
     if (!user) {
         return scopes;

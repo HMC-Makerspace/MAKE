@@ -1,4 +1,4 @@
-import { API_SCOPES, UUID } from "common/global";
+import { API_SCOPE, UUID } from "common/global";
 import { TCheckout } from "common/checkout";
 import { Checkout } from "models/checkout.model";
 import mongoose from "mongoose";
@@ -20,6 +20,19 @@ export async function getCheckouts(): Promise<TCheckout[]> {
 export async function getCheckout(uuid: UUID): Promise<TCheckout | null> {
     const Checkouts = mongoose.model("Checkout", Checkout, "checkouts");
     return Checkouts.findOne({ uuid: uuid });
+}
+
+/**
+ * Get all checkouts made by a specific user
+ * @param user_uuid The user's UUID to search by
+ * @returns A promise to a list of TCheckout objects, or an empty list if the
+ *    user has made no checkouts
+ */
+export async function getCheckoutsByUser(
+    user_uuid: UUID,
+): Promise<TCheckout[]> {
+    const Checkouts = mongoose.model("Checkout", Checkout, "checkouts");
+    return Checkouts.find({ checked_out_by: user_uuid });
 }
 
 /**
@@ -59,9 +72,7 @@ export async function updateCheckout(
     return Checkouts.findOneAndReplace(
         { uuid: checkout_obj.uuid },
         checkout_obj,
-        {
-            returnDocument: "after",
-        },
+        { returnDocument: "after" },
     );
 }
 
@@ -74,7 +85,7 @@ export async function checkInCheckout(
     checkout_uuid: UUID,
 ): Promise<TCheckout | null> {
     const Checkouts = mongoose.model("Checkout", Checkout, "checkouts");
-    return Checkouts.findOneAndUpdate(
+    return Checkouts.findOneAndReplace(
         { uuid: checkout_uuid },
         { timestamp_in: new Date() },
         { returnDocument: "after" },
@@ -92,7 +103,7 @@ export async function extendCheckout(
     new_timestamp_due: number,
 ): Promise<TCheckout | null> {
     const Checkouts = mongoose.model("Checkout", Checkout, "checkouts");
-    return Checkouts.findOneAndUpdate(
+    return Checkouts.findOneAndReplace(
         { uuid: checkout_uuid },
         { timestamp_due: new_timestamp_due },
         { returnDocument: "after" },

@@ -11,11 +11,13 @@ export type UnixTimestamp = number;
 /**
  * API_SCOPES - an enum of all possible API scopes
  */
-export enum API_SCOPES {
+export enum API_SCOPE {
     ADMIN = "admin",
     // Checkout scopes
     GET_ALL_CHECKOUTS = "get_checkouts",
     GET_ONE_CHECKOUT = "get_checkout",
+    GET_CHECKOUTS_FOR_USER = "get_user_checkouts",
+    GET_OWN_CHECKOUTS = "get_own_checkouts",
     CREATE_CHECKOUT = "create_checkout",
     UPDATE_CHECKOUT = "update_checkout",
     DELETE_CHECKOUT = "delete_checkout",

@@ -1,4 +1,4 @@
-import { API_SCOPES, UUID } from "common/global";
+import { API_SCOPE, UUID } from "common/global";
 import {
     getWorkshops,
     getWorkshop,
@@ -37,7 +37,7 @@ const router = Router();
 /**
  * Creates a new workshop. This is a protected route, and a 'requesting_uuid'
  * header is required to call it. The user must have the
- * {@link API_SCOPES.CREATE_WORKSHOP} scope.
+ * {@link API_SCOPE.CREATE_WORKSHOP} scope.
  */
 router.post("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
     const headers = req.headers as VerifyRequestHeader;
@@ -60,7 +60,7 @@ router.post("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
     });
 
     // If the user is authorized, create a workshop
-    if (await verifyRequest(requesting_uuid, API_SCOPES.CREATE_WORKSHOP)) {
+    if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_WORKSHOP)) {
         const workshop = await createWorkshop(workshop_obj);
         if (!workshop) {
             req.log.warn(
@@ -87,7 +87,7 @@ router.post("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
 /**
  * Deletes a workshop. This is a protected route, and a 'requesting_uuid'
  * header is required to call it. The user must have the
- * {@link API_SCOPES.DELETE_WORKSHOP} scope.
+ * {@link API_SCOPE.DELETE_WORKSHOP} scope.
  */
 router.delete(
     "/:UUID",
@@ -111,7 +111,7 @@ router.delete(
         });
 
         // If the user is authorized, delete a workshop object
-        if (await verifyRequest(requesting_uuid, API_SCOPES.DELETE_WORKSHOP)) {
+        if (await verifyRequest(requesting_uuid, API_SCOPE.DELETE_WORKSHOP)) {
             const workshop = await deleteWorkshop(workshop_uuid);
             if (!workshop) {
                 req.log.warn(`Failed to delete workshop ${workshop_uuid}`);
@@ -138,7 +138,7 @@ router.delete(
  * UUID does not exist. Instead, it will return a 404 error.
  * This is a protected route, and a `requesting_uuid`
  * header is required to call it. The user must have the
- * {@link API_SCOPES.UPDATE_WORKSHOP} scope.
+ * {@link API_SCOPE.UPDATE_WORKSHOP} scope.
  */
 router.put("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
     const headers = req.headers as VerifyRequestHeader;
@@ -161,7 +161,7 @@ router.put("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
     });
 
     // If the user is authorized, update a workshop's information
-    if (await verifyRequest(requesting_uuid, API_SCOPES.UPDATE_WORKSHOP)) {
+    if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_WORKSHOP)) {
         const workshop = await updateWorkshop(workshop_obj);
         if (!workshop) {
             req.log.warn(`Workshop ${workshop_uuid} failed to update`);
@@ -185,7 +185,7 @@ router.put("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
 /**
  * Get all workshops. This is a protected route, and a `requesting_uuid` header
  * is required to call it. The user must have the
- * {@link API_SCOPES.GET_ALL_WORKSHOPS} scope.
+ * {@link API_SCOPE.GET_ALL_WORKSHOPS} scope.
  */
 router.get("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
     const headers = req.headers as VerifyRequestHeader;
@@ -206,7 +206,7 @@ router.get("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
     });
 
     // If the user is authorized, get all workshop information
-    if (await verifyRequest(requesting_uuid, API_SCOPES.GET_ALL_WORKSHOPS)) {
+    if (await verifyRequest(requesting_uuid, API_SCOPE.GET_ALL_WORKSHOPS)) {
         const workshops = await getWorkshops();
         if (!workshops) {
             req.log.error("No workshops found in the database.");
@@ -230,7 +230,7 @@ router.get("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
 /**
  * Get a specific workshop. This is a protected route, and a `requesting_uuid` header
  * is required to call it. The user must have the
- * {@link API_SCOPES.GET_ONE_WORKSHOPS} scope.
+ * {@link API_SCOPE.GET_ONE_WORKSHOPS} scope.
  */
 router.get(
     "/",
@@ -254,7 +254,7 @@ router.get(
         });
 
         // If the user is authorized, get a workshop's information
-        if (await verifyRequest(requesting_uuid, API_SCOPES.GET_ONE_WORKSHOP)) {
+        if (await verifyRequest(requesting_uuid, API_SCOPE.GET_ONE_WORKSHOP)) {
             const workshop = await getWorkshop(workshop_uuid);
             if (!workshop) {
                 req.log.warn(`Workshop not found by uuid ${workshop}`);
@@ -279,7 +279,7 @@ router.get(
 /**
  * rsvpToWorkshop. This is a protected route and a `requesting_uuid` header
  * is required to call it. The user must have the
- * {@link API_SCOPES.RSVP_WORKSHOPS} scope.
+ * {@link API_SCOPE.RSVP_WORKSHOPS} scope.
  */
 router.patch(
     "/:workshop_uuid/rsvp/:user_uuid",
@@ -304,7 +304,7 @@ router.patch(
         });
 
         // If the user is authorized, update a workshop's information
-        if (await verifyRequest(requesting_uuid, API_SCOPES.RSVP_WORKSHOP)) {
+        if (await verifyRequest(requesting_uuid, API_SCOPE.RSVP_WORKSHOP)) {
             const rsvp_successful = await rsvpToWorkshop(
                 workshop_uuid,
                 user_uuid,
@@ -334,7 +334,7 @@ router.patch(
 /**
  * cancelRSVPToWorkshop. This is a protected route and a `requesting_uuid` header
  * is required to call it. The user must have the
- * {@link API_SCOPES.RSVP_WORKSHOPS} scope.
+ * {@link API_SCOPE.RSVP_WORKSHOPS} scope.
  */
 router.patch(
     "/:workshop_uuid/rsvp/:user_uuid",
@@ -359,7 +359,7 @@ router.patch(
         });
 
         // If the user is authorized, update a workshop's information
-        if (await verifyRequest(requesting_uuid, API_SCOPES.RSVP_WORKSHOP)) {
+        if (await verifyRequest(requesting_uuid, API_SCOPE.RSVP_WORKSHOP)) {
             const rsvp_successful = await cancelRSVPToWorkshop(
                 workshop_uuid,
                 user_uuid,
@@ -389,7 +389,7 @@ router.patch(
 /**
  * signInToWorkshop. This is a protected route and a `requesting_uuid` header
  * is required to call it. The user must have the
- * {@link API_SCOPES.SIGN_IN_WORKSHOP} scope.
+ * {@link API_SCOPE.SIGN_IN_WORKSHOP} scope.
  */
 router.patch(
     "/:workshop_uuid/rsvp/:user_uuid",
@@ -414,7 +414,7 @@ router.patch(
         });
 
         // If the user is authorized, update a workshop's information
-        if (await verifyRequest(requesting_uuid, API_SCOPES.RSVP_WORKSHOP)) {
+        if (await verifyRequest(requesting_uuid, API_SCOPE.RSVP_WORKSHOP)) {
             const rsvp_successful = await signInToWorkshop(
                 workshop_uuid,
                 user_uuid,

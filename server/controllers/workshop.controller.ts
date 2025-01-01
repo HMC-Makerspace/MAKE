@@ -1,4 +1,4 @@
-import { API_SCOPES, UUID } from "common/global";
+import { API_SCOPE, UUID } from "common/global";
 import { UserUUID } from "common/user";
 import { TWorkshop } from "common/workshop";
 import { Workshop } from "models/workshop.model";
