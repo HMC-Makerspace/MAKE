@@ -36,7 +36,10 @@ connectDB(logger);
 
 // Add a list of allowed origins.
 // If you have more origins you would like to add, you can add them to the array below.
-const allowedOrigins = [`http://localhost:${process.env.PORT || 3000}`];
+const allowedOrigins = [
+    `http://localhost:${process.env.PORT || 3000}`, // Backend
+    `http://localhost:${process.env.FRONTEND_PORT || 3001}`, // Frontend
+];
 const options: cors.CorsOptions = {
     origin: allowedOrigins,
 };
@@ -47,6 +50,9 @@ app.use(express.json(), compression(), loggerMiddleware(logger), cors(options));
 // API Routes
 // app.use("/api/v3", indexRoutes);
 app.use("/api/v3/user", userRoutes);
+app.get("/api/v3", (req, res) => {
+    res.send("Hello World!");
+});
 
 // Frontend, in website/public/index.html
 // TODO: Need to figure out how to serve the frontend in production

@@ -3,6 +3,7 @@ declare module "bun" {
         MONGO_URI: string;
         NODE_ENV: "development" | "production";
         PORT?: number;
+        FRONTEND_PORT?: number;
         EMAIL_BOT_NAME: string;
         EMAIL_BOT_HOST: string;
         EMAIL_BOT_PORT: number;
