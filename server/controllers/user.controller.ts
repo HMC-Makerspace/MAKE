@@ -61,11 +61,20 @@ export async function updateUser(user_obj: TUser): Promise<TUser | null> {
 }
 
 /**
- * Create a new user in the database
+ * Create a new user in the database. This function will return the created
+ * user object, or null if a user with the same UUID already exists.
  * @param user_obj The user's complete information
  */
 export async function createUser(user_obj: TUser): Promise<TUser | null> {
     const Users = mongoose.model("User", User, "users");
+    const user_uuid = user_obj.uuid;
+    // Check if the user already exists
+    const existingUser = await Users.exists({ uuid: user_uuid });
+    if (existingUser) {
+        // If so, return null, and don't create a new user
+        return null;
+    }
+    // If the user doesn't exist, create a new user and return it
     const newUser = new Users(user_obj);
     return newUser.save();
 }
@@ -104,7 +113,7 @@ export async function getUserRole(
 
 /**
  * Update a user role with a new TUserRole object, and return the updated object.
- * @param role_obj The new user role object
+ * @param role_obj The new user role object, or null if the role was not found
  */
 export async function updateUserRole(
     role_obj: TUserRole,
@@ -123,6 +132,13 @@ export async function createUserRole(
     role_obj: TUserRole,
 ): Promise<TUserRole | null> {
     const UserRoles = mongoose.model("UserRole", UserRole, "user_roles");
+    // Check if the user role already exists
+    const existingRole = await UserRoles.exists({ uuid: role_obj.uuid });
+    if (existingRole) {
+        // If so, return null, and don't create a new user role
+        return null;
+    }
+    // If the user role doesn't exist, create a new user role and return it
     const newRole = new UserRoles(role_obj);
     return newRole.save();
 }

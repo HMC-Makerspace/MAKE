@@ -1,3 +1,4 @@
+import { AreaUUID } from "./area";
 import type { CertificationUUID } from "./certification";
 import type { UnixTimestamp, UUID } from "./global";
 import type { UserRoleUUID, UserUUID } from "./user";
@@ -14,13 +15,13 @@ enum ITEM_RELATIVE_QUANTITY {
 
 /**
  * TLocation - Location of an inventory item
- * @property room - in which item is stored
+ * @property room - The UUID of an area where the item is stored
  * @property quantity - of item stored in this location
  * @property container - (optional) subsection of room
  * @property specific - specific section of container
  */
 export type TInventoryItemLocation = {
-    room: string;
+    room: AreaUUID;
     container?: string;
     specific?: string;
     quantity: ITEM_RELATIVE_QUANTITY | number;
