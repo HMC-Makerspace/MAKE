@@ -2,7 +2,6 @@ import { API_SCOPES } from "common/global";
 import {
     getCheckouts,
     getCheckout,
-    createCheckout,
     deleteCheckout,
     updateCheckout,
 } from "controllers/checkout.controller";

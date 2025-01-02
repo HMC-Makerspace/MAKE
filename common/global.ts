@@ -16,7 +16,7 @@ export enum API_SCOPES {
     GET_ALL_CHECKOUTS = "get_checkouts",
     GET_CHECKOUT = "get_checkout",
     UPDATE_CHECKOUT = "update_checkouts",
-    DELETE_CHECKOUTS = "get_checkouts",
+    DELETE_CHECKOUT = "get_checkouts",
     PRINTER = "3dprinter",
     INVENTORY = "inventory",
     INVENTORY_EDITOR = "inventory_editor",
