@@ -1,7 +1,7 @@
 import { AreaUUID } from "./area";
 import type { CertificationUUID } from "./certification";
-import type { UnixTimestamp, UUID } from "./global";
-import type { UserRoleUUID, UserUUID } from "./user";
+import type { UUID } from "./global";
+import type { UserRoleUUID } from "./user";
 
 export type InventoryItemUUID = UUID;
 
@@ -12,6 +12,8 @@ enum ITEM_RELATIVE_QUANTITY {
     LOW = -1,
     HIGH = -2,
 }
+
+export type ItemQuantity = ITEM_RELATIVE_QUANTITY | number;
 
 /**
  * TLocation - Location of an inventory item
@@ -24,7 +26,7 @@ export type TInventoryItemLocation = {
     room: AreaUUID;
     container?: string;
     specific?: string;
-    quantity: ITEM_RELATIVE_QUANTITY | number;
+    quantity: ItemQuantity;
 };
 
 /**
@@ -77,7 +79,7 @@ export type TItemCertificate = {
  * @property kit_contents - (optional) if kit, lists all item UUIDs in this kit
  * @property keywords - (optional) keywords associated with item
  * @property required_certs - UUIDs of certs required to use item
- * @property required_roles - (optional) A list of UserRole UUIDs that are
+ * @property authorized_roles - (optional) A list of UserRole UUIDs that are
  *      allowed to use this item. A user must have at least one of
  *      these roles to checkout the given item. If not present, any user may
  *      checkout this item.
@@ -88,68 +90,11 @@ export type TInventoryItem = {
     long_name?: string;
     role: ITEM_ROLE;
     access_type: ITEM_ACCESS_TYPE;
-    locations: TLocation[];
+    locations: TInventoryItemLocation[];
     reorder_url?: string;
     serial_number?: string;
     kit_contents?: InventoryItemUUID[];
     keywords?: string[];
     required_certifications?: TItemCertificate[];
     authorized_roles?: UserRoleUUID[];
-};
-
-/**
- * RESTOCK_REQUEST_STATUS - The status of an individual restock request
- * @member PENDING_APPROVAL - the request has been submitted but not yet seen
- *      for approval
- * @member DENIED - the request has been denied
- * @member APPROVED_WAITING - The request has been approved but not yet
- *      purchased (do to being out of stock, or otherwise)
- * @member APPROVED_ORDERED - The request has been approved and the item has
- *      been ordered but has not yet arrived
- * @member RESTOCKED - The item has arrived and been restocked
- */
-export enum RESTOCK_REQUEST_STATUS {
-    PENDING_APPROVAL = 0,
-    DENIED,
-    APPROVED_WAITING,
-    APPROVED_ORDERED,
-    RESTOCKED,
-}
-
-/**
- * TRestockRequestStatusLog - A log of info about a restock request's status
- * @property status - The updated status of the restock request
- * @property timestamp - The timestamp this update was logged
- * @property message - (optional) A message to display to the requesting user
- */
-export type TRestockRequestLog = {
-    timestamp: UnixTimestamp;
-    status: RESTOCK_REQUEST_STATUS;
-    message?: string;
-};
-
-/**
- * TRestockRequest - A request to restock a given item
- * @property uuid - a unique identifier for this request
- * @property item - a UUID of the item to be restocked
- * @property current_quantity - The current quantity of the item when the
- *      request was submitted
- * @property quantity_requested - (optional) The requested quantity to purchase
- * @property reason - (optional) A description for why this item needs to
- *      be restocked
- * @property requesting_user - The UUID of the user who created this request
- * @property current_status - The current status of this request, as described
- *      by {@link RESTOCK_REQUEST_STATUS}
- * @property status_logs - A list of status logs for this request, as a list
- *      of {@link TRestockRequestLog | `RestockRequestStatusLog`}
- */
-export type TRestockRequest = {
-    uuid: UUID;
-    item_uuid: InventoryItemUUID;
-    current_quantity: ITEM_RELATIVE_QUANTITY | number;
-    quantity_requested?: number;
-    reason?: string;
-    requesting_user: UserUUID;
-    current_status: RESTOCK_REQUEST_STATUS;
-    status_logs: TRestockRequestLog[];
 };
