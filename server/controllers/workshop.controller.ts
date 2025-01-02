@@ -1,15 +1,16 @@
-import { API_SCOPE, UUID } from "common/global";
+import { UUID } from "common/global";
 import { UserUUID } from "common/user";
-import { TWorkshop } from "common/workshop";
+import { TPublicWorkshopData, TWorkshop } from "common/workshop";
 import { Workshop } from "models/workshop.model";
 import mongoose from "mongoose";
 
 /**
  * Get all workshops in the database
- * @returns A promise to list of TWorkshop objects representing all workshops in the db
+ * @returns A promise to list of TWorkshop objects representing all workshops
+ *      in the db
  */
 export async function getWorkshops(): Promise<TWorkshop[]> {
-    const Workshops = mongoose.model("Workshop", Workshop, "workshops");
+    const Workshops = mongoose.model("Workshop", Workshop);
     return Workshops.find();
 }
 
@@ -19,8 +20,30 @@ export async function getWorkshops(): Promise<TWorkshop[]> {
  * @returns A promise to a TWorkshop object, or null if no workshop has the given UUID
  */
 export async function getWorkshop(workshop_uuid: UUID) {
-    const Workshops = mongoose.model("Workshop", Workshop, "workshops");
+    const Workshops = mongoose.model("Workshop", Workshop);
     return Workshops.findOne({ uuid: workshop_uuid });
+}
+
+/**
+ * Get all public workshop data, which only includes currently public
+ * workshops and is stripped of log information
+ * @returns A promise to list of TPublicWorkshopData objects representing all
+ *    currently public workshops
+ */
+export async function getPublicWorkshops(): Promise<TPublicWorkshopData[]> {
+    const Workshops = mongoose.model("Workshop", Workshop, "workshops");
+    // Get all workshops that are currently public
+    return Workshops.find({
+        timestamp_public: { $lte: Date.now() / 1000 },
+    }).select([
+        // Remove private information from workshop
+        "-uuid",
+        "-timestamp_public",
+        "-support_instructors",
+        "-rsvp_list",
+        "-users_notified",
+        "-sign_in_list",
+    ]);
 }
 
 /**
@@ -31,7 +54,7 @@ export async function getWorkshop(workshop_uuid: UUID) {
 export async function createWorkshop(
     workshop_obj: TWorkshop,
 ): Promise<TWorkshop | null> {
-    const Workshops = mongoose.model("Workshops", Workshop, "workshops");
+    const Workshops = mongoose.model("Workshop", Workshop);
     // Check if the workshop already exists
     const existingWorkshop = await Workshops.exists({
         uuid: workshop_obj.uuid,
@@ -46,39 +69,38 @@ export async function createWorkshop(
 }
 
 /**
- * Delete a workshop in the database
+ * Delete a workshop in the database by UUID
  * @param workshop_uuid the specific workshop's unique id
- * @returns The workshop object, or null if the workshop doesn't exist
+ * @returns The deleted workshop object, or null if the workshop doesn't exist
  */
 export async function deleteWorkshop(
     workshop_uuid: UUID,
 ): Promise<TWorkshop | null> {
-    const Workshops = mongoose.model("Workshops", Workshop, "workshops");
+    const Workshops = mongoose.model("Workshop", Workshop);
     // If the workshop exists, return it and delete it
     return Workshops.findOneAndDelete({ uuid: workshop_uuid });
 }
 
 /**
- * Update a workshop in the database
- * @param workshop_obj the information to update the workshop with
- * @returns The workshop object, or null if the workshop doesn't exist
+ * Update a workshop in the database, searching by UUID
+ * @param workshop_obj the new workshop information
+ * @returns The updated workshop object, or null if no workshop exists by the
+ *      given UUID
  */
 export async function updateWorkshop(
     workshop_obj: TWorkshop,
 ): Promise<TWorkshop | null> {
-    const Workshops = mongoose.model("Workshops", Workshop, "workshops");
-    // If the workshop exists, return it and delete it
+    const Workshops = mongoose.model("Workshop", Workshop);
+    // If the workshop exists, update it and return it
     return Workshops.findOneAndReplace(
         { uuid: workshop_obj.uuid },
         workshop_obj,
-        {
-            returnDocument: "after",
-        },
+        { returnDocument: "after" },
     );
 }
 
 /**
- * RSVP for a workshop
+ * RSVP a user to a workshop
  * @param workshop_uuid The workshop's UUID
  * @param user_uuid The user's UUID who is RSVPing
  * @returns Whether or not the RSVP was successful
@@ -92,20 +114,19 @@ export async function rsvpToWorkshop(
     if (!workshop) {
         return false;
     }
-    // Check if user is already in the rsvp list
+    // If the user is already in the rsvp list, the RSVP fails
     if (user_uuid in workshop.rsvp_list) {
-        // If so, the RSVP fails
         return false;
     }
     // Add the user to the rsvp list
-    workshop.rsvp_list[user_uuid] = Date.now();
+    workshop.rsvp_list[user_uuid] = Date.now() / 1000;
     // Update the workshop in the database
     workshop.save();
     return true;
 }
 
 /**
- * Cancel RSVP to a workshop
+ * Cancel a given user's RSVP to a workshop
  * @param workshop_uuid The workshop's UUID
  * @param user_uuid The user's UUID to cancel the RSVP for
  * @returns Whether or not the cancellation was successful
@@ -119,21 +140,21 @@ export async function cancelRSVPToWorkshop(
     if (!workshop) {
         return false;
     }
-    // Check if user is not already in the rsvp list
+    // If the user isn't in the rsvp list, the cancellation fails
     if (!(user_uuid in workshop.rsvp_list)) {
-        // If so, the cancellation fails
         return false;
     }
-    // Update the workshop in the database
+    // Remove the user from the rsvp list
     delete workshop.rsvp_list[user_uuid];
+    // Update the workshop in the database
     workshop.save();
     return true;
 }
 
 /**
- * Sign in to a workshop
+ * Sign in a user to a given workshop
  * @param workshop_uuid The workshop's UUID
- * @param user_uuid The user's UUID who is signing in
+ * @param user_uuid The user's UUID to sign in
  * @returns Whether or not the sign in was successful
  */
 export async function signInToWorkshop(
@@ -145,13 +166,13 @@ export async function signInToWorkshop(
     if (!workshop) {
         return false;
     }
-    // Check if user is already in the sign in list
+    // If the user is already in the sign in list, the sign in fails
     if (user_uuid in workshop.sign_in_list) {
-        // If so, the sign in fails
         return false;
     }
-    // Add the user to the sign in list
-    workshop.sign_in_list[user_uuid] = Date.now();
+    // Otherwise, add the user to the sign in list
+    workshop.sign_in_list[user_uuid] = Date.now() / 1000;
+    // Update the workshop in the database
     workshop.save();
     return true;
 }
