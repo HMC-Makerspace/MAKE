@@ -41,6 +41,15 @@ export async function getPublicAreas(): Promise<TPublicAreaData[]> {
 }
 
 /**
+ * Get all private areas, which are only areas with the `hidden` flag
+ * @returns A promise to list of TArea objects representing all private areas
+ */
+export async function getPrivateAreas(): Promise<TArea[]> {
+    const Areas = mongoose.model("Area", Area);
+    return Areas.find({ hidden: true });
+}
+
+/**
  * Get all machine objects in a specific area
  * @param area_uuid The area's UUID to search by
  * @returns A list of TMachine objects representing all machines in the area
