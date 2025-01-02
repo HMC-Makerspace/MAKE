@@ -354,7 +354,7 @@ router.patch(
  * a `requesting_uuid` header is required to call it. The user must have the
  * {@link API_SCOPE.UPDATE_CHECKOUT} scope.
  * The body of the request should contain a `new_timestamp_due` field with the
- * new due date in milliseconds since the Unix epoch.
+ * new due date in seconds since the Unix epoch.
  * @example
  * ```ts
  * fetch("/checkout/extend/checkout1234", {
@@ -364,7 +364,7 @@ router.patch(
  *     "requesting_uuid": "user1234",
  *   },
  *   body: JSON.stringify({
- *     new_timestamp_due: 1630000000000,
+ *     new_timestamp_due: 1630000000,
  *   }),
  * });
  * ```

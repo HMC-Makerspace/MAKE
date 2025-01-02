@@ -38,8 +38,8 @@ const UserRoleLog = new mongoose.Schema<TUserRoleLog>({
  * Stored as children of {@link UserAvailability}.
  */
 const UserAvailabilityTime = new mongoose.Schema<TUserAvailabilityTime>({
-    ms_start: { type: Number, required: true },
-    ms_end: { type: Number, required: true },
+    sec_start: { type: Number, required: true },
+    sec_end: { type: Number, required: true },
 });
 
 /**

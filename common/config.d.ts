@@ -29,7 +29,7 @@ export type TConfig = {
         /**
          * A list of day indices (based on {@link SHIFT_DAY}) that the space
          * is open. If not present, assume the space is open all 7 days of
-         * the week. Only affects how the schedule is displayed.
+         * the week. Only affects how the public schedule is displayed.
          */
         days_open?: number[];
         /**
@@ -42,18 +42,18 @@ export type TConfig = {
     };
     shift: {
         /**
-         * A list of the time when shifts start each day (in milliseconds
+         * A list of the time when shifts start each day (in seconds
          * after midnight), indexed based on {@link SHIFT_DAY}.
          */
-        daily_start_ms: number[];
+        daily_start_sec: number[];
         /**
-         * A list of the time when shifts end each day (in milliseconds
+         * A list of the time when shifts end each day (in seconds
          * after midnight), indexed based on {@link SHIFT_DAY}.
          */
-        daily_end_ms: number[];
+        daily_end_sec: number[];
         /**
-         * The increment between shifts (in milliseconds). This should evenly
-         * divide `daily_end_ms - daily_start_ms`.
+         * The increment between shifts (in seconds). This should evenly
+         * divide `daily_end_sec - daily_start_sec`.
          */
         increment_between_shifts: number;
     };
