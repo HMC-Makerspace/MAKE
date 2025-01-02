@@ -121,6 +121,7 @@
 
 - [x] Modify `InventoryItem`:
   - Store quantity as number >=0 or LOW (-1) or HIGH (-2), **no more medium**
+  - Change each `location.room` to be `location.area`, and be a UUID of an `Area` object
   - rename `certifications` to `required_certifications`, and instead of storing just a list of certification uuids, store a list of `ItemCertificate` objects
   - add `authorized_roles` - An optional list of UserRole UUIds who are allowed to checkout this item. If not present, anyone can checkout the item. If a user does not have at least one of the authorized roles, they will not be able to check out the item, and the item will not be visible to them in the inventory search.
   - Remove access type levels 4 and 5 in favor of `required_certifications` and `authorized_roles`

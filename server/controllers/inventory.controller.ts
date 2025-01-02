@@ -2,6 +2,10 @@ import { TInventoryItem } from "common/inventory";
 import { UserUUID } from "common/user";
 import { InventoryItem } from "models/inventory.model";
 import mongoose from "mongoose";
+import { getUser } from "./user.controller";
+import { getPrivateAreas } from "./area.controller";
+import { verifyRequest } from "./verify.controller";
+import { API_SCOPE } from "common/global";
 
 /**
  * Get all inventory items
@@ -25,9 +29,45 @@ export async function getInventoryItem(
 }
 
 // TODO: Finish once Area is done
-export async function getPublicInventory(user_uuid: UserUUID) {
+export async function getInventoryVisibleToUser(
+    user_uuid: UserUUID,
+): Promise<TInventoryItem[]> {
+    // If the user doesn't exist, return an empty array
+    const user = await getUser(user_uuid);
+    if (!user) {
+        return [];
+    }
+
+    // If the user is an admin, return all items
+    if (await verifyRequest(user_uuid, API_SCOPE.ADMIN)) {
+        return getInventory();
+    }
+
+    // Otherwise, find all items that the user can access
+    const role_uuids = user.active_roles.map((log) => log.role_uuid);
+    const cert_uuids =
+        user.certificates?.map((cert) => cert.certification_uuid) ?? [];
+
+    // Get all hidden areas
+    const private_areas = (await getPrivateAreas()).map((area) => area.uuid);
+
     const Inventory = mongoose.model("InventoryItem", InventoryItem);
-    const items = await Inventory.find();
+    // Find all items that the user has a role for, and exclude items in
+    // private areas
+    const items = await Inventory.find({
+        $and: [
+            { authorized_roles: { $elemMatch: { $in: role_uuids } } },
+            { "locations.area": { $nin: private_areas } },
+        ],
+    });
+
+    // Finally, filter out items that require certifications the user doesn't have
+    return items.filter(
+        (item) =>
+            item.required_certifications?.every((cert) =>
+                cert_uuids.includes(cert.certification_uuid),
+            ) ?? true,
+    );
 }
 
 /**

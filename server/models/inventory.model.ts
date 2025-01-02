@@ -6,7 +6,7 @@ import type { TInventoryItem, TInventoryItemLocation } from "common/inventory";
  * Stored as children of {@link InventoryItem}.
  */
 const InventoryItemLocation = new mongoose.Schema<TInventoryItemLocation>({
-    room: { type: String, required: true },
+    area: { type: String, required: true },
     container: { type: String, required: false },
     specific: { type: String, required: false },
     quantity: { type: Number, required: true },

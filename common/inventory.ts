@@ -23,7 +23,7 @@ export type ItemQuantity = ITEM_RELATIVE_QUANTITY | number;
  * @property specific - specific section of container
  */
 export type TInventoryItemLocation = {
-    room: AreaUUID;
+    area: AreaUUID;
     container?: string;
     specific?: string;
     quantity: ItemQuantity;
