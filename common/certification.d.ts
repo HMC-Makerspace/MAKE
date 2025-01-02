@@ -1,3 +1,4 @@
+import { TDocument } from "./file";
 import type { UnixTimestamp, UUID } from "./global";
 
 export type CertificationUUID = UUID;
@@ -29,6 +30,8 @@ export type TCertificationType = {
  * @property seconds_valid_for - (optional) how long the certification will last
  *      for in seconds. If not present, all certificates for this certification
  *      will never expire.
+ * @property documents - (optional) A list of documents that are related to this
+ *     certification, such as a training manual or a Google form link.
  */
 export type TCertification = {
     uuid: CertificationUUID;
@@ -38,6 +41,7 @@ export type TCertification = {
     color: string;
     max_level?: number;
     seconds_valid_for?: number;
+    documents?: TDocument[];
 };
 
 /**
