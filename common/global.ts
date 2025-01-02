@@ -16,16 +16,33 @@ export enum API_SCOPE {
     // Checkout scopes
     GET_ALL_CHECKOUTS = "get_checkouts",
     GET_ONE_CHECKOUT = "get_checkout",
-    GET_CHECKOUTS_FOR_USER = "get_user_checkouts",
-    GET_OWN_CHECKOUTS = "get_own_checkouts",
+    GET_CHECKOUTS_BY_USER = "get_user_checkouts",
+    GET_CHECKOUTS_BY_SELF = "get_own_checkouts",
     CREATE_CHECKOUT = "create_checkout",
     UPDATE_CHECKOUT = "update_checkout",
     DELETE_CHECKOUT = "delete_checkout",
     // 3D
     PRINTER = "3dprinter",
     // Inventory scopes
-    INVENTORY = "inventory",
-    INVENTORY_EDITOR = "inventory_editor",
+    GET_ALL_INVENTORY = "get_inventory",
+    CREATE_ITEM = "create_item",
+    UPDATE_ITEM = "update_item",
+    DELETE_ITEM = "delete_item",
+    // INVENTORY_EDITOR = "inventory_editor", // TODO: Use later?
+    // Machine scopes
+    GET_ALL_MACHINES = "get_machines",
+    CREATE_MACHINE = "create_machine",
+    UPDATE_MACHINE = "update_machine",
+    UPDATE_MACHINE_STATUSES = "update_machine_statuses",
+    DELETE_MACHINE = "delete_machine",
+    // Restock Request scopes
+    GET_ALL_RESTOCKS = "get_restock_requests",
+    GET_RESTOCKS_BY_USER = "get_user_restock_requests",
+    GET_RESTOCKS_BY_SELF = "get_own_restock_requests",
+    CREATE_RESTOCK = "create_restock_request",
+    UPDATE_RESTOCK = "update_restock_request",
+    UPDATE_RESTOCK_STATUS = "update_restock_status",
+    DELETE_RESTOCK = "delete_restock_request",
     // User scopes
     GET_ALL_USERS = "get_users",
     UPDATE_USER = "update_user",
@@ -39,7 +56,7 @@ export enum API_SCOPE {
     DELETE_ROLE = "delete_role",
     // Workshop scopes
     GET_ALL_WORKSHOPS = "get_workshops",
-    GET_ONE_WORKSHOP = "get_workshop",
+    GET_WORKSHOP = "get_workshop",
     CREATE_WORKSHOP = "create_workshop",
     UPDATE_WORKSHOP = "update_workshop",
     DELETE_WORKSHOP = "delete_workshop",
