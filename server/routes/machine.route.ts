@@ -330,7 +330,7 @@ router.patch(
             requesting_uuid: requesting_uuid,
         });
 
-        // If the user is authorized, update a workshop's information
+        // If the user is authorized, update the machine's statuses
         if (
             await verifyRequest(
                 requesting_uuid,
