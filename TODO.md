@@ -47,7 +47,7 @@
   - `status_logs` - a list of `MachineStatusLog` that contains the history of all status changes to the machines of this type
   - `documents` - an optional list of `Document` for manuals/policies about the machine
   - `required_certifications` - an optional list of certs required to reserve this machine
-  - `required_roles` - An optional list of UserRole UUIDs who are allowed to reserve this machine. If not present, anyone can reserve
+  - `authorized_roles` - An optional list of UserRole UUIDs who are allowed to reserve this machine. If not present, anyone can reserve
 
 - [x] \* Add `AreaStatus` - The status of an area
   - `available` - A boolean for whether the area is available (not reserved)
@@ -121,6 +121,7 @@
 
 - [x] Modify `InventoryItem`:
   - Store quantity as number >=0 or LOW (-1) or HIGH (-2), **no more medium**
+  - Change each `location.room` to be `location.area`, and be a UUID of an `Area` object
   - rename `certifications` to `required_certifications`, and instead of storing just a list of certification uuids, store a list of `ItemCertificate` objects
   - add `authorized_roles` - An optional list of UserRole UUIds who are allowed to checkout this item. If not present, anyone can checkout the item. If a user does not have at least one of the authorized roles, they will not be able to check out the item, and the item will not be visible to them in the inventory search.
   - Remove access type levels 4 and 5 in favor of `required_certifications` and `authorized_roles`
@@ -228,5 +229,6 @@
   - modify `required_quizzes` to be `required_certifications`, a list of Certification UUIDs that are required to attend this workshop
   - make `capacity` optional, if not present has no capacity (like a public event)
   - modify `rsvp_list` to be a dictionary of User UUIDs to the timestamp they RSVP'd for the workshop
+  - modify `sign_in_list` to be a dictionary of User UUIDs to the timestamp they signed in for the workshop
   - make `photos` a list of `File` uuids (though it might have been this already)
   - make `description` optional

@@ -1,6 +1,6 @@
 import type { TCertificate } from "./certification";
 import type { FileUUID, TFile } from "./file";
-import type { API_SCOPES, UnixTimestamp, UUID } from "./global";
+import type { API_SCOPE, UnixTimestamp, UUID } from "./global";
 import type { SHIFT_DAY } from "./shift";
 
 export type UserUUID = UUID;
@@ -13,7 +13,7 @@ export type UserRoleUUID = UUID;
  * @property title - The title of this user role
  * @property description - (optional) A description of what this role is
  * @property color - A hex color code that can be used to display this role
- * @property scopes - A list of {@link API_SCOPES} that users with this role
+ * @property scopes - A list of {@link API_SCOPE} that users with this role
  *      are allowed to access. Note, users can have multiple roles
  * @property default - A flag for if this is a default role to apply to all
  *      new users
@@ -23,7 +23,7 @@ export type TUserRole = {
     title: string;
     description?: string;
     color: string;
-    scopes: API_SCOPES[];
+    scopes: API_SCOPE[];
     default: boolean;
 };
 

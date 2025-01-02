@@ -1,5 +1,6 @@
-import { UserUUID } from "./user";
-import { IncomingHttpHeaders } from "http";
+import type { UserUUID } from "./user";
+import type { IncomingHttpHeaders } from "http";
+import type { Response } from "express";
 
 /**
  * VerifyRequestHeader - A standard interface for verifying requests
@@ -20,10 +21,10 @@ export type ErrorResponse = {
 };
 
 /**
- * PROTECTED_ERROR - A standard error message for protected routes that require
+ * UNAUTHORIZED_ERROR - A standard error message for protected routes that require
  * a requesting user UUID to be provided.
  */
-export const PROTECTED_ERROR: ErrorResponse = {
+export const UNAUTHORIZED_ERROR: ErrorResponse = {
     error:
         "This is a protected route, and no requesting user UUID was " +
         "provided. Add `requesting_uuid` as a header with a user's uuid to " +
@@ -31,11 +32,13 @@ export const PROTECTED_ERROR: ErrorResponse = {
 };
 
 /**
- * UNAUTHORIZED_ERROR - A standard error message for unauthorized requests,
+ * FORBIDDEN_ERROR - A standard error message for unauthorized requests,
  * where the requesting user UUID does not have the proper API scopes.
  */
-export const UNAUTHORIZED_ERROR: ErrorResponse = {
+export const FORBIDDEN_ERROR: ErrorResponse = {
     error:
         "This is a protected call, and the requesting user UUID does not " +
         "have the proper API scopes required.",
 };
+
+export type SuccessfulResponse = Response<null | ErrorResponse>;

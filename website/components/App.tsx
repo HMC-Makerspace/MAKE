@@ -1,12 +1,11 @@
-import React from 'react';
+import React from "react";
 
 const App: React.FC = () => {
-    const mobile = window.matchMedia('(max-width: 768px)').matches;
-
     return (
         <>
-            <SideBar />
-            <MainContent />
+            <div className="bg-black rounded-xl text-white flex justify-center items-center m-4 p-4 w-fit">
+                Hello from Tailwind!
+            </div>
         </>
     );
 };
