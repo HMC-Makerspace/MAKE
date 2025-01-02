@@ -70,4 +70,10 @@ export enum API_SCOPE {
     DELETE_WORKSHOP = "delete_workshop",
     RSVP_WORKSHOP = "rsvp_workshop",
     SIGN_IN_WORKSHOP = "sign_in_workshop",
+    // Certification scopes
+    GET_ALL_CERTIFICATIONS = "get_certifications",
+    GET_ONE_CERTIFICATION = "get_certification",
+    CREATE_CERTIFICATION = "create_certification",
+    UPDATE_CERTIFICATION = "update_certification",
+    DELETE_CERTIFICATION = "delete_certification",
 }

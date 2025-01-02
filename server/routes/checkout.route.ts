@@ -2,6 +2,7 @@ import { API_SCOPE } from "common/global";
 import {
     getCheckouts,
     getCheckout,
+    createCheckout,
     deleteCheckout,
     updateCheckout,
     checkInCheckout,
