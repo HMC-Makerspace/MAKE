@@ -44,7 +44,7 @@ router.get(
     async (req: Request, res: Response<TPublicWorkshopData[]>) => {
         const workshops = await getPublicWorkshops();
         if (!workshops) {
-            req.log.error("No workshops found in the database.");
+            req.log.error("No public workshops found in the database.");
         } else {
             req.log.debug("Returned all public workshops.");
         }

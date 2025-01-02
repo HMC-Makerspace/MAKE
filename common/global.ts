@@ -13,6 +13,13 @@ export type UnixTimestamp = number;
  */
 export enum API_SCOPE {
     ADMIN = "admin",
+    // Area scopes
+    GET_ALL_AREAS = "get_areas",
+    GET_AREA = "get_area",
+    CREATE_AREA = "create_area",
+    UPDATE_AREA = "update_area",
+    UPDATE_AREA_STATUS = "update_area_status",
+    DELETE_AREA = "delete_area",
     // Checkout scopes
     GET_ALL_CHECKOUTS = "get_checkouts",
     GET_ONE_CHECKOUT = "get_checkout",
@@ -31,6 +38,7 @@ export enum API_SCOPE {
     // INVENTORY_EDITOR = "inventory_editor", // TODO: Use later?
     // Machine scopes
     GET_ALL_MACHINES = "get_machines",
+    GET_MACHINE = "get_machine",
     CREATE_MACHINE = "create_machine",
     UPDATE_MACHINE = "update_machine",
     UPDATE_MACHINE_STATUSES = "update_machine_statuses",
