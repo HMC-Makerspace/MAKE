@@ -7,6 +7,7 @@ import {
     checkInCheckout,
     extendCheckout,
     getCheckoutsByUser,
+    createCheckout,
 } from "controllers/checkout.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
