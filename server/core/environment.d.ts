@@ -2,8 +2,8 @@ declare module "bun" {
     interface Env {
         MONGO_URI: string;
         NODE_ENV: "development" | "production";
-        PORT?: number;
-        FRONTEND_PORT?: number;
+        VITE_SERVER_PORT?: number;
+        VITE_PORT?: number;
         EMAIL_BOT_NAME: string;
         EMAIL_BOT_HOST: string;
         EMAIL_BOT_PORT: number;
