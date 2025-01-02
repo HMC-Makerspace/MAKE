@@ -9,10 +9,7 @@ import {
     extendCheckout,
     getCheckoutsByUser,
 } from "controllers/checkout.controller";
-import {
-    isUserRequestValid,
-    verifyRequest,
-} from "controllers/verify.controller";
+import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -31,6 +28,60 @@ type CheckoutsResponse = Response<TCheckout[] | ErrorResponse>;
 const router = Router();
 
 // --- Checkout Routes ---
+
+/**
+ * Get all checkouts made by a specific user. This is a protected route, and a
+ * `requesting_uuid` header is required to call it. The user must have the
+ * {@link API_SCOPE.GET_CHECKOUTS_BY_USER} scope. If the requesting user is
+ * the same as the user being queried, the {@link API_SCOPE.GET_CHECKOUTS_BY_SELF}
+ * scope is allowed instead. This route will return a list of checkouts made by
+ * the user, or a 403 error if the user is not authorized to view the checkouts.
+ */
+router.get(
+    "/by/user/:user_uuid",
+    async (req: Request<{ user_uuid: string }>, res: CheckoutsResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = headers.requesting_uuid;
+        const user_uuid = req.params.user_uuid;
+
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while getting a user's checkouts",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+
+        req.log.debug({
+            msg: `Getting checkouts for user ${user_uuid}`,
+            requesting_uuid: requesting_uuid,
+        });
+
+        // A get checkouts by user request is valid if the requesting user can
+        // get all checkouts, get checkouts for any user, or get their own checkouts
+        if (
+            await verifyRequest(
+                requesting_uuid,
+                API_SCOPE.GET_ALL_CHECKOUTS,
+                API_SCOPE.GET_CHECKOUTS_BY_USER,
+                requesting_uuid == user_uuid && API_SCOPE.GET_CHECKOUTS_BY_SELF,
+            )
+        ) {
+            // If authorized, get the user's checkout information
+            const checkouts = await getCheckoutsByUser(user_uuid);
+            req.log.debug("Returned user's checkouts.");
+            res.status(StatusCodes.OK).json(checkouts);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to get a user's checkouts",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
 
 /**
  * Get all checkouts. This is a protected route, and a `requesting_uuid` header
@@ -58,14 +109,13 @@ router.get("/", async (req: CheckoutRequest, res: CheckoutsResponse) => {
     // If the user is authorized, get all checkout information
     if (await verifyRequest(requesting_uuid, API_SCOPE.GET_ALL_CHECKOUTS)) {
         const checkouts = await getCheckouts();
+        // If no checkouts are found, log an error, but still return an empty
+        // list of checkouts
         if (!checkouts) {
             req.log.error("No checkouts found in the database.");
-            res.status(StatusCodes.NOT_FOUND).json({
-                error: "No checkouts found in the database.",
-            });
-            return;
+        } else {
+            req.log.debug("Returned all checkouts");
         }
-        req.log.debug("Returned all checkouts");
         res.status(StatusCodes.OK).json(checkouts);
     } else {
         req.log.warn({
@@ -103,8 +153,16 @@ router.get(
             requesting_uuid: requesting_uuid,
         });
 
-        // If the user is authorized, get a checkout's information
-        if (await verifyRequest(requesting_uuid, API_SCOPE.GET_ONE_CHECKOUT)) {
+        // A get checkout request is valid if the requesting user can get all
+        // checkouts or get one checkout at a time
+        if (
+            await verifyRequest(
+                requesting_uuid,
+                API_SCOPE.GET_ALL_CHECKOUTS,
+                API_SCOPE.GET_ONE_CHECKOUT,
+            )
+        ) {
+            // If the user is authorized, get a checkout's information
             const checkout = await getCheckout(checkout_uuid);
             if (!checkout) {
                 req.log.warn(`Checkout not found by uuid ${checkout_uuid}`);
@@ -118,61 +176,6 @@ router.get(
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to get a checkout",
-                requesting_uuid: requesting_uuid,
-            });
-            // If the user is not authorized, provide a status error
-            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-        }
-    },
-);
-
-/**
- * Get all checkouts made by a specific user. This is a protected route, and a
- * `requesting_uuid` header is required to call it. The user must have the
- * {@link API_SCOPE.GET_CHECKOUTS_FOR_USER} scope. If the requesting user is
- * the same as the user being queried, the {@link API_SCOPE.GET_OWN_CHECKOUTS}
- * scope is allowed instead. This route will return a list of checkouts made by
- * the user, or a 403 error if the user is not authorized to view the checkouts.
- */
-router.get(
-    "/by/user/:user_uuid",
-    async (req: Request<{ user_uuid: string }>, res: CheckoutsResponse) => {
-        const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
-        const user_uuid = req.params.user_uuid;
-
-        // If no requesting user uuid is provided, the call is not authorized
-        if (!requesting_uuid) {
-            req.log.warn(
-                "No requesting_uuid was provided while getting a user's checkouts",
-            );
-            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-            return;
-        }
-
-        req.log.debug({
-            msg: `Getting checkouts for user ${user_uuid}`,
-            requesting_uuid: requesting_uuid,
-        });
-
-        // A get checkouts by user request is valid if the requesting user can
-        // get checkouts for any user, or if the requesting user is allowed to
-        // get their own checkouts
-        if (
-            await isUserRequestValid(
-                requesting_uuid,
-                user_uuid,
-                API_SCOPE.GET_CHECKOUTS_FOR_USER,
-                API_SCOPE.GET_OWN_CHECKOUTS,
-            )
-        ) {
-            // If authorized, get the user's checkout information
-            const checkouts = await getCheckoutsByUser(user_uuid);
-            req.log.debug("Returned user's checkouts.");
-            res.status(StatusCodes.OK).json(checkouts);
-        } else {
-            req.log.warn({
-                msg: "Forbidden user attempted to get a user's checkouts",
                 requesting_uuid: requesting_uuid,
             });
             // If the user is not authorized, provide a status error
@@ -301,7 +304,7 @@ router.put("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
  * ```
  */
 router.patch(
-    "/check_in/:UUID",
+    "/:UUID/check_in",
     async (req: Request<{ UUID: string }>, res: CheckoutResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = headers.requesting_uuid;
@@ -369,7 +372,7 @@ router.patch(
  * checkout UUID is not found.
  */
 router.patch(
-    "/extend/:UUID",
+    "/:UUID/extend",
     async (
         req: Request<{ UUID: string }, {}, { new_timestamp_due: number }>,
         res: CheckoutResponse,

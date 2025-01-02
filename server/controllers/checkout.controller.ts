@@ -8,7 +8,7 @@ import mongoose from "mongoose";
  * @returns A promise to list of TCheckouts objects representing all users in the db
  */
 export async function getCheckouts(): Promise<TCheckout[]> {
-    const Checkouts = mongoose.model("Checkout", Checkout, "checkouts");
+    const Checkouts = mongoose.model("Checkout", Checkout);
     return Checkouts.find();
 }
 
@@ -18,7 +18,7 @@ export async function getCheckouts(): Promise<TCheckout[]> {
  * @returns A promise to a TCheckout object, or null if no user has the given UUID
  */
 export async function getCheckout(uuid: UUID): Promise<TCheckout | null> {
-    const Checkouts = mongoose.model("Checkout", Checkout, "checkouts");
+    const Checkouts = mongoose.model("Checkout", Checkout);
     return Checkouts.findOne({ uuid: uuid });
 }
 
@@ -31,7 +31,7 @@ export async function getCheckout(uuid: UUID): Promise<TCheckout | null> {
 export async function getCheckoutsByUser(
     user_uuid: UUID,
 ): Promise<TCheckout[]> {
-    const Checkouts = mongoose.model("Checkout", Checkout, "checkouts");
+    const Checkouts = mongoose.model("Checkout", Checkout);
     return Checkouts.find({ checked_out_by: user_uuid });
 }
 
@@ -43,7 +43,7 @@ export async function getCheckoutsByUser(
 export async function createCheckout(
     checkout_obj: TCheckout,
 ): Promise<TCheckout | null> {
-    const Checkouts = mongoose.model("Checkouts", Checkout, "checkouts");
+    const Checkouts = mongoose.model("Checkout", Checkout);
     // Check if the checkout already exists
     const existingCheckout = await Checkouts.exists({
         uuid: checkout_obj.uuid,
@@ -67,7 +67,7 @@ export async function createCheckout(
 export async function updateCheckout(
     checkout_obj: TCheckout,
 ): Promise<TCheckout | null> {
-    const Checkouts = mongoose.model("Checkout", Checkout, "checkouts");
+    const Checkouts = mongoose.model("Checkout", Checkout);
     // Update the given user with a new user_obj, searching by uuid
     return Checkouts.findOneAndReplace(
         { uuid: checkout_obj.uuid },
@@ -84,7 +84,7 @@ export async function updateCheckout(
 export async function checkInCheckout(
     checkout_uuid: UUID,
 ): Promise<TCheckout | null> {
-    const Checkouts = mongoose.model("Checkout", Checkout, "checkouts");
+    const Checkouts = mongoose.model("Checkout", Checkout);
     return Checkouts.findOneAndReplace(
         { uuid: checkout_uuid },
         { timestamp_in: new Date() },
@@ -102,7 +102,7 @@ export async function extendCheckout(
     checkout_uuid: UUID,
     new_timestamp_due: number,
 ): Promise<TCheckout | null> {
-    const Checkouts = mongoose.model("Checkout", Checkout, "checkouts");
+    const Checkouts = mongoose.model("Checkout", Checkout);
     return Checkouts.findOneAndReplace(
         { uuid: checkout_uuid },
         { timestamp_due: new_timestamp_due },
@@ -118,6 +118,6 @@ export async function extendCheckout(
 export async function deleteCheckout(
     checkout_uuid: UUID,
 ): Promise<TCheckout | null> {
-    const Checkouts = mongoose.model("Checkouts", Checkout, "checkouts");
+    const Checkouts = mongoose.model("Checkouts", Checkout);
     return Checkouts.findOneAndDelete({ uuid: checkout_uuid });
 }
