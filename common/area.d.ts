@@ -1,8 +1,9 @@
 import type { CertificationUUID } from "./certification";
 import type { FileUUID, TFile } from "./file";
 import type { UnixTimestamp, UUID } from "./global";
-import type { MachineUUID, TDocument } from "./machine";
+import type { MachineUUID } from "./machine";
 import type { UserRoleUUID } from "./user";
+import type { TDocument } from "./file";
 
 export type AreaUUID = UUID;
 

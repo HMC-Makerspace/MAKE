@@ -1,19 +1,9 @@
 import { CertificationUUID } from "./certification";
-import { FileUUID } from "./file";
+import { FileUUID, TDocument } from "./file";
 import { UnixTimestamp, UUID } from "./global";
 import { UserRoleUUID } from "./user";
 
 export type MachineUUID = UUID;
-
-/**
- * TAreaDocument - A document specific to an area or machine in the space
- * @property name - The name of the document
- * @property link - The link to the document
- */
-export type TDocument = {
-    name: string;
-    link: string;
-};
 
 /**
  * MACHINE_STATUS_TYPE - Possible statuses for a machine

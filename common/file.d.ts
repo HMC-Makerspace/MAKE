@@ -21,3 +21,13 @@ export type TFile = {
     size: number;
     user_uuid?: UserUUID;
 };
+
+/**
+ * TAreaDocument - A document link for users to access
+ * @property name - The name of the document
+ * @property link - The link to the document
+ */
+export type TDocument = {
+    name: string;
+    link: string;
+};

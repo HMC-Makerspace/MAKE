@@ -1,21 +1,6 @@
-import {
-    TDocument,
-    TMachineStatus,
-    TMachineStatusLog,
-    TMachine,
-} from "common/machine";
+import { TMachineStatus, TMachineStatusLog, TMachine } from "common/machine";
 import mongoose from "mongoose";
-
-// --- Machine ---
-
-/**
- * See {@link TDocument} documentation for type information.
- * Stored as children of {@link Area} and {@link Machine}.
- */
-export const Document = new mongoose.Schema<TDocument>({
-    name: { type: String, required: true },
-    link: { type: String, required: true },
-});
+import { Document } from "./file.model";
 
 /**
  * See {@link TMachineStatus} documentation for type information.

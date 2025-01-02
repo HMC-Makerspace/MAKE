@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import type { TArea, TAreaStatus, TAreaStatusLog } from "common/area";
-import { Document } from "./machine.model";
+import { Document } from "./file.model";
 
 // --- Area ---
 
