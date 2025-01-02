@@ -51,6 +51,21 @@ export enum API_SCOPE {
     UPDATE_RESTOCK = "update_restock_request",
     UPDATE_RESTOCK_STATUS = "update_restock_status",
     DELETE_RESTOCK = "delete_restock_request",
+    // Schedule scopes
+    GET_ALL_SCHEDULES = "get_schedules",
+    GET_SCHEDULE = "get_schedule",
+    GET_CURRENT_SCHEDULE = "get_current_schedule",
+    CREATE_SCHEDULE = "create_schedule",
+    UPDATE_SCHEDULE = "update_schedule",
+    DELETE_SCHEDULE = "delete_schedule",
+    // Shift scopes
+    GET_ALL_SHIFTS = "get_shifts",
+    GET_SHIFT = "get_shift",
+    GET_OWN_SHIFT = "get_own_shift",
+    CREATE_SHIFT = "create_shift",
+    UPDATE_SHIFT = "update_shift",
+    POST_SHIFT_EVENT = "post_shift_event",
+    DELETE_SHIFT = "delete_shift",
     // User scopes
     GET_ALL_USERS = "get_users",
     UPDATE_USER = "update_user",

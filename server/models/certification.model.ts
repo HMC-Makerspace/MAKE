@@ -4,6 +4,7 @@ import type {
     TCertification,
     TCertificationType,
 } from "common/certification";
+import { Document } from "./file.model";
 
 /**
  * See {@link TCertificationType} documentation for type information.
@@ -25,6 +26,7 @@ export const Certification = new mongoose.Schema<TCertification>({
     color: { type: String, required: true },
     max_level: { type: Number, required: false },
     seconds_valid_for: { type: Number, required: false },
+    documents: { type: [Document], required: false },
 });
 
 /**

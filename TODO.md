@@ -178,10 +178,10 @@
 
 ### Shift
 - [x] Modify `Shift`:
-  - modify `timestamp_start` to be `ms_start` - the number of milliseconds after midnight that this shift starts
-  - modify `timestamp_end` to be `ms_end` - the number of milliseconds after midnight that this shift ends
+  - modify `timestamp_start` to be `sec_start` - the number of seconds after midnight that this shift starts
+  - modify `timestamp_end` to be `sec_end` - the number of seconds after midnight that this shift ends
   - modify `day` to be `day_index` - the 0-indexed day that this shift occurs (0 = Sunday)
-  - modify `stewards` to be `assignee` - the UUID of a single steward that is on this shift (there could be multiple shift objects with the same `ms_start` and `ms_end` but different assignees)
+  - modify `stewards` to be `assignee` - the UUID of a single steward that is on this shift (there could be multiple shift objects with the same `sec_start` and `sec_end` but different assignees)
   - add `history` - A list of `ShiftEvent` objects for this shift
 
 - [x] \* Modify `ShiftChange` to be `ShiftEvent` (stored in a specific `Shift`):
@@ -208,7 +208,7 @@
 
 - [x] \* Add `UserAvailability` - a single day of availability for a user
   - `day` - the 0 indexed day
-  - `availability` - A list of objects containing `ms_start` and a `ms_end` properties that are pairs of start and end times (in milliseconds after midnight) that this user is available on this day
+  - `availability` - A list of objects containing `sec_start` and a `sec_end` properties that are pairs of start and end times (in seconds after midnight) that this user is available on this day
 
 - [x] Modify `User`:
   - rename `cx_id` -> `college_id` and store it as a string (if it wasn't already)

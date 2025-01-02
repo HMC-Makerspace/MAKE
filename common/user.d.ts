@@ -43,14 +43,14 @@ export type TUserRoleLog = {
 
 /**
  * TUserAvailabilityTimeSlot - An individual time slot of a user's availability
- * @property ms_start - The time (in milliseconds after midnight) this time
+ * @property sec_start - The time (in seconds after midnight) this time
  *      slot starts.
- * @property ms_end - The time (in milliseconds after midnight) this time
+ * @property sec_end - The time (in seconds after midnight) this time
  *      slot ends.
  */
 export type TUserAvailabilityTime = {
-    ms_start: number;
-    ms_end: number;
+    sec_start: number;
+    sec_end: number;
 };
 
 /**
@@ -58,7 +58,7 @@ export type TUserAvailabilityTime = {
  * @property day - The 0-indexed day associated with this availability,
  *      according to {@link SHIFT_DAY}
  * @property availability - A list of pairs of start and end times (in
- *      milliseconds after midnight) that this user is available on this day
+ *      seconds after midnight) that this user is available on this day
  */
 export type TUserAvailability = {
     day: SHIFT_DAY;

@@ -1,6 +1,8 @@
 import type { UnixTimestamp } from "./global";
 import type { UserUUID } from "./user";
 
+export type ShiftUUID = string;
+
 /**
  * The 0-indexed days of the week for shifts
  */
@@ -30,7 +32,7 @@ export enum SHIFT_EVENT_TYPE {
  * ShiftEvent - Object to store information about all changes to a shift
  * @property timestamp - the timestamp that this shift event occurred
  * @property shift_date - The Unix timestamp date of the shift that this event
- *      occurred on
+ *      occurred on, which is midnight of the day the shift is on
  * @property type - what modification is being made to the shift
  * @property initiator - the UUID of the user who incurred this shift event
  */
@@ -42,12 +44,13 @@ export type TShiftEvent = {
 };
 
 /**
- * Shift - Object to store information about all shifts
+ * Shift - Object to store information about a given shift
+ * @property uuid - the unique identifier for this shift
  * @property day - the 0-indexed day that this shift occurs, according to
  *      {@link SHIFT_DAY}
- * @property ms_start - the number of milliseconds after midnight that this
+ * @property sec_start - the number of seconds after midnight that this
  *      shift starts on the given day
- * @property ms_end - the number of milliseconds after midnight that this
+ * @property sec_end - the number of seconds after midnight that this
  *      shift ends on the given day
  * @property assignee - the UUID of user who is on this shift (note: there
  *      can be multiple `Shift` objects with the same `ms_start` and `ms_end`
@@ -56,9 +59,12 @@ export type TShiftEvent = {
  *      this shift
  */
 export type TShift = {
+    uuid: ShiftUUID;
     day: SHIFT_DAY;
-    ms_start: number;
-    ms_end: number;
+    sec_start: number;
+    sec_end: number;
     assignee: UserUUID;
     history: TShiftEvent[];
 };
+
+export type TPublicShiftData = Omit<TShift, "uuid", "history">;
