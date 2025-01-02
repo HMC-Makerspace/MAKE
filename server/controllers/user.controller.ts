@@ -8,7 +8,7 @@ import mongoose from "mongoose";
  * @returns A promise to list of TUser objects representing all users in the db
  */
 export async function getUsers(): Promise<TUser[]> {
-    const Users = mongoose.model("User", User, "users");
+    const Users = mongoose.model("User", User);
     return Users.find();
 }
 
@@ -18,7 +18,7 @@ export async function getUsers(): Promise<TUser[]> {
  * @returns A promise to a TUser object, or null if no user has the given UUID
  */
 export async function getUser(uuid: UserUUID): Promise<TUser | null> {
-    const Users = mongoose.model("User", User, "users");
+    const Users = mongoose.model("User", User);
     return Users.findOne({ uuid: uuid });
 }
 
@@ -30,7 +30,7 @@ export async function getUser(uuid: UserUUID): Promise<TUser | null> {
  * @returns A promise to a TUser object, or null if no user has the given id
  */
 export async function getUserByCollegeID(id: string): Promise<TUser | null> {
-    const Users = mongoose.model("User", User, "users");
+    const Users = mongoose.model("User", User);
     return Users.findOne({ college_id: id });
 }
 
@@ -42,7 +42,7 @@ export async function getUserByCollegeID(id: string): Promise<TUser | null> {
  * @returns A promise to a TUser object, or null if no user has the given email
  */
 export async function getUserByEmail(email: string): Promise<TUser | null> {
-    const Users = mongoose.model("User", User, "users");
+    const Users = mongoose.model("User", User);
     return Users.findOne({ email: email });
 }
 
@@ -52,7 +52,7 @@ export async function getUserByEmail(email: string): Promise<TUser | null> {
  * @param user_obj The user's complete and updated information
  */
 export async function updateUser(user_obj: TUser): Promise<TUser | null> {
-    const Users = mongoose.model("User", User, "users");
+    const Users = mongoose.model("User", User);
     // Update the given user with a new user_obj, searching by uuid
     // and return the new user object
     return Users.findOneAndReplace({ uuid: user_obj.uuid }, user_obj, {
@@ -66,7 +66,7 @@ export async function updateUser(user_obj: TUser): Promise<TUser | null> {
  * @param user_obj The user's complete information
  */
 export async function createUser(user_obj: TUser): Promise<TUser | null> {
-    const Users = mongoose.model("User", User, "users");
+    const Users = mongoose.model("User", User);
     const user_uuid = user_obj.uuid;
     // Check if the user already exists
     const existingUser = await Users.exists({ uuid: user_uuid });
@@ -85,7 +85,7 @@ export async function createUser(user_obj: TUser): Promise<TUser | null> {
  * @param uuid The user's UUID
  */
 export async function deleteUser(uuid: UserUUID): Promise<TUser | null> {
-    const Users = mongoose.model("User", User, "users");
+    const Users = mongoose.model("User", User);
     return Users.findOneAndDelete({ uuid: uuid });
 }
 
@@ -94,7 +94,7 @@ export async function deleteUser(uuid: UserUUID): Promise<TUser | null> {
  * @returns A list {@link TUserRole} of all user roles in the db
  */
 export async function getUserRoles(): Promise<TUserRole[]> {
-    const UserRoles = mongoose.model("UserRole", UserRole, "user_roles");
+    const UserRoles = mongoose.model("UserRole", UserRole);
     return UserRoles.find();
 }
 
@@ -107,8 +107,17 @@ export async function getUserRoles(): Promise<TUserRole[]> {
 export async function getUserRole(
     role_uuid: UserRoleUUID,
 ): Promise<TUserRole | null> {
-    const UserRoles = mongoose.model("UserRole", UserRole, "user_roles");
+    const UserRoles = mongoose.model("UserRole", UserRole);
     return UserRoles.findOne({ uuid: role_uuid });
+}
+
+/**
+ * Get all user roles that are applied to new users by default
+ * @returns A list of {@link TUserRole} objects that are marked as default
+ */
+export async function getDefaultUserRoles(): Promise<TUserRole[]> {
+    const UserRoles = mongoose.model("UserRole", UserRole);
+    return UserRoles.find({ default: true });
 }
 
 /**
@@ -118,7 +127,7 @@ export async function getUserRole(
 export async function updateUserRole(
     role_obj: TUserRole,
 ): Promise<TUserRole | null> {
-    const UserRoles = mongoose.model("UserRole", UserRole, "user_roles");
+    const UserRoles = mongoose.model("UserRole", UserRole);
     return UserRoles.findOneAndReplace({ uuid: role_obj.uuid }, role_obj, {
         returnDocument: "after",
     });
@@ -131,7 +140,7 @@ export async function updateUserRole(
 export async function createUserRole(
     role_obj: TUserRole,
 ): Promise<TUserRole | null> {
-    const UserRoles = mongoose.model("UserRole", UserRole, "user_roles");
+    const UserRoles = mongoose.model("UserRole", UserRole);
     // Check if the user role already exists
     const existingRole = await UserRoles.exists({ uuid: role_obj.uuid });
     if (existingRole) {
@@ -151,7 +160,7 @@ export async function createUserRole(
 export async function deleteUserRole(
     role_uuid: UserRoleUUID,
 ): Promise<TUserRole | null> {
-    const UserRoles = mongoose.model("UserRole", UserRole, "user_roles");
+    const UserRoles = mongoose.model("UserRole", UserRole);
     return UserRoles.findOneAndDelete({ uuid: role_uuid });
 }
 
@@ -175,4 +184,71 @@ export async function getUserScopes(uuid: UserUUID): Promise<API_SCOPE[]> {
         }
     }
     return scopes;
+}
+
+/**
+ * Initialize the database with an admin role if one does not already exist.
+ * Only to be used during initial setup.
+ * @returns The created admin role, or null if an admin role already exists
+ */
+export async function initializeAdminRole(): Promise<TUserRole | null> {
+    const UserRoles = mongoose.model("UserRole", UserRole);
+    // Check if any admin role already exists
+    const existsAdminRole = await UserRoles.exists({
+        scopes: { $elemMatch: { $eq: API_SCOPE.ADMIN } },
+    });
+    if (existsAdminRole) {
+        // If so, this route is invalid, as it should only be used to create
+        // the first admin role
+        return null;
+    }
+    // If no roles have admin scope, create a new admin role and return it
+    const newRole = new UserRoles({
+        uuid: crypto.randomUUID(),
+        title: "Initial Admin Role",
+        description:
+            "This admin role was automatically generated. It is advised to " +
+            "create a new admin role and delete this one after setup is complete.",
+        color: "#FF0000",
+        scopes: [API_SCOPE.ADMIN],
+        default: false,
+    });
+    return newRole.save();
+}
+
+/**
+ * Initialize the database with an admin user if one does not already exist.
+ * Only to be used during initial setup.
+ * @param admin_role_uuid The UUID of the admin role to assign to the new user
+ * @returns The created admin user, or null if an admin user already exists
+ */
+export async function initializeAdmin(
+    admin_role_uuid: UserRoleUUID,
+): Promise<TUser | null> {
+    const Users = mongoose.model("User", User);
+    // Check if any admin users already exist
+    const existsAdmin = await Users.exists({
+        active_roles: { $elemMatch: { role_uuid: admin_role_uuid } },
+    });
+    if (existsAdmin) {
+        // If so, this route is invalid, as it should only be used to create
+        // the first admin user
+        return null;
+    }
+    // If no users have admin scope, create a new admin user and return it
+    const newAdmin = new Users({
+        uuid: crypto.randomUUID(),
+        name: "Auto-Generated Admin (DELETE AFTER SETUP)",
+        email: "admin@admin.com",
+        college_id: "000000000",
+        active_roles: [
+            {
+                role_uuid: admin_role_uuid,
+                timestamp_gained: Date.now() / 1000,
+            },
+        ],
+        past_roles: [],
+        availability: [],
+    });
+    return newAdmin.save();
 }
