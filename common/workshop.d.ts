@@ -51,16 +51,14 @@ export type TWorkshop = {
 
 /**
  * TPublicWorkshopData - A specific subset of {@link TWorkshop} that is safe to
- *     expose to the public, namely removing UUID, timestamps, and RSVP,
+ *     expose to the public, namely removing UUID, public timestamp, and RSVP,
  *     notification, and sign-in lists
  */
-export type TPublicWorkshopData = {
-    title: string;
-    description?: string;
-    instructors: UserUUID[];
-    capacity?: number;
-    timestamp_start: UnixTimestamp;
-    timestamp_end: UnixTimestamp;
-    required_certifications?: CertificationUUID[];
-    photos?: FileUUID[];
-};
+export type TPublicWorkshopData = Omit<
+    TWorkshop,
+    | "uuid"
+    | "timestamp_public"
+    | "rsvp_list"
+    | "users_notified"
+    | "sign_in_list"
+>;
