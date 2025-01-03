@@ -27,6 +27,9 @@ import type { FileUUID } from "./file";
  *     signed in to the workshop
  * @property photos - (optional) a list UUIDs of {@link TFile | image Files} to
  *      display for this workshop
+ * @property authorized_roles - (optional) a list of UserRole UUIDs that are
+ *      allowed to see this workshop. If not present, any user may see this
+ *      workshop
  */
 export type TWorkshop = {
     uuid: UUID;
@@ -46,7 +49,8 @@ export type TWorkshop = {
     sign_in_list: {
         [user: UserUUID]: UnixTimestamp;
     };
-    photos?: FileUUID[];
+    images?: FileUUID[];
+    authorized_roles?: UserRoleUUID[];
 };
 
 /**

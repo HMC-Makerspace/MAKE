@@ -10,6 +10,8 @@ import {
     CertificationType,
 } from "models/certification.model";
 import mongoose from "mongoose";
+import { getUser } from "./user.controller";
+import { verifyRequest } from "./verify.controller";
 
 // --- Certification Controls ---
 
@@ -37,11 +39,67 @@ export async function getCertification(
 }
 
 /**
- * Update a certification information given an entire TCertification object. Certification is
- * found by UUID.
+ * Get all certifications that are visible to a specific user. If the user is
+ * an admin or has the {@link API_SCOPE.GET_ALL_CERTIFICATIONS} scope, all
+ * certifications are returned. Otherwise, only certifications that the user
+ * has access to are returned.
+ * @param user_uuid The user's UUID to search by
+ * @returns the list of TCertification objects representing all certifications
+ *          that the user can access
+ */
+export async function getCertificationsVisibleToUser(
+    user_uuid: UUID,
+): Promise<TCertification[]> {
+    // If the user doesn't exist, return only public certifications
+    const user = await getUser(user_uuid);
+    if (!user) {
+        return getPublicCertifications();
+    }
+
+    // If the user is an admin or can get all certifications, return all
+    if (
+        await verifyRequest(
+            user_uuid,
+            API_SCOPE.ADMIN,
+            API_SCOPE.GET_ALL_CERTIFICATIONS,
+        )
+    ) {
+        return getCertifications();
+    }
+
+    // Otherwise, find all items that the user can access
+    const role_uuids = user.active_roles.map((log) => log.role_uuid);
+
+    const Certifications = mongoose.model("Certification", Certification);
+    // Find all items that require no roles or which require roles that the
+    // user has at least one of
+    return await Certifications.find({
+        $or: [
+            { authorized_roles: null },
+            { authorized_roles: { $elemMatch: { $in: role_uuids } } },
+        ],
+    });
+}
+
+/**
+ * Get all certifications that are public, i.e. require no roles to access
+ * @returns A promise to the list of TCertification objects representing all
+ *          public certifications in the database
+ */
+async function getPublicCertifications(): Promise<TCertification[]> {
+    const Certifications = mongoose.model("Certification", Certification);
+    // Only return certifications that have require no roles
+    return Certifications.find({
+        authorized_roles: null,
+    });
+}
+
+/**
+ * Update a certification information given an entire TCertification object.
+ * Certification is found by UUID.
  * @param certification_obj The certification's complete and updated information
- * @returns A promise to the updated TCertification object, or null if no checkout
- *          has the given UUID
+ * @returns A promise to the updated TCertification object, or null if no
+ *          checkout has the given UUID
  */
 export async function updateCertification(
     certification_obj: TCertification,

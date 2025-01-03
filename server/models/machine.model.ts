@@ -36,6 +36,7 @@ export const Machine = new mongoose.Schema<TMachine>(
         documents: { type: [Document], required: false },
         required_certifications: { type: [String], required: false },
         authorized_roles: { type: [String], required: true },
+        reservable: { type: Boolean, required: false },
     },
     { collection: "machines" },
 );

@@ -31,9 +31,10 @@ export const Area = new mongoose.Schema<TArea>({
     description: { type: String, required: false },
     documents: { type: [Document], required: false },
     equipment: { type: [String], required: false },
+    images: { type: [String], required: false },
     current_status: { type: AreaStatus, required: true },
     status_logs: { type: [AreaStatusLog], required: true },
     required_certifications: { type: [String], required: false },
     authorized_roles: { type: [String], required: false },
-    hidden: { type: Boolean, required: false },
+    reservable: { type: Boolean, required: false },
 });

@@ -31,6 +31,8 @@ export const Certification = new mongoose.Schema<TCertification>(
         max_level: { type: Number, required: false },
         seconds_valid_for: { type: Number, required: false },
         documents: { type: [Document], required: false },
+        prerequisites: { type: [String], required: false },
+        authorized_roles: { type: [String], required: false },
     },
     { collection: "certifications" },
 );

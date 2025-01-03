@@ -28,11 +28,10 @@ export async function getInventoryItem(
     return Inventory.findOne({ uuid: item_uuid });
 }
 
-// TODO: Finish once Area is done
 export async function getInventoryVisibleToUser(
     user_uuid: UserUUID,
 ): Promise<TInventoryItem[]> {
-    // If the user doesn't exist, return an empty array
+    // If the user doesn't exist, return only public items
     const user = await getUser(user_uuid);
     if (!user) {
         return getPublicInventory();
@@ -58,10 +57,13 @@ export async function getInventoryVisibleToUser(
     const private_areas = (await getPrivateAreas()).map((area) => area.uuid);
 
     const Inventory = mongoose.model("InventoryItem", InventoryItem);
-    // Find all items that the user has a role for, and exclude items in
-    // private areas
+    // Find all items that require no roles or which require roles that the
+    // user has at least one of
     const items = await Inventory.find({
-        authorized_roles: { $elemMatch: { $in: role_uuids } },
+        $or: [
+            { authorized_roles: null },
+            { authorized_roles: { $elemMatch: { $in: role_uuids } } },
+        ],
     });
 
     // Filter out private locations

@@ -10,6 +10,7 @@ import {
     createCertificationType,
     deleteCertificationType,
     updateCertificationType,
+    getCertificationsVisibleToUser,
 } from "controllers/certification.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
@@ -48,6 +49,35 @@ type CertificationTypesResponse = Response<
 const router = Router();
 
 // --- Certification Routes ---
+
+/**
+ * Get all public certifications. This route allows for an optional
+ * `requesting_uuid` header to find all certifications that this user is
+ * authorized to see. If the user is an admin or has the
+ * {@link API_SCOPE.GET_ALL_CERTIFICATIONS} scope, all certifications
+ * are returned.
+ */
+router.get("/public", async (req: Request, res: CertificationsResponse) => {
+    const headers = req.headers as VerifyRequestHeader;
+    const requesting_uuid = headers.requesting_uuid;
+
+    req.log.debug({
+        msg: `Getting certifications visible to user ${requesting_uuid}`,
+        requesting_uuid: requesting_uuid,
+    });
+
+    const certification = await getCertificationsVisibleToUser(requesting_uuid);
+    if (!certification) {
+        req.log.warn(
+            `No certification items found visible to user ${requesting_uuid}`,
+        );
+    } else {
+        req.log.debug(
+            `Returned all certifications visible to user ${requesting_uuid}`,
+        );
+    }
+    res.status(StatusCodes.OK).json(certification);
+});
 
 /**
  * Get all certifications. This is a protected route, and a `requesting_uuid` header
@@ -197,7 +227,7 @@ router.post(
                     `An attempt was made to create a certification with uuid ` +
                         `${certification_uuid}, but a certification with that uuid already exists`,
                 );
-                res.status(StatusCodes.NOT_ACCEPTABLE).json({
+                res.status(StatusCodes.CONFLICT).json({
                     error: `A certification with uuid \`${certification_uuid}\` already exists.`,
                 });
                 return;
@@ -205,7 +235,7 @@ router.post(
             req.log.debug(
                 `Created certification with uuid ${certification_uuid}`,
             );
-            res.status(StatusCodes.OK).json(certification);
+            res.status(StatusCodes.CREATED).json(certification);
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to create a certification",
@@ -488,7 +518,7 @@ router.post(
                     `An attempt was made to create a certification type with uuid ` +
                         `${certification_type_uuid}, but a certification type with that uuid already exists`,
                 );
-                res.status(StatusCodes.NOT_ACCEPTABLE).json({
+                res.status(StatusCodes.CONFLICT).json({
                     error: `A certification type with uuid \`${certification_type_uuid}\` already exists.`,
                 });
                 return;
@@ -496,7 +526,7 @@ router.post(
             req.log.debug(
                 `Created certification type with uuid ${certification_type_uuid}`,
             );
-            res.status(StatusCodes.OK).json(certification_type);
+            res.status(StatusCodes.CREATED).json(certification_type);
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to create a certification type",

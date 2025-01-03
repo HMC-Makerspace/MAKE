@@ -11,7 +11,7 @@ import {
     deleteArea,
     getArea,
     getAreas,
-    getPublicAreas,
+    getAreasVisibleToUser,
     updateArea,
     updateAreaStatus,
 } from "controllers/area.controller";
@@ -35,17 +35,28 @@ const router = Router();
 // --- Area Routes ---
 
 /**
- * Get all public area data. This is a public route and does not require a
- * `requesting_uuid` header to call it.
+ * Get all public areas. This route allows for an optional
+ * `requesting_uuid` header to find all areas that this user is
+ * authorized to see. If the user is an admin or has the
+ * {@link API_SCOPE.GET_ALL_AREAS} scope, all areas
+ * are returned.
  */
 router.get(
     "/public",
     async (req: Request, res: Response<TPublicAreaData[]>) => {
-        const areas = await getPublicAreas();
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = headers.requesting_uuid;
+
+        req.log.debug({
+            msg: `Getting areas visible to user ${requesting_uuid}`,
+            requesting_uuid: requesting_uuid,
+        });
+
+        const areas = await getAreasVisibleToUser(requesting_uuid);
         if (!areas) {
-            req.log.error("No public areas found in the database.");
+            req.log.warn(`No areas visible to user ${requesting_uuid}.`);
         } else {
-            req.log.debug("Returned all public areas.");
+            req.log.debug(`Returned areas visible to user ${requesting_uuid}.`);
         }
         res.status(StatusCodes.OK).json(areas);
     },
@@ -54,7 +65,7 @@ router.get(
 /**
  * Get a specific area by UUID. This is a protected route, and a
  * `requesting_uuid` header is required to call it. The user must have the
- * {@link API_SCOPE.GET_ALL_AREAS} scope or the {@link API_SCOPE.GET_AREA}
+ * {@link API_SCOPE.GET_ALL_AREAS} scope or the {@link API_SCOPE.GET_ONE_AREA}
  * scope.
  */
 router.get(
@@ -66,7 +77,7 @@ router.get(
         // If no requesting user uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
-                "No requesting_uuid was provided while getting all areas",
+                "No requesting_uuid was provided while getting area by uuid",
             );
             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
@@ -84,7 +95,7 @@ router.get(
             await verifyRequest(
                 requesting_uuid,
                 API_SCOPE.GET_ALL_AREAS,
-                API_SCOPE.GET_AREA,
+                API_SCOPE.GET_ONE_AREA,
             )
         ) {
             // If the user is authorized, get the area information
@@ -183,13 +194,13 @@ router.post("/", async (req: AreaRequest, res: AreaResponse) => {
                 `An attempt was made to create a area with uuid ` +
                     `${area_uuid}, but a area with that uuid already exists`,
             );
-            res.status(StatusCodes.NOT_ACCEPTABLE).json({
+            res.status(StatusCodes.CONFLICT).json({
                 error: `A area with uuid \`${area_uuid}\` already exists.`,
             });
             return;
         }
         req.log.debug(`Created area with uuid ${area_uuid}`);
-        res.status(StatusCodes.OK).json(area);
+        res.status(StatusCodes.CREATED).json(area);
     } else {
         req.log.warn({
             msg: "Forbidden user attempted to create a area",

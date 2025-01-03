@@ -43,8 +43,8 @@ export type TMachineStatusLog = {
  * @property uuid - A unique id
  * @property name - The name of the machine
  * @property description - (optional) A longer description of the machine
- * @property images - A list of UUIDs of {@link TFile | File} objects that are
- *      images of this machine
+ * @property images - (optional) A list of UUIDs of {@link TFile | File} objects
+ *      that are images of this machine
  * @property count - The quantity of this machine available in the space
  * @property current_statuses - A list of status objects indicating the current
  *      status of each of the `count` machines in the space
@@ -54,20 +54,24 @@ export type TMachineStatusLog = {
  * @property required_certs - UUIDs of certs required to use/reserve the machine
  * @property authorized_roles - (optional) A list of UserRole UUIDs that are
  *      allowed to use this machine. A user must have at least one of these
- *      roles to reserve the given machine. If not present, any user may
- *      use/reserve this machine.
+ *      roles to see the given machine in the area tab. If not present, this
+ *      machine is public.
+ * @property reservable - (optional) Whether this machine is allowed to be
+ *      reserved. Only users with the required certifications and at least one
+ *      authorized role can reserve this machine.
  */
 export type TMachine = {
     uuid: MachineUUID;
     name: string;
     description?: string;
-    images: FileUUID[];
+    images?: FileUUID[];
     count: number;
     current_statuses: TMachineStatus[];
     status_logs: TMachineStatusLog[];
     documents?: TDocument[];
     required_certifications?: CertificationUUID[];
     authorized_roles?: UserRoleUUID[];
+    reservable?: boolean;
 };
 
 /**

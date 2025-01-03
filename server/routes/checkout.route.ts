@@ -88,7 +88,7 @@ router.get(
  * is required to call it. The user must have the
  * {@link API_SCOPE.GET_ALL_CHECKOUTS} scope.
  */
-router.get("/", async (req: CheckoutRequest, res: CheckoutsResponse) => {
+router.get("/", async (req: Request, res: CheckoutsResponse) => {
     const headers = req.headers as VerifyRequestHeader;
     const requesting_uuid = headers.requesting_uuid;
 
@@ -217,13 +217,13 @@ router.post("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
                 `An attempt was made to create a checkout with uuid ` +
                     `${checkout_uuid}, but a checkout with that uuid already exists`,
             );
-            res.status(StatusCodes.NOT_ACCEPTABLE).json({
+            res.status(StatusCodes.CONFLICT).json({
                 error: `A checkout with uuid \`${checkout_uuid}\` already exists.`,
             });
             return;
         }
         req.log.debug(`Created checkout with uuid ${checkout_uuid}`);
-        res.status(StatusCodes.OK).json(checkout);
+        res.status(StatusCodes.CREATED).json(checkout);
     } else {
         req.log.warn({
             msg: "Forbidden user attempted to create a checkout",

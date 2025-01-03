@@ -29,22 +29,30 @@ const router = Router();
 // --- Inventory Routes ---
 
 /**
- * Get all public inventory items. This is a public route, and does not require
- * a `requesting_uuid` header to call it. If the user is an admin or has the
- * {@link API_SCOPE.GET_ALL_INVENTORY} scope, all inventory items are returned.
- * Otherwise, users will only see items
+ * Get all public inventory items. This route allows for an optional
+ * `requesting_uuid` header to find all inventory items that this user is
+ * authorized to see. If the user is an admin or has the
+ * {@link API_SCOPE.GET_ALL_INVENTORY} scope, all inventory items
+ * are returned.
  */
 router.get("/public", async (req: Request, res: InventoryResponse) => {
     const headers = req.headers as VerifyRequestHeader;
     const requesting_uuid = headers.requesting_uuid;
 
+    req.log.debug({
+        msg: `Getting inventory visible to user ${requesting_uuid}`,
+        requesting_uuid: requesting_uuid,
+    });
+
     const inventory = await getInventoryVisibleToUser(requesting_uuid);
     if (!inventory) {
-        req.log.error(
+        req.log.warn(
             `No inventory items found visible to user ${requesting_uuid}`,
         );
     } else {
-        req.log.debug("Returned all inventory items");
+        req.log.debug(
+            `Returned inventory items visible to user ${requesting_uuid}`,
+        );
     }
     res.status(StatusCodes.OK).json(inventory);
 });
@@ -220,14 +228,14 @@ router.post("/", async (req: ItemRequest, res: ItemResponse) => {
                 `An attempt was made to create an inventory item with uuid ` +
                     `${new_item_uuid}, but an item with that uuid already exists`,
             );
-            res.status(StatusCodes.NOT_ACCEPTABLE).json({
+            res.status(StatusCodes.CONFLICT).json({
                 error: `An item with uuid \`${new_item_uuid}\` already exists.`,
             });
             return;
         }
         req.log.debug(`Created item with uuid ${new_item_uuid}`);
         // Return the new item object
-        res.status(StatusCodes.OK).json(item);
+        res.status(StatusCodes.CREATED).json(item);
     } else {
         // If the user is not authorized, provide a status error
         req.log.warn({

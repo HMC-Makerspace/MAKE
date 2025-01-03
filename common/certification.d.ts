@@ -32,6 +32,9 @@ export type TCertificationType = {
  *      will never expire.
  * @property documents - (optional) A list of documents that are related to this
  *     certification, such as a training manual or a Google form link.
+ * @property authorized_roles - (optional) a list of UserRole UUIDs that are
+ *      allowed to see this workshop. If not present, any user may see this
+ *      workshop
  */
 export type TCertification = {
     uuid: CertificationUUID;
@@ -42,6 +45,8 @@ export type TCertification = {
     max_level?: number;
     seconds_valid_for?: number;
     documents?: TDocument[];
+    prerequisites?: CertificationUUID[];
+    authorized_roles?: UserRoleUUID[];
 };
 
 /**

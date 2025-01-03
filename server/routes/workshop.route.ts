@@ -9,6 +9,7 @@ import {
     cancelRSVPToWorkshop,
     signInToWorkshop,
     getPublicWorkshops,
+    getWorkshopsVisibleToUser,
 } from "controllers/workshop.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
@@ -36,17 +37,30 @@ const router = Router();
 // --- Workshop Routes ---
 
 /**
- * Get all public workshop data. This is a public route and does not require a
- * `requesting_uuid` header to call it.
+ * Get all public workshops. This route allows for an optional
+ * `requesting_uuid` header to find all workshops that this user is
+ * authorized to see. If the user is an admin or has the
+ * {@link API_SCOPE.GET_ALL_CERTIFICATIONS} scope, all workshops
+ * are returned.
  */
 router.get(
     "/public",
     async (req: Request, res: Response<TPublicWorkshopData[]>) => {
-        const workshops = await getPublicWorkshops();
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = headers.requesting_uuid;
+
+        req.log.debug({
+            msg: `Getting public workshops visible to user ${requesting_uuid}.`,
+            requesting_uuid: requesting_uuid,
+        });
+
+        const workshops = await getWorkshopsVisibleToUser(requesting_uuid);
         if (!workshops) {
-            req.log.error("No public workshops found in the database.");
+            req.log.warn(`No workshops visible to user ${requesting_uuid}.`);
         } else {
-            req.log.debug("Returned all public workshops.");
+            req.log.debug(
+                `Returned workshops visible to user ${requesting_uuid}.`,
+            );
         }
         res.status(StatusCodes.OK).json(workshops);
     },
@@ -195,13 +209,13 @@ router.post("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
                 `An attempt was made to create a workshop with uuid ` +
                     `${workshop_uuid}, but a workshop with that uuid already exists`,
             );
-            res.status(StatusCodes.NOT_ACCEPTABLE).json({
+            res.status(StatusCodes.CONFLICT).json({
                 error: `A workshop with uuid \`${workshop_uuid}\` already exists.`,
             });
             return;
         }
         req.log.debug(`Created workshop with uuid ${workshop_uuid}`);
-        res.status(StatusCodes.OK).json(workshop);
+        res.status(StatusCodes.CREATED).json(workshop);
     } else {
         req.log.warn({
             msg: "Forbidden user attempted to create a workshop",

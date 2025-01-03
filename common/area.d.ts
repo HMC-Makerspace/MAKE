@@ -37,18 +37,20 @@ export type TAreaStatusLog = {
  *      information about the area
  * @property equipment - (optional) A list of {@link TMachine | machine } UUIDs
  *      that are available in this area
+ * @property images - (optional) A list of {@link TFile | File} UUIDs that are
+ *     images of this area
  * @property current_statuses - A list of status objects indicating the current
  *      status of each of the `count` machines in the space
  * @property status_logs - A list of changes in status logged by timestamp
- * @property required_certifications - UUIDs of certs required to use/reserve
- *      the area
+ * @property required_certifications - (optional) UUIDs of certs required to
+ *      use/reserve the area
  * @property authorized_roles - (optional) A list of UserRole UUIDs that are
- *      allowed to use this area. A user must have at least one of these
- *      roles to reserve the given area. If not present, any user may
- *      use/reserve this area.
- * @property hidden - (optional) Whether this area should be hidden from the
- *     public. If true, only users with an authorized role may see this area.
- *     Defaults to false if not present.
+ *      allowed to see this area. A user must have at least one of these
+ *      roles to see this area in the area tab. If not present, this is a
+ *      public area.
+ * @property reservable - (optional) Whether this area is allowed to be reserved.
+ *      Only users with the required certifications and authorized roles can
+ *      reserve this area.
  */
 export type TArea = {
     uuid: AreaUUID;
@@ -56,11 +58,12 @@ export type TArea = {
     description?: string;
     documents?: TDocument[];
     equipment?: MachineUUID[];
+    images?: FileUUID[];
     current_status: TAreaStatus;
     status_logs: TAreaStatusLog[];
     required_certifications?: CertificationUUID[];
     authorized_roles?: UserRoleUUID[];
-    hidden?: boolean;
+    reservable?: boolean;
 };
 
 export type TPublicAreaData = Omit<TArea, "uuid" | "status_logs">;

@@ -1,7 +1,9 @@
-import { UUID } from "common/global";
+import { API_SCOPE, UUID } from "common/global";
 import { TMachine, TMachineStatus, TPublicMachineData } from "common/machine";
 import { Machine } from "models/machine.model";
 import mongoose from "mongoose";
+import { getUser } from "./user.controller";
+import { verifyRequest } from "./verify.controller";
 
 /**
  * Get all machines in the database
@@ -24,14 +26,57 @@ export async function getMachine(machine_uuid: UUID) {
 }
 
 /**
+ * Get all machines visible to a user, which includes all public machines and
+ * all machines that the user has an authorized role for
+ * @param user_uuid The user's UUID
+ * @returns A promise to a list of TPublicMachineData objects representing all
+ *      machines visible to the user
+ */
+export async function getMachinesVisibleToUser(
+    user_uuid: UUID,
+): Promise<TPublicMachineData[]> {
+    // If the user doesn't exist, return only public machines
+    const user = await getUser(user_uuid);
+    if (!user) {
+        return getPublicMachines();
+    }
+
+    // If the user is an admin or can get all machines, return all machines
+    if (
+        await verifyRequest(
+            user_uuid,
+            API_SCOPE.ADMIN,
+            API_SCOPE.GET_ALL_MACHINES,
+        )
+    ) {
+        return getMachines();
+    }
+
+    // Otherwise, find all machines that the user can access
+    const role_uuids = user.active_roles.map((log) => log.role_uuid);
+
+    const Machines = mongoose.model("Machine", Machine);
+    // Find all machines that require no roles or which require roles that the
+    // user has
+    return Machines.find({
+        $or: [
+            { authorized_roles: null },
+            { authorized_roles: { $in: role_uuids } },
+        ],
+    });
+}
+
+/**
  * Get all public machine data, which is stripped of log information
  * @returns A promise to list of TPublicMachineData objects representing all
  *    public machine data
  */
-export async function getPublicMachines(): Promise<TPublicMachineData[]> {
+async function getPublicMachines(): Promise<TPublicMachineData[]> {
     const Machines = mongoose.model("Machine", Machine, "machines");
     // Get all machines that are public
-    return Machines.find().select([
+    return Machines.find({
+        authorized_roles: null,
+    }).select([
         // Remove private information from the machine
         "-uuid",
         "-status_logs",

@@ -11,7 +11,7 @@ export type TConfig = {
         /**
          * Maximum allowed individual file upload size (in bytes).
          */
-        max_individual_upload_size?: number;
+        // max_individual_upload_size?: number; // MOVED TO process.env FOR SECURITY
         /**
          * Maximum upload usage for each user (in bytes).
          */

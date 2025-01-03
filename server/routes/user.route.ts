@@ -201,13 +201,13 @@ router.post("/role/", async (req: UserRoleRequest, res: UserRoleResponse) => {
                 `An attempt was made to create a user role with uuid ` +
                     `${role_uuid}, but a role with that uuid already exists`,
             );
-            res.status(StatusCodes.NOT_ACCEPTABLE).json({
+            res.status(StatusCodes.CONFLICT).json({
                 error: `A user role with uuid \`${role_uuid}\` already exists.`,
             });
             return;
         }
         req.log.debug(`Created user role with uuid ${role_uuid}`);
-        res.status(StatusCodes.OK).json(user_role);
+        res.status(StatusCodes.CREATED).json(user_role);
     } else {
         // If the user is not authorized, provide a status error
         req.log.warn({
@@ -325,8 +325,6 @@ router.patch(
 
 // --- Certificate Routes ---
 
-
-
 // --- Admin Routes ---
 
 /**
@@ -338,14 +336,14 @@ router.post("/initialize_admin", async (req: Request, res: UserResponse) => {
     req.log.info("Initializing the first admin role and user in the database");
     const initial_admin_role = await initializeAdminRole();
     if (!initial_admin_role) {
-        res.status(StatusCodes.NOT_ACCEPTABLE).json({
+        res.status(StatusCodes.CONFLICT).json({
             error: "An admin role already exists.",
         });
         return;
     }
     const initial_admin = await initializeAdmin(initial_admin_role.uuid);
     if (!initial_admin) {
-        res.status(StatusCodes.NOT_ACCEPTABLE).json({
+        res.status(StatusCodes.CONFLICT).json({
             error: "An admin user already exists.",
         });
         return;
@@ -377,7 +375,7 @@ router.get(
             user: user,
         });
 
-        res.status(StatusCodes.OK).json(user);
+        res.status(StatusCodes.CREATED).json(user);
     },
 );
 
@@ -579,14 +577,14 @@ router.post("/", async (req: UserRequest, res: UserResponse) => {
                 `An attempt was made to create a user with uuid ` +
                     `${new_user_uuid}, but a user with that uuid already exists`,
             );
-            res.status(StatusCodes.NOT_ACCEPTABLE).json({
+            res.status(StatusCodes.CONFLICT).json({
                 error: `A user with uuid \`${new_user_uuid}\` already exists.`,
             });
             return;
         }
         req.log.debug(`Created user with uuid ${new_user_uuid}`);
         // Return the new user object
-        res.status(StatusCodes.OK).json(user);
+        res.status(StatusCodes.CREATED).json(user);
     } else {
         // If the user is not authorized, provide a status error
         req.log.warn({

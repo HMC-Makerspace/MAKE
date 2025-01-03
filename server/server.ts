@@ -21,6 +21,7 @@ import * as frontend from "../website/index";
 
 // Routes
 import checkoutRoutes from "./routes/checkout.route";
+import fileRoutes from "./routes/file.route";
 import inventoryRoutes from "./routes/inventory.route";
 import machineRoutes from "./routes/machine.route";
 import restockRoutes from "./routes/restock.route";
@@ -42,30 +43,17 @@ if (process.env.NODE_ENV == "development") {
 // Connect to the database
 connectDB(logger);
 
-// Setup file upload
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, process.env.FILE_TEMP_PATH);
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        cb(null, file.originalname + "-" + uniqueSuffix);
-    },
-});
-
-const upload = multer({
-    storage: storage,
-});
-
-// Add a list of allowed origins.
+// Setup CORS
+// Add a list of allowed origins
 // If you have more origins you would like to add, you can add them to the array below.
 const allowedOrigins = [
-    `http://localhost:${process.env.VITE_SERVER_PORT || 3000}`, // Backend
-    `http://localhost:${process.env.VITE_PORT || 3001}`, // Frontend
+    `http://localhost:${process.env.VITE_SERVER_PORT || 3001}`, // Backend
+    `http://localhost:${process.env.VITE_PORT || 3000}`, // Frontend
 ];
 const options: cors.CorsOptions = {
     origin: allowedOrigins,
 };
+logger.debug("CORS setup");
 
 // Middleware
 app.use(
@@ -78,6 +66,7 @@ app.use(
 // API Routes
 // app.use("/api/v3", indexRoutes);
 app.use("/api/v3/checkout", checkoutRoutes);
+app.use("/api/v3/file", fileRoutes);
 app.use("/api/v3/inventory", inventoryRoutes);
 app.use("/api/v3/machine", machineRoutes);
 app.use("/api/v3/restock", restockRoutes);

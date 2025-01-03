@@ -11,7 +11,8 @@ export const File = new mongoose.Schema<TFile>({
     timestamp_upload: { type: Number, required: true },
     timestamp_expires: { type: Number, required: false },
     size: { type: Number, required: true },
-    user_uuid: { type: String, required: false },
+    resource_uuid: { type: String, required: true },
+    resource_type: { type: String, required: true },
 });
 
 /**

@@ -230,5 +230,5 @@
   - make `capacity` optional, if not present has no capacity (like a public event)
   - modify `rsvp_list` to be a dictionary of User UUIDs to the timestamp they RSVP'd for the workshop
   - modify `sign_in_list` to be a dictionary of User UUIDs to the timestamp they signed in for the workshop
-  - make `photos` a list of `File` uuids (though it might have been this already)
+  - rename `photos` to `images` and make it a list of `File` uuids (though it might have been this already)
   - make `description` optional

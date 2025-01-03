@@ -317,40 +317,65 @@ export async function revokeRoleFromUser(
 export async function grantCertificateToUser(
     user_uuid: UserUUID,
     certification_uuid: CertificationUUID,
+    level: number = 1,
 ): Promise<TUser | null> {
     // Find the user
     const Users = mongoose.model("User", User);
     const Certifications = mongoose.model("Certification", Certification);
     const user = await Users.findOne({ uuid: user_uuid });
-    const certificate = await Certifications.findOne({
+    const certification = await Certifications.findOne({
         uuid: certification_uuid,
     });
-    // If either the user or certificate doesn't exist, we can't grant the role
-    if (!user || !certificate) {
-        return null;
+    // If either the user or certification doesn't exist, then there is
+    // nothing to grant
+    if (!user) {
+        throw new Error("User not found");
     }
-    // If the user already has the certificate, no changes are made
+    if (!certification) {
+        throw new Error("Certification not found");
+    }
+    // If the requested level is higher than the max level for the certification,
+    // then the certification cannot be granted
+    if (certification.max_level && level > certification.max_level) {
+        throw new Error("Level exceeds maximum level for certification");
+    }
+    // If the user already has the certificate, then move the old certificate
+    // to the past certificates list
     if (
         user.active_certificates &&
         user.active_certificates.some(
-            (log) => log.certification_uuid === certification_uuid,
+            (cert) => cert.certification_uuid === certification_uuid,
         )
     ) {
-        return user;
-    } else {
-        // Otherwise, add the certificate to the user's active certificate list
-        if (!user.active_certificates) {
-            user.active_certificates = [];
+        // Move the old certificate to the past certificates list
+        const old_cert = user.active_certificates.find(
+            (cert) => cert.certification_uuid === certification_uuid,
+        );
+        if (!user.past_certificates) {
+            user.past_certificates = [];
         }
-        const now = Date.now() / 1000;
-        user.active_certificates.push({
-            certification_uuid: certification_uuid,
-            level: certificate.level,
-            timestamp_granted: now,
-            timestamp_expires: now + 6 * 30 * 24 * 60 * 60, // 6 months from now
-        });
-        return user.save();
+        user.past_certificates.push(old_cert!);
+        // Remove the old certificate from the active certificates list
+        user.active_certificates = user.active_certificates.filter(
+            (cert) => cert.certification_uuid !== certification_uuid,
+        );
     }
+    // Add the new certificate to the active certificates list
+    if (!user.active_certificates) {
+        user.active_certificates = [];
+    }
+    const now = Date.now() / 1000;
+    // If the certification has a time limit, set the expiration date
+    const valid_until = certification.seconds_valid_for
+        ? now + certification.seconds_valid_for
+        : undefined;
+    user.active_certificates.push({
+        certification_uuid: certification_uuid,
+        level: level,
+        timestamp_granted: now,
+        timestamp_expires: valid_until,
+    });
+    return user.save();
 }
 
 /**
@@ -395,12 +420,7 @@ export async function revokeCertificateFromUser(
         if (!user.past_certificates) {
             user.past_certificates = [];
         }
-        user.past_certificates.push({
-            certification_uuid: certification_uuid,
-            level: certificate.level,
-            timestamp_granted: certificate.timestamp_granted,
-            timestamp_expires: Date.now() / 1000,
-        });
+        user.past_certificates.push(certificate);
     }
     return user.save();
 }

@@ -27,7 +27,8 @@ export const Workshop = new mongoose.Schema<TWorkshop>(
             of: Number, // Numbers as values
             required: true,
         },
-        photos: { type: [String], required: false },
+        images: { type: [String], required: false },
+        authorized_roles: { type: [String], required: false },
     },
     { collection: "workshops" }, // Collection name
 );

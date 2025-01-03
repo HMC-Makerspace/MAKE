@@ -1,8 +1,10 @@
-import { UUID } from "common/global";
+import { API_SCOPE, UUID } from "common/global";
 import { TArea, TAreaStatus, TPublicAreaData } from "common/area";
 import { Area } from "models/area.model";
 import mongoose from "mongoose";
 import { Machine } from "models/machine.model";
+import { getUser } from "./user.controller";
+import { verifyRequest } from "./verify.controller";
 
 /**
  * Get all areas in the database
@@ -24,16 +26,52 @@ export async function getArea(area_uuid: UUID) {
     return Areas.findOne({ uuid: area_uuid });
 }
 
+export async function getAreasVisibleToUser(
+    user_uuid: UUID,
+): Promise<TPublicAreaData[]> {
+    // If the user doesn't exist, return only public areas
+    const user = await getUser(user_uuid);
+    if (!user) {
+        return getPublicAreas();
+    }
+
+    // If the user is an admin or can get all areas, return all areas
+    if (
+        await verifyRequest(user_uuid, API_SCOPE.ADMIN, API_SCOPE.GET_ALL_AREAS)
+    ) {
+        return getAreas();
+    }
+
+    // Otherwise, find all areas that the user can access
+    const role_uuids = user.active_roles.map((log) => log.role_uuid);
+
+    const Areas = mongoose.model("Area", Area);
+    // Find all areas that require no roles or which require roles that the
+    // user has
+    return Areas.find({
+        $or: [
+            { authorized_roles: null },
+            { authorized_roles: { $in: role_uuids } },
+        ],
+    }).select([
+        // Remove private information from the area
+        "-uuid",
+        "-status_logs",
+    ]);
+}
+
 /**
  * Get all public area data, which only includes public
  * areas and is stripped of log information
  * @returns A promise to list of TPublicAreaData objects representing all
  *    public areas
  */
-export async function getPublicAreas(): Promise<TPublicAreaData[]> {
+async function getPublicAreas(): Promise<TPublicAreaData[]> {
     const Areas = mongoose.model("Area", Area, "areas");
     // Get all areas that are public
-    return Areas.find({ hidden: false }).select([
+    return Areas.find({
+        authorized_roles: null,
+    }).select([
         // Remove private information from the area
         "-uuid",
         "-status_logs",
@@ -46,7 +84,7 @@ export async function getPublicAreas(): Promise<TPublicAreaData[]> {
  */
 export async function getPrivateAreas(): Promise<TArea[]> {
     const Areas = mongoose.model("Area", Area);
-    return Areas.find({ hidden: true });
+    return Areas.find({ reservable: true });
 }
 
 /**

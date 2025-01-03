@@ -36,7 +36,7 @@ export async function getSchedule(schedule_uuid: UUID) {
  * @returns A promise to the TSchedule object representing the current
  *      schedule, or null if no schedule is currently active
  */
-export async function getCurrentSchedule(): Promise<TSchedule | null> {
+export async function getCurrentSchedule() {
     const Schedules = mongoose.model("Schedule", Schedule, "schedules");
     // Get the schedule that is currently active (should only be one)
     return Schedules.findOne({
@@ -264,6 +264,11 @@ export async function deleteAlertInSchedule(
     );
 }
 
+/**
+ * Get all shifts for a certain user for the current schedule
+ * @param user_uuid The UUID of the user to get shifts for
+ * @returns The list of shifts assigned to the user, or null if no schedule is active
+ */
 export async function getShiftsByUser(
     user_uuid: UserUUID,
 ): Promise<TShift[] | null> {
@@ -274,6 +279,11 @@ export async function getShiftsByUser(
     return schedule.shifts.filter((shift) => shift.assignee === user_uuid);
 }
 
+/**
+ * Get all shifts that a user has dropped for the current schedule
+ * @param user_uuid The UUID of the user to get dropped shifts for
+ * @returns The list of shifts that the user has dropped, or null if no schedule is active
+ */
 export async function getDroppedShiftsByUser(
     user_uuid: UserUUID,
 ): Promise<TShift[] | null> {
@@ -290,6 +300,11 @@ export async function getDroppedShiftsByUser(
     );
 }
 
+/**
+ * Get all shifts that a user has picked up for the current schedule
+ * @param user_uuid The UUID of the user to get picked up shifts for
+ * @returns The list of shifts that the user has picked up, or null if no schedule is active
+ */
 export async function getPickedUpShiftsByUser(
     user_uuid: UserUUID,
 ): Promise<TShift[] | null> {
@@ -305,6 +320,9 @@ export async function getPickedUpShiftsByUser(
         ),
     );
 }
+
+// TODO: Technically all shift functions do not check if a shift
+// exists by the given uuid.
 
 /**
  * Create a new shift in a given schedule
@@ -383,7 +401,7 @@ export async function deleteShiftInSchedule(
  * @returns The updated schedule object, or null if no schedule has the given
  *      UUID, or no shift has the given UUID in the schedule
  */
-export async function createShiftEventInSchedule(
+export async function addShiftEventInSchedule(
     schedule_uuid: UUID,
     shift_uuid: UUID,
     event: TShiftEvent,

@@ -2,6 +2,13 @@ import type { UnixTimestamp, UUID } from "./global";
 
 export type FileUUID = UUID;
 
+export enum FILE_RESOURCE_TYPE {
+    USER = "user",
+    AREA = "area",
+    MACHINE = "machine",
+    WORKSHOP = "workshop",
+}
+
 /**
  * All relevant user information
  * @property uuid - The file's unique identifier for the database
@@ -19,7 +26,8 @@ export type TFile = {
     timestamp_upload: UnixTimestamp;
     timestamp_expires?: UnixTimestamp;
     size: number;
-    user_uuid?: UserUUID;
+    resource_uuid: UUID;
+    resource_type: FILE_RESOURCE_TYPE;
 };
 
 /**

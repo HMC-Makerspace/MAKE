@@ -321,13 +321,13 @@ router.post("/", async (req: RestockRequestRequest, res: RestockResponse) => {
                 `An attempt was made to create a restock request with uuid ` +
                     `${restock_uuid}, but a request with that uuid already exists`,
             );
-            res.status(StatusCodes.NOT_ACCEPTABLE).json({
+            res.status(StatusCodes.CONFLICT).json({
                 error: `A restock request with uuid \`${restock_uuid}\` already exists.`,
             });
             return;
         }
         req.log.debug(`Created restock request with uuid ${restock_uuid}`);
-        res.status(StatusCodes.OK).json(restock);
+        res.status(StatusCodes.CREATED).json(restock);
     } else {
         req.log.warn({
             msg: "Forbidden user attempted to create restock request",

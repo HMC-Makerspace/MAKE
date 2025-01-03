@@ -11,6 +11,7 @@ declare module "bun" {
         EMAIL_BOT_PASSWORD: string;
         FILE_UPLOAD_PATH: string;
         FILE_TEMP_PATH: string;
+        FILE_MAX_SIZE: number;
     }
 }
 

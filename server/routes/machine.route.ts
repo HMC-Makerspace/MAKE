@@ -11,7 +11,7 @@ import {
     deleteMachine,
     getMachine,
     getMachines,
-    getPublicMachines,
+    getMachinesVisibleToUser,
     updateMachine,
     updateMachineStatuses,
 } from "controllers/machine.controller";
@@ -35,17 +35,30 @@ const router = Router();
 // --- Machine Routes ---
 
 /**
- * Get all public machine data. This is a public route and does not require a
- * `requesting_uuid` header to call it.
+ * Get all public machines. This route allows for an optional
+ * `requesting_uuid` header to find all machines that this user is
+ * authorized to see. If the user is an admin or has the
+ * {@link API_SCOPE.GET_ALL_CERTIFICATIONS} scope, all machines
+ * are returned.
  */
 router.get(
     "/public",
     async (req: Request, res: Response<TPublicMachineData[]>) => {
-        const machines = await getPublicMachines();
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = headers.requesting_uuid;
+
+        req.log.debug({
+            msg: `Getting machines visible to user ${requesting_uuid}.`,
+            requesting_uuid: requesting_uuid,
+        });
+
+        const machines = await getMachinesVisibleToUser(requesting_uuid);
         if (!machines) {
-            req.log.error("No public machines found in the database.");
+            req.log.warn(`No machines visible to user ${requesting_uuid}.`);
         } else {
-            req.log.debug("Returned all public machines.");
+            req.log.debug(
+                `Returned machines visible to user ${requesting_uuid}.`,
+            );
         }
         res.status(StatusCodes.OK).json(machines);
     },
@@ -187,13 +200,13 @@ router.post("/", async (req: MachineRequest, res: MachineResponse) => {
                 `An attempt was made to create a machine with uuid ` +
                     `${machine_uuid}, but a machine with that uuid already exists`,
             );
-            res.status(StatusCodes.NOT_ACCEPTABLE).json({
+            res.status(StatusCodes.CONFLICT).json({
                 error: `A machine with uuid \`${machine_uuid}\` already exists.`,
             });
             return;
         }
         req.log.debug(`Created machine with uuid ${machine_uuid}`);
-        res.status(StatusCodes.OK).json(machine);
+        res.status(StatusCodes.CREATED).json(machine);
     } else {
         req.log.warn({
             msg: "Forbidden user attempted to create a machine",
