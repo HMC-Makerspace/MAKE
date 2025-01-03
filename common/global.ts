@@ -69,7 +69,7 @@ export enum API_SCOPE {
     // User scopes
     GET_ALL_USERS = "get_users",
     UPDATE_USER = "update_user",
-    UPDATE_USER_SELF = "update_self",
+    UPDATE_INFO_SELF = "update_self",
     CREATE_USER = "create_user",
     DELETE_USER = "delete_user",
     DELETE_USER_SELF = "delete_self",
@@ -77,6 +77,8 @@ export enum API_SCOPE {
     UPDATE_ROLE = "update_role",
     CREATE_ROLE = "create_role",
     DELETE_ROLE = "delete_role",
+    GRANT_ROLE = "grant_role",
+    REVOKE_ROLE = "revoke_role",
     // Workshop scopes
     GET_ALL_WORKSHOPS = "get_workshops",
     GET_WORKSHOP = "get_workshop",
@@ -91,4 +93,10 @@ export enum API_SCOPE {
     CREATE_CERTIFICATION = "create_certification",
     UPDATE_CERTIFICATION = "update_certification",
     DELETE_CERTIFICATION = "delete_certification",
+    // Certification Type scopes
+    GET_ALL_CERTIFICATION_TYPES = "get_certification_types",
+    GET_ONE_CERTIFICATION_TYPE = "get_certification_type",
+    CREATE_CERTIFICATION_TYPE = "create_certification_type",
+    UPDATE_CERTIFICATION_TYPE = "update_certification_type",
+    DELETE_CERTIFICATION_TYPE = "delete_certification_type",
 }

@@ -1,9 +1,17 @@
 import { API_SCOPE, UUID } from "common/global";
-import { TCertificate } from "common/certification";
-import { TCertification } from "common/certification";
-import { Certificate } from "models/certification.model";
-import { Certification } from "models/certification.model";
+import {
+    TCertification,
+    TCertificate,
+    TCertificationType,
+} from "common/certification";
+import {
+    Certification,
+    Certificate,
+    CertificationType,
+} from "models/certification.model";
 import mongoose from "mongoose";
+
+// --- Certification Controls ---
 
 /**
  * Get all certifications in the database
@@ -19,7 +27,7 @@ export async function getCertifications(): Promise<TCertification[]> {
  * Get a specific certification in the database
  * @param uuid The certification's UUID to search by
  * @returns A promise to a TCertification object, or null if no certification
- * has the given UUID
+ *          has the given UUID
  */
 export async function getCertification(
     uuid: UUID,
@@ -33,7 +41,7 @@ export async function getCertification(
  * found by UUID.
  * @param certification_obj The certification's complete and updated information
  * @returns A promise to the updated TCertification object, or null if no checkout
- *     has the given UUID
+ *          has the given UUID
  */
 export async function updateCertification(
     certification_obj: TCertification,
@@ -43,32 +51,32 @@ export async function updateCertification(
     return Certifications.findOneAndReplace(
         { uuid: certification_obj.uuid },
         certification_obj,
-        {
-            returnDocument: "after",
-        },
+        { returnDocument: "after" },
     );
 }
 
 /**
  * Create a new certification in the database
- * @param certiifcation_obj The checkout's complete information
- * @returns The certification object
+ * @param certification_obj The checkout's complete information
+ * @returns The certification object, or null if a certification with the same
+ *          UUID already exists
  */
 export async function createCertification(
     certification_obj: TCertification,
 ): Promise<TCertification | null> {
     const Certifications = mongoose.model("Certification", Certification);
-    // Check if the certification already exists
-    const exisitingCertification = await Certifications.exists({
+    // Check if a certification already exists by the given UUID
+    const certification_exists = await Certifications.exists({
         uuid: certification_obj.uuid,
     });
-    if (exisitingCertification) {
+    if (certification_exists) {
         // If so, return null, and don't create new certification
         return null;
     }
-    // If the certification doesn't exist, create a new certification and return it
-    const newCertification = new Certifications(certification_obj);
-    return newCertification.save();
+    // If the certification doesn't exist, create a new certification and
+    // return it
+    const new_certification = new Certifications(certification_obj);
+    return new_certification.save();
 }
 
 /**
@@ -83,11 +91,112 @@ export async function deleteCertification(
     return Certifications.findOneAndDelete({ uuid: uuid });
 }
 
+// --- CertificationType Controls ---
+
+/**
+ * Get all certification types in the database
+ * @returns A list containing all certifications in the db.
+ */
+export async function getCertificationTypes(): Promise<TCertificationType[]> {
+    const CertificationTypes = mongoose.model(
+        "CertificationType",
+        CertificationType,
+    );
+    return CertificationTypes.find();
+}
+
+/**
+ * Get a specific certification type
+ * @param uuid
+ * @returns Either a certification corresponding to the given uuid or null if
+ *          the given uuid doesn't exist.
+ */
+export async function getCertificationType(
+    uuid: UUID,
+): Promise<TCertificationType | null> {
+    const CertificationTypes = mongoose.model(
+        "CertificationType",
+        CertificationType,
+    );
+    return CertificationTypes.findOne({ uuid: uuid });
+}
+
+/**
+ * Create a new certification type in the database
+ * @param certificate_type_obj The certification type's complete information
+ * @returns Either a certification corresponding to the given uuid or null if
+ *          the given uuid doesn't exist.
+ */
+export async function createCertificationType(
+    certification_type_obj: TCertificationType,
+): Promise<TCertificationType | null> {
+    const CertificationTypes = mongoose.model(
+        "CertificationType",
+        CertificationType,
+    );
+    // Check if the certification type already exists
+    const certification_type_exists = await CertificationTypes.exists({
+        uuid: certification_type_obj.uuid,
+    });
+    if (certification_type_exists) {
+        // If so, return null, and don't create any new certifications
+        return null;
+    }
+    // If the certification type doesn't exist, create a new certification and
+    // return it
+    const new_certification_type = new CertificationTypes(
+        certification_type_obj,
+    );
+    return new_certification_type.save();
+}
+
+/**
+ * Update a certification type information given an entire TCertificationType
+ * object. CertificationType is found by UUID.
+ * @param certification_obj The certification type's complete and updated
+ *                          information
+ * @returns A promise to the updated TCertificationType object, or null if no
+ *          certification type has the given UUID
+ */
+export async function updateCertificationType(
+    certification_type_obj: TCertificationType,
+): Promise<TCertificationType | null> {
+    const CertificationTypes = mongoose.model(
+        "CertificationType",
+        CertificationType,
+    );
+    // Update the given certification type with a new certification_obj,
+    // searching by uuid
+    return CertificationTypes.findOneAndReplace(
+        { uuid: certification_type_obj.uuid },
+        certification_type_obj,
+        { returnDocument: "after" },
+    );
+}
+
+/**
+ * Delete a certification type in the database
+ * @param uuid The certification type's uuid
+ * @returns The certification type object, or null if no certification type
+ *          has the given UUID
+ */
+export async function deleteCertificationType(
+    uuid: UUID,
+): Promise<TCertification | null> {
+    const CertificationTypes = mongoose.model(
+        "CertificationType",
+        CertificationType,
+    );
+    return CertificationTypes.findOneAndDelete({ uuid: uuid });
+}
+
+// --- Certificate Controls ---
+
 // /**
 //  * Get all certificates in the database
 //  * @param uuid The certificate's UUID to search by
 //  * @returns A promise to a TCertificate object, or null if no certificates have
-//  * the givn UUID
+//  * the given UUID
 //  */
 // export async function getCertificate(uuid: UUID): Promise<TCertificate | null> {
 //     const Certificates = mongoose.model("Certificate", Certificate);

@@ -90,7 +90,8 @@ export type TUser = {
     college_id: string;
     active_roles: TUserRoleLog[];
     past_roles: TUserRoleLog[];
-    certificates?: TCertificate[];
+    active_certificates?: TCertificate[];
+    past_certificates?: TCertificate[];
     files?: FileUUID[];
     availability?: TUserAvailability[];
 };

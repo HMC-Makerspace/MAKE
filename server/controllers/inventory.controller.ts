@@ -35,18 +35,24 @@ export async function getInventoryVisibleToUser(
     // If the user doesn't exist, return an empty array
     const user = await getUser(user_uuid);
     if (!user) {
-        return [];
+        return getPublicInventory();
     }
 
-    // If the user is an admin, return all items
-    if (await verifyRequest(user_uuid, API_SCOPE.ADMIN)) {
+    // If the user is an admin or can get all items, return all items
+    if (
+        await verifyRequest(
+            user_uuid,
+            API_SCOPE.ADMIN,
+            API_SCOPE.GET_ALL_INVENTORY,
+        )
+    ) {
         return getInventory();
     }
 
     // Otherwise, find all items that the user can access
     const role_uuids = user.active_roles.map((log) => log.role_uuid);
     const cert_uuids =
-        user.certificates?.map((cert) => cert.certification_uuid) ?? [];
+        user.active_certificates?.map((cert) => cert.certification_uuid) ?? [];
 
     // Get all hidden areas
     const private_areas = (await getPrivateAreas()).map((area) => area.uuid);
@@ -55,19 +61,50 @@ export async function getInventoryVisibleToUser(
     // Find all items that the user has a role for, and exclude items in
     // private areas
     const items = await Inventory.find({
-        $and: [
-            { authorized_roles: { $elemMatch: { $in: role_uuids } } },
-            { "locations.area": { $nin: private_areas } },
+        authorized_roles: { $elemMatch: { $in: role_uuids } },
+    });
+
+    // Filter out private locations
+    items.forEach((item) =>
+        item.locations.filter((loc) => !private_areas.includes(loc.area)),
+    );
+
+    // Finally, filter out items that have no locations or require certifications
+    // that the user doesn't have
+    return items.filter(
+        (item) =>
+            (item.locations.length === 0 ||
+                item.required_certifications?.every((cert) =>
+                    cert_uuids.includes(cert.certification_uuid),
+                )) ??
+            true,
+    );
+}
+
+/**
+ * Get all inventory items that are public (no roles or certifications required,
+ * and not in private areas)
+ * @returns A promise to an array of all public inventory items
+ */
+async function getPublicInventory(): Promise<TInventoryItem[]> {
+    const Inventory = mongoose.model("InventoryItem", InventoryItem);
+    // Find all items that need no roles or certifications
+    const items = await Inventory.find({
+        authorized_roles: null,
+        // Required certifications must either be empty or not exist
+        $or: [
+            { required_certifications: null },
+            { required_certifications: { $size: 0 } },
         ],
     });
 
-    // Finally, filter out items that require certifications the user doesn't have
-    return items.filter(
-        (item) =>
-            item.required_certifications?.every((cert) =>
-                cert_uuids.includes(cert.certification_uuid),
-            ) ?? true,
+    const private_areas = (await getPrivateAreas()).map((area) => area.uuid);
+
+    // Filter out private locations
+    items.forEach((item) =>
+        item.locations.filter((loc) => !private_areas.includes(loc.area)),
     );
+    return items;
 }
 
 /**

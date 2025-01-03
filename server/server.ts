@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import connectDB from "./core/db";
 import html from "bun-plugin-html";
+import multer from "multer";
 import pino from "pino";
 import loggerMiddleware from "pino-http";
 import cors from "cors";
@@ -40,6 +41,21 @@ if (process.env.NODE_ENV == "development") {
 
 // Connect to the database
 connectDB(logger);
+
+// Setup file upload
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, process.env.FILE_TEMP_PATH);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        cb(null, file.originalname + "-" + uniqueSuffix);
+    },
+});
+
+const upload = multer({
+    storage: storage,
+});
 
 // Add a list of allowed origins.
 // If you have more origins you would like to add, you can add them to the array below.

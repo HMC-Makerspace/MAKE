@@ -1,5 +1,7 @@
+import { CertificationUUID } from "common/certification";
 import { API_SCOPE } from "common/global";
 import { TUser, TUserRole, UserRoleUUID, UserUUID } from "common/user";
+import { Certification } from "models/certification.model";
 import { User, UserRole } from "models/user.model";
 import mongoose from "mongoose";
 
@@ -61,6 +63,42 @@ export async function updateUser(user_obj: TUser): Promise<TUser | null> {
 }
 
 /**
+ * Update a user's public information (name, email, and college_id) given the
+ * user's UUID.
+ * @param user_uuid The UUID of the user to update
+ * @param name The user's new name, or null to keep the existing name
+ * @param email The user's new email, or null to keep the existing email
+ * @param college_id The user's new college ID, or null to keep the existing ID
+ * @returns The updated user object, or null if the user doesn't exist
+ *     with the given UUID
+ */
+export async function updateUserPublicInfo(
+    user_uuid: UserUUID,
+    name?: string,
+    email?: string,
+    college_id?: string,
+): Promise<TUser | null> {
+    const Users = mongoose.model("User", User);
+    const user = await Users.findOne({ uuid: user_uuid });
+    // If the user doesn't exist, no changes are made
+    if (!user) {
+        return null;
+    }
+    // Update the user's information if provided
+    if (name) {
+        user.name = name;
+    }
+    if (email) {
+        user.email = email;
+    }
+    if (college_id) {
+        user.college_id = college_id;
+    }
+    // Save the updated user and return it
+    return user.save();
+}
+
+/**
  * Create a new user in the database. This function will return the created
  * user object, or null if a user with the same UUID already exists.
  * @param user_obj The user's complete information
@@ -69,14 +107,21 @@ export async function createUser(user_obj: TUser): Promise<TUser | null> {
     const Users = mongoose.model("User", User);
     const user_uuid = user_obj.uuid;
     // Check if the user already exists
-    const existingUser = await Users.exists({ uuid: user_uuid });
-    if (existingUser) {
+    const existing_user = await Users.exists({ uuid: user_uuid });
+    if (existing_user) {
         // If so, return null, and don't create a new user
         return null;
     }
-    // If the user doesn't exist, create a new user and return it
-    const newUser = new Users(user_obj);
-    return newUser.save();
+    // If the user doesn't exist
+    // Add the default user roles to the user
+    const default_roles = await getDefaultUserRoles();
+    user_obj.active_roles = default_roles.map((role) => ({
+        role_uuid: role.uuid,
+        timestamp_gained: Date.now() / 1000,
+    }));
+    // Create a new user and return it
+    const new_user = new Users(user_obj);
+    return new_user.save();
 }
 
 /**
@@ -184,6 +229,154 @@ export async function getUserScopes(uuid: UserUUID): Promise<API_SCOPE[]> {
         }
     }
     return scopes;
+}
+
+/**
+ * Grant a role to a user, given their UUID and the UUID of the role to grant.
+ * If the user already has the role, no changes are made.
+ * @param user_uuid The UUID of the user to grant the role to
+ * @param role_uuid The UUID of the role to grant
+ * @returns The updated user object, or null if the user or role doesn't exist.
+ *      If the user already has the role, the original user object is returned.
+ */
+export async function grantRoleToUser(
+    user_uuid: UserUUID,
+    role_uuid: UserRoleUUID,
+): Promise<TUser | null> {
+    // Find the user and the role
+    const Users = mongoose.model("User", User);
+    const UserRoles = mongoose.model("UserRole", UserRole);
+    const user = await Users.findOne({ uuid: user_uuid });
+    const role = await UserRoles.findOne({ uuid: role_uuid });
+    // If either the user or role doesn't exist, we can't grant the role
+    if (!user || !role) {
+        return null;
+    }
+    // If the user already has the role, no changes are made
+    if (user.active_roles.some((log) => log.role_uuid === role_uuid)) {
+        return user;
+    } else {
+        // Otherwise, add the role to the user's active role list
+        user.active_roles.push({
+            role_uuid: role_uuid,
+            timestamp_gained: Date.now() / 1000,
+        });
+        return user.save();
+    }
+}
+
+/**
+ * Revoke a role from a user, given their UUID and the UUID of the role to revoke.
+ * If the user doesn't have the role, no changes are made.
+ * @param user_uuid The UUID of the user to revoke the role from
+ * @param role_uuid The UUID of the role to revoke
+ * @returns The updated user object, or null if the user or role doesn't exist.
+ *     If the user doesn't have the role, the original user object is returned.
+ */
+export async function revokeRoleFromUser(
+    user_uuid: UserUUID,
+    role_uuid: UserRoleUUID,
+): Promise<TUser | null> {
+    // Find the user
+    const Users = mongoose.model("User", User);
+    const user = await Users.findOne({ uuid: user_uuid });
+    // If either the user or role doesn't exist, we can't revoke the role
+    if (!user) {
+        return null;
+    }
+    // Get the user's active role log for the role to revoke
+    const role_log = user.active_roles.find(
+        (log) => log.role_uuid === role_uuid,
+    );
+    // If the user doesn't actively have the role, no changes are made
+    if (!role_log) {
+        return user;
+    } else {
+        // Otherwise, remove the role from the user's active role list
+        user.active_roles = user.active_roles.filter(
+            (log) => log.role_uuid !== role_uuid,
+        );
+        // Add the role to the user's past role list
+        user.past_roles.push({
+            role_uuid: role_uuid,
+            timestamp_gained: role_log.timestamp_gained,
+            timestamp_revoked: Date.now() / 1000,
+        });
+        return user.save();
+    }
+}
+
+/**
+ * Grant a role to a user, given their UUID and the UUID of the role to grant.
+ * If the user already has the role, no changes are made.
+ * @param user_uuid The UUID of the user to grant the role to
+ * @param role_uuid The UUID of the role to grant
+ * @returns The updated user object, or null if the user or role doesn't exist.
+ *      If the user already has the role, the original user object is returned.
+ */
+export async function grantCertificateToUser(
+    user_uuid: UserUUID,
+    role_uuid: UserRoleUUID,
+): Promise<TUser | null> {
+    // Find the user and the role
+    const Users = mongoose.model("User", User);
+    const UserRoles = mongoose.model("UserRole", UserRole);
+    const user = await Users.findOne({ uuid: user_uuid });
+    const role = await UserRoles.findOne({ uuid: role_uuid });
+    // If either the user or role doesn't exist, we can't grant the role
+    if (!user || !role) {
+        return null;
+    }
+    // If the user already has the role, no changes are made
+    if (user.active_roles.some((log) => log.role_uuid === role_uuid)) {
+        return user;
+    } else {
+        // Otherwise, add the role to the user's active role list
+        user.active_roles.push({
+            role_uuid: role_uuid,
+            timestamp_gained: Date.now() / 1000,
+        });
+        return user.save();
+    }
+}
+
+/**
+ * Revoke a certificate from a user, given their UUID and the UUID of the
+ * certificate to revoke.
+ * If the user doesn't have the certificate, no changes are made.
+ * @param user_uuid The UUID of the user to revoke the certificate from
+ * @param certification_uuid The UUID of the certification to revoke
+ * @returns The updated user object, or null if the user or certificate doesn't
+ *          exist. If the user doesn't have the certificate, the original user
+ *          object is returned.
+ */
+export async function revokeCertificateFromUser(
+    user_uuid: UserUUID,
+    certification_uuid: CertificationUUID,
+): Promise<TUser | null> {
+    // Find the user and the certificate
+    const Users = mongoose.model("User", User);
+    const user = await Users.findOne({ uuid: user_uuid });
+    // If the user doesn't exist, we can't revoke the certificate
+    if (!user) {
+        return null;
+    }
+    // Get the user's active certificate log for the role to revoke
+    const role_log = user.active_roles.find(
+        (log) => log.role_uuid === certification_uuid,
+    );
+    // If the user doesn't actively have the role, no changes are made
+    if (!role_log) {
+        return user;
+    } else {
+        // Otherwise, remove the role from the user's active role list
+        user.active_roles = user.active_roles.filter(
+            (log) => log.role_uuid !== certification_uuid,
+        );
+        // Add the role to the user's past role list
+        user.past_roles.push(role_log);
+        return user.save();
+    }
 }
 
 /**

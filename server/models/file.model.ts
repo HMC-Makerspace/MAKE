@@ -16,7 +16,8 @@ export const File = new mongoose.Schema<TFile>({
 
 /**
  * See {@link TDocument} documentation for type information.
- * Stored as children of {@link Area} and {@link Machine}.
+ * Stored as children of {@link Area} and {@link Machine},
+ * and {@link Certification} objects.
  */
 export const Document = new mongoose.Schema<TDocument>({
     name: { type: String, required: true },

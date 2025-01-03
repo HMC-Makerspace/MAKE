@@ -20,10 +20,6 @@ export type TConfig = {
          * Maximum number of uploads for each user.
          */
         max_upload_count?: number;
-        /**
-         * Default path that files will upload to in the server.
-         */
-        default_upload_path: string;
     };
     schedule: {
         /**

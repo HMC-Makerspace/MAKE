@@ -4,6 +4,7 @@ import {
     deleteInventoryItem,
     getInventory,
     getInventoryItem,
+    getInventoryVisibleToUser,
     updateInventoryItem,
 } from "controllers/inventory.controller";
 import { verifyRequest } from "controllers/verify.controller";
@@ -26,6 +27,27 @@ type InventoryResponse = Response<TInventoryItem[] | ErrorResponse>;
 const router = Router();
 
 // --- Inventory Routes ---
+
+/**
+ * Get all public inventory items. This is a public route, and does not require
+ * a `requesting_uuid` header to call it. If the user is an admin or has the
+ * {@link API_SCOPE.GET_ALL_INVENTORY} scope, all inventory items are returned.
+ * Otherwise, users will only see items
+ */
+router.get("/public", async (req: Request, res: InventoryResponse) => {
+    const headers = req.headers as VerifyRequestHeader;
+    const requesting_uuid = headers.requesting_uuid;
+
+    const inventory = await getInventoryVisibleToUser(requesting_uuid);
+    if (!inventory) {
+        req.log.error(
+            `No inventory items found visible to user ${requesting_uuid}`,
+        );
+    } else {
+        req.log.debug("Returned all inventory items");
+    }
+    res.status(StatusCodes.OK).json(inventory);
+});
 
 /**
  * Get a specific inventory item by UUID

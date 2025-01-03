@@ -9,6 +9,8 @@ declare module "bun" {
         EMAIL_BOT_PORT: number;
         EMAIL_BOT_ADDRESS: string;
         EMAIL_BOT_PASSWORD: string;
+        FILE_UPLOAD_PATH: string;
+        FILE_TEMP_PATH: string;
     }
 }
 
