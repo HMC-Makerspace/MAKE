@@ -1,7 +1,7 @@
 import { CertificationUUID } from "common/certification";
 import { API_SCOPE } from "common/global";
 import { TUser, TUserRole, UserRoleUUID, UserUUID } from "common/user";
-import { Certification } from "models/certification.model";
+import { Certificate, Certification } from "models/certification.model";
 import { User, UserRole } from "models/user.model";
 import mongoose from "mongoose";
 
@@ -310,31 +310,44 @@ export async function revokeRoleFromUser(
  * Grant a role to a user, given their UUID and the UUID of the role to grant.
  * If the user already has the role, no changes are made.
  * @param user_uuid The UUID of the user to grant the role to
- * @param role_uuid The UUID of the role to grant
+ * @param certification_uuid The UUID of the certificate to grant
  * @returns The updated user object, or null if the user or role doesn't exist.
  *      If the user already has the role, the original user object is returned.
  */
 export async function grantCertificateToUser(
     user_uuid: UserUUID,
-    role_uuid: UserRoleUUID,
+    certification_uuid: CertificationUUID,
 ): Promise<TUser | null> {
-    // Find the user and the role
+    // Find the user
     const Users = mongoose.model("User", User);
-    const UserRoles = mongoose.model("UserRole", UserRole);
+    const Certifications = mongoose.model("Certification", Certification);
     const user = await Users.findOne({ uuid: user_uuid });
-    const role = await UserRoles.findOne({ uuid: role_uuid });
-    // If either the user or role doesn't exist, we can't grant the role
-    if (!user || !role) {
+    const certificate = await Certifications.findOne({
+        uuid: certification_uuid,
+    });
+    // If either the user or certificate doesn't exist, we can't grant the role
+    if (!user || !certificate) {
         return null;
     }
-    // If the user already has the role, no changes are made
-    if (user.active_roles.some((log) => log.role_uuid === role_uuid)) {
+    // If the user already has the certificate, no changes are made
+    if (
+        user.active_certificates &&
+        user.active_certificates.some(
+            (log) => log.certification_uuid === certification_uuid,
+        )
+    ) {
         return user;
     } else {
-        // Otherwise, add the role to the user's active role list
-        user.active_roles.push({
-            role_uuid: role_uuid,
-            timestamp_gained: Date.now() / 1000,
+        // Otherwise, add the certificate to the user's active certificate list
+        if (!user.active_certificates) {
+            user.active_certificates = [];
+        }
+        const now = Date.now() / 1000;
+        user.active_certificates.push({
+            certification_uuid: certification_uuid,
+            level: certificate.level,
+            timestamp_granted: now,
+            timestamp_expires: now + 6 * 30 * 24 * 60 * 60, // 6 months from now
         });
         return user.save();
     }
@@ -362,21 +375,34 @@ export async function revokeCertificateFromUser(
         return null;
     }
     // Get the user's active certificate log for the role to revoke
-    const role_log = user.active_roles.find(
-        (log) => log.role_uuid === certification_uuid,
+    // Check if the user has active certificates
+    if (!user.active_certificates) {
+        return user;
+    }
+    // If so, set certificate to the user's active certificates
+    const certificate = user.active_certificates.find(
+        (cert) => cert.certification_uuid === certification_uuid,
     );
-    // If the user doesn't actively have the role, no changes are made
-    if (!role_log) {
+    // If the user doesn't actively have the certificate, no changes are made
+    if (!certificate) {
         return user;
     } else {
-        // Otherwise, remove the role from the user's active role list
-        user.active_roles = user.active_roles.filter(
-            (log) => log.role_uuid !== certification_uuid,
+        // Otherwise, remove the certificate from the user's active certificate list
+        // And add it to the past certificates
+        user.active_certificates = user.active_certificates.filter(
+            (cert) => cert.certification_uuid !== certification_uuid,
         );
-        // Add the role to the user's past role list
-        user.past_roles.push(role_log);
-        return user.save();
+        if (!user.past_certificates) {
+            user.past_certificates = [];
+        }
+        user.past_certificates.push({
+            certification_uuid: certification_uuid,
+            level: certificate.level,
+            timestamp_granted: certificate.timestamp_granted,
+            timestamp_expires: Date.now() / 1000,
+        });
     }
+    return user.save();
 }
 
 /**

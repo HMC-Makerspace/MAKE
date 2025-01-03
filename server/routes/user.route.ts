@@ -323,6 +323,10 @@ router.patch(
     },
 );
 
+// --- Certificate Routes ---
+
+
+
 // --- Admin Routes ---
 
 /**
