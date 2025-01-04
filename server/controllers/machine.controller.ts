@@ -78,7 +78,6 @@ async function getPublicMachines(): Promise<TPublicMachineData[]> {
         authorized_roles: null,
     }).select([
         // Remove private information from the machine
-        "-uuid",
         "-status_logs",
     ]);
 }

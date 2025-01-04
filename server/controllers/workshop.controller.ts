@@ -74,7 +74,6 @@ export async function getPublicWorkshops(): Promise<TPublicWorkshopData[]> {
         authorized_roles: null,
     }).select([
         // Remove private information from workshop
-        "-uuid",
         "-timestamp_public",
         "-support_instructors",
         "-rsvp_list",

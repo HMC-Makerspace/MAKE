@@ -664,4 +664,4 @@ router.delete(
     },
 );
 
-// --- Certificate Routes ---
+export default router;

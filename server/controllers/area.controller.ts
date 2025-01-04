@@ -55,7 +55,6 @@ export async function getAreasVisibleToUser(
         ],
     }).select([
         // Remove private information from the area
-        "-uuid",
         "-status_logs",
     ]);
 }
@@ -73,7 +72,6 @@ async function getPublicAreas(): Promise<TPublicAreaData[]> {
         authorized_roles: null,
     }).select([
         // Remove private information from the area
-        "-uuid",
         "-status_logs",
     ]);
 }
