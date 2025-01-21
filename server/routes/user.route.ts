@@ -32,6 +32,7 @@ import { TUser, TUserRole } from "common/user";
 // --- Request and Response Types ---
 type UserRequest = Request<{}, {}, { user_obj: TUser }>;
 type UserResponse = Response<TUser | ErrorResponse>;
+type UsersRequest = Request<{}, {}, {}>;
 type UsersResponse = Response<TUser[] | ErrorResponse>;
 
 type UserRoleRequest = Request<{}, {}, { role_obj: TUserRole }>;
@@ -351,6 +352,37 @@ router.post("/initialize_admin", async (req: Request, res: UserResponse) => {
     res.status(StatusCodes.OK).json(initial_admin);
 });
 
+router.get("/self", async (req: Request, res: UserResponse) => {
+    const headers = req.headers as VerifyRequestHeader;
+    const requesting_uuid = headers.requesting_uuid;
+    if (!requesting_uuid) {
+        req.log.warn("No requesting_uuid was provided while getting self");
+        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+        return;
+    }
+    req.log.debug({
+        msg: "Getting self",
+        requesting_uuid: requesting_uuid,
+    });
+
+    const user = await getUser(requesting_uuid);
+
+    if (!user) {
+        req.log.warn(`User not found by uuid ${requesting_uuid}`);
+        res.status(StatusCodes.NOT_FOUND).json({
+            error: `No user found with uuid \`${requesting_uuid}\`.`,
+        });
+        return;
+    }
+
+    req.log.debug({
+        msg: `Found user by uuid ${requesting_uuid}`,
+        user: user,
+    });
+
+    res.status(StatusCodes.OK).json(user);
+});
+
 /**
  * Get a specific user by email
  */
@@ -412,7 +444,7 @@ router.get(
  * is required to call it. The user must have the
  * {@link API_SCOPE.GET_ALL_USERS} scope.
  */
-router.get("/", async (req: Request, res: UsersResponse) => {
+router.get("/", async (req: UsersRequest, res: UsersResponse) => {
     const headers = req.headers as VerifyRequestHeader;
     const requesting_uuid = headers.requesting_uuid;
     // If no requesting user_uuid is provided, the call is not authorized

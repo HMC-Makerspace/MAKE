@@ -487,7 +487,6 @@ export async function initializeAdmin(
             },
         ],
         past_roles: [],
-        availability: [],
     });
     return newAdmin.save();
 }

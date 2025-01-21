@@ -20,7 +20,8 @@ const WorkshopReminderTemplate = (
                 <br />
                 starts in {time_until}. If you are unable to attend, please
                 cancel on{" "}
-                <a href="https://make.hmc.edu?p=workshop">make.hmc.edu</a>.
+                <a href="https://make.hmc.edu?p=workshop">make.hmc.edu</a>
+                .
                 <br />
                 <br />
                 When you arrive, please{" "}

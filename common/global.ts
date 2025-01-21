@@ -33,7 +33,7 @@ export enum API_SCOPE {
     GET_ALL_FILES = "get_files",
     GET_ONE_FILE = "get_file",
     GET_FILES_BY_USER = "get_user_files",
-    GET_OWN_FILES = "get_own_fils",
+    GET_OWN_FILES = "get_own_files",
     RENAME_FILE = "rename_file",
     RENAME_OWN_FILE = "rename_own_file",
     CREATE_FILE = "create_file",
