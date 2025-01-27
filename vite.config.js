@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
         root: "website",
         target: "ESNext",
         module: "ESNext",
+        publicDir: "common",
         plugins: [react({ include: "**/*.tsx", exclude: "node_modules" })],
         server: {
             port: env.VITE_PORT ?? 3000,
@@ -14,9 +15,9 @@ export default defineConfig(({ mode }) => {
             proxy: {
                 "/api": {
                     target: `http://localhost:${env.VITE_SERVER_PORT ?? 3001}`,
-                    changeOrigin: true
-                }
-            }
-        }
+                    changeOrigin: true,
+                },
+            },
+        },
     };
 });

@@ -25,18 +25,19 @@ import {
 import Fuse from "fuse.js";
 import { useInfiniteScroll } from "@heroui/use-infinite-scroll";
 
+const initialVisibleContentLength = 20;
+const incrementVisibleContentLength = 20;
+
 export default function MAKETable<Type extends { uuid: string }>({
     content,
     columns,
     visibleColumns,
     multiSelect = false,
     selectedKeys,
-    onSelectionChange = undefined,
-    sortDescriptor,
-    onSortChange = undefined,
+    onSelectionChange = () => null,
     customColumnComponents = undefined,
     isLoading,
-    loadingContent = "Loading...",
+    loadingContent = () => "Loading...",
 }: {
     content: Type[];
     columns: {
@@ -47,16 +48,57 @@ export default function MAKETable<Type extends { uuid: string }>({
     }[];
     visibleColumns: Selection;
     selectedKeys: Selection;
-    onSelectionChange?: (selectedKeys: Selection) => void;
-    sortDescriptor: SortDescriptor;
-    onSortChange?: (sortDescriptor: SortDescriptor) => void;
+    onSelectionChange: (selectedKeys: Selection) => void;
     multiSelect: boolean;
     customColumnComponents?: {
         [key in keyof Type]?: (item: Type) => React.ReactNode;
     };
     isLoading: boolean;
-    loadingContent?: React.ReactNode;
+    loadingContent?: (ref?: React.Ref<HTMLElement>) => React.ReactNode;
 }) {
+    // The current number of items in content that are loaded in the DOM and
+    // are visible to the user
+    const [visibleContentLength, setVisibleContentLength] = React.useState(
+        initialVisibleContentLength,
+    );
+
+    // A function to load more content by updating the visible content length
+    const loadMoreContent = React.useCallback(() => {
+        console.log(
+            "setting content length",
+            visibleContentLength + incrementVisibleContentLength,
+        );
+        setVisibleContentLength(
+            visibleContentLength + incrementVisibleContentLength,
+        );
+    }, [visibleContentLength]);
+
+    // Whether there is more content left
+    const hasMoreContent = React.useMemo(
+        () => visibleContentLength < content.length,
+        [visibleContentLength, content.length],
+    );
+
+    // The list of currently visible content, sliced using visibleContentLength
+    const visibleContent = React.useMemo(
+        () => content.slice(0, visibleContentLength),
+        [content, visibleContentLength],
+    );
+
+    // When content changes, reset visible content length and selected keys
+    React.useMemo(() => {
+        if (!isLoading) {
+            setVisibleContentLength(initialVisibleContentLength);
+            onSelectionChange(new Set());
+        }
+    }, [content]);
+
+    // Create an infinite scroll ref to load more content as the user scrolls
+    const [loaderRef, scrollerRef] = useInfiniteScroll({
+        hasMore: hasMoreContent,
+        onLoadMore: loadMoreContent,
+    });
+
     // The actual column header objects, filtered based on the visible columns
     const headerColumns = React.useMemo(() => {
         return columns.filter(
@@ -83,21 +125,22 @@ export default function MAKETable<Type extends { uuid: string }>({
     return (
         <Table
             isHeaderSticky
-            aria-label="Example table with custom cells, pagination and sorting"
+            aria-label="A table for content"
             selectionMode={multiSelect ? "multiple" : "single"}
-            sortDescriptor={sortDescriptor}
+            selectedKeys={selectedKeys}
             onSelectionChange={onSelectionChange}
-            onSortChange={onSortChange}
+            baseRef={scrollerRef}
             classNames={{
                 base: "max-h-full overflow-auto",
             }}
+            bottomContent={hasMoreContent ? loadingContent(loaderRef) : null}
         >
             <TableHeader columns={headerColumns}>
                 {(column) => (
                     <TableColumn
                         key={column.id as string}
                         align="start"
-                        allowsSorting={column.sortable}
+                        // allowsSorting={column.sortable}
                     >
                         {column.name}
                     </TableColumn>
@@ -105,9 +148,9 @@ export default function MAKETable<Type extends { uuid: string }>({
             </TableHeader>
             <TableBody
                 emptyContent={"No users found"}
-                items={content}
+                items={visibleContent}
                 isLoading={isLoading}
-                loadingContent={loadingContent}
+                loadingContent={loadingContent()}
             >
                 {(item) => (
                     <TableRow key={item.uuid}>

@@ -5,12 +5,12 @@ import { Input, Button } from "@heroui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { QueryClient } from "@tanstack/react-query";
 import { useLogin } from "../useLogin";
-import { useStore } from "../../store";
+import { useMAKEStore } from "../../store";
 
 export function Login() {
     // const { loggedIn, saveLogin } = useLogin();
-    const setUserUUID = useStore((state) => state.setUserUUID);
-    const user_uuid = useStore((state) => state.user_uuid);
+    const setUserUUID = useMAKEStore((state) => state.setUserUUID);
+    const user_uuid = useMAKEStore((state) => state.user_uuid);
     return (
         <div className="w-fit">
             {!user_uuid ? (

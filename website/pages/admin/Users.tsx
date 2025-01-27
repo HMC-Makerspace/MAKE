@@ -1,21 +1,10 @@
 import AdminLayout from "../../layouts/AdminLayout";
-import UsersNavbar from "../../components/kiosks/admin/users/UsersNavbar";
-
 import UsersTable from "../../components/kiosks/admin/users/UsersTable";
-import {
-    Button,
-    Modal,
-    ModalContent,
-    Selection,
-    SortDescriptor,
-    useDisclosure,
-} from "@heroui/react";
-import { PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
+import UserEditor from "../../components/kiosks/admin/users/UserEditor";
+import { Modal, ModalContent, Selection, useDisclosure } from "@heroui/react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { TUser } from "common/user";
 import React from "react";
-import Fuse from "fuse.js";
-import axios from "axios";
 
 function EditUserModal({
     isOpen,
@@ -62,9 +51,6 @@ export default function UsersPage() {
         refetchOnWindowFocus: false,
     });
 
-    // Combine all user pages into a single array
-    const users = React.useMemo(() => data ?? [], [data]);
-
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const [selectedKeys, onSelectionChange] = React.useState<Selection>(
@@ -73,12 +59,20 @@ export default function UsersPage() {
 
     return (
         <AdminLayout pageHref={"/admin/users"}>
-            <UsersTable
-                users={users}
-                selectedKeys={selectedKeys}
-                onSelectionChange={onSelectionChange}
-                isLoading={isLoading}
-            />
+            <div className="flex flex-col lg:flex-row overflow-auto h-full gap-8">
+                <UserEditor
+                    users={data ?? []}
+                    selectedKeys={selectedKeys}
+                    isLoading={isLoading}
+                    isNew={false}
+                />
+                <UsersTable
+                    users={data ?? []}
+                    selectedKeys={selectedKeys}
+                    onSelectionChange={onSelectionChange}
+                    isLoading={isLoading}
+                />
+            </div>
         </AdminLayout>
     );
 }

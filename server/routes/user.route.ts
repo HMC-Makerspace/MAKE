@@ -10,6 +10,7 @@ import {
     getUserRole,
     getUserRoles,
     getUsers,
+    getUserScopes,
     grantRoleToUser,
     initializeAdmin,
     initializeAdminRole,
@@ -34,6 +35,8 @@ type UserRequest = Request<{}, {}, { user_obj: TUser }>;
 type UserResponse = Response<TUser | ErrorResponse>;
 type UsersRequest = Request<{}, {}, {}>;
 type UsersResponse = Response<TUser[] | ErrorResponse>;
+
+type UserScopesResponse = Response<API_SCOPE[] | ErrorResponse>;
 
 type UserRoleRequest = Request<{}, {}, { role_obj: TUserRole }>;
 type UserRoleResponse = Response<TUserRole | ErrorResponse>;
@@ -352,6 +355,12 @@ router.post("/initialize_admin", async (req: Request, res: UserResponse) => {
     res.status(StatusCodes.OK).json(initial_admin);
 });
 
+/**
+ * Get the user information for the requesting user. This is a public
+ * route, but a `requesting_uuid` header is required to call it.
+ * If the user is not found, a status error is returned. If the user is
+ * found, the user object is returned.
+ */
 router.get("/self", async (req: Request, res: UserResponse) => {
     const headers = req.headers as VerifyRequestHeader;
     const requesting_uuid = headers.requesting_uuid;
@@ -381,6 +390,37 @@ router.get("/self", async (req: Request, res: UserResponse) => {
     });
 
     res.status(StatusCodes.OK).json(user);
+});
+
+/**
+ * Get all API scopes for the requesting user. This is a public route, but a
+ * `requesting_uuid` header is required to call it. If the user is not found,
+ * a status error is returned. If the user is found, the user's API scopes
+ * are returned.
+ */
+router.get("/self/scopes", async (req: Request, res: UserScopesResponse) => {
+    const headers = req.headers as VerifyRequestHeader;
+    const requesting_uuid = headers.requesting_uuid;
+    if (!requesting_uuid) {
+        req.log.warn(
+            "No requesting_uuid was provided while getting own scopes",
+        );
+        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+        return;
+    }
+    req.log.debug({
+        msg: "Getting own scopes",
+        requesting_uuid: requesting_uuid,
+    });
+
+    const scopes = await getUserScopes(requesting_uuid);
+
+    req.log.debug({
+        msg: `Returning scopes for user with uuid ${requesting_uuid}`,
+        user: scopes,
+    });
+
+    res.status(StatusCodes.OK).json(scopes);
 });
 
 /**

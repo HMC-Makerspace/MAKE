@@ -4,10 +4,10 @@ import { Login } from "../components/user/Login";
 import { Button } from "@heroui/react";
 import axios from "axios";
 import { MAKEUser } from "../components/user/User";
-import { useStore } from "../store";
+import { useMAKEStore } from "../store";
 
 export default function HomePage() {
-    const user_uuid = useStore((state) => state.user_uuid);
+    const user_uuid = useMAKEStore((state) => state.user_uuid);
     return (
         <DefaultLayout>
             <div>Welcome to MAKE v3!</div>

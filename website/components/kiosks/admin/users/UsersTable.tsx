@@ -9,6 +9,7 @@ import {
     DropdownItem,
     Spinner,
 } from "@heroui/react";
+import { useInfiniteScroll } from "@heroui/use-infinite-scroll";
 import {
     MagnifyingGlassIcon as SearchIcon,
     ChevronDownIcon,
@@ -37,8 +38,8 @@ const defaultColumns = [
     "name",
     "college_id",
     "email",
-    // "active_roles",
-    // "active_certificates",
+    "active_roles",
+    "active_certificates",
 ];
 
 export default function UsersTable({
@@ -52,18 +53,11 @@ export default function UsersTable({
     onSelectionChange: (selectedKeys: Selection) => void;
     isLoading: boolean;
 }) {
+    // The set of columns that are visible
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
         new Set(defaultColumns),
     );
-
-    // The current input value for the search filter
-    const [filterString, setFilterString] = React.useState("");
-    // The column and order to sort by
-    const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
-        column: "college_id",
-        direction: "ascending",
-    });
-
+    const [search, setSearch] = React.useState<string>("");
     // Consider filtering by roles and certs, need to add custom getFn to Fuse
 
     // A fuse instance for filtering the content, memoized to prevent
@@ -77,53 +71,52 @@ export default function UsersTable({
     }, [users]);
 
     // The list of items after filtering and sorting
-    const content = React.useMemo(() => {
-        let filteredContent = users;
-
-        if (filterString) {
-            filteredContent = fuse
-                .search(filterString)
-                .map((result) => result.item);
-        }
-
-        return filteredContent.sort((a, b) => {
-            // Sort the items based on the sort descriptor
-            const column = sortDescriptor.column as keyof TUser;
-            const first = a[column];
-            const second = b[column];
-            let cmp = 0;
-            // Account for undefined values
-            if (!first) {
-                cmp = -1;
-            } else if (!second) {
-                cmp = 1;
-            } else {
-                cmp = first < second ? -1 : first > second ? 1 : 0;
-            }
-
-            return sortDescriptor.direction === "descending" ? -cmp : cmp;
-        });
-    }, [users, fuse, filterString, sortDescriptor]);
-
-    const onSearchChange = React.useCallback((value: string) => {
-        if (value) {
-            setFilterString(value);
-            // Consider scroll to top
+    const filteredUsers = React.useMemo(() => {
+        if (search) {
+            return fuse.search(search).map((result) => result.item);
         } else {
-            setFilterString("");
+            return users;
         }
+    }, [users, fuse, search]);
+
+    const numUsers = users.length;
+    const numFilteredUsers = filteredUsers.length;
+
+    const onInputChange = React.useCallback((value: string) => {
+        setSearch(value);
     }, []);
 
     const onSearchClear = React.useCallback(() => {
-        setFilterString("");
+        setSearch("");
         // Consider scroll to top
     }, []);
 
     const onOpen = () => null;
-    const multiSelect = true;
+
+    const [multiSelect, setMultiSelect] = React.useState(false);
+
+    const batchEdit = (batchEdit: boolean) => {
+        if (batchEdit) {
+            // Enter batch edit mode
+            setMultiSelect(true);
+        } else {
+            // Exit batch edit mode
+            setMultiSelect(false);
+            // Clear the selection if it exists
+            onSelectionChange(new Set());
+        }
+    };
+
+    const modifiedSelectionChange = (selectedKeys: Selection) => {
+        if (selectedKeys === "all") {
+            onSelectionChange(new Set(filteredUsers.map((user) => user.uuid)));
+        } else {
+            onSelectionChange(selectedKeys);
+        }
+    };
 
     return (
-        <div className="flex flex-col max-h-full overflow-auto">
+        <div className="flex flex-col max-h-full overflow-auto w-full">
             <div id="user-table-top-content" className="flex flex-col gap-4">
                 <div className="flex justify-between gap-3 items-end">
                     <Input
@@ -131,15 +124,16 @@ export default function UsersTable({
                         className="w-full sm:max-w-[44%] text-for"
                         placeholder="Search..."
                         startContent={<SearchIcon className="size-6" />}
-                        value={filterString}
+                        value={search}
                         onClear={() => onSearchClear()}
-                        onValueChange={onSearchChange}
+                        onValueChange={onInputChange}
+                        isDisabled={isLoading}
                         classNames={{
                             input: "placeholder:text-foreground-200",
                         }}
                     />
                     <div className="flex gap-3">
-                        <Dropdown>
+                        <Dropdown isDisabled={isLoading}>
                             <DropdownTrigger className="hidden sm:flex">
                                 <Button
                                     endContent={
@@ -172,18 +166,33 @@ export default function UsersTable({
                                     ))}
                             </DropdownMenu>
                         </Dropdown>
-                        <Button
-                            color="warning"
-                            startContent={
-                                <PencilSquareIcon className="size-6" />
-                            }
-                            onPress={onOpen}
-                        >
-                            Batch Edit
-                        </Button>
+                        {multiSelect ? (
+                            <Button
+                                color="danger"
+                                isDisabled={isLoading}
+                                startContent={
+                                    <PencilSquareIcon className="size-6" />
+                                }
+                                onPress={() => batchEdit(false)}
+                            >
+                                End Batch Edit
+                            </Button>
+                        ) : (
+                            <Button
+                                color="warning"
+                                isDisabled={isLoading}
+                                startContent={
+                                    <PencilSquareIcon className="size-6" />
+                                }
+                                onPress={() => batchEdit(true)}
+                            >
+                                Batch Edit
+                            </Button>
+                        )}
 
                         <Button
                             color="primary"
+                            isDisabled={isLoading}
                             startContent={<PlusIcon className="size-6" />}
                             onPress={onOpen}
                         >
@@ -193,19 +202,17 @@ export default function UsersTable({
                 </div>
                 <div className="flex justify-between items-center pb-2">
                     <span className="text-default-400 text-small">
-                        Total {content.length} users
+                        Total {numUsers} users
                     </span>
                 </div>
             </div>
             <MAKETable
-                content={content}
+                content={filteredUsers}
                 columns={columns}
                 visibleColumns={visibleColumns}
                 selectedKeys={selectedKeys}
-                onSelectionChange={onSelectionChange}
-                sortDescriptor={sortDescriptor}
-                onSortChange={setSortDescriptor}
-                multiSelect={true}
+                onSelectionChange={modifiedSelectionChange}
+                multiSelect={multiSelect}
                 customColumnComponents={{
                     active_roles: (user: TUser) => (
                         <div className="flex flex-col gap-2">
@@ -226,18 +233,19 @@ export default function UsersTable({
                     ),
                 }}
                 isLoading={isLoading}
-                loadingContent={
+                loadingContent={(ref) => (
                     <div className="flex w-full justify-center">
-                        <Spinner color="white" />
+                        <Spinner color="white" ref={ref} />
                     </div>
-                }
+                )}
             />
             {multiSelect && (
                 <div className="py-2 px-2 flex justify-between items-center">
                     <span className="w-[30%] text-small text-default-400">
-                        {selectedKeys === "all"
+                        {selectedKeys === "all" ||
+                        selectedKeys.size === numFilteredUsers
                             ? "All items selected"
-                            : `${selectedKeys.size} of ${content.length} selected`}
+                            : `${selectedKeys.size} of ${numFilteredUsers} selected`}
                     </span>
                 </div>
             )}

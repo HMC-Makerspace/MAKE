@@ -13,7 +13,7 @@ function setUserUUID(uuid: string) {
     return { user_uuid: uuid };
 }
 
-export const useStore = create<State>((set) => ({
+export const useMAKEStore = create<State>((set) => ({
     user_uuid: window.localStorage.getItem("requesting_uuid") || "",
     page_index: 0,
     setUserUUID: (uuid: string) => set((state) => setUserUUID(uuid)),

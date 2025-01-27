@@ -14,6 +14,14 @@ export type UnixTimestamp = number;
 export enum API_SCOPE {
     ADMIN = "admin",
     // TODO: Kiosk scopes?
+    VIEW_KIOSKS = "kiosk",
+    USER_KIOSK = "user_kiosk",
+    SCHEDULE_KIOSK = "schedule_kiosk",
+    SHIFT_KIOSK = "shift_kiosk",
+    WORKSHOP_KIOSK = "workshop_kiosk",
+    RESTOCK_KIOSK = "restock_kiosk",
+    CERTIFICATION_KIOSK = "certification_kiosk",
+    SETTINGS_KIOSK = "settings_kiosk",
     // Area scopes
     GET_ALL_AREAS = "get_areas",
     GET_ONE_AREA = "get_area",

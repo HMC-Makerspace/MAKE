@@ -12,7 +12,7 @@ import {
     NavbarMenuToggle,
     User,
 } from "@heroui/react";
-import { useStore } from "../../../../store";
+import { useMAKEStore } from "../../../../store";
 import { MAKEUser } from "../../../user/User";
 import { ThemeSwitcher } from "../../../ThemeSwitcher";
 
@@ -23,7 +23,7 @@ export default function AdminNavbar({
     pages: { name: string; href: string }[];
     pageIndex: number;
 }) {
-    const user_uuid = useStore((state) => state.user_uuid);
+    const user_uuid = useMAKEStore((state) => state.user_uuid);
     return (
         <Navbar
             className="w-full bg-default-200"

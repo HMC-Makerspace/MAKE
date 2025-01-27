@@ -8,10 +8,10 @@ import {
     NavbarMenuToggle,
 } from "@heroui/react";
 import clsx from "clsx";
-import { useStore } from "../store";
+import { useMAKEStore } from "../store";
 
 export default function CustomNavbar() {
-    const pageIndex = useStore((state) => state.page_index);
+    const pageIndex = useMAKEStore((state) => state.page_index);
 
     const pages = [
         {
