@@ -19,9 +19,9 @@ export enum CERTIFICATION_VISIBILITY {
  *     be displayed to all users, private, and only assignable by admins, or
  *     visible on the schedule
  * @property color - A hex color code to be used for displaying this certification
- * @property max_level - (optional) The maximum level that can be achieved for
+ * @property max_level - (optional) The maximum level that can be achieved for "none"
  *      this certification. If not present, has no max level.
- * @property seconds_valid_for - (optional) how long the certification will last
+ * @property seconds_valid_for - (optional) how long the certification will last (expires) "never"
  *      for in seconds. If not present, all certificates for this certification
  *      will never expire.
  * @property documents - (optional) A list of documents that are related to this
