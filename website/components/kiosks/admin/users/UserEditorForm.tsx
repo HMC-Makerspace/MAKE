@@ -1,4 +1,4 @@
-import { Form, Input } from "@heroui/react";
+import { Form, Input, Select } from "@heroui/react";
 import clsx from "clsx";
 import { TUser, TUserRole, TUserRoleLog, UserRoleUUID } from "common/user";
 import React from "react";
@@ -37,8 +37,8 @@ export default function UserEditorForm({
     const [name, setName] = React.useState<string>(user.name);
     const [email, setEmail] = React.useState<string>(user.email);
 
-    const [roles, setRoles] = React.useState<string[]>(
-        user.active_roles.map((role: TUserRoleLog) => role.role_uuid),
+    const [roles, setRoles] = React.useState<Set<string>>(
+        new Set(user.active_roles.map((role: TUserRoleLog) => role.role_uuid)),
     );
 
     const placeholder = (text: string) => (isEmpty ? `Select a user` : text);
@@ -144,6 +144,7 @@ export default function UserEditorForm({
                     ]),
                 }}
             />
+            <Select></Select>
         </Form>
     );
 }
