@@ -57,18 +57,3 @@ export type TCertificate = {
     timestamp_granted: UnixTimestamp;
     timestamp_expires?: UnixTimestamp;
 };
-
-[
-    {
-        uuid: "certification-uuid-1",
-        name: "Sample Certification",
-        description: "A sample certification for testing purposes",
-        visibility: "scheduled",
-        color: "#FF0000",
-        max_level: 3,
-        seconds_valid_for: 31536000,
-        documents: [],
-        prerequisites: [],
-        authorized_roles: [],
-    },
-];

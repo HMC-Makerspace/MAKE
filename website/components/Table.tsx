@@ -112,7 +112,7 @@ export default function MAKETable<Type extends { uuid: string }>({
     const renderCell = React.useCallback((item: Type, columnKey: React.Key) => {
         const keyString = columnKey as string;
         // If there exists a custom component function for this component, use it
-        if (customColumnComponents?.hasOwnProperty(keyString)) {
+        if (customColumnComponents && keyString in customColumnComponents) {
             return customColumnComponents[keyString](item);
         } else {
             // Otherwise, just return the cell value as a string
