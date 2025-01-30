@@ -3,6 +3,8 @@ import { Route, Routes } from "react-router-dom";
 import HomePage from "./pages/Home";
 import AdminPage from "./pages/admin/Admin";
 import UsersPage from "./pages/admin/Users";
+import RestockPage from "./pages/admin/Restock";
+
 
 const App: React.FC = () => {
     return (
@@ -10,6 +12,7 @@ const App: React.FC = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/users" element={<UsersPage />} />
+            <Route path="/admin/restocks" element={<RestockPage />} />
         </Routes>
     );
 };
