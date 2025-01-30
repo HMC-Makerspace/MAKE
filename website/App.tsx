@@ -8,6 +8,7 @@ import RolesPage from "./pages/admin/Roles";
 import SchedulePage from "./pages/admin/Schedules";
 import SettingsPage from "./pages/admin/Settings";
 import WorkshopPage from "./pages/admin/Workshops";
+import CertificationsPage from "./pages/admin/Certifications"
 
 const App: React.FC = () => {
     return (
@@ -20,6 +21,7 @@ const App: React.FC = () => {
             <Route path="/admin/settings" element={<SettingsPage />} />
             <Route path="/admin/restocks" element={<RestockPage />} />
             <Route path="/admin/workshops" element={<WorkshopPage />} />
+            <Route path="/admin/certifications" element={<CertificationsPage />} />
         </Routes>
     );
 };
