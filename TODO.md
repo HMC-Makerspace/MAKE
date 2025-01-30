@@ -72,15 +72,10 @@
     - Hidden areas can still be selected as the location for an inventory item, and items in that location will only be visible if the user can view the area
 
 ### Certification
-- [x] Add `CertificationType`
-  - add `uuid` - The uuid of this certification type
-  - add `name` - The name of this given certification type (quiz, proficiency, etc.)
-  - add `description` - The optional description of what this certification type is
-
 - [x] Modify `Certification` (which also now encompasses proficiencies and quizzes):
   - add `max_level` - A number for the maximum level of this certification
   - add `color` - A color that this certification can be displayed as
-  - add `type` - A uuid of a certification type stored in the DB
+  - add `visibility` - An enum of `PUBLIC`, `PRIVATE`, or `SCHEDULE` for whether this cert should be visible to the public, only to the user, or public on the schedule page
   - modify `description` to be an optional string
   - keep `uuid`, `name`, and `seconds_valid_for`
 
