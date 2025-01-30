@@ -51,7 +51,7 @@ export default function MAKETable<Type extends { uuid: string }>({
     onSelectionChange: (selectedKeys: Selection) => void;
     multiSelect: boolean;
     customColumnComponents?: {
-        [key in keyof Type]?: (item: Type) => React.ReactNode;
+        [column_id: string]: (item: Type) => React.ReactNode;
     };
     isLoading: boolean;
     loadingContent?: (ref?: React.Ref<HTMLElement>) => React.ReactNode;
@@ -110,15 +110,13 @@ export default function MAKETable<Type extends { uuid: string }>({
 
     //  The function to render each value in the table
     const renderCell = React.useCallback((item: Type, columnKey: React.Key) => {
-        const key = columnKey as keyof Type;
-        const cellValue = item[key];
+        const keyString = columnKey as string;
         // If there exists a custom component function for this component, use it
-        const customComponent = customColumnComponents?.[key];
-        if (customComponent) {
-            return customComponent(item);
+        if (customColumnComponents?.hasOwnProperty(keyString)) {
+            return customColumnComponents[keyString](item);
         } else {
-            // Otherwise, just return the cell value
-            return cellValue as string;
+            // Otherwise, just return the cell value as a string
+            return item[columnKey as keyof Type] as string;
         }
     }, []);
 
