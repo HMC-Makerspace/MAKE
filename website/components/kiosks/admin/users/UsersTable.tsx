@@ -215,7 +215,7 @@ export default function UsersTable({
                 multiSelect={multiSelect}
                 customColumnComponents={{
                     active_roles: (user: TUser) => (
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-row flex-wrap gap-2">
                             {user.active_roles.map((log) => (
                                 <MAKEUserRole
                                     role_uuid={log.role_uuid}

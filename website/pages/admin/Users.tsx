@@ -63,6 +63,7 @@ export default function UsersPage() {
                 <UserEditor
                     users={data ?? []}
                     selectedKeys={selectedKeys}
+                    onSelectionChange={onSelectionChange}
                     isLoading={isLoading}
                     isNew={false}
                 />

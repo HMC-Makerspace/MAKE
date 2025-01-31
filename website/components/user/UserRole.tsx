@@ -42,6 +42,7 @@ function getForegroundColor(hex: string): string {
 export default function UserRole({ role_uuid }: { role_uuid: string }) {
     const { data, isSuccess, isError } = useQuery<TUserRole>({
         queryKey: ["user", "role", role_uuid],
+        refetchOnWindowFocus: false,
     });
     // Default to gray if not yet successful
     const color = isSuccess ? data.color : "gray";
