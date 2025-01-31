@@ -6,11 +6,13 @@ import UserEditorForm from "./UserEditorForm";
 export default function UserEditor({
     users,
     selectedKeys,
+    onSelectionChange,
     isNew,
     isLoading,
 }: {
     users: TUser[];
     selectedKeys: Selection;
+    onSelectionChange: (selectedKeys: Selection) => void;
     isNew: boolean;
     isLoading: boolean;
 }) {
@@ -32,8 +34,12 @@ export default function UserEditor({
     // console.log("isMultiple", isMultiple);
     // console.log("name", name);
 
+    const onCancel = () => {
+        onSelectionChange(new Set());
+    };
+
     return (
-        <div className="flex flex-col h-full w-full lg:w-2/5 rounded-xl bg-content1 p-4">
+        <div className="flex flex-col h-fit lg:h-full w-full lg:w-2/5 rounded-xl bg-content1 p-4">
             <h1 className="3xl font-bold text-center pb-2">User Editor</h1>
             {isLoading ? (
                 <div>Loading...</div>
@@ -53,6 +59,8 @@ export default function UserEditor({
                               }
                     }
                     isMultiple={isMultiple}
+                    isNew={isNew}
+                    onCancel={onCancel}
                 />
             )}
         </div>
