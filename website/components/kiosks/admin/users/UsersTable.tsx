@@ -47,11 +47,13 @@ export default function UsersTable({
     selectedKeys,
     onSelectionChange,
     isLoading,
+    onCreate,
 }: {
     users: TUser[];
     selectedKeys: Selection;
     onSelectionChange: (selectedKeys: Selection) => void;
     isLoading: boolean;
+    onCreate: (state: boolean) => void;
 }) {
     // The set of columns that are visible
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
@@ -91,8 +93,6 @@ export default function UsersTable({
         // Consider scroll to top
     }, []);
 
-    const onOpen = () => null;
-
     const [multiSelect, setMultiSelect] = React.useState(false);
 
     const batchEdit = (batchEdit: boolean) => {
@@ -108,11 +108,18 @@ export default function UsersTable({
     };
 
     const modifiedSelectionChange = (selectedKeys: Selection) => {
+        // If the selection changes, we won't be creating a new user
+        onCreate(false);
         if (selectedKeys === "all") {
             onSelectionChange(new Set(filteredUsers.map((user) => user.uuid)));
         } else {
             onSelectionChange(selectedKeys);
         }
+    };
+
+    const createUser = () => {
+        onSelectionChange(new Set());
+        onCreate(true);
     };
 
     return (
@@ -194,7 +201,7 @@ export default function UsersTable({
                             color="primary"
                             isDisabled={isLoading}
                             startContent={<PlusIcon className="size-6" />}
-                            onPress={onOpen}
+                            onPress={createUser}
                         >
                             Create
                         </Button>
