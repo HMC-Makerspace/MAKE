@@ -1,7 +1,13 @@
 import AdminLayout from "../../layouts/AdminLayout";
 import UsersTable from "../../components/kiosks/admin/users/UsersTable";
 import UserEditor from "../../components/kiosks/admin/users/UserEditor";
-import { Modal, ModalContent, Selection, useDisclosure } from "@heroui/react";
+import {
+    Alert,
+    Modal,
+    ModalContent,
+    Selection,
+    useDisclosure,
+} from "@heroui/react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { TUser } from "common/user";
 import React from "react";
@@ -51,11 +57,11 @@ export default function UsersPage() {
         refetchOnWindowFocus: false,
     });
 
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
     const [selectedKeys, onSelectionChange] = React.useState<Selection>(
         new Set(),
     );
+
+    const [isNewUser, setIsNewUser] = React.useState<boolean>(false);
 
     return (
         <AdminLayout pageHref={"/admin/users"}>
@@ -63,15 +69,15 @@ export default function UsersPage() {
                 <UserEditor
                     users={data ?? []}
                     selectedKeys={selectedKeys}
-                    onSelectionChange={onSelectionChange}
                     isLoading={isLoading}
-                    isNew={false}
+                    isNew={isNewUser}
                 />
                 <UsersTable
                     users={data ?? []}
                     selectedKeys={selectedKeys}
                     onSelectionChange={onSelectionChange}
                     isLoading={isLoading}
+                    onCreate={setIsNewUser}
                 />
             </div>
         </AdminLayout>

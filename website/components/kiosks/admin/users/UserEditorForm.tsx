@@ -1,4 +1,5 @@
 import {
+    Alert,
     Button,
     Divider,
     Form,
@@ -15,9 +16,8 @@ import { TUser, TUserRole, TUserRoleLog, UserRoleUUID } from "common/user";
 import React from "react";
 import UserRole from "../../../user/UserRole";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
-import { motion } from "framer-motion";
 import axios from "axios";
-import { query } from "express";
+import PopupAlert from "../../../PopupAlert";
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateUser = async ({
@@ -40,19 +40,21 @@ export default function UserEditorForm({
     user,
     isMultiple,
     isNew,
-    onCancel,
 }: {
     user: TUser;
     isMultiple: boolean;
     isNew: boolean;
-    onCancel: () => void;
 }) {
     const user_role_query = useQuery<TUserRole[]>({
         queryKey: ["user", "role"],
         refetchOnWindowFocus: false,
     });
 
-    const isEmpty = !user.uuid;
+    const isEmpty = !user.uuid && !isNew;
+
+    const [UUID, setUUID] = React.useState<string>(
+        isNew ? crypto.randomUUID() : user.uuid,
+    );
 
     const [sendingChanges, setSendingChanges] = React.useState<boolean>(false);
 
@@ -61,10 +63,14 @@ export default function UserEditorForm({
     const mutation = useMutation({
         mutationFn: createUpdateUser,
         onSuccess: (result: TUser) => {
-            queryClient.setQueryData(["user", user.uuid], result);
-            queryClient.setQueryData(["user"], (old: TUser[]) =>
-                old.map((u) => (u.uuid === user.uuid ? result : u)),
-            );
+            queryClient.setQueryData(["user", UUID], result);
+            queryClient.setQueryData(["user"], (old: TUser[]) => {
+                if (isNew) {
+                    return [...old, result];
+                } else {
+                    return old.map((u) => (u.uuid === UUID ? result : u));
+                }
+            });
         },
         onSettled: () => {
             setSendingChanges(false);
@@ -131,7 +137,7 @@ export default function UserEditorForm({
             );
 
             const new_user: TUser = {
-                uuid: user.uuid,
+                uuid: data.get("uuid") as string,
                 name: data.get("name") as string,
                 email: data.get("email") as string,
                 college_id: data.get("college_id") as string,
@@ -156,7 +162,6 @@ export default function UserEditorForm({
 
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
 
-    const [UUID, setUUID] = React.useState<string>(user.uuid);
     const [collegeID, setCollegeID] = React.useState<string>(user.college_id);
     const [name, setName] = React.useState<string>(user.name);
     const [email, setEmail] = React.useState<string>(user.email);
@@ -177,23 +182,74 @@ export default function UserEditorForm({
         };
     }, []);
 
+    const isValid = React.useMemo(() => {
+        return (
+            hasEdits &&
+            UUID.length > 0 &&
+            collegeID.length > 0 &&
+            name.length > 0 &&
+            email.length > 0
+        );
+    }, [UUID, collegeID, name, email]);
+
     return (
-        <Form
-            onSubmit={onSubmit}
-            className="grid grid-cols-2 gap-4 lg:flex lg:h-full"
-        >
-            <div className="flex flex-row gap-4 w-full h-fit">
+        <>
+            <Form
+                onSubmit={onSubmit}
+                className="grid grid-cols-2 gap-4 lg:flex lg:h-full"
+            >
+                <div className="flex flex-row gap-4 w-full h-fit">
+                    <Input
+                        type="text"
+                        label="UUID"
+                        name="uuid"
+                        // If no user is selected, show a different placeholder
+                        placeholder={multiDisabledPlaceholder("UUID")}
+                        // UUID is not editable
+                        isDisabled
+                        // If the user exists, prefill the input with the user's uuid
+                        value={UUID}
+                        onValueChange={wrapEdit(setUUID)}
+                        variant="faded"
+                        color="primary"
+                        size="md"
+                        classNames={{
+                            input: clsx([
+                                "placeholder:text-default-500",
+                                "placeholder:italic",
+                                "text-default-700",
+                            ]),
+                        }}
+                    />
+                    <Button
+                        // Create button to copy the UUID to the clipboard
+                        size="md"
+                        radius="lg"
+                        className="my-auto"
+                        isIconOnly
+                        // Disable the button if there are multiple or no users selected
+                        isDisabled={isEmpty || isMultiple}
+                        onPress={() => {
+                            // Copy the UUID to the clipboard
+                            navigator.clipboard.writeText(UUID);
+                        }}
+                    >
+                        <ClipboardIcon className="size-6 text-primary-300" />
+                    </Button>
+                </div>
                 <Input
                     type="text"
-                    label="UUID"
-                    name="uuid"
+                    label="College ID"
+                    name="college_id"
                     // If no user is selected, show a different placeholder
-                    placeholder={multiDisabledPlaceholder("UUID")}
-                    // UUID is not editable
-                    isDisabled
-                    // If the user exists, prefill the input with the user's uuid
-                    value={UUID}
-                    onValueChange={wrapEdit(setUUID)}
+                    placeholder={multiDisabledPlaceholder("ID #")}
+                    // Disable the input if there are multiple or no users are selected
+                    isDisabled={isEmpty || isMultiple}
+                    // ID must not be empty
+                    isRequired
+                    // If the user exists, prefill the input with the user's id
+                    value={collegeID}
+                    onValueChange={wrapEdit(setCollegeID)}
                     variant="faded"
                     color="primary"
                     size="md"
@@ -205,160 +261,133 @@ export default function UserEditorForm({
                         ]),
                     }}
                 />
-                <Button
-                    // Create button to copy the UUID to the clipboard
-                    size="md"
-                    radius="lg"
-                    className="my-auto"
-                    isIconOnly
-                    // Disable the button if there are multiple or no users selected
+                <Input
+                    type="text"
+                    label="Name"
+                    name="name"
+                    // If no user is selected, show a different placeholder
+                    placeholder={multiDisabledPlaceholder("Firstname Lastname")}
+                    // Disable the input if there are multiple or no users are selected
                     isDisabled={isEmpty || isMultiple}
-                    onPress={() => {
-                        // Copy the UUID to the clipboard
-                        navigator.clipboard.writeText(UUID);
+                    // Name must not be empty
+                    isRequired
+                    // If the user exists, prefill the input with the user's name
+                    value={name}
+                    onValueChange={wrapEdit(setName)}
+                    variant="faded"
+                    color="primary"
+                    size="md"
+                    classNames={{
+                        input: clsx([
+                            "placeholder:text-default-500",
+                            "placeholder:italic",
+                            "text-default-700",
+                        ]),
+                    }}
+                />
+                <Input
+                    type="text"
+                    label="Email"
+                    name="email"
+                    // If no user is selected, show a different placeholder
+                    placeholder={multiDisabledPlaceholder("user@college.edu")}
+                    // Disable the input if there are multiple or no users are selected
+                    isDisabled={isEmpty || isMultiple}
+                    // Email must not be empty
+                    isRequired
+                    // If the user exists, prefill the input with the user's email
+                    value={email}
+                    onValueChange={wrapEdit(setEmail)}
+                    variant="faded"
+                    color="primary"
+                    size="md"
+                    classNames={{
+                        input: clsx([
+                            "placeholder:text-default-500",
+                            "placeholder:italic",
+                            "text-default-700",
+                        ]),
+                    }}
+                />
+                <Divider className="h-[1px] bg-default-400 col-span-2" />
+                <Select
+                    items={user_role_query.data ?? []}
+                    name="roles"
+                    // Disable the input if no users are selected
+                    isDisabled={isEmpty}
+                    selectedKeys={roles}
+                    onSelectionChange={wrapEdit(setRoles)}
+                    selectionMode="multiple"
+                    isMultiline
+                    placeholder="Select roles"
+                    size="lg"
+                    variant="faded"
+                    color="primary"
+                    label="Roles"
+                    labelPlacement="outside"
+                    classNames={{
+                        base: "col-span-2",
+                        label: "pl-2",
+                        value: "text-default-500",
+                    }}
+                    renderValue={(selectedKeys) => {
+                        if (selectedKeys.length === 0) {
+                            return "";
+                        } else {
+                            return (
+                                <div className="flex flex-wrap gap-1 p-2">
+                                    {selectedKeys.map(
+                                        (
+                                            selected_role: SelectedItemProps<TUserRole>,
+                                        ) => (
+                                            <UserRole
+                                                key={selected_role.data?.uuid}
+                                                role_uuid={
+                                                    selected_role.data?.uuid ||
+                                                    ""
+                                                }
+                                            />
+                                        ),
+                                    )}
+                                </div>
+                            );
+                        }
                     }}
                 >
-                    <ClipboardIcon className="size-6 text-primary-300" />
-                </Button>
-            </div>
-            <Input
-                type="text"
-                label="College ID"
-                name="college_id"
-                // If no user is selected, show a different placeholder
-                placeholder={multiDisabledPlaceholder("ID #")}
-                // Disable the input if there are multiple or no users are selected
-                isDisabled={isEmpty || isMultiple}
-                // ID must not be empty
-                isRequired
-                // If the user exists, prefill the input with the user's id
-                value={collegeID}
-                onValueChange={wrapEdit(setCollegeID)}
-                variant="faded"
-                color="primary"
-                size="md"
-                classNames={{
-                    input: clsx([
-                        "placeholder:text-default-500",
-                        "placeholder:italic",
-                        "text-default-700",
-                    ]),
-                }}
-            />
-            <Input
-                type="text"
-                label="Name"
-                name="name"
-                // If no user is selected, show a different placeholder
-                placeholder={multiDisabledPlaceholder("Firstname Lastname")}
-                // Disable the input if there are multiple or no users are selected
-                isDisabled={isEmpty || isMultiple}
-                // Name must not be empty
-                isRequired
-                // If the user exists, prefill the input with the user's name
-                value={name}
-                onValueChange={wrapEdit(setName)}
-                variant="faded"
-                color="primary"
-                size="md"
-                classNames={{
-                    input: clsx([
-                        "placeholder:text-default-500",
-                        "placeholder:italic",
-                        "text-default-700",
-                    ]),
-                }}
-            />
-            <Input
-                type="text"
-                label="Email"
-                name="email"
-                // If no user is selected, show a different placeholder
-                placeholder={multiDisabledPlaceholder("user@college.edu")}
-                // Disable the input if there are multiple or no users are selected
-                isDisabled={isEmpty || isMultiple}
-                // Email must not be empty
-                isRequired
-                // If the user exists, prefill the input with the user's email
-                value={email}
-                onValueChange={wrapEdit(setEmail)}
-                variant="faded"
-                color="primary"
-                size="md"
-                classNames={{
-                    input: clsx([
-                        "placeholder:text-default-500",
-                        "placeholder:italic",
-                        "text-default-700",
-                    ]),
-                }}
-            />
-            <Divider className="h-[1px] bg-default-400 col-span-2" />
-            <Select
-                items={user_role_query.data ?? []}
-                name="roles"
-                // Disable the input if no users are selected
-                isDisabled={isEmpty}
-                selectedKeys={roles}
-                onSelectionChange={wrapEdit(setRoles)}
-                selectionMode="multiple"
-                isMultiline
-                placeholder="Select roles"
-                size="lg"
-                variant="faded"
-                color="primary"
-                label="Roles"
-                labelPlacement="outside"
-                classNames={{
-                    base: "col-span-2",
-                    label: "pl-2",
-                    value: "text-default-500",
-                }}
-                renderValue={(selectedKeys) => {
-                    if (selectedKeys.length === 0) {
-                        return "";
-                    } else {
-                        return (
-                            <div className="flex flex-wrap gap-1 p-2">
-                                {selectedKeys.map(
-                                    (
-                                        selected_role: SelectedItemProps<TUserRole>,
-                                    ) => (
-                                        <UserRole
-                                            key={selected_role.data?.uuid}
-                                            role_uuid={
-                                                selected_role.data?.uuid || ""
-                                            }
-                                        />
-                                    ),
-                                )}
-                            </div>
-                        );
-                    }
-                }}
-            >
-                {(role) => (
-                    <SelectItem
-                        key={role.uuid}
-                        value={role.uuid}
-                        textValue={role.title}
+                    {(role) => (
+                        <SelectItem
+                            key={role.uuid}
+                            value={role.uuid}
+                            textValue={role.title}
+                        >
+                            <UserRole role_uuid={role.uuid} />
+                        </SelectItem>
+                    )}
+                </Select>
+                <Divider className="h-[1px] bg-default-400 col-span-2" />
+                <PopupAlert
+                    isOpen={isNew}
+                    placement="top"
+                    color="success"
+                    description="User updated successfully"
+                >
+                    <Button
+                        size="lg"
+                        className="w-full mt-auto col-span-2"
+                        isDisabled={isEmpty || !isValid}
+                        isLoading={sendingChanges}
+                        color={"primary"}
+                        variant="shadow"
+                        type="submit"
                     >
-                        <UserRole role_uuid={role.uuid} />
-                    </SelectItem>
-                )}
-            </Select>
-            <Divider className="h-[1px] bg-default-400 col-span-2" />
-            <Button
-                size="lg"
-                className="w-full mt-auto col-span-2"
-                isDisabled={isEmpty || !hasEdits}
-                isLoading={sendingChanges}
-                color={"primary"}
-                variant="shadow"
-                type="submit"
-            >
-                {isMultiple ? "Apply Batch Edit" : "Update User"}
-            </Button>
-        </Form>
+                        {isNew
+                            ? "Create User"
+                            : isMultiple
+                              ? "Apply Batch Edit"
+                              : "Update User"}
+                    </Button>
+                </PopupAlert>
+            </Form>
+        </>
     );
 }
