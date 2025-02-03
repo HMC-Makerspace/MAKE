@@ -37,6 +37,11 @@ const ADMIN_PAGES = [
         scope: API_SCOPE.WORKSHOP_KIOSK,
     },
     {
+        name: "Inventory",
+        href: "/admin/inventory",
+        scope: API_SCOPE.INVENTORY_KIOSK,
+    },
+    {
         name: "Restocks",
         href: "/admin/restocks",
         scope: API_SCOPE.RESTOCK_KIOSK,

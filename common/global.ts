@@ -19,6 +19,7 @@ export enum API_SCOPE {
     SCHEDULE_KIOSK = "schedule_kiosk",
     SHIFT_KIOSK = "shift_kiosk",
     WORKSHOP_KIOSK = "workshop_kiosk",
+    INVENTORY_KIOSK = "inventory_kiosk",
     RESTOCK_KIOSK = "restock_kiosk",
     CERTIFICATION_KIOSK = "certification_kiosk",
     SETTINGS_KIOSK = "settings_kiosk",
