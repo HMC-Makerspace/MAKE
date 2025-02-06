@@ -14,42 +14,22 @@ import {
     PlusIcon,
     PencilSquareIcon,
 } from "@heroicons/react/24/outline";
-
-import React from "react";
-
-import MAKETable from "../../../Table";
-
 import { TCertification } from "common/certification";
-import { CERTIFICATION_VISIBILITY } from "../../../../../common/certification";
+import MAKETable from "../../../Table";
+import MAKEUserRole from "../../../user/UserRole";
+import Fuse from "fuse.js";
+import React from "react";
+import CertificationTag from "./CertificationTag"
 
-import CertificationTag from "./CertificationTag";
-import EditCertModal from "./EditCertModal";
-import EditDocsModal from "./EditDocsModal";
-
-import UserRole from "../../../user/UserRole";
-
-const defaultCert: TCertification = {
-    uuid: "",
-    name: "",
-    description: "",
-    visibility: CERTIFICATION_VISIBILITY.PUBLIC,
-    color: "",
-    max_level: 0,
-    seconds_valid_for: 0,
-    documents: [],
-    authorized_roles: [],
-    prerequisites: []
-};
-
-const columns = [
+const columns = [ // uuid, name, description, type, color, max level, seconds valid for, documents, authorized roles
     { name: "UUID", id: "uuid" },
     { name: "Name", id: "name", sortable: true },
     { name: "Description", id: "description" },
-    { name: "Max Level", id: "max_level" },
-    { name: "Expires After", id: "seconds_valid_for" },
+    { name: "Type", id: "type" },
+    { name: "Max Level", id: "max_level", sortable: true }, // sortable? not sortable? idk
+    { name: "Seconds Valid For (this ought to be renamed)", id: "seconds_valid_for", sortable: true },
     { name: "Documents", id: "documents" },
-    { name: "Prerequisites", id: "prerequisites" },
-    { name: "Authorized Roles", id: "authorized_roles" }
+    // Skip files and availability, not useful right now
 ];
 
 const defaultColumns = [
@@ -81,15 +61,29 @@ export default function CertificationsTable({
         new Set(defaultColumns),
     );
     const [search, setSearch] = React.useState<string>("");
+    // Consider filtering by roles and certs, need to add custom getFn to Fuse
 
-    // Edit modal
-    const [editCert, setEditCert] = React.useState<TCertification | undefined>(undefined); // the certification being edited
-    const [isNew, setIsNew] = React.useState<boolean>(false); // whether editing or creating cert
-    const [isOpen, setIsOpen] = React.useState<boolean>(false); // whether modal is open
+    // A fuse instance for filtering the content, memoized to prevent
+    // unnecessary reinitialization on every render but updated when the
+    // content changes
+    // const fuse = React.useMemo(() => {
+    //     return new Fuse(certs, {
+    //         keys: ["name"],
+    //         threshold: 0.3,
+    //     });
+    // }, [certs]);
 
-    // Edit docs modal
-    const [certOpenDoc, setCertOpenDoc] = React.useState<TCertification>(defaultCert); // the certification with edited docs
-    const [docOpen, setDocOpen] = React.useState<boolean>(false); // whether modal is open
+    // The list of items after filtering and sorting
+    // const filteredCerts = React.useMemo(() => {
+    //     if (search) {
+    //         return fuse.search(search).map((result) => result.item);
+    //     } else {
+    //         return certs;
+    //     }
+    // }, [certs, fuse, search]);
+
+    const numCerts = certs.length;
+    // const numFilteredCerts = filteredCerts.length;
 
     const onInputChange = React.useCallback((value: string) => {
         setSearch(value);
@@ -100,7 +94,17 @@ export default function CertificationsTable({
         // Consider scroll to top
     }, []);
 
-    const numCerts = certs.length;
+    const onOpen = () => null;
+
+    // const [multiSelect, setMultiSelect] = React.useState(false);
+
+    // const modifiedSelectionChange = (selectedKeys: Selection) => {
+    //     // if (selectedKeys === "all") {
+    //     //     onSelectionChange(new Set(certs.map((cert) => cert.uuid)));
+    //     // } else {
+    //         onSelectionChange(selectedKeys);
+    //     // }
+    // };
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -190,48 +194,23 @@ export default function CertificationsTable({
                     }
                 }}
                 customColumnComponents={{
-                    documents: (cert: TCertification) => (
-                        <div className="flex flex-col gap-2">
-                            <Button
-                                variant="flat"
-                                color="secondary"
-                                onPress={() => {
-                                    setCertOpenDoc(cert);
-                                    setDocOpen(true);
-                                }}
-                                isIconOnly
-                            >
-                                <PencilSquareIcon className="size-6" />
-                            </Button>
-                        </div>
-                    ),
-                    name: (cert: TCertification) => (
-                        <CertificationTag cert_uuid={cert.uuid} showVisibility ></CertificationTag>
-                    ),
-                    seconds_valid_for: (cert: TCertification) => (
-                        <div>
-                            {cert.seconds_valid_for ? relativeTimestampToString(cert.seconds_valid_for) : "Never"}
-                        </div>
-                    ),
-                    max_level: (cert: TCertification) => (
-                        <div>
-                            {cert.max_level || "None"}
-                        </div>
-                    ),
-                    prerequisites: (cert: TCertification) => (
-                        <div>
-                            {cert.prerequisites?.map(prereq => (
-                                <CertificationTag cert_uuid={prereq} key={prereq} ></CertificationTag>
-                            ))}
-                        </div>
-                    ),
-                    authorized_roles: (cert: TCertification) => (
-                        <div>
-                            {cert.authorized_roles?.map(role => (
-                                <UserRole role_uuid={role} key={role} ></UserRole>
-                            ))}
-                        </div>
-                    ),
+                    // active_roles: (cert: TCertification) => (
+                    //     <div className="flex flex-col gap-2">
+                    //         {cert.active_roles.map((log) => (
+                    //             <MAKEUserRole
+                    //                 role_uuid={log.role_uuid}
+                    //                 key={log.role_uuid}
+                    //             />
+                    //         ))}
+                    //     </div>
+                    // ),
+                    // active_certificates: (user: TUser) => (
+                    //     <span>
+                    //         {user.active_certificates
+                    //             ?.map((cert) => cert.certification_uuid)
+                    //             .join(", ")}
+                    //     </span>
+                    // ),
                 }}
                 isLoading={isLoading}
                 loadingContent={(ref) => (
@@ -268,38 +247,4 @@ export default function CertificationsTable({
             )}
         </div>
     );
-}
-
-// Converts a seconds-based, relative timestamp to a string, e.g. "1 year, 3 days, 16 hours, 40 minutes, 20 seconds"
-function relativeTimestampToString(timestamp: number): string {
-    // The number of seconds, minutes, etc. corresponding to the timestamp
-    let times: number[] = [0, 0, 0, 0, 0];
-
-    // Reference for the names of each division
-    let ref: string[] = ["year", "day", "hour", "minute", "second"];
-
-    // Convert the timestamp to seconds, minutes, hours, days, & years
-    times[4] = timestamp % 60; // seconds
-    let mh = (timestamp - times[4]) / 60; // after removing seconds
-    times[3] = mh % 60; // minutes
-    let hd = (mh - times[3]) / 60; // after removing minutes
-    times[2] = hd % 24; // hours
-    let dy = (hd - times[2]) / 24; // after removing hours
-    times[1] = dy % 365; // days
-    times[0] = (dy - times[1]) / 365; // years
-
-    // The properly formatted time divisions
-    let res: string[] = [];
-
-    // Formatting divisions
-    for (let i = 0; i < times.length; i++) {
-        // If that division is greater than 0, include it in the result
-        res[i] = times[i] > 0 ? `${times[i]} ${ref[i]}` : "";
-
-        // Add an "s" to pluralize the division name if necessary
-        if (times[i] > 1) res[i] += "s";
-    }
-
-    // Join the different divisions together into one string, except for the empty divisions
-    return res.filter(Boolean).join(", ");
 }
