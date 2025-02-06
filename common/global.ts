@@ -16,6 +16,7 @@ export enum API_SCOPE {
     // TODO: Kiosk scopes?
     VIEW_KIOSKS = "kiosk",
     USER_KIOSK = "user_kiosk",
+    ROLES_KIOSK = "roles_kiosk",
     SCHEDULE_KIOSK = "schedule_kiosk",
     SHIFT_KIOSK = "shift_kiosk",
     WORKSHOP_KIOSK = "workshop_kiosk",
