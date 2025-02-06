@@ -8,11 +8,15 @@ export default function UserEditor({
     selectedKeys,
     isNew,
     isLoading,
+    onSuccess,
+    onError,
 }: {
     users: TUser[];
     selectedKeys: Selection;
     isNew: boolean;
     isLoading: boolean;
+    onSuccess: (message: string) => void;
+    onError: (message: string) => void;
 }) {
     const selectedUsers = React.useMemo(
         () =>
@@ -50,6 +54,8 @@ export default function UserEditor({
                     }
                     isMultiple={isMultiple}
                     isNew={isNew}
+                    onSuccess={onSuccess}
+                    onError={onError}
                 />
             )}
         </div>

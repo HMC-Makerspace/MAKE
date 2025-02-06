@@ -1,20 +1,18 @@
 import React from "react";
-import { Alert, Tooltip, TooltipPlacement } from "@heroui/react";
-import clsx from "clsx";
-import { AnimatePresence } from "framer-motion";
+import { Alert } from "@heroui/react";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function PopupAlert({
-    children,
     isOpen,
-    placement = "top",
+    onOpenChange,
     color = "success",
     description,
     icon,
     className,
+    timeout = 3000,
 }: {
-    children?: React.ReactNode;
     isOpen: boolean;
-    placement?: TooltipPlacement;
+    onOpenChange: (isOpen: boolean) => void;
     color?:
         | "default"
         | "primary"
@@ -25,24 +23,33 @@ export default function PopupAlert({
     description?: string;
     icon?: React.ReactNode;
     className?: string;
+    timeout?: number;
 }) {
+    // Hide the popup after 3 seconds
+    React.useEffect(() => {
+        if (isOpen) {
+            setTimeout(() => {
+                onOpenChange(false);
+            }, timeout);
+        }
+    }, [isOpen]);
+
     return (
         <AnimatePresence>
-            <Tooltip
-                className="bg-none w-full"
-                placement={placement}
-                isOpen={isOpen}
-                content={
+            {isOpen && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                >
                     <Alert
                         color={color}
                         description={description}
                         icon={icon}
-                        className={clsx("absolute w-4/5 left-[10%]", className)}
+                        className={className}
                     />
-                }
-            >
-                {children}
-            </Tooltip>
+                </motion.div>
+            )}
         </AnimatePresence>
     );
 }

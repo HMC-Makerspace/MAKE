@@ -8,10 +8,10 @@ export type AdminPage = {
     name: string;
     href: string;
     scope?: API_SCOPE;
-    subpages?: AdminPage[];
+    subPages?: AdminPage[];
 };
 
-const ADMIN_PAGES = [
+const ADMIN_PAGES: AdminPage[] = [
     {
         name: "Dashboard",
         href: "/admin",
@@ -20,6 +20,13 @@ const ADMIN_PAGES = [
         name: "Users",
         href: "/admin/users",
         scope: API_SCOPE.USER_KIOSK,
+        subPages: [
+            {
+                name: "Roles",
+                href: "/admin/users/roles",
+                scope: API_SCOPE.ROLES_KIOSK,
+            },
+        ],
     },
     {
         name: "Schedule",
@@ -60,18 +67,32 @@ export default function AdminLayout({
     children: React.ReactNode;
     pageHref: string;
 }) {
+    // Get the current users scopes
     const { data, isLoading, isError } = useQuery<API_SCOPE[]>({
         queryKey: ["user", "self", "scopes"],
         refetchOnWindowFocus: false,
     });
+    // Determine which pages the user has access to based on their scopes
     const scopes = data ?? [];
     const pages = scopes.includes(API_SCOPE.ADMIN)
         ? ADMIN_PAGES
-        : ADMIN_PAGES.filter((page) => {
+        : // Filter out pages that the user does not have access to
+          ADMIN_PAGES.filter((page) => {
               if (page.scope) {
                   return scopes.includes(page.scope);
               }
               return true;
+              // Of those pages, filter out sub-pages that the user does not have access to
+          }).map((page) => {
+              if (page.subPages) {
+                  return {
+                      ...page,
+                      subPages: page.subPages.filter((subPage) =>
+                          subPage.scope ? scopes.includes(subPage.scope) : true,
+                      ),
+                  };
+              }
+              return page;
           });
     const pageIndex = ADMIN_PAGES.findIndex((page) => page.href === pageHref);
     return (

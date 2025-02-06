@@ -40,10 +40,14 @@ export default function UserEditorForm({
     user,
     isMultiple,
     isNew,
+    onSuccess,
+    onError,
 }: {
     user: TUser;
     isMultiple: boolean;
     isNew: boolean;
+    onSuccess: (message: string) => void;
+    onError: (message: string) => void;
 }) {
     const user_role_query = useQuery<TUserRole[]>({
         queryKey: ["user", "role"],
@@ -71,6 +75,13 @@ export default function UserEditorForm({
                     return old.map((u) => (u.uuid === UUID ? result : u));
                 }
             });
+            onSuccess(
+                `Successfully ${isNew ? "created" : "updated"} user${isMultiple ? "s" : ""}`,
+            );
+            console.log(result);
+        },
+        onError: (error) => {
+            onError(`Error: ${error.message}`);
         },
         onSettled: () => {
             setSendingChanges(false);
@@ -137,7 +148,7 @@ export default function UserEditorForm({
             );
 
             const new_user: TUser = {
-                uuid: data.get("uuid") as string,
+                uuid: UUID,
                 name: data.get("name") as string,
                 email: data.get("email") as string,
                 college_id: data.get("college_id") as string,
@@ -157,7 +168,7 @@ export default function UserEditorForm({
             setSendingChanges(true);
             mutation.mutate({ data: new_user, isNew: isNew });
         },
-        [user.uuid, isEmpty],
+        [user, UUID, isEmpty],
     );
 
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
@@ -190,7 +201,7 @@ export default function UserEditorForm({
             name.length > 0 &&
             email.length > 0
         );
-    }, [UUID, collegeID, name, email]);
+    }, [hasEdits, UUID, collegeID, name, email]);
 
     return (
         <>
@@ -286,7 +297,7 @@ export default function UserEditorForm({
                     }}
                 />
                 <Input
-                    type="text"
+                    type="email"
                     label="Email"
                     name="email"
                     // If no user is selected, show a different placeholder
@@ -365,28 +376,21 @@ export default function UserEditorForm({
                     )}
                 </Select>
                 <Divider className="h-[1px] bg-default-400 col-span-2" />
-                <PopupAlert
-                    isOpen={isNew}
-                    placement="top"
-                    color="success"
-                    description="User updated successfully"
+                <Button
+                    size="lg"
+                    className="w-full mt-auto col-span-2"
+                    isDisabled={isEmpty || !isValid}
+                    isLoading={sendingChanges}
+                    color={"primary"}
+                    variant="shadow"
+                    type="submit"
                 >
-                    <Button
-                        size="lg"
-                        className="w-full mt-auto col-span-2"
-                        isDisabled={isEmpty || !isValid}
-                        isLoading={sendingChanges}
-                        color={"primary"}
-                        variant="shadow"
-                        type="submit"
-                    >
-                        {isNew
-                            ? "Create User"
-                            : isMultiple
-                              ? "Apply Batch Edit"
-                              : "Update User"}
-                    </Button>
-                </PopupAlert>
+                    {isNew
+                        ? "Create User"
+                        : isMultiple
+                          ? "Apply Batch Edit"
+                          : "Update User"}
+                </Button>
             </Form>
         </>
     );
