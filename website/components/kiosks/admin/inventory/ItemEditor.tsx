@@ -1,4 +1,8 @@
-import { TInventoryItem, ITEM_ROLE, ITEM_ACCESS_TYPE } from "../../../../../common/inventory";
+import {
+    TInventoryItem,
+    ITEM_ROLE,
+    ITEM_ACCESS_TYPE,
+} from "../../../../../common/inventory";
 import { Form, Input, Selection } from "@heroui/react";
 import React from "react";
 import ItemEditorForm from "./ItemEditorForm";
@@ -20,19 +24,8 @@ export default function ItemEditor({
             {isLoading ? (
                 <div>Loading...</div>
             ) : (
-                <ItemEditorForm
-                    item={
-                        {
-                            uuid: "",
-                            name: "",
-                            role: ITEM_ROLE.TOOL,
-                            access_type: ITEM_ACCESS_TYPE.USE_IN_SPACE,
-                            locations: [],
-                        }
-                    }
-                />
+                <ItemEditorForm key={item.uuid} item={item} />
             )}
         </div>
     );
 }
-
