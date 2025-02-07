@@ -3,27 +3,20 @@ import type { UnixTimestamp, UUID } from "./global";
 
 export type CertificationUUID = UUID;
 
-export type CertificationTypeUUID = UUID;
-
-/**
- * TCertificationType - A description of a type or style of certification
- * @property uuid - The index of this certification type
- * @property name - The name of this certification type
- * @property description - (optional) A description of what this certification type is
- */
-export type TCertificationType = {
-    uuid: CertificationTypeUUID;
-    name: string;
-    description?: string;
-};
+export enum CERTIFICATION_VISIBILITY {
+    PUBLIC = "public",
+    PRIVATE = "private",
+    SCHEDULE = "schedule",
+}
 
 /**
  * TCertification - Information about a given certification
  * @property uuid - unique id
  * @property name - short name of the certification
  * @property description - (optional) what the certification gives access to
- * @property type - The UUID of a {@link TCertificationType | CertificationType}
- *      that indicates the type of this cert
+ * @property visibility - whether or not the certification is public, and should
+ *     be displayed to all users, private, and only assignable by admins, or
+ *     visible on the schedule
  * @property color - A hex color code to be used for displaying this certification
  * @property max_level - (optional) The maximum level that can be achieved for
  *      this certification. If not present, has no max level.
@@ -40,7 +33,7 @@ export type TCertification = {
     uuid: CertificationUUID;
     name: string;
     description?: string;
-    type: CertificationTypeUUID;
+    visibility: CERTIFICATION_VISIBILITY;
     color: string;
     max_level?: number;
     seconds_valid_for?: number;
