@@ -213,12 +213,15 @@ async def route_rsvp_to_workshop(request: Request):
 
     # If the workshop is full, add the user to the waitlist
     rsvp_or_waitlist = "have RSVPed to"
+    extra_text = "Please show up on time, or else your slot may be given to the first person on the waitlist."
     if len(workshop["rsvp_list"]) >= workshop["capacity"]:
         rsvp_or_waitlist = "are on the waitlist for"
+        extra_text = "We will allocate waitlist spots on a first-come first-serve basis. Please show up on time to increase your chances of getting in! We most likely will have some spots open up."
 
     email_body = format_email_template("workshop_confirmation", {
         "workshop": workshop["title"],
         "rsvp_or_waitlist": rsvp_or_waitlist,
+        "extra_text": extra_text,
         "date": date_start.strftime("%A, %B %d, %Y"),
         "time": f"{date_start.strftime('%I:%M %p')} - {date_end.strftime('%I:%M %p')}",
     })
