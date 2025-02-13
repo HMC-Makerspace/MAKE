@@ -7,6 +7,7 @@ import {
     DropdownMenu,
     DropdownItem,
     Spinner,
+    useDisclosure,
 } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
@@ -134,7 +135,23 @@ export default function CertificationsTable({
                             color="primary"
                             isDisabled={isLoading}
                             startContent={<PlusIcon className="size-6" />}
-                            onPress={onOpen}
+                            onPress={() => {
+                                let new_cert: TCertification = {
+                                    uuid: "",
+                                    name: "",
+                                    description: "",
+                                    visibility: "",
+                                    color: "",
+                                    max_level: 0,
+                                    seconds_valid_for: 0,
+                                    documents: [],
+                                    authorized_roles: []
+                                };
+
+                                setEditCert(new_cert);
+                                setIsNew(true);
+                                setIsOpen(true);
+                            }}
                         >
                             Create
                         </Button>
@@ -153,6 +170,14 @@ export default function CertificationsTable({
                 selectedKeys={selectedKeys}
                 onSelectionChange={onSelectionChange}
                 multiSelect={false}
+                doubleClickAction={(uuid) => {
+                    if (canEdit) {
+                        let cert = certs.find((cert) => cert.uuid === uuid);
+                        setEditCert(cert);
+                        setIsNew(false);
+                        setIsOpen(true);
+                    }
+                }}
                 customColumnComponents={{
                     documents: (cert: TCertification) => (
                         <div className="flex flex-col gap-2">
@@ -183,6 +208,17 @@ export default function CertificationsTable({
                     </div>
                 )}
             />
+            {editCert && (
+                <EditCertModal
+                    key={editCert.uuid}
+                    cert={editCert}
+                    isNew={isNew}
+                    isOpen={isOpen}
+                    onOpenChange={setIsOpen}
+                    onSuccess={()=>setIsOpen(false)}
+                    onError={() => alert("Error")}
+                />
+            )}
         </div>
     );
 }
