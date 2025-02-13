@@ -7,6 +7,7 @@ import {
     DropdownMenu,
     DropdownItem,
     Spinner,
+    useDisclosure,
 } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
@@ -20,6 +21,7 @@ import MAKEUserRole from "../../../user/UserRole";
 import Fuse from "fuse.js";
 import React from "react";
 import CertificationTag from "./CertificationTag"
+import EditCertModal from "./EditCertModal"
 
 const columns = [ // uuid, name, description, type, color, max level, seconds valid for, documents, authorized roles
     { name: "UUID", id: "uuid" },
@@ -61,26 +63,6 @@ export default function CertificationsTable({
         new Set(defaultColumns),
     );
     const [search, setSearch] = React.useState<string>("");
-    // Consider filtering by roles and certs, need to add custom getFn to Fuse
-
-    // A fuse instance for filtering the content, memoized to prevent
-    // unnecessary reinitialization on every render but updated when the
-    // content changes
-    // const fuse = React.useMemo(() => {
-    //     return new Fuse(certs, {
-    //         keys: ["name"],
-    //         threshold: 0.3,
-    //     });
-    // }, [certs]);
-
-    // The list of items after filtering and sorting
-    // const filteredCerts = React.useMemo(() => {
-    //     if (search) {
-    //         return fuse.search(search).map((result) => result.item);
-    //     } else {
-    //         return certs;
-    //     }
-    // }, [certs, fuse, search]);
 
     const numCerts = certs.length;
     // const numFilteredCerts = filteredCerts.length;
@@ -95,16 +77,6 @@ export default function CertificationsTable({
     }, []);
 
     const onOpen = () => null;
-
-    // const [multiSelect, setMultiSelect] = React.useState(false);
-
-    // const modifiedSelectionChange = (selectedKeys: Selection) => {
-    //     // if (selectedKeys === "all") {
-    //     //     onSelectionChange(new Set(certs.map((cert) => cert.uuid)));
-    //     // } else {
-    //         onSelectionChange(selectedKeys);
-    //     // }
-    // };
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -162,11 +134,7 @@ export default function CertificationsTable({
                             color="primary"
                             isDisabled={isLoading}
                             startContent={<PlusIcon className="size-6" />}
-                            onPress={() => {
-                                setEditCert(defaultCert);
-                                setIsNew(true);
-                                setIsOpen(true);
-                            }}
+                            onPress={onOpen}
                         >
                             Create
                         </Button>
@@ -185,14 +153,6 @@ export default function CertificationsTable({
                 selectedKeys={selectedKeys}
                 onSelectionChange={onSelectionChange}
                 multiSelect={false}
-                doubleClickAction={(uuid) => {
-                    if (canEdit) {
-                        let cert = certs.find((c) => c.uuid === uuid);
-                        setEditCert(cert);
-                        setIsNew(false);
-                        setIsOpen(true);
-                    }
-                }}
                 customColumnComponents={{
                     // active_roles: (cert: TCertification) => (
                     //     <div className="flex flex-col gap-2">
@@ -219,32 +179,6 @@ export default function CertificationsTable({
                     </div>
                 )}
             />
-
-            {/* The key currently depends solely on the edited certification, meaning React does not update
-                state variables upon close and reopen of the modal. This is potentially undesired behavior. */}
-            {editCert && (
-                <EditCertModal
-                    key={"certedit-" + editCert.uuid}
-                    cert={editCert}
-                    isNew={isNew}
-                    isOpen={isOpen}
-                    onOpenChange={setIsOpen}
-                    onSuccess={() => setIsOpen(false)}
-                    onError={() => alert("Error")}
-                />
-            )}
-
-            {docOpen && (
-                <EditDocsModal
-                    key={"certdocedit-" + certOpenDoc.uuid}
-                    cert={certOpenDoc}
-                    documents={certOpenDoc.documents || []}
-                    isOpen={docOpen}
-                    onOpenChange={setDocOpen}
-                    onSuccess={() => setDocOpen(false)}
-                    onError={() => alert("Error")}
-                />
-            )}
         </div>
     );
 }
