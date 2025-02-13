@@ -23,6 +23,7 @@ import {
 import {
     MagnifyingGlassIcon as SearchIcon,
     ChevronDownIcon,
+    ArrowPathRoundedSquareIcon,
     PlusIcon,
     PencilSquareIcon,
 } from "@heroicons/react/24/outline";
@@ -31,10 +32,12 @@ import MAKETable from "../../../Table";
 import RestockUser from "./RestockUser";
 import RestockType from "./RestockType";
 import RestockEditor from "./RestockEditor"
+import RestockStatusLogs from "./RestockStatusLogs"
 import Fuse from "fuse.js";
 import React, { useState } from "react";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { UnixTimestamp } from "common/global";
 
 const columns = [
     { name: "UUID", id: "uuid" },
@@ -48,6 +51,7 @@ const columns = [
     { name: "Updated Time", id: "time_updated" },
     { name: "Completion Note", id: "completion_note" },
     { name: "Edit", id: "edit_button" },
+    { name: "Logs", id: "log_button" },
     // { name: "Status Logs", id: "status_logs" },
 ];
 
@@ -61,7 +65,8 @@ const defaultColumns = [
     "current_status",
     "time_updated",
     "completion_note",
-    "edit_button"
+    "edit_button",
+    "log_button"
 ];
 
 export default function RestockTable({
@@ -77,60 +82,103 @@ export default function RestockTable({
 }) {
 
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
-            new Set(defaultColumns),
+        new Set(defaultColumns),
     );
 
-    const [search, setSearch] = React.useState<string>("");
+    // const [search, setSearch] = React.useState<string>("");
 
-    const fuse = React.useMemo(() => {
-        return new Fuse(restocks, {
-            keys: ["time_requested", "inventory_uuid"],
-            threshold: 0.3,
-        });
-    }, [restocks]);
-    
-    
+    // const fuse = React.useMemo(() => {
+    //     return new Fuse(restocks, {
+    //         keys: ["time_requested", "inventory_uuid"],
+    //         threshold: 0.3,
+    //     });
+    // }, [restocks]);
+        
     // The list of items after filtering and sorting
+    const [areCompletedRestocksShown, setAreCompletedRestocksShown] = React.useState<boolean>(false);
+
     const filteredRestocks = React.useMemo(() => {
-        if (search) {
-            return fuse.search(search).map((result) => result.item);
-        } else {
+        if (areCompletedRestocksShown) {
+            return restocks.filter((restock) => restock.current_status === RESTOCK_REQUEST_STATUS.RESTOCKED);
+        }
+        else {
             return restocks;
         }
-    }, [restocks, fuse, search]);
+    }, [restocks, areCompletedRestocksShown]);
     
     const numUsers = restocks.length;
 
     const modifiedSelectionChange = (selectedKeys: Selection) => {     
-       
+       // not using selection here
     };
 
-     const [restockSelected, setRestockSelected] = React.useState<TRestockRequest | null>(null);
+    const [restockSelected, setRestockSelected] = React.useState<TRestockRequest | null>(null);
 
     //allows users to modify restock status 
-    const { isOpen, onOpen, onOpenChange } = useDisclosure(); // Manage modal state
-    
-    
+    const { isOpen: editIsOpen,
+            onOpen: editOnOpen,
+            onOpenChange: editOnOpenChange, 
+        } = useDisclosure(); // Manage modal state
     // modal for editor
-    function ModifyRestockModal({ isOpen, onOpenChange, }: { isOpen: boolean; onOpenChange: () => void; }) {
-
+    function ModifyRestockModal({ editIsOpen, editOnOpenChange, }: { editIsOpen: boolean; editOnOpenChange: () => void; }) {
         return (
-            <Modal isOpen={isOpen} placement="top-center" onOpenChange={onOpenChange}>
-                <ModalContent>
+            <Modal isOpen={editIsOpen} placement="top-center" onOpenChange={editOnOpenChange} className="flex flex-col justify-center">
+                <ModalContent className="flex flex-col justify-center">
                     {(onClose) => (
-
                         restockSelected ? <RestockEditor onClose={onClose} restock={restockSelected} /> : null
                     )}
                 </ModalContent>
             </Modal>
         );
 
-
-
     }
 
+    //showing past status logs 
+    const {
+        isOpen: logsIsOpen,
+        onOpen: logsOnOpen,
+        onOpenChange: logsOnOpenChange
+    } = useDisclosure();
+    function PastStatusLogs({logsIsOpen, logsOnOpenChange}: {logsIsOpen: boolean; logsOnOpenChange: () => void;}) {
+        return (
+            //modal holding restock logs content
+            <Modal isOpen={logsIsOpen} placement="top-center" onOpenChange={logsOnOpenChange} className="flex flex-col justify-center">
+                <ModalContent>
+                    {(onClose) => (
+                        restockSelected ? <RestockStatusLogs onClose={onClose} restock={restockSelected}/>
+                        : null
+                        )
+                    }
+                </ModalContent>
+            </Modal>
+        )
+    }
+
+    //function to convert timestamp to date
+    function convertTimestampToDate(timestamp?: number): string {
+        if (!timestamp) {
+            return "N/A";
+        }
+        return new Date((timestamp) * 1000).toLocaleString();
+    }
+
+    function toggleCompletedRestocks() {
+        setAreCompletedRestocksShown(!areCompletedRestocksShown);
+    }
+
+    // table returned
     return  (
         <div>
+            
+            <div className="flex  flex-col content-center items-center">
+                <h1 className="text-xl font-bold text-foreground-900 mb-2">Restocks</h1>
+                <h3 className="text-l text-foreground-900 mb-4">View, approve, and deny restock requests.</h3>
+                {areCompletedRestocksShown ?
+                <Button className="static mb-4 md:absolute md:right-10 md:top-20 " color="default" onPress={toggleCompletedRestocks}>All Restocks</Button> :
+                <Button className="static mb-4 md:absolute md:right-10 md:top-20" color="default" onPress={toggleCompletedRestocks}>Completed Restocks</Button>
+                }
+            </div>
+            
             <MAKETable
                 content={filteredRestocks}
                 columns={columns}
@@ -141,12 +189,12 @@ export default function RestockTable({
                 customColumnComponents={{
                     time_requested: (restock) => (
                         <span>
-                            {(restock.status_logs.at(0)?.timestamp)}
+                            {convertTimestampToDate(restock.status_logs.at(0)?.timestamp)}
                         </span>
                     ),
                     time_updated: (restock) => (
                         <span>
-                            {restock.status_logs.at(-1)?.timestamp}
+                            {convertTimestampToDate(restock.status_logs.at(-1)?.timestamp)}
                         </span>
                     ),
                     completion_note: (restock) => (
@@ -172,9 +220,23 @@ export default function RestockTable({
                             }
                             onPress={() => {
                                 setRestockSelected(restock);
-                                onOpen();
-
+                                editOnOpen();
                             }}
+                            isIconOnly
+                        >
+                        </Button>
+                    ),
+                    log_button: (restock) => (
+                        <Button
+                            color="default"
+                            startContent={
+                                <ArrowPathRoundedSquareIcon className="size-6" />
+                            }
+                            onPress={() => {
+                                setRestockSelected(restock);
+                                logsOnOpen();
+                            }}
+                            isIconOnly
                         >
                         </Button>
                     )
@@ -186,7 +248,9 @@ export default function RestockTable({
                     </div>
                 )}
             />
-            <ModifyRestockModal isOpen={isOpen} onOpenChange={onOpenChange} />
+            <ModifyRestockModal editIsOpen={editIsOpen} editOnOpenChange={editOnOpenChange} />
+            <PastStatusLogs logsIsOpen={logsIsOpen} logsOnOpenChange={logsOnOpenChange} />
+        
         </div>
 
     )

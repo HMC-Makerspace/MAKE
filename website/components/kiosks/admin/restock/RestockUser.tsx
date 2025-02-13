@@ -11,7 +11,6 @@ export default function RestockUser({ user_uuid }: { user_uuid: string }) {
         <div className="flex flex-col">
             <h2 className="text-x1">{data?.name}</h2>
             <h3>{data?.email}</h3>
-        
         </div>
     );
 }

@@ -25,15 +25,15 @@ import { RESTOCK_REQUEST_STATUS, TRestockRequest, TRestockRequestLog } from "../
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-    // Define the mutation function that will run when the form is submitted
-    const updateRestockRequest = async ({
-        data,
-    }: {
-        data: TRestockRequest;
-    }) => {
-        return (await axios.put<TRestockRequest>(`/api/v3/restock`, { request_obj: data })) // fixing here
-            .data;
-    };
+// Define the mutation function that will run when the form is submitted
+const updateRestockRequest = async ({
+    data,
+}: {
+    data: TRestockRequest;
+}) => {
+    return (await axios.put<TRestockRequest>(`/api/v3/restock`, { request_obj: data })) // fixing here
+        .data;
+};
     
 
 export default function RestockEditor({onClose, restock} : {onClose:() => void; restock: TRestockRequest}) {
@@ -81,16 +81,12 @@ export default function RestockEditor({onClose, restock} : {onClose:() => void; 
                 requesting_user: restock.requesting_user,
                 current_status: parseInt(data.get("status") as string) || RESTOCK_REQUEST_STATUS.PENDING_APPROVAL,
                 status_logs: [...restock.status_logs, 
-                    {
-                        
+                    {   
                         timestamp: Math.floor(Date.now() / 1000),
                         status: parseInt(data.get("status") as string) || RESTOCK_REQUEST_STATUS.PENDING_APPROVAL,
                         message: data.get("completion_note") as string || "Status updated",
-            
                     }
-
                 ]
-                
             };
 
             console.log(changed_restock);
@@ -105,10 +101,8 @@ export default function RestockEditor({onClose, restock} : {onClose:() => void; 
         [restock],
     );
 
-
-
     const restockOptions = [
-        {key:RESTOCK_REQUEST_STATUS.PENDING_APPROVAL, label: "Pending"},
+        // {key:RESTOCK_REQUEST_STATUS.PENDING_APPROVAL, label: "Pending"},
         {key:RESTOCK_REQUEST_STATUS.APPROVED_WAITING, label: "Approved, Waiting"},
         {key:RESTOCK_REQUEST_STATUS.APPROVED_ORDERED, label: "Ordered"},
         {key:RESTOCK_REQUEST_STATUS.RESTOCKED, label: "Restocked"},
@@ -118,12 +112,12 @@ export default function RestockEditor({onClose, restock} : {onClose:() => void; 
     return (
         <>
             <ModalHeader className="flex flex-col gap-1">Modify Restock Request</ModalHeader>
-
-            <ModalBody className=''>
-                <Form onSubmit={onSubmit}>
+            <ModalBody>
+                <Form onSubmit={onSubmit} >
                     <Select 
                         label="Update Restock Status"
                         name="status"
+                        isRequired
                     >
                         {
                             restockOptions.map((option) => (
@@ -133,14 +127,16 @@ export default function RestockEditor({onClose, restock} : {onClose:() => void; 
                     </Select>
                     <Input label="Completion Note" placeholder="Enter notes" variant="bordered" name="completion_note" />
 
-                    <ModalFooter className="flex align-center">
-                    <Button color="danger" variant="flat" >
-                        Cancel
-                    </Button>
-                    <Button color="primary" type="submit" >
-                        Save Changes
-                    </Button>
-                </ModalFooter>
+                    <ModalFooter className="flex justify-center">
+                        <div className='flex-row gap-2 flex justify-center'>
+                            <Button color="primary" type="submit" isLoading={sendingChanges}>
+                            Save Changes
+                            </Button>
+                            <Button color="danger" variant="flat" onPress={onClose} >
+                                Cancel
+                            </Button>
+                        </div>
+                    </ModalFooter>
 
                 </Form>
             </ModalBody>
