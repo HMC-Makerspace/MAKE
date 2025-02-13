@@ -4,6 +4,7 @@ import { Modal, ModalContent, Selection, useDisclosure } from "@heroui/react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { TCertification } from "common/certification";
 import React from "react";
+import { API_SCOPE } from "../../../common/global";
 
 
 export default function CertificationsPage() {
@@ -12,6 +13,16 @@ export default function CertificationsPage() {
         queryKey: ["certification"],
         refetchOnWindowFocus: false,
     });
+
+    const scopesQuery = useQuery<API_SCOPE[]>({
+        queryKey: ["user", "self", "scopes"],
+        refetchOnWindowFocus: false,
+    });
+    const scopes = scopesQuery.data ?? [];
+
+    const canEdit = scopes.some(
+        (scope) => scope === API_SCOPE.ADMIN || scope === API_SCOPE.UPDATE_CERTIFICATION,
+    );
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -26,6 +37,7 @@ export default function CertificationsPage() {
                 selectedKeys={selectedKeys}
                 onSelectionChange={onSelectionChange}
                 isLoading={isLoading}
+                canEdit={canEdit}
             />
         </AdminLayout>
     );
