@@ -287,7 +287,7 @@ router.delete(
             } else {
                 req.log.debug(`Deleted item with uuid ${item_uuid}`);
                 // Return a status ok, deleted item object is not returned
-                res.status(StatusCodes.OK);
+                res.status(StatusCodes.NO_CONTENT).json({});
             }
         } else {
             // If the user is not authorized, provide a status error

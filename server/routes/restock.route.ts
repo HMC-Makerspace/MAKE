@@ -376,7 +376,7 @@ router.delete(
                 return;
             }
             req.log.debug(`Deleted restock request with uuid ${restock_uuid}`);
-            res.status(StatusCodes.OK);
+            res.status(StatusCodes.NO_CONTENT).json({});
         } else {
             // If the user is not authorized, provide a status error
             req.log.warn({
