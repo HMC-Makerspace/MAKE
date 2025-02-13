@@ -16,25 +16,37 @@ import {
     Popover,
     PopoverTrigger,
     PopoverContent,
+    Select,
+    SelectedItemProps,
+    SelectedItems,
+    SelectItem,
+    SelectSection,
+    ListboxSection,
 } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
-    ChevronDownIcon,
     PlusIcon,
     CheckIcon,
     StarIcon,
+    TrashIcon,
 } from "@heroicons/react/24/outline";
 import { TUserRole, UserRoleUUID } from "common/user";
-import MAKETable from "../../../Table";
+import MAKETable, { ColumnSelect } from "../../../Table";
 import MAKEUserRole from "../../../user/UserRole";
 import Fuse from "fuse.js";
 import React from "react";
-import { API_SCOPE } from "common/global";
+import {
+    API_SCOPE,
+    API_SCOPE_DESCRIPTOR,
+    API_SCOPE_SECTIONS,
+} from "../../../../../common/global";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { HexColorPicker } from "react-colorful";
+import PopupAlert from "../../../PopupAlert";
+import APIScope from "../../../APIScope";
 
 const columns = [
     { name: "UUID", id: "uuid" },
@@ -89,13 +101,11 @@ function EditRoleModal({
                 if (isNew) {
                     return [...old, result];
                 } else {
-                    return old.map((role) =>
-                        role.uuid === role.uuid ? result : role,
-                    );
+                    return old.map((r) => (r.uuid === role.uuid ? result : r));
                 }
             });
             onSuccess(
-                `Successfully ${isNew ? "created" : "updated"} role ${result.title}`,
+                `Successfully ${isNew ? "created" : "updated"} role "${result.title}"`,
             );
         },
         onError: (error) => {
@@ -124,16 +134,16 @@ function EditRoleModal({
             // Check if there are any edits to save
             if (!hasEdits) return;
 
-            // Get form data as an object.
-            const data = new FormData(e.currentTarget);
+            // Roles cannot have all scopes
+            if (scopes === "all") return;
 
             const new_role: TUserRole = {
                 uuid: role.uuid,
-                title: data.get("title") as string,
-                description: data.get("description") as string,
-                color: data.get("color") as string,
-                scopes: data.getAll("scopes") as API_SCOPE[],
-                default: data.get("default") === "true",
+                title: title,
+                description: description,
+                color: color,
+                scopes: Array.from(scopes as Set<API_SCOPE>),
+                default: isDefault,
             };
 
             console.log(new_role);
@@ -143,7 +153,7 @@ function EditRoleModal({
             // Run the mutation
             mutation.mutate({ data: new_role, isNew: isNew });
         },
-        [role.uuid, hasEdits],
+        [hasEdits, role.uuid, title, description, color, scopes, isDefault],
     );
 
     React.useEffect(() => {
@@ -164,6 +174,347 @@ function EditRoleModal({
         return hasEdits && title.length > 0 && color.length > 0;
     }, [hasEdits, title, color]);
 
+    const {
+        isOpen: isDeleting,
+        onOpen: onDelete,
+        onOpenChange: onDeleteChange,
+    } = useDisclosure();
+
+    return (
+        <>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur">
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <Form
+                                onSubmit={onSubmit}
+                                className="flex flex-col gap-4 p-4"
+                            >
+                                <div className="text-lg font-semibold">{`${isNew ? "Create" : "Edit"} Role`}</div>
+                                <div className="flex flex-row w-full gap-2 items-center">
+                                    <Input
+                                        type="text"
+                                        label="UUID"
+                                        name="uuid"
+                                        placeholder={role.uuid}
+                                        // UUID is not editable
+                                        isDisabled
+                                        variant="faded"
+                                        color="primary"
+                                        size="md"
+                                        classNames={{
+                                            input: clsx([
+                                                "placeholder:text-default-500",
+                                                "placeholder:italic",
+                                                "text-default-700",
+                                            ]),
+                                        }}
+                                    />
+                                    <Button
+                                        variant="flat"
+                                        color="danger"
+                                        onPress={onDelete}
+                                        isIconOnly
+                                    >
+                                        <TrashIcon className="size-6" />
+                                    </Button>
+                                </div>
+                                <div className="flex flex-row w-full gap-2 items-center">
+                                    <Input
+                                        type="text"
+                                        label="Title"
+                                        name="title"
+                                        placeholder="Role Title"
+                                        isRequired
+                                        value={title}
+                                        onValueChange={wrapEdit(setTitle)}
+                                        variant="faded"
+                                        color="primary"
+                                        size="md"
+                                        classNames={{
+                                            input: clsx([
+                                                "placeholder:text-default-500",
+                                                "placeholder:italic",
+                                                "text-default-700",
+                                            ]),
+                                        }}
+                                    />
+
+                                    <motion.div
+                                        initial={{
+                                            color: "hsl(var(--heroui-default-500))",
+                                        }}
+                                        animate={{
+                                            color: isDefault
+                                                ? "hsl(var(--heroui-primary-500))"
+                                                : "hsl(var(--heroui-default-500))",
+                                        }}
+                                        whileHover={{
+                                            color: isDefault
+                                                ? "hsl(var(--heroui-primary-600))"
+                                                : "hsl(var(--heroui-default-600))",
+                                        }}
+                                        onClick={() => {
+                                            setIsDefault(!isDefault);
+                                            setHasEdits(true);
+                                        }}
+                                        className="w-[40px] flex justify-center"
+                                    >
+                                        <Tooltip
+                                            content={
+                                                "Whether or not this role should be granted" +
+                                                " to all newly created users by default"
+                                            }
+                                            className="w-56 p-2"
+                                            delay={500}
+                                            closeDelay={150}
+                                        >
+                                            <StarIcon
+                                                className="size-7 cursor-pointer"
+                                                strokeWidth={2.5}
+                                            />
+                                        </Tooltip>
+                                    </motion.div>
+                                </div>
+                                <Input
+                                    type="text"
+                                    label="Description"
+                                    name="description"
+                                    placeholder="A description of the role"
+                                    value={description}
+                                    onValueChange={wrapEdit(setDescription)}
+                                    variant="faded"
+                                    color="primary"
+                                    size="md"
+                                    classNames={{
+                                        input: clsx([
+                                            "placeholder:text-default-500",
+                                            "placeholder:italic",
+                                            "text-default-700 text-ellipsis",
+                                        ]),
+                                    }}
+                                />
+                                <div
+                                    id="role-color-picker"
+                                    className="grid grid-flow-col gap-2 items-center w-full"
+                                >
+                                    <Input
+                                        type="text"
+                                        label="Color"
+                                        name="color"
+                                        placeholder="Role Color"
+                                        isRequired
+                                        // Hex colors are always 7 characters long
+                                        minLength={7}
+                                        maxLength={7}
+                                        value={color}
+                                        onValueChange={wrapEdit(setColor)}
+                                        variant="faded"
+                                        color="primary"
+                                        size="md"
+                                        classNames={{
+                                            input: clsx([
+                                                "placeholder:text-default-500",
+                                                "placeholder:italic",
+                                                "text-default-700",
+                                                "uppercase",
+                                            ]),
+                                        }}
+                                    />
+                                    <Popover
+                                        showArrow
+                                        offset={10}
+                                        placement="right"
+                                        shouldCloseOnBlur={false}
+                                        triggerScaleOnOpen={false}
+                                    >
+                                        <PopoverTrigger>
+                                            <Button
+                                                size="md"
+                                                isIconOnly
+                                                className="rounded-full"
+                                                style={{
+                                                    backgroundColor: color,
+                                                }}
+                                            />
+                                        </PopoverTrigger>
+                                        <PopoverContent className="p-2.5">
+                                            <HexColorPicker
+                                                color={color}
+                                                onChange={wrapEdit(setColor)}
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                                <Select<API_SCOPE_DESCRIPTOR>
+                                    name="scopes"
+                                    selectedKeys={scopes}
+                                    onSelectionChange={wrapEdit(setScopes)}
+                                    selectionMode="multiple"
+                                    isMultiline
+                                    placeholder="Select scopes"
+                                    size="lg"
+                                    variant="faded"
+                                    color="primary"
+                                    label="Scopes"
+                                    labelPlacement="inside"
+                                    classNames={{
+                                        value: "text-default-500",
+                                    }}
+                                    itemHeight={45}
+                                    renderValue={(selectedKeys) => {
+                                        if (selectedKeys.length === 0) {
+                                            // If no scopes are selected, show the placeholder
+                                            return "";
+                                        } else {
+                                            return (
+                                                // Otherwise, show the selected scopes in a flexbox
+                                                <div className="flex flex-wrap gap-1 p-2">
+                                                    {selectedKeys.map(
+                                                        (scope) => {
+                                                            return scope.key &&
+                                                                scope.textValue ? (
+                                                                <APIScope
+                                                                    key={
+                                                                        scope.key
+                                                                    }
+                                                                    descriptor={{
+                                                                        scope: scope.key as API_SCOPE,
+                                                                        label: scope.textValue,
+                                                                        description:
+                                                                            "",
+                                                                    }}
+                                                                    size="sm"
+                                                                />
+                                                            ) : null;
+                                                        },
+                                                    )}
+                                                </div>
+                                            );
+                                        }
+                                    }}
+                                >
+                                    {API_SCOPE_SECTIONS.map((section) => (
+                                        <SelectSection
+                                            key={section.title}
+                                            title={section.title}
+                                        >
+                                            {section.scopes.map(
+                                                (scope_descriptor) => (
+                                                    <SelectItem
+                                                        key={
+                                                            scope_descriptor.scope
+                                                        }
+                                                        textValue={
+                                                            scope_descriptor.label
+                                                        }
+                                                        value={
+                                                            scope_descriptor.scope
+                                                        }
+                                                        className="h-[45px]"
+                                                    >
+                                                        <APIScope
+                                                            descriptor={
+                                                                scope_descriptor
+                                                            }
+                                                            size="md"
+                                                        />
+                                                    </SelectItem>
+                                                ),
+                                            )}
+                                        </SelectSection>
+                                    ))}
+                                </Select>
+                                <div
+                                    id="role-bottom-buttons"
+                                    className="flex flex-row justify-between w-full"
+                                >
+                                    <Button
+                                        variant="shadow"
+                                        type="submit"
+                                        color="primary"
+                                        className="w-full sm:w-1/4"
+                                        isDisabled={!isValid}
+                                        isLoading={mutation.isPending}
+                                    >
+                                        {isNew ? "Create" : "Save"}
+                                    </Button>
+                                    <Button
+                                        variant="flat"
+                                        color="secondary"
+                                        className="w-1/4"
+                                        onPress={onClose}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+                            </Form>
+                            <DeleteRoleModal
+                                key={role.uuid}
+                                role={role}
+                                isOpen={isDeleting}
+                                onOpenChange={onDeleteChange}
+                                onSuccess={(message) => {
+                                    onSuccess(message);
+                                    onClose();
+                                }}
+                                onError={(message) => {
+                                    onError(message);
+                                    onClose();
+                                }}
+                            />
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+        </>
+    );
+}
+
+function DeleteRoleModal({
+    role,
+    isOpen,
+    onOpenChange,
+    onSuccess,
+    onError,
+}: {
+    role: TUserRole;
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    onSuccess: (message: string) => void;
+    onError: (message: string) => void;
+}) {
+    const queryClient = useQueryClient();
+    const mutation = useMutation({
+        mutationFn: async () => {
+            return axios.delete(`/api/v3/user/role/${role.uuid}`);
+        },
+        onSuccess: (obj) => {
+            onSuccess(`Successfully deleted role "${role.title}"`);
+            // Remove the role from the query cache
+            queryClient.setQueryData(["user", "role"], (old: TUserRole[]) => {
+                return old.filter((r) => r.uuid !== role.uuid);
+            });
+            queryClient.removeQueries({
+                queryKey: ["user", "role", role.uuid],
+            });
+        },
+        onError: (error) => {
+            onError(`Error: ${error.message}`);
+        },
+    });
+
+    const onSubmit = React.useCallback(
+        (e: React.FormEvent<HTMLFormElement>) => {
+            // Prevent default browser page refresh.
+            e.preventDefault();
+
+            // Run the mutation
+            mutation.mutate();
+        },
+        [mutation],
+    );
+
     return (
         <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur">
             <ModalContent>
@@ -172,165 +523,36 @@ function EditRoleModal({
                         onSubmit={onSubmit}
                         className="flex flex-col gap-4 p-4"
                     >
-                        <div className="text-lg font-semibold">{`${isNew ? "Create" : "Edit"} Role`}</div>
-                        <Input
-                            type="text"
-                            label="UUID"
-                            name="uuid"
-                            // If no user is selected, show a different placeholder
-                            placeholder={role.uuid}
-                            // UUID is not editable
-                            isDisabled
-                            // If the user exists, prefill the input with the user's uuid
-                            variant="faded"
-                            color="primary"
-                            size="md"
-                            classNames={{
-                                input: clsx([
-                                    "placeholder:text-default-500",
-                                    "placeholder:italic",
-                                    "text-default-700",
-                                ]),
-                            }}
-                        />
-                        <div className="flex flex-row w-full gap-2 items-center">
-                            <Input
-                                type="text"
-                                label="Title"
-                                name="title"
-                                // If no user is selected, show a different placeholder
-                                placeholder="Role Title"
-                                isRequired
-                                // If the user exists, prefill the input with the user's uuid
-                                value={title}
-                                onValueChange={wrapEdit(setTitle)}
-                                variant="faded"
-                                color="primary"
-                                size="md"
-                                classNames={{
-                                    input: clsx([
-                                        "placeholder:text-default-500",
-                                        "placeholder:italic",
-                                        "text-default-700",
-                                    ]),
-                                }}
-                            />
-
-                            <motion.div
-                                initial={{
-                                    color: "hsl(var(--heroui-default-500))",
-                                }}
-                                animate={{
-                                    color: isDefault
-                                        ? "hsl(var(--heroui-primary-500))"
-                                        : "hsl(var(--heroui-default-500))",
-                                }}
-                                whileHover={{
-                                    color: isDefault
-                                        ? "hsl(var(--heroui-primary-600))"
-                                        : "hsl(var(--heroui-default-600))",
-                                }}
-                                onClick={() => {
-                                    setIsDefault(!isDefault);
-                                    setHasEdits(true);
-                                }}
-                            >
-                                <Tooltip
-                                    content={
-                                        "Whether or not this role should be granted" +
-                                        " to all newly created users by default"
-                                    }
-                                    className="w-56 p-2"
-                                    delay={500}
-                                    closeDelay={150}
-                                >
-                                    <StarIcon
-                                        className="size-7 cursor-pointer"
-                                        strokeWidth={2.5}
-                                    />
-                                </Tooltip>
-                            </motion.div>
+                        <div className="text-lg font-semibold">Delete Role</div>
+                        <div className="flex flex-col gap-2">
+                            <p>
+                                Are you sure you want to delete the role{" "}
+                                <span className="font-semibold">
+                                    {role.title}
+                                </span>
+                                ?
+                            </p>
+                            <p className="text-sm text-default-400">
+                                This action cannot be undone.
+                            </p>
                         </div>
-                        <Input
-                            type="text"
-                            label="Description"
-                            name="description"
-                            // If no user is selected, show a different placeholder
-                            placeholder="A description of the role"
-                            // If the user exists, prefill the input with the user's uuid
-                            value={description}
-                            onValueChange={wrapEdit(setDescription)}
-                            variant="faded"
-                            color="primary"
-                            size="md"
-                            classNames={{
-                                input: clsx([
-                                    "placeholder:text-default-500",
-                                    "placeholder:italic",
-                                    "text-default-700 text-ellipsis",
-                                ]),
-                            }}
-                        />
-                        <div className="grid grid-flow-col gap-2 items-center w-full">
-                            <Input
-                                type="text"
-                                label="Color"
-                                name="color"
-                                // If no user is selected, show a different placeholder
-                                placeholder="Role Color"
-                                isRequired
-                                // If the user exists, prefill the input with the user's uuid
-                                value={color}
-                                onValueChange={wrapEdit(setColor)}
-                                variant="faded"
-                                color="primary"
-                                size="md"
-                                classNames={{
-                                    input: clsx([
-                                        "placeholder:text-default-500",
-                                        "placeholder:italic",
-                                        "text-default-700",
-                                        "uppercase",
-                                    ]),
-                                }}
-                            />
-                            <Popover
-                                showArrow
-                                offset={10}
-                                placement="right"
-                                shouldCloseOnBlur={false}
-                                triggerScaleOnOpen={false}
-                            >
-                                <PopoverTrigger>
-                                    <Button
-                                        size="md"
-                                        isIconOnly
-                                        className="rounded-full"
-                                        style={{ backgroundColor: color }}
-                                    />
-                                </PopoverTrigger>
-                                <PopoverContent className="p-2.5">
-                                    <HexColorPicker
-                                        color={color}
-                                        onChange={wrapEdit(setColor)}
-                                    />
-                                </PopoverContent>
-                            </Popover>
-                        </div>
-                        <div className="flex flex-row justify-between w-full">
+                        <div
+                            id="role-bottom-buttons"
+                            className="flex flex-row justify-between w-full"
+                        >
                             <Button
                                 variant="shadow"
                                 type="submit"
-                                color="primary"
-                                className="w-full sm:w-auto"
-                                isDisabled={!isValid}
+                                color="danger"
+                                className="w-full sm:w-1/4"
                                 isLoading={mutation.isPending}
                             >
-                                Submit
+                                Delete
                             </Button>
                             <Button
                                 variant="flat"
-                                color="danger"
+                                color="secondary"
+                                className="w-1/4"
                                 onPress={onClose}
                             >
                                 Cancel
@@ -391,7 +613,6 @@ export default function RolesTable({
     }, [roles, fuse, search]);
 
     const numRoles = roles.length;
-    const numFilteredRoles = filteredRoles.length;
 
     const onInputChange = React.useCallback((value: string) => {
         setSearch(value);
@@ -399,7 +620,6 @@ export default function RolesTable({
 
     const onSearchClear = React.useCallback(() => {
         setSearch("");
-        // Consider scroll to top
     }, []);
 
     const [selectedKeys, setSelectedKeys] = React.useState<Selection>(
@@ -412,7 +632,18 @@ export default function RolesTable({
 
     const [isNew, setIsNew] = React.useState<boolean>(false);
 
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const {
+        isOpen: isEditing,
+        onOpen: onEdit,
+        onOpenChange: onEditChange,
+    } = useDisclosure();
+
+    const [popupMessage, setPopupMessage] = React.useState<string | undefined>(
+        undefined,
+    );
+    const [popupType, setPopupType] = React.useState<
+        "success" | "warning" | "danger"
+    >("success");
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -432,46 +663,30 @@ export default function RolesTable({
                         }}
                     />
                     <div className="flex gap-3">
-                        <Dropdown isDisabled={isLoading}>
-                            <DropdownTrigger className="hidden sm:flex">
-                                <Button
-                                    endContent={
-                                        <ChevronDownIcon className="size-6 text-small" />
-                                    }
-                                    variant="flat"
-                                >
-                                    Filter Columns
-                                </Button>
-                            </DropdownTrigger>
-                            <DropdownMenu
-                                disallowEmptySelection
-                                aria-label="Table Columns"
-                                closeOnSelect={false}
-                                selectedKeys={visibleColumns}
-                                selectionMode="multiple"
-                                onSelectionChange={setVisibleColumns}
-                            >
-                                {columns
-                                    .filter((column) =>
-                                        defaultColumns.includes(column.id),
-                                    )
-                                    .map((column) => (
-                                        <DropdownItem
-                                            key={column.id}
-                                            className="capitalize"
-                                        >
-                                            {column.name}
-                                        </DropdownItem>
-                                    ))}
-                            </DropdownMenu>
-                        </Dropdown>
-
+                        <ColumnSelect
+                            columns={columns.filter((c) =>
+                                defaultColumns.includes(c.id),
+                            )}
+                            visibleColumns={visibleColumns}
+                            setVisibleColumns={setVisibleColumns}
+                            isLoading={isLoading}
+                        />
                         {canEdit && (
                             <Button
                                 color="primary"
                                 isDisabled={isLoading}
                                 startContent={<PlusIcon className="size-6" />}
-                                onPress={() => alert("Create new role")}
+                                onPress={() => {
+                                    setIsNew(true);
+                                    setEditRole({
+                                        uuid: crypto.randomUUID(),
+                                        title: "",
+                                        description: "",
+                                        color: "#000000",
+                                        scopes: [],
+                                        default: false,
+                                    });
+                                }}
                             >
                                 Create
                             </Button>
@@ -498,7 +713,7 @@ export default function RolesTable({
                 multiSelect={false}
                 customColumnComponents={{
                     title: (role: TUserRole) => (
-                        <MAKEUserRole role_uuid={role.uuid} />
+                        <MAKEUserRole role_uuid={role.uuid} role={role} />
                     ),
                     default: (role: TUserRole) =>
                         role.default ? (
@@ -514,8 +729,7 @@ export default function RolesTable({
                 doubleClickAction={(uuid) => {
                     if (canEdit) {
                         setEditRole(roles.find((role) => role.uuid === uuid));
-                        console.log("Edit role", uuid);
-                        onOpen();
+                        onEdit();
                     }
                 }}
                 isLoading={isLoading}
@@ -530,12 +744,24 @@ export default function RolesTable({
                     key={editRole.uuid}
                     role={editRole}
                     isNew={isNew}
-                    isOpen={isOpen}
-                    onOpenChange={onOpenChange}
-                    onSuccess={() => alert("Success")}
-                    onError={() => alert("Error")}
+                    isOpen={isEditing}
+                    onOpenChange={onEditChange}
+                    onSuccess={(message) => {
+                        setPopupMessage(message);
+                        setPopupType("success");
+                    }}
+                    onError={(message) => {
+                        setPopupMessage(message);
+                        setPopupType("danger");
+                    }}
                 />
             )}
+            <PopupAlert
+                isOpen={!!popupMessage}
+                onOpenChange={() => setPopupMessage(undefined)}
+                color={popupType}
+                description={popupMessage}
+            />
         </div>
     );
 }

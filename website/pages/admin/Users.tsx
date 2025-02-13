@@ -37,17 +37,13 @@ export default function UsersPage() {
         "success" | "warning" | "danger"
     >("success");
 
-    const [showPopup, setShowPopup] = React.useState<boolean>(false);
-
     const onSuccess = (message: string) => {
         setPopupMessage(message);
         setPopupType("success");
-        setShowPopup(true);
     };
     const onError = (message: string) => {
         setPopupMessage(message);
         setPopupType("danger");
-        setShowPopup(true);
     };
 
     return (
@@ -72,11 +68,10 @@ export default function UsersPage() {
                 />
             </div>
             <PopupAlert
-                isOpen={showPopup}
-                onOpenChange={setShowPopup}
+                isOpen={!!popupMessage}
+                onOpenChange={() => setPopupMessage(undefined)}
                 color={popupType}
                 description={popupMessage}
-                className="absolute bottom-6 right-6 w-1/4"
             />
         </AdminLayout>
     );

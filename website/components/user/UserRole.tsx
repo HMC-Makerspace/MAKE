@@ -39,15 +39,24 @@ function getForegroundColor(hex: string): string {
     }
 }
 
-export default function UserRole({ role_uuid }: { role_uuid: string }) {
+export default function UserRole({
+    role_uuid,
+    role,
+}: {
+    role_uuid: string;
+    role?: TUserRole;
+}) {
     const { data, isSuccess, isError } = useQuery<TUserRole>({
         queryKey: ["user", "role", role_uuid],
         refetchOnWindowFocus: false,
+        // If the role is given use that, otherwise fetch the role
+        enabled: !role,
     });
     // Default to gray if not yet successful
-    const color = isSuccess ? data.color : "gray";
+    const color = role?.color ?? (isSuccess ? data.color : "gray");
     // Set the title to "Error" if isError, "Loading" if isLoading, or the title if isSuccess
-    const title = isSuccess ? data.title : isError ? "Error" : "Loading";
+    const title =
+        role?.color ?? (isSuccess ? data.title : isError ? "Error" : "Loading");
     const foregroundColor = getForegroundColor(color);
     return (
         <Card

@@ -60,8 +60,6 @@ export default function UserEditorForm({
         isNew ? crypto.randomUUID() : user.uuid,
     );
 
-    const [sendingChanges, setSendingChanges] = React.useState<boolean>(false);
-
     const queryClient = useQueryClient();
 
     const mutation = useMutation({
@@ -82,9 +80,6 @@ export default function UserEditorForm({
         },
         onError: (error) => {
             onError(`Error: ${error.message}`);
-        },
-        onSettled: () => {
-            setSendingChanges(false);
         },
     });
 
@@ -165,7 +160,6 @@ export default function UserEditorForm({
             // Reset the mutation (clears any previous errors)
             mutation.reset();
             // Run the mutation
-            setSendingChanges(true);
             mutation.mutate({ data: new_user, isNew: isNew });
         },
         [user, UUID, isEmpty],
@@ -380,7 +374,7 @@ export default function UserEditorForm({
                     size="lg"
                     className="w-full mt-auto col-span-2"
                     isDisabled={isEmpty || !isValid}
-                    isLoading={sendingChanges}
+                    isLoading={mutation.isPending}
                     color={"primary"}
                     variant="shadow"
                     type="submit"
