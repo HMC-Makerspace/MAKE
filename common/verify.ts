@@ -41,4 +41,4 @@ export const FORBIDDEN_ERROR: ErrorResponse = {
         "have the proper API scopes required.",
 };
 
-export type SuccessfulResponse = Response<null | ErrorResponse>;
+export type SuccessfulResponse = Response<null | ErrorResponse | {}>;

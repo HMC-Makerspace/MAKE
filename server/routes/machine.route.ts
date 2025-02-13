@@ -3,6 +3,7 @@ import { TMachine, TMachineStatus, TPublicMachineData } from "common/machine";
 import {
     ErrorResponse,
     FORBIDDEN_ERROR,
+    SuccessfulResponse,
     UNAUTHORIZED_ERROR,
     VerifyRequestHeader,
 } from "common/verify";
@@ -273,7 +274,7 @@ router.put("/", async (req: MachineRequest, res: MachineResponse) => {
  */
 router.delete(
     "/:UUID",
-    async (req: Request<{ UUID: string }>, res: MachineResponse) => {
+    async (req: Request<{ UUID: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = headers.requesting_uuid;
         const machine_uuid = req.params.UUID;
@@ -303,7 +304,7 @@ router.delete(
                 return;
             }
             req.log.debug(`Deleted machine ${machine_uuid}`);
-            res.status(StatusCodes.OK).json(machine);
+            res.status(StatusCodes.NO_CONTENT).json({});
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to delete a machine",
