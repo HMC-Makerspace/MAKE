@@ -282,7 +282,7 @@ router.put("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
  */
 router.delete(
     "/:UUID",
-    async (req: Request<{ UUID: string }>, res: WorkshopResponse) => {
+    async (req: Request<{ UUID: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = headers.requesting_uuid;
         const workshop_uuid = req.params.UUID;
@@ -312,7 +312,7 @@ router.delete(
                 return;
             }
             req.log.debug(`Deleted workshop ${workshop_uuid}`);
-            res.status(StatusCodes.OK).json(workshop);
+            res.status(StatusCodes.NO_CONTENT).json({});
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to delete a workshop",

@@ -3,6 +3,7 @@ import { TArea, TAreaStatus, TPublicAreaData } from "common/area";
 import {
     ErrorResponse,
     FORBIDDEN_ERROR,
+    SuccessfulResponse,
     UNAUTHORIZED_ERROR,
     VerifyRequestHeader,
 } from "common/verify";
@@ -265,7 +266,7 @@ router.put("/", async (req: AreaRequest, res: AreaResponse) => {
  */
 router.delete(
     "/:UUID",
-    async (req: Request<{ UUID: string }>, res: AreaResponse) => {
+    async (req: Request<{ UUID: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = headers.requesting_uuid;
         const area_uuid = req.params.UUID;
@@ -295,7 +296,7 @@ router.delete(
                 return;
             }
             req.log.debug(`Deleted area ${area_uuid}`);
-            res.status(StatusCodes.OK).json(area);
+            res.status(StatusCodes.NO_CONTENT).json({});
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to delete a area",

@@ -8,7 +8,7 @@ export default function PopupAlert({
     color = "success",
     description,
     icon,
-    className,
+    className = "absolute bottom-6 right-6 w-full sm:w-1/4",
     timeout = 3000,
 }: {
     isOpen: boolean;
