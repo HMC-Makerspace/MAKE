@@ -54,7 +54,11 @@ export default function AdminNavbar({
             {/* Menu items, hide for small screens */}
             <NavbarContent
                 justify="center"
-                className="hidden lg:flex gap-8 overflow-x-auto"
+                className={clsx([
+                    "hidden lg:flex",
+                    "px-4 gap-8 overflow-x-auto",
+                    "data-[justify=center]:justify-start",
+                ])}
             >
                 {
                     // Iterate over the pages (excluding home) and create a link for each

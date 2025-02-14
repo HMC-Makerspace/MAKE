@@ -32,16 +32,23 @@ const ADMIN_PAGES: AdminPage[] = [
         name: "Schedule",
         href: "/admin/schedule",
         scope: API_SCOPE.SCHEDULE_KIOSK,
-    },
-    {
-        name: "Shifts",
-        href: "/admin/shifts",
-        scope: API_SCOPE.SHIFT_KIOSK,
+        // subPages: [
+        //     {
+        //         name: "Shifts",
+        //         href: "/admin/schedule/shifts",
+        //         scope: API_SCOPE.SHIFT_KIOSK,
+        //     },
+        // ]
     },
     {
         name: "Workshops",
         href: "/admin/workshops",
         scope: API_SCOPE.WORKSHOP_KIOSK,
+    },
+    {
+        name: "Checkouts",
+        href: "/admin/checkouts",
+        scope: API_SCOPE.CHECKOUT_KIOSK,
     },
     {
         name: "Restocks",
@@ -102,7 +109,7 @@ export default function AdminLayout({
             ) : isError ? (
                 <div className="absolute inset-0 flex justify-center items-center bg-background">
                     <div className="text-default-400 text-lg">
-                        Error loading user data
+                        Error loading page
                     </div>
                 </div>
             ) : (
