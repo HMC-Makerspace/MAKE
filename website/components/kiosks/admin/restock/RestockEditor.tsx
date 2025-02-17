@@ -42,7 +42,7 @@ export default function RestockEditor({onClose, restock} : {onClose:() => void; 
 
     const [UUID, setUUID] = React.useState<string>(
             restock.uuid,
-        );
+    );
     
     const [sendingChanges, setSendingChanges] = React.useState<boolean>(false);
     const queryClient = useQueryClient();
@@ -63,8 +63,6 @@ export default function RestockEditor({onClose, restock} : {onClose:() => void; 
         (e: React.FormEvent<HTMLFormElement>) => {
             // Prevent default browser page refresh.
             e.preventDefault();
-
-            console.log("submitting form");
 
             // If something is wrong, don't submit.
             if (isEmpty) return;
@@ -89,8 +87,6 @@ export default function RestockEditor({onClose, restock} : {onClose:() => void; 
                 ]
             };
 
-            console.log(changed_restock);
-
             // Reset the mutation (clears any previous errors)
             mutation.reset();
             // Run the mutation
@@ -102,7 +98,7 @@ export default function RestockEditor({onClose, restock} : {onClose:() => void; 
     );
 
     const restockOptions = [
-        // {key:RESTOCK_REQUEST_STATUS.PENDING_APPROVAL, label: "Pending"},
+        // {key:RESTOCK_REQUEST_STATUS.PENDING_APPROVAL, label: "Pending"}, // can always add back if want to allow pending
         {key:RESTOCK_REQUEST_STATUS.APPROVED_WAITING, label: "Approved, Waiting"},
         {key:RESTOCK_REQUEST_STATUS.APPROVED_ORDERED, label: "Ordered"},
         {key:RESTOCK_REQUEST_STATUS.RESTOCKED, label: "Restocked"},
@@ -111,6 +107,7 @@ export default function RestockEditor({onClose, restock} : {onClose:() => void; 
 
     return (
         <>
+        
             <ModalHeader className="flex flex-col gap-1">Modify Restock Request</ModalHeader>
             <ModalBody>
                 <Form onSubmit={onSubmit} >
@@ -135,7 +132,6 @@ export default function RestockEditor({onClose, restock} : {onClose:() => void; 
                         <Button color="danger" variant="flat" onPress={onClose} >
                             Cancel
                         </Button>
-                        
                     </ModalFooter>
 
                 </Form>

@@ -21,7 +21,6 @@ export default function RestockPage() {
     return (
         <AdminLayout pageHref={"/admin/restocks"}>
             <div>
-                
                  <RestockTable
                     restocks={data ?? []}
                     selectedKeys={selectedKeys}

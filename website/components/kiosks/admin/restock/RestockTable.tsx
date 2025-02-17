@@ -10,21 +10,12 @@ import {
     Modal,
     Spinner,
     ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
     useDisclosure,
-    Checkbox,
-    Link,
-    Form,
-    Select,
-    SelectItem
 } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
     ChevronDownIcon,
     ArrowPathRoundedSquareIcon,
-    PlusIcon,
     PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 import { RESTOCK_REQUEST_STATUS, TRestockRequest, TRestockRequestLog } from "../../../../../common/restock";
@@ -32,10 +23,7 @@ import MAKETable from "../../../Table";
 import RestockType from "./RestockType";
 import RestockEditor from "./RestockEditor"
 import RestockStatusLogs from "./RestockStatusLogs"
-import Fuse from "fuse.js";
 import React, { useState } from "react";
-import axios from "axios";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UnixTimestamp } from "common/global";
 import { MAKEUser } from "../../../user/User";
 
@@ -98,16 +86,26 @@ export default function RestockTable({
     // The list of items after filtering and sorting
 
     const filteredRestocks = React.useMemo(() => {
-
+        
         let filteredRestocks = [...restocks];
 
+        // filtering by status
         if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
             filteredRestocks = restocks.filter(restock => {
-                return (Array.from(statusFilter)).includes(String(restock.current_status))           
+                return (Array.from(statusFilter)).includes(String(restock.current_status));    
             });
         }
         
-        filteredRestocks.sort((a, b) => { return (a.current_status) - (b.current_status)});
+        // sorting by status and then by time updated
+        filteredRestocks.sort((a, b) => { 
+            let statusDiff = (a.current_status) - (b.current_status);
+            if (statusDiff !== 0) {
+                return statusDiff;
+            }
+            else {
+                return (b.status_logs.at(-1)?.timestamp ?? 0) - (a.status_logs.at(-1)?.timestamp ?? 0);
+            }
+        });
         return filteredRestocks;
 
     }, [restocks, statusFilter]);
@@ -176,11 +174,18 @@ export default function RestockTable({
             <div className="flex  flex-col content-center items-center">
                 <h1 className="text-xl font-bold text-foreground-900 mb-2">Restocks</h1>
                 <h3 className="text-l text-foreground-900 mb-4">View, approve, and deny restock requests.</h3>
+
                 <div className="static mb-4 md:absolute md:right-10 md:top-20 ">
                     <Dropdown>
                         <DropdownTrigger className="hidden sm:flex">
                             <Button color="default" endContent={<ChevronDownIcon className="size-6" />}>
                                 Filter Status
+                                <div className='flex flex-row gap-1 m-2'>
+                                    {statusFilter === "all" ? 
+                                        statusOptions.map((status) => (<RestockType request_status={status.value} card={false} />)) : 
+                                        Array.from(statusFilter).map(Number).sort((a, b) => a - b).map((status) => (<RestockType request_status={status} card={false} />))
+                                    }
+                                </div>
                             </Button>
                         </DropdownTrigger>
                         <DropdownMenu
@@ -193,18 +198,12 @@ export default function RestockTable({
                         >
                             {statusOptions.map((status) => (
                             <DropdownItem key={status.value} className="capitalize">
-                                {(status.label)}
+                                <RestockType request_status={status.value} card={true} />
                             </DropdownItem>
                             ))}
                         </DropdownMenu>
                     </Dropdown>
                 </div>
-            
-
-                {/* {areCompletedRestocksShown ?
-                <Button className="static mb-4 md:absolute md:right-10 md:top-20 " color="default" onPress={toggleCompletedRestocks}>All Restocks</Button> :
-                <Button className="static mb-4 md:absolute md:right-10 md:top-20" color="default" onPress={toggleCompletedRestocks}>Completed Restocks</Button>
-                } */}
             </div>
             
             <MAKETable
@@ -214,6 +213,7 @@ export default function RestockTable({
                 selectedKeys={selectedKeys}
                 onSelectionChange={modifiedSelectionChange}
                 multiSelect = {false}
+                emptyContent={"No Restock Requests Found"}
                 customColumnComponents={{
                     time_requested: (restock) => (
                         <span>
@@ -237,7 +237,7 @@ export default function RestockTable({
                     ),
                     current_status: (restock) => (
                         <div>
-                            <RestockType request_status={restock.current_status} />
+                            <RestockType request_status={restock.current_status} card={true}/>
                         </div>
                     ),
                     edit_button: (restock) => (
