@@ -24,7 +24,7 @@ export default function MAKETable<Type extends { uuid: string }>({
     columns,
     visibleColumns,
     multiSelect = false,
-    selectedKeys,
+    selectedKeys = new Set(),
     onSelectionChange = () => null,
     customColumnComponents = undefined,
     doubleClickAction = () => null,
@@ -40,8 +40,8 @@ export default function MAKETable<Type extends { uuid: string }>({
         hidden?: boolean;
     }[];
     visibleColumns: Selection;
-    selectedKeys: Selection;
-    onSelectionChange: (selectedKeys: Selection) => void;
+    selectedKeys?: Selection;
+    onSelectionChange?: (selectedKeys: Selection) => void;
     multiSelect: boolean;
     customColumnComponents?: {
         [column_id: string]: (item: Type) => React.ReactNode;
