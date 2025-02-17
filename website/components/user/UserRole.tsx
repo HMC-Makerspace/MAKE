@@ -42,9 +42,11 @@ function getForegroundColor(hex: string): string {
 export default function UserRole({
     role_uuid,
     role,
+    size = "sm",
 }: {
     role_uuid: string;
     role?: TUserRole;
+    size?: "sm" | "md";
 }) {
     const { data, isSuccess, isError } = useQuery<TUserRole>({
         queryKey: ["user", "role", role_uuid],
