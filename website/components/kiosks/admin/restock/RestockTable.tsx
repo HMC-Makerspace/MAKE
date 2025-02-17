@@ -29,7 +29,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { RESTOCK_REQUEST_STATUS, TRestockRequest, TRestockRequestLog } from "../../../../../common/restock";
 import MAKETable from "../../../Table";
-import RestockUser from "./RestockUser";
 import RestockType from "./RestockType";
 import RestockEditor from "./RestockEditor"
 import RestockStatusLogs from "./RestockStatusLogs"
@@ -38,14 +37,15 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UnixTimestamp } from "common/global";
+import { MAKEUser } from "../../../user/User";
 
 const columns = [
     { name: "UUID", id: "uuid" },
     { name: "Requested Time", id: "time_requested"},
     { name: "Requesting User", id: "requesting_user" },
     { name: "Item UUID", id: "item_uuid" },
-    { name: "Current Quantity", id: "current_quantity",},
-    { name: "Requested Quantity", id: "quantity_requested",},
+    { name: "Curr Quantity", id: "current_quantity",},
+    { name: "Req Quantity", id: "quantity_requested",},
     { name: "Reason for Request", id: "reason" },
     { name: "Current Status", id: "current_status" },
     { name: "Updated Time", id: "time_updated" },
@@ -69,6 +69,14 @@ const defaultColumns = [
     "log_button"
 ];
 
+const statusOptions = [
+    { value: RESTOCK_REQUEST_STATUS.PENDING_APPROVAL, label: "Pending Approval" },
+    { value: RESTOCK_REQUEST_STATUS.APPROVED_WAITING, label: "Approved Waiting" },
+    { value: RESTOCK_REQUEST_STATUS.APPROVED_ORDERED, label: "Approved Ordered" },
+    { value: RESTOCK_REQUEST_STATUS.RESTOCKED, label: "Restocked" },
+    { value: RESTOCK_REQUEST_STATUS.DENIED, label: "Denied" },
+]
+
 export default function RestockTable({
     restocks,
     selectedKeys,
@@ -85,40 +93,37 @@ export default function RestockTable({
         new Set(defaultColumns),
     );
 
-    // const [search, setSearch] = React.useState<string>("");
+    const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
 
-    // const fuse = React.useMemo(() => {
-    //     return new Fuse(restocks, {
-    //         keys: ["time_requested", "inventory_uuid"],
-    //         threshold: 0.3,
-    //     });
-    // }, [restocks]);
-        
     // The list of items after filtering and sorting
-    const [areCompletedRestocksShown, setAreCompletedRestocksShown] = React.useState<boolean>(false);
 
     const filteredRestocks = React.useMemo(() => {
-        if (areCompletedRestocksShown) {
-            return restocks.filter((restock) => restock.current_status === RESTOCK_REQUEST_STATUS.RESTOCKED);
-        }
-        else {
-            return restocks;
-        }
-    }, [restocks, areCompletedRestocksShown]);
-    
-    const numUsers = restocks.length;
 
-    const modifiedSelectionChange = (selectedKeys: Selection) => {     
-       // not using selection here
+        let filteredRestocks = [...restocks];
+
+        if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
+            filteredRestocks = restocks.filter(restock => {
+                return (Array.from(statusFilter)).includes(String(restock.current_status))           
+            });
+        }
+        
+        filteredRestocks.sort((a, b) => { return (a.current_status) - (b.current_status)});
+        return filteredRestocks;
+
+    }, [restocks, statusFilter]);
+    
+    const modifiedSelectionChange = (selectedKeys: Selection) => {  // not using selection here
     };
 
     const [restockSelected, setRestockSelected] = React.useState<TRestockRequest | null>(null);
 
-    //allows users to modify restock status 
+    // Editor for modifying restocks status
+    // Modal state for editor
     const { isOpen: editIsOpen,
             onOpen: editOnOpen,
             onOpenChange: editOnOpenChange, 
         } = useDisclosure(); // Manage modal state
+
     // modal for editor
     function ModifyRestockModal({ editIsOpen, editOnOpenChange, }: { editIsOpen: boolean; editOnOpenChange: () => void; }) {
         return (
@@ -133,12 +138,14 @@ export default function RestockTable({
 
     }
 
-    //showing past status logs 
+    // Past status logs section
+    // Modal state for logs
     const {
         isOpen: logsIsOpen,
         onOpen: logsOnOpen,
         onOpenChange: logsOnOpenChange
     } = useDisclosure();
+
     function PastStatusLogs({logsIsOpen, logsOnOpenChange}: {logsIsOpen: boolean; logsOnOpenChange: () => void;}) {
         return (
             //modal holding restock logs content
@@ -162,10 +169,6 @@ export default function RestockTable({
         return new Date((timestamp) * 1000).toLocaleString();
     }
 
-    function toggleCompletedRestocks() {
-        setAreCompletedRestocksShown(!areCompletedRestocksShown);
-    }
-
     // table returned
     return  (
         <div>
@@ -173,10 +176,35 @@ export default function RestockTable({
             <div className="flex  flex-col content-center items-center">
                 <h1 className="text-xl font-bold text-foreground-900 mb-2">Restocks</h1>
                 <h3 className="text-l text-foreground-900 mb-4">View, approve, and deny restock requests.</h3>
-                {areCompletedRestocksShown ?
+                <div className="static mb-4 md:absolute md:right-10 md:top-20 ">
+                    <Dropdown>
+                        <DropdownTrigger className="hidden sm:flex">
+                            <Button color="default" endContent={<ChevronDownIcon className="size-6" />}>
+                                Filter Status
+                            </Button>
+                        </DropdownTrigger>
+                        <DropdownMenu
+                            disallowEmptySelection
+                            aria-label="Table Columns"
+                            closeOnSelect={false}
+                            selectedKeys={statusFilter}
+                            selectionMode="multiple"
+                            onSelectionChange={setStatusFilter}
+                        >
+                            {statusOptions.map((status) => (
+                            <DropdownItem key={status.value} className="capitalize">
+                                {(status.label)}
+                            </DropdownItem>
+                            ))}
+                        </DropdownMenu>
+                    </Dropdown>
+                </div>
+            
+
+                {/* {areCompletedRestocksShown ?
                 <Button className="static mb-4 md:absolute md:right-10 md:top-20 " color="default" onPress={toggleCompletedRestocks}>All Restocks</Button> :
                 <Button className="static mb-4 md:absolute md:right-10 md:top-20" color="default" onPress={toggleCompletedRestocks}>Completed Restocks</Button>
-                }
+                } */}
             </div>
             
             <MAKETable
@@ -204,7 +232,7 @@ export default function RestockTable({
                     ),
                     requesting_user: (restock) => (
                         <div>
-                            <RestockUser user_uuid={restock.requesting_user} />
+                            <MAKEUser user_uuid={restock.requesting_user} />
                         </div>
                     ),
                     current_status: (restock) => (

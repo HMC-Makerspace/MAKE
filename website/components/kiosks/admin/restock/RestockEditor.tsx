@@ -127,15 +127,15 @@ export default function RestockEditor({onClose, restock} : {onClose:() => void; 
                     </Select>
                     <Input label="Completion Note" placeholder="Enter notes" variant="bordered" name="completion_note" />
 
-                    <ModalFooter className="flex justify-center">
-                        <div className='flex-row gap-2 flex justify-center'>
-                            <Button color="primary" type="submit" isLoading={sendingChanges}>
+                    <ModalFooter className="">
+                        
+                        <Button color="primary" type="submit" isLoading={sendingChanges}>
                             Save Changes
-                            </Button>
-                            <Button color="danger" variant="flat" onPress={onClose} >
-                                Cancel
-                            </Button>
-                        </div>
+                        </Button>
+                        <Button color="danger" variant="flat" onPress={onClose} >
+                            Cancel
+                        </Button>
+                        
                     </ModalFooter>
 
                 </Form>
