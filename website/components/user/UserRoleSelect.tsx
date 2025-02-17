@@ -1,4 +1,9 @@
-import { Select, SelectedItemProps, SelectItem } from "@heroui/react";
+import {
+    Select,
+    SelectedItemProps,
+    Selection,
+    SelectItem,
+} from "@heroui/react";
 import { TUserRole, UserRoleUUID } from "common/user";
 import UserRole from "./UserRole";
 import { useQuery } from "@tanstack/react-query";
@@ -6,12 +11,16 @@ import { useQuery } from "@tanstack/react-query";
 export function UserRoleSelect({
     roles,
     selectedKeys,
+    onSelectionChange = () => {},
+    defaultSelectedKeys,
     isLoading,
     isDisabled = false,
     className = "",
 }: {
     roles?: TUserRole[]; // optional, if not passed will get internally
     selectedKeys?: UserRoleUUID[]; // optional, otherwise no selected roles
+    onSelectionChange?: (selectedKeys: Selection) => void; // optional, otherwise no selection change handler
+    defaultSelectedKeys?: UserRoleUUID[]; // optional, otherwise no default selected roles
     isLoading?: boolean; // only needed if roles is passed
     isDisabled?: boolean; // optional, defaults to false
     className?: string; // for the base className of the select, defaults to ""
@@ -29,6 +38,8 @@ export function UserRoleSelect({
             items={roles ?? []}
             name="roles"
             selectedKeys={selectedKeys}
+            onSelectionChange={onSelectionChange}
+            defaultSelectedKeys={defaultSelectedKeys}
             isLoading={isLoading || queryLoading}
             isDisabled={isDisabled}
             selectionMode="multiple"
