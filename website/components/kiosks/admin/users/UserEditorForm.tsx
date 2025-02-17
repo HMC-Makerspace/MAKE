@@ -18,6 +18,7 @@ import UserRole from "../../../user/UserRole";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import PopupAlert from "../../../PopupAlert";
+import { UserRoleSelect } from "../../../user/UserRoleSelect";
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateUser = async ({
@@ -49,11 +50,6 @@ export default function UserEditorForm({
     onSuccess: (message: string) => void;
     onError: (message: string) => void;
 }) {
-    const user_role_query = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
-    });
-
     const isEmpty = !user.uuid && !isNew;
 
     const [UUID, setUUID] = React.useState<string>(
@@ -315,60 +311,7 @@ export default function UserEditorForm({
                     }}
                 />
                 <Divider className="h-[1px] bg-default-400 col-span-2" />
-                <Select
-                    items={user_role_query.data ?? []}
-                    name="roles"
-                    // Disable the input if no users are selected
-                    isDisabled={isEmpty}
-                    selectedKeys={roles}
-                    onSelectionChange={wrapEdit(setRoles)}
-                    selectionMode="multiple"
-                    isMultiline
-                    placeholder="Select roles"
-                    size="lg"
-                    variant="faded"
-                    color="primary"
-                    label="Roles"
-                    labelPlacement="outside"
-                    classNames={{
-                        base: "col-span-2",
-                        label: "pl-2",
-                        value: "text-default-500",
-                    }}
-                    renderValue={(selectedKeys) => {
-                        if (selectedKeys.length === 0) {
-                            return "";
-                        } else {
-                            return (
-                                <div className="flex flex-wrap gap-1 p-2">
-                                    {selectedKeys.map(
-                                        (
-                                            selected_role: SelectedItemProps<TUserRole>,
-                                        ) => (
-                                            <UserRole
-                                                key={selected_role.data?.uuid}
-                                                role_uuid={
-                                                    selected_role.data?.uuid ||
-                                                    ""
-                                                }
-                                            />
-                                        ),
-                                    )}
-                                </div>
-                            );
-                        }
-                    }}
-                >
-                    {(role) => (
-                        <SelectItem
-                            key={role.uuid}
-                            value={role.uuid}
-                            textValue={role.title}
-                        >
-                            <UserRole role_uuid={role.uuid} />
-                        </SelectItem>
-                    )}
-                </Select>
+                <UserRoleSelect isDisabled={isEmpty} className="col-span-2" />
                 <Divider className="h-[1px] bg-default-400 col-span-2" />
                 <Button
                     size="lg"

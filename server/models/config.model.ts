@@ -18,18 +18,10 @@ const FileConfig = new mongoose.Schema(
 
 const ScheduleConfig = new mongoose.Schema(
     {
+        increment_sec: { type: Number, required: true },
         days_open: { type: [Number], required: false },
         first_display_day: { type: Number, required: false },
         schedulable_roles: { type: [String], required: true },
-    },
-    { _id: false },
-);
-
-const ShiftConfig = new mongoose.Schema(
-    {
-        daily_start_sec: { type: [Number], required: true },
-        daily_end_sec: { type: [Number], required: true },
-        increment_sec: { type: Number, required: true },
     },
     { _id: false },
 );
@@ -43,7 +35,6 @@ export const Config = new mongoose.Schema<TConfig>(
         checkout: { type: CheckoutConfig, required: true },
         file: { type: FileConfig, required: true },
         schedule: { type: ScheduleConfig, required: true },
-        shift: { type: ShiftConfig, required: true },
     },
     { collection: "config" },
 );

@@ -4,95 +4,17 @@ import {
     Button,
     Card,
     Divider,
-    Dropdown,
     Form,
     Input,
     Select,
-    SelectedItemProps,
     SelectItem,
-    TimeInput,
 } from "@heroui/react";
 import AdminLayout from "../../layouts/AdminLayout";
 import { useQuery } from "@tanstack/react-query";
-import { TConfig } from "common/config";
+import { TCheckoutConfig, TConfig, TFileConfig } from "common/config";
 import { SHIFT_DAY } from "../../../common/shift";
 import { TUserRole } from "common/user";
 import { UserRoleSelect } from "../../components/user/UserRoleSelect";
-
-const configData = [
-    {
-        title: "Checkout Config",
-        options: [
-            {
-                name: "Late Checkout Notification Interval",
-                description:
-                    "The interval at which to send late checkout notifications",
-                type: "time_seconds",
-            },
-        ],
-    },
-    {
-        title: "File Config",
-        options: [
-            {
-                name: "Max Upload Capacity per User",
-                description:
-                    "The maximum disk usage allowed as file uploads per user",
-                type: "bytes",
-            },
-            {
-                name: "Max Upload Count per User",
-                description: "The maximum number of files a user can upload",
-                type: "number",
-            },
-        ],
-    },
-    {
-        title: "Schedule Config",
-        options: [
-            {
-                name: "Open days",
-                description: "The days of the week the space is open",
-                type: "days",
-            },
-            {
-                name: "First Display Day",
-                description:
-                    "The first day of the week to display on the schedule",
-                type: "day",
-            },
-            {
-                name: "Schedulable Roles",
-                description: "The roles that can be scheduled",
-                type: "roles",
-                required: true,
-            },
-        ],
-    },
-    {
-        title: "Shift Config",
-        options: [
-            {
-                name: "Daily Start Time",
-                description: "The time of day shifts start",
-                type: "time",
-                required: true,
-            },
-            {
-                name: "Daily End Time",
-                description: "The time of day shifts end",
-                type: "time",
-                required: true,
-            },
-            {
-                name: "Shift Increment",
-                description: "The increment between shifts",
-                type: "shift_increment",
-                required: true,
-            },
-        ],
-    },
-];
 
 function ConfigItem({
     name,
@@ -140,10 +62,140 @@ export default function SettingsPage() {
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
+
+        const body = {
+            checkout: {
+                notification_interval_sec:
+                    config.checkout.notification_interval_sec ?? 0,
+            },
+            file: {
+                max_upload_capacity: config.file.max_upload_capacity,
+                max_upload_count: config.file.max_upload_count,
+            },
+            schedule: {
+                days_open: config.schedule.days_open,
+                first_display_day: config.schedule.first_display_day,
+                schedulable_roles: config.schedule.schedulable_roles,
+                increment_sec: config.schedule.increment_sec,
+            },
+        };
+
+        const notification_intervals: {
+            [key: string]: { set: keyof TCheckoutConfig; mod: number };
+        } = {
+            notification_interval_days: {
+                set: "notification_interval_sec",
+                mod: 86400,
+            },
+            notification_interval_hours: {
+                set: "notification_interval_sec",
+                mod: 3600,
+            },
+            notification_interval_mins: {
+                set: "notification_interval_sec",
+                mod: 60,
+            },
+            notification_interval_secs: {
+                set: "notification_interval_sec",
+                mod: 1,
+            },
+        };
+        const upload_capacities: {
+            [key: string]: { set: keyof TFileConfig; mod: number };
+        } = {
+            max_upload_gb: {
+                set: "max_upload_capacity",
+                mod: 1024 * 1024 * 1024,
+            },
+            max_upload_mb: {
+                set: "max_upload_capacity",
+                mod: 1024 * 1024,
+            },
+            max_upload_kb: {
+                set: "max_upload_capacity",
+                mod: 1024,
+            },
+            max_upload_bytes: {
+                set: "max_upload_capacity",
+                mod: 1,
+            },
+        };
+
         formData.forEach((value, key) => {
-            console.log(key, value);
+            switch (key) {
+                case "notification_interval_days":
+                case "notification_interval_hours":
+                case "notification_interval_mins":
+                case "notification_interval_secs":
+                case "max_upload_gb":
+                case "max_upload_mb":
+                case "max_upload_kb":
+                case "max_upload_bytes":
+                    const set_value = notification_intervals[key].set;
+                    body.checkout[set_value] -= body.checkout[set_value];
+                    break;
+                case "max_upload_count":
+                    body.file.max_upload_count = 0;
+                    break;
+                case "shift_increment_hours":
+                case "shift_increment_mins":
+                    body.schedule.increment_sec = 0;
+                    break;
+            }
         });
-        // console.log(formData.get("notification_interval_days"));
+
+        const notification_interval_days = parseInt(
+            formData.get("notification_interval_days") as string,
+        );
+        const notification_interval_hours = parseInt(
+            formData.get("notification_interval_hours") as string,
+        );
+        const notification_interval_mins = parseInt(
+            formData.get("notification_interval_mins") as string,
+        );
+        const notification_interval_secs = parseInt(
+            formData.get("notification_interval_secs") as string,
+        );
+        const notification_interval_sec =
+            notification_interval_days * 24 * 60 * 60 +
+            notification_interval_hours * 60 * 60 +
+            notification_interval_mins * 60 +
+            notification_interval_secs;
+
+        const max_upload_gb = parseInt(formData.get("max_upload_gb") as string);
+        const max_upload_mb = parseInt(formData.get("max_upload_mb") as string);
+        const max_upload_kb = parseInt(formData.get("max_upload_kb") as string);
+        const max_upload_bytes = parseInt(
+            formData.get("max_upload_bytes") as string,
+        );
+        const max_upload_capacity =
+            max_upload_gb * 1024 * 1024 * 1024 +
+            max_upload_mb * 1024 * 1024 +
+            max_upload_kb * 1024 +
+            max_upload_bytes;
+
+        const max_upload_count = parseInt(
+            formData.get("max_upload_count") as string,
+        );
+
+        const shift_increment_hours = parseInt(
+            formData.get("shift_increment_hours") as string,
+        );
+        const shift_increment_mins = parseInt(
+            formData.get("shift_increment_mins") as string,
+        );
+        const shift_increment_sec =
+            shift_increment_hours * 60 * 60 + shift_increment_mins * 60;
+
+        const days_open = formData.getAll("days_open") as string[];
+
+        const first_display_day = parseInt(
+            formData.get("first_display_day") as string,
+        );
+
+        const schedulable_roles = formData.getAll(
+            "schedulable_roles",
+        ) as string[];
     };
 
     // Calculate intermediary notification values
@@ -173,10 +225,17 @@ export default function SettingsPage() {
     );
     const max_upload_bytes = max_upload_capacity % 1024;
 
+    // Calculate intermediary shift increment values
+    const shift_increment_sec = config.schedule.increment_sec ?? 0;
+    const shift_increment_hours = Math.floor(shift_increment_sec / (60 * 60));
+    const shift_increment_mins = Math.floor(
+        (shift_increment_sec % (60 * 60)) / 60,
+    );
+
     return (
         <AdminLayout pageHref="/admin/settings">
-            <Form onSubmit={onSubmit} className="w-full h-full">
-                <Card className="w-4/5 h-full p-4 mx-auto flex flex-col gap-4 items-center">
+            <Form onSubmit={onSubmit} className="w-full h-full overflow-auto">
+                <Card className="w-4/5 h-full p-4 mx-auto flex flex-col gap-4 items-center overflow-auto">
                     <h1 className="text-2xl font-bold align-center text-primary-400">
                         Settings & Configuration
                     </h1>
@@ -195,7 +254,7 @@ export default function SettingsPage() {
                         <AccordionItem key="checkout" title="Checkout Config">
                             <ConfigItem
                                 name="Late Checkout Notification Interval"
-                                description="The interval at which to send late checkout notifications"
+                                description="The interval at which to send late checkout notifications."
                             >
                                 <Input
                                     type="number"
@@ -349,8 +408,53 @@ export default function SettingsPage() {
                         </AccordionItem>
                         <AccordionItem key="schedule" title="Schedule Config">
                             <ConfigItem
+                                name="Shift Increment"
+                                description="The smallest length of time for each shift (15 minutes, 30 minutes, etc.)"
+                            >
+                                <Input
+                                    type="number"
+                                    defaultValue={shift_increment_hours.toString()}
+                                    validate={(v) =>
+                                        parseInt(v) >= 0
+                                            ? true
+                                            : "Must be a positive number"
+                                    }
+                                    name="shift_increment_hours"
+                                    color="primary"
+                                    variant="faded"
+                                    endContent="hours"
+                                />
+                                <Input
+                                    type="number"
+                                    defaultValue={shift_increment_mins.toString()}
+                                    validate={(v) =>
+                                        parseInt(v) >= 0
+                                            ? true
+                                            : "Must be a positive number"
+                                    }
+                                    name="shift_increment_mins"
+                                    color="primary"
+                                    variant="faded"
+                                    endContent="minutes"
+                                />
+                                {/* no seconds
+                                    <Input  
+                                    type="number"
+                                    defaultValue={notification_interval_secs.toString()}
+                                    validate={(v) =>
+                                        parseInt(v) >= 0
+                                            ? true
+                                            : "Must be a positive number"
+                                    }
+                                    name="shift_increment_secs"
+                                    color="primary"
+                                    variant="faded"
+                                    endContent="seconds"
+                                /> */}
+                            </ConfigItem>
+                            <ConfigItem
                                 name="Open days"
-                                description="The days of the week the space is open"
+                                description="The days of the week the space is open, to display on the schedule. Defaults to all days."
                             >
                                 <Select
                                     name="days_open"
@@ -386,7 +490,7 @@ export default function SettingsPage() {
                             </ConfigItem>
                             <ConfigItem
                                 name="First Display Day"
-                                description="The first day of the week to display on the schedule. Defaults to Sunday"
+                                description="The first day of the week to display on the schedule. Defaults to Sunday."
                             >
                                 <Select
                                     name="first_display_day"
@@ -422,13 +526,23 @@ export default function SettingsPage() {
                             </ConfigItem>
                             <ConfigItem
                                 name="Schedulable Roles"
-                                description="The roles that can be scheduled"
+                                description="The roles that can be scheduled in the schedule editor."
                             >
-                                <UserRoleSelect />
+                                <UserRoleSelect
+                                    defaultSelectedKeys={
+                                        config.schedule.schedulable_roles
+                                    }
+                                />
                             </ConfigItem>
                         </AccordionItem>
                     </Accordion>
-                    <Button type="submit" color="primary" variant="solid">
+                    <Button
+                        type="submit"
+                        color="primary"
+                        variant="solid"
+                        size="lg"
+                        className="mt-auto flex-none mb-0"
+                    >
                         Save Changes
                     </Button>
                 </Card>
