@@ -6,23 +6,8 @@ import {
     TableBody,
     TableRow,
     TableCell,
-    Input,
-    Button,
-    DropdownTrigger,
-    Dropdown,
-    DropdownMenu,
-    DropdownItem,
     Selection,
-    SortDescriptor,
-    Spinner,
 } from "@heroui/react";
-import {
-    MagnifyingGlassIcon as SearchIcon,
-    ChevronDownIcon,
-    PlusIcon,
-    PencilSquareIcon,
-} from "@heroicons/react/24/outline";
-import Fuse from "fuse.js";
 import { useInfiniteScroll } from "@heroui/use-infinite-scroll";
 
 const initialVisibleContentLength = 20;
@@ -36,6 +21,7 @@ export default function MAKETable<Type extends { uuid: string }>({
     selectedKeys,
     onSelectionChange = () => null,
     customColumnComponents = undefined,
+    doubleClickAction = () => null,
     isLoading,
     loadingContent = () => "Loading...",
 }: {
@@ -53,6 +39,7 @@ export default function MAKETable<Type extends { uuid: string }>({
     customColumnComponents?: {
         [column_id: string]: (item: Type) => React.ReactNode;
     };
+    doubleClickAction?: (item_uuid: React.Key) => void;
     isLoading: boolean;
     loadingContent?: (ref?: React.Ref<HTMLElement>) => React.ReactNode;
 }) {
@@ -132,6 +119,8 @@ export default function MAKETable<Type extends { uuid: string }>({
                 base: "max-h-full overflow-auto",
             }}
             bottomContent={hasMoreContent ? loadingContent(loaderRef) : null}
+            selectionBehavior={multiSelect ? "toggle" : "replace"}
+            onRowAction={doubleClickAction}
         >
             <TableHeader columns={headerColumns}>
                 {(column) => (

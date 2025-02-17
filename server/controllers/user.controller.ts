@@ -113,12 +113,16 @@ export async function createUser(user_obj: TUser): Promise<TUser | null> {
         return null;
     }
     // If the user doesn't exist
-    // Add the default user roles to the user
+    // Add the default user roles to the user unless they already have them
     const default_roles = await getDefaultUserRoles();
-    user_obj.active_roles = default_roles.map((role) => ({
-        role_uuid: role.uuid,
-        timestamp_gained: Date.now() / 1000,
-    }));
+    default_roles.forEach((role) => {
+        if (!user_obj.active_roles.some((log) => log.role_uuid === role.uuid)) {
+            user_obj.active_roles.push({
+                role_uuid: role.uuid,
+                timestamp_gained: Date.now() / 1000,
+            });
+        }
+    });
     // Create a new user and return it
     const new_user = new Users(user_obj);
     return new_user.save();
