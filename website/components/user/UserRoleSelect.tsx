@@ -7,10 +7,12 @@ export function UserRoleSelect({
     roles,
     selectedKeys,
     isLoading,
+    isDisabled = false,
 }: {
     roles?: TUserRole[]; // optional, if not passed will get internally
     selectedKeys?: UserRoleUUID[]; // optional, otherwise no selected roles
     isLoading?: boolean; // only needed if roles is passed
+    isDisabled?: boolean; // optional, defaults to false
 }) {
     const { data: queryRoles, isLoading: queryLoading } = useQuery<TUserRole[]>(
         {
@@ -26,6 +28,7 @@ export function UserRoleSelect({
             name="roles"
             selectedKeys={selectedKeys}
             isLoading={isLoading || queryLoading}
+            isDisabled={isDisabled}
             selectionMode="multiple"
             isMultiline
             placeholder="Select roles"
