@@ -96,7 +96,8 @@ export async function updateRestockRequestStatus(
     if (!request) {
         return null;
     }
-    // Add the new status to the request's status logs
+    // Update the request's current status and status logs
+    request.current_status = new_status.status;
     request.status_logs.push(new_status);
     return request.save();
 }

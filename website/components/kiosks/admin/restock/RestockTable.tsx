@@ -1,7 +1,5 @@
 import {
-    Input,
     Selection,
-    SortDescriptor,
     Button,
     DropdownTrigger,
     Dropdown,
@@ -11,9 +9,11 @@ import {
     Spinner,
     ModalContent,
     useDisclosure,
+    ModalBody,
+    ModalFooter,
+    ModalHeader,
 } from "@heroui/react";
 import {
-    MagnifyingGlassIcon as SearchIcon,
     ChevronDownIcon,
     ArrowPathRoundedSquareIcon,
     PencilSquareIcon,
@@ -21,14 +21,12 @@ import {
 import {
     RESTOCK_REQUEST_STATUS,
     TRestockRequest,
-    TRestockRequestLog,
 } from "../../../../../common/restock";
 import MAKETable from "../../../Table";
 import RestockType from "./RestockType";
 import RestockEditor from "./RestockEditor";
 import RestockStatusLogs from "./RestockStatusLogs";
-import React, { useState } from "react";
-import { UnixTimestamp } from "common/global";
+import React from "react";
 import { MAKEUser } from "../../../user/User";
 
 const columns = [
@@ -78,15 +76,97 @@ const statusOptions = [
     { value: RESTOCK_REQUEST_STATUS.DENIED, label: "Denied" },
 ];
 
+// modal for editor
+function ModifyRestockModal({
+    restockSelected,
+    editIsOpen,
+    editOnOpenChange,
+}: {
+    restockSelected: TRestockRequest | null;
+    editIsOpen: boolean;
+    editOnOpenChange: () => void;
+}) {
+    return (
+        <Modal
+            isOpen={editIsOpen}
+            placement="top-center"
+            onOpenChange={editOnOpenChange}
+            className="flex flex-col justify-center"
+        >
+            <ModalContent className="flex flex-col justify-center">
+                {(onClose) =>
+                    restockSelected ? (
+                        <RestockEditor
+                            onClose={onClose}
+                            restock={restockSelected}
+                        />
+                    ) : null
+                }
+            </ModalContent>
+        </Modal>
+    );
+}
+
+function PastStatusLogs({
+    restockSelected,
+    logsIsOpen,
+    logsOnOpenChange,
+}: {
+    restockSelected: TRestockRequest | null;
+    logsIsOpen: boolean;
+    logsOnOpenChange: () => void;
+}) {
+    return (
+        //modal holding restock logs content
+        <Modal
+            isOpen={logsIsOpen}
+            placement="top-center"
+            onOpenChange={logsOnOpenChange}
+            className="flex flex-col justify-center overflow-auto"
+            classNames={{
+                base: "w-full max-w-3xl overflow-auto",
+            }}
+        >
+            <ModalContent className="overflow-auto">
+                {(onClose) => (
+                    <>
+                        <ModalHeader className="flex flex-col gap-1">
+                            Restock Status Log
+                        </ModalHeader>
+                        <ModalBody className="overflow-auto">
+                            {restockSelected ? (
+                                <RestockStatusLogs restock={restockSelected} />
+                            ) : (
+                                <div>No restock selected</div>
+                            )}
+                        </ModalBody>
+                        <ModalFooter className="flex justify-center">
+                            <div className="flex-row gap-2 flex justify-center">
+                                <Button color="primary" onPress={onClose}>
+                                    Done
+                                </Button>
+                            </div>
+                        </ModalFooter>
+                    </>
+                )}
+            </ModalContent>
+        </Modal>
+    );
+}
+
+//function to convert timestamp to date
+function convertTimestampToDate(timestamp?: number): string {
+    if (!timestamp) {
+        return "N/A";
+    }
+    return new Date(timestamp * 1000).toLocaleString();
+}
+
 export default function RestockTable({
     restocks,
-    selectedKeys,
-    onSelectionChange,
     isLoading,
 }: {
     restocks: TRestockRequest[];
-    selectedKeys: Selection;
-    onSelectionChange: (selectedKeys: Selection) => void;
     isLoading: boolean;
 }) {
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
@@ -127,10 +207,6 @@ export default function RestockTable({
         return filteredRestocks;
     }, [restocks, statusFilter]);
 
-    const modifiedSelectionChange = (selectedKeys: Selection) => {
-        // not using selection here
-    };
-
     const [restockSelected, setRestockSelected] =
         React.useState<TRestockRequest | null>(null);
 
@@ -142,35 +218,6 @@ export default function RestockTable({
         onOpenChange: editOnOpenChange,
     } = useDisclosure(); // Manage modal state
 
-    // modal for editor
-    function ModifyRestockModal({
-        editIsOpen,
-        editOnOpenChange,
-    }: {
-        editIsOpen: boolean;
-        editOnOpenChange: () => void;
-    }) {
-        return (
-            <Modal
-                isOpen={editIsOpen}
-                placement="top-center"
-                onOpenChange={editOnOpenChange}
-                className="flex flex-col justify-center"
-            >
-                <ModalContent className="flex flex-col justify-center">
-                    {(onClose) =>
-                        restockSelected ? (
-                            <RestockEditor
-                                onClose={onClose}
-                                restock={restockSelected}
-                            />
-                        ) : null
-                    }
-                </ModalContent>
-            </Modal>
-        );
-    }
-
     // Past status logs section
     // Modal state for logs
     const {
@@ -178,43 +225,6 @@ export default function RestockTable({
         onOpen: logsOnOpen,
         onOpenChange: logsOnOpenChange,
     } = useDisclosure();
-
-    function PastStatusLogs({
-        logsIsOpen,
-        logsOnOpenChange,
-    }: {
-        logsIsOpen: boolean;
-        logsOnOpenChange: () => void;
-    }) {
-        return (
-            //modal holding restock logs content
-            <Modal
-                isOpen={logsIsOpen}
-                placement="top-center"
-                onOpenChange={logsOnOpenChange}
-                className="flex flex-col justify-center"
-            >
-                <ModalContent>
-                    {(onClose) =>
-                        restockSelected ? (
-                            <RestockStatusLogs
-                                onClose={onClose}
-                                restock={restockSelected}
-                            />
-                        ) : null
-                    }
-                </ModalContent>
-            </Modal>
-        );
-    }
-
-    //function to convert timestamp to date
-    function convertTimestampToDate(timestamp?: number): string {
-        if (!timestamp) {
-            return "N/A";
-        }
-        return new Date(timestamp * 1000).toLocaleString();
-    }
 
     // table returned
     return (
@@ -242,7 +252,7 @@ export default function RestockTable({
                                         ? statusOptions.map((status) => (
                                               <RestockType
                                                   request_status={status.value}
-                                                  card={false}
+                                                  size="sm"
                                               />
                                           ))
                                         : Array.from(statusFilter)
@@ -251,7 +261,7 @@ export default function RestockTable({
                                               .map((status) => (
                                                   <RestockType
                                                       request_status={status}
-                                                      card={false}
+                                                      size="sm"
                                                   />
                                               ))}
                                 </div>
@@ -272,7 +282,6 @@ export default function RestockTable({
                                 >
                                     <RestockType
                                         request_status={status.value}
-                                        card={true}
                                     />
                                 </DropdownItem>
                             ))}
@@ -285,8 +294,6 @@ export default function RestockTable({
                 content={filteredRestocks}
                 columns={columns}
                 visibleColumns={visibleColumns}
-                selectedKeys={selectedKeys}
-                onSelectionChange={modifiedSelectionChange}
                 multiSelect={false}
                 emptyContent={"No Restock Requests Found"}
                 customColumnComponents={{
@@ -305,7 +312,9 @@ export default function RestockTable({
                         </span>
                     ),
                     completion_note: (restock) => (
-                        <span>{restock.status_logs.at(-1)?.message}</span>
+                        <span style={{ overflowWrap: "anywhere" }}>
+                            {restock.status_logs.at(-1)?.message}
+                        </span>
                     ),
                     requesting_user: (restock) => (
                         <div>
@@ -316,7 +325,6 @@ export default function RestockTable({
                         <div>
                             <RestockType
                                 request_status={restock.current_status}
-                                card={true}
                             />
                         </div>
                     ),
@@ -355,10 +363,12 @@ export default function RestockTable({
                 )}
             />
             <ModifyRestockModal
+                restockSelected={restockSelected}
                 editIsOpen={editIsOpen}
                 editOnOpenChange={editOnOpenChange}
             />
             <PastStatusLogs
+                restockSelected={restockSelected}
                 logsIsOpen={logsIsOpen}
                 logsOnOpenChange={logsOnOpenChange}
             />

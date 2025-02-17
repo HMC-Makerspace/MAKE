@@ -1,24 +1,13 @@
 import {
     Input,
-    Selection,
-    SortDescriptor,
     Button,
-    DropdownTrigger,
-    Dropdown,
-    DropdownMenu,
-    DropdownItem,
-    Modal,
-    Spinner,
-    ModalContent,
     ModalHeader,
     ModalBody,
     ModalFooter,
-    useDisclosure,
-    Checkbox,
-    Link,
     Select,
     SelectItem,
     Form,
+    Textarea,
 } from "@heroui/react";
 import React from "react";
 import {
@@ -27,15 +16,26 @@ import {
     TRestockRequestLog,
 } from "../../../../../common/restock";
 import axios from "axios";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { UUID } from "common/global";
+import RestockType from "./RestockType";
 
 // Define the mutation function that will run when the form is submitted
-const updateRestockRequest = async ({ data }: { data: TRestockRequest }) => {
+const updateRestockRequestLogs = async ({
+    data,
+    restock_uuid,
+}: {
+    data: TRestockRequestLog;
+    restock_uuid: UUID;
+}) => {
     return (
-        await axios.put<TRestockRequest>(`/api/v3/restock`, {
-            request_obj: data,
-        })
-    ).data; // fixing here
+        await axios.patch<TRestockRequest>(
+            `/api/v3/restock/status/${restock_uuid}`,
+            {
+                status_obj: data,
+            },
+        )
+    ).data;
 };
 
 export default function RestockEditor({
@@ -45,22 +45,16 @@ export default function RestockEditor({
     onClose: () => void;
     restock: TRestockRequest;
 }) {
-    const isEmpty = !restock.uuid;
-
-    const [UUID, setUUID] = React.useState<string>(restock.uuid);
-
-    const [sendingChanges, setSendingChanges] = React.useState<boolean>(false);
     const queryClient = useQueryClient();
 
     const mutation = useMutation({
-        mutationFn: updateRestockRequest,
+        mutationFn: updateRestockRequestLogs,
         onSuccess: (result: TRestockRequest) => {
+            // Update the restock request in the query cache
             queryClient.setQueryData(["restock"], (old: TRestockRequest[]) => {
-                return old.map((u) => (u.uuid === UUID ? result : u));
+                return old.map((u) => (u.uuid === restock.uuid ? result : u));
             });
-        },
-        onSettled: () => {
-            setSendingChanges(false);
+            queryClient.setQueryData(["restock", restock.uuid], result);
         },
     });
 
@@ -69,48 +63,30 @@ export default function RestockEditor({
             // Prevent default browser page refresh.
             e.preventDefault();
 
-            // If something is wrong, don't submit.
-            if (isEmpty) return;
-
             // Get form data as an object.
             const data = new FormData(e.currentTarget);
 
-            const changed_restock: TRestockRequest = {
-                uuid: restock.uuid,
-                item_uuid: restock.item_uuid,
-                current_quantity: restock.current_quantity,
-                quantity_requested: restock.quantity_requested,
-                reason: restock.reason,
-                requesting_user: restock.requesting_user,
-                current_status:
+            // Create a new status log object
+            const new_status: TRestockRequestLog = {
+                timestamp: Math.floor(Date.now() / 1000),
+                status:
                     parseInt(data.get("status") as string) ||
                     RESTOCK_REQUEST_STATUS.PENDING_APPROVAL,
-                status_logs: [
-                    ...restock.status_logs,
-                    {
-                        timestamp: Math.floor(Date.now() / 1000),
-                        status:
-                            parseInt(data.get("status") as string) ||
-                            RESTOCK_REQUEST_STATUS.PENDING_APPROVAL,
-                        message:
-                            (data.get("completion_note") as string) ||
-                            "Status updated",
-                    },
-                ],
+                message:
+                    (data.get("completion_note") as string) || "Status updated",
             };
 
             // Reset the mutation (clears any previous errors)
             mutation.reset();
             // Run the mutation
-            setSendingChanges(true);
-            mutation.mutate({ data: changed_restock });
+            mutation.mutate({ data: new_status, restock_uuid: restock.uuid });
             onClose();
         },
-        [restock],
+        [restock.uuid],
     );
 
     const restockOptions = [
-        { key: RESTOCK_REQUEST_STATUS.PENDING_APPROVAL, label: "Pending" }, // can always add back if want to allow pending
+        { key: RESTOCK_REQUEST_STATUS.PENDING_APPROVAL, label: "Pending" },
         {
             key: RESTOCK_REQUEST_STATUS.APPROVED_WAITING,
             label: "Approved, Waiting",
@@ -130,26 +106,47 @@ export default function RestockEditor({
                     <Select
                         label="Update Restock Status"
                         name="status"
+                        color="primary"
+                        variant="bordered"
+                        labelPlacement="outside"
+                        defaultSelectedKeys={[
+                            restock.current_status.toString(),
+                        ]}
                         isRequired
+                        renderValue={(items) =>
+                            items.map((item) => (
+                                <RestockType
+                                    request_status={item.key as number}
+                                    size="md"
+                                />
+                            ))
+                        }
+                        classNames={{
+                            label: "pl-2",
+                        }}
                     >
                         {restockOptions.map((option) => (
                             <SelectItem key={option.key}>
-                                {option.label}
+                                <RestockType request_status={option.key} />
                             </SelectItem>
                         ))}
                     </Select>
-                    <Input
+                    <Textarea
                         label="Completion Note"
                         placeholder="Enter notes"
                         variant="bordered"
+                        color="primary"
                         name="completion_note"
+                        classNames={{
+                            input: "placeholder:text-default-400 text-default-700",
+                        }}
                     />
 
-                    <ModalFooter className="">
+                    <ModalFooter className="w-full justify-between">
                         <Button
                             color="primary"
                             type="submit"
-                            isLoading={sendingChanges}
+                            isLoading={mutation.isPending}
                         >
                             Save Changes
                         </Button>
