@@ -3,6 +3,7 @@ import { API_SCOPE } from "common/global";
 import {
     ErrorResponse,
     FORBIDDEN_ERROR,
+    SuccessfulResponse,
     UNAUTHORIZED_ERROR,
     VerifyRequestHeader,
 } from "common/verify";
@@ -496,7 +497,7 @@ router.post(
  */
 router.delete(
     "/by/user/:file_uuid",
-    async (req: Request<{ file_uuid: string }>, res: FileResponse) => {
+    async (req: Request<{ file_uuid: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = headers.requesting_uuid;
         const file_uuid = req.params.file_uuid;
@@ -544,7 +545,7 @@ router.delete(
                                 return;
                             }
                             req.log.debug("Deleted file successfully.");
-                            res.status(StatusCodes.OK).json(deleted_file);
+                            res.status(StatusCodes.NO_CONTENT).json({});
                         })
                         .catch((err: Error) => {
                             req.log.error({

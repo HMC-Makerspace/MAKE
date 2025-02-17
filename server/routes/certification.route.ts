@@ -15,6 +15,7 @@ import {
     UNAUTHORIZED_ERROR,
     FORBIDDEN_ERROR,
     VerifyRequestHeader,
+    SuccessfulResponse,
 } from "common/verify";
 import { TCertification } from "common/certification";
 
@@ -293,7 +294,7 @@ router.put(
  */
 router.delete(
     "/:UUID",
-    async (req: Request<{ UUID: string }>, res: CertificationResponse) => {
+    async (req: Request<{ UUID: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = headers.requesting_uuid;
         const certification_uuid = req.params.UUID;
@@ -330,7 +331,7 @@ router.delete(
                 return;
             }
             req.log.debug(`Deleted certification ${certification_uuid}`);
-            res.status(StatusCodes.OK).json(certification);
+            res.status(StatusCodes.NO_CONTENT).json({});
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to delete a certification",

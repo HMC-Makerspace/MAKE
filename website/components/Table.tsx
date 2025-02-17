@@ -7,8 +7,14 @@ import {
     TableRow,
     TableCell,
     Selection,
+    Button,
+    Dropdown,
+    DropdownItem,
+    DropdownMenu,
+    DropdownTrigger,
 } from "@heroui/react";
 import { useInfiniteScroll } from "@heroui/use-infinite-scroll";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
 const initialVisibleContentLength = 20;
 const incrementVisibleContentLength = 20;
@@ -24,6 +30,7 @@ export default function MAKETable<Type extends { uuid: string }>({
     doubleClickAction = () => null,
     isLoading,
     loadingContent = () => "Loading...",
+    emptyContent = "No content",
 }: {
     content: Type[];
     columns: {
@@ -42,6 +49,7 @@ export default function MAKETable<Type extends { uuid: string }>({
     doubleClickAction?: (item_uuid: React.Key) => void;
     isLoading: boolean;
     loadingContent?: (ref?: React.Ref<HTMLElement>) => React.ReactNode;
+    emptyContent?: React.ReactNode;
 }) {
     // The current number of items in content that are loaded in the DOM and
     // are visible to the user
@@ -134,7 +142,7 @@ export default function MAKETable<Type extends { uuid: string }>({
                 )}
             </TableHeader>
             <TableBody
-                emptyContent={"No users found"}
+                emptyContent={emptyContent}
                 items={visibleContent}
                 isLoading={isLoading}
                 loadingContent={loadingContent()}
@@ -148,5 +156,51 @@ export default function MAKETable<Type extends { uuid: string }>({
                 )}
             </TableBody>
         </Table>
+    );
+}
+
+export function ColumnSelect({
+    columns: initialColumns,
+    visibleColumns,
+    setVisibleColumns,
+    isLoading,
+}: {
+    columns: {
+        name: string;
+        id: string;
+        sortable?: boolean;
+        hidden?: boolean;
+    }[];
+    visibleColumns: Selection;
+    setVisibleColumns: (newColumns: Selection) => void;
+    isLoading: boolean;
+}) {
+    return (
+        <Dropdown isDisabled={isLoading}>
+            <DropdownTrigger className="hidden sm:flex">
+                <Button
+                    endContent={
+                        <ChevronDownIcon className="size-6 text-small" />
+                    }
+                    variant="flat"
+                >
+                    Columns
+                </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+                disallowEmptySelection
+                aria-label="Table Columns"
+                closeOnSelect={false}
+                selectedKeys={visibleColumns}
+                selectionMode="multiple"
+                onSelectionChange={setVisibleColumns}
+            >
+                {initialColumns.map((column) => (
+                    <DropdownItem key={column.id} className="capitalize">
+                        {column.name}
+                    </DropdownItem>
+                ))}
+            </DropdownMenu>
+        </Dropdown>
     );
 }
