@@ -8,11 +8,13 @@ export function UserRoleSelect({
     selectedKeys,
     isLoading,
     isDisabled = false,
+    className = "",
 }: {
     roles?: TUserRole[]; // optional, if not passed will get internally
     selectedKeys?: UserRoleUUID[]; // optional, otherwise no selected roles
     isLoading?: boolean; // only needed if roles is passed
     isDisabled?: boolean; // optional, defaults to false
+    className?: string; // for the base className of the select, defaults to ""
 }) {
     const { data: queryRoles, isLoading: queryLoading } = useQuery<TUserRole[]>(
         {
@@ -38,10 +40,11 @@ export function UserRoleSelect({
             label="Roles"
             labelPlacement="outside"
             classNames={{
-                base: "col-span-2",
                 label: "pl-2",
                 value: "text-default-500",
             }}
+            // Base classes
+            className={className}
             renderValue={(selectedKeys) => {
                 if (selectedKeys.length === 0) {
                     return "";
