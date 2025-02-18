@@ -28,6 +28,7 @@ import RestockEditor from "./RestockEditor";
 import RestockStatusLogs from "./RestockStatusLogs";
 import React from "react";
 import { MAKEUser } from "../../../user/User";
+import PopupAlert from "../../../PopupAlert";
 
 const columns = [
     { name: "UUID", id: "uuid" },
@@ -81,10 +82,14 @@ function ModifyRestockModal({
     restockSelected,
     editIsOpen,
     editOnOpenChange,
+    onSuccess,
+    onError,
 }: {
     restockSelected: TRestockRequest | null;
     editIsOpen: boolean;
     editOnOpenChange: () => void;
+    onSuccess?: (message: string) => void;
+    onError?: (message: string) => void;
 }) {
     return (
         <Modal
@@ -99,6 +104,8 @@ function ModifyRestockModal({
                         <RestockEditor
                             onClose={onClose}
                             restock={restockSelected}
+                            onSuccess={onSuccess}
+                            onError={onError}
                         />
                     ) : null
                 }
@@ -225,6 +232,14 @@ export default function RestockTable({
         onOpen: logsOnOpen,
         onOpenChange: logsOnOpenChange,
     } = useDisclosure();
+
+    // Popup alert state
+    const [popupMessage, setPopupMessage] = React.useState<string | undefined>(
+        undefined,
+    );
+    const [popupType, setPopupType] = React.useState<"success" | "danger">(
+        "success",
+    );
 
     // table returned
     return (
@@ -366,11 +381,25 @@ export default function RestockTable({
                 restockSelected={restockSelected}
                 editIsOpen={editIsOpen}
                 editOnOpenChange={editOnOpenChange}
+                onSuccess={(message) => {
+                    setPopupMessage(message);
+                    setPopupType("success");
+                }}
+                onError={(message) => {
+                    setPopupMessage(message);
+                    setPopupType("danger");
+                }}
             />
             <PastStatusLogs
                 restockSelected={restockSelected}
                 logsIsOpen={logsIsOpen}
                 logsOnOpenChange={logsOnOpenChange}
+            />
+            <PopupAlert
+                isOpen={!!popupMessage}
+                onOpenChange={() => setPopupMessage(undefined)}
+                color={popupType}
+                description={popupMessage}
             />
         </div>
     );

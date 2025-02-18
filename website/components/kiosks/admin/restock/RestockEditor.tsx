@@ -42,9 +42,13 @@ const updateRestockRequestLogs = async ({
 export default function RestockEditor({
     onClose,
     restock,
+    onSuccess = () => {},
+    onError = () => {},
 }: {
     onClose: () => void;
     restock: TRestockRequest;
+    onSuccess?: (message: string) => void;
+    onError?: (message: string) => void;
 }) {
     const queryClient = useQueryClient();
 
@@ -56,6 +60,10 @@ export default function RestockEditor({
                 return old.map((u) => (u.uuid === restock.uuid ? result : u));
             });
             queryClient.setQueryData(["restock", restock.uuid], result);
+            onSuccess("Restock request updated successfully");
+        },
+        onError: (error) => {
+            onError("Error updating restock request: " + error.message);
         },
     });
 
