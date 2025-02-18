@@ -32,6 +32,7 @@ const ScheduleConfig = new mongoose.Schema(
  */
 export const Config = new mongoose.Schema<TConfig>(
     {
+        timestamp: { type: Number, required: true },
         checkout: { type: CheckoutConfig, required: true },
         file: { type: FileConfig, required: true },
         schedule: { type: ScheduleConfig, required: true },

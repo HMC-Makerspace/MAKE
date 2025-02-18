@@ -1,3 +1,4 @@
+import { UnixTimestamp, UUID } from "./global";
 import { UserRoleUUID } from "./user";
 
 export type TCheckoutConfig = {
@@ -52,6 +53,7 @@ export type TScheduleConfig = {
  * TConfig - Global configuration for the website
  */
 export type TConfig = {
+    timestamp: UnixTimestamp;
     checkout: TCheckoutConfig;
     file: TFileConfig;
     schedule: TScheduleConfig;
