@@ -32,7 +32,7 @@ const ROOMS_HTML = (function (value) {return `
 <option ${value === "Composite" ? "selected" : ""} value="Composite">Composite Room</option>
 <option ${value === "Outdoor Storage" ? "selected" : ""} value="Outdoor Storage">Outdoor Storage</option>
 <option ${value === "Backstock" ? "selected" : ""} value="Backstock">Backstock</option>
-<option ${value === "Deep Storage" ? "selected" : ""} value="Deep Storage">Deep Storage</option>
+<option ${value === "The Crypt" ? "selected" : ""} value="The Crypt">The Crypt</option>
 <option ${value === "Other" ? "selected" : ""} value="Other">Other</option>
 `});
 
