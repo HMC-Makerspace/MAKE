@@ -6,20 +6,15 @@ import {
     TableRow,
     TableCell,
 } from "@heroui/react";
-import { TRestockRequest } from "../../../../../common/restock";
+import {
+    TRestockRequest,
+    RESTOCK_REQUEST_STATUS_LABELS,
+} from "../../../../../common/restock";
 
 const columns = [
     { name: "Timestamp", id: "timestamp" },
     { name: "Status", id: "status" },
     { name: "Message", id: "message" },
-];
-
-const statusType = [
-    "Pending Approval",
-    "Approved Waiting",
-    "Approved Ordered",
-    "Restocked",
-    "Denied",
 ];
 
 //converting timestamp to date
@@ -35,15 +30,15 @@ export default function RestockStatusLog({
 }: {
     restock: TRestockRequest;
 }) {
-    // getting the status logs
-    const statusLogs = restock.status_logs.sort(
+    // sort the status logs
+    const sortedLogs = restock.status_logs.sort(
         (a, b) => b.timestamp - a.timestamp,
     );
 
     return (
         <Table
             isHeaderSticky
-            aria-label="A table for content"
+            aria-label="A table for restock status logs"
             classNames={{
                 base: "max-h-full overflow-auto",
             }}
@@ -54,12 +49,17 @@ export default function RestockStatusLog({
                 ))}
             </TableHeader>
             <TableBody>
-                {statusLogs.map((statusLog) => (
+                {sortedLogs.map((statusLog) => (
                     <TableRow key={statusLog.timestamp}>
                         <TableCell>
                             {convertTimestampToDate(statusLog.timestamp)}
                         </TableCell>
-                        <TableCell>{statusType[statusLog.status]}</TableCell>
+                        <TableCell>
+                            {
+                                RESTOCK_REQUEST_STATUS_LABELS[statusLog.status]
+                                    .label
+                            }
+                        </TableCell>
                         <TableCell>
                             {statusLog.message ? (
                                 statusLog.message

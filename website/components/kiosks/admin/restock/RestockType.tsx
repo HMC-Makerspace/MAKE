@@ -1,29 +1,41 @@
 import { Card } from "@heroui/react";
+import clsx from "clsx";
+import {
+    RESTOCK_REQUEST_STATUS,
+    RESTOCK_REQUEST_STATUS_LABELS,
+} from "../../../../../common/restock";
 
 export default function RestockType({
     request_status,
     size = "md",
 }: {
-    request_status: number;
+    request_status: RESTOCK_REQUEST_STATUS;
     size?: "sm" | "md";
 }) {
-    // card colors and card titles
-    let text_titles = ["Pending", "Waiting", "Ordered", "Restocked", "Denied"];
-    let color_types = ["#808080", "#F9C97C", "#F5A524", "#45D483", "#FF474D"];
+    // card colors
+    const type_colors = {
+        [RESTOCK_REQUEST_STATUS.PENDING_APPROVAL]: "bg-default-400",
+        [RESTOCK_REQUEST_STATUS.APPROVED_WAITING]: "bg-warning-400",
+        [RESTOCK_REQUEST_STATUS.APPROVED_ORDERED]: "bg-primary-400",
+        [RESTOCK_REQUEST_STATUS.RESTOCKED]: "bg-success-400",
+        [RESTOCK_REQUEST_STATUS.DENIED]: "bg-danger-400",
+    };
 
     // if it is a card (medium), return a card, else return a small circle
     if (size === "md") {
         return (
             <Card
-                className="p-1.5 flex flex-row gap-1 w-fit px-2.5"
-                style={{ backgroundColor: color_types[request_status] }}
+                className={clsx([
+                    "p-1.5 flex flex-row gap-1 w-fit px-2.5",
+                    type_colors[request_status],
+                ])}
             >
                 <h1
                     style={{
                         color: "black",
                     }}
                 >
-                    {text_titles[request_status]}
+                    {RESTOCK_REQUEST_STATUS_LABELS[request_status].short_label}
                 </h1>
             </Card>
         );
@@ -31,8 +43,10 @@ export default function RestockType({
         // size === "sm"
         return (
             <div
-                className="w-5 h-5 rounded-full"
-                style={{ backgroundColor: color_types[request_status] }}
+                className={clsx([
+                    "w-5 h-5 rounded-full",
+                    type_colors[request_status],
+                ])}
             ></div>
         );
     }

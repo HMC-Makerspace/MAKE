@@ -12,6 +12,7 @@ import {
 import React from "react";
 import {
     RESTOCK_REQUEST_STATUS,
+    RESTOCK_REQUEST_STATUS_LABELS,
     TRestockRequest,
     TRestockRequestLog,
 } from "../../../../../common/restock";
@@ -85,17 +86,6 @@ export default function RestockEditor({
         [restock.uuid],
     );
 
-    const restockOptions = [
-        { key: RESTOCK_REQUEST_STATUS.PENDING_APPROVAL, label: "Pending" },
-        {
-            key: RESTOCK_REQUEST_STATUS.APPROVED_WAITING,
-            label: "Approved, Waiting",
-        },
-        { key: RESTOCK_REQUEST_STATUS.APPROVED_ORDERED, label: "Ordered" },
-        { key: RESTOCK_REQUEST_STATUS.RESTOCKED, label: "Restocked" },
-        { key: RESTOCK_REQUEST_STATUS.DENIED, label: "Denied" },
-    ];
-
     return (
         <>
             <ModalHeader className="flex flex-col gap-1">
@@ -125,7 +115,7 @@ export default function RestockEditor({
                             label: "pl-2",
                         }}
                     >
-                        {restockOptions.map((option) => (
+                        {RESTOCK_REQUEST_STATUS_LABELS.map((option) => (
                             <SelectItem key={option.key}>
                                 <RestockType request_status={option.key} />
                             </SelectItem>
