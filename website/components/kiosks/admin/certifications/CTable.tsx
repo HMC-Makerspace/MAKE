@@ -22,15 +22,31 @@ import MAKETable from "../../../Table";
 import React from "react";
 import CertificationTag from "./CertificationTag"
 import EditCertModal from "./EditCertModal"
+import UserRole from "../../../user/UserRole";
+import { CERTIFICATION_VISIBILITY } from "../../../../../common/certification";
+
+const defaultCert: TCertification = {
+    uuid: "",
+    name: "",
+    description: "",
+    visibility: CERTIFICATION_VISIBILITY.PUBLIC,
+    color: "",
+    max_level: 0,
+    seconds_valid_for: 0,
+    documents: [],
+    authorized_roles: [],
+    prerequisites: []
+};
 
 const columns = [
     { name: "UUID", id: "uuid" },
     { name: "Name", id: "name", sortable: true },
     { name: "Description", id: "description" },
-    { name: "Type", id: "type" },
     { name: "Max Level", id: "max_level" },
-    { name: "Expires After", id: "seconds_valid_for", sortable: true },
+    { name: "Expires After", id: "seconds_valid_for" },
     { name: "Documents", id: "documents" },
+    { name: "Prerequisites", id: "prerequisites" },
+    { name: "Authorized Roles", id: "authorized_roles" }
 ];
 
 const defaultColumns = [
@@ -39,6 +55,9 @@ const defaultColumns = [
     "max_level",
     "seconds_valid_for",
     "documents",
+    "visibility",
+    "prerequisites",
+    "authorized_roles"
 ];
 
 export default function CertificationsTable({
@@ -138,19 +157,7 @@ export default function CertificationsTable({
                             isDisabled={isLoading}
                             startContent={<PlusIcon className="size-6" />}
                             onPress={() => {
-                                let new_cert: TCertification = {
-                                    uuid: "",
-                                    name: "",
-                                    description: "",
-                                    visibility: "",
-                                    color: "",
-                                    max_level: 0,
-                                    seconds_valid_for: 0,
-                                    documents: [],
-                                    authorized_roles: []
-                                };
-
-                                setEditCert(new_cert);
+                                setEditCert(defaultCert);
                                 setIsNew(true);
                                 setIsOpen(true);
                             }}
@@ -185,14 +192,14 @@ export default function CertificationsTable({
                         <div className="flex flex-col gap-2">
                         {cert.documents?.map((doc) => (
                                 // redesign later
-                                <div>
+                                <div key={doc.name}>
                                     <a href={doc.link} style={{textDecorationLine: "underline"}}>{doc.name}</a>
                                 </div>
                             ))}
                         </div>
                     ),
                     name: (cert: TCertification) => (
-                        <CertificationTag cert_uuid={cert.uuid} ></CertificationTag>
+                        <CertificationTag cert_uuid={cert.uuid} showVisibility ></CertificationTag>
                     ),
                     seconds_valid_for: (cert: TCertification) => (
                         <div>
@@ -201,7 +208,21 @@ export default function CertificationsTable({
                     ),
                     max_level: (cert: TCertification) => (
                         <div>{cert.max_level || "None"}</div>
-                    )
+                    ),
+                    prerequisites: (cert: TCertification) => (
+                        // size down maybe
+                        <div>{cert.prerequisites?.map(prereq => (
+                            <CertificationTag cert_uuid={prereq} key={prereq} ></CertificationTag>
+                        ))}
+                        </div>
+                    ),
+                    authorized_roles: (cert: TCertification) => (
+                        // size down maybe
+                        <div>{cert.authorized_roles?.map(role => (
+                            <UserRole role_uuid={role} key={role} ></UserRole>
+                        ))}
+                        </div>
+                    ),
                 }}
                 isLoading={isLoading}
                 loadingContent={(ref) => (
@@ -210,6 +231,9 @@ export default function CertificationsTable({
                     </div>
                 )}
             />
+
+            {/* The key currently depends solely on the edited certification, meaning React does not update
+                state variables upon close and reopen of the modal. This is potentially undesired behavior. */}
             {editCert && (
                 <EditCertModal
                     key={editCert.uuid}
