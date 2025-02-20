@@ -46,6 +46,24 @@ const UPLOAD_PATH = process.env.UPLOAD_PATH || "/uploads";
 // --- File Routes ---
 
 /**
+ * Download a file by UUID to be served to the user. This is a public route.
+ */
+router.get("/download/:UUID", async (req: Request, res: Response) => {
+    const file_uuid = req.params.UUID;
+    // TODO: Consider authorization?
+    const file = await getFile(file_uuid);
+    if (!file) {
+        req.log.warn(`File not found by uuid ${file_uuid}`);
+        res.status(StatusCodes.NOT_FOUND).json({
+            error: `No file found with uuid \`${file_uuid}\`.`,
+        });
+        return;
+    }
+    res.sendFile(file.path);
+    return;
+});
+
+/**
  * Get all files made by a specific user. This is a protected route, and a
  * `requesting_uuid` header is required to call it. The user must have the
  * {@link API_SCOPE.GET_FILES_BY_USER} scope. If the requesting user is
@@ -283,6 +301,7 @@ router.post(
         const requesting_uuid: string = headers.requesting_uuid;
         const user_uuid = req.params.user_uuid;
         const file = req.file;
+        console.log("File on server", file);
         // If no file is provided, no upload occurred
         if (!file) {
             res.status(StatusCodes.BAD_REQUEST).json({
@@ -383,6 +402,7 @@ router.post(
  */
 router.post(
     /\/for\/(workshop|area|machine)\/(.+)/,
+    upload.single("file"),
     async (req: Request, res: Response) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = headers.requesting_uuid;
