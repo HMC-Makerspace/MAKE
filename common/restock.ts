@@ -23,6 +23,38 @@ export enum RESTOCK_REQUEST_STATUS {
 }
 
 /**
+ * RESTOCK_REQUEST_STATUS_LABELS - A list of objects defining
+ * various string representations of restock request statuses
+ */
+export const RESTOCK_REQUEST_STATUS_LABELS = [
+    {
+        key: RESTOCK_REQUEST_STATUS.PENDING_APPROVAL,
+        label: "Pending Approval",
+        short_label: "Pending",
+    },
+    {
+        key: RESTOCK_REQUEST_STATUS.APPROVED_WAITING,
+        label: "Approved, Waiting",
+        short_label: "Waiting",
+    },
+    {
+        key: RESTOCK_REQUEST_STATUS.APPROVED_ORDERED,
+        label: "Approved, Ordered",
+        short_label: "Ordered",
+    },
+    {
+        key: RESTOCK_REQUEST_STATUS.RESTOCKED,
+        label: "Restocked",
+        short_label: "Restocked",
+    },
+    {
+        key: RESTOCK_REQUEST_STATUS.DENIED,
+        label: "Denied",
+        short_label: "Denied",
+    },
+];
+
+/**
  * TRestockRequestStatusLog - A log of info about a restock request's status
  * @property status - The updated status of the restock request
  * @property timestamp - The timestamp this update was logged
