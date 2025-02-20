@@ -40,8 +40,7 @@ function getForegroundColor(hex: string): string {
     }
 }
 
-// DEFINITELY rename this LOL
-export default function CertificationTag({ cert_uuid }: { cert_uuid: string }) {
+export default function CertificationTag({ cert_uuid, showVisibility=false }: { cert_uuid: string, showVisibility?: boolean }) {
     const { data, isSuccess, isError } = useQuery<TCertification>({
         queryKey: ["certification", cert_uuid],
     });
@@ -54,7 +53,7 @@ export default function CertificationTag({ cert_uuid }: { cert_uuid: string }) {
 
     return (
         <Card
-            className="p-1.5 flex flex-row gap-1 w-fit px-2.5"
+            className="p-1.5 flex flex-row gap-1 w-fit px-2.5 rounded-md"
             style={{ backgroundColor: color }}
             isBlurred={!isSuccess}
         >
