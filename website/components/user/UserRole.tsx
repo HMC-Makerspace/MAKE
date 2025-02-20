@@ -58,7 +58,7 @@ export default function UserRole({
     const color = role?.color ?? (isSuccess ? data.color : "gray");
     // Set the title to "Error" if isError, "Loading" if isLoading, or the title if isSuccess
     const title =
-        role?.color ?? (isSuccess ? data.title : isError ? "Error" : "Loading");
+        role?.title ?? (isSuccess ? data.title : isError ? "Error" : "Loading");
     const foregroundColor = getForegroundColor(color);
     return (
         <Card
