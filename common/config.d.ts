@@ -1,3 +1,4 @@
+import { UnixTimestamp, UUID } from "./global";
 import { UserRoleUUID } from "./user";
 
 export type TCheckoutConfig = {
@@ -41,22 +42,9 @@ export type TScheduleConfig = {
      * which will show up in in the schedule editor.
      */
     schedulable_roles: UserRoleUUID[];
-};
 
-export type TShiftConfig = {
     /**
-     * A list of the time when shifts start each day (in seconds
-     * after midnight), indexed based on {@link SHIFT_DAY}.
-     */
-    daily_start_sec: number[];
-    /**
-     * A list of the time when shifts end each day (in seconds
-     * after midnight), indexed based on {@link SHIFT_DAY}.
-     */
-    daily_end_sec: number[];
-    /**
-     * The increment between shifts (in seconds). This should evenly
-     * divide `daily_end_sec - daily_start_sec`.
+     * The increment between shifts (in seconds).
      */
     increment_sec: number;
 };
@@ -65,10 +53,10 @@ export type TShiftConfig = {
  * TConfig - Global configuration for the website
  */
 export type TConfig = {
+    timestamp: UnixTimestamp;
     checkout: TCheckoutConfig;
     file: TFileConfig;
     schedule: TScheduleConfig;
-    shift: TShiftConfig;
 };
 
 // const DefaultConfig: TConfig = {

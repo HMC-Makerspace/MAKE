@@ -8,11 +8,15 @@ export default function UserEditor({
     selectedKeys,
     isNew,
     isLoading,
+    onSuccess,
+    onError,
 }: {
     users: TUser[];
     selectedKeys: Selection;
     isNew: boolean;
     isLoading: boolean;
+    onSuccess: (message: string) => void;
+    onError: (message: string) => void;
 }) {
     const selectedUsers = React.useMemo(
         () =>
@@ -26,20 +30,16 @@ export default function UserEditor({
     const isSingle = selectedUsers.length === 1;
     const isMultiple = selectedUsers.length > 1;
 
-    // console.log("selectedUsers", selectedUsers);
-    // console.log("isEmpty", isEmpty);
-    // console.log("isSingle", isSingle);
-    // console.log("isMultiple", isMultiple);
-    // console.log("name", name);
+    const key = isNew ? "new" : isSingle ? selectedUsers[0].uuid : "multiple";
 
     return (
-        <div className="flex flex-col h-full w-full lg:w-2/5 rounded-xl bg-content1 p-4">
+        <div className="flex flex-col h-fit lg:h-full w-full lg:w-2/5 rounded-xl bg-content1 p-4 relative">
             <h1 className="3xl font-bold text-center pb-2">User Editor</h1>
             {isLoading ? (
                 <div>Loading...</div>
             ) : (
                 <UserEditorForm
-                    key={isSingle ? selectedUsers[0].uuid : "multiple"}
+                    key={key}
                     user={
                         isSingle
                             ? selectedUsers[0]
@@ -53,6 +53,9 @@ export default function UserEditor({
                               }
                     }
                     isMultiple={isMultiple}
+                    isNew={isNew}
+                    onSuccess={onSuccess}
+                    onError={onError}
                 />
             )}
         </div>

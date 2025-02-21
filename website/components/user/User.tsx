@@ -6,6 +6,7 @@ export function MAKEUser({ user_uuid }: { user_uuid: string }) {
     const query = useQuery<TUser>({
         queryKey: ["user", user_uuid],
         enabled: !!user_uuid,
+        refetchOnWindowFocus: false,
         // placeholderData: {
         //     uuid: user_uuid,
         //     name: "Loading...",
