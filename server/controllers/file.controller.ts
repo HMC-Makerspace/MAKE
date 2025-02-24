@@ -152,7 +152,6 @@ export async function moveTempFileOnServer(
     temp_path: string,
     target_path: string,
     req: Request,
-    res: Response,
 ) {
     return fs
         .rename(temp_path, target_path) // Attempt to move the file
@@ -200,6 +199,9 @@ export async function deleteFileOnServer(
             } else {
                 req.log.debug({ msg: `File at path ${file_path} deleted` });
             }
+            res.status(StatusCodes.FORBIDDEN).json({
+                error: "Requesting user is not authorized to create a file",
+            });
         })
         .catch((err) => {
             // If there was an error unlinking the file, and the user was not
