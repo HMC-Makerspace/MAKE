@@ -26,6 +26,7 @@ import {
     PlusIcon,
     CheckIcon,
     StarIcon,
+    TrashIcon,
 } from "@heroicons/react/24/outline";
 import { CertificationUUID, TCertification } from "common/certification";
 import Fuse from "fuse.js";
@@ -42,6 +43,7 @@ import UserRole from "../../../user/UserRole";
 import CertificationTag from "./CertificationTag";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
 import CVisibilityIcon from "./CVisibilityIcon";
+import DeleteCertModal from "./DelCertModal";
 
 const createUpdateCert = async ({
     data,
@@ -105,6 +107,12 @@ export default function EditCertModal({
             onError(`Error: ${error.message}`);
         },
     });
+
+    const {
+        isOpen: isDeleting,
+        onOpen: onDelete,
+        onOpenChange: onDeleteChange,
+    } = useDisclosure();
 
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
     const [name, setName] = React.useState<string>(cert?.name ?? "");
@@ -207,34 +215,47 @@ export default function EditCertModal({
     return (
         <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur">
             <ModalContent>
-                {(onClose) => (
+                {(onClose) => (<>
                     <Form
                         onSubmit={onSubmit}
                         className="flex flex-col gap-4 p-4"
                     >
                         <div className="text-lg font-semibold">{`${isNew ? "Create" : "Edit"} Certification`}</div>
-                        <Input
-                            type="text"
-                            label="UUID"
-                            name="uuid"
-                            // If no user is selected, show a different placeholder
-                            placeholder={uuid}
-                            // UUID is not editable
-                            isDisabled
-                            // If the user exists, prefill the input with the user's uuid
-                            value={uuid}
-                            onValueChange={wrapEdit(setUUID)}
-                            variant="faded"
-                            color="primary"
-                            size="md"
-                            classNames={{
-                                input: clsx([
-                                    "placeholder:text-default-500",
-                                    "placeholder:italic",
-                                    "text-default-700",
-                                ]),
-                            }}
-                        />
+                        <div className="flex flex-row w-full gap-2 items-center">
+                            <Input
+                                type="text"
+                                label="UUID"
+                                name="uuid"
+                                // If no user is selected, show a different placeholder
+                                placeholder={uuid}
+                                // UUID is not editable
+                                isDisabled
+                                // If the user exists, prefill the input with the user's uuid
+                                value={uuid}
+                                onValueChange={wrapEdit(setUUID)}
+                                variant="faded"
+                                color="primary"
+                                size="md"
+                                classNames={{
+                                    input: clsx([
+                                        "placeholder:text-default-500",
+                                        "placeholder:italic",
+                                        "text-default-700",
+                                    ]),
+                                }}
+                            />
+                            {!isNew && (
+                                <Button
+                                    variant="flat"
+                                    color="danger"
+                                    onPress={onDelete}
+                                    isIconOnly
+                                >
+                                    <TrashIcon className="size-6" />
+                                </Button>
+                            )}
+                        </div>
+
                         <div className="flex flex-row w-full gap-2 items-center">
                             <Input
                                 type="text"
@@ -460,7 +481,22 @@ export default function EditCertModal({
                             </Button>
                         </div>
                     </Form>
-                )}
+
+                    <DeleteCertModal
+                        key={cert.uuid}
+                        cert={cert}
+                        isOpen={isDeleting}
+                        onOpenChange={onDeleteChange}
+                        onSuccess={(message) => {
+                            onSuccess(message);
+                            onClose();
+                        }}
+                        onError={(message) => {
+                            onError(message);
+                            onClose();
+                        }}
+                    />
+                </>)}
             </ModalContent>
         </Modal>
     );
