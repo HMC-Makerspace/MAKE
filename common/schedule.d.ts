@@ -41,6 +41,8 @@ export type TSchedule = {
     timestamp_end: UnixTimestamp;
     shifts: TShift[];
     alerts: TAlert[];
+    daily_open_time: number;
+    daily_close_time: number;
 };
 
 /**
@@ -50,4 +52,49 @@ export type TSchedule = {
  */
 export type TPublicScheduleData = {
     shifts: TPublicShiftData[];
+    daily_open_time: number;
+    daily_close_time: number;
+};
+
+const EXAMPLE_SCHEDULE: TSchedule = {
+    uuid: "example-schedule",
+    timestamp_start: 1740106000,
+    timestamp_end: 1840106000,
+    shifts: [
+        {
+            uuid: "example-shift-1",
+            day: 0,
+            sec_start: 43200,
+            sec_end: 46800,
+            assignee: "example-user",
+            history: [],
+        },
+        {
+            uuid: "example-shift-2",
+            day: 0,
+            sec_start: 46800,
+            sec_end: 50400,
+            assignee: "example-user-2",
+            history: [],
+        },
+        {
+            uuid: "example-shift-3",
+            day: 0,
+            sec_start: 46200,
+            sec_end: 50400,
+            assignee: "example-user-3",
+            history: [],
+        },
+        {
+            uuid: "example-shift-4",
+            day: 6,
+            sec_start: 46200,
+            sec_end: 86400,
+            assignee: "example-user-4",
+            history: [],
+        },
+    ],
+    alerts: [],
+    daily_open_time: 43200,
+    daily_close_time: 86400,
 };
