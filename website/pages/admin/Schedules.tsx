@@ -18,13 +18,24 @@ export default function SchedulePage() {
         refetchOnWindowFocus: false,
     });
 
-    if (schedulesLoading || configLoading) return <div>Loading...</div>;
+    if (
+        schedules === undefined ||
+        config === undefined ||
+        schedulesLoading ||
+        configLoading
+    )
+        return <div>Loading...</div>;
 
     console.log(schedules, config);
 
     return (
         <AdminLayout pageHref="/admin/schedule">
-            <div>Schedule</div>
+            <Schedule
+                schedule={schedules[0] ? schedules[0] : null}
+                config={config}
+                isLoading={false}
+                editable
+            />
         </AdminLayout>
     );
 }

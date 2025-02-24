@@ -54,4 +54,6 @@ export const Schedule = new mongoose.Schema<TSchedule>({
     timestamp_end: { type: Number, required: true },
     shifts: { type: [Shift], required: true },
     alerts: { type: [Alert], required: true },
+    daily_open_time: { type: Number, required: true },
+    daily_close_time: { type: Number, required: true },
 });

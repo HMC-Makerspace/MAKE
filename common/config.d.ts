@@ -68,26 +68,6 @@ export type TConfig = {
 //     schedule: {
 //         days_open: [0, 1, 2, 3, 4, 5, 6],
 //         first_display_day: 1,
-//     },
-//     shift: {
-//         daily_start_sec: [
-//             43200, // Su: 12:00 PM
-//             43200, // Mo: 12:00 PM
-//             43200, // Tu: 12:00 PM
-//             43200, // We: 12:00 PM
-//             43200, // Th: 12:00 PM
-//             43200, // Fr: 12:00 PM
-//             43200, // Sa: 12:00 PM
-//         ],
-//         daily_end_sec: [
-//             82800, // Su: 11:00 PM
-//             82800, // Mo: 11:00 PM
-//             82800, // Tu: 11:00 PM
-//             82800, // We: 11:00 PM
-//             82800, // Th: 11:00 PM
-//             72000, // Fr: 08:00 PM
-//             72000, // Sa: 08:00 PM
-//         ],
 //         increment_sec: 60 * 60, // 1 hour
 //     },
 // };

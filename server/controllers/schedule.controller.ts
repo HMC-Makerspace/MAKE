@@ -17,7 +17,7 @@ import mongoose from "mongoose";
  */
 export async function getSchedules(): Promise<TSchedule[]> {
     const Schedules = mongoose.model("Schedule", Schedule);
-    return Schedules.find();
+    return Schedules.find().sort({ timestamp_start: -1 });
 }
 
 /**
@@ -65,6 +65,8 @@ export async function getCurrentPublicSchedule(): Promise<TPublicScheduleData | 
             .map(getCurrentPublicShift)
             // Remove dropped shifts
             .filter((shift) => shift !== null),
+        daily_open_time: current_schedule.daily_open_time,
+        daily_close_time: current_schedule.daily_close_time,
     };
 }
 
