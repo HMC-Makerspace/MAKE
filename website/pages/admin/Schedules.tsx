@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { TConfig } from "common/config";
 
 import Schedule from "../../components/kiosks/admin/schedule/Schedule";
+import { Spinner } from "@heroui/react";
+import { TUser } from "common/user";
 
 export default function SchedulePage() {
     const { data: schedules, isLoading: schedulesLoading } = useQuery<
@@ -18,13 +20,24 @@ export default function SchedulePage() {
         refetchOnWindowFocus: false,
     });
 
+    const { data: users, isLoading: usersLoading } = useQuery<TUser[]>({
+        queryKey: ["user"],
+        refetchOnWindowFocus: false,
+    });
+
     if (
         schedules === undefined ||
         config === undefined ||
+        users === undefined ||
         schedulesLoading ||
-        configLoading
+        configLoading ||
+        usersLoading
     )
-        return <div>Loading...</div>;
+        return (
+            <div className="w-full h-full justify-center align-middle">
+                <Spinner />
+            </div>
+        );
 
     console.log(schedules, config);
 
@@ -33,6 +46,7 @@ export default function SchedulePage() {
             <Schedule
                 schedule={schedules[0] ? schedules[0] : null}
                 config={config}
+                users={users}
                 isLoading={false}
                 editable
             />

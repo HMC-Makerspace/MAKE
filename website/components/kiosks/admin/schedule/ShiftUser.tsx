@@ -3,15 +3,13 @@ import { TUser } from "common/user";
 import { Button, Link, User } from "@heroui/react";
 import clsx from "clsx";
 
-export function MAKEUser({
-    user_uuid,
+export function ShiftUser({
     user,
     className,
     classNames = {
         description: "hidden sm:block",
         name: "hidden sm:block",
     },
-    size = "lg",
     onClick = () => {},
     defaultElement = (
         <Button
