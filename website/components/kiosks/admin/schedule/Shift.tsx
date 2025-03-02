@@ -1,5 +1,7 @@
 import clsx from "clsx";
 import { TShift } from "common/shift";
+import { TUser } from "common/user";
+import { MAKEUser } from "../../../user/User";
 
 const backgroudColors = [
     "bg-secondary-50",
@@ -11,11 +13,13 @@ const backgroudColors = [
 
 export default function Shift({
     shifts,
+    users,
     day,
     sec_start,
     sec_end,
 }: {
     shifts: TShift[];
+    users: TUser[];
     day: number;
     sec_start: number;
     sec_end: number;
@@ -30,8 +34,6 @@ export default function Shift({
         .map((shift) => shift.assignee);
     const backgroundColor =
         backgroudColors[Math.min(assignees.length, backgroudColors.length - 1)];
-    const foregroundColor =
-        backgroudColors[(assignees.length + 1) % backgroudColors.length];
     return (
         <div
             className={clsx(
@@ -43,17 +45,27 @@ export default function Shift({
             )}
         >
             {assignees.map((assignee) => (
-                <div
+                <MAKEUser
                     key={assignee}
+                    user_uuid={assignee}
+                    user={users.find((u) => u.uuid === assignee)}
+                    size="sm"
+                    className="border-2 border-default-400 rounded-full"
+                />
+            ))}
+            {assignees.length === 0 && (
+                <div
                     className={clsx(
-                        "text-default-800 text-sm text-center",
-                        "px-2 py-0.5 rounded-full border-2 border-default-800",
-                        // foregroundColor,
+                        "w-full h-full",
+                        "flex flex-row",
+                        "items-center justify-center",
+                        "text-default-400",
+                        "text-sm",
                     )}
                 >
-                    {assignee}
+                    Unassigned
                 </div>
-            ))}
+            )}
         </div>
     );
 }
