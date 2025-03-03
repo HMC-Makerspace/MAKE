@@ -84,15 +84,29 @@ function searchInventory(search, filters = null, kiosk_mode = false | "inventory
     let results = fuzzysort.go(search, state.inventory, search_options);
 
     // Scores are all undefined, so this sorting is irrelevant
-    // results.sort((a, b) => b.score - a.score);
+    
 
-    // Sort by the room, container, and specific of the first location, followed by name
-    results.sort((a, b) =>  {
-        return ((a.obj.locations[0] && b.obj.locations[0]) ? (a.obj.locations[0].room || "").localeCompare(b.obj.locations[0].room  || "") ||
-            (a.obj.locations[0].container  || "").localeCompare(b.obj.locations[0].container  || "") ||
-            (a.obj.locations[0].specific  || "").localeCompare(b.obj.locations[0].specific  || "") : 0) ||
-            a.obj.name.localeCompare(b.obj.name);
-    });
+    console.log("Results of search", results);
+    console.log("Search |" + search + "|");
+
+    if (search === "") {
+        // Sort by the room, container, and specific of the first location, followed by name
+        results.sort((a, b) =>  {
+            return ((a.obj.locations[0] && b.obj.locations[0]) ? (a.obj.locations[0].room || "").localeCompare(b.obj.locations[0].room  || "") ||
+                (a.obj.locations[0].container  || "").localeCompare(b.obj.locations[0].container  || "") ||
+                (a.obj.locations[0].specific  || "").localeCompare(b.obj.locations[0].specific  || "") : 0) ||
+                a.obj.name.localeCompare(b.obj.name);
+        });
+    } else {
+        // Sort by score and then room, container, and specific of the first location, followed by name
+        results.sort((a, b) =>  {
+            return (b.score - a.score ||
+                (a.obj.locations[0] && b.obj.locations[0]) ? (a.obj.locations[0].room || "").localeCompare(b.obj.locations[0].room  || "") ||
+                (a.obj.locations[0].container  || "").localeCompare(b.obj.locations[0].container  || "") ||
+                (a.obj.locations[0].specific  || "").localeCompare(b.obj.locations[0].specific  || "") : 0) ||
+                a.obj.name.localeCompare(b.obj.name);
+        });
+    }
 
     // If not in any kiosk mode, filter out steward-only items
     if (kiosk_mode === false) {
