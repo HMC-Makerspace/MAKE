@@ -125,7 +125,6 @@ export default function ImageCarousel({
                         {/* <p className="text-xl text-foreground-900">Add Your Images</p> */}
                     </div>
                 }
-                   
 
                    {editable &&
                        <Button isIconOnly className='absolute bottom-2 right-2' onPress={editOnOpenChange}>
