@@ -151,13 +151,17 @@ const main_area_equipment = {
             name: "Lost and Found Policy",
             link: "https://docs.google.com/document/d/1abznvqZAuiiUMQWZY2wXyiTc17sGK2Lkww3c1VEKFps/edit"
         },
-        {
-            name: "Printing Press Glossary",
-            link: "https://docs.google.com/document/d/1JiHqYf_kEaK3hFZ4yS2bjCtTyL6PKsosZmPeGssmNCo/edit"
-        },
+        // {
+        //     name: "Printing Press Glossary",
+        //     link: "https://docs.google.com/document/d/1JiHqYf_kEaK3hFZ4yS2bjCtTyL6PKsosZmPeGssmNCo/edit"
+        // },
         {
             name: "Injury Report Form",
             link: "https://docs.google.com/forms/d/e/1FAIpQLScLeBtqgH2RYPFIgOTd5TCk7fGLsU5j8lMBNgLgPaZ5c7n9jQ/viewform?usp=sf_link"
+        },
+        {
+            name: "Event Request Form",
+            link: "https://forms.gle/kqaVGsB4qkPpj3oU7"
         }
     ],
     "equipment": [
@@ -241,18 +245,13 @@ const studio_equipment = {
 
 
 const welding_area_equipment = {
-    "documents": [
-        {
-            name: "Welding Manual",
-            link: "https://docs.google.com/document/d/13k30JUPOOKK707lYuoaa8Pd3ICvUOBFMly4v8zQqU-Y/edit"
-        }
-    ],
+    "documents": [],
     "equipment": [
         {
             name: "Miller Multimatic 215 Multiprocess Welder",
             description: "The Miller Multimatic 215 is a multiprocess welder that can be used to weld steel, aluminum, and stainless steel. It can be used to weld with MIG, Flux-Cored, Stick, and TIG processes. It can also be used to cut steel with an oxy-fuel torch.",
             image: "img/equipment/multimatic215.webp",
-            link: ""
+            link: "https://docs.google.com/document/d/13k30JUPOOKK707lYuoaa8Pd3ICvUOBFMly4v8zQqU-Y/edit"
         }
     ]
 };
@@ -349,6 +348,10 @@ function generateEquipmentDiv(equipment) {
     name_div.classList.add("equipment-name");
     name_div.innerHTML = `<span class="material-symbols-outlined">${equipment.icon}</span> ${equipment.name}`
 
+    const documents_header = document.createElement("h3");
+    documents_header.classList.add("equipment-subheader");
+    documents_header.innerText = "Policies & Documents";
+
     const documents_div = document.createElement("div");
     documents_div.classList.add("equipment-documents");
 
@@ -357,6 +360,10 @@ function generateEquipmentDiv(equipment) {
     }
 
     header_div.appendChild(name_div);
+    // Add a "Policies & Documents" subheader if there are documents
+    if (equipment.obj.documents.length !== 0) {
+        header_div.appendChild(documents_header);
+    }
     header_div.appendChild(documents_div);
 
     const machine_div_container = document.createElement("div");

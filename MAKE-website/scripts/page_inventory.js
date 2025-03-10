@@ -84,11 +84,6 @@ function searchInventory(search, filters = null, kiosk_mode = false | "inventory
     let results = fuzzysort.go(search, state.inventory, search_options);
 
     // Scores are all undefined, so this sorting is irrelevant
-    
-
-    console.log("Results of search", results);
-    console.log("Search |" + search + "|");
-
     if (search === "") {
         // Sort by the room, container, and specific of the first location, followed by name
         results.sort((a, b) =>  {
