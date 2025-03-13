@@ -18,7 +18,7 @@ const columns = [
 ];
 
 //converting timestamp to date
-function convertTimestampToDate(timestamp?: number): string {
+export function convertTimestampToDate(timestamp?: number): string {
     if (!timestamp) {
         return "N/A";
     }

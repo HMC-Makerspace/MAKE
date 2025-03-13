@@ -438,7 +438,7 @@ router.post(
         ) {
             // Move the file from temp
             const temp_path = file.path;
-            const target_path = `${UPLOAD_PATH}/${file.filename}`;
+            const target_path = path.resolve(UPLOAD_PATH, file.filename);
             moveTempFileOnServer(temp_path, target_path, req)
                 // If the file was successfully saved, create a new File object
                 // in the db

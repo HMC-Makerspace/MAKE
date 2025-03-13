@@ -6,8 +6,8 @@ export default function AdminPage() {
     return (
         <AdminLayout pageHref={"/admin"}>
             <h1>Admin Page</h1>
-            <ImageCarousel uuid="bdb852ff-5a41-428f-ab1e-7a97a0ba1a6a" fileType={FILE_RESOURCE_TYPE.USER} editable={true}/>
-
+            <ImageCarousel uuid="a1b2c3d4-1234-5678-90ab-cdef12345678" fileType={FILE_RESOURCE_TYPE.WORKSHOP} editable={true}/>
+            <ImageCarousel uuid="a20759224c244439a309e69c5825e572" fileType={FILE_RESOURCE_TYPE.USER} editable={true}/>
         </AdminLayout>
     );
 }
