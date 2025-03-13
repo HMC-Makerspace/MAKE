@@ -24,6 +24,7 @@ import CertificationTag from "./CertificationTag"
 import EditCertModal from "./EditCertModal"
 import UserRole from "../../../user/UserRole";
 import { CERTIFICATION_VISIBILITY } from "../../../../../common/certification";
+import EditDocsModal from "./EditDocsModal";
 
 const defaultCert: TCertification = {
     uuid: "",
@@ -87,6 +88,9 @@ export default function CertificationsTable({
     // either way, React.useState() works instead.
     //const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [isOpen, setIsOpen] = React.useState<boolean>(false);
+
+    const [certOpenDoc, setCertOpenDoc] = React.useState<TCertification>(defaultCert);
+    const [docOpen, setDocOpen] = React.useState<boolean>();
 
     const numCerts = certs.length;
 
@@ -190,12 +194,24 @@ export default function CertificationsTable({
                 customColumnComponents={{
                     documents: (cert: TCertification) => (
                         <div className="flex flex-col gap-2">
-                        {cert.documents?.map((doc) => (
+                            {cert.documents?.map((doc) => (
                                 // redesign later
                                 <div key={doc.name}>
                                     <a href={doc.link} style={{textDecorationLine: "underline"}}>{doc.name}</a>
                                 </div>
                             ))}
+
+                            <Button
+                                variant="flat"
+                                color="warning"
+                                onPress={()=>{
+                                    setCertOpenDoc(cert);
+                                    setDocOpen(true);
+                                }}
+                                isIconOnly
+                            >
+                                <PencilSquareIcon className="size-6" />
+                            </Button>
                         </div>
                     ),
                     name: (cert: TCertification) => (
@@ -211,16 +227,18 @@ export default function CertificationsTable({
                     ),
                     prerequisites: (cert: TCertification) => (
                         // size down maybe
-                        <div>{cert.prerequisites?.map(prereq => (
-                            <CertificationTag cert_uuid={prereq} key={prereq} ></CertificationTag>
-                        ))}
+                        <div>
+                            {cert.prerequisites?.map(prereq => (
+                                <CertificationTag cert_uuid={prereq} key={prereq} ></CertificationTag>
+                            ))}
                         </div>
                     ),
                     authorized_roles: (cert: TCertification) => (
                         // size down maybe
-                        <div>{cert.authorized_roles?.map(role => (
-                            <UserRole role_uuid={role} key={role} ></UserRole>
-                        ))}
+                        <div>
+                            {cert.authorized_roles?.map(role => (
+                                <UserRole role_uuid={role} key={role} ></UserRole>
+                            ))}
                         </div>
                     ),
                 }}
@@ -241,7 +259,19 @@ export default function CertificationsTable({
                     isNew={isNew}
                     isOpen={isOpen}
                     onOpenChange={setIsOpen}
-                    onSuccess={()=>setIsOpen(false)}
+                    onSuccess={() => setIsOpen(false)}
+                    onError={() => alert("Error")}
+                />
+            )}
+
+            {docOpen && (
+                <EditDocsModal
+                    key={certOpenDoc.uuid}
+                    cert={certOpenDoc}
+                    documents={certOpenDoc.documents||[]}
+                    isOpen={docOpen}
+                    onOpenChange={setDocOpen}
+                    onSuccess={() => setDocOpen(false)}
                     onError={() => alert("Error")}
                 />
             )}
@@ -272,7 +302,7 @@ function relativeTimestampToString(timestamp: number): string {
 
     // Formatting divisions
     for (let i = 0; i < times.length; i++) {
-        // If that division is at least 0, include it in the result
+        // If that division is greater than 0, include it in the result
         res[i] = times[i] > 0 ? `${times[i]} ${ref[i]}` : "";
 
         // Add an "s" to pluralize the division name if necessary
