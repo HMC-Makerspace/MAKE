@@ -16,7 +16,7 @@ import { TCertification } from "common/certification";
 const emptyDoc: TDocument = {
     name: "",
     link: ""
-}
+};
 
 const updateDocs = async ({
     data,
@@ -84,7 +84,7 @@ export default function EditDocsModal({
 
     const wrapEdit = React.useCallback((i: number, prop: "name"|"link") => {
         return (val: any) => {
-            if (!docs[i]) docs[i] = emptyDoc;
+            if (!docs[i]) docs[i] = {...emptyDoc};
 
             docs[i][prop] = val;
             setDocs([...docs]);
@@ -93,8 +93,13 @@ export default function EditDocsModal({
     }, []);
 
     const isValid = React.useMemo(() => {
+        for (let i = 0; i < docs.length; i++) {
+            if (docs[i].name == "" || docs[i].link == "")
+                return false;
+        }
+
         return hasEdits;
-    }, [hasEdits]);
+    }, [hasEdits, docs]);
     
     return (
         <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur">
@@ -107,12 +112,13 @@ export default function EditDocsModal({
                         <div className="text-lg font-semibold">Edit Documents</div>
 
                         {docs.map((doc, i) => (
-                            <div className="flex flex-row w-full gap-2 items-center">
+                            <div className="flex flex-row w-full gap-2 items-center" key={cert.uuid + "-doc" + i}>
                                 <Input
                                     type="text"
                                     label="Name"
                                     name="name"
                                     placeholder={""}
+                                    isRequired
                                     value={doc.name}
                                     onValueChange={wrapEdit(i, "name")}
                                     variant="faded"
@@ -132,6 +138,7 @@ export default function EditDocsModal({
                                     label="Link"
                                     name="link"
                                     placeholder={""}
+                                    isRequired
                                     value={doc.link}
                                     onValueChange={wrapEdit(i, "link")}
                                     variant="faded"
@@ -166,7 +173,7 @@ export default function EditDocsModal({
                             className="w-full sm:w-1/3"
                             isLoading={false}
                             onPress={()=>{
-                                setDocs([...docs, emptyDoc]);
+                                setDocs([...docs, {...emptyDoc}]);
                                 setHasEdits(true);
                             }}
                         >
