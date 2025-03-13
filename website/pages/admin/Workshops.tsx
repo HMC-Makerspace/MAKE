@@ -15,10 +15,10 @@ export default function WorkshopPage() {
         <AdminLayout pageHref={"/admin/workshops"}>
             {isError ? (
             <div className="font-bold text-xl text-danger-400 text-center">
-                Error loading workshop data
+                Error loading restock data
             </div>
         ) : (
-            <WorkshopTable workshops={data ?? []} isLoading={isLoading}/>
+            <WorkshopTable workshops={data ?? []}/>
         )}
         </AdminLayout>
     );
