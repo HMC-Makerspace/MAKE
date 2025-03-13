@@ -189,16 +189,16 @@ export default function CertificationsTable({
                 customColumnComponents={{
                     documents: (cert: TCertification) => (
                         <div className="flex flex-col gap-2">
-                            {cert.documents?.map((doc) => (
+                            {/* {cert.documents?.map((doc) => (
                                 // redesign later
                                 <div key={doc.name}>
                                     <a href={doc.link} style={{textDecorationLine: "underline"}}>{doc.name}</a>
                                 </div>
-                            ))}
+                            ))} */}
 
                             <Button
                                 variant="flat"
-                                color="warning"
+                                color="secondary"
                                 onPress={()=>{
                                     setCertOpenDoc(cert);
                                     setDocOpen(true);
