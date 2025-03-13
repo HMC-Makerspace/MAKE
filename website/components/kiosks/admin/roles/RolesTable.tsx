@@ -618,9 +618,7 @@ export default function RolesTable({
         setSearch(value);
     }, []);
 
-    const onSearchClear = React.useCallback(() => {
-        setSearch("");
-    }, []);
+    const onSearchClear = React.useCallback(() => onInputChange(""), []);
 
     const [selectedKeys, setSelectedKeys] = React.useState<Selection>(
         new Set<UserRoleUUID>(),
@@ -664,9 +662,7 @@ export default function RolesTable({
                     />
                     <div className="flex gap-3">
                         <ColumnSelect
-                            columns={columns.filter((c) =>
-                                defaultColumns.includes(c.id),
-                            )}
+                            columns={columns}
                             visibleColumns={visibleColumns}
                             setVisibleColumns={setVisibleColumns}
                             isLoading={isLoading}

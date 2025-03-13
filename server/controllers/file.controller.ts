@@ -200,7 +200,7 @@ export async function deleteFileOnServer(
                 req.log.debug({ msg: `File at path ${file_path} deleted` });
             }
             res.status(StatusCodes.ACCEPTED).json({
-                error: "Successfully deleted file", 
+                error: "Successfully deleted file",
             });
         })
         .catch((err) => {
