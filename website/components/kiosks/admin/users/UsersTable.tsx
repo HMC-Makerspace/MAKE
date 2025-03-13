@@ -4,7 +4,7 @@ import {
     PlusIcon,
     PencilSquareIcon,
 } from "@heroicons/react/24/outline";
-import { TUser } from "common/user";
+import { TUser, TUserRole } from "common/user";
 import MAKETable, { ColumnSelect } from "../../../Table";
 import MAKEUserRole from "../../../user/UserRole";
 import Fuse from "fuse.js";
@@ -32,12 +32,14 @@ const defaultColumns = [
 
 export default function UsersTable({
     users,
+    roles,
     selectedKeys,
     onSelectionChange,
     isLoading,
     onCreate,
 }: {
     users: TUser[];
+    roles: TUserRole[];
     selectedKeys: Selection;
     onSelectionChange: (selectedKeys: Selection) => void;
     isLoading: boolean;
@@ -109,6 +111,11 @@ export default function UsersTable({
         onSelectionChange(new Set());
         onCreate(true);
     };
+
+    const findRole = React.useCallback(
+        (role_uuid: string) => roles.find((role) => role.uuid === role_uuid),
+        [roles],
+    );
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -188,6 +195,7 @@ export default function UsersTable({
                             {user.active_roles.map((log) => (
                                 <MAKEUserRole
                                     role_uuid={log.role_uuid}
+                                    role={findRole(log.role_uuid)}
                                     key={log.role_uuid}
                                 />
                             ))}
@@ -198,6 +206,7 @@ export default function UsersTable({
                             {user.past_roles.map((log) => (
                                 <MAKEUserRole
                                     role_uuid={log.role_uuid}
+                                    role={findRole(log.role_uuid)}
                                     key={log.role_uuid}
                                 />
                             ))}
