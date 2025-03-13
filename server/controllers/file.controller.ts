@@ -199,8 +199,8 @@ export async function deleteFileOnServer(
             } else {
                 req.log.debug({ msg: `File at path ${file_path} deleted` });
             }
-            res.status(StatusCodes.FORBIDDEN).json({
-                error: "Requesting user is not authorized to create a file",
+            res.status(StatusCodes.ACCEPTED).json({
+                error: "Successfully deleted file",
             });
         })
         .catch((err) => {
