@@ -201,7 +201,8 @@ function generateEditableInventoryDiv(item) {
             if (item.quantity_total === -1) {
                 quantity.innerText = "Quantity: Low";
             } else if (item.quantity_total === -2) {
-                quantity.innerText = "Quantity: Medium";
+                // Used to be "Medium", but changed to "High" for consistency with the other values
+                quantity.innerText = "Quantity: High"; 
             } else if (item.quantity_total === -3) {
                 quantity.innerText = "Quantity: High";
             }

@@ -349,8 +349,8 @@ function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | 
                 quantity.innerText += "Low";
                 break;
             case -2:
-                quantity.classList.add("medium");
-                quantity.innerText += "Medium";
+                quantity.classList.add("high");
+                quantity.innerText += "High";
                 break;
             case -3:
                 quantity.classList.add("high");

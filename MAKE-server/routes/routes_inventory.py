@@ -128,6 +128,28 @@ async def route_update_inventory_item(request: Request):
         await collection.insert_one(item.dict())
     else:
         await collection.replace_one({"uuid": item.uuid}, item.dict())
+        # If this item changed from not being low to low, automatically submit a restock request
+        if check["quantity_total"] != -1 and item.quantity_total == -1:
+            item_text = "[[AUTOMATED RESTOCK]]\n"
+            item_text += f"Item: {item.name} |\n"
+            if item.reorder_url:
+                item_text += f"URL: {item.reorder_url}"
+            else:
+                item_text += (
+                    "NO REORDER URL FOUND, message Ambika to resolve the issue."
+                )
+            # Create a restock from this item
+            restock = RestockRequest(
+                uuid=str(uuid.uuid1()),
+                timestamp_sent=datetime.datetime.now().timestamp(),
+                reason="Out of Stock",
+                item=item_text,
+                quantity="?",
+                authorized_request=True,
+                user_uuid="4e7265de27e94e4abcd1c8fe9f3195be",  # test user
+            )
+            restock_collection = await db.get_collection("restock_requests")
+            await restock_collection.insert_one(restock.dict())
 
     # Return the inventory item
     return
@@ -165,7 +187,6 @@ async def route_delete_inventory_item(item_uuid: str, request: Request):
 
     # Return the inventory item
     return
-
 
 
 @inventory_router.get("/get_restock_requests")
