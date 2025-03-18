@@ -323,73 +323,46 @@ async def complete_automated_restock_request(db: MongoDB, item_uuid: str) -> Non
 async def route_complete_restock_request(request: Request):
     logging.getLogger().setLevel(logging.INFO)
     logging.info("Completing restock notice...")
-    # Get the restock collection
+    
     db = MongoDB()
     collection = await db.get_collection("restock_requests")
-
+    
     if "api-key" in request.headers:
-        # The request is authorized
-
-        # Get the API key
         api_key = request.headers["api-key"]
-
-        # Validate the API key
         if await validate_api_key(db, api_key, "inventory") is False:
-            # The API key is invalid
-            # Return error
             raise HTTPException(status_code=401, detail="Invalid API key")
-
+    
     body = await request.json()
-
-    # Get the restock request
-    restock = await collection.find_one({"uuid": body["uuid"]})
-
+ 
+    
+    # Retrieve the restock request by its uuid
+    restock = await collection.find_one({"uuid": request_uuid})
     if restock is None:
-        # The restock request does not exist
-        # Return error
         raise HTTPException(
             status_code=404, detail="Restock request does not exist")
     
+    # Check if the request has already been processed
     if restock["timestamp_completed"] is not None:
-        # The restock request has already been completed
-        # Return error
         raise HTTPException(
             status_code=400, detail="Restock request has already been completed")
-
-    restock["timestamp_completed"] = datetime.datetime.now().timestamp()
-    restock["completion_note"] = body["completion_note"]
-    restock["is_approved"] = body["is_approved"]
-
-    # Update the restock request
+    
+    # Get the action from the payload (e.g. "deny" or "ordered")
+    action = body.get("action")
+   
+    # Get an optional note (if any)
+    note = body.get("completion_note", "")
+    
+    if action == "deny":
+        # If denied, mark as completed with a note "denied"
+        restock["timestamp_completed"] = datetime.datetime.now().timestamp()
+        restock["is_approved"] = False
+    elif action == "ordered":
+        # If ordered, mark as ordered
+        restock["timestamp_ordered"] = datetime.datetime.now().timestamp()
+        restock["is_approved"] = True
+    restock["completion_note"] = note
+    
     await collection.replace_one({"uuid": restock["uuid"]}, restock)
-
-    # do not attempt to email for automated restocks
-    if restock["user_uuid"] == 'automatedrestock':
-        return 
-
-    # elif restock["user_uuid"] is not None:
-    if restock["user_uuid"] is not None:
-        # The restock request is from a user
-        # Get the users collection
-        users = await db.get_collection("users")
-
-        # Get the user
-        user = await users.find_one({"uuid": restock["user_uuid"]})
-
-        if user is None:
-            # The user does not exist
-            # Return error
-            raise HTTPException(
-                status_code=404, detail="User does not exist")
-
-        # Email the user
-        success_email = await email_user_restock_request_complete(restock, user)
-
-        if not success_email:
-            # The email failed to send
-            # Return error
-            raise HTTPException(
-                status_code=500, detail="Failed to send email")
-
-    return
+    
+    return 
 
