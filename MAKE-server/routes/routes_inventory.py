@@ -333,7 +333,7 @@ async def route_complete_restock_request(request: Request):
             raise HTTPException(status_code=401, detail="Invalid API key")
     
     body = await request.json()
- 
+    request_uuid = body.get("uuid")
     
     # Retrieve the restock request by its uuid
     restock = await collection.find_one({"uuid": request_uuid})
@@ -356,7 +356,7 @@ async def route_complete_restock_request(request: Request):
         # If denied, mark as completed with a note "denied"
         restock["timestamp_completed"] = datetime.datetime.now().timestamp()
         restock["is_approved"] = False
-    elif action == "ordered":
+    elif action == "order":
         # If ordered, mark as ordered
         restock["timestamp_ordered"] = datetime.datetime.now().timestamp()
         restock["is_approved"] = True

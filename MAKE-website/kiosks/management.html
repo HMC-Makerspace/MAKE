@@ -67,6 +67,7 @@
                 </span>
                 Workshops
             </button>
+    <!-- AMBA NOTE: the tab button to go the restocks page -->
             <button id="restock-requests-button" class="set-page" onclick="setPage('restock-requests')">
                 <span class="material-symbols-outlined">
                     inventory
@@ -269,10 +270,11 @@
             </div>
         </div>
 
+    <!-- AMBA NOTE: the beginning of the restock page -->
         <div class="main-content content-container hidden" id="page-restock-requests">
             <div class="content-header">
                 <p>
-                    View, approve, and deny restock requests. Requests from Stewards are in
+                    View, order, and deny restock requests. Requests from Stewards are in
                     <!-- Font size styling is to remove the gap between "bold orange" and the period -->
                     <span style="font-size: 0;">
                         <span style="
@@ -288,15 +290,22 @@
             <div class="content-body">
                 <h1>Pending Requests</h1>
                 <table id="pending-restock-requests-list">
+                </table>
+
+        <!-- AMBA NOTE: new! this is rendering find -->
+                <h1>Ordered Requests</h1>
+                <table id="ordered-restock-requests-list">
+        <!-- AMBA NOTE: The JavaScript function generateOrderedRestockRequestDivs() will insert rows here -->
 
                 </table>
 
                 <h1>Completed Requests</h1>
                 <table id="completed-restock-requests-list">
-
                 </table>
             </div>
         </div>
+
+        <!-- AMBA NOTE: the end of the relevant part --> 
 
         <div class="main-content content-container hidden" id="page-statistics">
             <div class="content-header">
@@ -683,6 +692,8 @@
                 </div>
             </div>
 
+              <!-- BEGINNING -->
+
             <div id="complete-restock-request" class="hidden">
                 <h1>Complete Restock Request</h1>
 
@@ -697,8 +708,8 @@
                 <textarea id="complete-restock-request-notes" placeholder="Notes..."></textarea>
 
                 <div class="edit-buttons">
-                    <button id="complete-restock-request-approve" class="big"
-                        onclick="completeRestockRequest()">Approve</button>
+                    <button id="complete-restock-request-order" class="big"
+                        onclick="completeRestockRequest()">Order</button>
                     <button id="complete-restock-request-deny" class="big"
                         onclick="completeRestockRequest()">Deny</button>
                 </div>
@@ -707,6 +718,8 @@
                     <button id="complete-restock-request-cancel" onclick="closePopup()">Cancel</button>
                 </div>
             </div>
+
+        <!-- END -->
 
             <div id="workshop-signups" class="hidden">
                 <h1>Workshop Signups</h1>

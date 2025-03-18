@@ -1928,17 +1928,35 @@ function generateCheckoutsByUserRoleChart(roleCounts) {
     charts.checkouts_by_user_role = checkouts_by_user_role;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// AMBA NOTE:updated, now includes ordered_requests section
+
+
 function renderRestockRequests() {
     const pending_requests = document.getElementById("pending-restock-requests-list");
+    const ordered_requests   = document.getElementById("ordered-restock-requests-list");  // ← ADD THIS LINE
     const completed_requests = document.getElementById("completed-restock-requests-list");
 
     removeAllChildren(pending_requests);
     appendChildren(pending_requests, generatePendingRestockRequestDivs());
 
+    // AMBA NOTE: Clear and populate Ordered Requests
+    removeAllChildren(ordered_requests);
+    appendChildren(ordered_requests, generateOrderedRestockRequestDivs()); // NEW, created this function 
+
+
     removeAllChildren(completed_requests);
     appendChildren(completed_requests, generateCompletedRestockRequestDivs());
 }
 
+// AMBA NOTE: i think no need to update
 function replaceLinksWithA(str, shorten = false) {
     let matches = str.match(/(https?:\/\/[^\s]+)/g);
 
@@ -1959,8 +1977,12 @@ function replaceLinksWithA(str, shorten = false) {
     return str;
 }
 
+// AMBA NOTE: updated, adjusted to have request.timestamp_ordered == null part 
 function generatePendingRestockRequestDivs() {
-    let pending = state.restock_requests.filter(request => request.timestamp_completed === null);
+    let pending = state.restock_requests.filter(request =>
+        request.timestamp_ordered === null && request.timestamp_completed === null
+    ); 
+    // adjusted above to have request.timestamp_ordered == null part 
     pending.reverse();
 
     let divs = [];
@@ -2037,6 +2059,7 @@ function generatePendingRestockRequestDivs() {
     return divs;
 }
 
+
 function showCompleteRestockRequest(uuid, requested_by_str) {
     let request = state.restock_requests.find(request => request.uuid === uuid);
 
@@ -2046,54 +2069,157 @@ function showCompleteRestockRequest(uuid, requested_by_str) {
     document.getElementById("complete-restock-request-quantity").innerText = "Quantity: " + request.quantity;
     document.getElementById("complete-restock-request-notes").value = "";
 
-    document.getElementById("complete-restock-request-approve").removeAttribute("disabled");
+    document.getElementById("complete-restock-request-order").removeAttribute("disabled");
     document.getElementById("complete-restock-request-deny").removeAttribute("disabled");
 
-    document.getElementById("complete-restock-request-approve").onclick = () => {
-        completeRestockRequest(uuid, true);
+    document.getElementById("complete-restock-request-order").onclick = () => {
+        completeRestockRequest(uuid, "order");
     };
 
     document.getElementById("complete-restock-request-deny").onclick = () => {
-        completeRestockRequest(uuid, false);
+        completeRestockRequest(uuid, "deny");
     };
 
     showPopup("complete-restock-request");
 }
 
-async function completeRestockRequest(uuid, is_approved) {
-    document.getElementById("complete-restock-request-approve").setAttribute("disabled", "disabled");
+async function completeRestockRequest(uuid, action) {
+    console.log("▶ completeRestockRequest called — UUID:", uuid, "action:", action);
+
+    document.getElementById("complete-restock-request-order").setAttribute("disabled", "disabled");
     document.getElementById("complete-restock-request-deny").setAttribute("disabled", "disabled");
 
     let completion_note = document.getElementById("complete-restock-request-notes").value;
 
     let request = {
         uuid: uuid,
-        is_approved: is_approved,
+        action: action,
         completion_note: completion_note,
     };
 
-    let response = await fetch(`${API}/inventory/complete_restock_request`,
-        {
+    console.log("sending request payload:", request);
+
+    try {
+        let response = await fetch(`${API}/inventory/complete_restock_request`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "api-key": api_key,
             },
             body: JSON.stringify(request),
+        });
+        console.log("Fetch response status:", response.status);
+
+        if (response.status === 201) {
+            await fetchRestockRequests();
+            renderRestockRequests();
+            closePopup();
+        } else {
+            const body = await response.json();
+            console.error("Error response:", body);
+            alert("Error completing restock request: " + response.status + "\n" + body.detail);
         }
-    );
-
-    if (response.status == 201) {
-        await fetchRestockRequests();
-        renderRestockRequests();
-
-        closePopup();
-    } else {
-        const body = await response.json();
-        alert("Error completing restock request: " + response.status + "\n" + body.detail);
+    } catch (error) {
+        console.error("Error in completeRestockRequest:", error);
+        alert("Error completing restock request: " + error.message);
     }
 }
 
+
+// AMBA NOTE: new
+function generateOrderedRestockRequestDivs() {
+    // Filter restock requests that are in the "ordered" state
+    let ordered = state.restock_requests.filter(request =>
+        request.timestamp_ordered !== null && request.timestamp_completed === null
+    );
+    // Reverse the array so that the newest ordered requests appear first
+    ordered.reverse();
+
+    let rows = [];
+
+    // Create header row for the Ordered Requests table
+    let header = document.createElement("tr");
+    header.innerHTML = `<th>Timestamp Ordered</th>
+                        <th>Requested By</th>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Reason</th>
+                        <th>Action</th>`;
+    rows.push(header);
+
+    // Loop over each ordered request and create a table row
+    for (let request of ordered) {
+        let row = document.createElement("tr");
+        row.classList.add("restock-request");
+
+        // Timestamp Ordered cell
+        let tsOrderedCell = document.createElement("td");
+        tsOrderedCell.classList.add("restock-request-timestamp_ordered");
+        // Format timestamp_ordered to a human-readable string.
+        tsOrderedCell.innerText = new Date(request.timestamp_ordered * 1000)
+            .toLocaleString().replace(/:\d{2} /, " ");
+        row.appendChild(tsOrderedCell);
+
+        // Requested By cell: Get user information if available
+        let requestedByCell = document.createElement("td");
+        requestedByCell.classList.add("restock-request-requested_by");
+        let requestedByText = "";
+        if (request.user_uuid) {
+            let user = state.users.find(u => u.uuid === request.user_uuid) || null;
+            if (user) {
+                requestedByText = user.name + " (" + user.email + ")";
+                if (user.role === "steward" || user.role === "head_steward") {
+                    requestedByCell.classList.add("restock-request-requested_by-steward");
+                }
+            }
+        } else {
+            requestedByText = "Checkout Computer";
+            requestedByCell.classList.add("restock-request-requested_by-steward");
+        }
+        requestedByCell.innerText = requestedByText;
+        row.appendChild(requestedByCell);
+
+        // Item cell: Display item description with link replacement if applicable.
+        let itemCell = document.createElement("td");
+        itemCell.classList.add("restock-request-item");
+        itemCell.innerHTML = replaceLinksWithA(request.item, true);
+        row.appendChild(itemCell);
+
+        // Quantity cell
+        let quantityCell = document.createElement("td");
+        quantityCell.classList.add("restock-request-quantity");
+        quantityCell.innerText = request.quantity;
+        row.appendChild(quantityCell);
+
+        // Reason cell
+        let reasonCell = document.createElement("td");
+        reasonCell.classList.add("restock-request-reason");
+        reasonCell.innerText = request.reason;
+        row.appendChild(reasonCell);
+
+        // Action cell: Provide a button to finalize the ordered request.
+        let actionCell = document.createElement("td");
+        actionCell.classList.add("restock-request-action");
+
+        let completeBtn = document.createElement("button");
+        // Using a checkmark icon to denote completion
+        completeBtn.innerHTML = "<span class='material-symbols-outlined'>done</span>";
+        completeBtn.title = "Complete";
+        completeBtn.onclick = () => {
+            // For ordered requests, pressing the complete button finalizes the request.
+            // Here, we call the popup function with actionType "complete"
+            showCompleteRestockRequest(request.uuid, requestedByText, "complete");
+        };
+        actionCell.appendChild(completeBtn);
+        row.appendChild(actionCell);
+
+        rows.push(row);
+    }
+
+    return rows;
+}
+
+// AMBA NOTE: i think no need to update
 function generateCompletedRestockRequestDivs() {
     let completed = state.restock_requests.filter(request => request.timestamp_completed !== null);
     completed.reverse();
@@ -2170,6 +2296,34 @@ function generateCompletedRestockRequestDivs() {
 
     return divs;
 }
+
+//     let response = await fetch(`${API}/inventory/complete_restock_request`,
+//         {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//                 "api-key": api_key,
+//             },
+//             body: JSON.stringify(request),
+//         }
+//     );
+
+//     if (response.status == 201) {
+//         await fetchRestockRequests();
+//         renderRestockRequests();
+
+//         closePopup();
+//     } else {
+//         const body = await response.json();
+//         alert("Error completing restock request: " + response.status + "\n" + body.detail);
+//     }
+// }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function renderWorkshopsAdmin() {
     const workshops = document.getElementById("workshops-list");
