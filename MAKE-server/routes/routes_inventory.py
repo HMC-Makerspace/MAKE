@@ -130,13 +130,14 @@ async def route_update_inventory_item(request: Request):
         await collection.replace_one({"uuid": item.uuid}, item.dict())
         # If this item changed from not being low to low, automatically submit a restock request
         if check["quantity_total"] != -1 and item.quantity_total == -1:
-            item_text = "[[AUTOMATED RESTOCK]]\n"
-            item_text += f"Item: {item.name} |\n"
+            item_text = ""
+            item_text += f"Item: {item.name} "
             if item.reorder_url:
-                item_text += f"URL: {item.reorder_url}"
+                item_text += f"|\n URL: {item.reorder_url}"
             else:
+                # can we get them to prompt them for a link here? 
                 item_text += (
-                    "NO REORDER URL FOUND, message Ambika to resolve the issue."
+                    ""
                 )
             # Create a restock from this item
             restock = RestockRequest(
@@ -146,10 +147,11 @@ async def route_update_inventory_item(request: Request):
                 item=item_text,
                 quantity="?",
                 authorized_request=True,
-                user_uuid="4e7265de27e94e4abcd1c8fe9f3195be",  # test user
+                user_uuid="automatedrestock",  # test user
             )
             restock_collection = await db.get_collection("restock_requests")
             await restock_collection.insert_one(restock.dict())
+        
 
     # Return the inventory item
     return
@@ -322,8 +324,11 @@ async def route_complete_restock_request(request: Request):
     # Update the restock request
     await collection.replace_one({"uuid": restock["uuid"]}, restock)
 
-    # Email the user
-    if restock["user_uuid"] is not None:
+    # do not attempt to email for automated restocks
+    if restock["user_uuid"] == 'automatedrestock':
+        return 
+
+    elif restock["user_uuid"] is not None:
         # The restock request is from a user
         # Get the users collection
         users = await db.get_collection("users")
@@ -338,9 +343,9 @@ async def route_complete_restock_request(request: Request):
                 status_code=404, detail="User does not exist")
 
         # Email the user
-        success = await email_user_restock_request_complete(restock, user)
+        success_email = await email_user_restock_request_complete(restock, user)
 
-        if not success:
+        if not success_email:
             # The email failed to send
             # Return error
             raise HTTPException(
