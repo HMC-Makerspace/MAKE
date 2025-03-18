@@ -271,8 +271,9 @@ class UserFile(BaseModel):
 
 """
 The restock_requests class is used to store information about the restock requests.
-The following fields are stored:
+The following fields are stored
 - uuid: The uuid of the restock request
+- item_uuid: the uuid of the item in inventory for automated restocks 
 - Items Requested: A list of the items requested
 - Requested By: The name of the user who requested the restock
 - Requested By Email: The email of the user who requested the restock
@@ -282,6 +283,7 @@ The following fields are stored:
 
 
 class RestockRequest(BaseModel):
+    item_uuid: Union[str, None] = None  # make this optional
     uuid: str
     item: str
     quantity: str

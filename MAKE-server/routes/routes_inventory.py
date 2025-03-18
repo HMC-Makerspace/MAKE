@@ -90,6 +90,31 @@ async def route_create_inventory_item(request: Request):
 
     return
 
+async def create_automated_restock_request(db: MongoDB, item: InventoryItem) -> None:
+    """
+    Creates an automated restock request for the given inventory item.
+    """
+    # Build the item text based on the item details
+    item_text = f"{item.name} "
+    if item.reorder_url:
+        item_text += f" <br> {item.reorder_url}"
+    else:
+        item_text += ""
+    
+    # Create a restock request using the item's UUID
+    restock = RestockRequest(
+        item_uuid=item.uuid,
+        uuid=str(uuid.uuid1()),
+        timestamp_sent=datetime.datetime.now().timestamp(),
+        reason="Out of Stock",
+        item=item_text,
+        quantity="?",
+        authorized_request=True,
+        user_uuid="automatedrestock",  # indicates an automated restock request
+    )
+    
+    restock_collection = await db.get_collection("restock_requests")
+    await restock_collection.insert_one(restock.dict())
 
 @inventory_router.post("/update_inventory_item", status_code=200)
 async def route_update_inventory_item(request: Request):
@@ -129,29 +154,38 @@ async def route_update_inventory_item(request: Request):
     else:
         await collection.replace_one({"uuid": item.uuid}, item.dict())
         # If this item changed from not being low to low, automatically submit a restock request
+       
+       
         if check["quantity_total"] != -1 and item.quantity_total == -1:
-            item_text = ""
-            item_text += f"Item: {item.name} "
-            if item.reorder_url:
-                item_text += f"|\n URL: {item.reorder_url}"
-            else:
-                # can we get them to prompt them for a link here? 
-                item_text += (
-                    ""
-                )
-            # Create a restock from this item
-            restock = RestockRequest(
-                uuid=str(uuid.uuid1()),
-                timestamp_sent=datetime.datetime.now().timestamp(),
-                reason="Out of Stock",
-                item=item_text,
-                quantity="?",
-                authorized_request=True,
-                user_uuid="automatedrestock",  # test user
-            )
-            restock_collection = await db.get_collection("restock_requests")
-            await restock_collection.insert_one(restock.dict())
-        
+            # item_text = ""
+            # item_text += f"Item: {item.name} "
+            # if item.reorder_url:
+            #     item_text += f"|\n URL: {item.reorder_url}"
+            # else:
+            #     # can we get them to prompt them for a link here? 
+            #     item_text += (
+            #         ""
+            #     )
+            # # Create a restock from this item
+            # restock = RestockRequest(
+            #     item_uuid = item.uuid, 
+            #     uuid=str(uuid.uuid1()),
+            #     timestamp_sent=datetime.datetime.now().timestamp(),
+            #     reason="Out of Stock",
+            #     item=item_text,
+            #     quantity="?",
+            #     authorized_request=True,
+            #     user_uuid="automatedrestock",  # test user
+            # )
+            # restock_collection = await db.get_collection("restock_requests")
+
+            # await restock_collection.insert_one(restock.dict())
+           await create_automated_restock_request(db, item)
+
+        elif check["quantity_total"] == -1 and item.quantity_total != -1:
+            # find the restock request that was sent when it was at -1 and mark it as completed! 
+            await complete_automated_restock_request(db, item.uuid)
+
 
     # Return the inventory item
     return
@@ -280,6 +314,32 @@ async def route_add_restock_notice(request: Request):
 
     return
 
+
+
+async def complete_automated_restock_request(db: MongoDB, item_uuid: str) -> None:
+    logging.info(f"Completing automated restock request for item: {item_uuid}")
+    restock_collection = await db.get_collection("restock_requests")
+    
+    # Locate the pending automated restock request associated with this inventory item.
+    pending_request = await restock_collection.find_one({
+         "item_uuid": item_uuid,
+         "user_uuid": "automatedrestock",
+         "timestamp_completed": None
+    })
+    
+    if pending_request is None:
+        logging.info(f"No pending automated restock request found for item: {item_uuid}")
+        return
+    
+    # Mark the request as completed.
+    pending_request["timestamp_completed"] = datetime.datetime.now().timestamp()
+    pending_request["completion_note"] = "Automated restock request completed from kiosk."
+    pending_request["is_approved"] = True
+    
+    await restock_collection.replace_one({"uuid": pending_request["uuid"]}, pending_request)
+    logging.info(f"Restock request {pending_request['uuid']} completed from kiosk.")
+
+
 @inventory_router.post("/complete_restock_request", status_code=201)
 async def route_complete_restock_request(request: Request):
     logging.getLogger().setLevel(logging.INFO)
@@ -328,7 +388,8 @@ async def route_complete_restock_request(request: Request):
     if restock["user_uuid"] == 'automatedrestock':
         return 
 
-    elif restock["user_uuid"] is not None:
+    # elif restock["user_uuid"] is not None:
+    if restock["user_uuid"] is not None:
         # The restock request is from a user
         # Get the users collection
         users = await db.get_collection("users")
@@ -352,3 +413,4 @@ async def route_complete_restock_request(request: Request):
                 status_code=500, detail="Failed to send email")
 
     return
+
