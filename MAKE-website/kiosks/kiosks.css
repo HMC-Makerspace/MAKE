@@ -1504,9 +1504,103 @@ WORKSHOPS
   max-width: 1000px;
 }
 
-#attendees-table, #redirects-table, #pending-restock-requests-list, #completed-restock-requests-list {
+/* ****************************************** INVENTORY RESTOCKS PAGE START ********************************************************************************************* */
+
+#page-restock-requests h1 {
+  margin: 16px auto 8px auto;
+  padding-bottom: 0;
+  border-bottom: none;
+  font-size: 1.5rem;
+  width: 90%;
   text-align: center;
 }
+
+#pending-restock-requests-list,
+#ordered-restock-requests-list,
+#completed-restock-requests-list {
+  margin-bottom: 48px;
+}
+
+/* ------------------ Pending ------------------ */
+.restock-request-pending.restock-request-header {
+  display: grid;
+  grid-template-columns: 6fr 6fr 6fr 8fr 4fr; 
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #2a2a2a;
+  font-weight: bold;
+}
+
+.restock-request-pending {
+  display: grid;
+  grid-template-columns: 6fr 6fr 6fr 8fr 4fr; 
+  gap: 12px;
+  padding: 12px 16px;
+  align-items: center;
+  border-bottom: 1px solid #444;
+  text-align: left;
+}
+
+.restock-request-pending .restock-request-quantity,
+.restock-request-pending .restock-request-complete {
+  text-align: center;
+}
+
+
+/* ------------------ Ordered ------------------ */
+.restock-request-ordered.restock-request-header {
+  display: grid;
+  grid-template-columns: 6fr 6fr 6fr 4fr 4fr 4fr;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #2a2a2a;
+  font-weight: bold;
+}
+
+.restock-request-ordered {
+  display: grid;
+  grid-template-columns: 6fr 6fr 6fr 4fr 4fr 4fr;
+  gap: 12px;
+  padding: 12px 16px;
+  align-items: center;
+  border-bottom: 1px solid #444;
+  text-align: left;
+}
+
+.restock-request-ordered .restock-request-quantity,
+.restock-request-ordered .restock-request-note,
+.restock-request-ordered .restock-request-complete {
+  text-align: center;
+}
+
+
+/* ------------------ Completed ------------------ */
+.restock-request-completed.restock-request-header {
+  display: grid;
+  grid-template-columns: 6fr 6fr 6fr 8fr 4fr; 
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #2a2a2a;
+  font-weight: bold;
+}
+
+.restock-request-completed {
+  display: grid;
+  grid-template-columns: 6fr 6fr 6fr 8fr 4fr; 
+  gap: 12px;
+  padding: 12px 16px;
+  align-items: center;
+  border-bottom: 1px solid #444;
+  text-align: left;
+}
+
+.restock-request-completed .restock-request-quantity,
+.restock-request-completed .restock-request-note {
+  text-align: center;
+}
+
+/* ***************************************** INVENTORY RESTOCKS PAGE END ********************************************************************************************** */
+
 
 /*
 

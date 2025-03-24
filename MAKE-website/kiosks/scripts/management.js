@@ -1937,32 +1937,24 @@ function generateCheckoutsByUserRoleChart(roleCounts) {
 
 
 // AMBA NOTE:updated, now includes ordered_requests section
-
-
 function renderRestockRequests() {
     const pending_requests = document.getElementById("pending-restock-requests-list");
-    const ordered_requests   = document.getElementById("ordered-restock-requests-list");  // ← ADD THIS LINE
+    const ordered_requests = document.getElementById("ordered-restock-requests-list");
     const completed_requests = document.getElementById("completed-restock-requests-list");
 
     removeAllChildren(pending_requests);
     appendChildren(pending_requests, generatePendingRestockRequestDivs());
 
-    // AMBA NOTE: Clear and populate Ordered Requests
     removeAllChildren(ordered_requests);
-    appendChildren(ordered_requests, generateOrderedRestockRequestDivs()); // NEW, created this function 
-
+    appendChildren(ordered_requests, generateOrderedRestockRequestDivs());
 
     removeAllChildren(completed_requests);
     appendChildren(completed_requests, generateCompletedRestockRequestDivs());
 }
 
-// AMBA NOTE: i think no need to update
 function replaceLinksWithA(str, shorten = false) {
     let matches = str.match(/(https?:\/\/[^\s]+)/g);
-
-    if (matches === null) {
-        return str;
-    }
+    if (matches === null) return str;
 
     for (let match of matches) {
         let a = document.createElement("a");
@@ -1970,101 +1962,16 @@ function replaceLinksWithA(str, shorten = false) {
         a.target = "_blank";
         const base_url = new URL(match).hostname;
         a.innerText = shorten ? base_url : match;
-
         str = str.replace(match, a.outerHTML);
     }
-
     return str;
 }
-
-// AMBA NOTE: updated, adjusted to have request.timestamp_ordered == null part 
-function generatePendingRestockRequestDivs() {
-    let pending = state.restock_requests.filter(request =>
-        request.timestamp_ordered === null && request.timestamp_completed === null
-    ); 
-    // adjusted above to have request.timestamp_ordered == null part 
-    pending.reverse();
-
-    let divs = [];
-
-    let header = document.createElement("tr");
-    header.innerHTML = `<th>Timestamp Requested</th><th>Requested By</th><th>Item</th><th>Quantity</th><th>Reason</th><th>Complete</th>`;
-    divs.push(header);
-
-
-    for (let request of pending) {
-        let div = document.createElement("tr");
-        div.classList.add("restock-request");
-
-        let timestamp_requested = document.createElement("td");
-        timestamp_requested.classList.add("restock-request-timestamp_requested");
-        timestamp_requested.innerText = new Date(request.timestamp_sent * 1000).toLocaleString();
-
-        // Remove the seconds from the timestamp, but preserve the AM/PM
-        timestamp_requested.innerText = timestamp_requested.innerText.replace(/:\d{2} /, " ");
-
-        div.appendChild(timestamp_requested);
-
-        let requested_by = document.createElement("td");
-        requested_by.classList.add("restock-request-requested_by");
-        let requested_by_str = "";
-
-        if (request.user_uuid) {
-            let user = state.users.find(user => user.uuid === request.user_uuid) ?? null;
-
-            if (user) {
-                requested_by_str = user.name + " (" + user.email + ")";
-                if (user.role === "steward" || user.role === "head_steward") {
-                    requested_by.classList.add("restock-request-requested_by-steward");
-                }
-            }
-        } else {
-            requested_by_str = "Checkout Computer";
-            requested_by.classList.add("restock-request-requested_by-steward");
-        }
-
-        requested_by.innerText = requested_by_str;
-        div.appendChild(requested_by);
-
-        let item = document.createElement("td");
-        item.classList.add("restock-request-item");
-        item.innerHTML = replaceLinksWithA(request.item, shorten = true);
-        div.appendChild(item);
-
-        let quantity = document.createElement("td");
-        quantity.classList.add("restock-request-quantity");
-        quantity.innerText = request.quantity;
-        div.appendChild(quantity);
-
-        let reason = document.createElement("td");
-        reason.classList.add("restock-request-reason");
-        reason.innerText = request.reason;
-        div.appendChild(reason);
-
-        let complete = document.createElement("td");
-        complete.classList.add("restock-request-complete");
-
-        let complete_button = document.createElement("button");
-        complete_button.innerHTML = "<span class='material-symbols-outlined'>done</span>";
-        complete_button.onclick = () => {
-            showCompleteRestockRequest(request.uuid, requested_by_str);
-        };
-
-        complete.appendChild(complete_button);
-        div.appendChild(complete);
-
-        divs.push(div);
-    }
-
-    return divs;
-}
-
 
 function showCompleteRestockRequest(uuid, requested_by_str) {
     let request = state.restock_requests.find(request => request.uuid === uuid);
 
     document.getElementById("complete-restock-request-user").innerText = requested_by_str;
-    document.getElementById("complete-restock-request-item").innerHTML = "Item: " + replaceLinksWithA(request.item, shorten = true);
+    document.getElementById("complete-restock-request-item").innerHTML = "Item: " + replaceLinksWithA(request.item, true);
     document.getElementById("complete-restock-request-reason").innerText = "Reason: " + request.reason;
     document.getElementById("complete-restock-request-quantity").innerText = "Quantity: " + request.quantity;
     document.getElementById("complete-restock-request-notes").value = "";
@@ -2084,8 +1991,6 @@ function showCompleteRestockRequest(uuid, requested_by_str) {
 }
 
 async function completeRestockRequest(uuid, action) {
-    console.log("▶ completeRestockRequest called — UUID:", uuid, "action:", action);
-
     document.getElementById("complete-restock-request-order").setAttribute("disabled", "disabled");
     document.getElementById("complete-restock-request-deny").setAttribute("disabled", "disabled");
 
@@ -2097,8 +2002,6 @@ async function completeRestockRequest(uuid, action) {
         completion_note: completion_note,
     };
 
-    console.log("sending request payload:", request);
-
     try {
         let response = await fetch(`${API}/inventory/complete_restock_request`, {
             method: "POST",
@@ -2108,7 +2011,6 @@ async function completeRestockRequest(uuid, action) {
             },
             body: JSON.stringify(request),
         });
-        console.log("Fetch response status:", response.status);
 
         if (response.status === 201) {
             await fetchRestockRequests();
@@ -2116,180 +2018,84 @@ async function completeRestockRequest(uuid, action) {
             closePopup();
         } else {
             const body = await response.json();
-            console.error("Error response:", body);
             alert("Error completing restock request: " + response.status + "\n" + body.detail);
         }
     } catch (error) {
-        console.error("Error in completeRestockRequest:", error);
         alert("Error completing restock request: " + error.message);
     }
 }
 
-
-// AMBA NOTE: new
-function generateOrderedRestockRequestDivs() {
-    // Filter restock requests that are in the "ordered" state
-    let ordered = state.restock_requests.filter(request =>
-        request.timestamp_ordered !== null && request.timestamp_completed === null
+function generatePendingRestockRequestDivs() {
+    let pending = state.restock_requests.filter(request =>
+        request.timestamp_ordered === null && request.timestamp_completed === null
     );
-    // Reverse the array so that the newest ordered requests appear first
-    ordered.reverse();
-
-    let rows = [];
-
-    // Create header row for the Ordered Requests table
-    let header = document.createElement("tr");
-    header.innerHTML = `<th>Timestamp Ordered</th>
-                        <th>Requested By</th>
-                        <th>Item</th>
-                        <th>Quantity</th>
-                        <th>Reason</th>
-                        <th>Action</th>`;
-    rows.push(header);
-
-    // Loop over each ordered request and create a table row
-    for (let request of ordered) {
-        let row = document.createElement("tr");
-        row.classList.add("restock-request");
-
-        // Timestamp Ordered cell
-        let tsOrderedCell = document.createElement("td");
-        tsOrderedCell.classList.add("restock-request-timestamp_ordered");
-        // Format timestamp_ordered to a human-readable string.
-        tsOrderedCell.innerText = new Date(request.timestamp_ordered * 1000)
-            .toLocaleString().replace(/:\d{2} /, " ");
-        row.appendChild(tsOrderedCell);
-
-        // Requested By cell: Get user information if available
-        let requestedByCell = document.createElement("td");
-        requestedByCell.classList.add("restock-request-requested_by");
-        let requestedByText = "";
-        if (request.user_uuid) {
-            let user = state.users.find(u => u.uuid === request.user_uuid) || null;
-            if (user) {
-                requestedByText = user.name + " (" + user.email + ")";
-                if (user.role === "steward" || user.role === "head_steward") {
-                    requestedByCell.classList.add("restock-request-requested_by-steward");
-                }
-            }
-        } else {
-            requestedByText = "Checkout Computer";
-            requestedByCell.classList.add("restock-request-requested_by-steward");
-        }
-        requestedByCell.innerText = requestedByText;
-        row.appendChild(requestedByCell);
-
-        // Item cell: Display item description with link replacement if applicable.
-        let itemCell = document.createElement("td");
-        itemCell.classList.add("restock-request-item");
-        itemCell.innerHTML = replaceLinksWithA(request.item, true);
-        row.appendChild(itemCell);
-
-        // Quantity cell
-        let quantityCell = document.createElement("td");
-        quantityCell.classList.add("restock-request-quantity");
-        quantityCell.innerText = request.quantity;
-        row.appendChild(quantityCell);
-
-        // Reason cell
-        let reasonCell = document.createElement("td");
-        reasonCell.classList.add("restock-request-reason");
-        reasonCell.innerText = request.reason;
-        row.appendChild(reasonCell);
-
-        // Action cell: Provide a button to finalize the ordered request.
-        let actionCell = document.createElement("td");
-        actionCell.classList.add("restock-request-action");
-
-        let completeBtn = document.createElement("button");
-        // Using a checkmark icon to denote completion
-        completeBtn.innerHTML = "<span class='material-symbols-outlined'>done</span>";
-        completeBtn.title = "Complete";
-        completeBtn.onclick = () => {
-            // For ordered requests, pressing the complete button finalizes the request.
-            // Here, we call the popup function with actionType "complete"
-            showCompleteRestockRequest(request.uuid, requestedByText, "complete");
-        };
-        actionCell.appendChild(completeBtn);
-        row.appendChild(actionCell);
-
-        rows.push(row);
-    }
-
-    return rows;
-}
-
-// AMBA NOTE: i think no need to update
-function generateCompletedRestockRequestDivs() {
-    let completed = state.restock_requests.filter(request => request.timestamp_completed !== null);
-    completed.reverse();
+    pending.reverse();
 
     let divs = [];
 
-    let header = document.createElement("tr");
-    header.innerHTML = `<th>Timestamp Requested</th><th>Requested By</th><th>Item</th><th>Quantity</th><th>Reason</th><th>Result</th><th>Timestamp Completed</th><th>Completion Note</th>`;
+    let header = document.createElement("div");
+    header.classList.add("restock-request-pending", "restock-request-header");
+    header.innerHTML = `
+        <div class="restock-request-timestamp_requested">Timestamp Requested</div>
+        <div class="restock-request-requested_by">Requested By</div>
+        <div class="restock-request-item">Item</div>
+        <div class="restock-request-quantity">Quantity</div>
+        <div class="restock-request-complete">Action</div>
+    `;
     divs.push(header);
 
-    for (let request of completed) {
-        let div = document.createElement("tr");
-        div.classList.add("restock-request");
+    for (let request of pending) {
+        let div = document.createElement("div");
+        div.classList.add("restock-request", "restock-request-pending");
 
-        let timestamp_requested = document.createElement("td");
+        let timestamp_requested = document.createElement("div");
         timestamp_requested.classList.add("restock-request-timestamp_requested");
-        timestamp_requested.innerText = new Date(request.timestamp_sent * 1000).toLocaleString();
-
-        // Remove the seconds from the timestamp, but preserve the AM/PM
-        timestamp_requested.innerText = timestamp_requested.innerText.replace(/:\d{2} /, " ");
-
+        timestamp_requested.innerText = new Date(request.timestamp_sent * 1000).toLocaleString().replace(/:\d{2} /, " ");
         div.appendChild(timestamp_requested);
 
-        let requested_by = document.createElement("td");
+        let requested_by = document.createElement("div");
         requested_by.classList.add("restock-request-requested_by");
-        if (request.user_uuid) {
+        let requested_by_str = "";
+        
+        if (request.user_uuid === "automatedrestock") {
+            requested_by_str = "Automated Restock";
+        } else if (request.user_uuid) {
             let user = state.users.find(user => user.uuid === request.user_uuid) ?? null;
-
             if (user) {
-                requested_by.innerText = user.name + " (" + user.email + ")";
-                if (user.role === "steward" || user.role === "head_steward") {
+                requested_by_str = user.name;
+                if (["steward", "head_steward"].includes(user.role)) {
                     requested_by.classList.add("restock-request-requested_by-steward");
                 }
             }
         } else {
-            requested_by.innerText = "Checkout Computer";
+            requested_by_str = "Checkout Computer";
             requested_by.classList.add("restock-request-requested_by-steward");
         }
+        
+        requested_by.innerText = requested_by_str;
         div.appendChild(requested_by);
 
-        let item = document.createElement("td");
+        let item = document.createElement("div");
         item.classList.add("restock-request-item");
-        item.innerHTML = replaceLinksWithA(request.item, shorten = true);
+        let itemText = replaceLinksWithA(request.item, true);
+        if (request.reason && request.reason.toLowerCase() !== "out of stock") {
+            itemText += `<br><em>${request.reason}</em>`;
+        }
+        item.innerHTML = itemText;
         div.appendChild(item);
 
-        let quantity = document.createElement("td");
+        let quantity = document.createElement("div");
         quantity.classList.add("restock-request-quantity");
         quantity.innerText = request.quantity;
         div.appendChild(quantity);
 
-        let reason = document.createElement("td");
-        reason.classList.add("restock-request-reason");
-        reason.innerText = request.reason;
-        div.appendChild(reason);
-
-        let is_approved = document.createElement("td");
-        is_approved.classList.add("restock-request-is_approved");
-        is_approved.classList.add(request.is_approved ? "approved" : "denied");
-        is_approved.innerText = request.is_approved ? "Approved" : "Denied";
-        div.appendChild(is_approved);
-
-        let timestamp_completed = document.createElement("td");
-        timestamp_completed.classList.add("restock-request-timestamp_completed");
-        timestamp_completed.innerText = new Date(request.timestamp_completed * 1000).toLocaleString();
-        div.appendChild(timestamp_completed);
-
-        let completion_note = document.createElement("td");
-        completion_note.classList.add("restock-request-completion_note");
-        completion_note.innerText = request.completion_note;
-        div.appendChild(completion_note);
+        let complete = document.createElement("div");
+        complete.classList.add("restock-request-complete");
+        let complete_button = document.createElement("button");
+        complete_button.innerHTML = "<span class='material-symbols-outlined'>done</span>";
+        complete_button.onclick = () => showCompleteRestockRequest(request.uuid, requested_by_str);
+        complete.appendChild(complete_button);
+        div.appendChild(complete);
 
         divs.push(div);
     }
@@ -2297,27 +2103,165 @@ function generateCompletedRestockRequestDivs() {
     return divs;
 }
 
-//     let response = await fetch(`${API}/inventory/complete_restock_request`,
-//         {
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json",
-//                 "api-key": api_key,
-//             },
-//             body: JSON.stringify(request),
-//         }
-//     );
+function generateOrderedRestockRequestDivs() {
+    // var state defined first thing at the top of this doc, contains restock_requests inside it 
+    let ordered = state.restock_requests.filter(request =>
+        request.timestamp_ordered !== null && request.timestamp_completed === null
+    );
+    ordered.reverse();
 
-//     if (response.status == 201) {
-//         await fetchRestockRequests();
-//         renderRestockRequests();
+    let divs = [];
 
-//         closePopup();
-//     } else {
-//         const body = await response.json();
-//         alert("Error completing restock request: " + response.status + "\n" + body.detail);
-//     }
-// }
+    let header = document.createElement("div");
+    header.classList.add("restock-request-ordered", "restock-request-header");
+    header.innerHTML = `
+        <div class="restock-request-timestamp_ordered">Timestamp Ordered</div>
+        <div class="restock-request-requested_by">Requested By</div>
+        <div class="restock-request-item">Item</div>
+        <div class="restock-request-quantity">Quantity</div>
+        <div class="restock-request-note">Note</div>
+        <div class="restock-request-complete">Action</div>
+    `;
+    divs.push(header);
+
+    for (let request of ordered) {
+        let div = document.createElement("div");
+        div.classList.add("restock-request", "restock-request-ordered");
+
+        let timestamp = document.createElement("div");
+        timestamp.classList.add("restock-request-timestamp_ordered");
+        timestamp.innerText = new Date(request.timestamp_ordered * 1000).toLocaleString().replace(/:\d{2} /, " ");
+        div.appendChild(timestamp);
+
+        let requested_by = document.createElement("div");
+        requested_by.classList.add("restock-request-requested_by");
+        let requested_by_str = "";
+        
+        if (request.user_uuid === "automatedrestock") {
+            requested_by_str = "Automated Restock";
+        } else if (request.user_uuid) {
+            let user = state.users.find(user => user.uuid === request.user_uuid) ?? null;
+            if (user) {
+                requested_by_str = user.name;
+                if (["steward", "head_steward"].includes(user.role)) {
+                    requested_by.classList.add("restock-request-requested_by-steward");
+                }
+            }
+        } else {
+            requested_by_str = "Checkout Computer";
+            requested_by.classList.add("restock-request-requested_by-steward");
+        }
+        
+        requested_by.innerText = requested_by_str;
+        div.appendChild(requested_by);
+
+        let item = document.createElement("div");
+        item.classList.add("restock-request-item");
+        let itemText = replaceLinksWithA(request.item, true);
+        if (request.reason && request.reason.toLowerCase() !== "out of stock") {
+            itemText += `<br><em>${request.reason}</em>`;
+        }
+        item.innerHTML = itemText;
+        div.appendChild(item);
+
+        let quantity = document.createElement("div");
+        quantity.classList.add("restock-request-quantity");
+        quantity.innerText = request.quantity;
+        div.appendChild(quantity);
+
+        let note = document.createElement("div");
+        note.classList.add("restock-request-note");
+        note.innerText = request.completion_note || "";
+        div.appendChild(note);
+
+        let complete = document.createElement("div");
+        complete.classList.add("restock-request-complete");
+        let completeBtn = document.createElement("button");
+        completeBtn.innerHTML = "<span class='material-symbols-outlined'>done</span>";
+        completeBtn.onclick = async () => {
+            await completeRestockRequest(request.uuid, "complete");  // a new `"complete"` action we’ll handle below
+        };        complete.appendChild(completeBtn);
+        div.appendChild(complete);
+
+        divs.push(div);
+    }
+
+    return divs;
+}
+
+function generateCompletedRestockRequestDivs() {
+    let completed = state.restock_requests.filter(request => request.timestamp_completed !== null);
+    completed.reverse();
+
+    let divs = [];
+
+    let header = document.createElement("div");
+    header.classList.add("restock-request-completed", "restock-request-header");
+    header.innerHTML = `
+        <div class="restock-request-timestamp_completed">Timestamp Completed</div>
+        <div class="restock-request-requested_by">Requested By</div>
+        <div class="restock-request-item">Item</div>
+        <div class="restock-request-quantity">Quantity</div>
+        <div class="restock-request-note">Note</div>
+    `;
+    divs.push(header);
+
+    for (let request of completed) {
+        let div = document.createElement("div");
+        div.classList.add("restock-request", "restock-request-completed");
+
+        let timestamp_completed = document.createElement("div");
+        timestamp_completed.classList.add("restock-request-timestamp_completed");
+        timestamp_completed.innerText = new Date(request.timestamp_completed * 1000).toLocaleString().replace(/:\d{2} /, " ");
+        div.appendChild(timestamp_completed);
+
+        let requested_by = document.createElement("div");
+        requested_by.classList.add("restock-request-requested_by");
+        let requested_by_str = "";
+        
+        if (request.user_uuid === "automatedrestock") {
+            requested_by_str = "Automated Restock";
+        } else if (request.user_uuid) {
+            let user = state.users.find(user => user.uuid === request.user_uuid) ?? null;
+            if (user) {
+                requested_by_str = user.name;
+                if (["steward", "head_steward"].includes(user.role)) {
+                    requested_by.classList.add("restock-request-requested_by-steward");
+                }
+            }
+        } else {
+            requested_by_str = "Checkout Computer";
+            requested_by.classList.add("restock-request-requested_by-steward");
+        }
+        
+        requested_by.innerText = requested_by_str;
+        div.appendChild(requested_by);
+
+        let item = document.createElement("div");
+        item.classList.add("restock-request-item");
+        let itemText = replaceLinksWithA(request.item, true);
+        if (request.reason && request.reason.toLowerCase() !== "out of stock") {
+            itemText += `<br><em>${request.reason}</em>`;
+        }
+        item.innerHTML = itemText;
+        div.appendChild(item);
+
+        let quantity = document.createElement("div");
+        quantity.classList.add("restock-request-quantity");
+        quantity.innerText = request.quantity;
+        div.appendChild(quantity);
+
+        let note = document.createElement("div");
+        note.classList.add("restock-request-note");
+        let statusText = request.is_approved === true ? "Approved." : request.is_approved === false ? "Denied." : "";
+        note.innerText = statusText + (request.completion_note ? ` ${request.completion_note}` : "");
+        div.appendChild(note);
+
+        divs.push(div);
+    }
+
+    return divs;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

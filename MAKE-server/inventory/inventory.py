@@ -57,92 +57,92 @@ async def update_inventory_from_checkouts():
     logging.info("Updated inventory from checkouts")
 
 
-async def update_from_gsheet():
-    # Update the mongodb database from the google sheet
-    logging.getLogger().setLevel(logging.INFO)
-    logging.info("Updating database from google sheet...")
+# async def update_from_gsheet():
+#     # Update the mongodb database from the google sheet
+#     logging.getLogger().setLevel(logging.INFO)
+#     logging.info("Updating database from google sheet...")
 
-    # Scrape the google sheet
-    async with aiohttp.ClientSession() as session:
-        async with session.get(SHEET_URL) as resp:
-            text = await resp.text()
+#     # Scrape the google sheet
+#     async with aiohttp.ClientSession() as session:
+#         async with session.get(SHEET_URL) as resp:
+#             text = await resp.text()
 
-    # Parse the csv
-    csv_reader = csv.reader(text.splitlines(), delimiter=",")
-    rows = list(csv_reader)
+#     # Parse the csv
+#     csv_reader = csv.reader(text.splitlines(), delimiter=",")
+#     rows = list(csv_reader)
 
-    # Drop the first row
-    rows = rows[1:]
+#     # Drop the first row
+#     rows = rows[1:]
 
-    # Get the inventory collection
-    db = MongoDB()
-    collection = await db.get_collection("inventory")
-    all_inventory = await collection.find().to_list(None)
+#     # Get the inventory collection
+#     db = MongoDB()
+#     collection = await db.get_collection("inventory")
+#     all_inventory = await collection.find().to_list(None)
 
-    """
-    class InventoryItem(BaseModel):
-        _id: Optional[PyObjectId] = Field(alias="_id")
-        uuid: str
-        name: str
-        role: Union[str, None]
-        # Quantity can be a number or a string
-        quantity: Union[str, None]
-        in_overstock: bool
-        is_numbered: bool
-        location_room: Union[str, None]
-        location_specific: Union[str, None]
-        reorder_url: Union[str, None]
-        specific_name: Union[str, None]
-        serial_number: Union[str, None]
-        brand: Union[str, None]
-        model_number: Union[str, None]
-        qr_code: Union[str, None]
-        kit_ref: Union[str, None]
-        kit_contents: Union[List[str], None]
-    """
+#     """
+#     class InventoryItem(BaseModel):
+#         _id: Optional[PyObjectId] = Field(alias="_id")
+#         uuid: str
+#         name: str
+#         role: Union[str, None]
+#         # Quantity can be a number or a string
+#         quantity: Union[str, None]
+#         in_overstock: bool
+#         is_numbered: bool
+#         location_room: Union[str, None]
+#         location_specific: Union[str, None]
+#         reorder_url: Union[str, None]
+#         specific_name: Union[str, None]
+#         serial_number: Union[str, None]
+#         brand: Union[str, None]
+#         model_number: Union[str, None]
+#         qr_code: Union[str, None]
+#         kit_ref: Union[str, None]
+#         kit_contents: Union[List[str], None]
+#     """
 
-    # Go through the collection and match to a row in the csv by name
-    # If the item is not found, create it
-    # If the item is found, update it
-    # If no item matches, log a warning
-    num_items_created = 0
-    num_items_updated = 0
+#     # Go through the collection and match to a row in the csv by name
+#     # If the item is not found, create it
+#     # If the item is found, update it
+#     # If no item matches, log a warning
+#     num_items_created = 0
+#     num_items_updated = 0
 
-    for row in rows:
+#     for row in rows:
 
-        if row[0].strip() == "":
-            # Skip blank rows
-            continue
+#         if row[0].strip() == "":
+#             # Skip blank rows
+#             continue
 
-        # Find the item in the csv
-        found = False
-        for item in all_inventory:
-            if row[0] == item["name"]:
-                found = True
+#         # Find the item in the csv
+#         found = False
+#         for item in all_inventory:
+#             if row[0] == item["name"]:
+#                 found = True
 
-                new_item = await item_from_row(row, uuid=item["uuid"])
+#                 new_item = await item_from_row(row, uuid=item["uuid"])
 
-                # Update the item
-                await collection.update_one({"uuid": item["uuid"]}, {"$set": new_item})
+#                 # Update the item
+#                 await collection.update_one({"uuid": item["uuid"]}, {"$set": new_item})
 
-                # Increment the number of items updated
-                num_items_updated += 1
+#                 # Increment the number of items updated
+#                 num_items_updated += 1
 
-                # Break out of the loop
-                break
+#                 # Break out of the loop
+#                 break
 
-        if not found:
-            # Create a new item
-            new_item = await item_from_row(row)
+#         if not found:
+#             # Create a new item
+#             new_item = await item_from_row(row)
 
-            # Insert the new item
-            await collection.insert_one(new_item)
+#             # Insert the new item
+#             await collection.insert_one(new_item)
 
-            # Increment the number of items created
-            num_items_created += 1
+#             # Increment the number of items created
+#             num_items_created += 1
 
-    logging.info(f"Updated {num_items_updated} items")
-    logging.info(f"Created {num_items_created} items")
+#     logging.info(f"Updated {num_items_updated} items")
+#     logging.info(f"Created {num_items_created} items")
 
 
 async def item_from_row(row: List[str], uuid=None) -> dict:
