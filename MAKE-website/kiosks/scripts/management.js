@@ -2062,7 +2062,7 @@ function generatePendingRestockRequestDivs() {
         } else if (request.user_uuid) {
             let user = state.users.find(user => user.uuid === request.user_uuid) ?? null;
             if (user) {
-                requested_by_str = user.name;
+                requested_by_str = user.name + " (" + user.email + ")";
                 if (["steward", "head_steward"].includes(user.role)) {
                     requested_by.classList.add("restock-request-requested_by-steward");
                 }
@@ -2142,7 +2142,7 @@ function generateOrderedRestockRequestDivs() {
         } else if (request.user_uuid) {
             let user = state.users.find(user => user.uuid === request.user_uuid) ?? null;
             if (user) {
-                requested_by_str = user.name;
+                requested_by_str = user.name + " (" + user.email + ")";
                 if (["steward", "head_steward"].includes(user.role)) {
                     requested_by.classList.add("restock-request-requested_by-steward");
                 }
@@ -2224,7 +2224,7 @@ function generateCompletedRestockRequestDivs() {
         } else if (request.user_uuid) {
             let user = state.users.find(user => user.uuid === request.user_uuid) ?? null;
             if (user) {
-                requested_by_str = user.name;
+                requested_by_str = user.name + " (" + user.email + ")";
                 if (["steward", "head_steward"].includes(user.role)) {
                     requested_by.classList.add("restock-request-requested_by-steward");
                 }
