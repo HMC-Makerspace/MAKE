@@ -435,7 +435,6 @@ function editInventoryItem(uuid, create_item=false) {
     locations.innerHTML += `<div id="button-container"><button class="big" onclick="addLocationEditor()">Add Location</button></div>`;
 
 
-    // --- 👇 ADD THIS BLOCK to hook up the buttons ---
     const highBtn = document.getElementById("btn-high");
     const lowBtn = document.getElementById("btn-low");
     const quantityInput = document.getElementById("edit-quantity_total");
@@ -452,8 +451,6 @@ function editInventoryItem(uuid, create_item=false) {
         };
     }
 
-
-
     const inputs = container.querySelectorAll("input, select");
 
     for (let input of inputs) {
@@ -462,31 +459,31 @@ function editInventoryItem(uuid, create_item=false) {
         }
     }
 
-    // // Remove any existing banner first
-    // let oldBanner = document.getElementById("restock-banner");
-    // if (oldBanner) oldBanner.remove();
+    // Remove any existing banner first
+    let oldBanner = document.getElementById("restock-banner");
+    if (oldBanner) oldBanner.remove();
 
-    // // Check for pending restock request
-    // const hasPendingRestock = state.restock_requests?.some(req =>
-    //     req.item_uuid === uuid && req.timestamp_completed === null
-    // );
+    // Check for pending restock request
+    const hasPendingRestock = state.restock_requests?.some(req =>
+        req.item_uuid === uuid && req.timestamp_completed === null
+    );
 
-    // if (hasPendingRestock) {
-    //     const banner = document.createElement("div");
-    //     banner.id = "restock-banner";
-    //     banner.innerText = "Restock Request Submitted";
-    //     banner.style.backgroundColor = "#b63a3a";
-    //     banner.style.color = "white";
-    //     banner.style.padding = "10px 16px";
-    //     banner.style.fontWeight = "bold";
-    //     banner.style.textAlign = "center";
-    //     banner.style.marginBottom = "8px";
-    //     banner.style.marginLeft = "160px"; 
-    //     banner.style.borderRadius = "6px";
+    if (hasPendingRestock) {
+        const banner = document.createElement("div");
+        banner.id = "restock-banner";
+        banner.innerText = "Restock Request Submitted";
+        banner.style.backgroundColor = "#b63a3a";
+        banner.style.color = "white";
+        banner.style.padding = "10px 16px";
+        banner.style.fontWeight = "bold";
+        banner.style.textAlign = "center";
+        banner.style.marginBottom = "8px";
+        banner.style.marginLeft = "160px"; 
+        banner.style.borderRadius = "6px";
     
-    //     const container = document.getElementById("edit-inventory-item");
-    //     container.prepend(banner);
-    // }
+        const container = document.getElementById("edit-inventory-item");
+        container.prepend(banner);
+    }
 
 }
     
