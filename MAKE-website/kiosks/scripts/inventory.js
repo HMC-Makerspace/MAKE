@@ -78,15 +78,20 @@ async function authenticate() {
         window.location.href = "/";
     }
 
+    // TODO: Ask wil
+
     await fetchCertifications();
+    await fetchRestockRequests();
+    await fetchEditableInventory();
+
+    submitEditableSearch();
+
+    document.getElementById("edit-inventory-search-input").addEventListener("keyup", submitEditableSearch);
+    document.getElementById("container-input").addEventListener("keyup", submitEditableSearch);
+    document.getElementById("room-select").addEventListener("change", submitEditableSearch);
+    document.getElementById("tool-material-select").addEventListener("change", submitEditableSearch);
     
-    fetchEditableInventory().then(() => {
-        submitEditableSearch();
-        document.getElementById("edit-inventory-search-input").addEventListener("keyup", submitEditableSearch);
-        document.getElementById("container-input").addEventListener("keyup", submitEditableSearch);
-        document.getElementById("room-select").addEventListener("change", submitEditableSearch);
-        document.getElementById("tool-material-select").addEventListener("change", submitEditableSearch);
-    });
+
 
     // Register esc to close popup
     document.addEventListener("keyup", (e) => {
@@ -95,6 +100,22 @@ async function authenticate() {
         }
     });
 }
+
+async function fetchRestockRequests() {
+    const response = await fetch(`${API}/inventory/get_restock_requests`, {
+        headers: {
+            "Content-Type": "application/json",
+            "api-key": api_key,
+        }
+    });
+
+    if (response.status === 200) {
+        state.restock_requests = await response.json();
+    } else {
+        console.error("Failed to fetch restock requests");
+    }
+}
+
 
 authenticate();
 
@@ -167,9 +188,11 @@ function generateEditableInventoryDiv(item) {
     }
     */
 
+
     const div = document.createElement("div");
     div.classList.add("edit-inventory-item");
     div.id = `edit-inventory-item-${item.uuid}`;
+
     div.addEventListener("click", () => {
         highlightEditableInventoryItem(item.uuid);
         editInventoryItem(item.uuid);
@@ -271,6 +294,14 @@ function generateEditableInventoryDiv(item) {
     });
     div.appendChild(delete_button);
 
+    const hasPendingRestock = state.restock_requests?.some(req =>
+        req.item_uuid === item.uuid && req.timestamp_completed === null
+    );
+    
+    if (hasPendingRestock) {
+        div.classList.add("restock-pending");
+    }
+
     return div;
 }
 
@@ -314,8 +345,6 @@ function createInventoryItem() {
 }
 
 function editInventoryItem(uuid, create_item=false) {
-    const item = state.inventory.find((item) => item.uuid == uuid) ?? EMPTY_ITEM;
-    item.uuid = uuid;
     /*
     class InventoryItem(BaseModel):
     _id: Optional[PyObjectId] = Field(alias="_id")
@@ -364,13 +393,15 @@ function editInventoryItem(uuid, create_item=false) {
     certifications: Union[List[str], None] = None
     */
 
+    const item = state.inventory.find((item) => item.uuid == uuid) ?? EMPTY_ITEM;
+    item.uuid = uuid;
+
     const container = document.getElementById("edit-inventory-item");
     container.classList.remove("hidden");
     
     const attributes = ["uuid", "name", "long_name", "role", "access_type", "quantity_total", "reorder_url", "serial_number", "kit_contents", "keywords"];
     for (let attr of attributes) {
         const input = document.getElementById(`edit-${attr}`);
-
         if (input) {
             input.value = item[attr] ?? "";
         }
@@ -381,7 +412,7 @@ function editInventoryItem(uuid, create_item=false) {
 
     for (let cert of state.certifications) {
         const div = document.createElement("div");
-        div.classList.add("edit-proficiency-container")
+        div.classList.add("edit-proficiency-container");
         const label = document.createElement("label");
         label.innerText = cert.name;
 
@@ -392,11 +423,10 @@ function editInventoryItem(uuid, create_item=false) {
 
         div.appendChild(checkbox);
         div.appendChild(label);
-
         certifications.appendChild(div);
     }
 
-    const locations = container.querySelector(".locations")
+    const locations = container.querySelector(".locations");
     locations.innerHTML = "";
     for (let i = 0; i < item.locations.length; i++) {
         const loc_div = createLocationEditor(item.locations[i], i);
@@ -404,15 +434,62 @@ function editInventoryItem(uuid, create_item=false) {
     }
     locations.innerHTML += `<div id="button-container"><button class="big" onclick="addLocationEditor()">Add Location</button></div>`;
 
-    // Add event listeners to all inputs and selects
+
+    // --- 👇 ADD THIS BLOCK to hook up the buttons ---
+    const highBtn = document.getElementById("btn-high");
+    const lowBtn = document.getElementById("btn-low");
+    const quantityInput = document.getElementById("edit-quantity_total");
+
+    if (highBtn && lowBtn && quantityInput) {
+        highBtn.onclick = () => {
+            quantityInput.value = -3;
+            quantityInput.dispatchEvent(new Event("change", { bubbles: true }));
+        };
+    
+        lowBtn.onclick = () => {
+            quantityInput.value = -1;
+            quantityInput.dispatchEvent(new Event("change", { bubbles: true }));
+        };
+    }
+
+
+
     const inputs = container.querySelectorAll("input, select");
+
     for (let input of inputs) {
         input.onchange = (e) => {
             changeEventListener(e, item.uuid);
         }
     }
-}
 
+    // // Remove any existing banner first
+    // let oldBanner = document.getElementById("restock-banner");
+    // if (oldBanner) oldBanner.remove();
+
+    // // Check for pending restock request
+    // const hasPendingRestock = state.restock_requests?.some(req =>
+    //     req.item_uuid === uuid && req.timestamp_completed === null
+    // );
+
+    // if (hasPendingRestock) {
+    //     const banner = document.createElement("div");
+    //     banner.id = "restock-banner";
+    //     banner.innerText = "Restock Request Submitted";
+    //     banner.style.backgroundColor = "#b63a3a";
+    //     banner.style.color = "white";
+    //     banner.style.padding = "10px 16px";
+    //     banner.style.fontWeight = "bold";
+    //     banner.style.textAlign = "center";
+    //     banner.style.marginBottom = "8px";
+    //     banner.style.marginLeft = "160px"; 
+    //     banner.style.borderRadius = "6px";
+    
+    //     const container = document.getElementById("edit-inventory-item");
+    //     container.prepend(banner);
+    // }
+
+}
+    
 function changeEventListener(event, item_uuid) {
     let input = document.getElementById(event.target.id);
     // If it's required and empty, return
@@ -563,9 +640,36 @@ async function saveInventoryItem(uuid) {
         container.classList.remove("saved");
     }
 
-    fetchEditableInventory().then(() => {
-        submitEditableSearch();
-    });
+    await fetchRestockRequests();
+    await fetchEditableInventory();
+
+    // Remove any existing banner first
+    let oldBanner = document.getElementById("restock-banner");
+    if (oldBanner) oldBanner.remove();
+
+    // Check for pending restock request
+    const hasPendingRestock = state.restock_requests?.some(req =>
+        req.item_uuid === uuid && req.timestamp_completed === null
+    );
+
+    if (hasPendingRestock) {
+        const banner = document.createElement("div");
+        banner.id = "restock-banner";
+        banner.innerText = "Restock Request Submitted";
+        banner.style.backgroundColor = "#b63a3a";
+        banner.style.color = "white";
+        banner.style.padding = "10px 16px";
+        banner.style.fontWeight = "bold";
+        banner.style.textAlign = "center";
+        banner.style.marginBottom = "8px";
+        banner.style.marginLeft = "160px"; 
+        banner.style.borderRadius = "6px";
+    
+        const container = document.getElementById("edit-inventory-item");
+        container.prepend(banner);
+    }
+    
+    submitEditableSearch();
 }
 
 
@@ -618,3 +722,4 @@ function createLocationEditor(loc, index) {
 
     return div;
 }
+

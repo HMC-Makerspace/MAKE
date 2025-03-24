@@ -200,6 +200,8 @@ CHECKOUT
   font-weight: bold;
 }
 
+
+
 #printers-current.small > * {
   width: 100px;
   height: 110px;
@@ -1188,6 +1190,10 @@ INVENTORY
   background-color: var(--theme-color-2);
   width: calc(100% - 40px);
   padding: 10px;
+}
+
+.restock-pending {
+  border: 2px solid red;
 }
 
 .edit-inventory-item:nth-child(even) {

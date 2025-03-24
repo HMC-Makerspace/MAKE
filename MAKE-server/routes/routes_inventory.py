@@ -185,6 +185,7 @@ async def create_automated_restock_request(db: MongoDB, item: InventoryItem) -> 
         item_text += f" <br> {item.reorder_url}"
     else:
         item_text += ""
+        # TODO: prompt user at kiosk to add a link!! 
     
     # Create a restock request using the item's UUID
     restock = RestockRequest(
@@ -311,9 +312,10 @@ async def complete_automated_restock_request(db: MongoDB, item_uuid: str) -> Non
 
     # Mark the request as completed.
     pending_request["timestamp_completed"] = datetime.datetime.now().timestamp()
-    pending_request["completion_note"] = "\n Completed from kiosk."
+        # Append kiosk note to existing one (if any)
+    combined_note = (pending_request.get("completion_note") or "") + "\nCompleted from kiosk."
+    pending_request["completion_note"] = combined_note
     pending_request["is_approved"] = True
-    
     await restock_collection.replace_one({"uuid": pending_request["uuid"]}, pending_request)
     logging.info(f"Restock request {pending_request['uuid']} Completed from kiosk.")
 
@@ -350,7 +352,7 @@ async def route_complete_restock_request(request: Request):
    
     # Get an optional note (if any)
     note = body.get("completion_note", "")
-    restock["completion_note"] = note
+    restock["completion_note"] = ("\n" + note)
     
     if action == "deny":
         # If denied, mark as completed with a note "denied"
