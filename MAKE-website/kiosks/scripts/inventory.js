@@ -294,12 +294,26 @@ function generateEditableInventoryDiv(item) {
     });
     div.appendChild(delete_button);
 
+    // Remove any existing banner first
+    document.querySelectorAll(".restock-banner").forEach(banner => banner.remove());
+
+
+    // Check for pending restock request
     const hasPendingRestock = state.restock_requests?.some(req =>
-        req.item_uuid === item.uuid && req.timestamp_completed === null
+        req.item_uuid === item.uuid && req.timestamp_ordered === null && req.timestamp_completed === null
     );
-    
+
     if (hasPendingRestock) {
         div.classList.add("restock-pending");
+    }
+
+    // Check for ordered restock request
+    const hasOrderedRestock = state.restock_requests?.some(req =>
+        req.item_uuid === item.uuid && req.timestamp_ordered && req.timestamp_completed === null
+    );
+
+    if (hasOrderedRestock) {
+        div.classList.add("restock-ordered");
     }
 
     return div;
@@ -449,7 +463,7 @@ function editInventoryItem(uuid, create_item=false) {
             } else {
                 // Otherwise, ask the editor to put a reorder URL
                 alert(
-                    "A reorder url is needed for this item! Please find an appropriate Amazon link "
+                    "A reorder url is needed for this item! Please find an appropriate link "
                     + "for this item and paste it into the Reorder URL before marking the item as high."
                 )
             }
@@ -464,7 +478,7 @@ function editInventoryItem(uuid, create_item=false) {
             } else {
                 // Otherwise, ask the editor to put a reorder URL
                 alert(
-                    "A reorder url is needed for this item! Please find an appropriate Amazon link "
+                    "A reorder url is needed for this item! Please find an appropriate link "
                     + "for this item and paste it into the Reorder URL before marking the item as low."
                 )
             }
@@ -480,26 +494,33 @@ function editInventoryItem(uuid, create_item=false) {
     }
 
     // Remove any existing banner first
-    let oldBanner = document.getElementById("restock-banner");
-    if (oldBanner) oldBanner.remove();
+    document.querySelectorAll(".restock-banner").forEach(banner => banner.remove());
+
 
     // Check for pending restock request
     const hasPendingRestock = state.restock_requests?.some(req =>
-        req.item_uuid === uuid && req.timestamp_completed === null
+        req.item_uuid === item.uuid && req.timestamp_ordered === null && req.timestamp_completed === null
     );
+
 
     if (hasPendingRestock) {
         const banner = document.createElement("div");
-        banner.id = "restock-banner";
+        banner.classList.add("restock-banner");
         banner.innerText = "Restock Request Submitted";
-        banner.style.backgroundColor = "#b63a3a";
-        banner.style.color = "white";
-        banner.style.padding = "10px 16px";
-        banner.style.fontWeight = "bold";
-        banner.style.textAlign = "center";
-        banner.style.marginBottom = "8px";
-        banner.style.marginLeft = "160px"; 
-        banner.style.borderRadius = "6px";
+    
+        const container = document.getElementById("edit-inventory-item");
+        container.prepend(banner);
+    }
+
+    // Check for ordered restock request
+    const hasOrderedRestock = state.restock_requests?.some(req =>
+        req.item_uuid === uuid && req.timestamp_ordered && req.timestamp_completed === null
+    );
+
+    if (hasOrderedRestock) {
+        const banner = document.createElement("div");
+        banner.classList.add("restock-banner", "ordered");
+        banner.innerText = "Restock Request Ordered";
     
         const container = document.getElementById("edit-inventory-item");
         container.prepend(banner);
@@ -666,26 +687,32 @@ async function saveInventoryItem(uuid) {
 
     // Check for pending restock request
     const hasPendingRestock = state.restock_requests?.some(req =>
-        req.item_uuid === uuid && req.timestamp_completed === null
+        req.item_uuid === item.uuid && req.timestamp_ordered === null && req.timestamp_completed === null
     );
 
     if (hasPendingRestock) {
         const banner = document.createElement("div");
-        banner.id = "restock-banner";
+        banner.classList.add("restock-banner");
         banner.innerText = "Restock Request Submitted";
-        banner.style.backgroundColor = "#b63a3a";
-        banner.style.color = "white";
-        banner.style.padding = "10px 16px";
-        banner.style.fontWeight = "bold";
-        banner.style.textAlign = "center";
-        banner.style.marginBottom = "8px";
-        banner.style.marginLeft = "160px"; 
-        banner.style.borderRadius = "6px";
     
         const container = document.getElementById("edit-inventory-item");
         container.prepend(banner);
     }
+
+    // Check for ordered restock request
+    const hasOrderedRestock = state.restock_requests?.some(req =>
+        req.item_uuid === uuid && req.timestamp_ordered && req.timestamp_completed === null
+    );
+
+    if (hasOrderedRestock) {
+        const banner = document.createElement("div");
+        banner.classList.add("restock-banner", "ordered");
+        banner.innerText = "Restock Request Ordered";
     
+        const container = document.getElementById("edit-inventory-item");
+        container.prepend(banner);
+    }
+
     submitEditableSearch();
 }
 

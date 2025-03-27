@@ -2179,7 +2179,7 @@ function generateOrderedRestockRequestDivs() {
         let completeBtn = document.createElement("button");
         completeBtn.innerHTML = "<span class='material-symbols-outlined'>done</span>";
         completeBtn.onclick = async () => {
-            await completeRestockRequest(request.uuid, "complete");  // a new `"complete"` action we’ll handle below
+            await completeRestockRequest(request.uuid, "complete");  
         };        complete.appendChild(completeBtn);
         div.appendChild(complete);
 

@@ -1193,7 +1193,25 @@ INVENTORY
 }
 
 .restock-pending {
-  border: 2px solid red;
+  border: 3px solid red;
+}
+
+.restock-ordered {
+  border: 3px solid #52e5db;
+}
+
+.restock-banner {
+  background-color: #b63a3a; /* Default red — override with another class if needed */
+  color: white;
+  padding: 10px 16px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 8px;
+  margin-left: 160px;
+  border-radius: 6px;
+}
+.restock-banner.ordered {
+  background-color: #52e5db;
 }
 
 .edit-inventory-item:nth-child(even) {
