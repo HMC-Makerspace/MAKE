@@ -440,14 +440,34 @@ function editInventoryItem(uuid, create_item=false) {
     const quantityInput = document.getElementById("edit-quantity_total");
 
     if (highBtn && lowBtn && quantityInput) {
+        // When clicking the highBtn, set the quantity to high and bubble up
+        // an event so we can correctly trigger changeEventListener
         highBtn.onclick = () => {
-            quantityInput.value = -3;
-            quantityInput.dispatchEvent(new Event("change", { bubbles: true }));
+            if (item.reorder_url) {
+                quantityInput.value = -3;
+                quantityInput.dispatchEvent(new Event("change", { bubbles: true }));
+            } else {
+                // Otherwise, ask the editor to put a reorder URL
+                alert(
+                    "A reorder url is needed for this item! Please find an appropriate Amazon link "
+                    + "for this item and paste it into the Reorder URL before marking the item as high."
+                )
+            }
         };
     
         lowBtn.onclick = () => {
-            quantityInput.value = -1;
-            quantityInput.dispatchEvent(new Event("change", { bubbles: true }));
+            // If the item has a reorder URL, mark it as low (which will automatically)
+            // submit a restock request
+            if (item.reorder_url) {
+                quantityInput.value = -1;
+                quantityInput.dispatchEvent(new Event("change", { bubbles: true }));
+            } else {
+                // Otherwise, ask the editor to put a reorder URL
+                alert(
+                    "A reorder url is needed for this item! Please find an appropriate Amazon link "
+                    + "for this item and paste it into the Reorder URL before marking the item as low."
+                )
+            }
         };
     }
 
