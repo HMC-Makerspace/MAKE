@@ -29,6 +29,7 @@ import RestockStatusLogs from "./RestockStatusLogs";
 import React from "react";
 import { MAKEUser } from "../../../user/User";
 import PopupAlert from "../../../PopupAlert";
+import { convertTimestampToDate } from "../../../../utils";
 
 const columns = [
     { name: "UUID", id: "uuid" },
@@ -159,14 +160,6 @@ function PastStatusLogs({
             </ModalContent>
         </Modal>
     );
-}
-
-//function to convert timestamp to date
-function convertTimestampToDate(timestamp?: number): string {
-    if (!timestamp) {
-        return "N/A";
-    }
-    return new Date(timestamp * 1000).toLocaleString();
 }
 
 export default function RestockTable({
