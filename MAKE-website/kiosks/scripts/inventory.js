@@ -295,7 +295,11 @@ function generateEditableInventoryDiv(item) {
     div.appendChild(delete_button);
 
     // Remove any existing banner first
-    document.querySelectorAll(".restock-banner").forEach(banner => banner.remove());
+    // document.querySelectorAll(".restock-banner").forEach(banner => banner.remove());
+    // ^^ this line should not be here but should be in the other functions because this is 
+    // called everytime we save something - so when we press the 'low' button, it 
+    // triggers this function and the above line would have removed the bannersß
+    div.querySelectorAll(".restock-banner").forEach(banner => banner.remove());
 
 
     // Check for pending restock request
@@ -682,8 +686,7 @@ async function saveInventoryItem(uuid) {
     await fetchEditableInventory();
 
     // Remove any existing banner first
-    let oldBanner = document.getElementById("restock-banner");
-    if (oldBanner) oldBanner.remove();
+    document.querySelectorAll(".restock-banner").forEach(banner => banner.remove());
 
     // Check for pending restock request
     const hasPendingRestock = state.restock_requests?.some(req =>
