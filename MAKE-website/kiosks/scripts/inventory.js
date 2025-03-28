@@ -90,7 +90,7 @@ async function authenticate() {
     document.getElementById("container-input").addEventListener("keyup", submitEditableSearch);
     document.getElementById("room-select").addEventListener("change", submitEditableSearch);
     document.getElementById("tool-material-select").addEventListener("change", submitEditableSearch);
-    
+    document.getElementById("submit-kiosk-restock").addEventListener("click", submitKioskRestockRequest);
 
 
     // Register esc to close popup
@@ -461,9 +461,17 @@ function editInventoryItem(uuid, create_item=false) {
         // When clicking the highBtn, set the quantity to high and bubble up
         // an event so we can correctly trigger changeEventListener
         highBtn.onclick = () => {
-            if (item.reorder_url) {
+            const latestItem = state.inventory.find(i => i.uuid === item.uuid);
+            if (latestItem && latestItem.reorder_url) {
                 quantityInput.value = -3;
+                const index = state.inventory.findIndex(i => i.uuid === item.uuid);
+                state.inventory[index].automated_restock = true;
+        
+                // flag this as being part of automated_restock UI (not actually sending a restock request!)
+                // item.automated_restock = true;
+                // ^^ above line is not good enough because only sets it in local copy, not state
                 quantityInput.dispatchEvent(new Event("change", { bubbles: true }));
+
             } else {
                 // Otherwise, ask the editor to put a reorder URL
                 alert(
@@ -476,9 +484,11 @@ function editInventoryItem(uuid, create_item=false) {
         lowBtn.onclick = () => {
             // If the item has a reorder URL, mark it as low (which will automatically)
             // submit a restock request
-            if (item.reorder_url) {
-                quantityInput.value = -1;
-                quantityInput.dispatchEvent(new Event("change", { bubbles: true }));
+            const latestItem = state.inventory.find(i => i.uuid === item.uuid);
+            if (latestItem && latestItem.reorder_url) {
+                showRestockPopupFromKiosk(latestItem);
+                // quantityInput.value = -1;
+                // quantityInput.dispatchEvent(new Event("change", { bubbles: true }));
             } else {
                 // Otherwise, ask the editor to put a reorder URL
                 alert(
@@ -531,7 +541,113 @@ function editInventoryItem(uuid, create_item=false) {
     }
 
 }
-    
+
+async function submitKioskRestockRequest() {
+    console.log("submitKioskRestockRequest called");
+
+    const container = document.getElementById("popup-container");
+    const quantity = document.getElementById("popup-quantity").value;
+    const note = document.getElementById("popup-note").value;
+    const item_uuid = container.dataset.itemUuid;
+
+    if (!quantity.trim()) {
+        alert("Please enter a quantity.");
+        return;
+    }
+
+    const item = state.inventory.find(i => i.uuid === item_uuid);
+
+    const updatedItem = {
+        ...item,
+        quantity_total: -1,
+        quantity_available: -1,
+        automated_restock: true,
+        restock_quantity: quantity,  
+        restock_note: note           
+    };
+
+    const updateResponse = await fetch(`${API}/inventory/update_inventory_item`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "api-key": api_key
+        },
+        body: JSON.stringify(updatedItem)
+    });
+
+    if (!updateResponse.ok) {
+        const errorText = await updateResponse.text();
+        alert("Error updating item: " + errorText);
+        return;
+    }
+
+    // Update quantity input immediately like High does
+    const quantityInput = document.getElementById("edit-quantity_total");
+    if (quantityInput && item.uuid === item_uuid) {
+        quantityInput.value = -1;
+        quantityInput.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+
+    const containerElement = document.getElementById("edit-inventory-item");
+    const banner = document.createElement("div");
+    banner.classList.add("restock-banner");
+    banner.innerText = "Restock Request Submitted";
+    containerElement.prepend(banner); // Add the banner at the top of the container
+
+    container.classList.add("hidden");
+
+    await fetchRestockRequests();
+    await fetchEditableInventory();
+    submitEditableSearch();
+}
+
+
+function showRestockPopupFromKiosk(item) {
+    const container = document.getElementById("popup-container");
+    container.dataset.itemUuid = item.uuid;
+    const content = document.getElementById("popup-content");
+
+    // fill in the form dynamically based on the database
+    content.innerHTML = `
+        <h2>Submit Restock Request</h2>
+        <label>
+            Item:
+            <input type="text" id="popup-item" readonly value="${item.name}">
+        </label>
+        <label>
+            Link:
+            <input type="text" id="popup-link" readonly value="${item.reorder_url}">
+        </label>
+        <label>
+            Quantity:
+            <input type="number" id="popup-quantity" required>
+        </label>
+        <label>
+            Note:
+            <textarea id="popup-note"></textarea>
+        </label>
+        <div class="popup-buttons">
+            <button onclick="submitKioskRestockRequest()">Submit</button>
+            <button onclick="closePopup()">Cancel</button>
+        </div>
+    `;
+
+    container.classList.remove("hidden");
+
+    //  bind the submit click AFTER inserting HTML
+    document.getElementById("submit-kiosk-restock")
+    .addEventListener("click", submitKioskRestockRequest);
+}
+
+
+
+function closePopup() {
+    document.getElementById("popup-container").classList.add("hidden");
+}
+
+
+
 function changeEventListener(event, item_uuid) {
     let input = document.getElementById(event.target.id);
     // If it's required and empty, return
@@ -599,22 +715,13 @@ function changeEventListener(event, item_uuid) {
     }
 
     // Save the item
-    debounce(saveInventoryItem, 100)(item_uuid);
+    debounce(() => {
+        saveInventoryItem(item_uuid);
+        delete state.inventory[index].automated_restock;
+    }, 100)();
+    
 }
 
-/*
-Check if the given InventoryItem is valid.
-After using editInventoryItem, this function should be called to check if the edits
-to the item are valid. If they are not, the inventory editor should show that
-changes are not saved.
-
-The following fields are required:
-- name
-- role
-- access_type
-- quantity_total
-- locations.room for each location
-*/
 function isInventoryItemValid(item) {
     // Validate name
     if (item.name === null || item.name === "") {
@@ -677,6 +784,8 @@ async function saveInventoryItem(uuid) {
             container.classList.remove("error");
         }, 400);
     } else {
+        const errorText = await response.text();
+        alert("Error saving: " + errorText);  // Show the backend error message
         el.innerText = "Error saving";
         container.classList.add("error");
         container.classList.remove("saved");

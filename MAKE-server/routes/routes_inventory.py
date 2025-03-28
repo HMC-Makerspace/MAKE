@@ -97,13 +97,14 @@ async def route_update_inventory_item(request: Request):
     logging.info("Updating inventory item...")
 
     item = None
+
     try:
-        item = InventoryItem(**await request.json())
+         item = InventoryItem(**await request.json())
     except Exception as e:
-        # The request body is invalid
-        # Return error
-        raise HTTPException(
-            status_code=400, detail="Invalid request body: " + str(e))
+         # The request body is invalid
+         # Return error
+         raise HTTPException(
+             status_code=400, detail="Invalid request body: " + str(e))
 
     api_key = request.headers["api-key"]
     db = MongoDB()
@@ -121,22 +122,55 @@ async def route_update_inventory_item(request: Request):
     # Check if the inventory item already exists
     check = await collection.find_one({"uuid": item.uuid})
 
+
+    data = await request.json()
+
     if check is None:
         # The inventory item does not exist
         # Insert the inventory item after validating it
         await collection.insert_one(item.dict())
     else:
-        await collection.replace_one({"uuid": item.uuid}, item.dict())
+        # await collection.replace_one({"uuid": item.uuid}, item.dict())
 
         # If this item changed from not being low to low, automatically submit a restock request
-        if check["quantity_total"] != -1 and item.quantity_total == -1:
-           await create_automated_restock_request(db, item)
+        original_quantity = check["quantity_total"]
+        new_quantity = item.quantity_total
+        
+        # if original_quantity != new_quantity: 
+        #     if data["quantity_total"] < 0 and not data.get("automated_restock", False):
+        #         raise HTTPException(
+        #             status_code=400,
+        #             detail="Manual setting of negative quantity values is not allowed. Please use the restock popup."
+        #         )
+        #     if item.quantity_total == -1:
+        #         restock_quantity = data.get("restock_quantity")
+        #         restock_note = data.get("restock_note")
+        #         restock_link = item.reorder_url  # Get the link here
 
-        elif check["quantity_total"] == -1 and item.quantity_total != -1:
-            # find the restock request that was sent when it was at -1 and mark it as completed! 
-            await complete_automated_restock_request(db, item.uuid)
+        #         # restock_link = data.get("")
+        #         await create_automated_restock_request(db, item, quantity=restock_quantity, note=restock_note)
+        #     elif item.quantity_total != -1:
+        #         await complete_automated_restock_request(db, item.uuid)
 
-    # Return the inventory item
+        if original_quantity != new_quantity:
+            if new_quantity < 0 and not data.get("automated_restock", False):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Manual setting of negative quantity values is not allowed. Please use the restock popup."
+                )
+
+        # If all checks passed, then proceed to save the new item
+        await collection.replace_one({"uuid": item.uuid}, item.dict())
+
+        # Handle restock logic
+        if original_quantity != new_quantity:
+            if new_quantity == -1:
+                restock_quantity = data.get("restock_quantity")
+                restock_note = data.get("restock_note")
+                await create_automated_restock_request(db, item, quantity=restock_quantity, note=restock_note)
+            elif new_quantity != -1:
+                await complete_automated_restock_request(db, item.uuid)
+
     return
 
 
@@ -175,30 +209,29 @@ async def route_delete_inventory_item(item_uuid: str, request: Request):
 
 
 # AMBA : new function created to 
-async def create_automated_restock_request(db: MongoDB, item: InventoryItem) -> None:
+async def create_automated_restock_request(db: MongoDB, item: InventoryItem, quantity: Optional[int] = None, note: Optional[str] = None) -> None:
     """
     Creates an automated restock request for the given inventory item.
     """
-    # Build the item text based on the item details
+
     item_text = f"{item.name} "
-    if item.reorder_url:
-        item_text += f" <br> {item.reorder_url}"
-    else:
-        item_text += ""
-        # TODO: prompt user at kiosk to add a link!! 
-    
+
+
+    logging.info(f"TEXTTTTTTT for Restock Request: {item_text}")
+
     # Create a restock request using the item's UUID
     restock = RestockRequest(
         item_uuid=item.uuid,
         uuid=str(uuid.uuid1()),
         timestamp_sent=datetime.datetime.now().timestamp(),
-        reason="Out of Stock",
-        item=item_text,
-        quantity="?",
+        reason=note or "",                     #  use note from popup
+        item=item.name,                       #  use item name, not full object
+        quantity=quantity if quantity else "?",  #  use quantity from popup
         authorized_request=True,
         user_uuid="automatedrestock",  # indicates an automated restock request
+        
     )
-    
+        
     restock_collection = await db.get_collection("restock_requests")
     await restock_collection.insert_one(restock.dict())
 
@@ -254,7 +287,7 @@ async def route_add_restock_notice(request: Request):
     restock["uuid"] = str(uuid.uuid4())
     restock["item"] = body["item"]
     restock["quantity"] = body["quantity"]
-    restock["reason"] = body["reason"]
+    restock["reason"] = body.get("reason", "")
     restock["timestamp_sent"] = datetime.datetime.now().timestamp()
     restock["timestamp_completed"] = None
     restock["completion_note"] = None

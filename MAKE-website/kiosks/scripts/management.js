@@ -1938,6 +1938,7 @@ function generateCheckoutsByUserRoleChart(roleCounts) {
 
 // AMBA NOTE:updated, now includes ordered_requests section
 function renderRestockRequests() {
+    console.log("HERE Restock Requests...");
     const pending_requests = document.getElementById("pending-restock-requests-list");
     const ordered_requests = document.getElementById("ordered-restock-requests-list");
     const completed_requests = document.getElementById("completed-restock-requests-list");
@@ -2031,6 +2032,9 @@ function generatePendingRestockRequestDivs() {
     );
     pending.reverse();
 
+    console.log("inside generating pending");
+
+
     let divs = [];
 
     let header = document.createElement("div");
@@ -2077,7 +2081,15 @@ function generatePendingRestockRequestDivs() {
 
         let item = document.createElement("div");
         item.classList.add("restock-request-item");
-        let itemText = replaceLinksWithA(request.item, true);
+        // let itemText = replaceLinksWithA(request.item, true);
+
+        // Format the item text and append the reorder_url as a clickable link
+        let itemText = request.item; // This is the item name already passed from the request
+        if (request.reorder_url) {
+            itemText += "hello"
+            itemText += `<br><a href="${request.reorder_url}" target="_blank">${request.reorder_url}</a>`;
+        }
+
         if (request.reason && request.reason.toLowerCase() !== "out of stock") {
             itemText += `<br><em>${request.reason}</em>`;
         }
