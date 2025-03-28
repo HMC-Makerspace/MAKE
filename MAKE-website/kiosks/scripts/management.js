@@ -2086,8 +2086,7 @@ function generatePendingRestockRequestDivs() {
         // Format the item text and append the reorder_url as a clickable link
         let itemText = request.item; // This is the item name already passed from the request
         if (request.reorder_url) {
-            itemText += "hello"
-            itemText += `<br><a href="${request.reorder_url}" target="_blank">${request.reorder_url}</a>`;
+            itemText += `<br><a href="${request.reorder_url}" target="_blank">link</a>`;
         }
 
         if (request.reason && request.reason.toLowerCase() !== "out of stock") {
@@ -2169,11 +2168,20 @@ function generateOrderedRestockRequestDivs() {
 
         let item = document.createElement("div");
         item.classList.add("restock-request-item");
-        let itemText = replaceLinksWithA(request.item, true);
+
+        // Format the item text and append the reorder_url as a clickable link
+        let itemText = request.item; // This is the item name already passed from the request
+        if (request.reorder_url) {
+            itemText += `<br><a href="${request.reorder_url}" target="_blank">link</a>`;
+        }
+
         if (request.reason && request.reason.toLowerCase() !== "out of stock") {
             itemText += `<br><em>${request.reason}</em>`;
         }
         item.innerHTML = itemText;
+        div.appendChild(item);
+
+
         div.appendChild(item);
 
         let quantity = document.createElement("div");
@@ -2251,11 +2259,19 @@ function generateCompletedRestockRequestDivs() {
 
         let item = document.createElement("div");
         item.classList.add("restock-request-item");
-        let itemText = replaceLinksWithA(request.item, true);
+
+        // Format the item text and append the reorder_url as a clickable link
+        let itemText = request.item; // This is the item name already passed from the request
+        if (request.reorder_url) {
+            itemText += `<br><a href="${request.reorder_url}" target="_blank">link</a>`;
+        }
+
         if (request.reason && request.reason.toLowerCase() !== "out of stock") {
             itemText += `<br><em>${request.reason}</em>`;
         }
         item.innerHTML = itemText;
+        div.appendChild(item);
+        
         div.appendChild(item);
 
         let quantity = document.createElement("div");

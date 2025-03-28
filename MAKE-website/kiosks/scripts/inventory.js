@@ -581,13 +581,12 @@ async function submitKioskRestockRequest() {
         return;
     }
 
-    // Update quantity input immediately like High does
+    // Update quantity input immediately like HighBtn does
     const quantityInput = document.getElementById("edit-quantity_total");
     if (quantityInput && item.uuid === item_uuid) {
         quantityInput.value = -1;
         quantityInput.dispatchEvent(new Event("change", { bubbles: true }));
     }
-
 
     const containerElement = document.getElementById("edit-inventory-item");
     const banner = document.createElement("div");

@@ -295,6 +295,7 @@ class RestockRequest(BaseModel):
     timestamp_completed: Union[float, None] = None
     is_approved: Union[bool, None] = None
     completion_note: Union[str, None] = None
+    reorder_url: Union[str, None] = None
 
     # TODO[pydantic]: The following keys were removed: `json_encoders`.
     # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
