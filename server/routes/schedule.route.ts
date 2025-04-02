@@ -27,6 +27,7 @@ import {
     UNAUTHORIZED_ERROR,
     FORBIDDEN_ERROR,
     VerifyRequestHeader,
+    SuccessfulResponse,
 } from "common/verify";
 import { TAlert, TPublicScheduleData, TSchedule } from "common/schedule";
 import { TShift, TShiftEvent } from "common/shift";
@@ -1059,7 +1060,7 @@ router.put("/", async (req: ScheduleRequest, res: ScheduleResponse) => {
  */
 router.delete(
     "/:UUID",
-    async (req: Request<{ UUID: string }>, res: ScheduleResponse) => {
+    async (req: Request<{ UUID: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = headers.requesting_uuid;
         const schedule_uuid = req.params.UUID;
@@ -1094,7 +1095,7 @@ router.delete(
                 return;
             }
             req.log.debug(`Deleted schedule ${schedule_uuid}`);
-            res.status(StatusCodes.OK).json(schedule);
+            res.status(StatusCodes.NO_CONTENT).json({});
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to delete a schedule",

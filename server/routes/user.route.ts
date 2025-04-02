@@ -260,7 +260,7 @@ router.delete(
             }
             req.log.debug(`Deleted user role with uuid ${role_uuid}`);
             // Return a status ok, deleted user role object is not returned
-            res.status(StatusCodes.OK);
+            res.status(StatusCodes.NO_CONTENT).json({});
         } else {
             // If the user is not authorized, provide a status error
             req.log.warn({
@@ -783,7 +783,7 @@ router.delete(
             } else {
                 req.log.debug(`Deleted user with uuid ${user_uuid}`);
                 // Return a status ok, deleted user object is not returned
-                res.status(StatusCodes.OK);
+                res.status(StatusCodes.NO_CONTENT).json({});
             }
         } else {
             // If the user is not authorized, provide a status error

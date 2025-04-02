@@ -3,6 +3,7 @@ import { API_SCOPE } from "common/global";
 import {
     ErrorResponse,
     FORBIDDEN_ERROR,
+    SuccessfulResponse,
     UNAUTHORIZED_ERROR,
     VerifyRequestHeader,
 } from "common/verify";
@@ -19,6 +20,7 @@ import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import upload from "../core/upload";
+import path from "path";
 
 const router = Router();
 
@@ -40,9 +42,27 @@ TODO: extend one
 type FileResponse = Response<TFile | ErrorResponse>;
 type FilesResponse = Response<TFile[] | ErrorResponse>;
 
-const UPLOAD_PATH = process.env.UPLOAD_PATH || "/uploads";
+const UPLOAD_PATH = process.env.FILE_UPLOAD_PATH || "uploads";
 
 // --- File Routes ---
+
+/**
+ * Download a file by UUID to be served to the user. This is a public route.
+ */
+router.get("/download/:UUID", async (req: Request, res: Response) => {
+    const file_uuid = req.params.UUID;
+    // TODO: Consider authorization?
+    const file = await getFile(file_uuid);
+    if (!file) {
+        req.log.warn(`File not found by uuid ${file_uuid}`);
+        res.status(StatusCodes.NOT_FOUND).json({
+            error: `No file found with uuid \`${file_uuid}\`.`,
+        });
+        return;
+    }
+    res.sendFile(file.path);
+    return;
+});
 
 /**
  * Get all files made by a specific user. This is a protected route, and a
@@ -282,6 +302,7 @@ router.post(
         const requesting_uuid: string = headers.requesting_uuid;
         const user_uuid = req.params.user_uuid;
         const file = req.file;
+        console.log("File on server", file);
         // If no file is provided, no upload occurred
         if (!file) {
             res.status(StatusCodes.BAD_REQUEST).json({
@@ -299,67 +320,71 @@ router.post(
         ) {
             // Move the file from temp
             const temp_path = file.path;
-            const target_path = `${UPLOAD_PATH}/${file.filename}`;
-            moveTempFileOnServer(temp_path, target_path, req, res)
-                // If the file was successfully saved, create a new File object
-                // in the db
-                .then(() => {
-                    // Create a new file object
-                    const file_obj: TFile = {
-                        uuid: crypto.randomUUID(),
-                        name: file.originalname,
-                        path: target_path,
-                        timestamp_upload: Date.now(),
-                        size: file.size,
-                        resource_uuid: user_uuid,
-                        resource_type: FILE_RESOURCE_TYPE.USER,
-                    };
-                    createFile(file_obj)
-                        // Once the file has been created,
-                        .then((new_file) => {
-                            // If a file with the random uuid already exists,
-                            // return a conflict error
-                            if (!new_file) {
+            const target_path = path.resolve(UPLOAD_PATH, file.filename);
+            return (
+                moveTempFileOnServer(temp_path, target_path, req)
+                    // If the file was successfully saved, create a new File object
+                    // in the db
+                    .then(() => {
+                        // Create a new file object
+                        const file_obj: TFile = {
+                            uuid: crypto.randomUUID(),
+                            name: file.originalname,
+                            path: target_path,
+                            timestamp_upload: Date.now() / 1000,
+                            size: file.size,
+                            resource_uuid: user_uuid,
+                            resource_type: FILE_RESOURCE_TYPE.USER,
+                        };
+                        createFile(file_obj)
+                            // Once the file has been created,
+                            .then((new_file) => {
+                                // If a file with the random uuid already exists,
+                                // return a conflict error
+                                if (!new_file) {
+                                    req.log.error({
+                                        msg:
+                                            `Could not create file for user ` +
+                                            `${user_uuid} because the generated` +
+                                            `file UUID already exists.`,
+                                        file_path: target_path,
+                                        file_obj: file_obj,
+                                    });
+                                    res.status(StatusCodes.CONFLICT).json({
+                                        error:
+                                            `Could not create file for user ` +
+                                            `${user_uuid} because the generated ` +
+                                            `file UUID already exists. ` +
+                                            `Please try uploading again.`,
+                                    });
+                                    return;
+                                }
+                                // If the file was successfully created, log and
+                                // return the new file object
+                                req.log.debug("Returned new file for user.");
+                                res.status(StatusCodes.CREATED).json(new_file);
+                            })
+                            .catch((err: Error) => {
+                                // If there was an error saving the file, log it and
+                                // return an error to the user
                                 req.log.error({
-                                    msg:
-                                        `Could not create file for user ` +
-                                        `${user_uuid} because the generated` +
-                                        `file UUID already exists.`,
-                                    file_path: target_path,
-                                    file_obj: file_obj,
+                                    msg: `Error creating file for user ${user_uuid}`,
+                                    err: err,
                                 });
-                                res.status(StatusCodes.CONFLICT).json({
-                                    error:
-                                        `Could not create file for user ` +
-                                        `${user_uuid} because the generated ` +
-                                        `file UUID already exists. ` +
-                                        `Please try uploading again.`,
+                                res.status(
+                                    StatusCodes.INTERNAL_SERVER_ERROR,
+                                ).json({
+                                    error: err.message,
                                 });
-                                return;
-                            }
-                            // If the file was successfully created, log and
-                            // return the new file object
-                            req.log.debug("Returned new file for user.");
-                            res.status(StatusCodes.CREATED).json(new_file);
-                        })
-                        .catch((err: Error) => {
-                            // If there was an error saving the file, log it and
-                            // return an error to the user
-                            req.log.error({
-                                msg: `Error creating file for user ${user_uuid}`,
-                                err: err,
                             });
-                            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                                error: err.message,
-                            });
+                    })
+                    // If there was an error saving the file, return an error to the user
+                    .catch((err) => {
+                        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                            error: "Error saving file",
                         });
-                })
-                // If there was an error saving the file, return an error to the user
-                .catch((err) => {
-                    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                        error: "Error saving file",
-                    });
-                });
+                    })
+            );
         } else {
             req.log.warn({
                 msg:
@@ -382,6 +407,7 @@ router.post(
  */
 router.post(
     /\/for\/(workshop|area|machine)\/(.+)/,
+    upload.single("file"),
     async (req: Request, res: Response) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = headers.requesting_uuid;
@@ -412,8 +438,8 @@ router.post(
         ) {
             // Move the file from temp
             const temp_path = file.path;
-            const target_path = `${UPLOAD_PATH}/${file.filename}`;
-            moveTempFileOnServer(temp_path, target_path, req, res)
+            const target_path = path.resolve(UPLOAD_PATH, file.filename);
+            moveTempFileOnServer(temp_path, target_path, req)
                 // If the file was successfully saved, create a new File object
                 // in the db
                 .then(() => {
@@ -496,7 +522,7 @@ router.post(
  */
 router.delete(
     "/by/user/:file_uuid",
-    async (req: Request<{ file_uuid: string }>, res: FileResponse) => {
+    async (req: Request<{ file_uuid: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = headers.requesting_uuid;
         const file_uuid = req.params.file_uuid;
@@ -544,7 +570,7 @@ router.delete(
                                 return;
                             }
                             req.log.debug("Deleted file successfully.");
-                            res.status(StatusCodes.OK).json(deleted_file);
+                            res.status(StatusCodes.NO_CONTENT).json({});
                         })
                         .catch((err: Error) => {
                             req.log.error({

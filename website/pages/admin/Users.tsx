@@ -1,78 +1,89 @@
 import AdminLayout from "../../layouts/AdminLayout";
 import UsersTable from "../../components/kiosks/admin/users/UsersTable";
 import UserEditor from "../../components/kiosks/admin/users/UserEditor";
-import { Modal, ModalContent, Selection, useDisclosure } from "@heroui/react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { TUser } from "common/user";
+import { Selection } from "@heroui/react";
+import { useQuery } from "@tanstack/react-query";
+import { TUser, TUserRole } from "common/user";
 import React from "react";
-
-function EditUserModal({
-    isOpen,
-    onOpenChange,
-}: {
-    isOpen: boolean;
-    onOpenChange: () => void;
-}) {
-    return (
-        <Modal
-            id="edit-user"
-            placement="auto"
-            isOpen={isOpen}
-            onOpenChange={onOpenChange}
-        >
-            <ModalContent>{(onClose) => <div>Edit user</div>}</ModalContent>
-        </Modal>
-    );
-}
-
-function CreateUserModal({
-    isOpen,
-    onOpenChange,
-}: {
-    isOpen: boolean;
-    onOpenChange: () => void;
-}) {
-    return (
-        <Modal
-            id="create-user"
-            isOpen={isOpen}
-            placement="auto"
-            onOpenChange={onOpenChange}
-        >
-            <ModalContent>{(onClose) => <div></div>}</ModalContent>
-        </Modal>
-    );
-}
+import PopupAlert from "../../components/PopupAlert";
+import { API_SCOPE } from "../../../common/global";
 
 export default function UsersPage() {
     // Get all user data
-    const { data, isLoading, isError } = useQuery<TUser[]>({
+    const { data: users, isLoading: usersLoading } = useQuery<TUser[]>({
         queryKey: ["user"],
         refetchOnWindowFocus: false,
     });
 
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    // Get all role data
+    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
+        queryKey: ["user", "role"],
+        refetchOnWindowFocus: false,
+    });
+
+    const isLoading = usersLoading || rolesLoading;
+
+    const scopesQuery = useQuery<API_SCOPE[]>({
+        queryKey: ["user", "self", "scopes"],
+        refetchOnWindowFocus: false,
+    });
+    const scopes = scopesQuery.data ?? [];
+
+    const canEdit = scopes.some(
+        (scope) => scope === API_SCOPE.ADMIN || scope === API_SCOPE.UPDATE_USER,
+    );
 
     const [selectedKeys, onSelectionChange] = React.useState<Selection>(
         new Set(),
     );
 
+    const [isNewUser, setIsNewUser] = React.useState<boolean>(false);
+
+    const [popupMessage, setPopupMessage] = React.useState<string | undefined>(
+        undefined,
+    );
+    const [popupType, setPopupType] = React.useState<
+        "success" | "warning" | "danger"
+    >("success");
+
+    const onSuccess = (message: string) => {
+        setPopupMessage(message);
+        setPopupType("success");
+    };
+    const onError = (message: string) => {
+        setPopupMessage(message);
+        setPopupType("danger");
+    };
+
     return (
         <AdminLayout pageHref={"/admin/users"}>
             <div className="flex flex-col lg:flex-row overflow-auto h-full gap-8">
-                <UserEditor
-                    users={data ?? []}
-                    selectedKeys={selectedKeys}
-                    isLoading={isLoading}
-                    isNew={false}
-                />
+                {canEdit && (
+                    <UserEditor
+                        users={users ?? []}
+                        selectedKeys={selectedKeys}
+                        isLoading={isLoading}
+                        isNew={isNewUser}
+                        onSuccess={onSuccess}
+                        onError={onError}
+                    />
+                )}
                 <UsersTable
-                    users={data ?? []}
+                    key={isLoading ? "loading" : "table"}
+                    users={users ?? []}
+                    roles={roles ?? []}
                     selectedKeys={selectedKeys}
                     onSelectionChange={onSelectionChange}
                     isLoading={isLoading}
+                    onCreate={setIsNewUser}
                 />
             </div>
+            <PopupAlert
+                isOpen={!!popupMessage}
+                onOpenChange={() => setPopupMessage(undefined)}
+                color={popupType}
+                description={popupMessage}
+            />
         </AdminLayout>
     );
 }
