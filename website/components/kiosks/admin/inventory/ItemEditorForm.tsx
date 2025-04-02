@@ -1,5 +1,6 @@
 import { Form, Input } from "@heroui/react";
 import { Select, SelectSection, SelectItem } from "@heroui/select";
+import {Accordion, AccordionItem} from "@heroui/accordion";
 import clsx from "clsx";
 import {
     InventoryItemUUID,
@@ -16,6 +17,13 @@ export const roles = [
     { key: "MATERIAL", label: "Material" },
     { key: "TOOL", label: "Tool" },
     { key: "KIT", label: "Kit" },
+];
+
+export const accessTypes = [
+    { key: 0, label: "Use in Space" },
+    { key: 1, label: "Checkout in Space" },
+    { key: 2, label: "Checkout and Take Home" },
+    { key: 3, label: "Take Home" },
 ];
 
 export default function ItemEditorForm({ item }: { item: TInventoryItem }) {
@@ -69,7 +77,7 @@ export default function ItemEditorForm({ item }: { item: TInventoryItem }) {
     const placeholder = (text: string) => (isEmpty ? `Select an item` : text);
 
     return (
-        <Form onSubmit={onSubmit} className="grid grid-cols-2 gap-4 lg:flex">
+        <Form onSubmit={onSubmit} className="grid grid-cols-2 gap-4 lg:flex overflow-auto">
             <Input
                 type="text"
                 label="UUID"
@@ -89,7 +97,7 @@ export default function ItemEditorForm({ item }: { item: TInventoryItem }) {
                     ]),
                 }}
             />
-            <Input
+            <Input // Name
                 type="text"
                 label="Name"
                 name="name"
@@ -109,7 +117,7 @@ export default function ItemEditorForm({ item }: { item: TInventoryItem }) {
                     ]),
                 }}
             />
-            <Input
+            <Input // Long Name
                 type="text"
                 label="Long Name"
                 name="long_name"
@@ -128,61 +136,78 @@ export default function ItemEditorForm({ item }: { item: TInventoryItem }) {
                     ]),
                 }}
             />
-            <Select
-                onSelectionChange={(value)=>{
-                    if (value == "all") {
-                        return
-                    } else {
-                        setRole(Array.from(value)[0] as ITEM_ROLE)
-                    }
-                }}
-                isDisabled={isEmpty}
-                variant="faded"
-                color="primary"
-                size="md"
-                defaultSelectedKeys={[role]}
-                key = {role}
-                label="Role"
-                placeholder="You are roleless, jobless, and homeless"
-                classNames={{
-                    value: clsx([
-                        "placeholder:text-default-500",
-                        "placeholder:italic",
-                        "text-default-700",
-                    ]),
-                }}
-            >
-                {roles.map((role) => (
-                    <SelectItem key={role.key}>{role.label}</SelectItem>
-                ))}
-            </Select>
-            <Input
-                type="number"
-                label="Access Type"
-                name="access_type"
-                placeholder={placeholder("Access Type")}
-                isDisabled={isEmpty}
-                value={accessType.toString()}
-                onValueChange={(value) => setAccessType(Number(value))}
-                variant="faded"
-                color="primary"
-                size="md"
-                classNames={{
-                    input: clsx([
-                        "placeholder:text-default-500",
-                        "placeholder:italic",
-                        "text-default-700",
-                    ]),
-                }}
-            />
-            <Input
+            <div className="flex gap-3 w-full">
+                <Select // Role
+                    onSelectionChange={(value) => {
+                        if (value == "all") {
+                            return;
+                        } else {
+                            setRole(Array.from(value)[0] as ITEM_ROLE);
+                        }
+                    }}
+                    isDisabled={isEmpty}
+                    variant="faded"
+                    color="primary"
+                    size="md"
+                    defaultSelectedKeys={[role]}
+                    key={role}
+                    label="Role"
+                    placeholder="Role"
+                    classNames={{
+                        value: clsx([
+                            "placeholder:text-default-500",
+                            "placeholder:italic",
+                            "text-default-700",
+                        ]),
+                    }}
+                    className="w-auto"
+                >
+                    {roles.map((role) => (
+                        <SelectItem key={role.key}>{role.label}</SelectItem>
+                    ))}
+                </Select>
+                <Select // Access Type
+                    label="Access Type"
+                    name="access_type"
+                    placeholder={placeholder("Access Type")}
+                    isDisabled={isEmpty}
+                    value={accessType.toString()}
+                    onSelectionChange={(value) => {
+                        if (value == "all") {
+                            return;
+                        } else {
+                            setAccessType(
+                                parseInt(Array.from(value)[0] as string),
+                            );
+                        }
+                    }}
+                    variant="faded"
+                    color="primary"
+                    size="md"
+                    classNames={{
+                        value: clsx([
+                            "placeholder:text-default-500",
+                            "placeholder:italic",
+                            "text-default-700",
+                        ]),
+                    }}
+                    className="w-full"
+                >
+                    {accessTypes.map((accessType) => (
+                        <SelectItem key={accessType.key}>
+                            {accessType.label}
+                        </SelectItem>
+                    ))}
+                </Select>
+            </div>
+            <Input // Locations
                 type="text"
                 label="Locations"
                 name="locations"
                 placeholder={placeholder("Locations")}
                 isDisabled={isEmpty}
-                value={locations.map((location) => location.area).join(", ")}
-                onValueChange={setReorderUrl}
+                // value={locations.map((location) => location.area).join(", ")}
+                // onValueChange={setReorderUrl}
                 variant="faded"
                 color="primary"
                 size="md"
@@ -279,16 +304,14 @@ export default function ItemEditorForm({ item }: { item: TInventoryItem }) {
                 value={requiredCerts.join(", ")}
                 onValueChange={(value) =>
                     setRequiredCerts(
-                        value
-                            .split(", ")
-                            .map(
-                                (cert) =>
-                                    ({
-                                        name: cert,
-                                        certification_uuid: "",
-                                        required_level: 0,
-                                    }) as TItemCertificate,
-                            ),
+                        value.split(", ").map(
+                            (cert) =>
+                                ({
+                                    name: cert,
+                                    certification_uuid: "",
+                                    required_level: 0,
+                                }) as TItemCertificate,
+                        ),
                     )
                 }
                 variant="faded"
