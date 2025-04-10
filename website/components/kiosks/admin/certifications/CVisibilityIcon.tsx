@@ -9,6 +9,11 @@ import {
 
 import { CERTIFICATION_VISIBILITY } from "../../../../../common/certification";
 
+// An icon of changing form to indicate visibility of a certification
+// Lock open icon   : public
+// Lock closed icon : private
+// Clock icon       : schedule
+// No symbol icon   : (invalid visibility)
 export default function CVisibilityIcon({
     visibility,
     color="",
@@ -18,9 +23,7 @@ export default function CVisibilityIcon({
     color?: string,
     className?: string
 }) {
-    // in case of future customization
-    const strokeWidth = 2.5;
-
+    
     return (
         <Tooltip
             content={
@@ -30,34 +33,40 @@ export default function CVisibilityIcon({
             delay={500}
             closeDelay={150}
         >
-            {(() => {
-                switch(visibility) {
-                    case CERTIFICATION_VISIBILITY.PUBLIC:
-                        return (<LockOpenIcon
-                                    className={className}
-                                    strokeWidth={strokeWidth}
-                                    color={color}
-                                />);
-                    case CERTIFICATION_VISIBILITY.PRIVATE:
-                        return (<LockClosedIcon
-                                    className={className}
-                                    strokeWidth={strokeWidth}
-                                    color={color}
-                                />);
-                    case CERTIFICATION_VISIBILITY.SCHEDULE:
-                        return (<ClockIcon
-                                    className={className}
-                                    strokeWidth={strokeWidth}
-                                    color={color}
-                                />);
-                    default: // some accidentally missing visibility
-                        return (<NoSymbolIcon
-                                    className={className}
-                                    strokeWidth={strokeWidth}
-                                    color={color}
-                                />);
-                }
-            })()}
+            {getIcon(visibility, color, className)}
         </Tooltip>
     );
+}
+
+// Determines which icon to return based on visibility
+function getIcon(visibility: CERTIFICATION_VISIBILITY | undefined, color: string, className: string) {
+    // in case of future customization
+    const strokeWidth = 2.5;
+
+    switch(visibility) {
+        case CERTIFICATION_VISIBILITY.PUBLIC:
+            return (<LockOpenIcon
+                        className={className}
+                        strokeWidth={strokeWidth}
+                        color={color}
+                    />);
+        case CERTIFICATION_VISIBILITY.PRIVATE:
+            return (<LockClosedIcon
+                        className={className}
+                        strokeWidth={strokeWidth}
+                        color={color}
+                    />);
+        case CERTIFICATION_VISIBILITY.SCHEDULE:
+            return (<ClockIcon
+                        className={className}
+                        strokeWidth={strokeWidth}
+                        color={color}
+                    />);
+        default: // some accidentally missing visibility
+            return (<NoSymbolIcon
+                        className={className}
+                        strokeWidth={strokeWidth}
+                        color={color}
+                    />);
+    }
 }

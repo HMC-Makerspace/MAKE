@@ -1,30 +1,32 @@
 import {
     Input,
     Selection,
-    SortDescriptor,
     Button,
     DropdownTrigger,
     Dropdown,
     DropdownMenu,
     DropdownItem,
     Spinner,
-    useDisclosure,
 } from "@heroui/react";
-import { useInfiniteScroll } from "@heroui/use-infinite-scroll";
 import {
     MagnifyingGlassIcon as SearchIcon,
     ChevronDownIcon,
     PlusIcon,
     PencilSquareIcon,
 } from "@heroicons/react/24/outline";
-import { TCertification } from "common/certification";
-import MAKETable from "../../../Table";
+
 import React from "react";
-import CertificationTag from "./CertificationTag"
-import EditCertModal from "./EditCertModal"
-import UserRole from "../../../user/UserRole";
+
+import MAKETable from "../../../Table";
+
+import { TCertification } from "common/certification";
 import { CERTIFICATION_VISIBILITY } from "../../../../../common/certification";
+
+import CertificationTag from "./CertificationTag";
+import EditCertModal from "./EditCertModal";
 import EditDocsModal from "./EditDocsModal";
+
+import UserRole from "../../../user/UserRole";
 
 const defaultCert: TCertification = {
     uuid: "",
@@ -79,20 +81,15 @@ export default function CertificationsTable({
         new Set(defaultColumns),
     );
     const [search, setSearch] = React.useState<string>("");
-    const [editCert, setEditCert] = React.useState<TCertification | undefined>(
-        undefined,
-    );
-    const [isNew, setIsNew] = React.useState<boolean>(false);
 
-    // isOpen etc aren't updated on React re-render for some reason. Bug with my code or issue with HeroUI/React?
-    // either way, React.useState() works instead.
-    //const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [isOpen, setIsOpen] = React.useState<boolean>(false);
+    // Edit modal
+    const [editCert, setEditCert] = React.useState<TCertification | undefined>(undefined); // the certification being edited
+    const [isNew, setIsNew] = React.useState<boolean>(false); // whether editing or creating cert
+    const [isOpen, setIsOpen] = React.useState<boolean>(false); // whether modal is open
 
-    const [certOpenDoc, setCertOpenDoc] = React.useState<TCertification>(defaultCert);
-    const [docOpen, setDocOpen] = React.useState<boolean>();
-
-    const numCerts = certs.length;
+    // Edit docs modal
+    const [certOpenDoc, setCertOpenDoc] = React.useState<TCertification>(defaultCert); // the certification with edited docs
+    const [docOpen, setDocOpen] = React.useState<boolean>(false); // whether modal is open
 
     const onInputChange = React.useCallback((value: string) => {
         setSearch(value);
@@ -102,6 +99,8 @@ export default function CertificationsTable({
         setSearch("");
         // Consider scroll to top
     }, []);
+
+    const numCerts = certs.length;
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -155,7 +154,6 @@ export default function CertificationsTable({
                             </DropdownMenu>
                         </Dropdown>
                         
-
                         <Button
                             color="primary"
                             isDisabled={isLoading}
@@ -185,7 +183,7 @@ export default function CertificationsTable({
                 multiSelect={false}
                 doubleClickAction={(uuid) => {
                     if (canEdit) {
-                        let cert = certs.find((cert) => cert.uuid === uuid);
+                        let cert = certs.find((c) => c.uuid === uuid);
                         setEditCert(cert);
                         setIsNew(false);
                         setIsOpen(true);
@@ -194,17 +192,10 @@ export default function CertificationsTable({
                 customColumnComponents={{
                     documents: (cert: TCertification) => (
                         <div className="flex flex-col gap-2">
-                            {/* {cert.documents?.map((doc) => (
-                                // redesign later
-                                <div key={doc.name}>
-                                    <a href={doc.link} style={{textDecorationLine: "underline"}}>{doc.name}</a>
-                                </div>
-                            ))} */}
-
                             <Button
                                 variant="flat"
                                 color="secondary"
-                                onPress={()=>{
+                                onPress={() => {
                                     setCertOpenDoc(cert);
                                     setDocOpen(true);
                                 }}
@@ -223,10 +214,11 @@ export default function CertificationsTable({
                         </div>
                     ),
                     max_level: (cert: TCertification) => (
-                        <div>{cert.max_level || "None"}</div>
+                        <div>
+                            {cert.max_level || "None"}
+                        </div>
                     ),
                     prerequisites: (cert: TCertification) => (
-                        // size down maybe
                         <div>
                             {cert.prerequisites?.map(prereq => (
                                 <CertificationTag cert_uuid={prereq} key={prereq} ></CertificationTag>
@@ -234,7 +226,6 @@ export default function CertificationsTable({
                         </div>
                     ),
                     authorized_roles: (cert: TCertification) => (
-                        // size down maybe
                         <div>
                             {cert.authorized_roles?.map(role => (
                                 <UserRole role_uuid={role} key={role} ></UserRole>
@@ -254,7 +245,7 @@ export default function CertificationsTable({
                 state variables upon close and reopen of the modal. This is potentially undesired behavior. */}
             {editCert && (
                 <EditCertModal
-                    key={editCert.uuid}
+                    key={"certedit-" + editCert.uuid}
                     cert={editCert}
                     isNew={isNew}
                     isOpen={isOpen}
@@ -266,9 +257,9 @@ export default function CertificationsTable({
 
             {docOpen && (
                 <EditDocsModal
-                    key={certOpenDoc.uuid}
+                    key={"certdocedit-" + certOpenDoc.uuid}
                     cert={certOpenDoc}
-                    documents={certOpenDoc.documents||[]}
+                    documents={certOpenDoc.documents || []}
                     isOpen={docOpen}
                     onOpenChange={setDocOpen}
                     onSuccess={() => setDocOpen(false)}

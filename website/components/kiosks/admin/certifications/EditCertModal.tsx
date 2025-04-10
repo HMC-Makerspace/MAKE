@@ -1,49 +1,34 @@
 import {
     Input,
-    Selection,
     Button,
-    DropdownTrigger,
-    Dropdown,
-    DropdownMenu,
-    DropdownItem,
-    Spinner,
-    Checkbox,
     useDisclosure,
     Modal,
     Form,
     ModalContent,
-    Tooltip,
     Popover,
     PopoverTrigger,
     PopoverContent,
     Select,
-    SelectSection,
     SelectItem,
 } from "@heroui/react";
-import {
-    MagnifyingGlassIcon as SearchIcon,
-    ChevronDownIcon,
-    PlusIcon,
-    CheckIcon,
-    StarIcon,
-    TrashIcon,
-} from "@heroicons/react/24/outline";
-import { CertificationUUID, TCertification } from "common/certification";
-import Fuse from "fuse.js";
+import { TrashIcon } from "@heroicons/react/24/outline";
+
 import React from "react";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { HexColorPicker } from "react-colorful";
-import { TUser, TUserRole, UserRoleUUID } from "common/user";
+
+import { CertificationUUID, TCertification } from "common/certification";
 import { CERTIFICATION_VISIBILITY } from "../../../../../common/certification";
-import { TDocument } from "common/file";
-import UserRole from "../../../user/UserRole";
+
 import CertificationTag from "./CertificationTag";
-import { UserRoleSelect } from "../../../user/UserRoleSelect";
 import CVisibilityIcon from "./CVisibilityIcon";
 import DeleteCertModal from "./DelCertModal";
+
+import { UserRoleUUID } from "common/user";
+import { UserRoleSelect } from "../../../user/UserRoleSelect";
 
 const createUpdateCert = async ({
     data,
@@ -115,19 +100,17 @@ export default function EditCertModal({
     } = useDisclosure();
 
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
-    const [name, setName] = React.useState<string>(cert?.name ?? "");
-    const [description, setDescription] = React.useState<string>(cert?.description ?? "");
-    const [color, setColor] = React.useState<string>(cert?.color ?? "");
-    const [uuid, setUUID] = React.useState<string>(cert?.uuid || crypto.randomUUID());
-    
-    const [visibility, setVisibility] = React.useState<CERTIFICATION_VISIBILITY>(cert?.visibility || CERTIFICATION_VISIBILITY.PUBLIC);
 
+    // certification properties
+    const [uuid, setUUID] = React.useState<string>(cert?.uuid || crypto.randomUUID());
+    const [name, setName] = React.useState<string>(cert?.name ?? "");
+    const [visibility, setVisibility] = React.useState<CERTIFICATION_VISIBILITY>(cert?.visibility || CERTIFICATION_VISIBILITY.PUBLIC);
+    const [description, setDescription] = React.useState<string>(cert?.description ?? "");
     const [maxLevel, setMaxLevel] = React.useState<number>(cert?.max_level ?? 0); // 0: no max level
     const [secondsValidFor, setSVF] = React.useState<number>(cert?.seconds_valid_for ?? 0); // 0: no limit
-
     const [prereqs, setPrereqs] = React.useState<CertificationUUID[]>(cert?.prerequisites ?? []);
     const [authRoles, setAuthRoles] = React.useState<UserRoleUUID[]>(cert?.authorized_roles ?? []);
-    const [documents, setDocuments] = React.useState<TDocument[]>(cert?.documents ?? []);
+    const [color, setColor] = React.useState<string>(cert?.color ?? "");
 
     // Cycle through valid visibilities
     const getNextVisibility = function(vis: CERTIFICATION_VISIBILITY) : CERTIFICATION_VISIBILITY {
@@ -149,38 +132,24 @@ export default function EditCertModal({
 
             const new_cert: TCertification = {
                 uuid: uuid,
-                name: name, //data.get("name") as string,
-                description: description, //data.get("description") as string,
+                name: name,
+                description: description,
                 visibility: visibility,
-                color: color, //data.get("color") as string,
-                max_level: maxLevel, //parseInt(data.get("max_level") as string ?? ""),
-                seconds_valid_for: secondsValidFor,// parseInt(data.get("svf") as string ?? ""),
-                documents: documents, // drops all documents
+                color: color,
+                max_level: maxLevel,
+                seconds_valid_for: secondsValidFor,
+                documents: cert?.documents, // edit documents in separate modal
                 authorized_roles: authRoles,
                 prerequisites: prereqs
             };
-
-            // if (new_cert.max_level == 0) {
-            //     delete new_cert.max_level; // if 0, don't specify
-            // }
-            // if (new_cert.seconds_valid_for == 0) {
-            //     delete new_cert.seconds_valid_for; // v.s.
-            // }
 
             // Reset the mutation (clears any previous errors)
             mutation.reset();
             // Run the mutation
             mutation.mutate({ data: new_cert, isNew: isNew });
         },
-        [uuid, name, description, visibility, color, maxLevel, secondsValidFor, documents, authRoles, prereqs, hasEdits],
+        [uuid, name, description, visibility, color, maxLevel, secondsValidFor, authRoles, prereqs, hasEdits],
     );
-
-    // temporarily dropped; this instacloses modal fsr
-    // React.useEffect(() => {
-    //     if (!mutation.isPending) {
-    //         onOpenChange(false);
-    //     }
-    // }, [mutation.isPending]);
 
     // A function that wraps a setter to also update the hasEdits state
     const wrapEdit = React.useCallback((fn: (arg0: any) => void) => {
@@ -190,6 +159,7 @@ export default function EditCertModal({
         };
     }, []);
 
+    // Wrap effects for numbers specifically (e.g. validity checking)
     const wrapNumberEdit = React.useCallback((fn: (arg0: any) => void) => {
         return (value: any) => {
             let num = parseInt(value || 0);
@@ -226,11 +196,9 @@ export default function EditCertModal({
                                 type="text"
                                 label="UUID"
                                 name="uuid"
-                                // If no user is selected, show a different placeholder
                                 placeholder={uuid}
                                 // UUID is not editable
                                 isDisabled
-                                // If the user exists, prefill the input with the user's uuid
                                 value={uuid}
                                 onValueChange={wrapEdit(setUUID)}
                                 variant="faded"
@@ -244,7 +212,9 @@ export default function EditCertModal({
                                     ]),
                                 }}
                             />
-                            {!isNew && (
+
+                            { // Delete button
+                            !isNew && (
                                 <Button
                                     variant="flat"
                                     color="danger"
@@ -261,10 +231,8 @@ export default function EditCertModal({
                                 type="text"
                                 label="Name"
                                 name="name"
-                                // If no user is selected, show a different placeholder
                                 placeholder="Certification Name"
                                 isRequired
-                                // If the user exists, prefill the input with the user's uuid
                                 value={name}
                                 onValueChange={wrapEdit(setName)}
                                 variant="faded"
@@ -300,9 +268,7 @@ export default function EditCertModal({
                             type="text"
                             label="Description"
                             name="description"
-                            // If no user is selected, show a different placeholder
                             placeholder="A description of the certification"
-                            // If the user exists, prefill the input with the user's uuid
                             value={description}
                             onValueChange={wrapEdit(setDescription)}
                             variant="faded"
@@ -376,17 +342,17 @@ export default function EditCertModal({
                             itemHeight={45}
                             renderValue={(selectedKeys) => {
                                 if (selectedKeys.length === 0) {
-                                    // If no scopes are selected, show the placeholder
+                                    // If no prereqs are selected, show the placeholder
                                     return "";
                                 } else {
                                     return (
-                                        // Otherwise, show the selected scopes in a flexbox
+                                        // Otherwise, show the selected prereqs in a flexbox
                                         <div className="flex flex-wrap gap-1 p-2">
                                             {selectedKeys.map(
-                                                (cert) => {
-                                                    return cert.key &&
-                                                        cert.textValue ? (
-                                                        <CertificationTag cert_uuid={cert.key as string} key={cert.key} />
+                                                (c) => {
+                                                    return c.key &&
+                                                        c.textValue ? (
+                                                        <CertificationTag cert_uuid={c.key as string} key={cert.uuid + "-prereq-" + c.key} />
                                                     ) : null;
                                                 },
                                             )}
@@ -395,20 +361,20 @@ export default function EditCertModal({
                                 }
                             }}
                         >
-                            {allCerts.data.map((cert) => (
+                            {allCerts.data.map((c) => (
                                 <SelectItem
                                     key={
-                                        cert.uuid
+                                        c.uuid
                                     }
                                     textValue={
-                                        cert.name
+                                        c.name
                                     }
                                     value={
-                                        cert.uuid
+                                        c.uuid
                                     }
                                     className="h-[45px]"
                                 >
-                                    <CertificationTag cert_uuid={cert.uuid} />
+                                    <CertificationTag cert_uuid={c.uuid} />
                                 </SelectItem>
                             ))}
                         </Select>))}
@@ -420,10 +386,8 @@ export default function EditCertModal({
                                 type="text"
                                 label="Color"
                                 name="color"
-                                // If no user is selected, show a different placeholder
                                 placeholder="Certification Color"
                                 isRequired
-                                // If the user exists, prefill the input with the user's uuid
                                 value={color}
                                 onValueChange={wrapEdit(setColor)}
                                 variant="faded"
@@ -483,7 +447,7 @@ export default function EditCertModal({
                     </Form>
 
                     <DeleteCertModal
-                        key={cert.uuid}
+                        key={"del-" + cert.uuid}
                         cert={cert}
                         isOpen={isDeleting}
                         onOpenChange={onDeleteChange}

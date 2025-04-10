@@ -4,10 +4,12 @@ import {
     Form,
     ModalContent,
 } from "@heroui/react";
-import { TCertification } from "common/certification";
+
 import React from "react";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { TCertification } from "common/certification";
 
 export default function DeleteCertModal({
     cert,
@@ -27,9 +29,10 @@ export default function DeleteCertModal({
         mutationFn: async () => {
             return axios.delete(`/api/v3/certification/${cert.uuid}`);
         },
-        onSuccess: (obj) => {
+        onSuccess: () => {
             onSuccess(`Successfully deleted certification "${cert.name}"`);
-            // Remove the role from the query cache
+            
+            // Remove the cert from the query cache
             queryClient.setQueryData(["certification"], (old: TCertification[]) => {
                 return old.filter((c) => c.uuid !== cert.uuid);
             });

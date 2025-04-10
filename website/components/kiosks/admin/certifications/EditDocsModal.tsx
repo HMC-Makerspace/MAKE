@@ -5,12 +5,14 @@ import {
     ModalContent,
     Input,
 } from "@heroui/react";
-import { TDocument } from "common/file";
+import { TrashIcon } from "@heroicons/react/24/outline";
+
 import React from "react";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { TrashIcon } from "@heroicons/react/24/outline";
+
+import { TDocument } from "common/file";
 import { TCertification } from "common/certification";
 
 const emptyDoc: TDocument = {
@@ -84,21 +86,23 @@ export default function EditDocsModal({
 
     const wrapEdit = React.useCallback((i: number, prop: "name"|"link") => {
         return (val: any) => {
-            if (!docs[i]) docs[i] = {...emptyDoc};
+            if (!docs[i]) docs[i] = {...emptyDoc}; // copy the emptyDoc template
 
-            docs[i][prop] = val;
-            setDocs([...docs]);
+            docs[i][prop] = val; // update the value
+            setDocs([...docs]); // update the docs list
+
             setHasEdits(true);
         };
     }, []);
 
     const isValid = React.useMemo(() => {
         for (let i = 0; i < docs.length; i++) {
-            if (docs[i].name == "" || docs[i].link == "")
-                return false;
+            if (docs[i].name == "" || docs[i].link == "") {
+                return false; // invalid edit if either field is empty
+            }
         }
 
-        return hasEdits;
+        return hasEdits; // otherwise, invalid iff no edits made
     }, [hasEdits, docs]);
     
     return (
@@ -117,7 +121,7 @@ export default function EditDocsModal({
                                     type="text"
                                     label="Name"
                                     name="name"
-                                    placeholder={""}
+                                    placeholder=""
                                     isRequired
                                     value={doc.name}
                                     onValueChange={wrapEdit(i, "name")}
@@ -137,7 +141,7 @@ export default function EditDocsModal({
                                     type="text"
                                     label="Link"
                                     name="link"
-                                    placeholder={""}
+                                    placeholder=""
                                     isRequired
                                     value={doc.link}
                                     onValueChange={wrapEdit(i, "link")}
@@ -156,8 +160,8 @@ export default function EditDocsModal({
                                 <Button
                                     variant="flat"
                                     color="danger"
-                                    onPress={()=>{
-                                        docs.splice(i, 1);
+                                    onPress={() => {
+                                        docs.splice(i, 1); // remove that doc
                                         setDocs([...docs]);
                                         setHasEdits(true);
                                     }}
@@ -172,8 +176,8 @@ export default function EditDocsModal({
                             color="primary"
                             className="w-full sm:w-1/3"
                             isLoading={false}
-                            onPress={()=>{
-                                setDocs([...docs, {...emptyDoc}]);
+                            onPress={() => {
+                                setDocs([...docs, {...emptyDoc}]); // add a copy of the emptyDoc template
                                 setHasEdits(true);
                             }}
                         >
