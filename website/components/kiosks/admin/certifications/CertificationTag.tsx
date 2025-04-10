@@ -40,6 +40,7 @@ function getForegroundColor(hex: string): string {
     }
 }
 
+// A certification tag similar (but with less rounded edges) to user role tags (see UserRole)
 export default function CertificationTag({ cert_uuid, showVisibility=false }: { cert_uuid: string, showVisibility?: boolean }) {
     const { data, isSuccess, isError } = useQuery<TCertification>({
         queryKey: ["certification", cert_uuid],
@@ -53,7 +54,7 @@ export default function CertificationTag({ cert_uuid, showVisibility=false }: { 
 
     return (
         <Card
-            className="p-1.5 flex flex-row gap-1 w-fit px-2.5 rounded-md"
+            className="p-1.5 flex flex-row gap-1 w-fit px-2.5 rounded-sm"
             style={{ backgroundColor: color }}
             isBlurred={!isSuccess}
         >

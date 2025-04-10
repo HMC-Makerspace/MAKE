@@ -7,7 +7,6 @@ import {
     DropdownMenu,
     DropdownItem,
     Spinner,
-    useDisclosure,
 } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
@@ -21,13 +20,13 @@ import React from "react";
 import MAKETable from "../../../Table";
 
 import { TCertification } from "common/certification";
-import MAKETable from "../../../Table";
-import React from "react";
-import CertificationTag from "./CertificationTag"
-import EditCertModal from "./EditCertModal"
-import UserRole from "../../../user/UserRole";
 import { CERTIFICATION_VISIBILITY } from "../../../../../common/certification";
+
+import CertificationTag from "./CertificationTag";
+import EditCertModal from "./EditCertModal";
 import EditDocsModal from "./EditDocsModal";
+
+import UserRole from "../../../user/UserRole";
 
 const defaultCert: TCertification = {
     uuid: "",
@@ -180,7 +179,7 @@ export default function CertificationsTable({
                 multiSelect={false}
                 doubleClickAction={(uuid) => {
                     if (canEdit) {
-                        let cert = certs.find((cert) => cert.uuid === uuid);
+                        let cert = certs.find((c) => c.uuid === uuid);
                         setEditCert(cert);
                         setIsNew(false);
                         setIsOpen(true);
@@ -189,17 +188,10 @@ export default function CertificationsTable({
                 customColumnComponents={{
                     documents: (cert: TCertification) => (
                         <div className="flex flex-col gap-2">
-                            {/* {cert.documents?.map((doc) => (
-                                // redesign later
-                                <div key={doc.name}>
-                                    <a href={doc.link} style={{textDecorationLine: "underline"}}>{doc.name}</a>
-                                </div>
-                            ))} */}
-
                             <Button
                                 variant="flat"
                                 color="secondary"
-                                onPress={()=>{
+                                onPress={() => {
                                     setCertOpenDoc(cert);
                                     setDocOpen(true);
                                 }}
@@ -218,10 +210,11 @@ export default function CertificationsTable({
                         </div>
                     ),
                     max_level: (cert: TCertification) => (
-                        <div>{cert.max_level || "None"}</div>
+                        <div>
+                            {cert.max_level || "None"}
+                        </div>
                     ),
                     prerequisites: (cert: TCertification) => (
-                        // size down maybe
                         <div>
                             {cert.prerequisites?.map(prereq => (
                                 <CertificationTag cert_uuid={prereq} key={prereq} ></CertificationTag>
@@ -229,7 +222,6 @@ export default function CertificationsTable({
                         </div>
                     ),
                     authorized_roles: (cert: TCertification) => (
-                        // size down maybe
                         <div>
                             {cert.authorized_roles?.map(role => (
                                 <UserRole role_uuid={role} key={role} ></UserRole>
@@ -249,7 +241,7 @@ export default function CertificationsTable({
                 state variables upon close and reopen of the modal. This is potentially undesired behavior. */}
             {editCert && (
                 <EditCertModal
-                    key={editCert.uuid}
+                    key={"certedit-" + editCert.uuid}
                     cert={editCert}
                     isNew={isNew}
                     isOpen={isOpen}
@@ -261,9 +253,9 @@ export default function CertificationsTable({
 
             {docOpen && (
                 <EditDocsModal
-                    key={certOpenDoc.uuid}
+                    key={"certdocedit-" + certOpenDoc.uuid}
                     cert={certOpenDoc}
-                    documents={certOpenDoc.documents||[]}
+                    documents={certOpenDoc.documents || []}
                     isOpen={docOpen}
                     onOpenChange={setDocOpen}
                     onSuccess={() => setDocOpen(false)}
