@@ -63,12 +63,12 @@
             </div>
 
             <div id="edit-inventory-item" class="hidden">
-                <ul>
+                <!-- <ul>
                     <li>Required fields are marked with an asterisk (*)</li>
                     <li>Changes are saved automatically</li>
                     <li>New items are saved when all required fields are filled in</li>
-                    <li>For quantity, -3 = High, -2 = Medium, and -1 = Low</li>
-                </ul>
+                    <li>For quantity, -2 or -3 = High, and -1 = Low</li>
+                </ul> -->
                 <!--
                     {
                         "uuid": "3658b36d-9ba3-4391-ae21-3d9510db2f2d",
@@ -111,7 +111,19 @@
                         <option value="5">5: Staff only use</option>
                    </select>
                 </label>
-                <label>Total Quantity *<input id="edit-quantity_total" type="number" required></label>
+
+                <label>Total Quantity *
+                <input id="edit-quantity_total" type="number" required style="width: 100%;">
+                <!-- <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button id="btn-high" type="button">High</button>
+                    <button id="btn-low" type="button">Low – Submit Restock Request</button>
+                </div> -->
+                </label>
+
+                <div style="display: flex; gap: 8px; margin-top: 8px; margin-left: 160px; margin-bottom: 12px;">
+                    <button id="btn-high" type="button">High</button>
+                    <button id="btn-low" type="button">Low - Submit Restock Request</button>
+                </div>
 
                 <label>Long Name<input id="edit-long_name" type="text" placeholder="DEWALT Combination Wrench Set, Metric, 8-Piece"></label>
                 <label>Reorder URL<input id="edit-reorder_url" type="text" placeholder="https://www.amazon.com/DEWALT-DWMT73810-Metric-Combination-Wrench/dp/B00PQXNG0M/ref=sr_1_2?crid=3ID2AV9MD8EN9&dib=eyJ2IjoiMSJ9.Zb4Jp5zQqyXYXUiR2oo3OnsI25LOnG4M_ojOvCU4J823qiw5qOD158-_Nf6AXtrPS2lO_0o4eBzgZT-l5PtEWGmxezLau_ieDLR8iIWM3fAWZNor2-Kjwwdb1KRjzURcgrySx1v-yjeVhFnU3D19sWEMiXcKqo-JiV3AWFQcE7sGmP617z0aQnAwRBCG3XBTgtHDZJUTkBxP_Qj72EaOikaF6IC47CVQvTVNxB2KJKkn6KCZb7tfPvDReuAZIiec62PfLFuKAGS7rsGAiEVbXz_bxME4TV5Xx_l_Z-OwA8o.mRDrxsqZJMPNrqQAYeumUegN7q1TspRXVLEsFVr2Vzw&dib_tag=se&keywords=wrench%2Bset%2Bdewalt&qid=1708570059&sprefix=wrench%2Bset%2Bdewal%2Caps%2C316&sr=8-2&th=1"></label>
@@ -135,6 +147,33 @@
                 
             </div>
         </div>
+
+        <div id="restock-popup" class="popup hidden">
+            <div class="popup-content">
+                <h2>Submit Restock Request</h2>
+                <label>
+                Item:
+                <input type="text" id="popup-item" readonly>
+                </label>
+                <label>
+                Link:
+                <input type="text" id="popup-link" readonly>
+                </label>
+                <label>
+                Quantity:
+                <input type="number" id="popup-quantity" required>
+                </label>
+                <label>
+                Note:
+                <textarea id="popup-note"></textarea>
+                </label>
+                <div class="popup-buttons">
+                <button onclick="submitRestockFromKiosk()">Submit</button>
+                <button onclick="closeRestockPopup()">Cancel</button>
+                </div>
+            </div>
+            </div>
+    
 
         <script src="/scripts/libs/fuzzysort.min.js?v=3.0.2"></script>
         <script src="/scripts/libs/sweetalert.min.js"></script>

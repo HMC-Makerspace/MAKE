@@ -6,3 +6,7 @@ MAKE-server/server_files/
 .DS_Store
 .prettierignore
 .eslintignore
+lib/
+bin/
+pyvenv.cfg
+.gitignore

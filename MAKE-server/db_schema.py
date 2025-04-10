@@ -271,8 +271,9 @@ class UserFile(BaseModel):
 
 """
 The restock_requests class is used to store information about the restock requests.
-The following fields are stored:
+The following fields are stored
 - uuid: The uuid of the restock request
+- item_uuid: the uuid of the item in inventory for automated restocks 
 - Items Requested: A list of the items requested
 - Requested By: The name of the user who requested the restock
 - Requested By Email: The email of the user who requested the restock
@@ -284,25 +285,31 @@ The following fields are stored:
 class RestockRequest(BaseModel):
     uuid: str
     item: str
+    item_uuid: Union[str, None] = None  
     quantity: str
     reason: str
     user_uuid: Union[str, None] = None
     authorized_request: bool
     timestamp_sent: float
+    timestamp_ordered: Union[float, None] = None  
     timestamp_completed: Union[float, None] = None
     is_approved: Union[bool, None] = None
     completion_note: Union[str, None] = None
+    reorder_url: Union[str, None] = None
+
     # TODO[pydantic]: The following keys were removed: `json_encoders`.
     # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
     model_config = ConfigDict(arbitrary_types_allowed=True, json_encoders={ObjectId: str}, json_schema_extra={
         "example": {
             "uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
             "item": "Soldering Iron",
+            "item_uuid": "12345678-1234-1234-1234-1234567890ab" , 
             "quantity": "1 more iron",
             "reason": "Low/Out of Stock",
             "user_uuid": "d3f4e5c6-7b8a-9c0d-1e2f-3g4h5i6j7k8l",
             "authorized_request": False,
             "timestamp_sent": 1610000000,
+            "timestamp_ordered": 1610000500, 
             "timestamp_completed": None,
             "is_approved": None,
             "completion_note": None,

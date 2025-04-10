@@ -200,6 +200,8 @@ CHECKOUT
   font-weight: bold;
 }
 
+
+
 #printers-current.small > * {
   width: 100px;
   height: 110px;
@@ -1115,6 +1117,12 @@ INVENTORY
 
 */
 
+.hidden {
+  display: none !important;
+}
+
+
+
 #edit-inventory-grid {
   position: absolute;
   top: 0;
@@ -1188,6 +1196,28 @@ INVENTORY
   background-color: var(--theme-color-2);
   width: calc(100% - 40px);
   padding: 10px;
+}
+
+.restock-pending {
+  border: 3px solid red;
+}
+
+.restock-ordered {
+  border: 3px solid #52e5db;
+}
+
+.restock-banner {
+  background-color: #b63a3a; /* Default red — override with another class if needed */
+  color: white;
+  padding: 10px 16px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 8px;
+  margin-left: 160px;
+  border-radius: 6px;
+}
+.restock-banner.ordered {
+  background-color: #52e5db;
 }
 
 .edit-inventory-item:nth-child(even) {
@@ -1298,6 +1328,96 @@ INVENTORY
 #save-status.error {
   background-color: var(--low-color-dark);
   border: 2px solid var(--low-color);
+}
+
+/* .popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(30, 30, 30, 0.5); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup-content {
+  background-color: white;
+  color: black;
+  padding: 24px;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.popup-content label {
+  display: block;
+  margin: 12px 0;
+}
+
+.popup-content input,
+.popup-content textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+} */
+
+
+#popup-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+
+#popup-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999;
+}
+
+#popup-content {
+  z-index: 1000;
+  background-color: var(--theme-color-5);
+  padding: 40px;
+  max-width: 1500px;
+}
+
+#popup-content >* {
+  margin-bottom: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+}
+
+.popup-buttons button {
+  padding: 10px 20px; /* Adjust padding to make the button larger */
+  font-size: 16px; /* Increase font size for readability */
+  border-radius: 8px; /* Optional: to make the buttons' corners more rounded */
+  min-width: 200px; /* Optional: ensures buttons are not too narrow */
+  cursor: pointer;
 }
 
 /*
@@ -1504,9 +1624,103 @@ WORKSHOPS
   max-width: 1000px;
 }
 
-#attendees-table, #redirects-table, #pending-restock-requests-list, #completed-restock-requests-list {
+/* ****************************************** INVENTORY RESTOCKS PAGE START ********************************************************************************************* */
+
+#page-restock-requests h1 {
+  margin: 16px auto 8px auto;
+  padding-bottom: 0;
+  border-bottom: none;
+  font-size: 1.5rem;
+  width: 90%;
   text-align: center;
 }
+
+#pending-restock-requests-list,
+#ordered-restock-requests-list,
+#completed-restock-requests-list {
+  margin-bottom: 48px;
+}
+
+/* ------------------ Pending ------------------ */
+.restock-request-pending.restock-request-header {
+  display: grid;
+  grid-template-columns: 6fr 6fr 6fr 8fr 4fr; 
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #2a2a2a;
+  font-weight: bold;
+}
+
+.restock-request-pending {
+  display: grid;
+  grid-template-columns: 6fr 6fr 6fr 8fr 4fr; 
+  gap: 12px;
+  padding: 12px 16px;
+  align-items: center;
+  border-bottom: 1px solid #444;
+  text-align: left;
+}
+
+.restock-request-pending .restock-request-quantity,
+.restock-request-pending .restock-request-complete {
+  text-align: center;
+}
+
+
+/* ------------------ Ordered ------------------ */
+.restock-request-ordered.restock-request-header {
+  display: grid;
+  grid-template-columns: 6fr 6fr 6fr 4fr 4fr 4fr;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #2a2a2a;
+  font-weight: bold;
+}
+
+.restock-request-ordered {
+  display: grid;
+  grid-template-columns: 6fr 6fr 6fr 4fr 4fr 4fr;
+  gap: 12px;
+  padding: 12px 16px;
+  align-items: center;
+  border-bottom: 1px solid #444;
+  text-align: left;
+}
+
+.restock-request-ordered .restock-request-quantity,
+.restock-request-ordered .restock-request-note,
+.restock-request-ordered .restock-request-complete {
+  text-align: center;
+}
+
+
+/* ------------------ Completed ------------------ */
+.restock-request-completed.restock-request-header {
+  display: grid;
+  grid-template-columns: 6fr 6fr 6fr 8fr 4fr; 
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #2a2a2a;
+  font-weight: bold;
+}
+
+.restock-request-completed {
+  display: grid;
+  grid-template-columns: 6fr 6fr 6fr 8fr 4fr; 
+  gap: 12px;
+  padding: 12px 16px;
+  align-items: center;
+  border-bottom: 1px solid #444;
+  text-align: left;
+}
+
+.restock-request-completed .restock-request-quantity,
+.restock-request-completed .restock-request-note {
+  text-align: center;
+}
+
+/* ***************************************** INVENTORY RESTOCKS PAGE END ********************************************************************************************** */
+
 
 /*
 
