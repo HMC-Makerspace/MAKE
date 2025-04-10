@@ -1666,6 +1666,10 @@ WORKSHOPS
   text-align: center;
 }
 
+.restock-request-item {
+  width: 300px;
+  overflow-wrap: break-word;
+}
 
 /* ------------------ Ordered ------------------ */
 .restock-request-ordered.restock-request-header {
