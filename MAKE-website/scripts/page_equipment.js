@@ -187,7 +187,7 @@ const main_area_equipment = {
             name: "Embroidery Machines (Brother PE800)",
             description: "The Brother PE800 can automatically embroider designs onto fabric. Embroidery designs can be designed on the machine for simple text and symbols, with more complex designs able to be created on a computer and transferred to the machine.",
             image: "img/equipment/embroiderymachine.webp",
-            link: "https://docs.google.com/document/d/10-NArw55j5zZnTbBB5HI8VhwPEMYRjAXWBKud1ITeVE/edit"
+            link: "https://docs.google.com/document/d/1jcCVIsQ3OVNj_GZX1dKoWpJwT7uQp9psPVM54dnIonY/edit?usp=sharing"
         },
         {
             name: "Digital Jacquard Loom",
