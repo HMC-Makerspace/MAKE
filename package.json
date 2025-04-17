@@ -27,6 +27,7 @@
     "@heroicons/react": "^2.2.0",
     "@heroui/react": "^2.6.13",
     "@heroui/use-infinite-scroll": "^2.2.3",
+    "@internationalized/date": "^3.7.0",
     "@tanstack/react-query": "^5.62.15",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.9",

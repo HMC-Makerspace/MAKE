@@ -1,7 +1,7 @@
 import { API_SCOPE, UUID } from "common/global";
 import {
-    getCurrentSchedule,
-    getCurrentPublicSchedule,
+    getActiveSchedule,
+    getActivePublicSchedule,
     createSchedule,
     deleteSchedule,
     updateSchedule,
@@ -18,6 +18,7 @@ import {
     createAlertInSchedule,
     updateAlertInSchedule,
     deleteAlertInSchedule,
+    setActiveSchedule,
 } from "controllers/schedule.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
@@ -72,7 +73,7 @@ const router = Router();
 // --- Shift Routes ---
 
 /**
- * Get a list of shifts for a given user in the current schedule. This is
+ * Get a list of shifts for a given user in the active schedule. This is
  * a protected route, and a `requesting_uuid` header is required to
  * call it. The user must have the
  * {@link API_SCOPE.GET_ALL_SHIFTS} scope. If the requesting user is
@@ -81,7 +82,7 @@ const router = Router();
  * the user, or a 403 error if the user is not authorized.
  */
 router.get(
-    "/current/shifts/by/user/:user_uuid",
+    "/active/shifts/by/user/:user_uuid",
     async (req: Request<{ user_uuid: string }>, res: ShiftsResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = headers.requesting_uuid;
@@ -90,14 +91,14 @@ router.get(
         // If no requesting user uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
-                "No requesting_uuid was provided while getting a user's current shifts",
+                "No requesting_uuid was provided while getting a user's active shifts",
             );
             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
 
         req.log.debug({
-            msg: `Getting current shifts for user ${user_uuid}`,
+            msg: `Getting active shifts for user ${user_uuid}`,
             requesting_uuid: requesting_uuid,
         });
 
@@ -137,7 +138,7 @@ router.get(
  *
  */
 router.get(
-    "/current/drops/by/user/:user_uuid",
+    "/active/drops/by/user/:user_uuid",
     async (req: Request<{ user_uuid: string }>, res: ShiftsResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = headers.requesting_uuid;
@@ -147,14 +148,14 @@ router.get(
         if (!requesting_uuid) {
             req.log.warn(
                 "No requesting_uuid was provided while getting a user's " +
-                    "current shift drops",
+                    "active shift drops",
             );
             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
 
         req.log.debug({
-            msg: `Getting current shift drops for user ${user_uuid}`,
+            msg: `Getting active shift drops for user ${user_uuid}`,
             requesting_uuid: requesting_uuid,
         });
 
@@ -191,7 +192,7 @@ router.get(
 );
 
 router.get(
-    "/current/pickups/by/user/:user_uuid",
+    "/active/pickups/by/user/:user_uuid",
     async (req: Request<{ user_uuid: string }>, res: ShiftsResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = headers.requesting_uuid;
@@ -201,14 +202,14 @@ router.get(
         if (!requesting_uuid) {
             req.log.warn(
                 "No requesting_uuid was provided while getting a user's " +
-                    "current shift pickups",
+                    "active shift pickups",
             );
             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
 
         req.log.debug({
-            msg: `Getting current shift pickups for user ${user_uuid}`,
+            msg: `Getting active shift pickups for user ${user_uuid}`,
             requesting_uuid: requesting_uuid,
         });
 
@@ -225,9 +226,9 @@ router.get(
             // If authorized, get the user's shifts information
             const dropped_shifts = await getPickedUpShiftsByUser(user_uuid);
             if (dropped_shifts === null) {
-                req.log.error("No current schedule found");
+                req.log.error("No active schedule found");
                 res.status(StatusCodes.NOT_FOUND).json({
-                    error: "No current schedule found.",
+                    error: "No active schedule found.",
                 });
             } else {
                 req.log.debug("Returned user's shift pickups.");
@@ -357,8 +358,9 @@ router.put(
             );
             if (!new_schedule) {
                 req.log.warn(
-                    `An attempt was made to update a shift in the schedule ` +
-                        `with uuid ${schedule_uuid}, but that schedule was not found`,
+                    `An attempt was made to update a shift with uuid ${shift_uuid}` +
+                        ` in the schedule with uuid ${schedule_uuid}, but the` +
+                        ` schedule or shift was not found`,
                 );
                 res.status(StatusCodes.NOT_FOUND).json({
                     error: `Schedule with uuid \`${schedule_uuid}\` not found.`,
@@ -513,25 +515,22 @@ router.patch(
 );
 
 /**
- * Get the current active alerts for a schedule. This is a public route.
+ * Get the active active alerts for a schedule. This is a public route.
  */
-router.get(
-    "/current/alerts/active",
-    async (req: Request, res: AlertsResponse) => {
-        req.log.debug("Getting current active alerts.");
+router.get("/active/alerts", async (req: Request, res: AlertsResponse) => {
+    req.log.debug("Getting active active alerts.");
 
-        const alerts = await getActiveAlerts();
-        if (!alerts) {
-            req.log.warn("No active alerts found.");
-            res.status(StatusCodes.NOT_FOUND).json({
-                error: "No active alerts found.",
-            });
-        } else {
-            req.log.debug("Returned active alerts.");
-            res.status(StatusCodes.OK).json(alerts);
-        }
-    },
-);
+    const alerts = await getActiveAlerts();
+    if (!alerts) {
+        req.log.warn("No active alerts found.");
+        res.status(StatusCodes.NOT_FOUND).json({
+            error: "No active alerts found.",
+        });
+    } else {
+        req.log.debug("Returned active alerts.");
+        res.status(StatusCodes.OK).json(alerts);
+    }
+});
 
 /**
  * Add an alert to a schedule. This is a protected route, and a `requesting_uuid`
@@ -784,52 +783,52 @@ router.get("/", async (req: Request, res: SchedulesResponse) => {
 });
 
 /**
- * Get the current schedule. This is a protected route, and a `requesting_uuid`
+ * Get the active schedule. This is a protected route, and a `requesting_uuid`
  * header is required to call it. The user must have the
- * {@link API_SCOPE.GET_CURRENT_SCHEDULE} scope.
+ * {@link API_SCOPE.GET_ACTIVE_SCHEDULE} scope.
  */
-router.get("/current", async (req: Request, res: ScheduleResponse) => {
+router.get("/active", async (req: Request, res: ScheduleResponse) => {
     const headers = req.headers as VerifyRequestHeader;
     const requesting_uuid = headers.requesting_uuid;
 
     // If no requesting user uuid is provided, the call is not authorized
     if (!requesting_uuid) {
         req.log.warn(
-            "No requesting_uuid was provided while getting the current schedule.",
+            "No requesting_uuid was provided while getting the active schedule.",
         );
         res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
         return;
     }
 
     req.log.debug({
-        msg: `Getting the current schedule.`,
+        msg: `Getting the active schedule.`,
         requesting_uuid: requesting_uuid,
     });
 
-    // A get current schedule request is valid if the requesting user can get all
-    // schedules or get the current schedule at a time
+    // A get active schedule request is valid if the requesting user can get all
+    // schedules or get the active schedule at a time
     if (
         await verifyRequest(
             requesting_uuid,
             API_SCOPE.GET_ALL_SCHEDULES,
             API_SCOPE.GET_ONE_SCHEDULE,
-            API_SCOPE.GET_CURRENT_SCHEDULE,
+            API_SCOPE.GET_ACTIVE_SCHEDULE,
         )
     ) {
         // If the user is authorized, get a schedule's information
-        const schedule = await getCurrentSchedule();
+        const schedule = await getActiveSchedule();
         if (!schedule) {
-            req.log.warn(`Current schedule not found.`);
+            req.log.warn(`Active schedule not found.`);
             res.status(StatusCodes.NOT_FOUND).json({
-                error: `Current schedule not found.`,
+                error: `Active schedule not found.`,
             });
             return;
         }
-        req.log.debug("Returned current schedule.");
+        req.log.debug("Returned active schedule.");
         res.status(StatusCodes.OK).json(schedule);
     } else {
         req.log.warn({
-            msg: "Forbidden user attempted to get the current schedule",
+            msg: "Forbidden user attempted to get the active schedule",
             requesting_uuid: requesting_uuid,
         });
         // If the user is not authorized, provide a status error
@@ -838,9 +837,9 @@ router.get("/current", async (req: Request, res: ScheduleResponse) => {
 });
 
 /**
- * Get the current public schedule. This is a protected route, and a `requesting_uuid`
+ * Get the active public schedule. This is a protected route, and a `requesting_uuid`
  * header is required to call it. The user must have the
- * {@link API_SCOPE.GET_CURRENT_PUBLIC_SCHEDULE} scope.
+ * {@link API_SCOPE.GET_ACTIVE_PUBLIC_SCHEDULE} scope.
  */
 router.get("/public", async (req: Request, res: PublicScheduleResponse) => {
     const headers = req.headers as VerifyRequestHeader;
@@ -849,43 +848,43 @@ router.get("/public", async (req: Request, res: PublicScheduleResponse) => {
     // If no requesting user uuid is provided, the call is not authorized
     if (!requesting_uuid) {
         req.log.warn(
-            "No requesting_uuid was provided while getting the current public schedule.",
+            "No requesting_uuid was provided while getting the active public schedule.",
         );
         res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
         return;
     }
 
     req.log.debug({
-        msg: `Getting the current public schedule.`,
+        msg: `Getting the active public schedule.`,
         requesting_uuid: requesting_uuid,
     });
 
-    // A get current public schedule request is valid if the requesting user
-    // can get all schedules or get one schedule or get the current schedule
-    // or get the current public schedule at a time
+    // A get active public schedule request is valid if the requesting user
+    // can get all schedules or get one schedule or get the active schedule
+    // or get the active public schedule at a time
     if (
         await verifyRequest(
             requesting_uuid,
             API_SCOPE.GET_ALL_SCHEDULES,
             API_SCOPE.GET_ONE_SCHEDULE,
-            API_SCOPE.GET_CURRENT_SCHEDULE,
-            API_SCOPE.GET_CURRENT_PUBLIC_SCHEDULE,
+            API_SCOPE.GET_ACTIVE_SCHEDULE,
+            API_SCOPE.GET_ACTIVE_PUBLIC_SCHEDULE,
         )
     ) {
         // If the user is authorized, get a schedule's information
-        const schedule = await getCurrentPublicSchedule();
+        const schedule = await getActivePublicSchedule();
         if (!schedule) {
-            req.log.warn(`Current public schedule not found.`);
+            req.log.warn(`Active public schedule not found.`);
             res.status(StatusCodes.NOT_FOUND).json({
-                error: `Current public schedule not found.`,
+                error: `Active public schedule not found.`,
             });
             return;
         }
-        req.log.debug("Returned current public schedule.");
+        req.log.debug("Returned active public schedule.");
         res.status(StatusCodes.OK).json(schedule);
     } else {
         req.log.warn({
-            msg: "Forbidden user attempted to get the current public schedule",
+            msg: "Forbidden user attempted to get the active public schedule",
             requesting_uuid: requesting_uuid,
         });
         // If the user is not authorized, provide a status error
@@ -1052,6 +1051,58 @@ router.put("/", async (req: ScheduleRequest, res: ScheduleResponse) => {
         res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
     }
 });
+
+/**
+ * Set the active schedule by uuid. Requires the {@link API_SCOPE.UPDATE_SCHEDULE} scope.
+ */
+router.patch(
+    "/active/:UUID",
+    async (req: Request<{ UUID: string }>, res: ScheduleResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = headers.requesting_uuid;
+        const schedule_uuid = req.params.UUID;
+
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while updating active schedule",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+
+        req.log.debug({
+            msg: `Setting active schedule to uuid ${schedule_uuid}`,
+            requesting_uuid: requesting_uuid,
+        });
+
+        // If the user is authorized, delete a schedule object
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_SCHEDULE)) {
+            const schedule = await setActiveSchedule(schedule_uuid);
+            if (!schedule) {
+                req.log.warn(
+                    `Schedule with uuid ${schedule_uuid} could not be ` +
+                        `activated because it was not found.`,
+                );
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error:
+                        `Schedule with uuid ${schedule_uuid} could not be ` +
+                        `activated because it was not found.`,
+                });
+                return;
+            }
+            req.log.debug(`Activated schedule ${schedule_uuid}`);
+            res.status(StatusCodes.OK).json(schedule);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to activate a schedule",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
 
 /**
  * Delete a specific schedule. This is a protected route, and a

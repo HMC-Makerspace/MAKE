@@ -26,6 +26,8 @@ export type TAlert = {
 
 /**
  * TSchedule - Object to store information about the shift schedule
+ * @property uuid - A unique identifier for this schedule
+ * @property name - The display name for this schedule
  * @property timestamp_start -  A unix timestamp for when this schedule
  *      becomes active
  * @property timestamp_end - A unix timestamp for when this schedule
@@ -34,15 +36,20 @@ export type TAlert = {
  *      schedule
  * @property alerts - A list of {@link TAlert | Alert} objects that occurred
  *      during this schedule
+ * @property daily_open_time - The time (in seconds after midnight) that shifts start
+ * @property daily_close_time - he time (in seconds after midnight) that shifts end
+ * @property active - Whether or not to display the schedule as the active schedule
  */
 export type TSchedule = {
     uuid: UUID;
+    name: string;
     timestamp_start: UnixTimestamp;
     timestamp_end: UnixTimestamp;
     shifts: TShift[];
     alerts: TAlert[];
     daily_open_time: number;
     daily_close_time: number;
+    active: boolean;
 };
 
 /**
@@ -58,6 +65,7 @@ export type TPublicScheduleData = {
 
 const EXAMPLE_SCHEDULE: TSchedule = {
     uuid: "example-schedule",
+    name: "Example Schedule",
     timestamp_start: 1740106000,
     timestamp_end: 1840106000,
     shifts: [
