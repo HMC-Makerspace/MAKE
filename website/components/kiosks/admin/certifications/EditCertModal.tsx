@@ -379,7 +379,16 @@ export default function EditCertModal({
                             ))}
                         </Select>))}
 
-                        <UserRoleSelect selectedKeys={authRoles} onSelectionChange={wrapSetEdit(setAuthRoles)} />
+                        <UserRoleSelect
+                            selectedKeys={authRoles}
+                            onSelectionChange={wrapSetEdit(setAuthRoles)}
+                            placeholder="Select authorized roles"
+                            label="Authorized Roles"
+                            labelPlacement="inside"
+                            classNames={{
+                                value: "text-default-500",
+                            }}
+                        />
 
                         <div className="grid grid-flow-col gap-2 items-center w-full">
                             <Input
