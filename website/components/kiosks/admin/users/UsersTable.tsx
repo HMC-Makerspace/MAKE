@@ -1,32 +1,20 @@
-import {
-    Input,
-    Selection,
-    SortDescriptor,
-    Button,
-    DropdownTrigger,
-    Dropdown,
-    DropdownMenu,
-    DropdownItem,
-    Spinner,
-} from "@heroui/react";
-import { useInfiniteScroll } from "@heroui/use-infinite-scroll";
+import { Input, Selection, Button, Spinner } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
-    ChevronDownIcon,
     PlusIcon,
     PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 import { TUser } from "common/user";
-import MAKETable from "../../../Table";
+import MAKETable, { ColumnSelect } from "../../../Table";
 import MAKEUserRole from "../../../user/UserRole";
 import Fuse from "fuse.js";
 import React from "react";
 
 const columns = [
-    { name: "UUID", id: "uuid" },
+    // { name: "UUID", id: "uuid" }, // No need to show
     { name: "ID", id: "college_id" },
-    { name: "Name", id: "name", sortable: true },
-    { name: "Email", id: "email", sortable: true },
+    { name: "Name", id: "name" },
+    { name: "Email", id: "email" },
     { name: "Roles", id: "active_roles" },
     { name: "Past Roles", id: "past_roles" },
     { name: "Certificates", id: "active_certificates" },
@@ -47,11 +35,13 @@ export default function UsersTable({
     selectedKeys,
     onSelectionChange,
     isLoading,
+    onCreate,
 }: {
     users: TUser[];
     selectedKeys: Selection;
     onSelectionChange: (selectedKeys: Selection) => void;
     isLoading: boolean;
+    onCreate: (state: boolean) => void;
 }) {
     // The set of columns that are visible
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
@@ -91,8 +81,6 @@ export default function UsersTable({
         // Consider scroll to top
     }, []);
 
-    const onOpen = () => null;
-
     const [multiSelect, setMultiSelect] = React.useState(false);
 
     const batchEdit = (batchEdit: boolean) => {
@@ -108,11 +96,18 @@ export default function UsersTable({
     };
 
     const modifiedSelectionChange = (selectedKeys: Selection) => {
+        // If the selection changes, we won't be creating a new user
+        onCreate(false);
         if (selectedKeys === "all") {
             onSelectionChange(new Set(filteredUsers.map((user) => user.uuid)));
         } else {
             onSelectionChange(selectedKeys);
         }
+    };
+
+    const createUser = () => {
+        onSelectionChange(new Set());
+        onCreate(true);
     };
 
     return (
@@ -133,39 +128,13 @@ export default function UsersTable({
                         }}
                     />
                     <div className="flex gap-3">
-                        <Dropdown isDisabled={isLoading}>
-                            <DropdownTrigger className="hidden sm:flex">
-                                <Button
-                                    endContent={
-                                        <ChevronDownIcon className="size-6 text-small" />
-                                    }
-                                    variant="flat"
-                                >
-                                    Filter Columns
-                                </Button>
-                            </DropdownTrigger>
-                            <DropdownMenu
-                                disallowEmptySelection
-                                aria-label="Table Columns"
-                                closeOnSelect={false}
-                                selectedKeys={visibleColumns}
-                                selectionMode="multiple"
-                                onSelectionChange={setVisibleColumns}
-                            >
-                                {columns
-                                    .filter((column) =>
-                                        defaultColumns.includes(column.id),
-                                    )
-                                    .map((column) => (
-                                        <DropdownItem
-                                            key={column.id}
-                                            className="capitalize"
-                                        >
-                                            {column.name}
-                                        </DropdownItem>
-                                    ))}
-                            </DropdownMenu>
-                        </Dropdown>
+                        <ColumnSelect
+                            columns={columns}
+                            visibleColumns={visibleColumns}
+                            setVisibleColumns={setVisibleColumns}
+                            isLoading={isLoading}
+                        />
+                        {/* TODO: Make a filter by dropdown that has sub-selection part for role, cert, etc. */}
                         {multiSelect ? (
                             <Button
                                 color="danger"
@@ -194,7 +163,7 @@ export default function UsersTable({
                             color="primary"
                             isDisabled={isLoading}
                             startContent={<PlusIcon className="size-6" />}
-                            onPress={onOpen}
+                            onPress={createUser}
                         >
                             Create
                         </Button>
@@ -215,8 +184,18 @@ export default function UsersTable({
                 multiSelect={multiSelect}
                 customColumnComponents={{
                     active_roles: (user: TUser) => (
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-row flex-wrap gap-2">
                             {user.active_roles.map((log) => (
+                                <MAKEUserRole
+                                    role_uuid={log.role_uuid}
+                                    key={log.role_uuid}
+                                />
+                            ))}
+                        </div>
+                    ),
+                    past_roles: (user: TUser) => (
+                        <div className="flex flex-row flex-wrap gap-2">
+                            {user.past_roles.map((log) => (
                                 <MAKEUserRole
                                     role_uuid={log.role_uuid}
                                     key={log.role_uuid}
