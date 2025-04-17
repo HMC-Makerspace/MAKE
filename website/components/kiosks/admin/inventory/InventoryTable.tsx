@@ -131,7 +131,6 @@ export default function InventoryTable({
                             <DropdownMenu
                                 disallowEmptySelection
                                 aria-label="Table Columns"
-                                hello, this is going to break the code, and hopefully, you just wont see it for a while
                                 closeOnSelect={false}
                                 selectedKeys={visibleColumns}
                                 selectionMode="multiple"
