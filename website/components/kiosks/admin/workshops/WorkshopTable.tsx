@@ -1,27 +1,38 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { 
     Selection,
     Button,
-    User
+    Modal,
+    ModalHeader,
+    useDisclosure
 } from '@heroui/react';
 import {
     PhotoIcon,
     UserIcon,
-    PencilSquareIcon
+    PencilSquareIcon,
+    CheckIcon
 } from '@heroicons/react/24/outline';
 import { TWorkshop } from 'common/workshop';
 import MAKETable from '../../../Table.tsx';
 import  { MAKEUser } from '../../../user/User.tsx';
+import  UserRole from '../../../user/UserRole.tsx';
 import { convertTimestampToDate } from '../../../../utils.tsx';
 import ImageCarousel from '../../../ImageCarousel.tsx';
 import { FILE_RESOURCE_TYPE } from '../../../../../common/file.ts';
+import WorkshopPeopleModal from './WorkshopPeopleModal.tsx';
+import WorkshopImagesModal from './WorkshopImagesModal.tsx';
+import WorkshopEditModal from './WorkshopEditModal.tsx';
 
+// TODO- 
+// [] FIX TIME
+// [] FIX AUTHORIZED ROLES
 
 const columns = [
     {name: 'Title', id: 'title'},
     {name: 'Description', id:'description'},
     {name: 'Instructors + Support', id:'instructors'},
     {name: 'Time', id:'ws_time'},
+    {name: 'Live', id: 'timestamp_public'},
     {name: 'Capacity', id:'capacity'},
     {name: 'Certifications', id:'required_certifications'},
     // {name: 'RSVP List', id:'rsvp_list'},
@@ -36,6 +47,7 @@ const defaultColumns = [
     'description',
     'instructors',
     'ws_time',
+    'timestamp_public',
     'capacity',
     'signups',
     'required_certifications',
@@ -53,10 +65,31 @@ export default function WorkshopTable({
     workshops: TWorkshop[];
     isLoading: boolean
 }) {
+
+    
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
             new Set(defaultColumns),
         );
-    console.log(workshops)
+    
+    const [selectedWorkshop, setSelectedWorkshop] = React.useState<TWorkshop | null>(null);
+
+    const {
+            isOpen: peopleIsOpen,
+            onOpen: peopleOnOpen,
+            onOpenChange: peopleOnOpenChange,
+        } = useDisclosure(); 
+
+    const {
+        isOpen: imagesIsOpen,
+        onOpen: imagesOnOpen,
+        onOpenChange: imagesOnOpenChange,
+    } = useDisclosure();
+    const {
+        isOpen: editIsOpen,
+        onOpen: editOnOpen,
+        onOpenChange: editOnOpenChange,
+    } = useDisclosure();
+
     return (
         <>
             <div className='flex flex-col justify-center items-center'>
@@ -79,20 +112,23 @@ export default function WorkshopTable({
                     "title": (workshop) => {
                         return (
                             <div>
-                                <h2 className='font-bold text-[#faf8f7]'>{workshop.title}</h2>
+                                <h2 className='font-bold text-color[#403c38]'>{workshop.title}</h2>
                             </div>
                         )
                     },
                     "description": (workshop) => {
                         return (
                             <div className='min-w-[15vw]'>
-                                <p>{workshop.description}</p>
+                                {workshop.description ?
+                                    <p>{workshop.description}</p>
+                                    : <p>Come join the Makerspace for a fun workshop!</p>
+                                }
                             </div>
                         )
                     },
                     "instructors": (workshop) => {
                         return (
-                            <div className='flex flex-col gap-2'>
+                            <div className='flex flex-col gap-2 my-2'>
                                 {
                                    workshop.instructors.map((instructor) => {
                                         return <MAKEUser size='sm' user_uuid={instructor} />
@@ -102,7 +138,7 @@ export default function WorkshopTable({
                                  (
                                     <>
                                         {workshop.support_instructors.map((instructor) => {
-                                            return <MAKEUser size='sm' user_uuid={instructor} />
+                                            return <MAKEUser size='sm' user_uuid={instructor}/> //className="bg-default-400"
                                         })}
                                     </>
                                    
@@ -111,21 +147,58 @@ export default function WorkshopTable({
                             </div>
                         )
                     },
-                    // "support_instructors": (workshop) => {
-                    //     return (
-                    //         <div className='flex flex-col gap-2'>
-                    //             { workshop.support_instructors &&
-                    //                workshop.support_instructors.map((instructor) => {
-                    //                     return <MAKEUser size='sm' user_uuid={instructor} />
-                    //                 })
-                    //             }
-                    //         </div>
-                    //     )
-                    // },
                     "ws_time": (workshop) => {
                         return (
-                            <div>
-                                <h2>{convertTimestampToDate(workshop.timestamp_start)} - {new Date(workshop.timestamp_end * 1000).toLocaleTimeString()}</h2>
+                            <div className='flex flex-col min-w-[6vw]'>
+                                <h2 className=' text-center'>{new Date(workshop.timestamp_start * 1000).toLocaleDateString()},</h2>
+                                <h2 className='text-sm'>{new Date(workshop.timestamp_start * 1000).toLocaleTimeString()} - {new Date(workshop.timestamp_end * 1000).toLocaleTimeString()}</h2>
+                            </div>
+                        )
+                    },
+                    "timestamp_public": (workshop) => {
+                        return (
+                            <>
+                            
+                            { workshop.timestamp_public > Date.now() / 1000 ?
+                                <div className='min-w-[6vw]'>
+                                    <h2 className='text-center'>{convertTimestampToDate(workshop.timestamp_public)}</h2>
+                                </div> : 
+                                <div className='flex justify-center'>
+
+                                <Button 
+                                isIconOnly 
+                                color='success'
+                                radius='full'
+                                startContent={
+                                  <CheckIcon className="size-6" />
+                                  }
+                              ></Button>
+                              </div>
+                            }
+                        </>
+                        )
+                    },
+                    "capacity": (workshop) => {
+                        return (
+                            <div className='flex flex-col gap-2'>
+                                {   
+                                workshop.capacity ?
+                                <p>{workshop.capacity}</p> :
+                                <p>No Capacity</p>
+                                }
+                            </div>
+                        )
+                    },
+                    "required_certifications": (workshop) => {
+                        return (
+                            <div className='flex flex-col gap-2'>
+                                {   
+                                (workshop.required_certifications && workshop.required_certifications.length > 0) ?
+                                workshop.required_certifications.map((certification) => {
+                                    return <p>{certification}</p> 
+                                }) :
+                                <p>No Certs</p>
+                                }
                             </div>
                         )
                     },
@@ -138,7 +211,11 @@ export default function WorkshopTable({
                                   startContent={
                                     <UserIcon className="size-6" />
                                     }
-                                ></Button>
+                                   onPress={() => {
+                                        setSelectedWorkshop(workshop);
+                                        peopleOnOpen();
+                                    }}
+                                />
                             </>
                         )
                     },
@@ -151,10 +228,31 @@ export default function WorkshopTable({
                                   startContent={
                                     <PhotoIcon className="size-6" />
                                     }
+                                    onPress={() => {
+                                        setSelectedWorkshop(workshop);
+                                        imagesOnOpen();
+                                    }}
                                 ></Button>
                             </>
                         )
                     },
+                    // "authorized_roles": (workshop) => {
+                    //     return (
+                    //         <div>
+                    //             {
+                    //                 workshop.authorized_roles ?
+
+                    //                 workshop.authorized_roles.map((roleUUID) => {
+                    //                     return <UserRole 
+                    //                     role_uuid={workshop.authorized_roles}
+                    //                   />
+                    //                 })
+
+                    //             }
+                                
+                    //         </div>
+                    //     )
+                    // },
                     "edit": (workshop) => {
                         return (
                             <>
@@ -164,15 +262,36 @@ export default function WorkshopTable({
                                     startContent={
                                     <PencilSquareIcon className="size-6" />
                                     }
+                                    onPress={() => {
+                                        setSelectedWorkshop(workshop);
+                                        editOnOpen();
+                                    }}
                                 ></Button>
                             </>
                         )
                         
                     }
                   }}
+                /> 
+
+                <WorkshopPeopleModal 
+                    workshop={selectedWorkshop}
+                    isOpen={peopleIsOpen}
+                    onOpenChange={peopleOnOpenChange}
+                />
+                <WorkshopImagesModal 
+                    workshop={selectedWorkshop}
+                    isOpen={imagesIsOpen}
+                    onOpenChange={imagesOnOpenChange}
+                />
+                <WorkshopEditModal 
+                    workshop={selectedWorkshop}
+                    isOpen={editIsOpen}
+                    onOpenChange={editOnOpenChange}
                 />
             </div>
-        : null}            
+            
+        : <p>No Workshops Found</p>}            
         </>
     )
 }

@@ -1,0 +1,62 @@
+import React from "react";
+import {
+  Input,
+  Button,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  Select,
+  SelectItem,
+  Form,
+  Textarea,
+} from "@heroui/react";
+import { TWorkshop } from "../../../../../common/workshop";
+import ImageCarousel from "../../../ImageCarousel";
+import { FILE_RESOURCE_TYPE } from "../../../../../common/file";
+
+export default function WorkshopImagesModal({
+    workshop,
+    isOpen,
+    onOpenChange,
+}:{
+  workshop: TWorkshop | null;
+  isOpen: boolean;
+  onOpenChange: () => void;
+}) {
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      placement="top-center"
+      size="lg"
+      onOpenChange={onOpenChange}
+      className="flex flex-col justify-center"
+      >
+        <ModalContent>
+        <ModalHeader>
+          Workshop Images
+        </ModalHeader>
+
+      <ModalBody className='flex flex-col items-center px-6 min-h-[20vh] justify-center'>
+        <ImageCarousel
+          uuid={workshop?.uuid}
+          fileType={FILE_RESOURCE_TYPE.WORKSHOP} 
+          editable={false}
+        />
+      </ModalBody>
+      <ModalFooter className='flex flex-col items-center'>
+        <Button
+          color="primary"
+          onPress={() => {
+            onOpenChange();
+          }}
+        >
+          Done
+        </Button>
+      </ModalFooter>
+        </ModalContent>
+    </Modal>
+  )
+}

@@ -106,7 +106,7 @@ export default function ImageCarousel({
    };
 
    return (
-           <div className='relative w-[100%] h-auto'>
+           <div className='relative w-[100%]'>
                 {(images.length > 1) && 
                     <Button 
                     className='absolute left-[0%] top-[50%] translate-x-[50%] translate-y-[-50%]' 
@@ -121,9 +121,9 @@ export default function ImageCarousel({
                 }
                 {images.length > 0 ?
                     <img className="w-[100%] h-[100%] object-cover" src={images[index] ? `/api/v3/file/download/${images[index].uuid}` : undefined} /> :
-                    <div className="w-[100%] h-[100%] object-cover bg-gray-500"> 
-                        {/* <p className="text-xl text-foreground-900">Add Your Images</p> */}
-                    </div>
+                    
+                        <p className="text-center text-l text-bold">No Images Found</p>
+                    
                 }
 
                    {editable &&
