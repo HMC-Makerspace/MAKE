@@ -1,5 +1,6 @@
 import { TDocument } from "./file";
 import type { UnixTimestamp, UUID } from "./global";
+import type { UserRoleUUID } from "./user";
 
 export type CertificationUUID = UUID;
 
