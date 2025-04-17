@@ -56,10 +56,10 @@ export function UserRoleSelect({
             enabled: !roles,
         },
     );
-    roles = roles || queryRoles || [];
+    const allRoles = roles || queryRoles || [];
     return (
         <Select
-            items={roles ?? []}
+            items={allRoles ?? []}
             name="roles"
             selectedKeys={selectedKeys}
             onSelectionChange={onSelectionChange}
@@ -92,6 +92,11 @@ export function UserRoleSelect({
                                         role_uuid={
                                             selected_role.data?.uuid || ""
                                         }
+                                        role={allRoles.find(
+                                            (r) =>
+                                                r.uuid ==
+                                                selected_role.data?.uuid,
+                                        )}
                                     />
                                 ),
                             )}

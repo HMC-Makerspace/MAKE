@@ -1,30 +1,36 @@
-import { Card, Table, TableRow } from "@heroui/react";
+import { Card, Selection, Table, TableRow } from "@heroui/react";
 import { TConfig } from "common/config";
 import { TSchedule } from "common/schedule";
 import Shift from "./Shift";
-import { SHIFT_DAY } from "common/shift";
-import { TUser } from "common/user";
+import { SHIFT_DAY } from "../../../../../common/shift";
+import { TUser, UserUUID } from "common/user";
 import clsx from "clsx";
+import { type } from "os";
+import { useState } from "react";
 
 export default function Schedule({
     schedule,
     users,
     config,
     isLoading,
-    editable,
+    selectedUser = null,
+    setSelectedUsers = () => {},
+    type = "view",
 }: {
-    schedule: TSchedule | null;
+    schedule: TSchedule | undefined;
     users: TUser[];
     config: TConfig;
     isLoading: boolean;
-    editable: boolean;
+    selectedUser?: UserUUID | null;
+    setSelectedUsers?: (users: Selection) => void;
+    type?: "view" | "edit" | "availability";
 }) {
-    if (schedule === null) {
+    if (!schedule) {
         // New schedule
         return (
             <Card className="w-full grow p-10" shadow="sm">
                 <div className="flex h-full w-full flex-col items-center justify-center gap-4">
-                    New Schedule
+                    Please
                 </div>
             </Card>
         );
@@ -37,13 +43,35 @@ export default function Schedule({
 
     const days = config.schedule.days_open ?? [0, 1, 2, 3, 4, 5, 6];
 
+    const [selectedShift, setSelectedShift] = useState<number[]>([0, 0, 0]);
+
     return (
-        <Card className="w-full grow p-10 overflow-auto h-full" shadow="sm">
-            {/* <Table className="h-full w-full items-center justify-center gap-2">
-                
-            </Table> */}
-            <table className="h-full w-full items-center justify-center border-separate border-spacing-1">
+        <Card className="w-full grow p-5 overflow-auto h-full" shadow="sm">
+            <table
+                className={clsx(
+                    "h-full w-full items-center justify-center",
+                    "border-separate border-spacing-1",
+                    type == "availability" ? "table-fixed" : "",
+                )}
+            >
                 <tbody>
+                    {/* TODO: Think about adding tap to clear selection */}
+                    <tr key="header">
+                        <td key="space" className="w-15"></td>
+                        {days.map((day) => (
+                            <th
+                                key={`day-${day}`}
+                                className={clsx(
+                                    "text-default-600 text-sm",
+                                    "py-1 min-w-15 capitalize",
+                                )}
+                            >
+                                <div className="flex justify-center w-full align-text-bottom">
+                                    {SHIFT_DAY[day].toLowerCase()}
+                                </div>
+                            </th>
+                        ))}
+                    </tr>
                     {[...Array(numIntervals)].map((_, i) => {
                         const row_start_sec =
                             schedule.daily_open_time +
@@ -63,23 +91,33 @@ export default function Schedule({
                                 <td
                                     className={clsx(
                                         "flex flex-col justify-center",
-                                        "text-default-600 text-sm",
-                                        "py-1 min-w-15 h-full",
+                                        "items-end text-default-600 text-sm",
+                                        "py-1 min-w-15 h-full pr-3",
                                     )}
+                                    key={`shift-time-${i}`}
                                 >
                                     {row_str}
                                 </td>
                                 {
-                                    // Columns
+                                    // Column
                                     days.map((day) => (
-                                        <td>
+                                        <td key={`shift-${day}-${i}`}>
                                             <Shift
-                                                key={`shift-${day}-${i}`}
+                                                schedule_uuid={schedule.uuid}
                                                 shifts={schedule.shifts}
                                                 users={users}
                                                 day={day}
                                                 sec_start={row_start_sec}
                                                 sec_end={row_end_sec}
+                                                selectedUser={selectedUser}
+                                                setSelectedUsers={
+                                                    setSelectedUsers
+                                                }
+                                                type={type}
+                                                selectedShift={selectedShift}
+                                                setSelectedShift={
+                                                    setSelectedShift
+                                                }
                                             />
                                         </td>
                                     ))

@@ -44,7 +44,7 @@ export function MAKEUser({
 }) {
     const query = useQuery<TUser>({
         queryKey: ["user", user_uuid],
-        enabled: !!user_uuid,
+        enabled: !!user_uuid && !user,
         refetchOnWindowFocus: false,
         // placeholderData: {
         //     uuid: user_uuid,
@@ -79,7 +79,7 @@ export function MAKEUser({
                     "justify-items-center sm:w-auto",
                     className,
                 )}
-                onPress={() => onClick(user_uuid)}
+                onPress={(e) => onClick(user_uuid)}
                 size={size}
             >
                 {size === "lg" ? (

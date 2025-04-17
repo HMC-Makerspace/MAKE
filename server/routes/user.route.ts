@@ -677,7 +677,7 @@ router.post("/", async (req: UserRequest, res: UserResponse) => {
  * is returned.
  */
 router.patch(
-    "/info/:UUID",
+    "/:UUID/info",
     async (req: UserUpdateInfoRequest, res: UserResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = headers.requesting_uuid;
@@ -735,6 +735,73 @@ router.patch(
         }
     },
 );
+
+/**
+ * Update a user's availability
+ * This is a protected route, and a `requesting_uuid` header is required to
+ * call it. The user must have the {@link API_SCOPE.UPDATE_USER} scope. If the
+ * user is requesting to update their own information, they must have the
+ * {@link API_SCOPE.UPDATE_INFO_SELF} scope. If the user is not authorized, a
+ * status error is returned. If the user is authorized, the updated user object
+ * is returned.
+ */
+// router.patch(
+//     "/:UUID/availability",
+//     async (req: UserUpdateInfoRequest, res: UserResponse) => {
+//         const headers = req.headers as VerifyRequestHeader;
+//         const requesting_uuid = headers.requesting_uuid;
+//         // If no requesting user_uuid is provided, the call is not authorized
+//         if (!requesting_uuid) {
+//             req.log.warn(
+//                 "No requesting_uuid was provided while updating user availability",
+//             );
+//             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+//             return;
+//         }
+
+//         const user_uuid = req.params.UUID;
+//         const 
+//         req.log.debug({
+//             msg: `Updating user's public info with uuid ${user_uuid}`,
+//             requesting_uuid: user_uuid,
+//         });
+
+//         // A patch request is valid if the requesting user can update any user,
+//         // or if the requesting user is allowed to update their own information
+//         if (
+//             await verifyRequest(
+//                 requesting_uuid,
+//                 API_SCOPE.UPDATE_USER,
+//                 requesting_uuid === user_uuid && API_SCOPE.UPDATE_INFO_SELF,
+//             )
+//         ) {
+//             // If the user is authorized, perform the update
+//             const updated_user = await updateUserPublicInfo(
+//                 user_uuid,
+//                 new_name,
+//                 new_email,
+//                 new_college_id,
+//             );
+//             if (!updated_user) {
+//                 req.log.warn(`No user found to update with uuid ${user_uuid}`);
+//                 res.status(StatusCodes.NOT_FOUND).json({
+//                     error: `No user found to update with uuid \`${user_uuid}\`.`,
+//                 });
+//                 return;
+//             }
+//             req.log.debug(`Updated user with uuid ${user_uuid}`);
+//             // Return the updated user object
+//             res.status(StatusCodes.OK).json(updated_user);
+//         } else {
+//             // If the user is not authorized, provide a status error
+//             req.log.warn({
+//                 msg: `Forbidden user attempted to update user with uuid ${user_uuid}`,
+//                 requesting_uuid: requesting_uuid,
+//             });
+//             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+//         }
+//     },
+// );
 
 /**
  * Delete a specific user by UUID

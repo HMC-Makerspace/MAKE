@@ -31,6 +31,7 @@ export default function MAKETable<Type extends { uuid: string }>({
     isLoading,
     loadingContent = () => "Loading...",
     emptyContent = "No content",
+    color = "primary",
 }: {
     content: Type[];
     columns: {
@@ -50,6 +51,13 @@ export default function MAKETable<Type extends { uuid: string }>({
     isLoading: boolean;
     loadingContent?: (ref?: React.Ref<HTMLElement>) => React.ReactNode;
     emptyContent?: React.ReactNode;
+    color?:
+        | "default"
+        | "primary"
+        | "secondary"
+        | "success"
+        | "warning"
+        | "danger";
 }) {
     // The current number of items in content that are loaded in the DOM and
     // are visible to the user
@@ -59,10 +67,6 @@ export default function MAKETable<Type extends { uuid: string }>({
 
     // A function to load more content by updating the visible content length
     const loadMoreContent = React.useCallback(() => {
-        console.log(
-            "setting content length",
-            visibleContentLength + incrementVisibleContentLength,
-        );
         setVisibleContentLength(
             visibleContentLength + incrementVisibleContentLength,
         );
@@ -79,14 +83,6 @@ export default function MAKETable<Type extends { uuid: string }>({
         () => content.slice(0, visibleContentLength),
         [content, visibleContentLength],
     );
-
-    // When content changes, reset visible content length and selected keys
-    React.useMemo(() => {
-        if (!isLoading) {
-            setVisibleContentLength(initialVisibleContentLength);
-            onSelectionChange(new Set());
-        }
-    }, [content]);
 
     // Create an infinite scroll ref to load more content as the user scrolls
     const [loaderRef, scrollerRef] = useInfiniteScroll({
@@ -129,6 +125,7 @@ export default function MAKETable<Type extends { uuid: string }>({
             bottomContent={hasMoreContent ? loadingContent(loaderRef) : null}
             selectionBehavior={multiSelect ? "toggle" : "replace"}
             onRowAction={doubleClickAction}
+            color={color}
         >
             <TableHeader columns={headerColumns}>
                 {(column) => (
@@ -148,7 +145,10 @@ export default function MAKETable<Type extends { uuid: string }>({
                 loadingContent={loadingContent()}
             >
                 {(item) => (
-                    <TableRow key={item.uuid}>
+                    <TableRow
+                        key={item.uuid}
+                        // className="data-[selected=true]:bg-default-400"
+                    >
                         {(columnKey) => (
                             <TableCell>{renderCell(item, columnKey)}</TableCell>
                         )}
