@@ -7,3 +7,6 @@ website/build
 node_modules
 .vscode/
 bun.lockb
+temp/*
+uploads/*
+!uploads/favicon.ico

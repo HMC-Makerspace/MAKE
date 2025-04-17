@@ -3,17 +3,26 @@ import UsersTable from "../../components/kiosks/admin/users/UsersTable";
 import UserEditor from "../../components/kiosks/admin/users/UserEditor";
 import { Selection } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
-import { TUser } from "common/user";
+import { TUser, TUserRole } from "common/user";
 import React from "react";
 import PopupAlert from "../../components/PopupAlert";
 import { API_SCOPE } from "../../../common/global";
 
 export default function UsersPage() {
     // Get all user data
-    const { data, isLoading, isError } = useQuery<TUser[]>({
+    const { data: users, isLoading: usersLoading } = useQuery<TUser[]>({
         queryKey: ["user"],
         refetchOnWindowFocus: false,
     });
+
+    // Get all role data
+    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
+        queryKey: ["user", "role"],
+        refetchOnWindowFocus: false,
+    });
+
+    const isLoading = usersLoading || rolesLoading;
+
     const scopesQuery = useQuery<API_SCOPE[]>({
         queryKey: ["user", "self", "scopes"],
         refetchOnWindowFocus: false,
@@ -51,7 +60,7 @@ export default function UsersPage() {
             <div className="flex flex-col lg:flex-row overflow-auto h-full gap-8">
                 {canEdit && (
                     <UserEditor
-                        users={data ?? []}
+                        users={users ?? []}
                         selectedKeys={selectedKeys}
                         isLoading={isLoading}
                         isNew={isNewUser}
@@ -60,7 +69,9 @@ export default function UsersPage() {
                     />
                 )}
                 <UsersTable
-                    users={data ?? []}
+                    key={isLoading ? "loading" : "table"}
+                    users={users ?? []}
+                    roles={roles ?? []}
                     selectedKeys={selectedKeys}
                     onSelectionChange={onSelectionChange}
                     isLoading={isLoading}

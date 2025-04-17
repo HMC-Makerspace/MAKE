@@ -1,15 +1,16 @@
 import multer from "multer";
+import path from "path";
 
 // Setup file upload with multer
 const storage = multer.diskStorage({
     // Set the destination for the file uploads
     destination: (req, file, cb) => {
-        cb(null, process.env.FILE_TEMP_PATH);
+        cb(null, path.resolve(process.env.FILE_TEMP_PATH || "temp"));
     },
     // Set the filename for the file uploads to be unique
     filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        cb(null, file.originalname + "-" + uniqueSuffix);
+        const uniquePrefix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        cb(null, uniquePrefix + "-" + file.originalname);
     },
 });
 
