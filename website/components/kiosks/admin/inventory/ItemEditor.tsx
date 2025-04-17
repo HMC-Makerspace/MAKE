@@ -11,10 +11,14 @@ export default function ItemEditor({
     item,
     isNew,
     isLoading,
+    onSuccess,
+    onError
 }: {
     item: TInventoryItem;
     isNew: boolean;
     isLoading: boolean;
+    onSuccess: (message: string) => void;
+    onError: (message: string) => void;
 }) {
     const isEmpty = item.uuid != "";
 
