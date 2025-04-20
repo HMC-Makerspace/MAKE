@@ -18,10 +18,11 @@ const FileConfig = new mongoose.Schema(
 
 const ScheduleConfig = new mongoose.Schema(
     {
-        increment_sec: { type: Number, required: true },
         days_open: { type: [Number], required: false },
         first_display_day: { type: Number, required: false },
         schedulable_roles: { type: [String], required: true },
+        increment_sec: { type: Number, required: true },
+        timezone: { type: String, required: true },
     },
     { _id: false },
 );

@@ -17,7 +17,7 @@ import mongoose from "mongoose";
  */
 export async function getSchedules(): Promise<TSchedule[]> {
     const Schedules = mongoose.model("Schedule", Schedule);
-    return Schedules.find().sort({ timestamp_start: -1 });
+    return await Schedules.find().sort({ active: -1, timestamp_start: -1 });
 }
 
 /**
@@ -147,6 +147,27 @@ export async function setActiveSchedule(
             $set: {
                 active: true,
             },
+        },
+        { returnDocument: "after" },
+    );
+}
+
+/**
+ * Set the current active schedule, replacing the previous active schedule.
+ * @param schedule_uuid The schedule to set as active
+ * @returns The updated schedule object
+ */
+export async function patchSchedule(
+    schedule_uuid: UUID,
+    partial_schedule: Partial<TSchedule>,
+): Promise<TSchedule | null> {
+    const Schedules = mongoose.model("Schedule", Schedule);
+
+    return await Schedules.findOneAndUpdate(
+        { uuid: schedule_uuid },
+        {
+            // Update partial changes
+            $set: partial_schedule,
         },
         { returnDocument: "after" },
     );

@@ -5,7 +5,6 @@ import Shift from "./Shift";
 import { SHIFT_DAY } from "../../../../../common/shift";
 import { TUser, UserUUID } from "common/user";
 import clsx from "clsx";
-import { type } from "os";
 import { useState } from "react";
 
 export default function Schedule({
@@ -15,6 +14,7 @@ export default function Schedule({
     isLoading,
     selectedUser = null,
     setSelectedUsers = () => {},
+    setSelectedSchedules = () => {},
     type = "view",
 }: {
     schedule: TSchedule | undefined;
@@ -23,6 +23,7 @@ export default function Schedule({
     isLoading: boolean;
     selectedUser?: UserUUID | null;
     setSelectedUsers?: (users: Selection) => void;
+    setSelectedSchedules?: (schedules: Selection) => void;
     type?: "view" | "edit" | "availability";
 }) {
     if (!schedule) {
@@ -117,6 +118,9 @@ export default function Schedule({
                                                 selectedShift={selectedShift}
                                                 setSelectedShift={
                                                     setSelectedShift
+                                                }
+                                                setSelectedSchedules={
+                                                    setSelectedSchedules
                                                 }
                                             />
                                         </td>
