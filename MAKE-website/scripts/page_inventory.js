@@ -1,12 +1,14 @@
 const search_options = {
-    // Previous limit was 1000 and loading times were perfectly fine,
-    // but we only have ~1200 total items so no limit is needed
-    // limit: 1500, 
-    allowTypo: true, // if you don't care about allowing typos
-    threshold: -10000, // don't return bad results
-    keys: ['name', 'long_name', 'serial_number', 'keywords'], // keys to search
-    all: true,
+    fieldNormWeight: 2.0,
+    keys: [
+        'name',
+        'long_name',
+        'serial_number',
+        { name: "keywords", weight: 0.5}
+    ], // keys to search
 }
+
+let inventory_fuse;
 
 
 async function fetchInventory(kiosk_mode = false | "inventory_editor" | "checkout" | "steward") {
@@ -81,40 +83,50 @@ function getInventoryFilters() {
 }
 
 function searchInventory(search, filters = null, kiosk_mode = false | "inventory_editor" | "checkout" | "steward") {
-    let results = fuzzysort.go(search, state.inventory, search_options);
-
-    // Scores are all undefined, so this sorting is irrelevant
+    let results;
     if (search === "") {
-        // Sort by the room, container, and specific of the first location, followed by name
-        results.sort((a, b) =>  {
-            return ((a.obj.locations[0] && b.obj.locations[0]) ? (a.obj.locations[0].room || "").localeCompare(b.obj.locations[0].room  || "") ||
-                (a.obj.locations[0].container  || "").localeCompare(b.obj.locations[0].container  || "") ||
-                (a.obj.locations[0].specific  || "").localeCompare(b.obj.locations[0].specific  || "") : 0) ||
-                a.obj.name.localeCompare(b.obj.name);
-        });
+        results = state.inventory;
     } else {
-        // Sort by score and then room, container, and specific of the first location, followed by name
-        results.sort((a, b) =>  {
-            return (b.score - a.score ||
-                (a.obj.locations[0] && b.obj.locations[0]) ? (a.obj.locations[0].room || "").localeCompare(b.obj.locations[0].room  || "") ||
-                (a.obj.locations[0].container  || "").localeCompare(b.obj.locations[0].container  || "") ||
-                (a.obj.locations[0].specific  || "").localeCompare(b.obj.locations[0].specific  || "") : 0) ||
-                a.obj.name.localeCompare(b.obj.name);
-        });
+        if (!inventory_fuse) {
+            inventory_fuse = new Fuse(state.inventory, search_options);
+        } else {
+            inventory_fuse.setCollection(state.inventory);
+        }
+        results = inventory_fuse.search(search).map((i) => i.item);
     }
+
+    // // Scores are all undefined, so this sorting is irrelevant
+    // if (search === "") {
+    //     // Sort by the room, container, and specific of the first location, followed by name
+    //     results.sort((a, b) =>  {
+    //         return ((a.obj.locations[0] && b.obj.locations[0]) ? (a.obj.locations[0].room || "").localeCompare(b.obj.locations[0].room  || "") ||
+    //             (a.obj.locations[0].container  || "").localeCompare(b.obj.locations[0].container  || "") ||
+    //             (a.obj.locations[0].specific  || "").localeCompare(b.obj.locations[0].specific  || "") : 0) ||
+    //             a.obj.name.localeCompare(b.obj.name);
+    //     });
+    // } else {
+    //     // Sort by score and then room, container, and specific of the first location, followed by name
+    //     results.sort((a, b) =>  {
+    //         return (b.score - a.score ||
+    //             (a.obj.locations[0] && b.obj.locations[0]) ? (a.obj.locations[0].room || "").localeCompare(b.obj.locations[0].room  || "") ||
+    //             (a.obj.locations[0].container  || "").localeCompare(b.obj.locations[0].container  || "") ||
+    //             (a.obj.locations[0].specific  || "").localeCompare(b.obj.locations[0].specific  || "") : 0) ||
+    //             a.obj.name.localeCompare(b.obj.name);
+    //     });
+    // }
 
     // If not in any kiosk mode, filter out steward-only items
     if (kiosk_mode === false) {
         results = results.filter(inventory_item => {
             // Exclude items with access type 5 (steward-only)
-            if (inventory_item.obj.access_type === 5
+            if (inventory_item.access_type === 5
                 // Exclude items that only have a location in Backstock or Cage 5
-                || (inventory_item.obj.locations.length === 1
-                    && inventory_item.obj.locations[0].room === "Backstock")
-                || (inventory_item.obj.locations.length === 1
-                    && inventory_item.obj.locations[0].room === "Cage"
-                    && inventory_item.obj.locations[0].container
-                    && inventory_item.obj.locations[0].container.includes("5"))
+                || (inventory_item.locations.length === 1
+                    && inventory_item.locations[0].room === "Backstock")
+                || (inventory_item.locations.length === 1
+                    && inventory_item.locations[0].room === "Cage"
+                    && inventory_item.locations[0].container
+                    && inventory_item.locations[0].container.includes("5"))
                 ) {
                 return false;
             }
@@ -124,7 +136,7 @@ function searchInventory(search, filters = null, kiosk_mode = false | "inventory
 
     if (filters !== null) {
         const results_filtered = results.filter(result => {
-            const item = result.obj;
+            const item = result;
 
             if (filters.stock && item.quantity_available == 0) {
                 return false;
@@ -244,7 +256,7 @@ function generateInventoryDiv(result, kiosk_mode = false | "inventory_editor" | 
         div.classList.add("kiosk-mode");
     }
 
-    const item = result.obj;
+    const item = result;
 
     div.id = `inventory-result-${item.uuid}`;
 
