@@ -66,6 +66,7 @@ export default function Shift({
     type = "view",
     selectedShift = [0, 0, 0],
     setSelectedShift = () => {},
+    setSelectedSchedules = () => {},
 }: {
     schedule_uuid: UUID;
     shifts: TShift[];
@@ -78,6 +79,7 @@ export default function Shift({
     type?: "view" | "edit" | "availability";
     selectedShift?: number[];
     setSelectedShift?: (day_start_end: number[]) => void;
+    setSelectedSchedules?: (schedules: Selection) => void;
 }) {
     const queryClient = useQueryClient();
 
@@ -88,9 +90,10 @@ export default function Shift({
             queryClient.setQueryData(["schedule"], (old: TSchedule[]) =>
                 old.map((sche) => (sche.uuid === result.uuid ? result : sche)),
             );
+            // setSelectedSchedules(new Set([schedule_uuid]));
         },
         onError: (error) => {
-            // TODO: deal with
+            console.log(error);
         },
     });
 

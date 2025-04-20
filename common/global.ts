@@ -517,13 +517,14 @@ export const API_SCOPE_SECTIONS: {
             },
             {
                 scope: API_SCOPE.GET_ACTIVE_SCHEDULE,
-                label: "Get ACTIVE Schedule",
+                label: "Get Active Schedule",
                 description: "Able to view the active schedule",
             },
             {
                 scope: API_SCOPE.GET_ACTIVE_PUBLIC_SCHEDULE,
                 label: "Get Public Schedule",
-                description: "Able to view the active public schedule",
+                description:
+                    "Able to view only public info about the active schedule",
             },
             {
                 scope: API_SCOPE.CREATE_SCHEDULE,

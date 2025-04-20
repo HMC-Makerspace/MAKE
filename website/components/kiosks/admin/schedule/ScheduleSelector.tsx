@@ -1,19 +1,25 @@
 import {
     Button,
     Card,
-    DateInput,
     DateRangePicker,
+    DateValue,
+    Divider,
     Dropdown,
     DropdownItem,
     DropdownMenu,
     DropdownSection,
     DropdownTrigger,
     Input,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+    RangeValue,
     Selection,
+    TimeInput,
     Tooltip,
 } from "@heroui/react";
 import { TSchedule } from "common/schedule";
-import { fromAbsolute, parseZonedDateTime } from "@internationalized/date";
+import { fromAbsolute } from "@internationalized/date";
 import {
     BellAlertIcon,
     BellIcon,
@@ -21,15 +27,17 @@ import {
     CheckIcon,
     ChevronDownIcon,
     ClipboardDocumentIcon,
+    Cog8ToothIcon,
     EyeIcon,
     EyeSlashIcon,
     PlusIcon,
+    TrashIcon,
 } from "@heroicons/react/24/outline";
 import React, { Key, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios, { isCancel } from "axios";
+import axios from "axios";
 import clsx from "clsx";
-import { data } from "react-router-dom";
+import { TConfig } from "common/config";
 
 const createUpdateSchedule = async ({
     schedule,
@@ -53,6 +61,20 @@ const createUpdateSchedule = async ({
     }
 };
 
+const patchSchedule = async ({
+    schedule_uuid,
+    partial_schedule,
+}: {
+    schedule_uuid: string;
+    partial_schedule: Partial<TSchedule>;
+}) => {
+    return (
+        await axios.patch<TSchedule>(`/api/v3/schedule/${schedule_uuid}`, {
+            partial_schedule_obj: partial_schedule,
+        })
+    ).data;
+};
+
 const activateSchedule = async ({
     schedule_uuid,
 }: {
@@ -68,15 +90,17 @@ export default function ScheduleSelector({
     defaultSchedule,
     selectedSchedule,
     setSelectedSchedules = () => {},
+    config,
 }: {
     schedules: TSchedule[];
     defaultSchedule?: TSchedule;
     selectedSchedule?: TSchedule;
     setSelectedSchedules: (selection: Selection) => void;
+    config: TConfig;
 }) {
     const queryClient = useQueryClient();
 
-    const scheduleMutation = useMutation({
+    const createReplaceMutation = useMutation({
         mutationFn: createUpdateSchedule,
         onSuccess: (data: TSchedule, variables) => {
             queryClient.setQueryData(["schedule", data.uuid], data);
@@ -92,6 +116,23 @@ export default function ScheduleSelector({
                         }
                     });
                 }
+            });
+            setSelectedSchedules(new Set([data.uuid]));
+        },
+    });
+
+    const patchMutation = useMutation({
+        mutationFn: patchSchedule,
+        onSuccess: (data: TSchedule, variables) => {
+            queryClient.setQueryData(["schedule", data.uuid], data);
+            queryClient.setQueryData(["schedule"], (oldData: TSchedule[]) => {
+                return oldData.map((schedule) => {
+                    if (schedule.uuid === data.uuid) {
+                        return data;
+                    } else {
+                        return schedule;
+                    }
+                });
             });
             setSelectedSchedules(new Set([data.uuid]));
         },
@@ -134,14 +175,31 @@ export default function ScheduleSelector({
             daily_close_time: schedule.daily_close_time,
             active: false, // all schedules start inactive
         };
-        scheduleMutation.mutate({ schedule: newSchedule, isNew: true });
+        createReplaceMutation.mutate({ schedule: newSchedule, isNew: true });
+    };
+
+    const createSchedule = () => {
+        const schedule: TSchedule = {
+            uuid: crypto.randomUUID(),
+            name: "New Schedule",
+            timestamp_start: Date.now() / 1000, // today
+            timestamp_end: Date.now() / 1000 + 24 * 60 * 60, // tomorrow
+            shifts: [],
+            alerts: [],
+            daily_open_time: 12 * 60 * 60, // noon
+            daily_close_time: 22 * 60 * 60, // 10pm
+            active: false,
+        };
+        createReplaceMutation.mutate({
+            schedule: schedule,
+            isNew: true,
+        });
     };
 
     const scheduleChangeHandler = React.useCallback(
         (newSchedule: Key) => {
             if (newSchedule === "new") {
-                // TODO: Handle new schedule creation logic here
-                return;
+                createSchedule();
             } else {
                 setSelectedSchedules(new Set([newSchedule as string]));
             }
@@ -155,6 +213,9 @@ export default function ScheduleSelector({
         schedule ? schedule.name : "",
     );
 
+    const [scheduleRange, setScheduleRange] =
+        useState<RangeValue<DateValue> | null>();
+
     return (
         <Card
             className="w-full p-2 pb bg-default-200 gap-2 flex-row justify-between items-center"
@@ -163,6 +224,7 @@ export default function ScheduleSelector({
             <div className="flex flex-row gap-2 w-2/5">
                 <DateRangePicker
                     isRequired
+                    isDisabled={!schedule}
                     // @ts-ignore
                     defaultValue={
                         schedule &&
@@ -171,22 +233,43 @@ export default function ScheduleSelector({
                             ? {
                                   start: fromAbsolute(
                                       schedule.timestamp_start * 1000,
-                                      "America/Los_Angeles",
+                                      config.schedule.timezone,
                                   ),
                                   end: fromAbsolute(
                                       schedule.timestamp_end * 1000,
-                                      "America/Los_Angeles",
+                                      config.schedule.timezone,
                                   ),
                               }
                             : undefined
                     }
                     showMonthAndYearPickers
                     granularity="day"
-                    label="Active Range"
+                    label="Date Range"
                     className="w-min py h-full justify-self-end"
                     size="md"
                     color="secondary"
                     variant="faded"
+                    onChange={(value) => {
+                        setScheduleRange(value);
+                    }}
+                    onBlur={() => {
+                        if (scheduleRange && schedule) {
+                            const partial_schedule: Partial<TSchedule> = {
+                                timestamp_start:
+                                    scheduleRange.start
+                                        .toDate(config.schedule.timezone)
+                                        .getTime() / 1000,
+                                timestamp_end:
+                                    scheduleRange.end
+                                        .toDate(config.schedule.timezone)
+                                        .getTime() / 1000,
+                            };
+                            patchMutation.mutate({
+                                schedule_uuid: schedule.uuid,
+                                partial_schedule: partial_schedule,
+                            });
+                        }
+                    }}
                 />
                 {schedule && (
                     <Tooltip
@@ -209,7 +292,7 @@ export default function ScheduleSelector({
                                 )
                             }
                             disableRipple={schedule.active}
-                            variant={schedule.active ? "ghost" : "faded"}
+                            variant="ghost"
                             color={schedule.active ? "success" : "danger"}
                             size="lg"
                             className="self-end m-1"
@@ -256,13 +339,9 @@ export default function ScheduleSelector({
                         // Get input value
                         const value = blurEvent.target.value;
                         // Update name of schedule
-                        const newSchedule: TSchedule = {
-                            ...schedule,
-                            name: value,
-                        };
-                        scheduleMutation.mutate({
-                            schedule: newSchedule,
-                            isNew: false,
+                        patchMutation.mutate({
+                            schedule_uuid: schedule.uuid,
+                            partial_schedule: { name: value },
                         });
                     }}
                     type="text"
@@ -271,7 +350,7 @@ export default function ScheduleSelector({
                     variant="faded"
                     className="w-full self-end"
                     classNames={{
-                        input: "placeholder:text-default-400 text-center ",
+                        input: "placeholder:text-default-400 text-center",
                     }}
                     minLength={1}
                     aria-label="Schedule Name"
@@ -296,10 +375,18 @@ export default function ScheduleSelector({
                             <DropdownMenu
                                 aria-label="Choose Schedule"
                                 onAction={scheduleChangeHandler}
+                                className="max-h-[50vh] overflow-auto"
                             >
                                 <DropdownSection>
                                     {schedules.map((item) => (
-                                        <DropdownItem key={item.uuid}>
+                                        <DropdownItem
+                                            key={item.uuid}
+                                            className={
+                                                item.active
+                                                    ? "text-success-300"
+                                                    : ""
+                                            }
+                                        >
                                             {item.name}
                                         </DropdownItem>
                                     ))}
@@ -319,27 +406,64 @@ export default function ScheduleSelector({
                         </Dropdown>
                     }
                 />
-                <Tooltip
-                    content={
-                        <div className="text-md text-default-700">
-                            Duplicate Schedule
-                        </div>
-                    }
-                    className="bg-default-300"
-                    placement="bottom"
-                >
-                    <Button
-                        isIconOnly
-                        startContent={
-                            <ClipboardDocumentIcon className="size-6 text-secondary-400" />
-                        }
-                        variant="faded"
-                        color="secondary"
-                        size="lg"
-                        className="self-end"
-                        onPress={() => duplicateSchedule(schedule)}
-                    />
-                </Tooltip>
+                <Dropdown placement="bottom-end">
+                    <DropdownTrigger>
+                        <Button
+                            isIconOnly
+                            startContent={
+                                <Cog8ToothIcon className="size-6 text-secondary-400" />
+                            }
+                            variant="faded"
+                            color="secondary"
+                            size="lg"
+                            className="self-end"
+                        />
+                    </DropdownTrigger>
+                    <DropdownMenu
+                        className="p-2"
+                        onAction={(key) => {
+                            if (key === "duplicate") {
+                                duplicateSchedule(schedule);
+                            } else if (key === "delete") {
+                            }
+                        }}
+                    >
+                        <DropdownItem
+                            key="duplicate"
+                            startContent={
+                                <ClipboardDocumentIcon className="size-5" />
+                            }
+                            variant="shadow"
+                            color="secondary"
+                            className="text-secondary"
+                        >
+                            Duplicate
+                        </DropdownItem>
+                        <DropdownItem
+                            key="delete"
+                            startContent={<TrashIcon className="size-5" />}
+                            variant="shadow"
+                            color="danger"
+                            className="text-danger"
+                        >
+                            Delete
+                        </DropdownItem>
+                        <DropdownItem
+                            key="open-time"
+                            variant="flat"
+                            closeOnSelect={false}
+                        >
+                            <TimeInput variant="faded" label="Open Time" />
+                        </DropdownItem>
+                        <DropdownItem
+                            key="close-time"
+                            variant="flat"
+                            closeOnSelect={false}
+                        >
+                            <TimeInput variant="faded" label="Close Time" />
+                        </DropdownItem>
+                    </DropdownMenu>
+                </Dropdown>
             </div>
         </Card>
     );

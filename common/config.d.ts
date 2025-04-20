@@ -47,6 +47,11 @@ export type TScheduleConfig = {
      * The increment between shifts (in seconds).
      */
     increment_sec: number;
+
+    /**
+     * The IANA timezone to use for all date objects
+     */
+    timezone: string;
 };
 
 /**
