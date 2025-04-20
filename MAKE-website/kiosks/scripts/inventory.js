@@ -139,8 +139,9 @@ function submitEditableSearch() {
     const items = searchInventory(search, getInventoryFilters(), kiosk_mode = "inventory_editor");
     
     state.current_search_results = [];
+    console.log("items:", items)
     for (let item of items) {
-        state.current_search_results.push(generateEditableInventoryDiv(item.obj));
+        state.current_search_results.push(generateEditableInventoryDiv(item));
     }
 
     removeAllChildren(results);
