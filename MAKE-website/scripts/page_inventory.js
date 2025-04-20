@@ -1,5 +1,6 @@
 const search_options = {
     fieldNormWeight: 2.0,
+    ignoreLocation: true,
     keys: [
         'name',
         'long_name',
