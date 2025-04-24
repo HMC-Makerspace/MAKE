@@ -18,7 +18,7 @@ export default function WorkshopPage() {
                 Error loading restock data
             </div>
         ) : (
-            <WorkshopTable workshops={data ?? []}/>
+            <WorkshopTable workshops={data ?? []}  isLoading={isLoading}/>
         )}
         </AdminLayout>
     );

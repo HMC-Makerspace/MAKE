@@ -6,8 +6,8 @@ import {
     CardFooter,
     Divider
 } from '@heroui/react';
-import { convertTimestampToDate } from '../restock/RestockStatusLogs';
-import { TWorkshop } from 'common/workshop';
+import { convertTimestampToDate } from '../../../../utils.tsx';
+import { TWorkshop } from '../../../../../common/workshop';
 import { MAKEUser } from '../../../user/User';
 import ImageCarousel from '../../../ImageCarousel';
 import { FILE_RESOURCE_TYPE } from '../../../../../common/file';
