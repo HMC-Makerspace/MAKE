@@ -72,7 +72,7 @@ export function MAKEUser({
                     "justify-items-center sm:w-auto",
                     className,
                 )}
-                onPress={(e) => onClick(user_uuid)}
+                onPress={() => onClick(user_uuid)}
                 size={size}
             >
                 {size === "lg" ? (
