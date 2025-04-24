@@ -42,13 +42,9 @@ export type TWorkshop = {
     timestamp_end: UnixTimestamp;
     timestamp_public: UnixTimestamp;
     required_certifications?: CertificationUUID[];
-    rsvp_list: {
-        [user: UserUUID]: UnixTimestamp;
-    };
+    rsvp_list: Map<UserUUID, UnixTimestamp>;
     users_notified: UserUUID[];
-    sign_in_list: {
-        [user: UserUUID]: UnixTimestamp;
-    };
+    sign_in_list: Map<UserUUID, UnixTimestamp>;
     images?: FileUUID[];
     authorized_roles?: UserRoleUUID[];
 };
