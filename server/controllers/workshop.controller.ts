@@ -155,7 +155,10 @@ export async function rsvpToWorkshop(
         return false;
     }
     // Add the user to the rsvp list
-    workshop.rsvp_list[user_uuid] = Date.now() / 1000;
+    workshop.rsvp_list.push({
+        user_uuid: user_uuid,
+        timestamp: Date.now() / 1000,
+    });
     // Update the workshop in the database
     workshop.save();
     return true;
@@ -181,7 +184,7 @@ export async function cancelRSVPToWorkshop(
         return false;
     }
     // Remove the user from the rsvp list
-    delete workshop.rsvp_list[user_uuid];
+    workshop.rsvp_list.filter((rsvp) => rsvp.user_uuid != user_uuid);
     // Update the workshop in the database
     workshop.save();
     return true;
@@ -207,7 +210,10 @@ export async function signInToWorkshop(
         return false;
     }
     // Otherwise, add the user to the sign in list
-    workshop.sign_in_list[user_uuid] = Date.now() / 1000;
+    workshop.sign_in_list.push({
+        user_uuid: user_uuid,
+        timestamp: Date.now() / 1000,
+    });
     // Update the workshop in the database
     workshop.save();
     return true;
