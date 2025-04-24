@@ -76,6 +76,7 @@ export type TUserAvailabilityDay = {
  *      wants to work per week
  */
 export type TUserAvailability = {
+    schedule: ScheduleUUID;
     days: TUserAvailabilityDay[];
     min_shift_count?: number;
     max_shift_count?: number;
@@ -109,5 +110,5 @@ export type TUser = {
     active_certificates?: TCertificate[];
     past_certificates?: TCertificate[];
     files?: FileUUID[];
-    work_schedules?: Map<ScheduleUUID, TUserAvailability>;
+    work_schedules?: TUserAvailability[];
 };
