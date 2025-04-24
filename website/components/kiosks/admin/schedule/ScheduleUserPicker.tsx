@@ -19,7 +19,10 @@ export default function ScheduleUserPicker({
     setSelectedUsers: (selectedUsers: Selection) => void;
 }) {
     return (
-        <Card className="w-1/3 p-5 overflow-auto h-full" shadow="sm">
+        <Card
+            className="w-full lg:w-1/3 p-5 overflow-auto h-2/3 lg:h-full"
+            shadow="sm"
+        >
             <UsersTable
                 key={users.length}
                 users={users}

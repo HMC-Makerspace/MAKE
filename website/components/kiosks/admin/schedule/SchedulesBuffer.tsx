@@ -3,8 +3,10 @@ import { TConfig } from "common/config";
 import Schedule from "./Schedule";
 import ScheduleUserPicker from "./ScheduleUserPicker";
 import ScheduleSelector from "./ScheduleSelector";
-import { Selection } from "@heroui/react";
+import { Selection, useDisclosure } from "@heroui/react";
 import { TUser, TUserRole, UserUUID } from "common/user";
+import PopupAlert from "../../../PopupAlert";
+import React from "react";
 
 /**
  * This buffer ensures that state parameters are defined
@@ -51,35 +53,58 @@ export default function ScheduleBuffer({
                       s.uuid === (Array.from(selectedSchedules)[0] as string),
               ) ?? defaultSchedule);
 
+    const [popupMessage, setPopupMessage] = React.useState<string | undefined>(
+        undefined,
+    );
+    const [popupType, setPopupType] = React.useState<
+        "success" | "warning" | "danger"
+    >("success");
+
     return (
-        <div className="w-full h-full flex flex-col lg:flex-row gap-4 overflow-auto">
-            <div className="w-full flex flex-col overflow-auto gap-2">
-                <ScheduleSelector
-                    schedules={schedules}
-                    defaultSchedule={defaultSchedule}
-                    selectedSchedule={schedule}
-                    setSelectedSchedules={setSelectedSchedules}
-                    config={config}
-                    key={schedule?.uuid}
-                />
-                <Schedule
-                    schedule={schedule}
+        <div className="w-full h-full">
+            <div className="w-full h-full flex flex-col lg:flex-row gap-4 overflow-auto">
+                <div className="w-full flex flex-col overflow-auto gap-2">
+                    <ScheduleSelector
+                        schedules={schedules}
+                        defaultSchedule={defaultSchedule}
+                        selectedSchedule={schedule}
+                        setSelectedSchedules={setSelectedSchedules}
+                        config={config}
+                        onSuccess={(message) => {
+                            setPopupMessage(message);
+                            setPopupType("success");
+                        }}
+                        onError={(message) => {
+                            setPopupMessage(message);
+                            setPopupType("danger");
+                        }}
+                        key={schedule?.uuid}
+                    />
+                    <Schedule
+                        schedule={schedule}
+                        config={config}
+                        users={filteredUsers}
+                        isLoading={false}
+                        selectedUser={selectedUser}
+                        setSelectedUsers={setSelectedUsers}
+                        setSelectedSchedules={setSelectedSchedules}
+                        type="edit"
+                    />
+                </div>
+                <ScheduleUserPicker
                     config={config}
                     users={filteredUsers}
+                    roles={roles}
                     isLoading={false}
-                    selectedUser={selectedUser}
+                    selectedUsers={selectedUsers}
                     setSelectedUsers={setSelectedUsers}
-                    setSelectedSchedules={setSelectedSchedules}
-                    type="edit"
                 />
             </div>
-            <ScheduleUserPicker
-                config={config}
-                users={filteredUsers}
-                roles={roles}
-                isLoading={false}
-                selectedUsers={selectedUsers}
-                setSelectedUsers={setSelectedUsers}
+            <PopupAlert
+                isOpen={!!popupMessage}
+                onOpenChange={() => setPopupMessage(undefined)}
+                color={popupType}
+                description={popupMessage}
             />
         </div>
     );

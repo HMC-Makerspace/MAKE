@@ -7,8 +7,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { UUID } from "common/global";
 import axios from "axios";
 import { TSchedule } from "common/schedule";
-import { Selection } from "@heroui/react";
-import { useState } from "react";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+    Selection,
+    user,
+} from "@heroui/react";
+import React, { useState } from "react";
+import { type } from "os";
 
 const baseColors = [
     "bg-secondary-50",
@@ -153,126 +160,172 @@ export default function Shift({
         selectedShift[1] === sec_start &&
         selectedShift[2] === sec_end;
 
+    const [isOpen, setIsOpen] = React.useState(false);
+
+    const [statUser, setStatUser] = React.useState<TUser | undefined>(
+        undefined,
+    );
+
     return (
-        <motion.div
-            className={clsx(
-                "min-h-full w-full",
-                "flex flex-col",
-                "items-center justify-center",
-                "gap-1 p-2 rounded-md",
-                // If in view mode, cells are clickable to show info
-                type === "view" && "cursor-pointer",
-                type === "view" && !isShiftSelected && baseColors[colorIndex],
-                type === "view" && isShiftSelected && "bg-primary-300",
-                ...editor_classes,
-                type === "availability" && available && "bg-primary-300",
-            )}
-            animate
-            style={{
-                transition: "background-color 0.15s ease",
+        <Popover
+            isOpen={isOpen}
+            onOpenChange={(open) => setIsOpen(open)}
+            shouldCloseOnBlur
+            isKeyboardDismissDisabled
+            placement="left"
+            shouldFlip
+            showArrow
+            classNames={{
+                content: "bg-default-300",
             }}
-            onDragOver={
-                type === "availability"
-                    ? () => {
-                          // TODO: do stuff
-                      }
-                    : undefined
-            }
-            onTap={() => {
-                if (type === "edit") {
-                    if (selectedUser) {
-                        if (!scheduled) {
-                            shiftMutation.mutate({
-                                shift: {
-                                    uuid: crypto.randomUUID(),
-                                    day: day,
-                                    sec_start: sec_start,
-                                    sec_end: sec_end,
-                                    assignee: selectedUser,
-                                    history: [],
-                                },
-                                isScheduled: false,
-                                schedule_uuid: schedule_uuid,
-                            });
-                        } else {
-                            shiftMutation.mutate({
-                                shift: relevant_shifts.find(
-                                    (s) => s.assignee === selectedUser,
-                                )!,
-                                isScheduled: true,
-                                schedule_uuid: schedule_uuid,
-                            });
-                        }
-                    } else {
-                        // No user selected,
-                    }
-                } else if (type === "view") {
-                    if (isShiftSelected) {
-                        setSelectedUsers(new Set());
-                        setSelectedShift([0, 0, 0]);
-                    } else {
-                        // Selecting all users in this shift
-                        setSelectedUsers(new Set(assignees));
-                        setSelectedShift([day, sec_start, sec_end]);
-                    }
-                } else {
-                    // Update availability at this time
-                }
-            }}
-            whileTap={{
-                scale: type !== "view" ? 0.98 : 1,
-            }}
+            triggerScaleOnOpen={false}
         >
-            {assignees.map((assignee) => {
-                const u = users.find((u) => u.uuid === assignee);
-                if (!u) return;
-                if (type === "edit") {
-                    return (
-                        <MAKEUser
-                            key={assignee}
-                            user_uuid={assignee}
-                            user={u}
-                            onClick={(uuid) => {
-                                // Show popup
-                            }}
-                            size="sm"
-                            className={clsx(
-                                "rounded-full",
-                                selectedUser ? "cursor-not-allowed" : "",
-                            )}
-                        />
-                    );
-                } else if (type === "view") {
-                    return (
-                        <div
-                            className={clsx(
-                                "w-full h-full",
-                                "flex flex-row",
-                                "items-center justify-center",
-                                "text-default-800",
-                                "text-sm",
-                            )}
-                        >
-                            {u.name}
-                        </div>
-                    );
-                }
-            })}
-            {assignees.length === 0 && type !== "availability" && (
-                <div
+            <PopoverTrigger>
+                <motion.button
                     className={clsx(
-                        "w-full h-[32px] text-sm",
-                        "flex flex-row",
+                        "min-h-full w-full",
+                        "flex flex-col",
                         "items-center justify-center",
-                        available ? "text-default-200" : "text-default-400",
+                        "gap-1 p-2 rounded-md",
+                        // If in view mode, cells are clickable to show info
+                        type === "view" && "cursor-pointer",
+                        type === "view" &&
+                            !isShiftSelected &&
+                            baseColors[colorIndex],
+                        type === "view" && isShiftSelected && "bg-primary-300",
+                        ...editor_classes,
+                        type === "availability" &&
+                            available &&
+                            "bg-primary-300",
                     )}
+                    animate
                     style={{
-                        transition: "color 0.15s ease",
+                        transition: "background-color 0.15s ease",
+                    }}
+                    onDragOver={
+                        type === "availability"
+                            ? () => {
+                                  // TODO: do stuff
+                              }
+                            : undefined
+                    }
+                    onTap={() => {
+                        if (type === "edit") {
+                            if (selectedUser) {
+                                if (!scheduled) {
+                                    shiftMutation.mutate({
+                                        shift: {
+                                            uuid: crypto.randomUUID(),
+                                            day: day,
+                                            sec_start: sec_start,
+                                            sec_end: sec_end,
+                                            assignee: selectedUser,
+                                            history: [],
+                                        },
+                                        isScheduled: false,
+                                        schedule_uuid: schedule_uuid,
+                                    });
+                                } else {
+                                    shiftMutation.mutate({
+                                        shift: relevant_shifts.find(
+                                            (s) => s.assignee === selectedUser,
+                                        )!,
+                                        isScheduled: true,
+                                        schedule_uuid: schedule_uuid,
+                                    });
+                                }
+                            } else {
+                                // No user selected,
+                            }
+                        } else if (type === "view") {
+                            if (isShiftSelected) {
+                                setSelectedUsers(new Set());
+                                setSelectedShift([0, 0, 0]);
+                            } else {
+                                // Selecting all users in this shift
+                                setSelectedUsers(new Set(assignees));
+                                setSelectedShift([day, sec_start, sec_end]);
+                            }
+                        } else {
+                            // Update availability at this time
+                        }
+                    }}
+                    whileTap={{
+                        scale: type !== "view" ? 0.98 : 1,
                     }}
                 >
-                    {type === "edit" ? "Unassigned" : "No shift"}
-                </div>
-            )}
-        </motion.div>
+                    {assignees.map((assignee) => {
+                        const u = users.find((u) => u.uuid === assignee);
+                        if (!u) {
+                            return (
+                                <div
+                                    className={clsx(
+                                        "w-full h-full",
+                                        "flex flex-row",
+                                        "items-center justify-center",
+                                        "text-danger-800",
+                                        "text-sm",
+                                    )}
+                                >
+                                    Unknown User
+                                </div>
+                            );
+                        }
+                        if (type === "edit") {
+                            return (
+                                <MAKEUser
+                                    key={assignee}
+                                    user_uuid={assignee}
+                                    user={u}
+                                    size="sm"
+                                    className={clsx(
+                                        "rounded-full",
+                                        selectedUser
+                                            ? "cursor-not-allowed"
+                                            : "",
+                                    )}
+                                    onClick={() => {
+                                        setIsOpen(!isOpen);
+                                        setStatUser(u);
+                                    }}
+                                />
+                            );
+                        } else if (type === "view") {
+                            return (
+                                <div
+                                    className={clsx(
+                                        "w-full h-full",
+                                        "flex flex-row",
+                                        "items-center justify-center",
+                                        "text-default-800",
+                                        "text-sm",
+                                    )}
+                                >
+                                    {u.name}
+                                </div>
+                            );
+                        }
+                    })}
+                    {assignees.length === 0 && type !== "availability" && (
+                        <div
+                            className={clsx(
+                                "w-full h-[32px] text-sm",
+                                "flex flex-row",
+                                "items-center justify-center",
+                                available
+                                    ? "text-default-200"
+                                    : "text-default-400",
+                            )}
+                            style={{
+                                transition: "color 0.15s ease",
+                            }}
+                        >
+                            {type === "edit" ? "Unassigned" : "No shift"}
+                        </div>
+                    )}
+                </motion.button>
+            </PopoverTrigger>
+            <PopoverContent>Blah</PopoverContent>
+        </Popover>
     );
 }

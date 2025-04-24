@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { TUser } from "common/user";
 import { Button, Link, User } from "@heroui/react";
 import clsx from "clsx";
+import React from "react";
 
 export function MAKEUser({
     user_uuid,
@@ -46,14 +47,6 @@ export function MAKEUser({
         queryKey: ["user", user_uuid],
         enabled: !!user_uuid && !user,
         refetchOnWindowFocus: false,
-        // placeholderData: {
-        //     uuid: user_uuid,
-        //     name: "Loading...",
-        //     email: "Loading...",
-        //     college_id: "Loading...",
-        //     active_roles: [],
-        //     past_roles: [],
-        // },
     });
 
     const user_data = user ? user : query.data;
@@ -79,7 +72,7 @@ export function MAKEUser({
                     "justify-items-center sm:w-auto",
                     className,
                 )}
-                onPress={(e) => onClick(user_uuid)}
+                onPress={() => onClick(user_uuid)}
                 size={size}
             >
                 {size === "lg" ? (

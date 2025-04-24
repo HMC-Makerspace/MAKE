@@ -3,28 +3,22 @@ import {
     Card,
     DateRangePicker,
     DateValue,
-    Divider,
     Dropdown,
     DropdownItem,
     DropdownMenu,
     DropdownSection,
     DropdownTrigger,
     Input,
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
     RangeValue,
     Selection,
     TimeInput,
     Tooltip,
+    useDisclosure,
 } from "@heroui/react";
 import { TSchedule } from "common/schedule";
-import { fromAbsolute } from "@internationalized/date";
+import { fromAbsolute, Time } from "@internationalized/date";
 import {
-    BellAlertIcon,
     BellIcon,
-    BellSlashIcon,
-    CheckIcon,
     ChevronDownIcon,
     ClipboardDocumentIcon,
     Cog8ToothIcon,
@@ -38,6 +32,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import clsx from "clsx";
 import { TConfig } from "common/config";
+import DeleteModal from "../../../DeleteModal";
+import { timestampToTime, timeToTimestamp } from "../../../../utils";
 
 const createUpdateSchedule = async ({
     schedule,
@@ -85,18 +81,78 @@ const activateSchedule = async ({
     ).data;
 };
 
+function DeleteScheduleModal({
+    schedule,
+    isOpen,
+    onOpenChange,
+    onSuccess,
+    onError,
+}: {
+    schedule: TSchedule;
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    onSuccess: (message: string) => void;
+    onError: (message: string) => void;
+}) {
+    const queryClient = useQueryClient();
+    const mutation = useMutation({
+        mutationFn: async () => {
+            return axios.delete(`/api/v3/schedule/${schedule.uuid}`);
+        },
+        onSuccess: () => {
+            // Remove the role from the query cache
+            queryClient.setQueryData(["schedule"], (old: TSchedule[]) => {
+                return old.filter((s) => s.uuid !== schedule.uuid);
+            });
+            queryClient.removeQueries({
+                queryKey: ["schedule", schedule.uuid],
+            });
+            onSuccess(`Successfully deleted schedule "${schedule.name}"`);
+        },
+        onError: (error) => {
+            onError(`Error: ${error.message}`); // consider adding an error popup
+        },
+    });
+
+    const onSubmit = React.useCallback(
+        (e: React.FormEvent<HTMLFormElement>) => {
+            // Prevent default browser page refresh.
+            e.preventDefault();
+
+            // Run the mutation
+            mutation.mutate();
+        },
+        [mutation],
+    );
+
+    return (
+        <DeleteModal
+            itemType="schedule"
+            itemName={schedule.name}
+            onSubmit={onSubmit}
+            isOpen={isOpen}
+            onOpenChange={onOpenChange}
+            isLoading={mutation.isPending}
+        />
+    );
+}
+
 export default function ScheduleSelector({
     schedules,
     defaultSchedule,
     selectedSchedule,
     setSelectedSchedules = () => {},
     config,
+    onSuccess,
+    onError,
 }: {
     schedules: TSchedule[];
     defaultSchedule?: TSchedule;
     selectedSchedule?: TSchedule;
     setSelectedSchedules: (selection: Selection) => void;
     config: TConfig;
+    onSuccess: (message: string) => void;
+    onError: (message: string) => void;
 }) {
     const queryClient = useQueryClient();
 
@@ -213,8 +269,22 @@ export default function ScheduleSelector({
         schedule ? schedule.name : "",
     );
 
+    const [openTime, setOpenTime] = useState(
+        schedule ? timestampToTime(schedule.daily_open_time) : undefined,
+    );
+
+    const [closeTime, setCloseTime] = useState(
+        schedule ? timestampToTime(schedule.daily_close_time) : undefined,
+    );
+
     const [scheduleRange, setScheduleRange] =
         useState<RangeValue<DateValue> | null>();
+
+    const {
+        isOpen: isDeleting,
+        onOpen: onDelete,
+        onOpenChange: onDeleteChange,
+    } = useDisclosure();
 
     return (
         <Card
@@ -225,7 +295,7 @@ export default function ScheduleSelector({
                 <DateRangePicker
                     isRequired
                     isDisabled={!schedule}
-                    // @ts-ignore
+                    // @ts-expect-error - Not actually a type conflict
                     defaultValue={
                         schedule &&
                         schedule.timestamp_start &&
@@ -406,7 +476,7 @@ export default function ScheduleSelector({
                         </Dropdown>
                     }
                 />
-                <Dropdown placement="bottom-end">
+                <Dropdown placement="bottom-end" isDisabled={!schedule}>
                     <DropdownTrigger>
                         <Button
                             isIconOnly
@@ -425,6 +495,7 @@ export default function ScheduleSelector({
                             if (key === "duplicate") {
                                 duplicateSchedule(schedule);
                             } else if (key === "delete") {
+                                onDelete();
                             }
                         }}
                     >
@@ -453,18 +524,77 @@ export default function ScheduleSelector({
                             variant="flat"
                             closeOnSelect={false}
                         >
-                            <TimeInput variant="faded" label="Open Time" />
+                            <TimeInput
+                                variant="faded"
+                                label="Open Time"
+                                isRequired
+                                // @ts-expect-error - Not actually a type conflict
+                                value={openTime}
+                                onChange={(value) => {
+                                    if (!value) {
+                                        return;
+                                    } else {
+                                        // @ts-expect-error - Not actually a type conflict
+                                        setOpenTime(value);
+                                    }
+                                }}
+                                onBlur={() => {
+                                    if (!schedule || !openTime) return;
+                                    // Update schedule open time
+                                    patchMutation.mutate({
+                                        schedule_uuid: schedule.uuid,
+                                        partial_schedule: {
+                                            daily_open_time:
+                                                timeToTimestamp(openTime),
+                                        },
+                                    });
+                                }}
+                            />
                         </DropdownItem>
                         <DropdownItem
                             key="close-time"
                             variant="flat"
                             closeOnSelect={false}
                         >
-                            <TimeInput variant="faded" label="Close Time" />
+                            <TimeInput
+                                variant="faded"
+                                label="Close Time"
+                                // @ts-expect-error - Not actually a type conflict
+                                value={closeTime}
+                                isRequired
+                                onChange={(value) => {
+                                    if (!value) {
+                                        return;
+                                    } else {
+                                        // @ts-expect-error - Not actually a type conflict
+                                        setCloseTime(value);
+                                    }
+                                }}
+                                onBlur={() => {
+                                    if (!schedule || !closeTime) return;
+                                    // Update schedule close time
+                                    patchMutation.mutate({
+                                        schedule_uuid: schedule.uuid,
+                                        partial_schedule: {
+                                            daily_close_time:
+                                                timeToTimestamp(closeTime),
+                                        },
+                                    });
+                                }}
+                            />
                         </DropdownItem>
                     </DropdownMenu>
                 </Dropdown>
             </div>
+            {!!schedule && (
+                <DeleteScheduleModal
+                    schedule={schedule}
+                    isOpen={isDeleting}
+                    onOpenChange={onDeleteChange}
+                    onSuccess={onSuccess}
+                    onError={onError}
+                />
+            )}
         </Card>
     );
 }
