@@ -1,6 +1,8 @@
 import type { UnixTimestamp, UUID } from "./global";
 import type { TPublicShiftData, TShift } from "./shift";
 
+export type ScheduleUUID = UUID;
+
 /**
  * TAlert - Object to store information about an alert about the space
  * @property uuid - the unique identifier for this alert
