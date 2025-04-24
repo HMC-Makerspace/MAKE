@@ -43,6 +43,10 @@ const UserAvailabilityTime = new mongoose.Schema<TUserAvailabilityTime>({
     sec_end: { type: Number, required: true },
 });
 
+/**
+ * See {@link TUserAvailabilityDay} documentation for type information.
+ * Stored as children of {@link User}.
+ */
 const UserAvailabilityDay = new mongoose.Schema<TUserAvailabilityDay>({
     day: { type: Number, required: true },
     availability: { type: [UserAvailabilityTime], required: true },
@@ -53,6 +57,7 @@ const UserAvailabilityDay = new mongoose.Schema<TUserAvailabilityDay>({
  * Stored as children of {@link User}.
  */
 const UserAvailability = new mongoose.Schema<TUserAvailability>({
+    schedule: { type: String, required: true },
     days: { type: [UserAvailabilityDay], required: true },
     min_shift_count: { type: Number, required: false },
     max_shift_count: { type: Number, required: false },
@@ -72,11 +77,7 @@ export const User = new mongoose.Schema<TUser>(
         active_certificates: { type: [Certificate], required: false },
         past_certificates: { type: [Certificate], required: false },
         files: { type: [String], required: false },
-        work_schedules: {
-            type: Map, // All Maps have strings as keys (Schedule UUID)
-            of: UserAvailability, // Availability as values
-            required: false,
-        },
+        work_schedules: { type: [UserAvailability], required: false },
     },
     { collection: "users" },
 );

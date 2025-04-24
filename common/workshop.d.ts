@@ -3,6 +3,11 @@ import type { CertificationUUID, TCertification } from "./certification";
 import type { UserUUID } from "./user";
 import type { FileUUID } from "./file";
 
+export type TWorkshopUserRecord = {
+    user_uuid: UserUUID;
+    timestamp: UnixTimestamp;
+};
+
 /**
  * Workshop - Object to store information about all workshops
  * @property uuid - the unique identifier of the workshop
@@ -42,9 +47,9 @@ export type TWorkshop = {
     timestamp_end: UnixTimestamp;
     timestamp_public: UnixTimestamp;
     required_certifications?: CertificationUUID[];
-    rsvp_list: Map<UserUUID, UnixTimestamp>;
+    rsvp_list: TWorkshopUserRecord[];
     users_notified: UserUUID[];
-    sign_in_list: Map<UserUUID, UnixTimestamp>;
+    sign_in_list: TWorkshopUserRecord[];
     images?: FileUUID[];
     authorized_roles?: UserRoleUUID[];
 };
