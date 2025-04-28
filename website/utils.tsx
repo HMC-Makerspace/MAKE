@@ -32,3 +32,11 @@ export function convertTimestampToDate(timestamp?: number): string {
     }
     return new Date(timestamp * 1000).toLocaleString();
 }
+
+/** Convert an UNIX timestamp into a Locale String  */
+export function convertTimestampToDate(timestamp?: number): string {
+    if (!timestamp) {
+        return "N/A";
+    }
+    return new Date(timestamp * 1000).toLocaleString();
+}

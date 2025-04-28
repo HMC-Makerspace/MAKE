@@ -14,44 +14,77 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  Selection,
 } from "@heroui/react";
 import { TWorkshop } from "../../../../../common/workshop";
 import { MAKEUser } from "../../../user/User";
 import MAKETable from '../../../Table.tsx';
 import { convertTimestampToDate } from '../../../../utils.tsx';
-import type { UnixTimestamp } from "../../../../../common/global";
+import type { UUID } from "../../../../../common/global";
 import type { UserUUID } from "../../../../../common/user";
 
+//TODO: PUT A PLACE FOR PEOPLE NOTIFIED & CHECK SCROLLING
+
+const rsvpColumns = [
+  {name: 'User', id: 'user'},
+  {name: 'Sign Up Time', id: 'sign_up_time'},
+];
+const rsvpDefaultColumns = ['user', 'sign_up_time'];
+
+const attendeeColumns = [
+  {name: 'User', id: 'user'},
+  {name: 'Attended Time', id: 'attended_time'},
+];
+const attendeeDefaultColumns = ['user', 'attended_time'];
 
 export default function WorkshopPeopleModal({
     workshop,
     isOpen,
     onOpenChange,
 }:{
-  workshop: TWorkshop | null;
+  workshop?: TWorkshop;
   isOpen: boolean;
   onOpenChange: () => void;
 }) {
 
-  const [rsvpList, setRsvpList] = useState<{user: string; time: number;}[]>([]);
+  const [rsvpList, setRsvpList] = useState<{uuid:UUID; user: string; time: number;}[]>([]);
+  const [attendeesList, setAttendeesList] = useState<{uuid:UUID; user: string; time: number;}[]>([]);
 
+  const [rsvpVisibleColumns, setRsvpVisibleColumns] = React.useState<Selection>(
+      new Set(rsvpDefaultColumns),
+    );
+
+    const [attendeeVisibleColumns, setAttendeeVisibleColumns] = React.useState<Selection>(
+      new Set(attendeeDefaultColumns),
+    );
+    
   useEffect(() => {
     {
       if (workshop?.rsvp_list) {
-        const rsvpListArray = Object.entries(workshop.rsvp_list).map(([user, time]) => ({
-          user,
-          time,
+        // Convert the rsvp_list object to an array of objects
+        const rsvpArray = Object.entries(workshop.rsvp_list).map(([user, time]) => ({
+          uuid: workshop.uuid,
+          user: user,
+          time: time,
         }));
-        setRsvpList(rsvpListArray);
+        setRsvpList(rsvpArray);
+      }
+    }
+    {
+      if (workshop?.sign_in_list) {
+        // Convert the sign_in_list object to an array of objects
+        const signInArray = Object.entries(workshop.sign_in_list).map(([user, time]) => ({
+          uuid: workshop.uuid,
+          user: user,
+          time: time,
+        }));
+        setAttendeesList(signInArray);
       }
     }
       
-  }, [isOpen])
+  }, [isOpen]);
 
-  const columns = [
-    {name: 'User', id: 'user'},
-    {name: 'Sign Up Time', id: 'sign_up_time'},
-  ]
+  
 
   return (
     <Modal
@@ -76,45 +109,77 @@ export default function WorkshopPeopleModal({
             title="Signups"
             className='w-full mb-0'
           >
-          {workshop?.rsvp_list && Object.keys(workshop?.rsvp_list).length > 0 ? (
-          <Table
-            isHeaderSticky
-            aria-label="A table for workshop signups"
-            fullWidth
-        >
-            <TableHeader>
-                {columns.map((column) => (
-                    <TableColumn key={column.id}>{column.name}</TableColumn>
-                ))}
-            </TableHeader>
-            <TableBody>
-            
-            {Object.entries(workshop.rsvp_list).map(([user, time]) => (
-              <TableRow key={user}>
-                <TableCell>
-                    <MAKEUser 
-                    user_uuid={user}
-                    size="lg"
-                     />
-                </TableCell>
-                <TableCell>
-                    {convertTimestampToDate(time)}
-                </TableCell>
-            </TableRow>
-            ))}
-            </TableBody>
-        </Table>
+          {rsvpList.length > 0 ? (
+          <MAKETable 
+            content={rsvpList}  
+            columns={rsvpColumns}
+            visibleColumns={rsvpVisibleColumns}
+            multiSelect={false}
+            isLoading={false}
+            customColumnComponents={{
+              "user": (user) => {
+                        return (
+                            <div>
+                                <MAKEUser 
+                                user_uuid={user.user}
+                                size="lg" 
+                                />
+                            </div>
+                        )
+                },
+                "sign_up_time": (user) => {
+                  return (
+                    <div>
+                      {convertTimestampToDate(user.time)}
+                    </div>
+                  )
+                }
+            }}
+          />
         ) : (
           <div className='flex items-center justify-center m-8'>
             <p>No Signups Found</p>
           </div>
-          
         )}
           </Tab>
+
           <Tab 
             key="attendees" 
             title="Attendees"
+            className='w-full mb-0'
           >
+          {attendeesList.length > 0 ? (
+          <MAKETable 
+            content={attendeesList}  
+            columns={attendeeColumns}
+            visibleColumns={attendeeVisibleColumns}
+            multiSelect={false}
+            isLoading={false}
+            customColumnComponents={{
+              "user": (user) => {
+                        return (
+                            <div>
+                                <MAKEUser 
+                                user_uuid={user.user}
+                                size="lg" 
+                                />
+                            </div>
+                        )
+                },
+                "attended_time": (user) => {
+                  return (
+                    <div>
+                      {convertTimestampToDate(user.time)}
+                    </div>
+                  )
+                }
+            }}
+          />
+        ) : (
+          <div className='flex items-center justify-center m-8'>
+            <p>No Signups Found</p>
+          </div>
+        )}
           </Tab>
         </Tabs>
       </ModalBody>

@@ -10,7 +10,9 @@ import {
     PhotoIcon,
     UserIcon,
     PencilSquareIcon,
-    CheckIcon
+    CheckIcon,
+    TrashIcon,
+    PlusIcon
 } from '@heroicons/react/24/outline';
 import { TWorkshop } from 'common/workshop';
 import MAKETable from '../../../Table.tsx';
@@ -22,6 +24,8 @@ import { FILE_RESOURCE_TYPE } from '../../../../../common/file.ts';
 import WorkshopPeopleModal from './WorkshopPeopleModal.tsx';
 import WorkshopImagesModal from './WorkshopImagesModal.tsx';
 import WorkshopEditModal from './WorkshopEditModal.tsx';
+import DeleteModal from "../../../DeleteModal";
+
 
 // TODO- 
 // [] FIX TIME
@@ -40,7 +44,8 @@ const columns = [
     {name: 'People', id:'signups'},
     {name: 'Photos', id:'photos'},
     {name: 'Authorized Roles', id:'authorized_roles'},
-    {name: 'Edit', id:'edit'}
+    {name: 'Edit', id:'edit'},
+    {name: 'Delete', id:'delete'}
 ]
 const defaultColumns = [
     'title',
@@ -55,7 +60,8 @@ const defaultColumns = [
     // 'sign_in_list',
     'photos',
     'authorized_roles',
-    'edit'
+    'edit',
+    'delete'
 ]
 
 export default function WorkshopTable({
@@ -66,12 +72,12 @@ export default function WorkshopTable({
     isLoading: boolean
 }) {
 
-    
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
             new Set(defaultColumns),
         );
     
-    const [selectedWorkshop, setSelectedWorkshop] = React.useState<TWorkshop | null>(null);
+    const [selectedWorkshop, setSelectedWorkshop] = React.useState<TWorkshop | undefined>(undefined);
+    const [isNew, setIsNew] = React.useState<boolean>(false);
 
     const {
             isOpen: peopleIsOpen,
@@ -92,13 +98,24 @@ export default function WorkshopTable({
 
     return (
         <>
-            <div className='flex flex-col justify-center items-center'>
+            <div className='flex flex-col justify-center items-center relative'>
                 <h1 className="text-xl font-bold text-foreground-900 mb-2">
                     Workshops
                 </h1>
                 <h3 className="text-l text-foreground-900 mb-4">
                     View, edit, and create workshops.
                 </h3>
+                <Button
+                    color="primary"
+                    isDisabled={isLoading}
+                    startContent={<PlusIcon className="size-6" />}
+                    onPress={() => {
+                        
+                    }}
+                    className="relative lg:absolute top-0 right-0 mb-4"
+                >
+                    Create
+                </Button>
             </div>
         {   workshops.length > 0 ?
             <div>
@@ -138,7 +155,7 @@ export default function WorkshopTable({
                                  (
                                     <>
                                         {workshop.support_instructors.map((instructor) => {
-                                            return <MAKEUser size='sm' user_uuid={instructor}/> //className="bg-default-400"
+                                            return <MAKEUser size='sm' user_uuid={instructor}/> 
                                         })}
                                     </>
                                    
@@ -269,7 +286,23 @@ export default function WorkshopTable({
                                 ></Button>
                             </>
                         )
-                        
+                    },
+                    "delete": (workshop) => {
+                        return (
+                            <>
+                                <Button 
+                                    isIconOnly 
+                                    color="danger"
+                                    startContent={
+                                    <TrashIcon className="size-6" />
+                                    }
+                                    onPress={() => {
+                                        setSelectedWorkshop(workshop);
+
+                                    }}
+                                ></Button>
+                            </>
+                        )
                     }
                   }}
                 /> 
@@ -286,6 +319,7 @@ export default function WorkshopTable({
                 />
                 <WorkshopEditModal 
                     workshop={selectedWorkshop}
+                    isNew={isNew}
                     isOpen={editIsOpen}
                     onOpenChange={editOnOpenChange}
                 />
