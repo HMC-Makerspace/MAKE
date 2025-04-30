@@ -1351,7 +1351,7 @@ function renderAvailability() {
     // Sort by name
     stewards.sort((a, b) => a.name.localeCompare(b.name));
 
-    for (let i = 11; i < 24; i++) {
+    for (let i = 14; i < 22; i++) {
         const row = document.createElement("tr");
 
         const time = document.createElement("th");
