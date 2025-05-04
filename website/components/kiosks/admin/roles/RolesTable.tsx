@@ -55,6 +55,7 @@ const columns = [
     { name: "Description", id: "description" },
     { name: "Color", id: "color" },
     { name: "Default", id: "default" },
+    { name: "Hierarchy", id: "display_hierarchy" },
 ];
 
 const defaultColumns = ["title", "description", "color", "default"];
@@ -126,6 +127,9 @@ function EditRoleModal({
     const [isDefault, setIsDefault] = React.useState<boolean>(
         role?.default ?? false,
     );
+    const [displayHierarchy, setDisplayHierarchy] = React.useState<
+        number | undefined
+    >(role?.display_hierarchy ?? undefined);
 
     const onSubmit = React.useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
@@ -135,7 +139,7 @@ function EditRoleModal({
             // Check if there are any edits to save
             if (!hasEdits) return;
 
-            // Roles cannot have all scopes
+            // Roles cannot have all scopes, will be a populated list
             if (scopes === "all") return;
 
             const new_role: TUserRole = {
@@ -145,6 +149,7 @@ function EditRoleModal({
                 color: color,
                 scopes: Array.from(scopes as Set<API_SCOPE>),
                 default: isDefault,
+                display_hierarchy: displayHierarchy,
             };
 
             console.log(new_role);
@@ -297,7 +302,7 @@ function EditRoleModal({
                                 />
                                 <div
                                     id="role-color-picker"
-                                    className="grid grid-flow-col gap-2 items-center w-full"
+                                    className="flex flex-row gap-2 items-center w-full"
                                 >
                                     <Input
                                         type="text"
@@ -319,6 +324,7 @@ function EditRoleModal({
                                                 "placeholder:italic",
                                                 "text-default-700",
                                                 "uppercase",
+                                                "placeholder:capitalize",
                                             ]),
                                         }}
                                     />
@@ -328,6 +334,7 @@ function EditRoleModal({
                                         placement="right"
                                         shouldCloseOnBlur={false}
                                         triggerScaleOnOpen={false}
+                                        className="w-fit"
                                     >
                                         <PopoverTrigger>
                                             <Button
@@ -426,6 +433,30 @@ function EditRoleModal({
                                         </SelectSection>
                                     ))}
                                 </Select>
+                                <Input
+                                    type="number"
+                                    label="Display Hierarchy"
+                                    name="display_hierarchy"
+                                    placeholder="Enter a hierarchy level, larger displays above smaller..."
+                                    value={
+                                        displayHierarchy
+                                            ? displayHierarchy.toString()
+                                            : ""
+                                    }
+                                    onValueChange={wrapEdit((value: string) =>
+                                        setDisplayHierarchy(parseInt(value)),
+                                    )}
+                                    variant="faded"
+                                    color="primary"
+                                    size="md"
+                                    classNames={{
+                                        input: clsx([
+                                            "placeholder:text-default-500",
+                                            "placeholder:italic",
+                                            "text-default-700",
+                                        ]),
+                                    }}
+                                />
                                 <div
                                     id="role-bottom-buttons"
                                     className="flex flex-row justify-between w-full"

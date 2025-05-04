@@ -1,21 +1,21 @@
 import clsx from "clsx";
 import { TShift } from "common/shift";
-import { TUser, UserUUID } from "common/user";
-import { MAKEUser } from "../../../user/User";
-import { animate, motion } from "framer-motion";
+import { TUser, TUserRole, UserUUID } from "common/user";
+import { motion } from "framer-motion";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { UUID } from "common/global";
+import { API_SCOPE, UUID } from "../../../../../common/global";
 import axios from "axios";
 import { TSchedule } from "common/schedule";
 import {
+    Button,
     Popover,
     PopoverContent,
     PopoverTrigger,
     Selection,
-    user,
 } from "@heroui/react";
-import React, { useState } from "react";
-import { type } from "os";
+import React from "react";
+import UserRole from "../../../user/UserRole";
+import { getUserRoleHierarchy } from "../../../../utils";
 
 const baseColors = [
     "bg-secondary-50",
@@ -65,6 +65,7 @@ export default function Shift({
     schedule_uuid,
     shifts,
     users,
+    roles,
     day,
     sec_start,
     sec_end,
@@ -78,6 +79,7 @@ export default function Shift({
     schedule_uuid: UUID;
     shifts: TShift[];
     users: TUser[];
+    roles: TUserRole[];
     day: number;
     sec_start: number;
     sec_end: number;
@@ -125,15 +127,17 @@ export default function Shift({
         : null;
 
     const available = selected_user
-        ? selected_user.availability?.some(
-              (record) =>
-                  record.day === day &&
-                  record.availability.some(
-                      (time) =>
-                          time.sec_start <= sec_start &&
-                          time.sec_end >= sec_end,
-                  ),
-          )
+        ? selected_user.work_schedules
+              ?.find((a) => a.schedule == schedule_uuid)
+              ?.days.some(
+                  (record) =>
+                      record.day === day &&
+                      record.availability.some(
+                          (time) =>
+                              time.sec_start <= sec_start &&
+                              time.sec_end >= sec_end,
+                      ),
+              )
         : false;
 
     const colorIndex = Math.min(assignees.length, baseColors.length - 1);
@@ -166,12 +170,59 @@ export default function Shift({
         undefined,
     );
 
+    const statHierarchicalRoles = statUser
+        ? getUserRoleHierarchy(statUser, roles)
+        : [];
+
+    const statUserScheduledShifts = shifts.filter(
+        (s) => s.assignee === statUser?.uuid,
+    ).length;
+
+    const statUserMinRequestedShifts = statUser?.work_schedules?.find(
+        (a) => a.schedule == schedule_uuid,
+    )?.min_shift_count;
+    const statUserMaxRequestedShifts = statUser?.work_schedules?.find(
+        (a) => a.schedule == schedule_uuid,
+    )?.max_shift_count;
+
+    let statUserShiftStatusColor;
+    if (!statUserMinRequestedShifts && !statUserMaxRequestedShifts) {
+        statUserShiftStatusColor = "text-secondary-300";
+    } else if (
+        !statUserMinRequestedShifts ||
+        statUserMinRequestedShifts <= statUserScheduledShifts
+    ) {
+        // Over min requested shift count
+
+        if (
+            !statUserMaxRequestedShifts ||
+            statUserMaxRequestedShifts >= statUserScheduledShifts
+        ) {
+            // Over min and under max requested shift count, optimal
+            statUserShiftStatusColor = "text-primary-300";
+        } else {
+            // Over min and also over max requested shift count, bad
+            statUserShiftStatusColor = "text-danger-300";
+        }
+    } else {
+        // Under min requested shift count
+        if (
+            !statUserMaxRequestedShifts ||
+            statUserMaxRequestedShifts >= statUserScheduledShifts
+        ) {
+            // Under min and over max... something is wrong
+            statUserShiftStatusColor = "text-warning-300";
+        } else {
+            // Under min and under max, not the end of the world
+            statUserShiftStatusColor = "text-danger-200";
+        }
+    }
+
     return (
         <Popover
             isOpen={isOpen}
-            onOpenChange={(open) => setIsOpen(open)}
+            onOpenChange={() => setIsOpen(false)} // always close on blur, but don't open
             shouldCloseOnBlur
-            isKeyboardDismissDisabled
             placement="left"
             shouldFlip
             showArrow
@@ -181,7 +232,7 @@ export default function Shift({
             triggerScaleOnOpen={false}
         >
             <PopoverTrigger>
-                <motion.button
+                <motion.div
                     className={clsx(
                         "min-h-full w-full",
                         "flex flex-col",
@@ -272,23 +323,46 @@ export default function Shift({
                             );
                         }
                         if (type === "edit") {
+                            const hierarchical_roles = getUserRoleHierarchy(
+                                u,
+                                roles,
+                            );
+                            const hierarchical_color =
+                                hierarchical_roles[0].color;
                             return (
-                                <MAKEUser
+                                <Button
                                     key={assignee}
-                                    user_uuid={assignee}
-                                    user={u}
-                                    size="sm"
                                     className={clsx(
+                                        "bg-default-300 px-3",
+                                        "justify-items-center sm:w-auto",
                                         "rounded-full",
                                         selectedUser
                                             ? "cursor-not-allowed"
                                             : "",
                                     )}
-                                    onClick={() => {
-                                        setIsOpen(!isOpen);
+                                    onPress={() => {
+                                        setIsOpen(true);
                                         setStatUser(u);
                                     }}
-                                />
+                                    size="sm"
+                                >
+                                    <div
+                                        className={clsx(
+                                            "inline-flex outline-none",
+                                            "items-center justify-center",
+                                            "gap-2 rounded-xl",
+                                        )}
+                                    >
+                                        {u.name}
+                                        <span
+                                            style={{
+                                                backgroundColor:
+                                                    hierarchical_color,
+                                            }}
+                                            className="size-2 rounded-full"
+                                        ></span>
+                                    </div>
+                                </Button>
                             );
                         } else if (type === "view") {
                             return (
@@ -323,9 +397,45 @@ export default function Shift({
                             {type === "edit" ? "Unassigned" : "No shift"}
                         </div>
                     )}
-                </motion.button>
+                </motion.div>
             </PopoverTrigger>
-            <PopoverContent>Blah</PopoverContent>
+            <PopoverContent>
+                {statUser ? (
+                    <div className="p-1 pr-0 flex flex-col gap-1">
+                        <div className="flex flex-row gap-4 justify-between items-center">
+                            <span key="name" className="font-bold text-medium">
+                                {statUser.name}
+                            </span>
+                            <UserRole
+                                role_uuid={statHierarchicalRoles[0].uuid}
+                            />
+                        </div>
+                        <div className="flex flex-row gap-1">
+                            <span
+                                className={clsx(
+                                    "font-bold",
+                                    statUserShiftStatusColor,
+                                )}
+                            >
+                                {statUserScheduledShifts}
+                            </span>
+                            <span>scheduled shifts</span>
+                        </div>
+                        <div className="flex flex-row gap-1">
+                            <span>Requested shift range:</span>
+                            <span className="font-semibold text-primary-300">
+                                {statUserMinRequestedShifts ?? "?"}
+                            </span>
+                            <span className="font-thin">-</span>
+                            <span className="font-semibold text-primary-300">
+                                {statUserMaxRequestedShifts ?? "?"}
+                            </span>
+                        </div>
+                    </div>
+                ) : (
+                    <></>
+                )}
+            </PopoverContent>
         </Popover>
     );
 }

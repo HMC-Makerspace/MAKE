@@ -20,6 +20,7 @@ export const UserRole = new mongoose.Schema<TUserRole>(
         color: { type: String, required: true },
         scopes: { type: [String], required: true },
         default: { type: Boolean, required: true },
+        display_hierarchy: { type: Number, required: false },
     },
     { collection: "user_roles" },
 );
