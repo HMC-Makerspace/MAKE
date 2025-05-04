@@ -3,13 +3,14 @@ import { TConfig } from "common/config";
 import { TSchedule } from "common/schedule";
 import Shift from "./Shift";
 import { SHIFT_DAY } from "../../../../../common/shift";
-import { TUser, UserUUID } from "common/user";
+import { TUser, TUserRole, UserUUID } from "common/user";
 import clsx from "clsx";
 import { useState } from "react";
 
 export default function Schedule({
     schedule,
     users,
+    roles,
     config,
     isLoading,
     selectedUser = null,
@@ -19,6 +20,7 @@ export default function Schedule({
 }: {
     schedule: TSchedule | undefined;
     users: TUser[];
+    roles: TUserRole[];
     config: TConfig;
     isLoading: boolean;
     selectedUser?: UserUUID | null;
@@ -107,6 +109,7 @@ export default function Schedule({
                                                 schedule_uuid={schedule.uuid}
                                                 shifts={schedule.shifts}
                                                 users={users}
+                                                roles={roles}
                                                 day={day}
                                                 sec_start={row_start_sec}
                                                 sec_end={row_end_sec}

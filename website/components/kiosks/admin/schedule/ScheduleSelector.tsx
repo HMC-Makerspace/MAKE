@@ -137,6 +137,16 @@ function DeleteScheduleModal({
     );
 }
 
+function AlertEditorModal({
+    selectedSchedule,
+    setSelectedSchedules,
+}: {
+    selectedSchedule: TSchedule;
+    setSelectedSchedules: (schedules: Selection) => void;
+}) {
+    return;
+}
+
 export default function ScheduleSelector({
     schedules,
     defaultSchedule,
@@ -395,7 +405,9 @@ export default function ScheduleSelector({
                             variant="faded"
                             size="lg"
                             className="self-end"
-                            onPress={() => /** show alert modal */ {}}
+                            onPress={() => /**TODO: show alert modal */ {
+                                alert("Alert modal WIP");
+                            }}
                         />
                     </Tooltip>
                 )}

@@ -84,6 +84,7 @@ export default function ScheduleBuffer({
                         schedule={schedule}
                         config={config}
                         users={filteredUsers}
+                        roles={roles}
                         isLoading={false}
                         selectedUser={selectedUser}
                         setSelectedUsers={setSelectedUsers}

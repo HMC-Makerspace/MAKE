@@ -1,4 +1,5 @@
 import { Time, ZonedDateTime, parseZonedDateTime, now } from "@internationalized/date";
+import { TUser, TUserRole } from "common/user";
 
 /**
  * A file to contain useful utility functions for the website.
@@ -25,14 +26,6 @@ export function updateSearchParams(
     return searchParams;
 }
 
-//converting timestamp to date
-export function convertTimestampToDate(timestamp?: number): string {
-    if (!timestamp) {
-        return "N/A";
-    }
-    return new Date(timestamp * 1000).toLocaleString();
-}
-
 /** Convert an UNIX timestamp into a Locale String  */
 export function convertTimestampToDate(timestamp?: number): string {
     if (!timestamp) {
@@ -48,15 +41,7 @@ export function timestampToZonedDateTime(timestamp: number, timeZone: string = '
     );
 }
 
-/** Convert a ZonedDateTime object back to a UNIX timestamp */
-export function zonedDateTimeToTimestamp(zonedDateTime: ZonedDateTime): number {
-    return Math.floor(zonedDateTime.toDate().getTime() / 1000);
-}
-
-/** Convert an UNIX timestamp into a Locale String  */
-export function convertTimestampToDate(timestamp?: number): string {
-    if (!timestamp) {
-        return "N/A";
-    }
-    return new Date(timestamp * 1000).toLocaleString();
+/** Convert an internationalized Time object to a UNIX second timestamp */
+export function timeToTimestamp(time: Time) {
+    return time.hour * 60 * 60 + time.minute * 60 + time.second;
 }
