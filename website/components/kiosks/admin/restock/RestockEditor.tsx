@@ -81,8 +81,7 @@ export default function RestockEditor({
                 status:
                     parseInt(data.get("status") as string) ||
                     RESTOCK_REQUEST_STATUS.PENDING_APPROVAL,
-                message:
-                    (data.get("completion_note") as string) || "Status updated",
+                message: (data.get("completion_note") as string) || undefined,
             };
 
             // Reset the mutation (clears any previous errors)
