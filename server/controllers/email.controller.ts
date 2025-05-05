@@ -24,6 +24,8 @@ export async function sendEmail(
     subject: string,
     bodyHTML: string,
     logger: Logger,
+    cc?: string[],
+    bcc?: string[],
 ) {
     const tokens = await getOAuthToken(logger);
 
@@ -53,6 +55,8 @@ export async function sendEmail(
         to: to,
         subject: subject,
         html: bodyHTML,
+        cc: cc,
+        bcc: bcc,
     };
     logger.debug({
         msg: `Sending email to ${to}`,
