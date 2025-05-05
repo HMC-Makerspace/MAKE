@@ -1,16 +1,16 @@
 import React from "react";
 import {
-  Input,
-  Button,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  Select,
-  SelectItem,
-  Form,
-  Textarea,
+    Input,
+    Button,
+    Modal,
+    ModalHeader,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    Select,
+    SelectItem,
+    Form,
+    Textarea,
 } from "@heroui/react";
 import { TWorkshop } from "../../../../../common/workshop";
 import ImageCarousel from "../../../ImageCarousel";
@@ -21,9 +21,9 @@ export default function WorkshopImagesModal({
     isOpen,
     onOpenChange,
 }:{
-  workshop?: TWorkshop;
-  isOpen: boolean;
-  onOpenChange: () => void;
+    workshop?: TWorkshop;
+    isOpen: boolean;
+    onOpenChange: () => void;
 }) {
 
   return (
@@ -35,27 +35,27 @@ export default function WorkshopImagesModal({
       className="flex flex-col justify-center"
       >
         <ModalContent>
-          <ModalHeader>
-            Workshop Images
-          </ModalHeader>
+            <ModalHeader>
+                Workshop Images
+            </ModalHeader>
 
-          <ModalBody className='flex flex-col items-center px-6 min-h-[20vh] justify-center'>
-            <ImageCarousel
-              uuid={workshop?.uuid}
-              fileType={FILE_RESOURCE_TYPE.WORKSHOP} 
-              editable={false}
-            />
-          </ModalBody>
-          <ModalFooter className='flex flex-col items-center'>
-            <Button
-              color="primary"
-              onPress={() => {
-                onOpenChange();
-              }}
-            >
-              Done
-            </Button>
-          </ModalFooter>
+            <ModalBody className='flex flex-col items-center px-6 min-h-[20vh] justify-center'>
+                <ImageCarousel
+                uuid={workshop?.uuid}
+                fileType={FILE_RESOURCE_TYPE.WORKSHOP} 
+                editable={false}
+                />
+            </ModalBody>
+            <ModalFooter className='flex flex-col items-center'>
+                <Button
+                  color="primary"
+                  onPress={() => {
+                    onOpenChange();
+                  }}
+                >
+                    Done
+                </Button>
+            </ModalFooter>
         </ModalContent>
     </Modal>
   )
