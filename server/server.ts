@@ -1,6 +1,7 @@
 import express, { Application } from "express";
 import compression from "compression";
 import https from "https";
+import http from "http";
 import fs from "fs";
 import path from "path";
 import connectDB from "./core/db";
@@ -34,7 +35,11 @@ import scheduleRoutes from "./routes/schedule.route";
 import userRoutes from "./routes/user.route";
 import workshopRoutes from "./routes/workshop.route";
 import emailRoutes from "./routes/email.route";
-import { getOAuthURL, sendEmail } from "controllers/email.controller";
+import {
+    getOAuthToken,
+    getOAuthURL,
+    sendEmail,
+} from "controllers/email.controller";
 
 const app: Application = express();
 
@@ -92,24 +97,40 @@ app.get("/api/v3/test", (req, res) => {
 
 // Frontend, in website/public/index.html
 // TODO: Need to figure out how to serve the frontend in production
-// app.use(express.static(path.join(__dirname, "../website/build")));
+
+const PORT = process.env.VITE_SERVER_PORT || 3000;
 
 if (process.env.NODE_ENV === "production") {
-    const options = {
-        key: fs.readFileSync("path/to/key.pem"),
-        cert: fs.readFileSync("path/to/cert.pem"),
-    };
+    // Doesn't work yet...
+    app.use(express.static(path.join(__dirname, "../website/dist")));
+    // const options = {
+    //     key: fs.readFileSync("path/to/key.pem"),
+    //     cert: fs.readFileSync("path/to/cert.pem"),
+    // };
 
-    https.createServer(options, app).listen(443, "0.0.0.0", () => {
-        logger.info("Server running in production mode on port 443");
+    // https.createServer(options, app).listen(443, "0.0.0.0", () => {
+    //     logger.info("Server running in production mode on port 443");
+    // });
+
+    http.createServer(app).listen(PORT, () => {
+        logger.info(`Server running on http://127.0.0.1:${PORT}`);
     });
 } else {
-    const PORT = process.env.VITE_SERVER_PORT || 3000;
     app.listen(PORT, () => {
         logger.info(`Server running on http://127.0.0.1:${PORT}`);
     });
-    // Setup email client if CLI option included
-    if (Bun.argv.includes("--setup-email")) {
-        logger.info(getOAuthURL());
-    }
+}
+
+// Setup email client if CLI option included
+// if (Bun.argv.includes("--setup-email")) {
+//     logger.info(getOAuthURL());
+// }
+if (!(await getOAuthToken(logger))) {
+    // If OAuth token is invalid, prompt the administrator to login
+    logger.info({
+        msg: "No OAuth token found. Please authenticate with a valid OAuth account.",
+        url: getOAuthURL(),
+    });
+} else {
+    logger.debug("OAuth is enabled.");
 }

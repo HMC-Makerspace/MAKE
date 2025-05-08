@@ -93,20 +93,32 @@ export async function sendTemplatedEmail(
     subject: string,
     template: JSX.Element,
     logger: Logger,
+    cc?: string[],
+    bcc?: string[],
 ) {
     const bodyHTML = renderToString(template);
-    sendEmail(to, subject, bodyHTML, logger);
+    sendEmail(to, subject, bodyHTML, logger, cc, bcc);
 }
 
 // ----- Google OAuth -----
 
+/**
+ * Generate an OAuth authentication url using the client id/secret in the environment.
+ * This method is called if no OAuth token exists on startup
+ * @returns The authentication URL as a string.
+ */
 export function getOAuthURL() {
     return oAuth2Client.generateAuthUrl({
-        access_type: "offline",
+        access_type: "offline", // offline access gives a refresh token, which means fewer logins
         scope: "https://mail.google.com",
     });
 }
 
+/**
+ * Get the active OAuth access and refresh tokens from file.
+ * @param logger The Pino logger to output success/warning messages to
+ * @returns The token file containing the access and refresh tokens as strings
+ */
 export async function getOAuthToken(logger: Logger) {
     return fs
         .readFile("oauthtoken.json")
@@ -116,6 +128,9 @@ export async function getOAuthToken(logger: Logger) {
                 const tokenFile: {
                     access_token: string;
                     refresh_token: string;
+                    scope: string;
+                    token_type: string;
+                    expiry_date: number;
                 } = JSON.parse(data.toString());
                 return tokenFile;
             } catch (e) {
@@ -135,18 +150,37 @@ export async function getOAuthToken(logger: Logger) {
         });
 }
 
+/**
+ * Given an OAuth authentication code, save the associated token to file.
+ * @param code The OAuth code sent as a query parameter from the OAuth URL
+ * @param logger The Pino logger to output success/warning messages to
+ * @returns A boolean indicating if the token was successfully saved or not.
+ */
 export async function saveOAuthToken(code: string, logger: Logger) {
-    const tokenResponse = await oAuth2Client.getToken(code);
-    return fs
-        .writeFile("oauthtoken.json", JSON.stringify(tokenResponse.tokens))
-        .then(() => {
-            logger.debug("Wrote OAuth token to file.");
-            return true;
-        })
-        .catch((err) => {
+    return oAuth2Client
+        .getToken(code)
+        .then((tokenResponse) =>
+            fs
+                .writeFile(
+                    "oauthtoken.json",
+                    JSON.stringify(tokenResponse.tokens),
+                )
+                .then(() => {
+                    logger.debug("Wrote OAuth token to file.");
+                    return true;
+                })
+                .catch((writeErr) => {
+                    logger.fatal({
+                        msg: "Error saving OAuth token file.",
+                        error: writeErr,
+                    });
+                    return false;
+                }),
+        )
+        .catch((tokenErr) => {
             logger.fatal({
-                msg: "Error saving OAuth token file.",
-                error: err,
+                msg: "OAuth code did not produce a valid token.",
+                error: tokenErr,
             });
             return false;
         });
