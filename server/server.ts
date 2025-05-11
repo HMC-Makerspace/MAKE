@@ -96,7 +96,7 @@ if (process.env.NODE_ENV === "production") {
         res.sendFile(path.join(__dirname, "../website/build", "index.html"));
     });
 
-    http.createServer(app).listen(PORT, "0.0.0.0", () => {
+    http.createServer(app).listen(PORT, () => {
         logger.info(
             `Server running in production mode http://127.0.0.1:${PORT}`,
         );
