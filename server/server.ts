@@ -1,6 +1,6 @@
 import express, { Application } from "express";
 import compression from "compression";
-import https from "https";
+import http from "http";
 import fs from "fs";
 import path from "path";
 import connectDB from "./core/db";
@@ -86,9 +86,7 @@ app.get("/api/v3/test", (req, res) => {
     res.send("Hello World!");
 });
 
-// Frontend, in website/public/index.html
-// TODO: Need to figure out how to serve the frontend in production
-// app.use(express.static(path.join(__dirname, "../website/build")));
+const PORT = process.env.VITE_SERVER_PORT || 3000;
 
 if (process.env.NODE_ENV === "production") {
     // Join frontend build paths statically
@@ -98,20 +96,12 @@ if (process.env.NODE_ENV === "production") {
         res.sendFile(path.join(__dirname, "../website/build", "index.html"));
     });
 
-    const options = {
-        key: fs.readFileSync(process.env.KEY_PEM_ROUTE),
-        cert: fs.readFileSync(process.env.CERT_PEM_ROUTE),
-    };
-
-    https.createServer(options, app).listen(443, "0.0.0.0", () => {
-        logger.info("Server running in production mode on port 443");
+    http.createServer(app).listen(PORT, "0.0.0.0", () => {
+        logger.info(
+            `Server running in production mode http://127.0.0.1:${PORT}`,
+        );
     });
-
-    // http.createServer(app).listen(PORT, () => {
-    //     logger.info(`Server running on http://127.0.0.1:${PORT}`);
-    // });
 } else {
-    const PORT = process.env.VITE_SERVER_PORT || 3000;
     app.listen(PORT, () => {
         logger.info(`Server running on http://localhost:${PORT}`);
     });
