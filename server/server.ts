@@ -11,7 +11,7 @@ import loggerMiddleware from "pino-http";
 import cors from "cors";
 
 // await Bun.build({
-//     entrypoints: ["index.html"],
+//     entrypoints: ["website/index.html"],
 //     outdir: "website/build",
 //     plugins: [html()],
 // });
@@ -91,14 +91,25 @@ app.get("/api/v3/test", (req, res) => {
 // app.use(express.static(path.join(__dirname, "../website/build")));
 
 if (process.env.NODE_ENV === "production") {
+    // Join frontend build paths statically
+    app.use(express.static(path.join(__dirname, "../website/build")));
+    // Route all other paths to index so React Router can handle frontend routes.
+    app.get("/*path", function (req, res) {
+        res.sendFile(path.join(__dirname, "../website/build", "index.html"));
+    });
+
     const options = {
-        key: fs.readFileSync("path/to/key.pem"),
-        cert: fs.readFileSync("path/to/cert.pem"),
+        key: fs.readFileSync(process.env.KEY_PEM_ROUTE),
+        cert: fs.readFileSync(process.env.CERT_PEM_ROUTE),
     };
 
     https.createServer(options, app).listen(443, "0.0.0.0", () => {
         logger.info("Server running in production mode on port 443");
     });
+
+    // http.createServer(app).listen(PORT, () => {
+    //     logger.info(`Server running on http://127.0.0.1:${PORT}`);
+    // });
 } else {
     const PORT = process.env.VITE_SERVER_PORT || 3000;
     app.listen(PORT, () => {

@@ -4,7 +4,10 @@ declare module "bun" {
         NODE_ENV: "development" | "production";
         VITE_SERVER_PORT?: number;
         VITE_PORT?: number;
-        EMAIL_BOT_NAME: string;
+
+        KEY_PEM_ROUTE: string;
+        CERT_PEM_ROUTE: string;
+
         EMAIL_BOT_HOST: string;
         EMAIL_BOT_PORT: number;
         EMAIL_BOT_ADDRESS: string;
