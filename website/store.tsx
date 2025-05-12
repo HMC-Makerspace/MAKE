@@ -9,6 +9,7 @@ type State = {
 };
 
 function setUserUUID(uuid: string) {
+    window.localStorage.setItem("requesting_uuid", uuid);
     axios.defaults.headers.common["requesting_uuid"] = uuid;
     return { user_uuid: uuid };
 }

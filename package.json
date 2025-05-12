@@ -60,7 +60,8 @@
     "backend:dev": "bun run --watch server/server.ts",
     "frontend:dev": "vite",
     "prettify": "pino-pretty -i hostname,req.id,req.query,req.params,req.headers,req.remoteAddress,req.remotePort,res.headers",
-    "backend:build": "bun build website/index.tsx --outdir website/build",
+    "frontend:prod": "bun vite build --outDir=build",
+    "backend:prod": "bun run server/server.ts | bun prettify",
     "setup": "echo 'Project setup is a WIP.'"
   }
 }

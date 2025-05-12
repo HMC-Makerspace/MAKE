@@ -1,6 +1,5 @@
 import express, { Application } from "express";
 import compression from "compression";
-import https from "https";
 import http from "http";
 import fs from "fs";
 import path from "path";
@@ -13,7 +12,7 @@ import cors from "cors";
 import { GoogleAuth, OAuth2Client } from "google-auth-library";
 
 // await Bun.build({
-//     entrypoints: ["index.html"],
+//     entrypoints: ["website/index.html"],
 //     outdir: "website/build",
 //     plugins: [html()],
 // });
@@ -95,25 +94,20 @@ app.get("/api/v3/test", (req, res) => {
     res.send("Hello World!");
 });
 
-// Frontend, in website/public/index.html
-// TODO: Need to figure out how to serve the frontend in production
-
 const PORT = process.env.VITE_SERVER_PORT || 3000;
 
 if (process.env.NODE_ENV === "production") {
-    // Doesn't work yet...
-    app.use(express.static(path.join(__dirname, "../website/dist")));
-    // const options = {
-    //     key: fs.readFileSync("path/to/key.pem"),
-    //     cert: fs.readFileSync("path/to/cert.pem"),
-    // };
-
-    // https.createServer(options, app).listen(443, "0.0.0.0", () => {
-    //     logger.info("Server running in production mode on port 443");
-    // });
+    // Join frontend build paths statically
+    app.use(express.static(path.join(__dirname, "../website/build")));
+    // Route all other paths to index so React Router can handle frontend routes.
+    app.get("/*path", function (req, res) {
+        res.sendFile(path.join(__dirname, "../website/build", "index.html"));
+    });
 
     http.createServer(app).listen(PORT, () => {
-        logger.info(`Server running on http://127.0.0.1:${PORT}`);
+        logger.info(
+            `Server running in production mode http://127.0.0.1:${PORT}`,
+        );
     });
 } else {
     app.listen(PORT, () => {
