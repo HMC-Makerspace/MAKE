@@ -18,7 +18,6 @@ import { MAKEUser } from "../../../user/User";
 import { ThemeSwitcher } from "../../../ThemeSwitcher";
 import { AdminPage } from "../../../../layouts/AdminLayout";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import axios from "axios";
 
 export default function AdminNavbar({
     pages,
@@ -28,14 +27,6 @@ export default function AdminNavbar({
     pageIndex: number;
 }) {
     const user_uuid = useMAKEStore((state) => state.user_uuid);
-    console.log(
-        "Local storage:",
-        window.localStorage.getItem("requesting_uuid"),
-    );
-    console.log(
-        "Axios defaults:",
-        axios.defaults.headers.common["requesting_uuid"],
-    );
     return (
         <Navbar
             className="w-full bg-default-200"
