@@ -2,17 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { TUser } from "common/user";
 import { Button, Link, User } from "@heroui/react";
 import clsx from "clsx";
-import React from "react";
 
-export function MAKEUser({
-    user_uuid,
+export function ShiftUser({
     user,
     className,
     classNames = {
         description: "hidden sm:block",
         name: "hidden sm:block",
     },
-    size = "lg",
     onClick = () => {},
     defaultElement = (
         <Button
@@ -45,8 +42,16 @@ export function MAKEUser({
 }) {
     const query = useQuery<TUser>({
         queryKey: ["user", user_uuid],
-        enabled: !!user_uuid && !user,
+        enabled: !!user_uuid,
         refetchOnWindowFocus: false,
+        // placeholderData: {
+        //     uuid: user_uuid,
+        //     name: "Loading...",
+        //     email: "Loading...",
+        //     college_id: "Loading...",
+        //     active_roles: [],
+        //     past_roles: [],
+        // },
     });
 
     const user_data = user ? user : query.data;

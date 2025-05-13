@@ -17,7 +17,7 @@ import mongoose from "mongoose";
  */
 export async function getSchedules(): Promise<TSchedule[]> {
     const Schedules = mongoose.model("Schedule", Schedule);
-    return Schedules.find();
+    return await Schedules.find().sort({ active: -1, timestamp_start: -1 });
 }
 
 /**
@@ -36,12 +36,11 @@ export async function getSchedule(schedule_uuid: UUID) {
  * @returns A promise to the TSchedule object representing the current
  *      schedule, or null if no schedule is currently active
  */
-export async function getCurrentSchedule() {
+export async function getActiveSchedule() {
     const Schedules = mongoose.model("Schedule", Schedule, "schedules");
     // Get the schedule that is currently active (should only be one)
     return Schedules.findOne({
-        timestamp_start: { $lte: Date.now() / 1000 },
-        timestamp_end: { $gte: Date.now() / 1000 },
+        active: true,
     });
 }
 
@@ -52,8 +51,8 @@ export async function getCurrentSchedule() {
  *      The public schedule data only includes the shift data for the current
  *      schedule, with the shift UUID and history removed.
  */
-export async function getCurrentPublicSchedule(): Promise<TPublicScheduleData | null> {
-    const current_schedule = await getCurrentSchedule();
+export async function getActivePublicSchedule(): Promise<TPublicScheduleData | null> {
+    const current_schedule = await getActiveSchedule();
     // If there is no current schedule, there can be no current public schedule
     if (current_schedule === null) {
         return null;
@@ -65,6 +64,8 @@ export async function getCurrentPublicSchedule(): Promise<TPublicScheduleData | 
             .map(getCurrentPublicShift)
             // Remove dropped shifts
             .filter((shift) => shift !== null),
+        daily_open_time: current_schedule.daily_open_time,
+        daily_close_time: current_schedule.daily_close_time,
     };
 }
 
@@ -117,6 +118,59 @@ function getCurrentPublicShift(shift: TShift): TPublicShiftData | null {
     //         assignee: last_event.initiator,
     //     };
     // }
+}
+
+/**
+ * Set the current active schedule, replacing the previous active schedule.
+ * @param schedule_uuid The schedule to set as active
+ * @returns The updated schedule object
+ */
+export async function setActiveSchedule(
+    schedule_uuid: UUID,
+): Promise<TSchedule | null> {
+    const Schedules = mongoose.model("Schedule", Schedule);
+
+    await Schedules.updateMany(
+        { active: true },
+        {
+            // Set as inactive
+            $set: {
+                active: false,
+            },
+        },
+    );
+
+    return await Schedules.findOneAndUpdate(
+        { uuid: schedule_uuid },
+        {
+            // Set as active
+            $set: {
+                active: true,
+            },
+        },
+        { returnDocument: "after" },
+    );
+}
+
+/**
+ * Set the current active schedule, replacing the previous active schedule.
+ * @param schedule_uuid The schedule to set as active
+ * @returns The updated schedule object
+ */
+export async function patchSchedule(
+    schedule_uuid: UUID,
+    partial_schedule: Partial<TSchedule>,
+): Promise<TSchedule | null> {
+    const Schedules = mongoose.model("Schedule", Schedule);
+
+    return await Schedules.findOneAndUpdate(
+        { uuid: schedule_uuid },
+        {
+            // Update partial changes
+            $set: partial_schedule,
+        },
+        { returnDocument: "after" },
+    );
 }
 
 /**
@@ -180,7 +234,7 @@ export async function updateSchedule(
  */
 export async function getActiveAlerts(): Promise<TAlert[] | null> {
     // Get the current schedule
-    const current_schedule = await getCurrentSchedule();
+    const current_schedule = await getActiveSchedule();
     // If there is no current schedule, there can be no current alert
     if (current_schedule === null) {
         return null;
@@ -272,7 +326,7 @@ export async function deleteAlertInSchedule(
 export async function getShiftsByUser(
     user_uuid: UserUUID,
 ): Promise<TShift[] | null> {
-    const schedule = await getCurrentSchedule();
+    const schedule = await getActiveSchedule();
     if (schedule === null) {
         return null;
     }
@@ -287,7 +341,7 @@ export async function getShiftsByUser(
 export async function getDroppedShiftsByUser(
     user_uuid: UserUUID,
 ): Promise<TShift[] | null> {
-    const schedule = await getCurrentSchedule();
+    const schedule = await getActiveSchedule();
     if (schedule === null) {
         return null;
     }
@@ -308,7 +362,7 @@ export async function getDroppedShiftsByUser(
 export async function getPickedUpShiftsByUser(
     user_uuid: UserUUID,
 ): Promise<TShift[] | null> {
-    const schedule = await getCurrentSchedule();
+    const schedule = await getActiveSchedule();
     if (schedule === null) {
         return null;
     }

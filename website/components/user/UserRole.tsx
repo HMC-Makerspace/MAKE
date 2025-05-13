@@ -60,13 +60,14 @@ export default function UserRole({
     const title =
         role?.title ?? (isSuccess ? data.title : isError ? "Error" : "Loading");
     const foregroundColor = getForegroundColor(color);
+    const isDefault = role?.default ?? data?.default;
     return (
         <Card
             className="p-1.5 flex flex-row gap-1 w-fit px-2.5"
             style={{ backgroundColor: color }}
             isBlurred={!isSuccess}
         >
-            {data?.default ? (
+            {isDefault ? (
                 <StarIcon
                     className={`size-4 mt-[1.5px] -ml-0.5`}
                     strokeWidth={2.5}

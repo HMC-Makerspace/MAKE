@@ -10,3 +10,4 @@ bun.lockb
 temp/*
 uploads/*
 !uploads/favicon.ico
+oauthtoken.json

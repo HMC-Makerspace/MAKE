@@ -28,6 +28,8 @@ export type TAlert = {
 
 /**
  * TSchedule - Object to store information about the shift schedule
+ * @property uuid - A unique identifier for this schedule
+ * @property name - The display name for this schedule
  * @property timestamp_start -  A unix timestamp for when this schedule
  *      becomes active
  * @property timestamp_end - A unix timestamp for when this schedule
@@ -36,13 +38,20 @@ export type TAlert = {
  *      schedule
  * @property alerts - A list of {@link TAlert | Alert} objects that occurred
  *      during this schedule
+ * @property daily_open_time - The time (in seconds after midnight) that shifts start
+ * @property daily_close_time - he time (in seconds after midnight) that shifts end
+ * @property active - Whether or not to display the schedule as the active schedule
  */
 export type TSchedule = {
     uuid: UUID;
+    name: string;
     timestamp_start: UnixTimestamp;
     timestamp_end: UnixTimestamp;
     shifts: TShift[];
     alerts: TAlert[];
+    daily_open_time: number;
+    daily_close_time: number;
+    active: boolean;
 };
 
 /**
@@ -52,4 +61,50 @@ export type TSchedule = {
  */
 export type TPublicScheduleData = {
     shifts: TPublicShiftData[];
+    daily_open_time: number;
+    daily_close_time: number;
+};
+
+const EXAMPLE_SCHEDULE: TSchedule = {
+    uuid: "example-schedule",
+    name: "Example Schedule",
+    timestamp_start: 1740106000,
+    timestamp_end: 1840106000,
+    shifts: [
+        {
+            uuid: "example-shift-1",
+            day: 0,
+            sec_start: 43200,
+            sec_end: 46800,
+            assignee: "example-user",
+            history: [],
+        },
+        {
+            uuid: "example-shift-2",
+            day: 0,
+            sec_start: 46800,
+            sec_end: 50400,
+            assignee: "example-user-2",
+            history: [],
+        },
+        {
+            uuid: "example-shift-3",
+            day: 0,
+            sec_start: 46200,
+            sec_end: 50400,
+            assignee: "example-user-3",
+            history: [],
+        },
+        {
+            uuid: "example-shift-4",
+            day: 6,
+            sec_start: 46200,
+            sec_end: 86400,
+            assignee: "example-user-4",
+            history: [],
+        },
+    ],
+    alerts: [],
+    daily_open_time: 43200,
+    daily_close_time: 86400,
 };

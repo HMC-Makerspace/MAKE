@@ -19,6 +19,9 @@ export enum API_SCOPE {
     VIEW_KIOSKS = "view_kiosks",
     USER_KIOSK = "user_kiosk",
     ROLES_KIOSK = "roles_kiosk",
+    INVENTORY_KIOSK = "inventory_kiosk",
+    AREA_KIOSK = "area_kiosk",
+    MACHINE_KIOSK = "machine_kiosk",
     SCHEDULE_KIOSK = "schedule_kiosk",
     SHIFT_KIOSK = "shift_kiosk",
     WORKSHOP_KIOSK = "workshop_kiosk",
@@ -91,8 +94,8 @@ export enum API_SCOPE {
     // Schedule scopes
     GET_ALL_SCHEDULES = "get_schedules",
     GET_ONE_SCHEDULE = "get_schedule",
-    GET_CURRENT_SCHEDULE = "get_current_schedule",
-    GET_CURRENT_PUBLIC_SCHEDULE = "get_public_schedule",
+    GET_ACTIVE_SCHEDULE = "get_active_schedule",
+    GET_ACTIVE_PUBLIC_SCHEDULE = "get_public_schedule",
     CREATE_SCHEDULE = "create_schedule",
     UPDATE_SCHEDULE = "update_schedule",
     DELETE_SCHEDULE = "delete_schedule",
@@ -513,14 +516,15 @@ export const API_SCOPE_SECTIONS: {
                 description: "Able to view data about individual schedules",
             },
             {
-                scope: API_SCOPE.GET_CURRENT_SCHEDULE,
-                label: "Get Current Schedule",
-                description: "Able to view the current schedule",
+                scope: API_SCOPE.GET_ACTIVE_SCHEDULE,
+                label: "Get Active Schedule",
+                description: "Able to view the active schedule",
             },
             {
-                scope: API_SCOPE.GET_CURRENT_PUBLIC_SCHEDULE,
+                scope: API_SCOPE.GET_ACTIVE_PUBLIC_SCHEDULE,
                 label: "Get Public Schedule",
-                description: "Able to view the current public schedule",
+                description:
+                    "Able to view only public info about the active schedule",
             },
             {
                 scope: API_SCOPE.CREATE_SCHEDULE,

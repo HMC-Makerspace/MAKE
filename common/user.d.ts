@@ -26,6 +26,7 @@ export type TUserRole = {
     color: string;
     scopes: API_SCOPE[];
     default: boolean;
+    display_hierarchy?: number;
 };
 
 /**
