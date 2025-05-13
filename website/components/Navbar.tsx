@@ -19,8 +19,8 @@ export default function CustomNavbar() {
             href: "/",
         },
         {
-            name: "User",
-            href: "/user",
+            name: "Admin",
+            href: "/admin",
         },
     ];
 

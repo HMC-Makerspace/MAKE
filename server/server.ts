@@ -1,6 +1,6 @@
 import express, { Application } from "express";
 import compression from "compression";
-import https from "https";
+import http from "http";
 import fs from "fs";
 import path from "path";
 import connectDB from "./core/db";
@@ -11,7 +11,7 @@ import loggerMiddleware from "pino-http";
 import cors from "cors";
 
 // await Bun.build({
-//     entrypoints: ["index.html"],
+//     entrypoints: ["website/index.html"],
 //     outdir: "website/build",
 //     plugins: [html()],
 // });
@@ -86,21 +86,22 @@ app.get("/api/v3/test", (req, res) => {
     res.send("Hello World!");
 });
 
-// Frontend, in website/public/index.html
-// TODO: Need to figure out how to serve the frontend in production
-// app.use(express.static(path.join(__dirname, "../website/build")));
+const PORT = process.env.VITE_SERVER_PORT || 3000;
 
 if (process.env.NODE_ENV === "production") {
-    const options = {
-        key: fs.readFileSync("path/to/key.pem"),
-        cert: fs.readFileSync("path/to/cert.pem"),
-    };
+    // Join frontend build paths statically
+    app.use(express.static(path.join(__dirname, "../website/build")));
+    // Route all other paths to index so React Router can handle frontend routes.
+    app.get("/*path", function (req, res) {
+        res.sendFile(path.join(__dirname, "../website/build", "index.html"));
+    });
 
-    https.createServer(options, app).listen(443, "0.0.0.0", () => {
-        logger.info("Server running in production mode on port 443");
+    http.createServer(app).listen(PORT, () => {
+        logger.info(
+            `Server running in production mode http://127.0.0.1:${PORT}`,
+        );
     });
 } else {
-    const PORT = process.env.VITE_SERVER_PORT || 3000;
     app.listen(PORT, () => {
         logger.info(`Server running on http://localhost:${PORT}`);
     });
