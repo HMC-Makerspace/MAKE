@@ -8,6 +8,25 @@ import { TUser, TUserRole, UserUUID } from "common/user";
 import PopupAlert from "../../../PopupAlert";
 import React from "react";
 
+function getUserTotalAvailableTime(user: TUser, schedule?: TSchedule) {
+    if (!schedule) {
+        return 0;
+    }
+    return (
+        user.work_schedules
+            ?.find((s) => s.schedule === schedule.uuid)
+            ?.days.reduce(
+                (sum, day) =>
+                    sum +
+                    day.availability.reduce(
+                        (day_sum, b) => day_sum + b.sec_end - b.sec_start,
+                        0,
+                    ),
+                0,
+            ) || 0
+    );
+}
+
 /**
  * This buffer ensures that state parameters are defined
  */
@@ -39,12 +58,6 @@ export default function ScheduleBuffer({
 
     const defaultSchedule = schedules.find((schedule) => schedule.active);
 
-    const filteredUsers = users.filter((user) =>
-        user.active_roles.some((role) =>
-            config.schedule.schedulable_roles.includes(role.role_uuid),
-        ),
-    );
-
     const schedule =
         selectedSchedules === "all"
             ? defaultSchedule
@@ -60,6 +73,23 @@ export default function ScheduleBuffer({
         "success" | "warning" | "danger"
     >("success");
 
+    const filteredUsers = users.filter((user) =>
+        user.active_roles.some((role) =>
+            config.schedule.schedulable_roles.includes(role.role_uuid),
+        ),
+    );
+
+    const sortedUsers = filteredUsers.toSorted(
+        (a, b) =>
+            getUserTotalAvailableTime(a, schedule) -
+            getUserTotalAvailableTime(b, schedule),
+    );
+
+    // Opposite of schedule mode is availability mode
+    const [scheduleMode, setScheduleMode] = React.useState<
+        "schedule" | "availability"
+    >("schedule");
+
     return (
         <div className="w-full h-full">
             <div className="w-full h-full flex flex-col lg:flex-row gap-4 overflow-auto">
@@ -70,6 +100,8 @@ export default function ScheduleBuffer({
                         selectedSchedule={schedule}
                         setSelectedSchedules={setSelectedSchedules}
                         config={config}
+                        scheduleMode={scheduleMode}
+                        setScheduleMode={setScheduleMode}
                         onSuccess={(message) => {
                             setPopupMessage(message);
                             setPopupType("success");
@@ -89,12 +121,16 @@ export default function ScheduleBuffer({
                         selectedUser={selectedUser}
                         setSelectedUsers={setSelectedUsers}
                         setSelectedSchedules={setSelectedSchedules}
-                        type="edit"
+                        type={
+                            scheduleMode === "schedule"
+                                ? "edit"
+                                : "availability"
+                        }
                     />
                 </div>
                 <ScheduleUserPicker
                     config={config}
-                    users={filteredUsers}
+                    users={sortedUsers}
                     roles={roles}
                     isLoading={false}
                     selectedUsers={selectedUsers}

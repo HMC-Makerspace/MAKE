@@ -153,6 +153,8 @@ export default function ScheduleSelector({
     selectedSchedule,
     setSelectedSchedules = () => {},
     config,
+    scheduleMode,
+    setScheduleMode,
     onSuccess,
     onError,
 }: {
@@ -161,6 +163,8 @@ export default function ScheduleSelector({
     selectedSchedule?: TSchedule;
     setSelectedSchedules: (selection: Selection) => void;
     config: TConfig;
+    scheduleMode: "schedule" | "availability";
+    setScheduleMode: (mode: "schedule" | "availability") => void;
     onSuccess: (message: string) => void;
     onError: (message: string) => void;
 }) {
@@ -301,7 +305,7 @@ export default function ScheduleSelector({
             className="w-full p-2 pb bg-default-200 gap-2 flex-row justify-between items-center"
             shadow="sm"
         >
-            <div className="flex flex-row gap-2 w-2/5">
+            <div className="flex flex-row gap-2">
                 <DateRangePicker
                     isRequired
                     isDisabled={!schedule}
@@ -387,6 +391,32 @@ export default function ScheduleSelector({
                     </Tooltip>
                 )}
             </div>
+            <Tooltip
+                content={"Toggle schedule/availability mode"}
+                delay={250}
+                color={scheduleMode === "schedule" ? "primary" : "warning"}
+                placement="bottom"
+            >
+                <Button
+                    variant="bordered"
+                    className={clsx(
+                        "h-full rounded-xl text-md",
+                        scheduleMode === "availability" && "text-warning-400",
+                    )}
+                    color={scheduleMode === "schedule" ? "primary" : "warning"}
+                    onPress={() =>
+                        setScheduleMode(
+                            scheduleMode === "schedule"
+                                ? "availability"
+                                : "schedule",
+                        )
+                    }
+                >
+                    {scheduleMode === "schedule"
+                        ? "Schedule Mode"
+                        : "Availability Mode"}
+                </Button>
+            </Tooltip>
             <div className="flex flex-row gap-0 items-center w-2/5">
                 {schedule && (
                     <Tooltip

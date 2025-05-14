@@ -25,12 +25,21 @@ const baseColors = [
     "bg-secondary-400",
 ];
 
-const availableColors = [
+const assigneeColors = [
     "bg-success-300",
     "bg-success-200",
     "bg-success-100",
     "bg-success-100",
     "bg-success-100",
+];
+
+const availabilityColors = [
+    "bg-warning-50",
+    "bg-warning-100",
+    "bg-warning-200",
+    "bg-warning-300",
+    "bg-warning-400",
+    "bg-warning-500",
 ];
 
 const toggleUserShift = async ({
@@ -61,6 +70,28 @@ const toggleUserShift = async ({
     }
 };
 
+function getAvailableUsers(
+    schedule_uuid: UUID,
+    users: TUser[],
+    day: number,
+    sec_start: number,
+    sec_end: number,
+) {
+    return users.filter((u) =>
+        u.work_schedules
+            ?.find((a) => a.schedule == schedule_uuid)
+            ?.days.some(
+                (record) =>
+                    record.day === day &&
+                    record.availability.some(
+                        (time) =>
+                            time.sec_start <= sec_start &&
+                            time.sec_end >= sec_end,
+                    ),
+            ),
+    );
+}
+
 export default function Shift({
     schedule_uuid,
     shifts,
@@ -85,7 +116,7 @@ export default function Shift({
     sec_end: number;
     selectedUser?: UserUUID | null;
     setSelectedUsers?: (users: Selection) => void;
-    type?: "view" | "edit" | "availability";
+    type?: "view" | "edit" | "availability" | "worker";
     selectedShift?: number[];
     setSelectedShift?: (day_start_end: number[]) => void;
     setSelectedSchedules?: (schedules: Selection) => void;
@@ -152,7 +183,7 @@ export default function Shift({
                       : selectedUser && "cursor-not-allowed",
                   // Background cell color is based on if the selected user is
                   // scheduled and or available
-                  !scheduled && available && availableColors[colorIndex],
+                  !scheduled && available && assigneeColors[colorIndex],
                   !scheduled && !available && baseColors[colorIndex],
                   scheduled && available && "bg-primary-300",
                   scheduled && !available && "bg-danger-100",
@@ -218,6 +249,16 @@ export default function Shift({
         }
     }
 
+    // Only get available users if necessary
+    const availableUsers =
+        type === "availability"
+            ? getAvailableUsers(schedule_uuid, users, day, sec_start, sec_end)
+            : [];
+
+    const availabilityColorIndex = Math.floor(
+        (availableUsers.length / users.length) * availabilityColors.length,
+    );
+
     return (
         <Popover
             isOpen={isOpen}
@@ -245,16 +286,20 @@ export default function Shift({
                             baseColors[colorIndex],
                         type === "view" && isShiftSelected && "bg-primary-300",
                         ...editor_classes,
+                        type === "worker" && available && "bg-primary-300",
                         type === "availability" &&
                             available &&
-                            "bg-primary-300",
+                            "bg-success-300",
+                        type === "availability" &&
+                            !available &&
+                            availabilityColors[availabilityColorIndex],
                     )}
                     animate
                     style={{
                         transition: "background-color 0.15s ease",
                     }}
                     onDragOver={
-                        type === "availability"
+                        type === "worker"
                             ? () => {
                                   // TODO: do stuff
                               }
@@ -285,9 +330,20 @@ export default function Shift({
                                         schedule_uuid: schedule_uuid,
                                     });
                                 }
-                            } else {
-                                // No user selected,
                             }
+                        } else if (type === "availability") {
+                            // In availability mode, show popup with available users.
+                            // setSelectedUsers(
+                            //     new Set(
+                            //         getAvailableUsers(
+                            //             schedule_uuid,
+                            //             users,
+                            //             day,
+                            //             sec_start,
+                            //             sec_end,
+                            //         ).map((u) => u.uuid),
+                            //     ),
+                            // );
                         } else if (type === "view") {
                             if (isShiftSelected) {
                                 setSelectedUsers(new Set());
@@ -305,98 +361,119 @@ export default function Shift({
                         scale: type !== "view" ? 0.98 : 1,
                     }}
                 >
-                    {assignees.map((assignee) => {
-                        const u = users.find((u) => u.uuid === assignee);
-                        if (!u) {
-                            return (
-                                <div
-                                    className={clsx(
-                                        "w-full h-full",
-                                        "flex flex-row",
-                                        "items-center justify-center",
-                                        "text-danger-800",
-                                        "text-sm",
-                                    )}
-                                >
-                                    Unknown User
-                                </div>
-                            );
-                        }
-                        if (type === "edit") {
-                            const hierarchical_roles = getUserRoleHierarchy(
-                                u,
-                                roles,
-                            );
-                            const hierarchical_color =
-                                hierarchical_roles[0].color;
-                            return (
-                                <Button
-                                    key={assignee}
-                                    className={clsx(
-                                        "bg-default-300 px-3",
-                                        "justify-items-center sm:w-auto",
-                                        "rounded-full",
-                                        selectedUser
-                                            ? "cursor-not-allowed"
-                                            : "",
-                                    )}
-                                    onPress={() => {
-                                        setIsOpen(true);
-                                        setStatUser(u);
-                                    }}
-                                    size="sm"
-                                >
+                    {type != "availability" &&
+                        assignees.map((assignee) => {
+                            const u = users.find((u) => u.uuid === assignee);
+                            if (!u) {
+                                return (
                                     <div
                                         className={clsx(
-                                            "inline-flex outline-none",
+                                            "w-full h-full",
+                                            "flex flex-row",
                                             "items-center justify-center",
-                                            "gap-2 rounded-xl",
+                                            "text-danger-800",
+                                            "text-sm",
+                                        )}
+                                    >
+                                        Unknown User
+                                    </div>
+                                );
+                            }
+                            if (type === "edit") {
+                                const hierarchical_roles = getUserRoleHierarchy(
+                                    u,
+                                    roles,
+                                );
+                                const hierarchical_color =
+                                    hierarchical_roles[0].color;
+                                return (
+                                    <Button
+                                        key={assignee}
+                                        className={clsx(
+                                            "bg-default-300 px-3",
+                                            "justify-items-center sm:w-auto",
+                                            "rounded-full",
+                                            selectedUser
+                                                ? "cursor-not-allowed"
+                                                : "",
+                                        )}
+                                        onPress={() => {
+                                            setIsOpen(true);
+                                            setStatUser(u);
+                                        }}
+                                        size="sm"
+                                    >
+                                        <div
+                                            className={clsx(
+                                                "inline-flex outline-none",
+                                                "items-center justify-center",
+                                                "gap-2 rounded-xl",
+                                            )}
+                                        >
+                                            {u.name}
+                                            <span
+                                                style={{
+                                                    backgroundColor:
+                                                        hierarchical_color,
+                                                }}
+                                                className="size-2 rounded-full"
+                                            ></span>
+                                        </div>
+                                    </Button>
+                                );
+                            } else if (type === "view") {
+                                return (
+                                    <div
+                                        className={clsx(
+                                            "w-full h-full",
+                                            "flex flex-row",
+                                            "items-center justify-center",
+                                            "text-default-800",
+                                            "text-sm",
                                         )}
                                     >
                                         {u.name}
-                                        <span
-                                            style={{
-                                                backgroundColor:
-                                                    hierarchical_color,
-                                            }}
-                                            className="size-2 rounded-full"
-                                        ></span>
                                     </div>
-                                </Button>
-                            );
-                        } else if (type === "view") {
-                            return (
-                                <div
-                                    className={clsx(
-                                        "w-full h-full",
-                                        "flex flex-row",
-                                        "items-center justify-center",
-                                        "text-default-800",
-                                        "text-sm",
-                                    )}
-                                >
-                                    {u.name}
-                                </div>
-                            );
-                        }
-                    })}
-                    {assignees.length === 0 && type !== "availability" && (
+                                );
+                            }
+                        })}
+                    {type === "availability" && (
                         <div
                             className={clsx(
-                                "w-full h-[32px] text-sm",
-                                "flex flex-row",
+                                `w-full flex`,
                                 "items-center justify-center",
                                 available
-                                    ? "text-default-200"
-                                    : "text-default-400",
+                                    ? "text-default-300"
+                                    : "text-default-500",
                             )}
                             style={{
-                                transition: "color 0.15s ease",
+                                // Keep same vertical height when switching modes
+                                height:
+                                    32 * assignees.length +
+                                    4 * (assignees.length - 1),
                             }}
                         >
-                            {type === "edit" ? "Unassigned" : "No shift"}
+                            {`${availableUsers.length}/${users.length}`}
                         </div>
                     )}
+                    {assignees.length === 0 &&
+                        (type === "edit" || type === "view") && (
+                            <div
+                                className={clsx(
+                                    "w-full h-[32px] text-sm",
+                                    "flex flex-row",
+                                    "items-center justify-center",
+                                    available
+                                        ? "text-default-200"
+                                        : "text-default-400",
+                                )}
+                                style={{
+                                    transition: "color 0.15s ease",
+                                }}
+                            >
+                                {type === "view" ? "No shift" : "Unassigned"}
+                            </div>
+                        )}
                 </motion.div>
             </PopoverTrigger>
             <PopoverContent>

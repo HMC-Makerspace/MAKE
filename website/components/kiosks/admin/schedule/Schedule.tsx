@@ -26,14 +26,14 @@ export default function Schedule({
     selectedUser?: UserUUID | null;
     setSelectedUsers?: (users: Selection) => void;
     setSelectedSchedules?: (schedules: Selection) => void;
-    type?: "view" | "edit" | "availability";
+    type?: "view" | "edit" | "availability" | "worker";
 }) {
     if (!schedule) {
         // New schedule
         return (
             <Card className="w-full grow p-10" shadow="sm">
                 <div className="flex h-full w-full flex-col items-center justify-center gap-4">
-                    Please
+                    Please create a new schedule.
                 </div>
             </Card>
         );
