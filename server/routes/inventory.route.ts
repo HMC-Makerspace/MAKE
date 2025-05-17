@@ -133,6 +133,10 @@ router.get("/", async (req: Request, res: InventoryResponse) => {
  * the updated InventoryItem object is returned.
  */
 router.put("/", async (req: ItemRequest, res: ItemResponse) => {
+
+    console.log("Received:", req.body.item_obj);
+
+
     // Get the item object from the request body
     const item_obj = req.body.item_obj;
     if (!item_obj) {

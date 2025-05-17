@@ -28,7 +28,7 @@ export default function ItemEditor({
             {isLoading ? (
                 <div>Loading...</div>
             ) : (
-                <ItemEditorForm key={item.uuid} item={item} />
+                <ItemEditorForm key={item.uuid} item={item} isMultiple={false} isNew={isNew} onSuccess={onSuccess} onError={onError} />
             )}
         </div>
     );

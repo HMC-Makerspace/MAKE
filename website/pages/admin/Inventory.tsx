@@ -34,6 +34,8 @@ export default function InventoryPage() {
                     item={items[0] ?? DEFAULT_ITEM}
                     isLoading={isLoading}
                     isNew={false}
+                    onSuccess={()=>{}}
+                    onError={()=>{}}
                 />
                 <InventoryTable
                     items={data ?? []}

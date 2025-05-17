@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import type { TInventoryItem, TInventoryItemLocation } from "common/inventory";
+import type { TInventoryItem, TInventoryItemLocation, TItemCertificate } from "common/inventory";
 
 /**
  * See {@link TInventoryItemLocation} documentation for type information.
@@ -10,6 +10,15 @@ const InventoryItemLocation = new mongoose.Schema<TInventoryItemLocation>({
     container: { type: String, required: false },
     specific: { type: String, required: false },
     quantity: { type: Number, required: true },
+});
+
+/**
+ * See {@link TInventoryItemLocation} documentation for type information.
+ * Stored as children of {@link InventoryItem}.
+ */
+const ItemCertificate = new mongoose.Schema<TItemCertificate>({
+    certification_uuid: { type: String, required: true },
+    required_level: { type: Number, required: true },
 });
 
 /**
@@ -27,7 +36,7 @@ export const InventoryItem = new mongoose.Schema<TInventoryItem>(
         serial_number: { type: String, required: false },
         kit_contents: { type: [String], required: false },
         keywords: { type: [String], required: false },
-        required_certifications: { type: [String], required: false },
+        required_certifications: { type: [ItemCertificate], required: false },
         authorized_roles: { type: [String], required: false },
     },
     { collection: "inventory" },

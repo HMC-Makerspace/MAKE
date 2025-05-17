@@ -24,14 +24,14 @@ import React from "react";
 const columns = [
     { name: "Name", id: "name", sortable: true},
     { name: "Location", id: "location", sortable: true},
-    { name: "Required Certifications", id: "required_certifications"},
+    //{ name: "Required Certifications", id: "required_certifications"}, TODO MAK THIS WORK
     { name: "Quantity", id: "quantity", sortable: true},
 ];
 
 const defaultColumns = [
     "name",
     "location",
-    "required_certifications",
+    //"required_certifications", // TODO
     "quantity",
 ];
 
@@ -107,7 +107,7 @@ export default function InventoryTable({
                         isClearable
                         className="w-full sm:max-w-[44%] text-for"
                         placeholder="Search..."
-                        startContent={<SearchIcon className="size 6" />}
+                        startContent={<SearchIcon className="size-6" />}
                         value={search}
                         onClear={() => onSearchClear()}
                         onValueChange={onInputChange}
