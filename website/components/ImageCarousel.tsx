@@ -106,7 +106,7 @@ export default function ImageCarousel({
    };
 
    return (
-           <div className='relative w-[100%]'>
+           <div className='relative w-[100%] h-[100%]'>
                 {(images.length > 1) && 
                     <Button 
                     className='absolute left-[0%] top-[50%] translate-x-[50%] translate-y-[-50%]' 

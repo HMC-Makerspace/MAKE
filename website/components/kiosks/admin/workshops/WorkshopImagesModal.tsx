@@ -39,12 +39,15 @@ export default function WorkshopImagesModal({
                 Workshop Images
             </ModalHeader>
 
-            <ModalBody className='flex flex-col items-center px-6 min-h-[20vh] justify-center'>
+            <ModalBody className='flex flex-col items-center px-6 justify-center'>
+              <div className="w-[90%] h-[40vh]">
                 <ImageCarousel
                 uuid={workshop?.uuid}
                 fileType={FILE_RESOURCE_TYPE.WORKSHOP} 
-                editable={false}
+                editable={true}
                 />
+              </div>
+                
             </ModalBody>
             <ModalFooter className='flex flex-col items-center'>
                 <Button

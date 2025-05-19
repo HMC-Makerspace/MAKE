@@ -15,12 +15,12 @@ import {
     PlusIcon
 } from '@heroicons/react/24/outline';
 import { TWorkshop } from 'common/workshop';
+import { TCertification } from "common/certification";
+import { TUser, TUserRole } from "common/user";
 import MAKETable from '../../../Table.tsx';
 import  { MAKEUser } from '../../../user/User.tsx';
 import  UserRole from '../../../user/UserRole.tsx';
 import { convertTimestampToDate } from '../../../../utils.tsx';
-import ImageCarousel from '../../../ImageCarousel.tsx';
-import { FILE_RESOURCE_TYPE } from '../../../../../common/file.ts';
 import WorkshopPeopleModal from './WorkshopPeopleModal.tsx';
 import WorkshopImagesModal from './WorkshopImagesModal.tsx';
 import WorkshopEditModal from './WorkshopEditModal.tsx';
@@ -66,10 +66,16 @@ const defaultColumns = [
 
 export default function WorkshopTable({
     workshops,
+    users,
+    certs,
+    roles,
     isLoading
 } : {
     workshops: TWorkshop[];
-    isLoading: boolean
+    users: TUser[];
+    certs: TCertification[];
+    roles: TUserRole[];
+    isLoading: boolean;
 }) {
 
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
@@ -80,11 +86,10 @@ export default function WorkshopTable({
     const [isNew, setIsNew] = React.useState<boolean>(false);
 
     const {
-            isOpen: peopleIsOpen,
-            onOpen: peopleOnOpen,
-            onOpenChange: peopleOnOpenChange,
-        } = useDisclosure(); 
-
+        isOpen: peopleIsOpen,
+        onOpen: peopleOnOpen,
+        onOpenChange: peopleOnOpenChange,
+    } = useDisclosure(); 
     const {
         isOpen: imagesIsOpen,
         onOpen: imagesOnOpen,
@@ -110,7 +115,8 @@ export default function WorkshopTable({
                     isDisabled={isLoading}
                     startContent={<PlusIcon className="size-6" />}
                     onPress={() => {
-                        
+                        setSelectedWorkshop(undefined);
+                        editOnOpen();
                     }}
                     className="relative lg:absolute top-0 right-0 mb-4"
                 >
@@ -307,22 +313,28 @@ export default function WorkshopTable({
                   }}
                 /> 
 
-                <WorkshopPeopleModal 
+                {selectedWorkshop && 
+                <>
+                    <WorkshopPeopleModal 
                     workshop={selectedWorkshop}
                     isOpen={peopleIsOpen}
                     onOpenChange={peopleOnOpenChange}
-                />
-                <WorkshopImagesModal 
-                    workshop={selectedWorkshop}
-                    isOpen={imagesIsOpen}
-                    onOpenChange={imagesOnOpenChange}
-                />
-                <WorkshopEditModal 
-                    workshop={selectedWorkshop}
-                    isNew={isNew}
-                    isOpen={editIsOpen}
-                    onOpenChange={editOnOpenChange}
-                />
+                    />
+                    <WorkshopImagesModal 
+                        workshop={selectedWorkshop}
+                        isOpen={imagesIsOpen}
+                        onOpenChange={imagesOnOpenChange}
+                    />
+                    <WorkshopEditModal 
+                        workshop={selectedWorkshop}
+                        users={users}
+                        certs={certs}
+                        isNew={isNew}
+                        isOpen={editIsOpen}
+                        onOpenChange={editOnOpenChange}
+                    />
+                </>
+               }
             </div>
             
         : <p>No Workshops Found</p>}            
