@@ -20,13 +20,11 @@ const ADMIN_PAGES: AdminPage[] = [
         name: "Users",
         href: "/admin/users",
         scope: API_SCOPE.USER_KIOSK,
-        subPages: [
-            {
-                name: "Roles",
-                href: "/admin/users/roles",
-                scope: API_SCOPE.ROLES_KIOSK,
-            },
-        ],
+    },
+    {
+        name: "Roles",
+        href: "/admin/roles",
+        scope: API_SCOPE.ROLES_KIOSK,
     },
     {
         name: "Checkouts",
@@ -37,13 +35,11 @@ const ADMIN_PAGES: AdminPage[] = [
         name: "Areas",
         href: "/admin/areas",
         scope: API_SCOPE.AREA_KIOSK,
-        subPages: [
-            {
-                name: "Machines",
-                href: "/admin/areas/machines",
-                scope: API_SCOPE.MACHINE_KIOSK,
-            },
-        ],
+    },
+    {
+        name: "Machines",
+        href: "/admin/machines",
+        scope: API_SCOPE.MACHINE_KIOSK,
     },
     {
         name: "Inventory",
