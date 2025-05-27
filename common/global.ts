@@ -19,7 +19,6 @@ export enum API_SCOPE {
     VIEW_KIOSKS = "view_kiosks",
     USER_KIOSK = "user_kiosk",
     ROLES_KIOSK = "roles_kiosk",
-    INVENTORY_KIOSK = "inventory_kiosk",
     AREA_KIOSK = "area_kiosk",
     MACHINE_KIOSK = "machine_kiosk",
     SCHEDULE_KIOSK = "schedule_kiosk",
