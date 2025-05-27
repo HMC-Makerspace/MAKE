@@ -117,6 +117,7 @@ export enum API_SCOPE {
     GET_ALL_USERS = "get_users",
     UPDATE_USER = "update_user",
     UPDATE_INFO_SELF = "update_self",
+    UPDATE_AVAILABILITY = "update_availability",
     CREATE_USER = "create_user",
     DELETE_USER = "delete_user",
     DELETE_USER_SELF = "delete_self",
@@ -631,6 +632,11 @@ export const API_SCOPE_SECTIONS: {
                 scope: API_SCOPE.UPDATE_INFO_SELF,
                 label: "Update Self",
                 description: "Able to update own information",
+            },
+            {
+                scope: API_SCOPE.UPDATE_AVAILABILITY,
+                label: "Update Availability",
+                description: "Able to update own availability",
             },
             {
                 scope: API_SCOPE.CREATE_USER,

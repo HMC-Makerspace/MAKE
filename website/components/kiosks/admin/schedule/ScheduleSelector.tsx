@@ -155,6 +155,7 @@ export default function ScheduleSelector({
     config,
     scheduleMode,
     setScheduleMode,
+    setSelectedUsers,
     onSuccess,
     onError,
 }: {
@@ -165,6 +166,7 @@ export default function ScheduleSelector({
     config: TConfig;
     scheduleMode: "schedule" | "availability";
     setScheduleMode: (mode: "schedule" | "availability") => void;
+    setSelectedUsers: (users: Selection) => void;
     onSuccess: (message: string) => void;
     onError: (message: string) => void;
 }) {
@@ -404,13 +406,14 @@ export default function ScheduleSelector({
                         scheduleMode === "availability" && "text-warning-400",
                     )}
                     color={scheduleMode === "schedule" ? "primary" : "warning"}
-                    onPress={() =>
+                    onPress={() => {
+                        setSelectedUsers(new Set());
                         setScheduleMode(
                             scheduleMode === "schedule"
                                 ? "availability"
                                 : "schedule",
-                        )
-                    }
+                        );
+                    }}
                 >
                     {scheduleMode === "schedule"
                         ? "Schedule Mode"
@@ -563,6 +566,7 @@ export default function ScheduleSelector({
                         </DropdownItem>
                         <DropdownItem
                             key="open-time"
+                            textValue={openTime?.toString()}
                             variant="flat"
                             closeOnSelect={false}
                         >
@@ -595,6 +599,7 @@ export default function ScheduleSelector({
                         </DropdownItem>
                         <DropdownItem
                             key="close-time"
+                            textValue={closeTime?.toString()}
                             variant="flat"
                             closeOnSelect={false}
                         >
