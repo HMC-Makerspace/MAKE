@@ -180,7 +180,6 @@ export default function Shift({
         },
     });
 
-    // TODO: Make edit availability work
     const availabilityMutation = useMutation({
         mutationFn: toggleWorkerAvailability,
         onSuccess: (result: TUser) => {
