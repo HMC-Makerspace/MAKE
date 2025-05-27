@@ -50,8 +50,12 @@ export const Alert = new mongoose.Schema<TAlert>({
  */
 export const Schedule = new mongoose.Schema<TSchedule>({
     uuid: { type: String, required: true },
+    name: { type: String, required: true },
     timestamp_start: { type: Number, required: true },
     timestamp_end: { type: Number, required: true },
     shifts: { type: [Shift], required: true },
     alerts: { type: [Alert], required: true },
+    daily_open_time: { type: Number, required: true },
+    daily_close_time: { type: Number, required: true },
+    active: { type: Boolean, required: true },
 });

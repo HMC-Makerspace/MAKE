@@ -1,7 +1,8 @@
 import { Card } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
-import { TUserRole } from "common/user";
-import { StarIcon } from "@heroicons/react/24/outline";
+
+import { TCertification } from "common/certification";
+import CVisibilityIcon from "./CVisibilityIcon";
 
 /**
  * A simple hex to RGB converter
@@ -39,41 +40,25 @@ function getForegroundColor(hex: string): string {
     }
 }
 
-export default function UserRole({
-    role_uuid,
-    role,
-    size = "sm",
-}: {
-    role_uuid: string;
-    role?: TUserRole;
-    size?: "sm" | "md";
-}) {
-    const { data, isSuccess, isError } = useQuery<TUserRole>({
-        queryKey: ["user", "role", role_uuid],
-        refetchOnWindowFocus: false,
-        // If the role is given use that, otherwise fetch the role
-        enabled: !role,
+// A certification tag similar (but with less rounded edges) to user role tags (see UserRole)
+export default function CertificationTag({ cert_uuid, showVisibility=false }: { cert_uuid: string, showVisibility?: boolean }) {
+    const { data, isSuccess, isError } = useQuery<TCertification>({
+        queryKey: ["certification", cert_uuid],
     });
+
     // Default to gray if not yet successful
-    const color = role?.color ?? (isSuccess ? data.color : "gray");
+    const color = isSuccess ? data.color : "gray";
     // Set the title to "Error" if isError, "Loading" if isLoading, or the title if isSuccess
-    const title =
-        role?.title ?? (isSuccess ? data.title : isError ? "Error" : "Loading");
+    const title = isSuccess ? data.name : isError ? "Error" : "Loading";
     const foregroundColor = getForegroundColor(color);
-    const isDefault = role?.default ?? data?.default;
+
     return (
         <Card
-            className="p-1.5 flex flex-row gap-1 w-fit px-2.5"
+            className="p-1.5 flex flex-row gap-1 w-fit px-2.5 rounded-sm"
             style={{ backgroundColor: color }}
             isBlurred={!isSuccess}
         >
-            {isDefault ? (
-                <StarIcon
-                    className={`size-4 mt-[1.5px] -ml-0.5`}
-                    strokeWidth={2.5}
-                    color={foregroundColor}
-                />
-            ) : null}
+            
             <h1
                 className="text-sm font-semibold text-nowrap"
                 style={{
@@ -82,6 +67,14 @@ export default function UserRole({
             >
                 {title}
             </h1>
+
+            {showVisibility && (<div className="ml-1">
+                <CVisibilityIcon
+                    visibility={data?.visibility}
+                    color={foregroundColor}
+                    className="size-4 mt-[1.5px] -ml-0.5"
+                />
+            </div>)}
         </Card>
     );
 }

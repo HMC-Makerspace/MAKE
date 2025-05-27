@@ -1,5 +1,6 @@
 import { API_SCOPE } from "common/global";
 import {
+    addUserAvailability,
     createUser,
     createUserRole,
     deleteUser,
@@ -14,6 +15,7 @@ import {
     grantRoleToUser,
     initializeAdmin,
     initializeAdminRole,
+    removeUserAvailability,
     updateUser,
     updateUserPublicInfo,
     updateUserRole,
@@ -46,6 +48,12 @@ type UserUpdateInfoRequest = Request<
     { UUID: string },
     {},
     { name?: string; email?: string; college_id?: string }
+>;
+
+type UserAvailabilityRequest = Request<
+    { UUID: string },
+    {},
+    { day: number; sec_start: number; sec_end: number }
 >;
 
 const router = Router();
@@ -677,7 +685,7 @@ router.post("/", async (req: UserRequest, res: UserResponse) => {
  * is returned.
  */
 router.patch(
-    "/info/:UUID",
+    "/:UUID/info",
     async (req: UserUpdateInfoRequest, res: UserResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = headers.requesting_uuid;
@@ -729,6 +737,156 @@ router.patch(
             // If the user is not authorized, provide a status error
             req.log.warn({
                 msg: `Forbidden user attempted to update user with uuid ${user_uuid}`,
+                requesting_uuid: requesting_uuid,
+            });
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
+
+/**
+ * Add availability for a given user in the current active schedule.
+ * This is a protected route, and a `requesting_uuid` header is required to
+ * call it. The user must have the {@link API_SCOPE.UPDATE_USER} scope. If the
+ * user is requesting to update their own availability, they must have the
+ * {@link API_SCOPE.UPDATE_AVAILABILITY} scope. If the user is not authorized, a
+ * status error is returned. If the user is authorized, the updated user object
+ * is returned.
+ */
+router.patch(
+    "/:UUID/availability/add",
+    async (req: UserAvailabilityRequest, res: UserResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = headers.requesting_uuid;
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while adding user availability",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+
+        const user_uuid = req.params.UUID;
+        const day = req.body.day;
+        const sec_start = req.body.sec_start;
+        const sec_end = req.body.sec_end;
+
+        req.log.debug({
+            msg: `Adding to a user's availability with uuid ${user_uuid}`,
+            requesting_uuid: user_uuid,
+        });
+
+        // A patch request is valid if the requesting user can update any user,
+        // or if the requesting user is allowed to update their own availability
+        if (
+            await verifyRequest(
+                requesting_uuid,
+                API_SCOPE.UPDATE_USER,
+                requesting_uuid === user_uuid && API_SCOPE.UPDATE_AVAILABILITY,
+            )
+        ) {
+            // If the user is authorized, perform the update
+            const updated_user = await addUserAvailability(
+                user_uuid,
+                day,
+                sec_start,
+                sec_end,
+            );
+            if (!updated_user) {
+                req.log.warn(
+                    `No user found to update availability with uuid ${user_uuid}` +
+                        "or no active schedule",
+                );
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error:
+                        `No user found to update availability with uuid ${user_uuid}` +
+                        "or no active schedule",
+                });
+                return;
+            }
+            req.log.debug(`Updated user availability with uuid ${user_uuid}`);
+            // Return the updated user object
+            res.status(StatusCodes.OK).json(updated_user);
+        } else {
+            // If the user is not authorized, provide a status error
+            req.log.warn({
+                msg: `Forbidden user attempted to update user availability with uuid ${user_uuid}`,
+                requesting_uuid: requesting_uuid,
+            });
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
+
+/**
+ * Remove availability for a given user in the current active schedule.
+ * This is a protected route, and a `requesting_uuid` header is required to
+ * call it. The user must have the {@link API_SCOPE.UPDATE_USER} scope. If the
+ * user is requesting to update their own availability, they must have the
+ * {@link API_SCOPE.UPDATE_AVAILABILITY} scope. If the user is not authorized, a
+ * status error is returned. If the user is authorized, the updated user object
+ * is returned.
+ */
+router.patch(
+    "/:UUID/availability/remove",
+    async (req: UserAvailabilityRequest, res: UserResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = headers.requesting_uuid;
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while removing user availability",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+
+        const user_uuid = req.params.UUID;
+        const day = req.body.day;
+        const sec_start = req.body.sec_start;
+        const sec_end = req.body.sec_end;
+
+        req.log.debug({
+            msg: `Removing from a user's availability with uuid ${user_uuid}`,
+            requesting_uuid: user_uuid,
+        });
+
+        // A patch request is valid if the requesting user can update any user,
+        // or if the requesting user is allowed to update their own availability
+        if (
+            await verifyRequest(
+                requesting_uuid,
+                API_SCOPE.UPDATE_USER,
+                requesting_uuid === user_uuid && API_SCOPE.UPDATE_AVAILABILITY,
+            )
+        ) {
+            // If the user is authorized, perform the update
+            const updated_user = await removeUserAvailability(
+                user_uuid,
+                day,
+                sec_start,
+                sec_end,
+            );
+            if (!updated_user) {
+                req.log.warn(
+                    `No user found to update availability with uuid ${user_uuid}` +
+                        "or no active schedule",
+                );
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error:
+                        `No user found to update availability with uuid ${user_uuid}` +
+                        "or no active schedule",
+                });
+                return;
+            }
+            req.log.debug(`Updated user availability with uuid ${user_uuid}`);
+            // Return the updated user object)
+            res.status(StatusCodes.OK).json(updated_user);
+        } else {
+            // If the user is not authorized, provide a status error
+            req.log.warn({
+                msg: `Forbidden user attempted to update user availability with uuid ${user_uuid}`,
                 requesting_uuid: requesting_uuid,
             });
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);

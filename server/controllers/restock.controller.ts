@@ -1,7 +1,12 @@
-import { TRestockRequestLog } from "common/restock";
+import { TRestockRequest, TRestockRequestLog } from "common/restock";
 import { UserUUID } from "common/user";
 import { RestockRequest } from "models/restock.model";
 import mongoose from "mongoose";
+import { Logger } from "pino";
+import { getUser } from "./user.controller";
+import { sendTemplatedEmail } from "./email.controller";
+import RestockRequestTemplate from "email_templates/restock_completion";
+import { getInventoryItem } from "./inventory.controller";
 
 /**
  * Get all restock requests
@@ -100,4 +105,35 @@ export async function updateRestockRequestStatus(
     request.current_status = new_status.status;
     request.status_logs.push(new_status);
     return request.save();
+}
+
+export async function sendRestockUpdateEmail(
+    restock: TRestockRequest,
+    logger: Logger,
+) {
+    const user = await getUser(restock.requesting_user);
+    const item = await getInventoryItem(restock.item_uuid);
+    if (!user) {
+        logger.warn({
+            msg: "No requesting user associated with restock, unable to send update email",
+            restock: restock,
+        });
+        return;
+    }
+    if (!item) {
+        logger.warn({
+            msg: "Invalid item associated with restock, unable to send update email",
+            restock: restock,
+        });
+        return;
+    }
+
+    const date = new Date(Date.now());
+    // Send automated email to requesting user to indicate that the status has changed
+    sendTemplatedEmail(
+        user.email,
+        `Updated Restock Request (${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()})`,
+        RestockRequestTemplate(restock, user, item),
+        logger,
+    );
 }

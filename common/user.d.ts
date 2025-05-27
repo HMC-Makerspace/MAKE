@@ -2,6 +2,7 @@ import type { TCertificate } from "./certification";
 import type { FileUUID, TFile } from "./file";
 import type { API_SCOPE, UnixTimestamp, UUID } from "./global";
 import type { SHIFT_DAY } from "./shift";
+import type { ScheduleUUID } from "./schedule";
 
 export type UserUUID = UUID;
 
@@ -25,6 +26,7 @@ export type TUserRole = {
     color: string;
     scopes: API_SCOPE[];
     default: boolean;
+    display_hierarchy?: number;
 };
 
 /**
@@ -54,15 +56,31 @@ export type TUserAvailabilityTime = {
 };
 
 /**
- * TUserAvailability - The availability of a User, used for scheduling
+ * TUserAvailabilityDay - The availability of a user for a given schedule day
  * @property day - The 0-indexed day associated with this availability,
  *      according to {@link SHIFT_DAY}
  * @property availability - A list of pairs of start and end times (in
  *      seconds after midnight) that this user is available on this day
  */
-export type TUserAvailability = {
+export type TUserAvailabilityDay = {
     day: SHIFT_DAY;
     availability: TUserAvailabilityTime[];
+};
+
+/**
+ * TUserAvailability - Information relevant to scheduling a user in the space
+ * @property days - The list of {@link TUserAvailabilityDay} objects indicating
+ *      when this user is available during the week
+ * @property min_shift_count - The preferred minimum number of shifts this user
+ *      wants to work per week
+ * @property max_shift_count - The preferred maximum number of shifts this user
+ *      wants to work per week
+ */
+export type TUserAvailability = {
+    schedule: ScheduleUUID;
+    days: TUserAvailabilityDay[];
+    min_shift_count?: number;
+    max_shift_count?: number;
 };
 
 /**
@@ -93,5 +111,5 @@ export type TUser = {
     active_certificates?: TCertificate[];
     past_certificates?: TCertificate[];
     files?: FileUUID[];
-    availability?: TUserAvailability[];
+    work_schedules?: TUserAvailability[];
 };

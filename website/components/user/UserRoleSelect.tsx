@@ -15,7 +15,16 @@ export function UserRoleSelect({
     defaultSelectedKeys,
     isLoading,
     isDisabled = false,
+    color = "primary",
+    variant = "faded",
     className = "",
+    classNames = {
+        label: "pl-2",
+        value: "text-default-500",
+    },
+    placeholder = "Select roles",
+    label = "Roles",
+    labelPlacement = "outside",
 }: {
     roles?: TUserRole[]; // optional, if not passed will get internally
     selectedKeys?: UserRoleUUID[]; // optional, otherwise no selected roles
@@ -23,7 +32,22 @@ export function UserRoleSelect({
     defaultSelectedKeys?: UserRoleUUID[]; // optional, otherwise no default selected roles
     isLoading?: boolean; // only needed if roles is passed
     isDisabled?: boolean; // optional, defaults to false
+    color?:
+        | "primary"
+        | "default"
+        | "secondary"
+        | "success"
+        | "warning"
+        | "danger";
+    variant?: "faded" | "flat" | "bordered" | "underlined";
     className?: string; // for the base className of the select, defaults to ""
+    classNames?: {
+        label?: string;
+        value?: string;
+    }; // optinal, has default styles
+    placeholder?: string; // optional, defaults to "Select roles"
+    label?: string; // optional, defaults to "Roles"
+    labelPlacement?: "outside" | "outside-left" | "inside"; // optional, defaults to "outside"
 }) {
     const { data: queryRoles, isLoading: queryLoading } = useQuery<TUserRole[]>(
         {
@@ -32,10 +56,10 @@ export function UserRoleSelect({
             enabled: !roles,
         },
     );
-    roles = roles || queryRoles || [];
+    const allRoles = roles || queryRoles || [];
     return (
         <Select
-            items={roles ?? []}
+            items={allRoles ?? []}
             name="roles"
             selectedKeys={selectedKeys}
             onSelectionChange={onSelectionChange}
@@ -44,16 +68,13 @@ export function UserRoleSelect({
             isDisabled={isDisabled}
             selectionMode="multiple"
             isMultiline
-            placeholder="Select roles"
+            placeholder={placeholder}
             size="lg"
-            variant="faded"
-            color="primary"
-            label="Roles"
-            labelPlacement="outside"
-            classNames={{
-                label: "pl-2",
-                value: "text-default-500",
-            }}
+            variant={variant}
+            color={color}
+            label={label}
+            labelPlacement={labelPlacement}
+            classNames={classNames}
             // Base classes
             className={className}
             renderValue={(selectedKeys) => {
@@ -71,6 +92,11 @@ export function UserRoleSelect({
                                         role_uuid={
                                             selected_role.data?.uuid || ""
                                         }
+                                        role={allRoles.find(
+                                            (r) =>
+                                                r.uuid ==
+                                                selected_role.data?.uuid,
+                                        )}
                                     />
                                 ),
                             )}

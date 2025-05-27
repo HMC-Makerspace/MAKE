@@ -1,17 +1,14 @@
 import express, { Application } from "express";
 import compression from "compression";
-import https from "https";
-import fs from "fs";
+import http from "http";
 import path from "path";
 import connectDB from "./core/db";
-import html from "bun-plugin-html";
-import multer from "multer";
 import pino from "pino";
 import loggerMiddleware from "pino-http";
 import cors from "cors";
 
 // await Bun.build({
-//     entrypoints: ["index.html"],
+//     entrypoints: ["website/index.html"],
 //     outdir: "website/build",
 //     plugins: [html()],
 // });
@@ -32,6 +29,8 @@ import restockRoutes from "./routes/restock.route";
 import scheduleRoutes from "./routes/schedule.route";
 import userRoutes from "./routes/user.route";
 import workshopRoutes from "./routes/workshop.route";
+import emailRoutes from "./routes/email.route";
+import { getOAuthToken, getOAuthURL } from "controllers/email.controller";
 
 const app: Application = express();
 
@@ -80,28 +79,44 @@ app.use("/api/v3/restock", restockRoutes);
 app.use("/api/v3/schedule", scheduleRoutes);
 app.use("/api/v3/user", userRoutes);
 app.use("/api/v3/workshop", workshopRoutes);
+app.use("/api/v3/oauth", emailRoutes);
 
 app.get("/api/v3/test", (req, res) => {
     req.log.debug("Test log");
     res.send("Hello World!");
 });
 
-// Frontend, in website/public/index.html
-// TODO: Need to figure out how to serve the frontend in production
-// app.use(express.static(path.join(__dirname, "../website/build")));
+const PORT = process.env.VITE_SERVER_PORT || 3000;
 
 if (process.env.NODE_ENV === "production") {
-    const options = {
-        key: fs.readFileSync("path/to/key.pem"),
-        cert: fs.readFileSync("path/to/cert.pem"),
-    };
+    // Join frontend build paths statically
+    app.use(express.static(path.join(__dirname, "../website/build")));
+    // Route all other paths to index so React Router can handle frontend routes.
+    app.get("/*path", function (req, res) {
+        res.sendFile(path.join(__dirname, "../website/build", "index.html"));
+    });
 
-    https.createServer(options, app).listen(443, "0.0.0.0", () => {
-        logger.info("Server running in production mode on port 443");
+    http.createServer(app).listen(PORT, () => {
+        logger.info(
+            `Server running in production mode http://127.0.0.1:${PORT}`,
+        );
     });
 } else {
-    const PORT = process.env.VITE_SERVER_PORT || 3000;
     app.listen(PORT, () => {
-        logger.info(`Server running on http://localhost:${PORT}`);
+        logger.info(`Server running on http://127.0.0.1:${PORT}`);
     });
+}
+
+// Setup email client if CLI option included
+// if (Bun.argv.includes("--setup-email")) {
+//     logger.info(getOAuthURL());
+// }
+if (!(await getOAuthToken(logger))) {
+    // If OAuth token is invalid, prompt the administrator to login
+    logger.info({
+        msg: "No OAuth token found. Please authenticate with a valid OAuth account.",
+        url: getOAuthURL(),
+    });
+} else {
+    logger.debug("OAuth is enabled.");
 }

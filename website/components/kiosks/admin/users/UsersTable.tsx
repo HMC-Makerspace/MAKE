@@ -8,7 +8,8 @@ import { TUser, TUserRole } from "common/user";
 import MAKETable, { ColumnSelect } from "../../../Table";
 import MAKEUserRole from "../../../user/UserRole";
 import Fuse from "fuse.js";
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import clsx from "clsx";
 
 const columns = [
     // { name: "UUID", id: "uuid" }, // No need to show
@@ -22,9 +23,9 @@ const columns = [
     // Skip files and availability, not useful right now
 ];
 
-const defaultColumns = [
-    "name",
+const defaultUserColumns: string[] = [
     "college_id",
+    "name",
     "email",
     "active_roles",
     "active_certificates",
@@ -37,6 +38,8 @@ export default function UsersTable({
     onSelectionChange,
     isLoading,
     onCreate,
+    fullHeader = true,
+    defaultColumns = defaultUserColumns,
 }: {
     users: TUser[];
     roles: TUserRole[];
@@ -44,6 +47,8 @@ export default function UsersTable({
     onSelectionChange: (selectedKeys: Selection) => void;
     isLoading: boolean;
     onCreate: (state: boolean) => void;
+    fullHeader?: boolean;
+    defaultColumns?: string[];
 }) {
     // The set of columns that are visible
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
@@ -123,7 +128,10 @@ export default function UsersTable({
                 <div className="flex justify-between gap-3 items-end">
                     <Input
                         isClearable
-                        className="w-full sm:max-w-[44%] text-for"
+                        className={clsx(
+                            "w-full text-for",
+                            fullHeader ? "sm:max-w-[44%]" : "",
+                        )}
                         placeholder="Search..."
                         startContent={<SearchIcon className="size-6" />}
                         value={search}
@@ -134,47 +142,49 @@ export default function UsersTable({
                             input: "placeholder:text-foreground-200",
                         }}
                     />
-                    <div className="flex gap-3">
-                        <ColumnSelect
-                            columns={columns}
-                            visibleColumns={visibleColumns}
-                            setVisibleColumns={setVisibleColumns}
-                            isLoading={isLoading}
-                        />
-                        {/* TODO: Make a filter by dropdown that has sub-selection part for role, cert, etc. */}
-                        {multiSelect ? (
-                            <Button
-                                color="danger"
-                                isDisabled={isLoading}
-                                startContent={
-                                    <PencilSquareIcon className="size-6" />
-                                }
-                                onPress={() => batchEdit(false)}
-                            >
-                                End Batch Edit
-                            </Button>
-                        ) : (
-                            <Button
-                                color="warning"
-                                isDisabled={isLoading}
-                                startContent={
-                                    <PencilSquareIcon className="size-6" />
-                                }
-                                onPress={() => batchEdit(true)}
-                            >
-                                Batch Edit
-                            </Button>
-                        )}
+                    {fullHeader && (
+                        <div className="flex gap-3">
+                            <ColumnSelect
+                                columns={columns}
+                                visibleColumns={visibleColumns}
+                                setVisibleColumns={setVisibleColumns}
+                                isLoading={isLoading}
+                            />
+                            {/* TODO: Make a filter by dropdown that has sub-selection part for role, cert, etc. */}
+                            {multiSelect ? (
+                                <Button
+                                    color="danger"
+                                    isDisabled={isLoading}
+                                    startContent={
+                                        <PencilSquareIcon className="size-6" />
+                                    }
+                                    onPress={() => batchEdit(false)}
+                                >
+                                    End Batch Edit
+                                </Button>
+                            ) : (
+                                <Button
+                                    color="warning"
+                                    isDisabled={isLoading}
+                                    startContent={
+                                        <PencilSquareIcon className="size-6" />
+                                    }
+                                    onPress={() => batchEdit(true)}
+                                >
+                                    Batch Edit
+                                </Button>
+                            )}
 
-                        <Button
-                            color="primary"
-                            isDisabled={isLoading}
-                            startContent={<PlusIcon className="size-6" />}
-                            onPress={createUser}
-                        >
-                            Create
-                        </Button>
-                    </div>
+                            <Button
+                                color="primary"
+                                isDisabled={isLoading}
+                                startContent={<PlusIcon className="size-6" />}
+                                onPress={createUser}
+                            >
+                                Create
+                            </Button>
+                        </div>
+                    )}
                 </div>
                 <div className="flex justify-between items-center pb-2">
                     <span className="text-default-400 text-small">
@@ -183,6 +193,7 @@ export default function UsersTable({
                 </div>
             </div>
             <MAKETable
+                key={filteredUsers.length} // Re-render the table when the filtered users change
                 content={filteredUsers}
                 columns={columns}
                 visibleColumns={visibleColumns}
@@ -197,6 +208,7 @@ export default function UsersTable({
                                     role_uuid={log.role_uuid}
                                     role={findRole(log.role_uuid)}
                                     key={log.role_uuid}
+                                    size="md"
                                 />
                             ))}
                         </div>
@@ -208,6 +220,7 @@ export default function UsersTable({
                                     role_uuid={log.role_uuid}
                                     role={findRole(log.role_uuid)}
                                     key={log.role_uuid}
+                                    size="md"
                                 />
                             ))}
                         </div>

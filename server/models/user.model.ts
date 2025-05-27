@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import type {
     TUser,
     TUserAvailability,
+    TUserAvailabilityDay,
     TUserAvailabilityTime,
     TUserRole,
     TUserRoleLog,
@@ -19,6 +20,7 @@ export const UserRole = new mongoose.Schema<TUserRole>(
         color: { type: String, required: true },
         scopes: { type: [String], required: true },
         default: { type: Boolean, required: true },
+        display_hierarchy: { type: Number, required: false },
     },
     { collection: "user_roles" },
 );
@@ -43,12 +45,23 @@ const UserAvailabilityTime = new mongoose.Schema<TUserAvailabilityTime>({
 });
 
 /**
+ * See {@link TUserAvailabilityDay} documentation for type information.
+ * Stored as children of {@link User}.
+ */
+const UserAvailabilityDay = new mongoose.Schema<TUserAvailabilityDay>({
+    day: { type: Number, required: true },
+    availability: { type: [UserAvailabilityTime], required: true },
+});
+
+/**
  * See {@link TUserAvailability} documentation for type information.
  * Stored as children of {@link User}.
  */
 const UserAvailability = new mongoose.Schema<TUserAvailability>({
-    day: { type: Number, required: true },
-    availability: { type: [UserAvailabilityTime], required: true },
+    schedule: { type: String, required: true },
+    days: { type: [UserAvailabilityDay], required: true },
+    min_shift_count: { type: Number, required: false },
+    max_shift_count: { type: Number, required: false },
 });
 
 /**
@@ -65,7 +78,7 @@ export const User = new mongoose.Schema<TUser>(
         active_certificates: { type: [Certificate], required: false },
         past_certificates: { type: [Certificate], required: false },
         files: { type: [String], required: false },
-        availability: { type: [UserAvailability], required: false },
+        work_schedules: { type: [UserAvailability], required: false },
     },
     { collection: "users" },
 );

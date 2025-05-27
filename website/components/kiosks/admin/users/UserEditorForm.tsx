@@ -39,12 +39,14 @@ const createUpdateUser = async ({
 
 export default function UserEditorForm({
     user,
+    roles,
     isMultiple,
     isNew,
     onSuccess,
     onError,
 }: {
     user: TUser;
+    roles: TUserRole[];
     isMultiple: boolean;
     isNew: boolean;
     onSuccess: (message: string) => void;
@@ -72,6 +74,7 @@ export default function UserEditorForm({
             onSuccess(
                 `Successfully ${isNew ? "created" : "updated"} user${isMultiple ? "s" : ""}`,
             );
+            setHasEdits(false);
             console.log(result);
         },
         onError: (error) => {
@@ -151,8 +154,6 @@ export default function UserEditorForm({
                 availability: user.availability,
             };
 
-            console.log(new_user);
-
             // Reset the mutation (clears any previous errors)
             mutation.reset();
             // Run the mutation
@@ -166,10 +167,6 @@ export default function UserEditorForm({
     const [collegeID, setCollegeID] = React.useState<string>(user.college_id);
     const [name, setName] = React.useState<string>(user.name);
     const [email, setEmail] = React.useState<string>(user.email);
-
-    const [roles, setRoles] = React.useState<Selection>(
-        new Set(user.active_roles.map((role: TUserRoleLog) => role.role_uuid)),
-    );
 
     const placeholder = (text: string) => (isEmpty ? `Select a user` : text);
     const multiDisabledPlaceholder = (text: string) =>
@@ -192,6 +189,10 @@ export default function UserEditorForm({
             email.length > 0
         );
     }, [hasEdits, UUID, collegeID, name, email]);
+
+    const user_roles = user.active_roles.map(
+        (role: TUserRoleLog) => role.role_uuid,
+    );
 
     return (
         <>
@@ -311,7 +312,24 @@ export default function UserEditorForm({
                     }}
                 />
                 <Divider className="h-[1px] bg-default-400 col-span-2" />
-                <UserRoleSelect isDisabled={isEmpty} className="col-span-2" />
+                <UserRoleSelect
+                    roles={roles}
+                    onSelectionChange={(selection) => {
+                        if (selection == "all") {
+                            setHasEdits(true);
+                        } else if (
+                            user_roles.length == selection.size &&
+                            user_roles.every((r) => selection.has(r))
+                        ) {
+                            setHasEdits(false);
+                        } else {
+                            setHasEdits(true);
+                        }
+                    }}
+                    defaultSelectedKeys={user_roles}
+                    isDisabled={isEmpty}
+                    className="col-span-2"
+                />
                 <Divider className="h-[1px] bg-default-400 col-span-2" />
                 <Button
                     size="lg"

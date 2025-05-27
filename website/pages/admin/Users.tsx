@@ -69,7 +69,6 @@ export default function UsersPage() {
                     />
                 )}
                 <UsersTable
-                    key={isLoading ? "loading" : "table"}
                     users={users ?? []}
                     roles={roles ?? []}
                     selectedKeys={selectedKeys}

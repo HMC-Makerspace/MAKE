@@ -46,6 +46,7 @@ import clsx from "clsx";
 import { motion } from "framer-motion";
 import { HexColorPicker } from "react-colorful";
 import PopupAlert from "../../../PopupAlert";
+import DeleteModal from "../../../DeleteModal";
 import APIScope from "../../../APIScope";
 
 const columns = [
@@ -54,6 +55,7 @@ const columns = [
     { name: "Description", id: "description" },
     { name: "Color", id: "color" },
     { name: "Default", id: "default" },
+    { name: "Hierarchy", id: "display_hierarchy" },
 ];
 
 const defaultColumns = ["title", "description", "color", "default"];
@@ -125,6 +127,9 @@ function EditRoleModal({
     const [isDefault, setIsDefault] = React.useState<boolean>(
         role?.default ?? false,
     );
+    const [displayHierarchy, setDisplayHierarchy] = React.useState<
+        number | undefined
+    >(role?.display_hierarchy ?? undefined);
 
     const onSubmit = React.useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
@@ -134,7 +139,7 @@ function EditRoleModal({
             // Check if there are any edits to save
             if (!hasEdits) return;
 
-            // Roles cannot have all scopes
+            // Roles cannot have all scopes, will be a populated list
             if (scopes === "all") return;
 
             const new_role: TUserRole = {
@@ -144,6 +149,7 @@ function EditRoleModal({
                 color: color,
                 scopes: Array.from(scopes as Set<API_SCOPE>),
                 default: isDefault,
+                display_hierarchy: displayHierarchy,
             };
 
             console.log(new_role);
@@ -296,7 +302,7 @@ function EditRoleModal({
                                 />
                                 <div
                                     id="role-color-picker"
-                                    className="grid grid-flow-col gap-2 items-center w-full"
+                                    className="flex flex-row gap-2 items-center w-full"
                                 >
                                     <Input
                                         type="text"
@@ -318,6 +324,7 @@ function EditRoleModal({
                                                 "placeholder:italic",
                                                 "text-default-700",
                                                 "uppercase",
+                                                "placeholder:capitalize",
                                             ]),
                                         }}
                                     />
@@ -327,6 +334,7 @@ function EditRoleModal({
                                         placement="right"
                                         shouldCloseOnBlur={false}
                                         triggerScaleOnOpen={false}
+                                        className="w-fit"
                                     >
                                         <PopoverTrigger>
                                             <Button
@@ -425,6 +433,30 @@ function EditRoleModal({
                                         </SelectSection>
                                     ))}
                                 </Select>
+                                <Input
+                                    type="number"
+                                    label="Display Hierarchy"
+                                    name="display_hierarchy"
+                                    placeholder="Enter a hierarchy level, larger displays above smaller..."
+                                    value={
+                                        displayHierarchy
+                                            ? displayHierarchy.toString()
+                                            : ""
+                                    }
+                                    onValueChange={wrapEdit((value: string) =>
+                                        setDisplayHierarchy(parseInt(value)),
+                                    )}
+                                    variant="faded"
+                                    color="primary"
+                                    size="md"
+                                    classNames={{
+                                        input: clsx([
+                                            "placeholder:text-default-500",
+                                            "placeholder:italic",
+                                            "text-default-700",
+                                        ]),
+                                    }}
+                                />
                                 <div
                                     id="role-bottom-buttons"
                                     className="flex flex-row justify-between w-full"
@@ -516,52 +548,14 @@ function DeleteRoleModal({
     );
 
     return (
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur">
-            <ModalContent>
-                {(onClose) => (
-                    <Form
-                        onSubmit={onSubmit}
-                        className="flex flex-col gap-4 p-4"
-                    >
-                        <div className="text-lg font-semibold">Delete Role</div>
-                        <div className="flex flex-col gap-2">
-                            <p>
-                                Are you sure you want to delete the role{" "}
-                                <span className="font-semibold">
-                                    {role.title}
-                                </span>
-                                ?
-                            </p>
-                            <p className="text-sm text-default-400">
-                                This action cannot be undone.
-                            </p>
-                        </div>
-                        <div
-                            id="role-bottom-buttons"
-                            className="flex flex-row justify-between w-full"
-                        >
-                            <Button
-                                variant="shadow"
-                                type="submit"
-                                color="danger"
-                                className="w-full sm:w-1/4"
-                                isLoading={mutation.isPending}
-                            >
-                                Delete
-                            </Button>
-                            <Button
-                                variant="flat"
-                                color="secondary"
-                                className="w-1/4"
-                                onPress={onClose}
-                            >
-                                Cancel
-                            </Button>
-                        </div>
-                    </Form>
-                )}
-            </ModalContent>
-        </Modal>
+        <DeleteModal
+            itemType="role"
+            itemName={role.title}
+            onSubmit={onSubmit}
+            isOpen={isOpen}
+            onOpenChange={onOpenChange}
+            isLoading={mutation.isPending}
+        />
     );
 }
 
