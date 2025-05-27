@@ -1,15 +1,11 @@
 import express, { Application } from "express";
 import compression from "compression";
 import http from "http";
-import fs from "fs";
 import path from "path";
 import connectDB from "./core/db";
-import html from "bun-plugin-html";
-import multer from "multer";
 import pino from "pino";
 import loggerMiddleware from "pino-http";
 import cors from "cors";
-import { GoogleAuth, OAuth2Client } from "google-auth-library";
 
 // await Bun.build({
 //     entrypoints: ["website/index.html"],
@@ -34,11 +30,7 @@ import scheduleRoutes from "./routes/schedule.route";
 import userRoutes from "./routes/user.route";
 import workshopRoutes from "./routes/workshop.route";
 import emailRoutes from "./routes/email.route";
-import {
-    getOAuthToken,
-    getOAuthURL,
-    sendEmail,
-} from "controllers/email.controller";
+import { getOAuthToken, getOAuthURL } from "controllers/email.controller";
 
 const app: Application = express();
 
