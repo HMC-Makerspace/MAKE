@@ -26,14 +26,14 @@ export default function Schedule({
     selectedUser?: UserUUID | null;
     setSelectedUsers?: (users: Selection) => void;
     setSelectedSchedules?: (schedules: Selection) => void;
-    type?: "view" | "edit" | "availability";
+    type?: "view" | "edit" | "availability" | "worker";
 }) {
     if (!schedule) {
         // New schedule
         return (
             <Card className="w-full grow p-10" shadow="sm">
                 <div className="flex h-full w-full flex-col items-center justify-center gap-4">
-                    Please
+                    Please create a new schedule.
                 </div>
             </Card>
         );
@@ -48,13 +48,19 @@ export default function Schedule({
 
     const [selectedShift, setSelectedShift] = useState<number[]>([0, 0, 0]);
 
+    const [dragging, setDragging] = useState(false);
+
+    const selected_user = selectedUser
+        ? users.find((u) => u.uuid === selectedUser)
+        : undefined;
+
     return (
         <Card className="w-full grow p-5 overflow-auto h-full" shadow="sm">
             <table
                 className={clsx(
                     "h-full w-full items-center justify-center",
                     "border-separate border-spacing-1",
-                    type == "availability" ? "table-fixed" : "",
+                    type === "worker" ? "table-fixed" : "",
                 )}
             >
                 <tbody>
@@ -113,7 +119,7 @@ export default function Schedule({
                                                 day={day}
                                                 sec_start={row_start_sec}
                                                 sec_end={row_end_sec}
-                                                selectedUser={selectedUser}
+                                                selected_user={selected_user}
                                                 setSelectedUsers={
                                                     setSelectedUsers
                                                 }
@@ -122,9 +128,8 @@ export default function Schedule({
                                                 setSelectedShift={
                                                     setSelectedShift
                                                 }
-                                                setSelectedSchedules={
-                                                    setSelectedSchedules
-                                                }
+                                                dragging={dragging}
+                                                setDragging={setDragging}
                                             />
                                         </td>
                                     ))

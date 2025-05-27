@@ -275,7 +275,6 @@ router.patch(
             }
             sendRestockUpdateEmail(restock, req.log);
             req.log.debug(`Updated restock request with uuid ${restock_uuid}`);
-            // TODO: Email the requesting user that the restock status has been updated
             res.status(StatusCodes.OK).json(restock);
         } else {
             // If the user is not authorized, provide a status error

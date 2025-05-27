@@ -4,6 +4,8 @@ import { TUser, TUserRole, UserRoleUUID, UserUUID } from "common/user";
 import { Certificate, Certification } from "models/certification.model";
 import { User, UserRole } from "models/user.model";
 import mongoose from "mongoose";
+import { getActiveSchedule } from "./schedule.controller";
+import { SHIFT_DAY } from "common/shift";
 
 /**
  * Get all users in the database
@@ -19,7 +21,7 @@ export async function getUsers(): Promise<TUser[]> {
  * @param uuid The user's UUID to search by
  * @returns A promise to a TUser object, or null if no user has the given UUID
  */
-export async function getUser(uuid: UserUUID): Promise<TUser | null> {
+export async function getUser(uuid: UserUUID) {
     const Users = mongoose.model("User", User);
     return Users.findOne({ uuid: uuid });
 }
@@ -397,8 +399,7 @@ export async function revokeCertificateFromUser(
     certification_uuid: CertificationUUID,
 ): Promise<TUser | null> {
     // Find the user and the certificate
-    const Users = mongoose.model("User", User);
-    const user = await Users.findOne({ uuid: user_uuid });
+    const user = await getUser(user_uuid);
     // If the user doesn't exist, we can't revoke the certificate
     if (!user) {
         return null;
@@ -426,6 +427,112 @@ export async function revokeCertificateFromUser(
         }
         user.past_certificates.push(certificate);
     }
+    return user.save();
+}
+
+/**
+ * Add a block of availability for a user in the current active schedule.
+ * @param user_uuid The uuid of the user to update
+ * @param day The day of the week, defined by {@link SHIFT_DAY}
+ * @param sec_start The start time in seconds after midnight
+ * @param sec_end The end time in seconds after midnight
+ * @returns The updated user object, or null if the user or active schedule does
+ *      not exist.
+ */
+export async function addUserAvailability(
+    user_uuid: UserUUID,
+    day: SHIFT_DAY,
+    sec_start: number,
+    sec_end: number,
+) {
+    const user = await getUser(user_uuid);
+
+    const active_schedule = await getActiveSchedule();
+
+    // If the user or schedule doesn't exist, we cannot update availability
+    if (!user || !active_schedule) {
+        return null;
+    }
+
+    if (!user.work_schedules) {
+        user.work_schedules = [];
+    }
+
+    const work = user.work_schedules.find(
+        (s) => s.schedule === active_schedule.uuid,
+    ) ?? {
+        days: [],
+        schedule: active_schedule.uuid,
+    };
+
+    const work_day = work.days.find((d) => d.day === day) ?? {
+        day: day,
+        availability: [],
+    };
+
+    work_day.availability.push({ sec_start: sec_start, sec_end: sec_end });
+
+    work.days = work.days.filter((d) => d.day !== day).concat(work_day);
+
+    user.work_schedules = user.work_schedules
+        .filter((w) => w.schedule !== active_schedule.uuid)
+        .concat(work);
+
+    return user.save();
+}
+
+/**
+ * Remove a block of availability from a user in the current active schedule.
+ * @param user_uuid The uuid of the user to update
+ * @param day The day of the week, defined by {@link SHIFT_DAY}
+ * @param sec_start The start time of the clear in seconds after midnight
+ * @param sec_end The end time of the clear in seconds after midnight
+ * @returns The updated user object, or null if the user or active schedule does
+ *      not exist, or false if the user has no availability at the given time.
+ */
+export async function removeUserAvailability(
+    user_uuid: UserUUID,
+    day: SHIFT_DAY,
+    sec_start: number,
+    sec_end: number,
+) {
+    const user = await getUser(user_uuid);
+
+    const active_schedule = await getActiveSchedule();
+
+    // If the user or schedule doesn't exist, we cannot update availability
+    if (!user || !active_schedule) {
+        return null;
+    }
+
+    if (!user.work_schedules) {
+        return false;
+    }
+
+    const work = user.work_schedules.find(
+        (s) => s.schedule === active_schedule.uuid,
+    );
+
+    if (!work) {
+        return false;
+    }
+
+    const work_day = work.days.find((d) => d.day === day);
+
+    if (!work_day) {
+        return false;
+    }
+
+    work_day.availability = work_day.availability.filter(
+        (a) => sec_start > a.sec_start || a.sec_end > sec_end,
+    );
+
+    work.days = work.days.filter((d) => d.day !== day).concat(work_day);
+
+    user.work_schedules = user.work_schedules
+        .filter((w) => w.schedule !== active_schedule.uuid)
+        .concat(work);
+
     return user.save();
 }
 
