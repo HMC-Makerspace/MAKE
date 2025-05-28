@@ -219,7 +219,6 @@ If the user is a Steward or Head Steward, the following fields are stored:
 - Proficiencies: A list of the proficiencies that the user has
 """
 
-
 class User(BaseModel):
     uuid: str
     name: str

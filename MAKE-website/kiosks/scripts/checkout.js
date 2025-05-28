@@ -788,8 +788,13 @@ async function undoCheckout(checkout_uuid) {
 async function extendCheckout(checkout_uuid) {
     let checkout = state.checkouts.find((checkout) => checkout.uuid === checkout_uuid);
 
-    // Add 24 hours to the timestamp_due
-    checkout.timestamp_due = String(Number(checkout.timestamp_due) + (24 * 3600));
+    // Use the first case of getCheckoutLength to extend the checkout
+    let additional_time = getSecondsUntilClose();
+    if (additional_time < 0) {
+        additional_time = getSecondsUntilClose(1);
+    }
+
+    checkout.timestamp_due = String(Number(checkout.timestamp_due) + additional_time);
 
     const response = await fetch(`${API}/checkouts/update_checkout/${checkout_uuid}`,
         {
