@@ -78,4 +78,4 @@ export type TMachine = {
  * TMachinePublicData - A specific subset of {@link TMachine} that is safe to
  *     expose to the public, namely removing UUID and status logs
  */
-export type TPublicMachineData = Omit<TMachine, "uuid" | "status_logs">;
+export type TPublicMachineData = Omit<TMachine, "status_logs">;
