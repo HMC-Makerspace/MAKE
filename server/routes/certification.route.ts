@@ -99,7 +99,7 @@ router.get(
             if (!certifications) {
                 req.log.error("No certifications found in the database.");
             } else {
-                req.log.error("Returned all certifications.");
+                req.log.debug("Returned all certifications.");
             }
             res.status(StatusCodes.OK).json(certifications);
         } else {

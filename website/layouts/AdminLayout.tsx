@@ -60,33 +60,6 @@ const ADMIN_PAGES: AdminPage[] = [
         name: "Schedule",
         href: "/admin/schedule",
         scope: API_SCOPE.SCHEDULE_KIOSK,
-        // subPages: [
-        //     {
-        //         name: "Shifts",
-        //         href: "/admin/schedule/shifts",
-        //         scope: API_SCOPE.SHIFT_KIOSK,
-        //     },
-        // ]
-    },
-    {
-        name: "Workshops",
-        href: "/admin/workshops",
-        scope: API_SCOPE.WORKSHOP_KIOSK,
-    },
-    {
-        name: "Checkouts",
-        href: "/admin/checkouts",
-        scope: API_SCOPE.CHECKOUT_KIOSK,
-    },
-    {
-        name: "Inventory",
-        href: "/admin/inventory",
-        scope: API_SCOPE.INVENTORY_KIOSK,
-    },
-    {
-        name: "Restocks",
-        href: "/admin/restocks",
-        scope: API_SCOPE.RESTOCK_KIOSK,
     },
     {
         name: "Certifications",

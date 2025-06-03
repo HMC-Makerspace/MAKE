@@ -26,7 +26,6 @@ export type TInventoryItemLocation = {
     area: AreaUUID;
     container?: string;
     specific?: string;
-    quantity: ItemQuantity;
 };
 
 /**
@@ -73,6 +72,10 @@ export type TItemCertificate = {
  * @property long_name - (optional) contains brand, exact type, etc.
  * @property role - One of T (for Tool), M (for Material), or K (for Kit)
  * @property access_type - See {@link ITEM_ACCESS_TYPE} documentation
+ * @property quantity - The quantity of the item in the space
+ * @property available - (optional) The current available quantity
+ *      after accounting for checkouts/reservations (only applicable to items
+ *      with a number quantity, not relative quantity)
  * @property locations - See {@link TLocation} documentation
  * @property reorder_url - (optional) url for reordering item
  * @property serial_number - (optional) serial number of item
@@ -90,6 +93,8 @@ export type TInventoryItem = {
     long_name?: string;
     role: ITEM_ROLE;
     access_type: ITEM_ACCESS_TYPE;
+    quantity: ItemQuantity;
+    available?: number;
     locations: TInventoryItemLocation[];
     reorder_url?: string;
     serial_number?: string;
