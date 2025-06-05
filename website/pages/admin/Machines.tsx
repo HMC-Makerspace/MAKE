@@ -54,34 +54,39 @@ export default function MachinesPage() {
                     )}
                 >
                     <Machine
-                        machines={machines}
+                        machine={machines[0]}
+                        roles={roles}
+                        certifications={certifications}
+                        editable
+                    ></Machine>
+                    <Machine
+                        machine={machines[0]}
                         roles={roles}
                         certifications={certifications}
                     ></Machine>
                     <Machine
-                        machines={machines}
+                        machine={machines[0]}
                         roles={roles}
                         certifications={certifications}
+                        editable
                     ></Machine>
                     <Machine
-                        machines={machines}
+                        machine={machines[0]}
                         roles={roles}
                         certifications={certifications}
+                        editable
                     ></Machine>
                     <Machine
-                        machines={machines}
+                        machine={machines[0]}
                         roles={roles}
                         certifications={certifications}
+                        editable
                     ></Machine>
                     <Machine
-                        machines={machines}
+                        machine={machines[0]}
                         roles={roles}
                         certifications={certifications}
-                    ></Machine>
-                    <Machine
-                        machines={machines}
-                        roles={roles}
-                        certifications={certifications}
+                        editable
                     ></Machine>
                 </div>
             </Card>
