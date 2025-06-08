@@ -83,6 +83,27 @@ async function getPublicMachines(): Promise<TPublicMachineData[]> {
 }
 
 /**
+ * Updates a machine's data with partial information
+ * @param machine_uuid The machine to update
+ * @returns The updated machine object
+ */
+export async function patchMachine(
+    machine_uuid: UUID,
+    partial_machine: Partial<TMachine>,
+): Promise<TMachine | null> {
+    const Machines = mongoose.model("Machine", Machine);
+
+    return await Machines.findOneAndUpdate(
+        { uuid: machine_uuid},
+        {
+            // Updates the partial change
+            $set: partial_machine,
+        },
+        { returnDocument: "after"},
+    );
+}
+
+/**
  * Create a new machine in the database
  * @param machine_obj the complete machine information
  * @returns The machine object

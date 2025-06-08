@@ -16,6 +16,32 @@ export enum MACHINE_STATUS_TYPE {
 }
 
 /**
+ * MACHINE_STATUS_LABELS - A list of objects defining
+ * various string representations of machine statuses
+ */
+export const MACHINE_STATUS_LABELS = [
+    {
+        key: MACHINE_STATUS_TYPE.OFFLINE,
+        label: "Offline",
+        short_label: "Offline",
+    },
+    {
+        key: MACHINE_STATUS_TYPE.ONLINE,
+        label: "Online",
+        short_label: "Online",
+    },
+    {
+        key: MACHINE_STATUS_TYPE.FLAGGED_FOR_REPAIR,
+        label: "Flagged for Repair",
+        short_label: "Flagged",
+    },
+    {
+        key: MACHINE_STATUS_TYPE.IN_REPAIR,
+        label: "In Repair",
+        short_label: "In Repair",
+    },
+];
+/**
  * TMachineStatus - The status of a single machine in the space
  * @property status - The current status of the machine, as described by
  *      {@link MACHINE_STATUS_TYPE}

@@ -118,7 +118,7 @@ export default function ImageCarousel({
             )}
             {images.length > 0 ? (
                 <img
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover rounded-lg"
                     src={
                         images[index]
                             ? `/api/v3/file/download/${images[index].uuid}`

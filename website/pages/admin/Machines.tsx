@@ -44,13 +44,13 @@ export default function MachinesPage() {
     }
 
     return (
-        <AdminLayout pageHref="/admin/schedule">
-            <Card className="w-full h-full p-4" shadow="sm">
+        <AdminLayout pageHref="/admin/machines">
+            <Card className="w-full h-full p-4 overflow-auto">
                 <div
                     className={clsx(
-                        "w-full h-fit overflow-auto",
+                        "w-full min-h-fit overflow-auto",
                         "gap-4 grid grid-cols-1",
-                        "md:grid-cols-2 xl:grid-cols-3",
+                        "md:grid-cols-2 3xl:grid-cols-3",
                     )}
                 >
                     <Machine
@@ -60,24 +60,30 @@ export default function MachinesPage() {
                         editable
                     ></Machine>
                     <Machine
-                        machine={machines[0]}
+                        machine={machines[1]}
                         roles={roles}
                         certifications={certifications}
                     ></Machine>
                     <Machine
-                        machine={machines[0]}
-                        roles={roles}
-                        certifications={certifications}
-                        editable
-                    ></Machine>
-                    <Machine
-                        machine={machines[0]}
+                        machine={machines[1]}
                         roles={roles}
                         certifications={certifications}
                         editable
                     ></Machine>
                     <Machine
-                        machine={machines[0]}
+                        machine={machines[1]}
+                        roles={roles}
+                        certifications={certifications}
+                        editable
+                    ></Machine>
+                    <Machine
+                        machine={machines[2]}
+                        roles={roles}
+                        certifications={certifications}
+                        editable
+                    ></Machine>
+                    <Machine
+                        machine={machines[3]}
                         roles={roles}
                         certifications={certifications}
                         editable

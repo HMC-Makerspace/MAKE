@@ -15,6 +15,7 @@ import {
     getMachinesVisibleToUser,
     updateMachine,
     updateMachineStatuses,
+    patchMachine,
 } from "controllers/machine.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
@@ -266,6 +267,65 @@ router.put("/", async (req: MachineRequest, res: MachineResponse) => {
         res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
     }
 });
+
+/**
+ * Updates the machine with partial machine
+ */
+router.patch(
+    "/:UUID",
+    async (
+        req: Request<
+            { UUID: string },
+            {},
+            { partial_machine_obj: Partial<TMachine> }
+        >,
+        res: MachineResponse,
+    ) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = headers.requesting_uuid;
+        const machine_uuid = req.params.UUID;
+        const partial_machine = req.body.partial_machine_obj;
+
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                `No requesting_uuid was provided while updating ${machine_uuid}`,
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+
+        req.log.debug({
+            msg: `Patching machine with uuid ${machine_uuid}`,
+            partial_machine_obj: partial_machine,
+            requesting_uuid: requesting_uuid,
+        });
+
+        // If the user is authorized, delete a machine object
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_MACHINE)) {
+            const machine = await patchMachine(machine_uuid, partial_machine);
+            if (!machine) {
+                req.log.warn(
+                    `Machine with uuid ${machine_uuid} could not be ` +
+                        `patched because it was not found.`,
+                );
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `Machine with uuid ${machine_uuid} could not be found`,
+                });
+                return;
+            }
+            req.log.debug(`Patched machine ${machine_uuid}`);
+            res.status(StatusCodes.OK).json(machine);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to patch a machine",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
 
 /**
  * Deletes a machine. This is a protected route, and a 'requesting_uuid'

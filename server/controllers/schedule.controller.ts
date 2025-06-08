@@ -153,8 +153,8 @@ export async function setActiveSchedule(
 }
 
 /**
- * Set the current active schedule, replacing the previous active schedule.
- * @param schedule_uuid The schedule to set as active
+ * Update a schedule with partial information
+ * @param schedule_uuid The schedule to update
  * @returns The updated schedule object
  */
 export async function patchSchedule(
