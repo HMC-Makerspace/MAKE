@@ -24,7 +24,6 @@ export default function ScheduleUserPicker({
             shadow="sm"
         >
             <UsersTable
-                key={users.length}
                 users={users}
                 roles={roles}
                 selectedKeys={selectedUsers}

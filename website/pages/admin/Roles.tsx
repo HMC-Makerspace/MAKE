@@ -21,7 +21,7 @@ export default function RolesPage() {
     );
 
     return (
-        <AdminLayout pageHref={"/admin/users"}>
+        <AdminLayout pageHref={"/admin/roles"}>
             <div className="flex flex-col lg:flex-row overflow-auto h-full gap-8">
                 <RolesTable
                     roles={data ?? []}

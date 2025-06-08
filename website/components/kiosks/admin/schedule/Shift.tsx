@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { TShift } from "common/shift";
+import { SHIFT_DAY, TShift } from "common/shift";
 import { TUser, TUserRole, UserUUID } from "common/user";
 import { motion } from "framer-motion";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -25,12 +25,23 @@ const baseColors = [
     "bg-secondary-400",
 ];
 
-const availableColors = [
+const assigneeColors = [
     "bg-success-300",
     "bg-success-200",
     "bg-success-100",
     "bg-success-100",
     "bg-success-100",
+];
+
+const availabilityColors = [
+    "bg-warning-50",
+    "bg-warning-100",
+    "bg-warning-200",
+    "bg-warning-300",
+    "bg-warning-400",
+    "bg-warning-500",
+    "bg-warning-500",
+    "bg-warning-500",
 ];
 
 const toggleUserShift = async ({
@@ -61,6 +72,68 @@ const toggleUserShift = async ({
     }
 };
 
+const toggleWorkerAvailability = async ({
+    user_uuid,
+    isAvailable,
+    day,
+    sec_start,
+    sec_end,
+}: {
+    user_uuid: string;
+    isAvailable: boolean;
+    day: SHIFT_DAY;
+    sec_start: number;
+    sec_end: number;
+}) => {
+    if (!isAvailable) {
+        // Add the user's availability
+        return (
+            await axios.patch<TUser>(
+                `/api/v3/user/${user_uuid}/availability/add`,
+                {
+                    day: day,
+                    sec_start: sec_start,
+                    sec_end: sec_end,
+                },
+            )
+        ).data;
+    } else {
+        // Remove the user's availability
+        return (
+            await axios.patch<TUser>(
+                `/api/v3/user/${user_uuid}/availability/remove`,
+                {
+                    day: day,
+                    sec_start: sec_start,
+                    sec_end: sec_end,
+                },
+            )
+        ).data;
+    }
+};
+
+function getAvailableUsers(
+    schedule_uuid: UUID,
+    users: TUser[],
+    day: number,
+    sec_start: number,
+    sec_end: number,
+) {
+    return users.filter((u) =>
+        u.work_schedules
+            ?.find((a) => a.schedule == schedule_uuid)
+            ?.days.some(
+                (record) =>
+                    record.day === day &&
+                    record.availability.some(
+                        (time) =>
+                            time.sec_start <= sec_start &&
+                            time.sec_end >= sec_end,
+                    ),
+            ),
+    );
+}
+
 export default function Shift({
     schedule_uuid,
     shifts,
@@ -69,12 +142,13 @@ export default function Shift({
     day,
     sec_start,
     sec_end,
-    selectedUser = null,
+    selected_user,
     setSelectedUsers = () => {},
     type = "view",
     selectedShift = [0, 0, 0],
     setSelectedShift = () => {},
-    setSelectedSchedules = () => {},
+    dragging = false,
+    setDragging = () => {},
 }: {
     schedule_uuid: UUID;
     shifts: TShift[];
@@ -83,12 +157,13 @@ export default function Shift({
     day: number;
     sec_start: number;
     sec_end: number;
-    selectedUser?: UserUUID | null;
+    selected_user?: TUser;
     setSelectedUsers?: (users: Selection) => void;
-    type?: "view" | "edit" | "availability";
+    type?: "view" | "edit" | "availability" | "worker";
     selectedShift?: number[];
     setSelectedShift?: (day_start_end: number[]) => void;
-    setSelectedSchedules?: (schedules: Selection) => void;
+    dragging: boolean;
+    setDragging: (dragging: boolean) => void;
 }) {
     const queryClient = useQueryClient();
 
@@ -97,19 +172,23 @@ export default function Shift({
         onSuccess: (result: TSchedule) => {
             queryClient.setQueryData(["schedule", schedule_uuid], result);
             queryClient.setQueryData(["schedule"], (old: TSchedule[]) =>
-                old.map((sche) => (sche.uuid === result.uuid ? result : sche)),
+                old.map((s) => (s.uuid === result.uuid ? result : s)),
             );
-            // setSelectedSchedules(new Set([schedule_uuid]));
         },
         onError: (error) => {
             console.log(error);
         },
     });
 
-    // TODO: Make edit availability work
-    // const availabilityMutation = useMutation({
-    //     mutationFn:
-    // })
+    const availabilityMutation = useMutation({
+        mutationFn: toggleWorkerAvailability,
+        onSuccess: (result: TUser) => {
+            queryClient.setQueryData(["user", result.uuid], result);
+            queryClient.setQueryData(["user"], (old: TUser[]) =>
+                old.map((u) => (u.uuid === result.uuid ? result : u)),
+            );
+        },
+    });
 
     const relevant_shifts = shifts.filter(
         (shift) =>
@@ -120,11 +199,7 @@ export default function Shift({
 
     const assignees = relevant_shifts.map((shift) => shift.assignee);
 
-    const scheduled = selectedUser && assignees.includes(selectedUser);
-
-    const selected_user = selectedUser
-        ? users.find((u) => u.uuid === selectedUser)
-        : null;
+    const scheduled = selected_user && assignees.includes(selected_user.uuid);
 
     const available = selected_user
         ? selected_user.work_schedules
@@ -147,12 +222,12 @@ export default function Shift({
             ? [
                   // If in edit mode and the user is scheduled, show a + cursor,
                   // otherwise a no-edit cursor
-                  selectedUser && !scheduled
+                  selected_user && !scheduled
                       ? "cursor-cell"
-                      : selectedUser && "cursor-not-allowed",
+                      : selected_user && "cursor-not-allowed",
                   // Background cell color is based on if the selected user is
                   // scheduled and or available
-                  !scheduled && available && availableColors[colorIndex],
+                  !scheduled && available && assigneeColors[colorIndex],
                   !scheduled && !available && baseColors[colorIndex],
                   scheduled && available && "bg-primary-300",
                   scheduled && !available && "bg-danger-100",
@@ -218,6 +293,29 @@ export default function Shift({
         }
     }
 
+    // Only get available users if necessary
+    const availableUsers =
+        type === "availability"
+            ? getAvailableUsers(schedule_uuid, users, day, sec_start, sec_end)
+            : [];
+
+    const availabilityColorIndex = Math.floor(
+        (availableUsers.length / users.length) * availabilityColors.length,
+    );
+
+    const dragFn =
+        type === "worker" && !!selected_user && dragging
+            ? () => {
+                  availabilityMutation.mutate({
+                      user_uuid: selected_user.uuid,
+                      isAvailable: !!available,
+                      day: day,
+                      sec_start: sec_start,
+                      sec_end: sec_end,
+                  });
+              }
+            : undefined;
+
     return (
         <Popover
             isOpen={isOpen}
@@ -245,24 +343,39 @@ export default function Shift({
                             baseColors[colorIndex],
                         type === "view" && isShiftSelected && "bg-primary-300",
                         ...editor_classes,
+                        type === "worker" && !available && "bg-default-300",
+                        type === "worker" && available && "bg-success-400",
                         type === "availability" &&
                             available &&
-                            "bg-primary-300",
+                            "bg-success-300",
+                        type === "availability" &&
+                            !available &&
+                            availabilityColors[availabilityColorIndex],
+                        type === "availability" && isShiftSelected && "ring-2",
                     )}
                     animate
                     style={{
                         transition: "background-color 0.15s ease",
                     }}
-                    onDragOver={
-                        type === "availability"
-                            ? () => {
-                                  // TODO: do stuff
-                              }
-                            : undefined
-                    }
+                    onMouseOver={dragFn}
+                    onTapStart={() => {
+                        if (type === "worker") {
+                            setDragging(true);
+                            if (selected_user) {
+                                availabilityMutation.mutate({
+                                    user_uuid: selected_user.uuid,
+                                    isAvailable: !!available,
+                                    day: day,
+                                    sec_start: sec_start,
+                                    sec_end: sec_end,
+                                });
+                            }
+                        }
+                    }}
+                    onTapCancel={() => setDragging(false)}
                     onTap={() => {
                         if (type === "edit") {
-                            if (selectedUser) {
+                            if (selected_user) {
                                 if (!scheduled) {
                                     shiftMutation.mutate({
                                         shift: {
@@ -270,7 +383,7 @@ export default function Shift({
                                             day: day,
                                             sec_start: sec_start,
                                             sec_end: sec_end,
-                                            assignee: selectedUser,
+                                            assignee: selected_user.uuid,
                                             history: [],
                                         },
                                         isScheduled: false,
@@ -279,15 +392,29 @@ export default function Shift({
                                 } else {
                                     shiftMutation.mutate({
                                         shift: relevant_shifts.find(
-                                            (s) => s.assignee === selectedUser,
+                                            (s) =>
+                                                s.assignee ===
+                                                selected_user.uuid,
                                         )!,
                                         isScheduled: true,
                                         schedule_uuid: schedule_uuid,
                                     });
                                 }
-                            } else {
-                                // No user selected,
                             }
+                        } else if (type === "availability") {
+                            // In availability mode, show popup with available users.
+                            setSelectedUsers(
+                                new Set(
+                                    getAvailableUsers(
+                                        schedule_uuid,
+                                        users,
+                                        day,
+                                        sec_start,
+                                        sec_end,
+                                    ).map((u) => u.uuid),
+                                ),
+                            );
+                            setSelectedShift([day, sec_start, sec_end]);
                         } else if (type === "view") {
                             if (isShiftSelected) {
                                 setSelectedUsers(new Set());
@@ -297,106 +424,132 @@ export default function Shift({
                                 setSelectedUsers(new Set(assignees));
                                 setSelectedShift([day, sec_start, sec_end]);
                             }
-                        } else {
-                            // Update availability at this time
+                        } else if (type === "worker") {
+                            setDragging(false);
                         }
                     }}
                     whileTap={{
                         scale: type !== "view" ? 0.98 : 1,
                     }}
                 >
-                    {assignees.map((assignee) => {
-                        const u = users.find((u) => u.uuid === assignee);
-                        if (!u) {
-                            return (
-                                <div
-                                    className={clsx(
-                                        "w-full h-full",
-                                        "flex flex-row",
-                                        "items-center justify-center",
-                                        "text-danger-800",
-                                        "text-sm",
-                                    )}
-                                >
-                                    Unknown User
-                                </div>
-                            );
-                        }
-                        if (type === "edit") {
-                            const hierarchical_roles = getUserRoleHierarchy(
-                                u,
-                                roles,
-                            );
-                            const hierarchical_color =
-                                hierarchical_roles[0].color;
-                            return (
-                                <Button
-                                    key={assignee}
-                                    className={clsx(
-                                        "bg-default-300 px-3",
-                                        "justify-items-center sm:w-auto",
-                                        "rounded-full",
-                                        selectedUser
-                                            ? "cursor-not-allowed"
-                                            : "",
-                                    )}
-                                    onPress={() => {
-                                        setIsOpen(true);
-                                        setStatUser(u);
-                                    }}
-                                    size="sm"
-                                >
+                    {type != "availability" &&
+                        assignees.map((assignee) => {
+                            const u = users.find((u) => u.uuid === assignee);
+                            if (!u) {
+                                return (
                                     <div
                                         className={clsx(
-                                            "inline-flex outline-none",
+                                            "w-full h-full",
+                                            "flex flex-row",
                                             "items-center justify-center",
-                                            "gap-2 rounded-xl",
+                                            "text-danger-800",
+                                            "text-sm",
+                                        )}
+                                    >
+                                        Unknown User
+                                    </div>
+                                );
+                            }
+                            if (type === "edit") {
+                                const hierarchical_roles = getUserRoleHierarchy(
+                                    u,
+                                    roles,
+                                );
+                                const hierarchical_color =
+                                    hierarchical_roles[0].color;
+                                return (
+                                    <Button
+                                        key={assignee}
+                                        className={clsx(
+                                            "bg-default-300 px-3",
+                                            "justify-items-center sm:w-auto",
+                                            "rounded-full",
+                                            selected_user
+                                                ? "cursor-not-allowed"
+                                                : "",
+                                        )}
+                                        onPress={() => {
+                                            // Don't open the popup if a user is
+                                            // selected, because a selected user
+                                            // means we are assigning shifts
+                                            if (!selected_user) {
+                                                setIsOpen(true);
+                                                setStatUser(u);
+                                            }
+                                        }}
+                                        size="sm"
+                                    >
+                                        <div
+                                            className={clsx(
+                                                "inline-flex outline-none",
+                                                "items-center justify-center",
+                                                "gap-2 rounded-xl",
+                                            )}
+                                        >
+                                            {u.name}
+                                            <span
+                                                style={{
+                                                    backgroundColor:
+                                                        hierarchical_color,
+                                                }}
+                                                className="size-2 rounded-full"
+                                            ></span>
+                                        </div>
+                                    </Button>
+                                );
+                            } else if (type === "view") {
+                                return (
+                                    <div
+                                        className={clsx(
+                                            "w-full h-full",
+                                            "flex flex-row",
+                                            "items-center justify-center",
+                                            "text-default-800",
+                                            "text-sm",
                                         )}
                                     >
                                         {u.name}
-                                        <span
-                                            style={{
-                                                backgroundColor:
-                                                    hierarchical_color,
-                                            }}
-                                            className="size-2 rounded-full"
-                                        ></span>
                                     </div>
-                                </Button>
-                            );
-                        } else if (type === "view") {
-                            return (
-                                <div
-                                    className={clsx(
-                                        "w-full h-full",
-                                        "flex flex-row",
-                                        "items-center justify-center",
-                                        "text-default-800",
-                                        "text-sm",
-                                    )}
-                                >
-                                    {u.name}
-                                </div>
-                            );
-                        }
-                    })}
-                    {assignees.length === 0 && type !== "availability" && (
+                                );
+                            }
+                        })}
+                    {type === "availability" && (
                         <div
                             className={clsx(
-                                "w-full h-[32px] text-sm",
-                                "flex flex-row",
+                                `w-full flex`,
                                 "items-center justify-center",
                                 available
-                                    ? "text-default-200"
-                                    : "text-default-400",
+                                    ? "text-default-300"
+                                    : "text-default-500",
                             )}
                             style={{
-                                transition: "color 0.15s ease",
+                                // Keep same vertical height when switching modes
+                                height:
+                                    32 * assignees.length +
+                                    4 * (assignees.length - 1),
                             }}
                         >
-                            {type === "edit" ? "Unassigned" : "No shift"}
+                            {`${availableUsers.length}/${users.length}`}
                         </div>
                     )}
+                    {assignees.length === 0 &&
+                        (type === "edit" || type === "view") && (
+                            <div
+                                className={clsx(
+                                    "w-full h-[32px] text-sm",
+                                    "flex flex-row",
+                                    "items-center justify-center",
+                                    available
+                                        ? "text-default-200"
+                                        : "text-default-400",
+                                )}
+                                style={{
+                                    transition: "color 0.15s ease",
+                                }}
+                            >
+                                {type === "view" ? "No shift" : "Unassigned"}
+                            </div>
+                        )}
                 </motion.div>
             </PopoverTrigger>
             <PopoverContent>
@@ -410,24 +563,36 @@ export default function Shift({
                                 role_uuid={statHierarchicalRoles[0].uuid}
                             />
                         </div>
-                        <div className="flex flex-row gap-1">
-                            <span
-                                className={clsx(
-                                    "font-bold",
-                                    statUserShiftStatusColor,
-                                )}
-                            >
-                                {statUserScheduledShifts}
-                            </span>
+                        <div
+                            className={clsx(
+                                "flex flex-row gap-1 font-bold",
+                                statUserShiftStatusColor,
+                            )}
+                        >
+                            {statUserScheduledShifts}
                             <span>scheduled shifts</span>
                         </div>
                         <div className="flex flex-row gap-1">
                             <span>Requested shift range:</span>
-                            <span className="font-semibold text-primary-300">
+                            <span
+                                className={clsx(
+                                    "font-semibold",
+                                    statUserMinRequestedShifts
+                                        ? "text-primary-300"
+                                        : "text-secondary-300",
+                                )}
+                            >
                                 {statUserMinRequestedShifts ?? "?"}
                             </span>
                             <span className="font-thin">-</span>
-                            <span className="font-semibold text-primary-300">
+                            <span
+                                className={clsx(
+                                    "font-semibold",
+                                    statUserMaxRequestedShifts
+                                        ? "text-primary-300"
+                                        : "text-secondary-300",
+                                )}
+                            >
                                 {statUserMaxRequestedShifts ?? "?"}
                             </span>
                         </div>
