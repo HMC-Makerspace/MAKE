@@ -33,7 +33,7 @@ export type TWorkshopUserRecord = {
  * @property photos - (optional) a list UUIDs of {@link TFile | image Files} to
  *      display for this workshop
  * @property authorized_roles - (optional) a list of UserRole UUIDs that are
- *      allowed to see this workshop. If not present, any user may see this
+ *      allowed to see this workshop. If null, any user may see this
  *      workshop
  */
 export type TWorkshop = {
@@ -51,7 +51,7 @@ export type TWorkshop = {
     users_notified: UserUUID[];
     sign_in_list: TWorkshopUserRecord[];
     images?: FileUUID[];
-    authorized_roles?: UserRoleUUID[];
+    authorized_roles?: UserRoleUUID[] | null;
 };
 
 /**

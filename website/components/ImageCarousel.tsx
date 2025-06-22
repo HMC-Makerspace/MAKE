@@ -14,10 +14,11 @@ import {
 } from "@heroui/react";
 import {
     TrashIcon,
-    PencilSquareIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
     PlusIcon,
+    ArrowUpTrayIcon,
+    ArrowUpOnSquareIcon,
 } from "@heroicons/react/24/outline";
 
 async function deleteImage({
@@ -103,7 +104,7 @@ export default function ImageCarousel({
     }
 
     return (
-        <div className="relative w-full h-full min-h-[100px] content-center">
+        <div className="relative w-full h-full min-h-[150px] content-center">
             {images.length > 1 && (
                 <Button
                     className="absolute left-1 top-0 bottom-0 my-auto"
@@ -135,7 +136,7 @@ export default function ImageCarousel({
                     className="absolute bottom-2 right-2"
                     onPress={editOnOpenChange}
                 >
-                    <PencilSquareIcon className="size-6" />
+                    <ArrowUpOnSquareIcon className="size-7" />
                 </Button>
             )}
             {images.length > 1 && (
