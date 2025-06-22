@@ -34,7 +34,7 @@ export enum API_SCOPE {
     GET_ONE_AREA = "get_area",
     CREATE_AREA = "create_area",
     UPDATE_AREA = "update_area",
-    UPDATE_AREA_STATUS = "update_area_status",
+    UPDATE_ALL_AREAS = "update_all_areas",
     DELETE_AREA = "delete_area",
     // Certification scopes
     GET_ALL_CERTIFICATIONS = "get_certifications",
@@ -74,7 +74,7 @@ export enum API_SCOPE {
     GET_MACHINE = "get_machine",
     CREATE_MACHINE = "create_machine",
     UPDATE_MACHINE = "update_machine",
-    UPDATE_MACHINE_STATUSES = "update_machine_statuses",
+    UPDATE_MACHINE_INSTANCES = "update_machine_statuses",
     DELETE_MACHINE = "delete_machine",
     // Restock Request scopes
     GET_ALL_RESTOCKS = "get_restock_requests",
@@ -225,9 +225,9 @@ export const API_SCOPE_SECTIONS: {
                 description: "Able to update all area information",
             },
             {
-                scope: API_SCOPE.UPDATE_AREA_STATUS,
-                label: "Update Area Status",
-                description: "Able to update area statuses",
+                scope: API_SCOPE.UPDATE_ALL_AREAS,
+                label: "Update All Areas",
+                description: "Able to update all areas at once",
             },
             {
                 scope: API_SCOPE.DELETE_AREA,
@@ -416,7 +416,7 @@ export const API_SCOPE_SECTIONS: {
                 description: "Able to update all machine information",
             },
             {
-                scope: API_SCOPE.UPDATE_MACHINE_STATUSES,
+                scope: API_SCOPE.UPDATE_MACHINE_INSTANCES,
                 label: "Update Machine Statuses",
                 description: "Able to the statuses for any machine",
             },

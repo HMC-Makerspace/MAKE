@@ -19,14 +19,17 @@ import React from "react";
 
 import MAKETable from "../../../Table";
 
-import { TCertification } from "common/certification";
+import { CertificationUUID, TCertification } from "common/certification";
 import { CERTIFICATION_VISIBILITY } from "../../../../../common/certification";
 
 import CertificationTag from "./CertificationTag";
 import EditCertModal from "./EditCertModal";
-import EditDocsModal from "./EditDocsModal";
+import EditDocsModal from "../../../EditDocsModal";
 
 import UserRole from "../../../user/UserRole";
+import { TDocument } from "common/file";
+import axios from "axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const defaultCert: TCertification = {
     uuid: "",
@@ -38,7 +41,7 @@ const defaultCert: TCertification = {
     seconds_valid_for: 0,
     documents: [],
     authorized_roles: [],
-    prerequisites: []
+    prerequisites: [],
 };
 
 const columns = [
@@ -49,7 +52,7 @@ const columns = [
     { name: "Expires After", id: "seconds_valid_for" },
     { name: "Documents", id: "documents" },
     { name: "Prerequisites", id: "prerequisites" },
-    { name: "Authorized Roles", id: "authorized_roles" }
+    { name: "Authorized Roles", id: "authorized_roles" },
 ];
 
 const defaultColumns = [
@@ -60,15 +63,29 @@ const defaultColumns = [
     "documents",
     "visibility",
     "prerequisites",
-    "authorized_roles"
+    "authorized_roles",
 ];
+
+const updateCertDocs = async ({
+    uuid,
+    patch,
+}: {
+    uuid: CertificationUUID;
+    patch: Partial<TCertification>;
+}) => {
+    return (
+        await axios.patch<TCertification>(`/api/v3/certification/${uuid}`, {
+            partial_cert_obj: patch,
+        })
+    ).data;
+};
 
 export default function CertificationsTable({
     certs,
     selectedKeys,
     onSelectionChange,
     isLoading,
-    canEdit
+    canEdit,
 }: {
     certs: TCertification[];
     selectedKeys: Selection;
@@ -83,13 +100,37 @@ export default function CertificationsTable({
     const [search, setSearch] = React.useState<string>("");
 
     // Edit modal
-    const [editCert, setEditCert] = React.useState<TCertification | undefined>(undefined); // the certification being edited
+    const [editCert, setEditCert] = React.useState<TCertification | undefined>(
+        undefined,
+    ); // the certification being edited
     const [isNew, setIsNew] = React.useState<boolean>(false); // whether editing or creating cert
     const [isOpen, setIsOpen] = React.useState<boolean>(false); // whether modal is open
 
     // Edit docs modal
-    const [certOpenDoc, setCertOpenDoc] = React.useState<TCertification>(defaultCert); // the certification with edited docs
+    const [certOpenDoc, setCertOpenDoc] =
+        React.useState<TCertification>(defaultCert); // the certification with edited docs
     const [docOpen, setDocOpen] = React.useState<boolean>(false); // whether modal is open
+
+    const queryClient = useQueryClient();
+    const mutation = useMutation({
+        mutationFn: updateCertDocs,
+        onSuccess: (obj: TCertification) => {
+            queryClient.setQueryData(["certification", certOpenDoc.uuid], obj);
+            queryClient.setQueryData(
+                ["certification"],
+                (old: TCertification[]) => {
+                    return old.map((certification) =>
+                        certification.uuid === obj.uuid ? obj : certification,
+                    );
+                },
+            );
+
+            setDocOpen(false);
+        },
+        onError: (error) => {
+            alert(`Error: ${error.message}`);
+        },
+    });
 
     const onInputChange = React.useCallback((value: string) => {
         setSearch(value);
@@ -153,7 +194,7 @@ export default function CertificationsTable({
                                     ))}
                             </DropdownMenu>
                         </Dropdown>
-                        
+
                         <Button
                             color="primary"
                             isDisabled={isLoading}
@@ -206,29 +247,40 @@ export default function CertificationsTable({
                         </div>
                     ),
                     name: (cert: TCertification) => (
-                        <CertificationTag cert_uuid={cert.uuid} showVisibility ></CertificationTag>
+                        <CertificationTag
+                            cert_uuid={cert.uuid}
+                            showVisibility
+                        ></CertificationTag>
                     ),
                     seconds_valid_for: (cert: TCertification) => (
                         <div>
-                            {cert.seconds_valid_for ? relativeTimestampToString(cert.seconds_valid_for) : "Never"}
+                            {cert.seconds_valid_for
+                                ? relativeTimestampToString(
+                                      cert.seconds_valid_for,
+                                  )
+                                : "Never"}
                         </div>
                     ),
                     max_level: (cert: TCertification) => (
-                        <div>
-                            {cert.max_level || "None"}
-                        </div>
+                        <div>{cert.max_level || "None"}</div>
                     ),
                     prerequisites: (cert: TCertification) => (
                         <div>
-                            {cert.prerequisites?.map(prereq => (
-                                <CertificationTag cert_uuid={prereq} key={prereq} ></CertificationTag>
+                            {cert.prerequisites?.map((prereq) => (
+                                <CertificationTag
+                                    cert_uuid={prereq}
+                                    key={prereq}
+                                ></CertificationTag>
                             ))}
                         </div>
                     ),
                     authorized_roles: (cert: TCertification) => (
                         <div>
-                            {cert.authorized_roles?.map(role => (
-                                <UserRole role_uuid={role} key={role} ></UserRole>
+                            {cert.authorized_roles?.map((role) => (
+                                <UserRole
+                                    role_uuid={role}
+                                    key={role}
+                                ></UserRole>
                             ))}
                         </div>
                     ),
@@ -246,6 +298,7 @@ export default function CertificationsTable({
             {editCert && (
                 <EditCertModal
                     key={"certedit-" + editCert.uuid}
+                    certifications={certs}
                     cert={editCert}
                     isNew={isNew}
                     isOpen={isOpen}
@@ -258,12 +311,10 @@ export default function CertificationsTable({
             {docOpen && (
                 <EditDocsModal
                     key={"certdocedit-" + certOpenDoc.uuid}
-                    cert={certOpenDoc}
-                    documents={certOpenDoc.documents || []}
+                    element={certOpenDoc}
                     isOpen={docOpen}
                     onOpenChange={setDocOpen}
-                    onSuccess={() => setDocOpen(false)}
-                    onError={() => alert("Error")}
+                    patchMutation={mutation}
                 />
             )}
         </div>

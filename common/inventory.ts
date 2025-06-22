@@ -1,5 +1,5 @@
 import { AreaUUID } from "./area";
-import type { CertificationUUID } from "./certification";
+import type { CertificationUUID, TRequiredCertificate } from "./certification";
 import type { UUID } from "./global";
 import type { UserRoleUUID } from "./user";
 
@@ -35,9 +35,11 @@ export type TInventoryItemLocation = {
  * @member Kit - a collection of multiple items
  */
 export enum ITEM_ROLE {
-    TOOL = "T",
-    MATERIAL = "M",
-    KIT = "K",
+    TOOL = "tool",
+    MATERIAL = "material",
+    KIT = "kit",
+    MACHINE = "machine",
+    AREA = "area",
 }
 
 /**
@@ -49,21 +51,41 @@ export enum ITEM_ROLE {
  * @member TAKE_HOME - can take home freely without needing to checkout
  */
 export enum ITEM_ACCESS_TYPE {
-    USE_IN_SPACE = 0,
+    USE_IN_SPACE = 1,
     CHECKOUT_IN_SPACE,
     CHECKOUT_TAKE_HOME,
     TAKE_HOME,
 }
 
 /**
- * TItemCertificate: The specification for a certification required to use an item
- * @property certification_uuid - The UUID of the required certification
- * @property required_level - The minimum cert level needed to use this item
+ * ITEM_ACCESS_DESCRIPTORS: Descriptions of the above item access types
  */
-export type TItemCertificate = {
-    certification_uuid: CertificationUUID;
-    required_level: number;
-};
+export const ITEM_ACCESS_DESCRIPTORS: {
+    type: ITEM_ACCESS_TYPE;
+    label: string;
+    description: string;
+}[] = [
+    {
+        type: ITEM_ACCESS_TYPE.TAKE_HOME,
+        label: "Take Home",
+        description: "Free to use in space or take home without checking out",
+    },
+    {
+        type: ITEM_ACCESS_TYPE.USE_IN_SPACE,
+        label: "Use In Space",
+        description: "Free to use in the space without checking out",
+    },
+    {
+        type: ITEM_ACCESS_TYPE.CHECKOUT_TAKE_HOME,
+        label: "Checkout, Take Home",
+        description: "Requires a checkout, but can be used or taken home",
+    },
+    {
+        type: ITEM_ACCESS_TYPE.CHECKOUT_IN_SPACE,
+        label: "Checkout, Use In Space",
+        description: "Requires a checkout, and can only be used in the space",
+    },
+];
 
 /**
  * TInventoryItem - Unique object for item
@@ -84,7 +106,7 @@ export type TItemCertificate = {
  * @property required_certs - UUIDs of certs required to use item
  * @property authorized_roles - (optional) A list of UserRole UUIDs that are
  *      allowed to use this item. A user must have at least one of
- *      these roles to checkout the given item. If not present, any user may
+ *      these roles to checkout the given item. If null, any user may
  *      checkout this item.
  */
 export type TInventoryItem = {
@@ -92,14 +114,14 @@ export type TInventoryItem = {
     name: string;
     long_name?: string;
     role: ITEM_ROLE;
+    linked_uuid?: UUID;
     access_type: ITEM_ACCESS_TYPE;
     quantity: ItemQuantity;
     available?: number;
     locations: TInventoryItemLocation[];
     reorder_url?: string;
     serial_number?: string;
-    kit_contents?: InventoryItemUUID[];
     keywords?: string[];
-    required_certifications?: TItemCertificate[];
-    authorized_roles?: UserRoleUUID[];
+    required_certifications?: TRequiredCertificate[];
+    authorized_roles?: UserRoleUUID[] | null;
 };

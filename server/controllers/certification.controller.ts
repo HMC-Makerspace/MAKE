@@ -1,5 +1,5 @@
 import { API_SCOPE, UUID } from "common/global";
-import { TCertification } from "common/certification";
+import { CertificationUUID, TCertification } from "common/certification";
 import { Certification } from "models/certification.model";
 import mongoose from "mongoose";
 import { getUser } from "./user.controller";
@@ -101,6 +101,29 @@ export async function updateCertification(
     return Certifications.findOneAndReplace(
         { uuid: certification_obj.uuid },
         certification_obj,
+        { returnDocument: "after" },
+    );
+}
+
+/**
+ * Patch part of a certification information given an partial TCertification object.
+ * Certification is found by UUID.
+ * @param partial_cert_obj The certification's complete and updated information
+ * @returns A promise to the updated TCertification object, or null if no
+ *          checkout has the given UUID
+ */
+export async function patchCertification(
+    certification_uuid: CertificationUUID,
+    partial_cert_obj: Partial<TCertification>,
+): Promise<TCertification | null> {
+    const Certifications = mongoose.model("Certification", Certification);
+    // Update the given certification with partial changes certification_obj, searching by uuid
+    return await Certifications.findOneAndUpdate(
+        { uuid: certification_uuid },
+        {
+            // Updates the partial change
+            $set: partial_cert_obj,
+        },
         { returnDocument: "after" },
     );
 }

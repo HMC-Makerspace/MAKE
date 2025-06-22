@@ -1106,7 +1106,7 @@ router.patch(
 );
 
 /**
- * Set the active schedule by uuid. Requires the {@link API_SCOPE.UPDATE_SCHEDULE} scope.
+ * Updates the schedule with a partial schedule
  */
 router.patch(
     "/:UUID",
@@ -1160,7 +1160,7 @@ router.patch(
             res.status(StatusCodes.OK).json(schedule);
         } else {
             req.log.warn({
-                msg: "Forbidden user attempted to activate a schedule",
+                msg: "Forbidden user attempted to patch a schedule",
                 requesting_uuid: requesting_uuid,
             });
             // If the user is not authorized, provide a status error
