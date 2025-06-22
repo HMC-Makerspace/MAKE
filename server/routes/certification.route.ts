@@ -6,6 +6,7 @@ import {
     deleteCertification,
     updateCertification,
     getCertificationsVisibleToUser,
+    patchCertification,
 } from "controllers/certification.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
@@ -62,54 +63,23 @@ router.get("/public", async (req: Request, res: CertificationsResponse) => {
 });
 
 /**
- * Get all certifications. This is a protected route, and a `requesting_uuid` header
- * is required to call it. The user must have the
- * {@link API_SCOPE.GET_ALL_CERTIFICATIONS} scope.
+ * Get all certifications. This is a public route, since machines, items, areas, and
+ * workshops need to be able to display their certifications.
  */
 router.get(
     "/",
     async (req: CertificationRequest, res: CertificationsResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
 
-        // If no requesting certification uuid is provided, the call is not authorized
-        if (!requesting_uuid) {
-            req.log.warn(
-                "No requesting_uuid was provided while getting all certifications",
-            );
-            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-            return;
-        }
+        const certifications = await getCertifications();
 
-        req.log.debug({
-            msg: "Getting all certifications.",
-            requesting_uuid: requesting_uuid,
-        });
-
-        // If the user is authorized, get all certification information
-        if (
-            await verifyRequest(
-                requesting_uuid,
-                API_SCOPE.GET_ALL_CERTIFICATIONS,
-            )
-        ) {
-            const certifications = await getCertifications();
-
-            // If not certifications are found, log an error, but still return an empty list of certifications
-            if (!certifications) {
-                req.log.error("No certifications found in the database.");
-            } else {
-                req.log.error("Returned all certifications.");
-            }
-            res.status(StatusCodes.OK).json(certifications);
+        // If not certifications are found, log an error, but still return an empty list of certifications
+        if (!certifications) {
+            req.log.error("No certifications found in the database.");
         } else {
-            req.log.warn({
-                msg: "Forbidden user attempted to get all certifications",
-                requesting_uuid: requesting_uuid,
-            });
-            // If the user is not authorized, provide a status error
-            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+            req.log.error("Returned all certifications.");
         }
+        res.status(StatusCodes.OK).json(certifications);
     },
 );
 
@@ -164,6 +134,62 @@ router.get(
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to get a certification",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
+
+router.patch(
+    "/:UUID",
+    async (
+        req: Request<
+            { UUID: string },
+            {},
+            { partial_cert_obj: Partial<TCertification> }
+        >,
+        res: CertificationResponse,
+    ) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = headers.requesting_uuid;
+        const cert_uuid = req.params.UUID;
+        const partial_cert = req.body.partial_cert_obj;
+
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                `No requesting_uuid was provided while updating ${cert_uuid}`,
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+
+        req.log.debug({
+            msg: `Patching certification with uuid ${cert_uuid}`,
+            partial_cert_obj: partial_cert,
+            requesting_uuid: requesting_uuid,
+        });
+
+        // If the user is authorized, delete a machine object
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_MACHINE)) {
+            const cert = await patchCertification(cert_uuid, partial_cert);
+            if (!cert) {
+                req.log.warn(
+                    `Certification with uuid ${cert_uuid} could not be ` +
+                        `patched because it was not found.`,
+                );
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `Certification with uuid ${cert_uuid} could not be found`,
+                });
+                return;
+            }
+            req.log.debug(`Patched certification ${cert_uuid}`);
+            res.status(StatusCodes.OK).json(cert);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to patch a certification",
                 requesting_uuid: requesting_uuid,
             });
             // If the user is not authorized, provide a status error
