@@ -1,5 +1,5 @@
 import { API_SCOPE } from "common/global";
-import { TMachine, TMachineStatus, TPublicMachineData } from "common/machine";
+import { TMachine, TMachineInstance, TPublicMachineData } from "common/machine";
 import {
     ErrorResponse,
     FORBIDDEN_ERROR,
@@ -14,7 +14,7 @@ import {
     getMachines,
     getMachinesVisibleToUser,
     updateMachine,
-    updateMachineStatuses,
+    setMachineInstances,
     patchMachine,
 } from "controllers/machine.controller";
 import { verifyRequest } from "controllers/verify.controller";
@@ -26,10 +26,10 @@ type MachineRequest = Request<{}, {}, { machine_obj: TMachine }>;
 type MachineResponse = Response<TMachine | ErrorResponse>;
 type MachinesResponse = Response<TMachine[] | ErrorResponse>;
 
-type MachineStatusRequest = Request<
+type MachineInstanceStatusRequest = Request<
     { machine_uuid: string },
     {},
-    { statuses: TMachineStatus[] }
+    { instances: TMachineInstance[] }
 >;
 
 const router = Router();
@@ -377,59 +377,59 @@ router.delete(
 );
 
 /**
- * Update the list of statuses for a machine type. This is a protected route
+ * Set the list of instances for a machine type. This is a protected route
  * and a `requesting_uuid` header is required to call it. The user must have the
- * {@link API_SCOPE.UPDATE_MACHINE_STATUSES} scope, or be able to update any
+ * {@link API_SCOPE.UPDATE_MACHINE_INSTANCES} scope, or be able to update any
  * machine.
  */
 router.patch(
-    "/:machine_uuid/statuses/",
-    async (req: MachineStatusRequest, res: MachineResponse) => {
+    "/:machine_uuid/instances/",
+    async (req: MachineInstanceStatusRequest, res: MachineResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = headers.requesting_uuid;
         const machine_uuid = req.params.machine_uuid;
-        const statuses = req.body.statuses;
+        const instances = req.body.instances;
 
         // If no requesting user uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
-                "No requesting_uuid was provided while updating the machine statuses",
+                "No requesting_uuid was provided while setting machine instances",
             );
             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
 
         req.log.debug({
-            msg: `Updating statuses of machine with uuid ${machine_uuid}`,
+            msg: `Setting instances of machine with uuid ${machine_uuid}`,
             requesting_uuid: requesting_uuid,
         });
 
-        // If the user is authorized, update the machine's statuses
+        // If the user is authorized, update the machine's instances
         if (
             await verifyRequest(
                 requesting_uuid,
                 API_SCOPE.UPDATE_MACHINE,
-                API_SCOPE.UPDATE_MACHINE_STATUSES,
+                API_SCOPE.UPDATE_MACHINE_INSTANCES,
             )
         ) {
-            const updated_machine = await updateMachineStatuses(
+            const updated_machine = await setMachineInstances(
                 machine_uuid,
-                statuses,
+                instances,
             );
             if (!updated_machine) {
                 req.log.warn(
-                    `Machine with uuid ${machine_uuid} not found, failed to update statuses`,
+                    `Machine with uuid ${machine_uuid} not found, failed to set instances`,
                 );
                 res.status(StatusCodes.NOT_FOUND).json({
                     error: `Machine with uuid \`${machine_uuid}\` not found.`,
                 });
                 return;
             }
-            req.log.debug("Updated machine statuses successfully.");
+            req.log.debug("Set machine instances successfully.");
             res.status(StatusCodes.OK).json(updated_machine);
         } else {
             req.log.warn({
-                msg: "Forbidden user attempted to update machine statuses",
+                msg: "Forbidden user attempted to set machine instances",
                 requesting_uuid: requesting_uuid,
             });
             // If the user is not authorized, provide a status error

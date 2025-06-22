@@ -13,6 +13,8 @@ import {
     getArea,
     getAreas,
     getAreasVisibleToUser,
+    patchArea,
+    setAllAreas,
     updateArea,
     updateAreaStatus,
 } from "controllers/area.controller";
@@ -22,6 +24,7 @@ import { StatusCodes } from "http-status-codes";
 
 // --- Request and Response Types ---
 type AreaRequest = Request<{}, {}, { area_obj: TArea }>;
+type AreasRequest = Request<{}, {}, { area_objs: TArea[] }>;
 type AreaResponse = Response<TArea | ErrorResponse>;
 type AreasResponse = Response<TArea[] | ErrorResponse>;
 
@@ -213,6 +216,49 @@ router.post("/", async (req: AreaRequest, res: AreaResponse) => {
 });
 
 /**
+ * Update many areas. This will overwrite all existing areas. The
+ * {@link API_SCOPE.UPDATE_ALL_AREAS scope is required.
+ */
+router.put("/all", async (req: AreasRequest, res: AreasResponse) => {
+    const headers = req.headers as VerifyRequestHeader;
+    const requesting_uuid: string = headers.requesting_uuid;
+    const area_objs = req.body.area_objs;
+
+    // If no requesting user uuid is provided, the call is not authorized
+    if (!requesting_uuid) {
+        req.log.warn("No requesting_uuid was provided while setting all area");
+        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+        return;
+    }
+
+    req.log.debug({
+        msg: `Setting all areas`,
+        requesting_uuid: requesting_uuid,
+    });
+
+    // If the user is authorized, update a area's information
+    if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_ALL_AREAS)) {
+        const areas = await setAllAreas(area_objs);
+        if (!areas) {
+            req.log.warn("Failed to update all areas");
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                error: "Failed to update areas.",
+            });
+            return;
+        }
+        req.log.debug("Returned updated area.");
+        res.status(StatusCodes.OK).json(areas);
+    } else {
+        req.log.warn({
+            msg: "Forbidden user attempted to update a area",
+            requesting_uuid: requesting_uuid,
+        });
+        // If the user is not authorized, provide a status error
+        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+    }
+});
+
+/**
  * Update a specific area. This route will not create a new area if the
  * UUID does not exist. Instead, it will return a 404 error.
  * This is a protected route, and a `requesting_uuid`
@@ -314,51 +360,110 @@ router.delete(
  * {@link API_SCOPE.UPDATE_AREA_STATUS} scope, or be able to update any
  * area.
  */
+// router.patch(
+//     "/:area_uuid/status/",
+//     async (req: AreaStatusRequest, res: AreaResponse) => {
+//         const headers = req.headers as VerifyRequestHeader;
+//         const requesting_uuid: string = headers.requesting_uuid;
+//         const area_uuid = req.params.area_uuid;
+//         const status = req.body.status;
+
+//         // If no requesting user uuid is provided, the call is not authorized
+//         if (!requesting_uuid) {
+//             req.log.warn(
+//                 "No requesting_uuid was provided while updating area status",
+//             );
+//             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+//             return;
+//         }
+
+//         req.log.debug({
+//             msg: `Updating status of area with uuid ${area_uuid}`,
+//             requesting_uuid: requesting_uuid,
+//         });
+
+//         // If the user is authorized, update the area's status
+//         if (
+//             await verifyRequest(
+//                 requesting_uuid,
+//                 API_SCOPE.UPDATE_AREA,
+//                 API_SCOPE.UPDATE_AREA_STATUS,
+//             )
+//         ) {
+//             const updated_area = await updateAreaStatus(area_uuid, status);
+//             if (!updated_area) {
+//                 req.log.warn(
+//                     `Area with uuid ${area_uuid} not found, failed to update status`,
+//                 );
+//                 res.status(StatusCodes.NOT_FOUND).json({
+//                     error: `Area with uuid \`${area_uuid}\` not found.`,
+//                 });
+//                 return;
+//             }
+//             req.log.debug("Updated area status successfully.");
+//             res.status(StatusCodes.OK).json(updated_area);
+//         } else {
+//             req.log.warn({
+//                 msg: "Forbidden user attempted to update area status",
+//                 requesting_uuid: requesting_uuid,
+//             });
+//             // If the user is not authorized, provide a status error
+//             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+//         }
+//     },
+// );
+
+/**
+ * Updates the area with partial information
+ */
 router.patch(
-    "/:area_uuid/status/",
-    async (req: AreaStatusRequest, res: AreaResponse) => {
+    "/:UUID",
+    async (
+        req: Request<
+            { UUID: string },
+            {},
+            { partial_area_obj: Partial<TArea> }
+        >,
+        res: AreaResponse,
+    ) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
-        const area_uuid = req.params.area_uuid;
-        const status = req.body.status;
+        const requesting_uuid = headers.requesting_uuid;
+        const area_uuid = req.params.UUID;
+        const partial_area = req.body.partial_area_obj;
 
         // If no requesting user uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
-                "No requesting_uuid was provided while updating area status",
+                `No requesting_uuid was provided while updating ${area_uuid}`,
             );
             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
 
         req.log.debug({
-            msg: `Updating status of area with uuid ${area_uuid}`,
+            msg: `Patching area with uuid ${area_uuid}`,
+            partial_area_obj: partial_area,
             requesting_uuid: requesting_uuid,
         });
 
-        // If the user is authorized, update the area's status
-        if (
-            await verifyRequest(
-                requesting_uuid,
-                API_SCOPE.UPDATE_AREA,
-                API_SCOPE.UPDATE_AREA_STATUS,
-            )
-        ) {
-            const updated_area = await updateAreaStatus(area_uuid, status);
-            if (!updated_area) {
+        // If the user is authorized, delete a area object
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_AREA)) {
+            const area = await patchArea(area_uuid, partial_area);
+            if (!area) {
                 req.log.warn(
-                    `Area with uuid ${area_uuid} not found, failed to update status`,
+                    `Area with uuid ${area_uuid} could not be ` +
+                        `patched because it was not found.`,
                 );
                 res.status(StatusCodes.NOT_FOUND).json({
-                    error: `Area with uuid \`${area_uuid}\` not found.`,
+                    error: `Area with uuid ${area_uuid} could not be found`,
                 });
                 return;
             }
-            req.log.debug("Updated area status successfully.");
-            res.status(StatusCodes.OK).json(updated_area);
+            req.log.debug(`Patched area ${area_uuid}`);
+            res.status(StatusCodes.OK).json(area);
         } else {
             req.log.warn({
-                msg: "Forbidden user attempted to update area status",
+                msg: "Forbidden user attempted to patch a area",
                 requesting_uuid: requesting_uuid,
             });
             // If the user is not authorized, provide a status error
