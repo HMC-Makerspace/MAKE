@@ -56,17 +56,6 @@ export enum MACHINE_EDIT_LEVEL {
 }
 
 /**
- * Styles for machine statuses
- */
-export const MACHINE_STATUS_STYLES = {
-    [MACHINE_STATUS_TYPE.OFFLINE]: "bg-danger-300 text-danger-foreground",
-    [MACHINE_STATUS_TYPE.ONLINE]: "bg-success-300 text-success-foreground",
-    [MACHINE_STATUS_TYPE.FLAGGED_FOR_REPAIR]:
-        "bg-secondary-300 text-secondary-foreground",
-    [MACHINE_STATUS_TYPE.IN_REPAIR]: "bg-warning-300 text-warning-foreground",
-} as const;
-
-/**
  * TMachineInstance - Information about a single instance of a machine in the space
  * @property uuid - A unique identifier for this instance
  * @property name - (optional) The name of this specific machine instance. If not set,

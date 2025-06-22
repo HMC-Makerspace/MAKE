@@ -19,7 +19,6 @@ import {
     TMachine,
     TMachineInstance,
     MACHINE_EDIT_LEVEL,
-    MACHINE_STATUS_STYLES,
 } from "../../../../../common/machine";
 import { useState, useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -32,6 +31,7 @@ function InstanceRow({
     wrapEdit,
     deleteIndex,
     editable,
+    styles,
 }: {
     machine: TMachine;
     instance: TMachineInstance;
@@ -42,6 +42,7 @@ function InstanceRow({
     ): (val: TMachineInstance[P]) => void;
     deleteIndex: (index: number) => void;
     editable: MACHINE_EDIT_LEVEL;
+    styles: { [key in MACHINE_STATUS_TYPE]: string };
 }) {
     const fullEdit = editable == MACHINE_EDIT_LEVEL.FULL;
     const statusEdit =
@@ -121,7 +122,7 @@ function InstanceRow({
                                 key={item.textValue}
                                 className={clsx(
                                     "rounded-md h-fit w-[90%] p-0.5 text-center mb-1",
-                                    MACHINE_STATUS_STYLES[item.data?.key ?? 0],
+                                    styles[item.data?.key ?? 0],
                                 )}
                             >
                                 {item.textValue}
@@ -137,7 +138,7 @@ function InstanceRow({
                             <div
                                 className={clsx(
                                     "rounded-md h-fit w-full p-0.5 text-center",
-                                    MACHINE_STATUS_STYLES[status_type.key],
+                                    styles[status_type.key],
                                 )}
                             >
                                 {status_type.short_label}
@@ -212,11 +213,13 @@ export default function EditStatusModal({
     isOpen,
     onOpenChange,
     editable,
+    styles,
 }: {
     machine: TMachine;
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
     editable: MACHINE_EDIT_LEVEL;
+    styles: { [key in MACHINE_STATUS_TYPE]: string };
 }) {
     const [hasEdits, setHasEdits] = useState<boolean>(false);
     const [localInstances, setLocalInstances] = useState<TMachineInstance[]>(
@@ -311,6 +314,7 @@ export default function EditStatusModal({
                                         setHasEdits(true);
                                     }}
                                     editable={editable}
+                                    styles={styles}
                                 />
                             ))}
                         </div>
