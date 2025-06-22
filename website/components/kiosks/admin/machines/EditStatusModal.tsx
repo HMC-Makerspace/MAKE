@@ -19,9 +19,9 @@ import {
     TMachine,
     TMachineInstance,
     MACHINE_EDIT_LEVEL,
+    MACHINE_STATUS_STYLES,
 } from "../../../../../common/machine";
 import { useState, useCallback } from "react";
-import { status_styles } from "./MachineStatus";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -121,7 +121,7 @@ function InstanceRow({
                                 key={item.textValue}
                                 className={clsx(
                                     "rounded-md h-fit w-[90%] p-0.5 text-center mb-1",
-                                    status_styles[item.data?.key ?? 0],
+                                    MACHINE_STATUS_STYLES[item.data?.key ?? 0],
                                 )}
                             >
                                 {item.textValue}
@@ -137,7 +137,7 @@ function InstanceRow({
                             <div
                                 className={clsx(
                                     "rounded-md h-fit w-full p-0.5 text-center",
-                                    status_styles[status_type.key],
+                                    MACHINE_STATUS_STYLES[status_type.key],
                                 )}
                             >
                                 {status_type.short_label}

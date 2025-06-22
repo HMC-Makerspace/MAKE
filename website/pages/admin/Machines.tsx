@@ -1,6 +1,6 @@
 import { TSchedule } from "common/schedule";
 import AdminLayout from "../../layouts/AdminLayout";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Spinner, Card, Button } from "@heroui/react";
 import { TUserRole } from "common/user";
 import Machine from "../../components/kiosks/admin/machines/Machine";
@@ -15,6 +15,21 @@ import {
     PlusIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import axios from "axios";
+
+const createEmptyMachine = async () => {
+    return (
+        await axios.post<TMachine>("/api/v3/machine/", {
+            machine_obj: {
+                uuid: crypto.randomUUID(),
+                name: "New Machine",
+                count: 0,
+                instances: [],
+                status_logs: [],
+            },
+        })
+    ).data;
+};
 
 export default function MachinesPage() {
     const { data: areas, isLoading: areasLoading } = useQuery<TArea[]>({
@@ -42,6 +57,20 @@ export default function MachinesPage() {
     });
 
     const [preview, setPreview] = useState(false);
+
+    const queryClient = useQueryClient();
+    const createMutation = useMutation({
+        mutationFn: createEmptyMachine,
+        onSuccess: (obj: TMachine) => {
+            queryClient.setQueryData(["machine", obj.uuid], obj);
+            queryClient.setQueryData(["machine"], (old: TMachine[]) => {
+                return [...old, obj];
+            });
+        },
+        onError: (error) => {
+            alert(`Error: ${error.message}`);
+        },
+    });
 
     if (
         machines === undefined ||
@@ -116,6 +145,8 @@ export default function MachinesPage() {
                         )}
                         color="default"
                         variant="bordered"
+                        onPress={() => createMutation.mutate()}
+                        disableRipple
                     >
                         <PlusIcon className="size-6" />
                     </Button>

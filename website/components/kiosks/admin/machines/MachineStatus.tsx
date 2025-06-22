@@ -12,18 +12,11 @@ import {
     MACHINE_STATUS_TYPE,
     TMachine,
     MACHINE_EDIT_LEVEL,
+    MACHINE_STATUS_STYLES,
 } from "../../../../../common/machine";
 import clsx from "clsx";
 import MAKETable from "../../../Table";
 import EditStatusModal from "./EditStatusModal";
-
-export const status_styles = {
-    [MACHINE_STATUS_TYPE.OFFLINE]: "bg-danger-300 text-danger-foreground",
-    [MACHINE_STATUS_TYPE.ONLINE]: "bg-success-300 text-success-foreground",
-    [MACHINE_STATUS_TYPE.FLAGGED_FOR_REPAIR]:
-        "bg-secondary-300 text-secondary-foreground",
-    [MACHINE_STATUS_TYPE.IN_REPAIR]: "bg-warning-300 text-warning-foreground",
-} as const;
 
 function StatusModal({
     machine,
@@ -95,7 +88,7 @@ function StatusModal({
                                     radius="md"
                                     className={clsx(
                                         "max-w-full w-full",
-                                        status_styles[instance.status],
+                                        MACHINE_STATUS_STYLES[instance.status],
                                     )}
                                     classNames={{
                                         content: "flex flex-row justify-around",
@@ -155,7 +148,7 @@ export default function MachineStatus({
                     {machine.count > 1 ? "Statuses" : "Status"}
                 </div>
                 {machine.count == 0 && (
-                    <div className="w-full h-full text-default-500 content-center">
+                    <div className="w-full h-full text-default-500 content-center -mt-5">
                         Click to add statuses
                     </div>
                 )}
@@ -164,7 +157,7 @@ export default function MachineStatus({
                         radius="sm"
                         className={clsx(
                             "min-w-full h-full text-xl",
-                            status_styles[machine.instances[0].status],
+                            MACHINE_STATUS_STYLES[machine.instances[0].status],
                         )}
                     >
                         {
@@ -181,7 +174,7 @@ export default function MachineStatus({
                                 key={`machine-${machine.uuid}-big-status-${i}-${machine.uuid}`}
                                 className={clsx(
                                     "size-4 rounded-sm",
-                                    status_styles[instance.status],
+                                    MACHINE_STATUS_STYLES[instance.status],
                                 )}
                             />
                         ))}
@@ -201,7 +194,7 @@ export default function MachineStatus({
                                 radius="md"
                                 className={clsx(
                                     "max-w-full",
-                                    status_styles[status.key],
+                                    MACHINE_STATUS_STYLES[status.key],
                                 )}
                                 classNames={{
                                     content: "flex flex-row justify-around",
