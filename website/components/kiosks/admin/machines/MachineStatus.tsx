@@ -12,11 +12,21 @@ import {
     MACHINE_STATUS_TYPE,
     TMachine,
     MACHINE_EDIT_LEVEL,
-    MACHINE_STATUS_STYLES,
 } from "../../../../../common/machine";
 import clsx from "clsx";
 import MAKETable from "../../../Table";
 import EditStatusModal from "./EditStatusModal";
+
+/**
+ * Styles for machine statuses
+ */
+const MACHINE_STATUS_STYLES = {
+    [MACHINE_STATUS_TYPE.OFFLINE]: "bg-danger-300 text-danger-foreground",
+    [MACHINE_STATUS_TYPE.ONLINE]: "bg-success-300 text-success-foreground",
+    [MACHINE_STATUS_TYPE.FLAGGED_FOR_REPAIR]:
+        "bg-secondary-300 text-secondary-foreground",
+    [MACHINE_STATUS_TYPE.IN_REPAIR]: "bg-warning-300 text-warning-foreground",
+} as const;
 
 function StatusModal({
     machine,
@@ -212,6 +222,7 @@ export default function MachineStatus({
                 isOpen={isOpen}
                 onOpenChange={onOpenChange}
                 editable={editable}
+                styles={MACHINE_STATUS_STYLES}
             />
         </>
     );
