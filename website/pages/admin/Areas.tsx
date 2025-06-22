@@ -96,6 +96,8 @@ export default function AreasPage() {
         );
     }
 
+    // TODO: Add more engrained feature disables depending on user scopes
+
     return (
         <AdminLayout pageHref="/admin/areas">
             <div className="h-full overflow-auto flex flex-col gap-3">
