@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
-import type { TCertificate, TCertification } from "common/certification";
+import type {
+    TCertificate,
+    TCertification,
+    TRequiredCertificate,
+} from "common/certification";
 import { Document } from "./file.model";
 
 /**
@@ -30,4 +34,13 @@ export const Certificate = new mongoose.Schema<TCertificate>({
     level: { type: Number, required: true },
     timestamp_granted: { type: Number, required: true },
     timestamp_expires: { type: Number, required: false },
+});
+
+/**
+ * See {@link TRequiredCertificate} documentation for type information.
+ * Stored as children of {@link User}.
+ */
+export const RequiredCertificate = new mongoose.Schema<TRequiredCertificate>({
+    certification_uuid: { type: String, required: true },
+    required_level: { type: Number, required: true },
 });

@@ -15,12 +15,14 @@ export function UserRoleSelect({
     defaultSelectedKeys,
     isLoading,
     isDisabled = false,
+    isRequired = false,
+    selectionMode = "multiple",
     color = "primary",
     variant = "faded",
     className = "",
     classNames = {
         label: "pl-2",
-        value: "text-default-500",
+        value: "text-default-500 min-h-[48px] content-center",
     },
     placeholder = "Select roles",
     label = "Roles",
@@ -32,6 +34,8 @@ export function UserRoleSelect({
     defaultSelectedKeys?: UserRoleUUID[]; // optional, otherwise no default selected roles
     isLoading?: boolean; // only needed if roles is passed
     isDisabled?: boolean; // optional, defaults to false
+    isRequired?: boolean; // optional, defaults to false
+    selectionMode?: "single" | "multiple"; // optional, defaults to multiple selection
     color?:
         | "primary"
         | "default"
@@ -44,7 +48,7 @@ export function UserRoleSelect({
     classNames?: {
         label?: string;
         value?: string;
-    }; // optinal, has default styles
+    }; // optional, has default styles
     placeholder?: string; // optional, defaults to "Select roles"
     label?: string; // optional, defaults to "Roles"
     labelPlacement?: "outside" | "outside-left" | "inside"; // optional, defaults to "outside"
@@ -66,7 +70,8 @@ export function UserRoleSelect({
             defaultSelectedKeys={defaultSelectedKeys}
             isLoading={isLoading || queryLoading}
             isDisabled={isDisabled}
-            selectionMode="multiple"
+            isRequired={isRequired}
+            selectionMode={selectionMode}
             isMultiline
             placeholder={placeholder}
             size="lg"
@@ -106,11 +111,7 @@ export function UserRoleSelect({
             }}
         >
             {(role) => (
-                <SelectItem
-                    key={role.uuid}
-                    value={role.uuid}
-                    textValue={role.title}
-                >
+                <SelectItem key={role.uuid} textValue={role.title}>
                     <UserRole role_uuid={role.uuid} />
                 </SelectItem>
             )}

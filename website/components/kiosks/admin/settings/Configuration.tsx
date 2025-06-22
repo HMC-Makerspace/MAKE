@@ -119,6 +119,7 @@ export default function Configuration({ config }: { config: TConfig }) {
                 first_display_day: config.schedule.first_display_day,
                 schedulable_roles: config.schedule.schedulable_roles,
                 increment_sec: config.schedule.increment_sec,
+                timezone: config.schedule.timezone,
             },
         };
 
@@ -201,6 +202,11 @@ export default function Configuration({ config }: { config: TConfig }) {
         const schedulable_roles = formData.getAll("roles") as string[];
         if (schedulable_roles.length > 0) {
             body.schedule.schedulable_roles = schedulable_roles;
+        }
+
+        const timezone = formData.get("timezone") as string;
+        if (timezone) {
+            body.schedule.timezone = timezone;
         }
 
         // Update the config
@@ -416,8 +422,7 @@ export default function Configuration({ config }: { config: TConfig }) {
                                 >
                                     {[0, 1, 2, 3, 4, 5, 6].map((index) => (
                                         <SelectItem
-                                            key={`${index}`}
-                                            value={SHIFT_DAY[index]}
+                                            key={SHIFT_DAY[index]}
                                             aria-label={SHIFT_DAY[index]}
                                             textValue={SHIFT_DAY[
                                                 index
@@ -451,8 +456,7 @@ export default function Configuration({ config }: { config: TConfig }) {
                                 >
                                     {[0, 1, 2, 3, 4, 5, 6].map((index) => (
                                         <SelectItem
-                                            key={`day${index}`}
-                                            value={SHIFT_DAY[index]}
+                                            key={SHIFT_DAY[index]}
                                             aria-label={SHIFT_DAY[index]}
                                             textValue={SHIFT_DAY[
                                                 index
