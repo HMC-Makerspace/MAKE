@@ -25,6 +25,7 @@ import WorkshopPeopleModal from './WorkshopPeopleModal.tsx';
 import WorkshopImagesModal from './WorkshopImagesModal.tsx';
 import WorkshopEditModal from './WorkshopEditModal.tsx';
 import DeleteModal from "../../../DeleteModal";
+import { set } from 'mongoose';
 
 
 // TODO- 
@@ -115,7 +116,16 @@ export default function WorkshopTable({
                     isDisabled={isLoading}
                     startContent={<PlusIcon className="size-6" />}
                     onPress={() => {
-                        setSelectedWorkshop(undefined);
+                        setIsNew(true);
+                        setSelectedWorkshop({
+                            uuid: crypto.randomUUID(),
+                            title: "",
+                            instructors: [],
+                            timestamp_start: Date.now() / 1000,
+                            timestamp_end: Date.now() / 1000 + 60*60*24,
+                            rsvp_list: [],
+                            users_notified: [],
+                            sign_in_list: []});
                         editOnOpen();
                     }}
                     className="relative lg:absolute top-0 right-0 mb-4"
@@ -182,7 +192,7 @@ export default function WorkshopTable({
                         return (
                             <>
                             
-                            { workshop.timestamp_public > Date.now() / 1000 ?
+                            { workshop.timestamp_public && workshop.timestamp_public > Date.now() / 1000 ?
                                 <div className='min-w-[6vw]'>
                                     <h2 className='text-center'>{convertTimestampToDate(workshop.timestamp_public)}</h2>
                                 </div> : 

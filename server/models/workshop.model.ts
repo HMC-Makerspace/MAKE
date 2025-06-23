@@ -19,7 +19,7 @@ export const Workshop = new mongoose.Schema<TWorkshop>(
         capacity: { type: Number, required: false },
         timestamp_start: { type: Number, required: true },
         timestamp_end: { type: Number, required: true },
-        timestamp_public: { type: Number, required: true },
+        timestamp_public: { type: Number, required: false },
         required_certifications: { type: [String], required: false },
         rsvp_list: { type: [WorkshopUserRecord], required: true },
         users_notified: { type: [String], required: true },

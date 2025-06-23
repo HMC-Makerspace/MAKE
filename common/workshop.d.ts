@@ -45,7 +45,7 @@ export type TWorkshop = {
     capacity?: number;
     timestamp_start: UnixTimestamp;
     timestamp_end: UnixTimestamp;
-    timestamp_public: UnixTimestamp;
+    timestamp_public?: UnixTimestamp;
     required_certifications?: CertificationUUID[];
     rsvp_list: TWorkshopUserRecord[];
     users_notified: UserUUID[];
