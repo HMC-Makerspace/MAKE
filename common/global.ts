@@ -47,6 +47,7 @@ export enum API_SCOPE {
     GET_ONE_CHECKOUT = "get_checkout",
     GET_CHECKOUTS_BY_USER = "get_user_checkouts",
     GET_CHECKOUTS_BY_SELF = "get_own_checkouts",
+    VALIDATE_CHECKOUT = "validate_checkout",
     CREATE_CHECKOUT = "create_checkout",
     UPDATE_CHECKOUT = "update_checkout",
     DELETE_CHECKOUT = "delete_checkout",
@@ -289,6 +290,11 @@ export const API_SCOPE_SECTIONS: {
                 scope: API_SCOPE.GET_CHECKOUTS_BY_SELF,
                 label: "Get Own Checkouts",
                 description: "Able to view all checkouts by oneself",
+            },
+            {
+                scope: API_SCOPE.VALIDATE_CHECKOUT,
+                label: "Validate Checkout",
+                description: "Able to validate checkout times",
             },
             {
                 scope: API_SCOPE.CREATE_CHECKOUT,

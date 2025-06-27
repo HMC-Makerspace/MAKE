@@ -8,6 +8,7 @@ import {
     checkInCheckout,
     extendCheckout,
     getCheckoutsByUser,
+    getCheckoutDisabledTimes as getCheckoutUnavailability,
 } from "controllers/checkout.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
@@ -18,16 +19,76 @@ import {
     FORBIDDEN_ERROR,
     VerifyRequestHeader,
 } from "common/verify";
-import { TCheckout } from "common/checkout";
+import {
+    TCheckout,
+    TCheckoutItem,
+    TCheckoutItemUnavailability,
+} from "common/checkout";
 
 // --- Request and Response Types ---
 type CheckoutRequest = Request<{}, {}, { checkout_obj: TCheckout }>;
+type CheckoutItemRequest = Request<{}, {}, { checkout_items: TCheckoutItem[] }>;
 type CheckoutResponse = Response<TCheckout | ErrorResponse>;
 type CheckoutsResponse = Response<TCheckout[] | ErrorResponse>;
+type CheckoutUnavailabilityResponse = Response<
+    TCheckoutItemUnavailability[] | ErrorResponse
+>;
 
 const router = Router();
 
 // --- Checkout Routes ---
+
+/**
+ * Validate a list of checkout items by finding pairs of times when the given
+ * items are unavailable for checkout. This is a private route and requires either
+ * the {@link API_SCOPE.GET_ALL_CHECKOUTS} or {@link API_SCOPE.VALIDATE_CHECKOUT}
+ */
+router.get(
+    "/validate",
+    async (req: CheckoutItemRequest, res: CheckoutUnavailabilityResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = headers.requesting_uuid;
+        const checkout_items = req.body.checkout_items;
+
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while validating a checkout.",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+
+        req.log.debug({
+            msg: `Validating checkout`,
+            requesting_uuid: requesting_uuid,
+        });
+
+        // User must be able to get all checkouts or validate checkouts
+        if (
+            await verifyRequest(
+                requesting_uuid,
+                API_SCOPE.GET_ALL_CHECKOUTS,
+                API_SCOPE.VALIDATE_CHECKOUT,
+            )
+        ) {
+            if (!checkout_items || checkout_items.length === 0) {
+                res.status(StatusCodes.OK).json([]);
+            } else {
+                const unavailability =
+                    await getCheckoutUnavailability(checkout_items);
+                res.status(StatusCodes.OK).json(unavailability);
+            }
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to validate checkout",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
 
 /**
  * Get all checkouts made by a specific user. This is a protected route, and a
