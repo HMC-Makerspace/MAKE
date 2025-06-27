@@ -246,7 +246,7 @@ export async function refreshMachineItems(
         // Pre-fetch item location data
         const Areas = mongoose.model("Areas", Area);
         const areas_with_machine = await Areas.find({
-            machines: machine.uuid,
+            equipment: machine.uuid,
         });
         const locations = areas_with_machine.map((a) => ({
             area: a.uuid,
