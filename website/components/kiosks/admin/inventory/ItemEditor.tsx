@@ -6,30 +6,49 @@ import {
 import { Form, Input, Selection } from "@heroui/react";
 import React from "react";
 import ItemEditorForm from "./ItemEditorForm";
+import { TCertification } from "common/certification";
+import { TUserRole } from "common/user";
+import clsx from "clsx";
 
 export default function ItemEditor({
     item,
+    certs,
+    roles,
     isNew,
-    isLoading,
+    isDisabled,
     onSuccess,
-    onError
+    onError,
 }: {
     item: TInventoryItem;
+    certs: TCertification[];
+    roles: TUserRole[];
     isNew: boolean;
-    isLoading: boolean;
+    isDisabled: boolean;
     onSuccess: (message: string) => void;
     onError: (message: string) => void;
 }) {
     const isEmpty = item.uuid != "";
 
     return (
-        <div className="flex flex-col h-full w-full lg:w-2/5 rounded-xl bg-content1 p-4">
-            <h1 className="3xl font-bold text-center pb-2">Item Editor</h1>
-            {isLoading ? (
-                <div>Loading...</div>
-            ) : (
-                <ItemEditorForm key={item.uuid} item={item} isMultiple={false} isNew={isNew} onSuccess={onSuccess} onError={onError} />
+        <div
+            className={clsx(
+                "flex flex-col rounded-xl bg-content1 p-4",
+                "h-1/3 lg:h-full",
+                "w-full lg:w-2/3 xl:w-1/2 2xl:w-1/3",
             )}
+        >
+            <h1 className="3xl font-bold text-center pb-2">Item Editor</h1>
+            <ItemEditorForm
+                key={item.uuid}
+                item={item}
+                certs={certs}
+                roles={roles}
+                isMultiple={false}
+                isDisabled={isDisabled}
+                isNew={isNew}
+                onSuccess={onSuccess}
+                onError={onError}
+            />
         </div>
     );
 }
