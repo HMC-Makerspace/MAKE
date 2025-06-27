@@ -216,14 +216,16 @@ function EditRoleModal({
                                             ]),
                                         }}
                                     />
-                                    <Button
-                                        variant="flat"
-                                        color="danger"
-                                        onPress={onDelete}
-                                        isIconOnly
-                                    >
-                                        <TrashIcon className="size-6" />
-                                    </Button>
+                                    {!isNew && (
+                                        <Button
+                                            variant="flat"
+                                            color="danger"
+                                            onPress={onDelete}
+                                            isIconOnly
+                                        >
+                                            <TrashIcon className="size-6" />
+                                        </Button>
+                                    )}
                                 </div>
                                 <div className="flex flex-row w-full gap-2 items-center">
                                     <Input
@@ -415,9 +417,6 @@ function EditRoleModal({
                                                         }
                                                         textValue={
                                                             scope_descriptor.label
-                                                        }
-                                                        value={
-                                                            scope_descriptor.scope
                                                         }
                                                         className="h-[45px]"
                                                     >
