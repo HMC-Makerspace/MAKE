@@ -244,6 +244,7 @@ function EditModal({
                                                 ? `/api/v3/file/download/${images[index].uuid}`
                                                 : undefined
                                         }
+                                        alt={image.name || "Image"}
                                     />
                                     <div className="flex gap-4 flex-row items-center">
                                         <Button
