@@ -457,6 +457,7 @@ export default function WorkshopEditModal({
 
                             <DateRangePicker
                                 label="Workshop Date Range"
+                                aria-label="Workshop Time"
                                 startName="timestamp_start"
                                 endName="timestamp_end"
                                 isRequired

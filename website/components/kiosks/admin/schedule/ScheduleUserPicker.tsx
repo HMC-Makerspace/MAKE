@@ -3,6 +3,7 @@ import { TConfig } from "common/config";
 import { TUser, TUserRole } from "common/user";
 import UsersTable from "../users/UsersTable";
 import { ScheduleUUID } from "common/schedule";
+import { TCertification } from "common/certification";
 
 export default function ScheduleUserPicker({
     schedule_uuid,
@@ -29,6 +30,7 @@ export default function ScheduleUserPicker({
             <UsersTable
                 users={users}
                 roles={roles}
+                certs={[]}
                 selectedKeys={selectedUsers}
                 onSelectionChange={setSelectedUsers}
                 isLoading={isLoading}

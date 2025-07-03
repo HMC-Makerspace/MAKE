@@ -547,7 +547,6 @@ router.get(
 
         req.log.debug({
             msg: `Found user by uuid ${user_uuid}`,
-            user: user,
         });
 
         res.status(StatusCodes.OK).json(user);

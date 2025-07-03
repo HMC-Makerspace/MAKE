@@ -30,7 +30,7 @@ export default function AdminNavbar({
     return (
         <Navbar
             className="w-full bg-primary-500 dark:bg-primary-300"
-            classNames={{ wrapper: "max-w-full" }}
+            classNames={{ wrapper: "max-w-full justify-none gap-0" }}
         >
             <NavbarContent justify="start">
                 {/* Branding, always visible */}
@@ -55,7 +55,7 @@ export default function AdminNavbar({
                 justify="center"
                 className={clsx([
                     "hidden lg:flex",
-                    "px-4 gap-8 overflow-x-auto",
+                    "pl-8 gap-8 overflow-x-auto",
                     "data-[justify=center]:justify-start",
                 ])}
             >
@@ -115,7 +115,10 @@ export default function AdminNavbar({
             <NavbarContent justify="end">
                 {/* Menu dropdown for small screens, hide for larger */}
                 <NavbarMenuToggle className="lg:hidden text-background" />
-                <MAKEUser user_uuid={user_uuid} />
+                <MAKEUser
+                    user_uuid={user_uuid}
+                    className="-mr-6 rounded-r-none h-[85%]"
+                />
             </NavbarContent>
             {/* Menu drop down, for small screens */}
             <NavbarMenu>

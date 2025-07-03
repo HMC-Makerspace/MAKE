@@ -28,6 +28,10 @@ import WorkshopEditModal from "./WorkshopEditModal.tsx";
 import DeleteModal from "../../../DeleteModal";
 import { set } from "mongoose";
 import { TConfig } from "common/config.js";
+import RequiredCertsModal from "../certifications/RequiredCertsModal.tsx";
+import { UUID } from "common/global.ts";
+import axios from "axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 // TODO-
 // [] FIX TIME
@@ -66,6 +70,20 @@ const defaultColumns = [
     "delete",
 ];
 
+async function patchWorkshop({
+    uuid,
+    patch,
+}: {
+    uuid: UUID;
+    patch: Partial<TWorkshop>;
+}) {
+    return (
+        await axios.patch<TWorkshop>(`/api/v3/workshop/${uuid}`, {
+            partial_workshop_obj: patch,
+        })
+    ).data;
+}
+
 export default function WorkshopTable({
     workshops,
     users,
@@ -81,6 +99,18 @@ export default function WorkshopTable({
     config: TConfig;
     isLoading: boolean;
 }) {
+    const queryClient = useQueryClient();
+    const patchMutation = useMutation({
+        mutationFn: patchWorkshop,
+        onSuccess: (data) => {
+            queryClient.setQueryData(["workshop", data.uuid], data);
+            queryClient.setQueryData(["workshop"], (old: TWorkshop[]) =>
+                old.map((w) => (w.uuid === data.uuid ? data : w)),
+            );
+        },
+        onError: (e) => alert(e),
+    });
+
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
         new Set(defaultColumns),
     );
@@ -183,6 +213,7 @@ export default function WorkshopTable({
                                             (instructor) => {
                                                 return (
                                                     <MAKEUser
+                                                        key={instructor}
                                                         size="sm"
                                                         user_uuid={instructor}
                                                         color="secondary"
@@ -196,6 +227,7 @@ export default function WorkshopTable({
                                                     (instructor) => {
                                                         return (
                                                             <MAKEUser
+                                                                key={instructor}
                                                                 size="sm"
                                                                 user_uuid={
                                                                     instructor
@@ -388,6 +420,13 @@ export default function WorkshopTable({
                         isOpen={editIsOpen}
                         onOpenChange={editOnOpenChange}
                         config={config}
+                    />
+                    <RequiredCertsModal
+                        element={selectedWorkshop}
+                        certifications={certs}
+                        isOpen={certsIsOpen}
+                        onOpenChange={certsOnOpenChange}
+                        patchMutation={patchMutation}
                     />
                 </>
             )}

@@ -10,6 +10,8 @@ import MAKEUserRole from "../../../user/UserRole";
 import Fuse from "fuse.js";
 import React, { useEffect, useRef } from "react";
 import clsx from "clsx";
+import CertificationTag from "../certifications/CertificationTag";
+import { TCertification } from "common/certification";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" }, // No need to show
@@ -34,6 +36,7 @@ const defaultUserColumns: string[] = [
 export default function UsersTable({
     users,
     roles,
+    certs,
     selectedKeys,
     onSelectionChange,
     isLoading,
@@ -47,6 +50,7 @@ export default function UsersTable({
 }: {
     users: TUser[];
     roles: TUserRole[];
+    certs: TCertification[];
     selectedKeys: Selection;
     onSelectionChange: (selectedKeys: Selection) => void;
     isLoading: boolean;
@@ -177,7 +181,9 @@ export default function UsersTable({
                             ) : (
                                 <Button
                                     color="warning"
-                                    isDisabled={isLoading}
+                                    // TODO: Make batch editing work
+                                    isDisabled
+                                    // isDisabled={isLoading}
                                     startContent={
                                         <PencilSquareIcon className="size-6" />
                                     }
@@ -240,11 +246,28 @@ export default function UsersTable({
                         </div>
                     ),
                     active_certificates: (user: TUser) => (
-                        <span>
-                            {user.active_certificates
-                                ?.map((cert) => cert.certification_uuid)
-                                .join(", ")}
-                        </span>
+                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
+                            {user.active_certificates?.map((c) => (
+                                <CertificationTag
+                                    key={c.certification_uuid}
+                                    cert_uuid={c.certification_uuid}
+                                    certifications={certs}
+                                    level={c.level}
+                                />
+                            ))}
+                        </div>
+                    ),
+                    past_certificates: (user: TUser) => (
+                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
+                            {user.past_certificates?.map((c) => (
+                                <CertificationTag
+                                    key={c.certification_uuid}
+                                    cert_uuid={c.certification_uuid}
+                                    certifications={certs}
+                                    level={c.level}
+                                />
+                            ))}
+                        </div>
                     ),
                     ...customColumnComponents,
                 }}

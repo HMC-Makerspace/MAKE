@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import type { TWorkshop, TWorkshopUserRecord } from "common/workshop";
+import { RequiredCertificate } from "./certification.model";
 
 const WorkshopUserRecord = new mongoose.Schema<TWorkshopUserRecord>({
     user_uuid: { type: String, required: true },
@@ -20,7 +21,10 @@ export const Workshop = new mongoose.Schema<TWorkshop>(
         timestamp_start: { type: Number, required: true },
         timestamp_end: { type: Number, required: true },
         timestamp_public: { type: Number, required: false },
-        required_certifications: { type: [String], required: false },
+        required_certifications: {
+            type: [RequiredCertificate],
+            required: false,
+        },
         rsvp_list: { type: [WorkshopUserRecord], required: true },
         users_notified: { type: [String], required: true },
         sign_in_list: { type: [WorkshopUserRecord], required: true },

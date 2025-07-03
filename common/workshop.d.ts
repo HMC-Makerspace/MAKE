@@ -1,5 +1,10 @@
 import type { UnixTimestamp } from "./global";
-import type { CertificationUUID, TCertification } from "./certification";
+import type {
+    CertificationUUID,
+    TCertificate,
+    TCertification,
+    TRequiredCertificate,
+} from "./certification";
 import type { UserUUID } from "./user";
 import type { FileUUID } from "./file";
 
@@ -46,7 +51,7 @@ export type TWorkshop = {
     timestamp_start: UnixTimestamp;
     timestamp_end: UnixTimestamp;
     timestamp_public?: UnixTimestamp;
-    required_certifications?: CertificationUUID[];
+    required_certifications?: TRequiredCertificate[];
     rsvp_list: TWorkshopUserRecord[];
     users_notified: UserUUID[];
     sign_in_list: TWorkshopUserRecord[];
