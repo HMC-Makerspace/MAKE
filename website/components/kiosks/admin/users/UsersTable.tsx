@@ -11,7 +11,7 @@ import Fuse from "fuse.js";
 import React, { useEffect, useRef } from "react";
 import clsx from "clsx";
 
-const baseColumns = [
+const columns = [
     // { name: "UUID", id: "uuid" }, // No need to show
     { name: "ID", id: "college_id" },
     { name: "Name", id: "name" },
@@ -39,11 +39,7 @@ export default function UsersTable({
     isLoading,
     onCreate,
     fullHeader = true,
-    extraColumns = [],
     defaultColumns = defaultUserColumns,
-    doubleClickAction = () => {},
-    customColumnComponents = {},
-    emptyContent = undefined,
 }: {
     users: TUser[];
     roles: TUserRole[];
@@ -52,16 +48,8 @@ export default function UsersTable({
     isLoading: boolean;
     onCreate: (state: boolean) => void;
     fullHeader?: boolean;
-    extraColumns?: { name: string; id: string }[];
     defaultColumns?: string[];
-    doubleClickAction?: (uuid: React.Key) => void;
-    customColumnComponents?: {
-        [column_id: string]: (item: TUser) => React.ReactNode;
-    };
-    emptyContent?: React.ReactNode;
 }) {
-    const columns = [...baseColumns, ...extraColumns];
-
     // The set of columns that are visible
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
         new Set(defaultColumns),
@@ -212,8 +200,6 @@ export default function UsersTable({
                 selectedKeys={selectedKeys}
                 onSelectionChange={modifiedSelectionChange}
                 multiSelect={multiSelect}
-                doubleClickAction={doubleClickAction}
-                emptyContent={emptyContent}
                 customColumnComponents={{
                     active_roles: (user: TUser) => (
                         <div className="flex flex-row flex-wrap gap-2">
@@ -246,7 +232,6 @@ export default function UsersTable({
                                 .join(", ")}
                         </span>
                     ),
-                    ...customColumnComponents,
                 }}
                 isLoading={isLoading}
                 loadingContent={(ref) => (

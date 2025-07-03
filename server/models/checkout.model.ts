@@ -8,8 +8,7 @@ import type { TCheckout, TCheckoutItem } from "common/checkout";
 const CheckoutItem = new mongoose.Schema<TCheckoutItem>({
     item_uuid: { type: String, required: true },
     quantity: { type: Number, required: true },
-    role: { type: String, required: true },
-    linked_uuid: { type: String, required: false },
+    location_index: { type: Number, required: true },
 });
 
 /**
@@ -23,7 +22,7 @@ export const Checkout = new mongoose.Schema<TCheckout>(
         timestamp_out: { type: Number, required: true },
         timestamp_due: { type: Number, required: true },
         timestamp_in: { type: Number, required: false },
-        notifications_sent: { type: Number, required: false },
+        notifications_sent: { type: Number, required: true },
     },
     { collection: "checkouts" }, // Collection name
 );

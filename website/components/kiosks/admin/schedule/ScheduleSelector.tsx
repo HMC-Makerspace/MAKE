@@ -407,7 +407,7 @@ export default function ScheduleSelector({
                     )}
                     color={scheduleMode === "schedule" ? "primary" : "warning"}
                     onPress={() => {
-                        // setSelectedUsers(new Set());
+                        setSelectedUsers(new Set());
                         setScheduleMode(
                             scheduleMode === "schedule"
                                 ? "availability"
@@ -574,11 +574,13 @@ export default function ScheduleSelector({
                                 variant="faded"
                                 label="Open Time"
                                 isRequired
+                                // @ts-expect-error - Not actually a type conflict
                                 value={openTime}
                                 onChange={(value) => {
                                     if (!value) {
                                         return;
                                     } else {
+                                        // @ts-expect-error - Not actually a type conflict
                                         setOpenTime(value);
                                     }
                                 }}
@@ -604,12 +606,14 @@ export default function ScheduleSelector({
                             <TimeInput
                                 variant="faded"
                                 label="Close Time"
+                                // @ts-expect-error - Not actually a type conflict
                                 value={closeTime}
                                 isRequired
                                 onChange={(value) => {
                                     if (!value) {
                                         return;
                                     } else {
+                                        // @ts-expect-error - Not actually a type conflict
                                         setCloseTime(value);
                                     }
                                 }}

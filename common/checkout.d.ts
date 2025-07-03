@@ -1,7 +1,5 @@
-import { AreaUUID } from "./area";
-import type { UnixTimestamp, UUID } from "./global";
-import type { InventoryItemUUID, ITEM_ROLE, TInventoryItem } from "./inventory";
-import { MachineUUID } from "./machine";
+import type { UnixTimestamp } from "./global";
+import type { InventoryItemUUID, TInventoryItem } from "./inventory";
 import type { UserUUID } from "./user";
 
 /**
@@ -16,8 +14,7 @@ import type { UserUUID } from "./user";
 export type TCheckoutItem = {
     item_uuid: InventoryItemUUID;
     quantity: number;
-    role: ITEM_ROLE;
-    linked_uuid?: MachineUUID | AreaUUID;
+    location_index: number;
 };
 
 /**
@@ -40,30 +37,5 @@ export type TCheckout = {
     timestamp_out: UnixTimestamp;
     timestamp_due: UnixTimestamp;
     timestamp_in?: UnixTimestamp;
-    notifications_sent?: number;
-};
-
-// For checkout controller
-export enum CHECKOUT_VALIDATION {
-    NO_USER = 0,
-    NO_ITEMS,
-    MISSING_ROLE,
-    MISSING_CERT,
-    UNAVAILABLE,
-    VALID,
-}
-
-export type TCheckoutValidation = {
-    status: CHECKOUT_VALIDATION;
-    error_uuid?: UUID;
-    item_uuid?: InventoryItemUUID;
-};
-
-/**
- * A time pair indicating when a given item is unavailable for checkout.
- */
-export type TCheckoutItemUnavailability = {
-    item_uuid: string;
-    start_time: UnixTimestamp;
-    end_time: UnixTimestamp;
+    notifications_sent: number;
 };

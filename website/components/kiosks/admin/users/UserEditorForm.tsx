@@ -151,7 +151,7 @@ export default function UserEditorForm({
                 active_certificates: user.active_certificates,
                 past_certificates: user.past_certificates,
                 files: user.files,
-                work_schedules: user.work_schedules,
+                availability: user.availability,
             };
 
             // Reset the mutation (clears any previous errors)

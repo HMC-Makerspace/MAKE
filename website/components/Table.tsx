@@ -32,7 +32,6 @@ export default function MAKETable<Type extends { uuid: string }>({
     loadingContent = () => "Loading...",
     emptyContent = "No content",
     color = "primary",
-    showSelectionCheckboxes = true, // Only applies if multiSelect is true
 }: {
     content: Type[];
     columns: {
@@ -59,7 +58,6 @@ export default function MAKETable<Type extends { uuid: string }>({
         | "success"
         | "warning"
         | "danger";
-    showSelectionCheckboxes?: boolean;
 }) {
     // The current number of items in content that are loaded in the DOM and
     // are visible to the user
@@ -120,7 +118,6 @@ export default function MAKETable<Type extends { uuid: string }>({
             selectionMode={multiSelect ? "multiple" : "single"}
             selectedKeys={selectedKeys}
             onSelectionChange={onSelectionChange}
-            showSelectionCheckboxes={showSelectionCheckboxes}
             baseRef={scrollerRef}
             classNames={{
                 base: "max-h-full overflow-auto",

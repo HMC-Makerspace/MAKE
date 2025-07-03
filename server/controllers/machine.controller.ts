@@ -1,10 +1,5 @@
 import { API_SCOPE, UUID } from "common/global";
-import {
-    MachineUUID,
-    TMachine,
-    TMachineInstance,
-    TPublicMachineData,
-} from "common/machine";
+import { TMachine, TMachineInstance, TPublicMachineData } from "common/machine";
 import { Machine } from "models/machine.model";
 import mongoose from "mongoose";
 import { getUser } from "./user.controller";
@@ -251,7 +246,7 @@ export async function refreshMachineItems(
         // Pre-fetch item location data
         const Areas = mongoose.model("Areas", Area);
         const areas_with_machine = await Areas.find({
-            equipment: machine.uuid,
+            machines: machine.uuid,
         });
         const locations = areas_with_machine.map((a) => ({
             area: a.uuid,
@@ -266,7 +261,7 @@ export async function refreshMachineItems(
         instances.forEach((instance, i) => {
             const name = instance.name || machine.name + ` ${i + 1}`;
             const instance_item_data = {
-                uuid: instance.uuid, // Same UUID as the instance
+                uuid: crypto.randomUUID(),
                 name: name,
                 long_name: `Instance ${name} of machine ${machine.name}`,
                 role: ITEM_ROLE.MACHINE,
@@ -289,36 +284,4 @@ export async function refreshMachineItems(
             linked_uuid: machine.uuid,
         });
     }
-}
-
-export async function reserveMachineInstance(
-    machine_uuid: MachineUUID,
-    instance_uuid: UUID,
-    reserved: boolean = true,
-) {
-    const Machines = mongoose.model("Machine", Machine);
-    return Machines.updateOne(
-        {
-            uuid: machine_uuid,
-        },
-        {
-            $set: { "instances.$[elem].reserved": reserved },
-        },
-        {
-            arrayFilters: [{ "elem.uuid": instance_uuid }],
-        },
-    );
-}
-
-/**
- * Clear the reserved status for all instances of all machines
- */
-export async function clearMachineReservations() {
-    const Machines = mongoose.model("Machine", Machine);
-    await Machines.updateMany(
-        {},
-        {
-            $set: { "instances.$[].reserved": false },
-        },
-    );
 }

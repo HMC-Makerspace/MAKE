@@ -6,7 +6,7 @@ import ScheduleSelector from "./ScheduleSelector";
 import { Selection, useDisclosure } from "@heroui/react";
 import { TUser, TUserRole, UserUUID } from "common/user";
 import PopupAlert from "../../../PopupAlert";
-import React, { useCallback, useMemo, useState } from "react";
+import React from "react";
 
 function getUserTotalAvailableTime(user: TUser, schedule?: TSchedule) {
     if (!schedule) {
@@ -61,8 +61,6 @@ export default function ScheduleBuffer({
         "schedule" | "availability"
     >("schedule");
 
-    const [availableUsers, setAvailableUsers] = useState<Selection>(new Set());
-
     // When in schedule mode, only one user can be selected at a time, so
     // we can just use the first. When in availability mode, selected users are available
     const selectedUser =
@@ -86,23 +84,14 @@ export default function ScheduleBuffer({
         ),
     );
 
-    const sortedUsers = useMemo(
-        () =>
-            filteredUsers.toSorted(
-                (a, b) =>
-                    getUserTotalAvailableTime(a, schedule) -
-                    getUserTotalAvailableTime(b, schedule),
-            ),
-        [filteredUsers, schedule],
+    const sortedUsers = filteredUsers.toSorted(
+        (a, b) =>
+            getUserTotalAvailableTime(a, schedule) -
+            getUserTotalAvailableTime(b, schedule),
     );
 
-    const sortedAvailableUsers = useMemo(
-        () =>
-            sortedUsers.filter(
-                (user) =>
-                    availableUsers === "all" || availableUsers.has(user.uuid),
-            ),
-        [sortedUsers, availableUsers],
+    const sortedAvailableUsers = sortedUsers.filter(
+        (user) => selectedUsers === "all" || selectedUsers.has(user.uuid),
     );
 
     return (
@@ -135,11 +124,7 @@ export default function ScheduleBuffer({
                         roles={roles}
                         isLoading={false}
                         selectedUser={selectedUser}
-                        setSelectedUsers={
-                            scheduleMode === "schedule"
-                                ? setSelectedUsers
-                                : setAvailableUsers
-                        }
+                        setSelectedUsers={setSelectedUsers}
                         setSelectedSchedules={setSelectedSchedules}
                         type={
                             scheduleMode === "schedule"
@@ -149,7 +134,6 @@ export default function ScheduleBuffer({
                     />
                 </div>
                 <ScheduleUserPicker
-                    schedule_uuid={schedule?.uuid}
                     config={config}
                     users={
                         scheduleMode === "schedule"
@@ -159,11 +143,7 @@ export default function ScheduleBuffer({
                     roles={roles}
                     isLoading={false}
                     selectedUsers={selectedUsers}
-                    setSelectedUsers={
-                        scheduleMode === "schedule"
-                            ? setSelectedUsers
-                            : setAvailableUsers
-                    }
+                    setSelectedUsers={setSelectedUsers}
                 />
             </div>
             <PopupAlert

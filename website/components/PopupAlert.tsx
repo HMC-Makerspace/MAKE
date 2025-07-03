@@ -1,7 +1,6 @@
 import React from "react";
 import { Alert } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
-import clsx from "clsx";
 
 export default function PopupAlert({
     isOpen,
@@ -9,7 +8,7 @@ export default function PopupAlert({
     color = "success",
     description,
     icon,
-    className,
+    className = "absolute bottom-6 right-6 w-full sm:w-1/4",
     timeout = 3000,
 }: {
     isOpen: boolean;
@@ -47,10 +46,7 @@ export default function PopupAlert({
                         color={color}
                         description={description}
                         icon={icon}
-                        className={clsx(
-                            "absolute bottom-6 right-6 w-full sm:w-1/4",
-                            className,
-                        )}
+                        className={className}
                     />
                 </motion.div>
             )}

@@ -29,7 +29,7 @@ export default function AdminNavbar({
     const user_uuid = useMAKEStore((state) => state.user_uuid);
     return (
         <Navbar
-            className="w-full bg-primary-500 dark:bg-primary-300"
+            className="w-full bg-default-200"
             classNames={{ wrapper: "max-w-full" }}
         >
             <NavbarContent justify="start">
@@ -40,7 +40,8 @@ export default function AdminNavbar({
                         className={clsx([
                             "font-title font-semibold",
                             "text-5xl",
-                            "text-background",
+                            "text-primary-500",
+                            "dark:text-primary-300",
                             "tracking-title pl-2 pr-0",
                         ])}
                         href="/"
@@ -67,10 +68,10 @@ export default function AdminNavbar({
                                 key={`page-${page.name}-${index}`}
                                 href={page.href}
                                 className={clsx([
-                                    "text-xl font-medium gap-1",
+                                    "text-xl font-semibold gap-1",
                                     pageIndex === index
-                                        ? "font-bold text-foreground-500"
-                                        : " text-background",
+                                        ? "font-bold text-primary-400"
+                                        : " text-foreground-900",
                                 ])}
                             >
                                 {page.name}
@@ -114,7 +115,7 @@ export default function AdminNavbar({
             </NavbarContent>
             <NavbarContent justify="end">
                 {/* Menu dropdown for small screens, hide for larger */}
-                <NavbarMenuToggle className="lg:hidden text-background" />
+                <NavbarMenuToggle className="lg:hidden text-primary" />
                 <MAKEUser user_uuid={user_uuid} />
             </NavbarContent>
             {/* Menu drop down, for small screens */}

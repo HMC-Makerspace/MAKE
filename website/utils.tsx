@@ -1,10 +1,4 @@
-import {
-    CalendarDateTime,
-    fromAbsolute,
-    parseDateTime,
-    Time,
-    ZonedDateTime,
-} from "@internationalized/date";
+import { Time } from "@internationalized/date";
 import { TUser, TUserRole } from "common/user";
 
 /**
@@ -44,14 +38,6 @@ export function timestampToTime(timestamp: number) {
 /** Convert an internationalized Time object to a UNIX second timestamp */
 export function timeToTimestamp(time: Time) {
     return time.hour * 60 * 60 + time.minute * 60 + time.second;
-}
-
-export function timestampToZonedDateTime(timestamp: number, timeZone: string) {
-    return fromAbsolute(timestamp * 1000, timeZone);
-}
-
-export function zonedDateTimeToTimestamp(zonedDateTime: ZonedDateTime) {
-    return zonedDateTime.toDate().getTime() / 1000;
 }
 
 export function getUserRoleHierarchy(user: TUser, roles: TUserRole[]) {

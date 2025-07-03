@@ -1,4 +1,4 @@
-import { InventoryItemUUID, TInventoryItem } from "common/inventory";
+import { TInventoryItem } from "common/inventory";
 import { UserUUID } from "common/user";
 import { InventoryItem } from "models/inventory.model";
 import mongoose from "mongoose";
@@ -22,20 +22,10 @@ export async function getInventory(): Promise<TInventoryItem[]> {
  * @returns A promise to an inventory item, or null if no item has the given UUID
  */
 export async function getInventoryItem(
-    item_uuid: InventoryItemUUID,
+    item_uuid: string,
 ): Promise<TInventoryItem | null> {
     const Inventory = mongoose.model("InventoryItem", InventoryItem);
     return Inventory.findOne({ uuid: item_uuid });
-}
-
-/**
- * Get multiple inventory items by UUID
- * @param item_uuids The UUIDs of the item to search for
- * @returns A promise to an inventory item, or null if no item has the given UUID
- */
-export async function getInventoryItems(item_uuids: InventoryItemUUID[]) {
-    const Inventory = mongoose.model("InventoryItem", InventoryItem);
-    return Inventory.find({ uuid: item_uuids });
 }
 
 export async function getInventoryVisibleToUser(
@@ -165,12 +155,4 @@ export async function updateInventoryItem(
     return Inventory.findOneAndReplace({ uuid: item_obj.uuid }, item_obj, {
         returnDocument: "after",
     });
-}
-
-export async function clearInventoryAvailability() {
-    // Update all available amounts to be equal to max quantity
-    const Inventory = mongoose.model("InventoryItem", InventoryItem);
-    // Must be a list (aggregation pipeline) to set available
-    // based on quantity (another field)
-    await Inventory.updateMany({}, [{ $set: { available: "$quantity" } }]);
 }

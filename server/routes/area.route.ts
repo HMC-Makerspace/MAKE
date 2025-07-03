@@ -1,5 +1,5 @@
 import { API_SCOPE } from "common/global";
-import { TArea, TAreaStatus } from "common/area";
+import { TArea, TAreaStatus, TPublicAreaData } from "common/area";
 import {
     ErrorResponse,
     FORBIDDEN_ERROR,
@@ -45,23 +45,26 @@ const router = Router();
  * {@link API_SCOPE.GET_ALL_AREAS} scope, all areas
  * are returned.
  */
-router.get("/public", async (req: Request, res: Response<TArea[]>) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+router.get(
+    "/public",
+    async (req: Request, res: Response<TPublicAreaData[]>) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = headers.requesting_uuid;
 
-    req.log.debug({
-        msg: `Getting areas visible to user ${requesting_uuid}`,
-        requesting_uuid: requesting_uuid,
-    });
+        req.log.debug({
+            msg: `Getting areas visible to user ${requesting_uuid}`,
+            requesting_uuid: requesting_uuid,
+        });
 
-    const areas = await getAreasVisibleToUser(requesting_uuid);
-    if (!areas) {
-        req.log.warn(`No areas visible to user ${requesting_uuid}.`);
-    } else {
-        req.log.debug(`Returned areas visible to user ${requesting_uuid}.`);
-    }
-    res.status(StatusCodes.OK).json(areas);
-});
+        const areas = await getAreasVisibleToUser(requesting_uuid);
+        if (!areas) {
+            req.log.warn(`No areas visible to user ${requesting_uuid}.`);
+        } else {
+            req.log.debug(`Returned areas visible to user ${requesting_uuid}.`);
+        }
+        res.status(StatusCodes.OK).json(areas);
+    },
+);
 
 /**
  * Get a specific area by UUID. This is a protected route, and a

@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { TCertification } from "common/certification";
 import CVisibilityIcon from "./CVisibilityIcon";
 import { BookmarkIcon } from "@heroicons/react/24/outline";
-import clsx from "clsx";
 
 /**
  * A simple hex to RGB converter
@@ -73,10 +72,7 @@ export default function CertificationTag({
 
     return (
         <Card
-            className={clsx(
-                "p-1.5 flex flex-row gap-1 w-fit px-2.5 rounded-sm",
-                "content-center items-center min-w-fit",
-            )}
+            className="p-1.5 flex flex-row gap-1 w-fit px-2.5 rounded-sm content-center items-center"
             style={{ backgroundColor: color }}
             isBlurred={!isLoading}
             as={href ? Link : undefined}

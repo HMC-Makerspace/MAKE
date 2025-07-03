@@ -16,44 +16,6 @@ export enum SHIFT_DAY {
     SATURDAY,
 }
 
-export const SHIFT_DAYS = [
-    {
-        day: SHIFT_DAY.SUNDAY,
-        name: "Sunday",
-        key: `day${SHIFT_DAY.SUNDAY}`,
-    },
-    {
-        day: SHIFT_DAY.MONDAY,
-        name: "Monday",
-        key: `day${SHIFT_DAY.MONDAY}`,
-    },
-    {
-        day: SHIFT_DAY.TUESDAY,
-        name: "Tuesday",
-        key: `day${SHIFT_DAY.TUESDAY}`,
-    },
-    {
-        day: SHIFT_DAY.WEDNESDAY,
-        name: "Wednesday",
-        key: `day${SHIFT_DAY.WEDNESDAY}`,
-    },
-    {
-        day: SHIFT_DAY.THURSDAY,
-        name: "Thursday",
-        key: `day${SHIFT_DAY.THURSDAY}`,
-    },
-    {
-        day: SHIFT_DAY.FRIDAY,
-        name: "Friday",
-        key: `day${SHIFT_DAY.FRIDAY}`,
-    },
-    {
-        day: SHIFT_DAY.SATURDAY,
-        name: "Saturday",
-        key: `day${SHIFT_DAY.SATURDAY}`,
-    },
-];
-
 /**
  * SHIFT_EVENT - An event regarding the status of a shift
  * @member DROP - If the shift assignee is dropping their shift
