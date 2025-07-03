@@ -1,6 +1,7 @@
 import { AreaUUID } from "./area";
-import type { CertificationUUID, TRequiredCertificate } from "./certification";
+import type { TRequiredCertificate } from "./certification";
 import type { UUID } from "./global";
+import { MachineUUID } from "./machine";
 import type { UserRoleUUID } from "./user";
 
 export type InventoryItemUUID = UUID;
@@ -8,7 +9,7 @@ export type InventoryItemUUID = UUID;
 /**
  * ITEM_RELATIVE_QUANTITY - The relative (high/low) of an item
  */
-enum ITEM_RELATIVE_QUANTITY {
+export enum ITEM_RELATIVE_QUANTITY {
     LOW = -1,
     HIGH = -2,
 }
@@ -76,14 +77,14 @@ export const ITEM_ACCESS_DESCRIPTORS: {
         description: "Free to use in the space without checking out",
     },
     {
-        type: ITEM_ACCESS_TYPE.CHECKOUT_TAKE_HOME,
-        label: "Checkout, Take Home",
-        description: "Requires a checkout, but can be used or taken home",
-    },
-    {
         type: ITEM_ACCESS_TYPE.CHECKOUT_IN_SPACE,
         label: "Checkout, Use In Space",
         description: "Requires a checkout, and can only be used in the space",
+    },
+    {
+        type: ITEM_ACCESS_TYPE.CHECKOUT_TAKE_HOME,
+        label: "Checkout, Take Home",
+        description: "Requires a checkout, but can be used or taken home",
     },
 ];
 
@@ -114,10 +115,10 @@ export type TInventoryItem = {
     name: string;
     long_name?: string;
     role: ITEM_ROLE;
-    linked_uuid?: UUID;
+    linked_uuid?: MachineUUID | AreaUUID;
     access_type: ITEM_ACCESS_TYPE;
     quantity: ItemQuantity;
-    available?: number;
+    available: ItemQuantity;
     locations: TInventoryItemLocation[];
     reorder_url?: string;
     serial_number?: string;

@@ -1,5 +1,5 @@
 import { API_SCOPE, UUID } from "common/global";
-import { TArea, TAreaStatus, TPublicAreaData } from "common/area";
+import { TArea, TAreaStatus } from "common/area";
 import { Area } from "models/area.model";
 import mongoose from "mongoose";
 import { Machine } from "models/machine.model";
@@ -7,6 +7,7 @@ import { getUser } from "./user.controller";
 import { verifyRequest } from "./verify.controller";
 import { InventoryItem } from "models/inventory.model";
 import { ITEM_ACCESS_TYPE, ITEM_ROLE, TInventoryItem } from "common/inventory";
+import { refreshMachineItems } from "./machine.controller";
 
 /**
  * Get all areas in the database
@@ -28,9 +29,7 @@ export async function getArea(area_uuid: UUID) {
     return Areas.findOne({ uuid: area_uuid });
 }
 
-export async function getAreasVisibleToUser(
-    user_uuid: UUID,
-): Promise<TPublicAreaData[]> {
+export async function getAreasVisibleToUser(user_uuid: UUID): Promise<TArea[]> {
     // If the user doesn't exist, return only public areas
     const user = await getUser(user_uuid);
     if (!user) {
@@ -51,14 +50,8 @@ export async function getAreasVisibleToUser(
     // Find all areas that require no roles or which require roles that the
     // user has
     return Areas.find({
-        $or: [
-            { authorized_roles: null },
-            { authorized_roles: { $in: role_uuids } },
-        ],
-    }).select([
-        // Remove private information from the area
-        "-status_logs",
-    ]);
+        $or: [{ visible_to: null }, { visible_to: { $in: role_uuids } }],
+    });
 }
 
 /**
@@ -67,15 +60,12 @@ export async function getAreasVisibleToUser(
  * @returns A promise to list of TPublicAreaData objects representing all
  *    public areas
  */
-async function getPublicAreas(): Promise<TPublicAreaData[]> {
+async function getPublicAreas(): Promise<TArea[]> {
     const Areas = mongoose.model("Area", Area, "areas");
     // Get all areas that are public
     return Areas.find({
-        authorized_roles: null,
-    }).select([
-        // Remove private information from the area
-        "-status_logs",
-    ]);
+        visible_to: null,
+    });
 }
 
 /**
@@ -196,6 +186,8 @@ export async function patchArea(
 ): Promise<TArea | null> {
     const Areas = mongoose.model("Area", Area);
 
+    const original_area = await Areas.findOne({ uuid: area_uuid });
+
     const updated_area = await Areas.findOneAndUpdate(
         { uuid: area_uuid },
         {
@@ -214,6 +206,22 @@ export async function patchArea(
             partial_area.required_certifications)
     ) {
         refreshAreaItem(updated_area);
+    }
+    if (original_area && updated_area) {
+        const equipment_to_update = new Set(updated_area.equipment).union(
+            new Set(original_area.equipment),
+        );
+        console.log("Refreshing machines from area update");
+        const Machines = mongoose.model("Machine", Machine);
+        for (const e of equipment_to_update) {
+            const machine = await Machines.findOne({
+                uuid: e,
+            });
+            if (machine) {
+                console.log("Refreshing", machine.uuid);
+                refreshMachineItems(machine, machine.instances);
+            }
+        }
     }
     return updated_area;
 }
@@ -291,4 +299,17 @@ export async function refreshAreaItem(area: TArea) {
             linked_uuid: area.uuid,
         });
     }
+}
+
+/**
+ * Remove all reservations from all areas
+ */
+export async function clearAreaReservations() {
+    const Areas = mongoose.model("Area", Area);
+    await Areas.updateMany(
+        {},
+        {
+            $set: { reserved: false },
+        },
+    );
 }
