@@ -13,11 +13,7 @@
     "@types/nodemailer": "^6.4.17",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-<<<<<<< HEAD
-    "@vitejs/plugin-react": "^4.5.2",
-=======
     "@vitejs/plugin-react": "^4.6.0",
->>>>>>> ce259ef573ea5e60fe6f18d7b01c8ec995a77476
     "pino-pretty": "^13.0.0",
     "postcss": "8.4.38",
     "prettier": "3.3.3",
@@ -25,22 +21,14 @@
     "vite": "^6.3.5"
   },
   "peerDependencies": {
-<<<<<<< HEAD
     "typescript": "^5.8.3"
-=======
-    "typescript": "^5.7.3"
->>>>>>> ce259ef573ea5e60fe6f18d7b01c8ec995a77476
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@heroui/react": "^2.7.11",
     "@heroui/use-infinite-scroll": "^2.2.9",
     "@internationalized/date": "^3.8.2",
-<<<<<<< HEAD
-    "@tanstack/react-query": "^5.81.2",
-=======
     "@tanstack/react-query": "^5.81.5",
->>>>>>> ce259ef573ea5e60fe6f18d7b01c8ec995a77476
     "autoprefixer": "^10.4.21",
     "axios": "^1.10.0",
     "bun-plugin-html": "^2.2.8",
@@ -53,33 +41,20 @@
     "fuse.js": "^7.1.0",
     "google-auth-library": "^9.15.1",
     "http-status-codes": "^2.3.0",
-<<<<<<< HEAD
-    "mongoose": "^8.16.0",
-    "multer": "^1.4.5-lts.2",
-    "next-themes": "^0.4.6",
-=======
     "mongoose": "^8.16.1",
     "multer": "^1.4.5-lts.2",
     "next-themes": "^0.4.6",
     "node-cron": "^4.2.0",
->>>>>>> ce259ef573ea5e60fe6f18d7b01c8ec995a77476
     "nodemailer": "^6.10.1",
     "pino": "^9.7.0",
     "pino-http": "^10.5.0",
     "react": "^19.1.0",
     "react-colorful": "^5.6.1",
     "react-dom": "^19.1.0",
-<<<<<<< HEAD
-    "react-router-dom": "^7.6.2",
-    "tailwind-variants": "0.1.20",
-    "tailwindcss": "3.4.16",
-    "zustand": "^5.0.5"
-=======
     "react-router-dom": "^7.6.3",
     "tailwind-variants": "0.1.20",
     "tailwindcss": "3.4.16",
     "zustand": "^5.0.6"
->>>>>>> ce259ef573ea5e60fe6f18d7b01c8ec995a77476
   },
   "scripts": {
     "start": "concurrently \"bun backend:dev\" \"bun frontend:dev\" --prefix none | bun prettify",
