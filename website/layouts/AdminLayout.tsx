@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import AdminNavbar from "../components/kiosks/admin/dashboard/AdminNavbar";
 import { API_SCOPE } from "../../common/global";
 import { Spinner } from "@heroui/react";
+import clsx from "clsx";
 // import AdminSidebar from "../components/kiosks/admin/AdminSidebar";
 
 export type AdminPage = {
@@ -76,9 +77,11 @@ const ADMIN_PAGES: AdminPage[] = [
 export default function AdminLayout({
     children,
     pageHref,
+    className = "",
 }: {
     children: React.ReactNode;
     pageHref: string;
+    className?: string;
 }) {
     // Get the current users scopes
     const { data, isLoading, isError } = useQuery<API_SCOPE[]>({
@@ -121,7 +124,12 @@ export default function AdminLayout({
             ) : (
                 <AdminNavbar pages={pages} pageIndex={pageIndex} />
             )}
-            <main className="container mx-auto flex-grow px-0 py-4 overflow-auto">
+            <main
+                className={clsx(
+                    "container mx-auto flex-grow px-0 py-4 overflow-auto",
+                    className,
+                )}
+            >
                 {children}
             </main>
         </div>
