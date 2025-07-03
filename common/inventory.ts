@@ -8,7 +8,7 @@ export type InventoryItemUUID = UUID;
 /**
  * ITEM_RELATIVE_QUANTITY - The relative (high/low) of an item
  */
-enum ITEM_RELATIVE_QUANTITY {
+export enum ITEM_RELATIVE_QUANTITY {
     LOW = -1,
     HIGH = -2,
 }
