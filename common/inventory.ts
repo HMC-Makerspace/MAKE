@@ -118,7 +118,7 @@ export type TInventoryItem = {
     linked_uuid?: MachineUUID | AreaUUID;
     access_type: ITEM_ACCESS_TYPE;
     quantity: ItemQuantity;
-    available: number;
+    available: ItemQuantity;
     locations: TInventoryItemLocation[];
     reorder_url?: string;
     serial_number?: string;

@@ -300,3 +300,16 @@ export async function refreshAreaItem(area: TArea) {
         });
     }
 }
+
+/**
+ * Remove all reservations from all areas
+ */
+export async function clearAreaReservations() {
+    const Areas = mongoose.model("Area", Area);
+    await Areas.updateMany(
+        {},
+        {
+            $set: { reserved: false },
+        },
+    );
+}

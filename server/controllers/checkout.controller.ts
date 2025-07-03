@@ -4,6 +4,7 @@ import {
     TCheckout,
     TCheckoutItem,
     TCheckoutItemUnavailability,
+    TCheckoutValidation,
 } from "common/checkout";
 import { Checkout } from "models/checkout.model";
 import mongoose from "mongoose";
@@ -16,6 +17,19 @@ import { StatusCodes } from "http-status-codes";
 import { Response } from "express";
 import { verify } from "crypto";
 import { verifyRequest } from "./verify.controller";
+import { sendTemplatedEmail } from "./email.controller";
+import {
+    clearInventoryAvailability,
+    getInventoryItems,
+} from "./inventory.controller";
+import ExpiredCheckoutTemplate from "email_templates/expired_checkout";
+import { Logger } from "pino";
+import {
+    clearMachineReservations,
+    reserveMachineInstance,
+} from "./machine.controller";
+import { clearAreaReservations, patchArea } from "./area.controller";
+import { getConfig } from "./config.controller";
 
 /**
  * Get all checkouts in the database
@@ -23,7 +37,11 @@ import { verifyRequest } from "./verify.controller";
  */
 export async function getCheckouts(): Promise<TCheckout[]> {
     const Checkouts = mongoose.model("Checkout", Checkout);
-    return Checkouts.find();
+    return Checkouts.find().sort({
+        timestamp_in: 1,
+        timestamp_out: 1,
+        timestamp_due: 1,
+    });
 }
 
 /**
@@ -49,11 +67,9 @@ export async function getCheckoutsByUser(
     return Checkouts.find({ checked_out_by: user_uuid });
 }
 
-export async function validateCheckout(checkout_obj: TCheckout): Promise<{
-    status: CHECKOUT_VALIDATION;
-    error_uuid?: string;
-    item_uuid?: string;
-}> {
+export async function validateCheckout(
+    checkout_obj: TCheckout,
+): Promise<TCheckoutValidation> {
     const user = await getUser(checkout_obj.checked_out_by);
     if (!user) {
         return {
@@ -242,6 +258,9 @@ export async function getCheckoutDisabledTimes(
     // Look for all active checkouts
     const scheduled_checkouts = await Checkouts.find({
         timestamp_in: undefined,
+        "items.item_uuid": {
+            $in: item_uuids,
+        },
     });
 
     const events: {
@@ -273,7 +292,12 @@ export async function getCheckoutDisabledTimes(
             0;
         const item_quantity =
             item_objs.find((i) => i.uuid === item_uuid)?.quantity ?? 0;
-        item_quantities.set(item_uuid, item_quantity - checkout_quantity);
+        // If the item uses relative quantity, don't count it
+        if (item_quantity < 0) {
+            item_quantities.set(item_uuid, Infinity);
+        } else {
+            item_quantities.set(item_uuid, item_quantity - checkout_quantity);
+        }
     }
 
     // Store information about the delta quantity checked out over time, the
@@ -340,6 +364,12 @@ export async function createCheckout(
 
     // If the user role doesn't exist, create a new user role and return it
     const newCheckout = new Checkouts(checkout_obj);
+
+    // If checkout is in the within the next 2 minutes, update item availability preemptively
+    if (checkout_obj.timestamp_out < Date.now() / 1000 + 120) {
+        updateItemAvailabilities(checkout_obj.items);
+    }
+
     return newCheckout.save();
 }
 
@@ -371,11 +401,45 @@ export async function checkInCheckout(
     checkout_uuid: UUID,
 ): Promise<TCheckout | null> {
     const Checkouts = mongoose.model("Checkout", Checkout);
-    return Checkouts.findOneAndReplace(
-        { uuid: checkout_uuid },
-        { timestamp_in: new Date() },
-        { returnDocument: "after" },
-    );
+    const checkout = await Checkouts.findOne({
+        uuid: checkout_uuid,
+    });
+    if (!checkout) {
+        return null;
+    }
+    checkout.timestamp_in = Date.now() / 1000;
+    // Update item available counts if checkout was active
+    if (checkout.timestamp_out < checkout.timestamp_in) {
+        updateItemAvailabilities(checkout.items, undefined, false);
+    }
+
+    // Return updated checkout
+    checkout.save();
+    return checkout;
+}
+
+export async function undoCheckInCheckout(
+    checkout_uuid: UUID,
+): Promise<TCheckout | null> {
+    const Checkouts = mongoose.model("Checkout", Checkout);
+    const checkout = await Checkouts.findOne({
+        uuid: checkout_uuid,
+    });
+    if (!checkout) {
+        return null;
+    }
+    // Update item available counts if checkout will be active
+    if (
+        checkout.timestamp_in &&
+        checkout.timestamp_out < checkout.timestamp_in
+    ) {
+        updateItemAvailabilities(checkout.items);
+    }
+    checkout.timestamp_in = undefined;
+
+    // Return updated checkout
+    checkout.save();
+    return checkout;
 }
 
 /**
@@ -406,4 +470,120 @@ export async function deleteCheckout(
 ): Promise<TCheckout | null> {
     const Checkouts = mongoose.model("Checkouts", Checkout);
     return Checkouts.findOneAndDelete({ uuid: checkout_uuid });
+}
+
+export async function updateItemAvailabilities(
+    checkout_items: TCheckoutItem[],
+    logger?: Logger,
+    out: boolean = true,
+) {
+    if (logger) {
+        logger.info("Updating item availabilities");
+    }
+    const items =
+        (await getInventoryItems(checkout_items.map((c) => c.item_uuid))) || [];
+
+    // Update item quantity, or machine/area reservation status
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const checkout_item = checkout_items[i];
+        if (item.quantity < 0) {
+            // Available quantity of relative items never changes
+            return;
+        }
+        // Update availability
+        if (out) {
+            item.available -= checkout_item.quantity;
+        } else {
+            item.available += checkout_item.quantity;
+        }
+        // Safety check
+        if (logger && (item.available < 0 || item.available > item.quantity)) {
+            logger.warn({
+                msg: "Inventory item is checked out beyond quantity",
+                item: item,
+                checkout: checkout_item,
+            });
+        }
+        await item.save();
+        if (item.role === ITEM_ROLE.MACHINE && item.linked_uuid) {
+            const machine_uuid = item.linked_uuid;
+            const instance_uuid = item.uuid;
+            await reserveMachineInstance(machine_uuid, instance_uuid, out);
+        } else if (item.role === ITEM_ROLE.AREA && item.linked_uuid) {
+            const area_uuid = item.linked_uuid;
+            await patchArea(area_uuid, { reserved: out });
+        }
+    }
+}
+
+export async function checkoutAvailabilityCron(logger: Logger) {
+    const timestamp = Date.now() / 1000;
+    // Get active checkouts
+    const Checkouts = mongoose.model("Checkouts", Checkout);
+    const active_checkouts = await Checkouts.find({
+        // Checkouts that aren't checked in
+        timestamp_in: undefined,
+        // and were checked out before now
+        timestamp_out: { $lte: timestamp },
+    });
+    // Update all items to be fully available
+    await clearInventoryAvailability();
+    await clearMachineReservations();
+    await clearAreaReservations();
+    for (const checkout of active_checkouts) {
+        updateItemAvailabilities(checkout.items, logger);
+    }
+}
+
+export async function checkoutEmailCron(logger: Logger) {
+    const config = await getConfig();
+    if (!config?.checkout.notification_interval_sec) {
+        // If there is no notification interval set,
+        // don't send any notifications
+        return;
+    }
+    const reminder_frequency = config.checkout.notification_interval_sec;
+    logger.info("Sending overdue checkout emails.");
+    const timestamp = Date.now() / 1000;
+    // Get active checkouts
+    const Checkouts = mongoose.model("Checkouts", Checkout);
+    const active_checkouts = await Checkouts.find({
+        // Checkouts that aren't checked in
+        timestamp_in: undefined,
+        // and were checked out before now
+        timestamp_out: { $lte: timestamp },
+    });
+    for (const checkout of active_checkouts) {
+        const items =
+            (await getInventoryItems(checkout.items.map((c) => c.item_uuid))) ||
+            [];
+        // Overdue emails
+        const checkout_reminder_time =
+            checkout.timestamp_due +
+            (checkout.notifications_sent || 0) * reminder_frequency;
+        if (checkout_reminder_time < timestamp) {
+            // Checkout is overdue, send email to user
+            const user = await getUser(checkout.checked_out_by);
+
+            if (user && items) {
+                sendTemplatedEmail(
+                    user.email,
+                    "Overdue Checkout Reminder",
+                    ExpiredCheckoutTemplate(checkout, items),
+                    logger,
+                );
+                // Increase checkout notifications_sent counter
+                await Checkouts.updateOne(
+                    {
+                        uuid: checkout.uuid,
+                    },
+                    {
+                        notifications_sent:
+                            (checkout.notifications_sent || 0) + 1,
+                    },
+                );
+            }
+        }
+    }
 }

@@ -53,6 +53,12 @@ export enum CHECKOUT_VALIDATION {
     VALID,
 }
 
+export type TCheckoutValidation = {
+    status: CHECKOUT_VALIDATION;
+    error_uuid?: UUID;
+    item_uuid?: InventoryItemUUID;
+};
+
 /**
  * A time pair indicating when a given item is unavailable for checkout.
  */
