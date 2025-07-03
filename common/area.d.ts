@@ -62,5 +62,3 @@ export type TArea = {
     reserved?: boolean;
     visible_to?: UserRoleUUID[] | null;
 };
-
-export type TPublicAreaData = Omit<TArea, "status_logs">;

@@ -6,6 +6,7 @@ import connectDB from "./core/db";
 import pino from "pino";
 import loggerMiddleware from "pino-http";
 import cors from "cors";
+import cron from "node-cron";
 
 // await Bun.build({
 //     entrypoints: ["website/index.html"],
@@ -31,6 +32,11 @@ import userRoutes from "./routes/user.route";
 import workshopRoutes from "./routes/workshop.route";
 import emailRoutes from "./routes/email.route";
 import { getOAuthToken, getOAuthURL } from "controllers/email.controller";
+import { reserveMachineInstance } from "controllers/machine.controller";
+import {
+    checkoutAvailabilityCron,
+    checkoutEmailCron,
+} from "controllers/checkout.controller";
 
 const app: Application = express();
 
@@ -84,6 +90,19 @@ app.use("/api/v3/oauth", emailRoutes);
 app.get("/api/v3/test", (req, res) => {
     req.log.debug("Test log");
     res.send("Hello World!");
+});
+
+// Setup cron jobs
+// Query for checkout emails every minute
+checkoutEmailCron(logger);
+cron.schedule("* * * * *", () => {
+    checkoutEmailCron(logger);
+});
+
+// Refresh all checkout quantities every 15 minutes
+checkoutAvailabilityCron(logger);
+cron.schedule("*/15 * * * *", () => {
+    checkoutAvailabilityCron(logger);
 });
 
 const PORT = process.env.VITE_SERVER_PORT || 3000;
