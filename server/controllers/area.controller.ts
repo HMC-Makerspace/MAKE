@@ -1,10 +1,13 @@
 import { API_SCOPE, UUID } from "common/global";
-import { TArea, TAreaStatus, TPublicAreaData } from "common/area";
+import { TArea, TAreaStatus } from "common/area";
 import { Area } from "models/area.model";
 import mongoose from "mongoose";
 import { Machine } from "models/machine.model";
 import { getUser } from "./user.controller";
 import { verifyRequest } from "./verify.controller";
+import { InventoryItem } from "models/inventory.model";
+import { ITEM_ACCESS_TYPE, ITEM_ROLE, TInventoryItem } from "common/inventory";
+import { refreshMachineItems } from "./machine.controller";
 
 /**
  * Get all areas in the database
@@ -26,9 +29,7 @@ export async function getArea(area_uuid: UUID) {
     return Areas.findOne({ uuid: area_uuid });
 }
 
-export async function getAreasVisibleToUser(
-    user_uuid: UUID,
-): Promise<TPublicAreaData[]> {
+export async function getAreasVisibleToUser(user_uuid: UUID): Promise<TArea[]> {
     // If the user doesn't exist, return only public areas
     const user = await getUser(user_uuid);
     if (!user) {
@@ -49,14 +50,8 @@ export async function getAreasVisibleToUser(
     // Find all areas that require no roles or which require roles that the
     // user has
     return Areas.find({
-        $or: [
-            { authorized_roles: null },
-            { authorized_roles: { $in: role_uuids } },
-        ],
-    }).select([
-        // Remove private information from the area
-        "-status_logs",
-    ]);
+        $or: [{ visible_to: null }, { visible_to: { $in: role_uuids } }],
+    });
 }
 
 /**
@@ -65,15 +60,12 @@ export async function getAreasVisibleToUser(
  * @returns A promise to list of TPublicAreaData objects representing all
  *    public areas
  */
-async function getPublicAreas(): Promise<TPublicAreaData[]> {
+async function getPublicAreas(): Promise<TArea[]> {
     const Areas = mongoose.model("Area", Area, "areas");
     // Get all areas that are public
     return Areas.find({
-        authorized_roles: null,
-    }).select([
-        // Remove private information from the area
-        "-status_logs",
-    ]);
+        visible_to: null,
+    });
 }
 
 /**
@@ -130,6 +122,12 @@ export async function createArea(area_obj: TArea): Promise<TArea | null> {
  */
 export async function deleteArea(area_uuid: UUID): Promise<TArea | null> {
     const Areas = mongoose.model("Area", Area);
+    // If the area has linked items, delete them
+    const Inventory = mongoose.model("InventoryItem", InventoryItem);
+    await Inventory.deleteMany({
+        role: ITEM_ROLE.AREA,
+        linked_uuid: area_uuid,
+    });
     // If the area exists, return it and delete it
     return Areas.findOneAndDelete({ uuid: area_uuid });
 }
@@ -146,6 +144,86 @@ export async function updateArea(area_obj: TArea): Promise<TArea | null> {
     return Areas.findOneAndReplace({ uuid: area_obj.uuid }, area_obj, {
         returnDocument: "after",
     });
+}
+
+/**
+ * Set all areas, deleting any that exist.
+ * @param area_objs The new list of area objects.
+ * @returns The inputted list of area objects.
+ */
+export async function setAllAreas(area_objs: TArea[]): Promise<TArea[] | null> {
+    const Areas = mongoose.model("Area", Area);
+    // Delete all existing areas
+    await Areas.deleteMany({});
+    // Add new areas
+    for (const area_obj of area_objs) {
+        const area = new Areas({
+            uuid: area_obj.uuid,
+            name: area_obj.name,
+            description: area_obj.description,
+            documents: area_obj.documents,
+            equipment: area_obj.equipment,
+            images: area_obj.images,
+            required_certifications: area_obj.required_certifications,
+            authorized_roles: area_obj.authorized_roles,
+            reservable: area_obj.reservable,
+            reserved: area_obj.reserved,
+            visible_to: area_obj.visible_to,
+        });
+        await area.save();
+    }
+    return area_objs;
+}
+
+/**
+ * Updates a area's data with partial information
+ * @param area_uuid The area to update
+ * @returns The updated area object
+ */
+export async function patchArea(
+    area_uuid: UUID,
+    partial_area: Partial<TArea>,
+): Promise<TArea | null> {
+    const Areas = mongoose.model("Area", Area);
+
+    const original_area = await Areas.findOne({ uuid: area_uuid });
+
+    const updated_area = await Areas.findOneAndUpdate(
+        { uuid: area_uuid },
+        {
+            // Updates the partial change
+            $set: partial_area,
+        },
+        { returnDocument: "after" },
+    );
+    if (
+        updated_area &&
+        // If any data related to area instances changes,
+        // refresh instance items
+        (partial_area.reservable !== undefined ||
+            partial_area.name ||
+            partial_area.authorized_roles ||
+            partial_area.required_certifications)
+    ) {
+        refreshAreaItem(updated_area);
+    }
+    if (original_area && updated_area) {
+        const equipment_to_update = new Set(updated_area.equipment).union(
+            new Set(original_area.equipment),
+        );
+        console.log("Refreshing machines from area update");
+        const Machines = mongoose.model("Machine", Machine);
+        for (const e of equipment_to_update) {
+            const machine = await Machines.findOne({
+                uuid: e,
+            });
+            if (machine) {
+                console.log("Refreshing", machine.uuid);
+                refreshMachineItems(machine, machine.instances);
+            }
+        }
+    }
+    return updated_area;
 }
 
 /**
@@ -173,9 +251,65 @@ export async function updateAreaStatus(
             },
             // Replace the current_status with with the new status
             $set: {
-                current_status: status,
+                status: status,
             },
         },
         { returnDocument: "after" },
+    );
+}
+
+/**
+ * Create linked item for an area
+ * @param area The entire area object
+ * @param statuses The list of instances
+ */
+export async function refreshAreaItem(area: TArea) {
+    if (area.reservable) {
+        const Inventory = mongoose.model("InventoryItem", InventoryItem);
+        // Delete existing linked item
+        await Inventory.deleteMany({
+            role: ITEM_ROLE.AREA,
+            linked_uuid: area.uuid,
+        });
+        // Create a linked item for the area
+        const instance_item_data: TInventoryItem = {
+            uuid: crypto.randomUUID(),
+            name: `${area.name}: Reservation`,
+            long_name: `Reserve the entire area.`,
+            role: ITEM_ROLE.AREA,
+            linked_uuid: area.uuid,
+            quantity: 1,
+            available: area.reservable ? 1 : 0,
+            access_type: ITEM_ACCESS_TYPE.CHECKOUT_IN_SPACE,
+            locations: [
+                {
+                    area: area.uuid,
+                },
+            ],
+            required_certifications: area.required_certifications,
+            authorized_roles: area.authorized_roles,
+        };
+        new Inventory(instance_item_data).save();
+    } else if (area.reservable === false) {
+        // If the area is no longer reservable, delete
+        // linked instance items
+        const Inventory = mongoose.model("InventoryItem", InventoryItem);
+        await Inventory.deleteMany({
+            role: ITEM_ROLE.AREA,
+            linked_uuid: area.uuid,
+        });
+    }
+}
+
+/**
+ * Remove all reservations from all areas
+ */
+export async function clearAreaReservations() {
+    const Areas = mongoose.model("Area", Area);
+    await Areas.updateMany(
+        {},
+        {
+            $set: { reserved: false },
+        },
     );
 }

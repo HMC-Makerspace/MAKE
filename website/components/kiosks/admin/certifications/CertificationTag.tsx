@@ -1,8 +1,10 @@
-import { Card } from "@heroui/react";
+import { As, Card, Link } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
 
 import { TCertification } from "common/certification";
 import CVisibilityIcon from "./CVisibilityIcon";
+import { BookmarkIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
 
 /**
  * A simple hex to RGB converter
@@ -41,24 +43,58 @@ function getForegroundColor(hex: string): string {
 }
 
 // A certification tag similar (but with less rounded edges) to user role tags (see UserRole)
-export default function CertificationTag({ cert_uuid, showVisibility=false }: { cert_uuid: string, showVisibility?: boolean }) {
-    const { data, isSuccess, isError } = useQuery<TCertification>({
+export default function CertificationTag({
+    cert_uuid,
+    certifications,
+    showVisibility = false,
+    level = undefined,
+    href = undefined,
+}: {
+    cert_uuid: string;
+    certifications?: TCertification[];
+    showVisibility?: boolean;
+    level?: number;
+    href?: string;
+}) {
+    const { data, isLoading, isError } = useQuery<TCertification>({
         queryKey: ["certification", cert_uuid],
+        enabled: !certifications,
     });
 
+    const cert = certifications
+        ? certifications.find((c) => c.uuid === cert_uuid)
+        : data;
+
     // Default to gray if not yet successful
-    const color = isSuccess ? data.color : "gray";
-    // Set the title to "Error" if isError, "Loading" if isLoading, or the title if isSuccess
-    const title = isSuccess ? data.name : isError ? "Error" : "Loading";
+    const color = cert ? cert.color : "gray";
+    // Set the title to "Error" if isError, "Loading" if isLoading, or the title if isLoading
+    const title = cert ? cert.name : isError ? "Error" : "Loading";
     const foregroundColor = getForegroundColor(color);
 
     return (
         <Card
-            className="p-1.5 flex flex-row gap-1 w-fit px-2.5 rounded-sm"
+            className={clsx(
+                "p-1.5 flex flex-row gap-1 w-fit px-2.5 rounded-sm",
+                "content-center items-center min-w-fit",
+            )}
             style={{ backgroundColor: color }}
-            isBlurred={!isSuccess}
+            isBlurred={!isLoading}
+            as={href ? Link : undefined}
+            href={href}
         >
-            
+            {showVisibility ? (
+                <CVisibilityIcon
+                    visibility={cert?.visibility}
+                    color={foregroundColor}
+                    className="size-5 -ml-0.5"
+                />
+            ) : (
+                <BookmarkIcon
+                    color={foregroundColor}
+                    strokeWidth={2}
+                    className="size-5 -ml-0.5"
+                />
+            )}
             <h1
                 className="text-sm font-semibold text-nowrap"
                 style={{
@@ -67,14 +103,16 @@ export default function CertificationTag({ cert_uuid, showVisibility=false }: { 
             >
                 {title}
             </h1>
-
-            {showVisibility && (<div className="ml-1">
-                <CVisibilityIcon
-                    visibility={data?.visibility}
-                    color={foregroundColor}
-                    className="size-4 mt-[1.5px] -ml-0.5"
-                />
-            </div>)}
+            {level !== undefined && level !== 0 && (
+                <div
+                    className="text-sm font-semibold"
+                    style={{
+                        color: foregroundColor,
+                    }}
+                >
+                    {level}
+                </div>
+            )}
         </Card>
     );
 }

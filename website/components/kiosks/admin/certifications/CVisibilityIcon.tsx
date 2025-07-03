@@ -1,10 +1,10 @@
 import { Tooltip } from "@heroui/react";
 
 import {
-    LockOpenIcon,
     LockClosedIcon,
-    ClockIcon,
-    NoSymbolIcon
+    NoSymbolIcon,
+    GlobeAltIcon,
+    CalendarIcon,
 } from "@heroicons/react/24/outline";
 
 import { CERTIFICATION_VISIBILITY } from "../../../../../common/certification";
@@ -16,19 +16,16 @@ import { CERTIFICATION_VISIBILITY } from "../../../../../common/certification";
 // No symbol icon   : (invalid visibility)
 export default function CVisibilityIcon({
     visibility,
-    color="",
-    className=""
+    color = "",
+    className = "",
 }: {
-    visibility: CERTIFICATION_VISIBILITY | undefined,
-    color?: string,
-    className?: string
+    visibility: CERTIFICATION_VISIBILITY | undefined;
+    color?: string;
+    className?: string;
 }) {
-    
     return (
         <Tooltip
-            content={
-                `Visibility: ${visibility}`
-            }
+            content={`Visibility: ${visibility}`}
             className="w-fit p-2"
             delay={500}
             closeDelay={150}
@@ -39,34 +36,46 @@ export default function CVisibilityIcon({
 }
 
 // Determines which icon to return based on visibility
-function getIcon(visibility: CERTIFICATION_VISIBILITY | undefined, color: string, className: string) {
+function getIcon(
+    visibility: CERTIFICATION_VISIBILITY | undefined,
+    color: string,
+    className: string,
+) {
     // in case of future customization
-    const strokeWidth = 2.5;
+    const strokeWidth = 2;
 
-    switch(visibility) {
+    switch (visibility) {
         case CERTIFICATION_VISIBILITY.PUBLIC:
-            return (<LockOpenIcon
-                        className={className}
-                        strokeWidth={strokeWidth}
-                        color={color}
-                    />);
+            return (
+                <GlobeAltIcon
+                    className={className}
+                    strokeWidth={strokeWidth}
+                    color={color}
+                />
+            );
         case CERTIFICATION_VISIBILITY.PRIVATE:
-            return (<LockClosedIcon
-                        className={className}
-                        strokeWidth={strokeWidth}
-                        color={color}
-                    />);
+            return (
+                <LockClosedIcon
+                    className={className}
+                    strokeWidth={strokeWidth}
+                    color={color}
+                />
+            );
         case CERTIFICATION_VISIBILITY.SCHEDULE:
-            return (<ClockIcon
-                        className={className}
-                        strokeWidth={strokeWidth}
-                        color={color}
-                    />);
+            return (
+                <CalendarIcon
+                    className={className}
+                    strokeWidth={strokeWidth}
+                    color={color}
+                />
+            );
         default: // some accidentally missing visibility
-            return (<NoSymbolIcon
-                        className={className}
-                        strokeWidth={strokeWidth}
-                        color={color}
-                    />);
+            return (
+                <NoSymbolIcon
+                    className={className}
+                    strokeWidth={strokeWidth}
+                    color={color}
+                />
+            );
     }
 }

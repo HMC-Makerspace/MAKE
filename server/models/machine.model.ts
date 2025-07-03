@@ -1,25 +1,36 @@
-import { TMachineStatus, TMachineStatusLog, TMachine } from "common/machine";
+import {
+    TMachineInstance,
+    TMachineInstanceStatusLog,
+    TMachine,
+} from "common/machine";
 import mongoose from "mongoose";
 import { Document } from "./file.model";
+import { RequiredCertificate } from "./certification.model";
 
 /**
- * See {@link TMachineStatus} documentation for type information.
- * Stored as children of {@link MachineStatusLog} and {@link Machine}.
+ * See {@link TMachineInstance} documentation for type information.
+ * Stored as children of {@link MachineInstanceStatusLog} and {@link Machine}.
  */
-const MachineStatus = new mongoose.Schema<TMachineStatus>({
+const MachineInstance = new mongoose.Schema<TMachineInstance>({
+    uuid: { type: String, required: true },
+    name: { type: String, required: false },
     status: { type: Number, required: true },
-    available: { type: Boolean, required: true },
+    reserved: { type: Boolean, required: true },
     message: { type: String, required: false },
 });
 
 /**
- * See {@link TMachineStatusLog} documentation for type information.
+ * See {@link TMachineInstanceStatusLog} documentation for type information.
  * Stored as children of {@link Machine}.
  */
-const MachineStatusLog = new mongoose.Schema<TMachineStatusLog>({
-    timestamp: { type: Number, required: true },
-    statuses: { type: [MachineStatus], required: true },
-});
+const MachineInstanceStatusLog = new mongoose.Schema<TMachineInstanceStatusLog>(
+    {
+        timestamp: { type: Number, required: true },
+        instance_uuid: { type: String, required: false },
+        status: { type: Number, required: true },
+        message: { type: String, required: false },
+    },
+);
 
 /**
  * See {@link TMachine} documentation for type information.
@@ -31,12 +42,16 @@ export const Machine = new mongoose.Schema<TMachine>(
         description: { type: String, required: false },
         images: { type: [String], required: false },
         count: { type: Number, required: true },
-        current_statuses: { type: [MachineStatus], required: true },
-        status_logs: { type: [MachineStatusLog], required: true },
+        instances: { type: [MachineInstance], required: true },
+        status_logs: { type: [MachineInstanceStatusLog], required: true },
         documents: { type: [Document], required: false },
-        required_certifications: { type: [String], required: false },
+        required_certifications: {
+            type: [RequiredCertificate],
+            required: false,
+        },
         authorized_roles: { type: [String], required: true },
         reservable: { type: Boolean, required: false },
+        reservation_type: { type: Number, required: false },
     },
     { collection: "machines" },
 );

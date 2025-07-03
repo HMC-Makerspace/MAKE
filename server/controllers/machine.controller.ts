@@ -1,9 +1,17 @@
 import { API_SCOPE, UUID } from "common/global";
-import { TMachine, TMachineStatus, TPublicMachineData } from "common/machine";
+import {
+    MachineUUID,
+    TMachine,
+    TMachineInstance,
+    TPublicMachineData,
+} from "common/machine";
 import { Machine } from "models/machine.model";
 import mongoose from "mongoose";
 import { getUser } from "./user.controller";
 import { verifyRequest } from "./verify.controller";
+import { InventoryItem } from "models/inventory.model";
+import { ITEM_ROLE } from "common/inventory";
+import { Area } from "models/area.model";
 
 /**
  * Get all machines in the database
@@ -113,6 +121,24 @@ export async function deleteMachine(
     machine_uuid: UUID,
 ): Promise<TMachine | null> {
     const Machines = mongoose.model("Machine", Machine);
+    // If the machine has associated items, delete them
+    const Inventory = mongoose.model("InventoryItem", InventoryItem);
+    await Inventory.deleteMany({
+        role: ITEM_ROLE.MACHINE,
+        linked_uuid: machine_uuid,
+    });
+    // If any areas have this machine, remove them
+    const Areas = mongoose.model("Area", Area);
+    await Areas.updateMany(
+        {
+            equipment: machine_uuid,
+        },
+        {
+            $pull: {
+                equipment: machine_uuid,
+            },
+        },
+    );
     // If the machine exists, return it and delete it
     return Machines.findOneAndDelete({ uuid: machine_uuid });
 }
@@ -134,33 +160,165 @@ export async function updateMachine(
 }
 
 /**
- * Update a machine's statuses in the database, searching by UUID
+ * Updates a machine's data with partial information
+ * @param machine_uuid The machine to update
+ * @returns The updated machine object
+ */
+export async function patchMachine(
+    machine_uuid: UUID,
+    partial_machine: Partial<TMachine>,
+): Promise<TMachine | null> {
+    const Machines = mongoose.model("Machine", Machine);
+
+    const updated_machine = await Machines.findOneAndUpdate(
+        { uuid: machine_uuid },
+        {
+            // Updates the partial change
+            $set: partial_machine,
+        },
+        { returnDocument: "after" },
+    );
+    if (
+        updated_machine &&
+        // If any data related to machine instances changes,
+        // refresh instance items
+        (partial_machine.reservable !== undefined ||
+            partial_machine.name ||
+            partial_machine.authorized_roles ||
+            partial_machine.reservation_type ||
+            partial_machine.required_certifications)
+    ) {
+        refreshMachineItems(updated_machine, updated_machine.instances);
+    }
+    return updated_machine;
+}
+
+/**
+ * Set a machine's statuses in the database, searching by UUID
  * @param machine_uuid The machine's UUID
- * @param statuses The new list of statuses for all the machines of this type
+ * @param statuses The new list of instances for all the machines of this type
  * @returns The updated machine object, or null if no machine has the given UUID
  */
-export async function updateMachineStatuses(
+export async function setMachineInstances(
     machine_uuid: UUID,
-    statuses: TMachineStatus[],
+    instances: TMachineInstance[],
 ): Promise<TMachine | null> {
     const Machines = mongoose.model("Machine", Machine);
     // If the machine exists, update it and return it
-    return Machines.findOneAndUpdate(
+    const machine = await Machines.findOneAndUpdate(
         { uuid: machine_uuid },
         // Perform the following operations:
         {
-            // Push the new statuses as a log to the status_logs array
-            $push: {
-                status_logs: {
-                    timestamp: Date.now() / 1000,
-                    statuses: statuses,
-                },
-            },
-            // Replace the current_statuses array with the new statuses
+            // Set the machine instances
             $set: {
-                current_statuses: statuses,
+                instances: instances,
+                count: instances.length,
+            },
+            $push: {
+                // Push the new statuses as a log to the status_logs array
+                status_logs: {
+                    $each: instances.map((i) => {
+                        return {
+                            timestamp: Date.now() / 1000,
+                            instance_uuid: i.uuid,
+                            status: i.status,
+                            message: i.message,
+                        };
+                    }),
+                },
             },
         },
         { returnDocument: "after" },
+    );
+
+    if (!machine) return null;
+
+    refreshMachineItems(machine, instances);
+
+    return machine;
+}
+
+/**
+ * Create linked items for a machine
+ * @param machine The entire machine object
+ * @param statuses The list of instances
+ */
+export async function refreshMachineItems(
+    machine: TMachine,
+    instances: TMachineInstance[],
+) {
+    if (machine.reservable && machine.reservation_type) {
+        // Pre-fetch item location data
+        const Areas = mongoose.model("Areas", Area);
+        const areas_with_machine = await Areas.find({
+            equipment: machine.uuid,
+        });
+        const locations = areas_with_machine.map((a) => ({
+            area: a.uuid,
+        }));
+        const Inventory = mongoose.model("InventoryItem", InventoryItem);
+        // Delete existing linked items
+        await Inventory.deleteMany({
+            role: ITEM_ROLE.MACHINE,
+            linked_uuid: machine.uuid,
+        });
+        // Create a linked item for each instance
+        instances.forEach((instance, i) => {
+            const name = instance.name || machine.name + ` ${i + 1}`;
+            const instance_item_data = {
+                uuid: instance.uuid, // Same UUID as the instance
+                name: name,
+                long_name: `Instance ${name} of machine ${machine.name}`,
+                role: ITEM_ROLE.MACHINE,
+                linked_uuid: machine.uuid,
+                quantity: 1,
+                available: instance.reserved ? 0 : 1,
+                access_type: machine.reservation_type,
+                locations: locations,
+                required_certifications: machine.required_certifications,
+                authorized_roles: machine.authorized_roles,
+            };
+            new Inventory(instance_item_data).save();
+        });
+    } else if (machine.reservable === false) {
+        // If the machine is no longer reservable, delete all
+        // linked instance items
+        const Inventory = mongoose.model("InventoryItem", InventoryItem);
+        await Inventory.deleteMany({
+            role: ITEM_ROLE.MACHINE,
+            linked_uuid: machine.uuid,
+        });
+    }
+}
+
+export async function reserveMachineInstance(
+    machine_uuid: MachineUUID,
+    instance_uuid: UUID,
+    reserved: boolean = true,
+) {
+    const Machines = mongoose.model("Machine", Machine);
+    return Machines.updateOne(
+        {
+            uuid: machine_uuid,
+        },
+        {
+            $set: { "instances.$[elem].reserved": reserved },
+        },
+        {
+            arrayFilters: [{ "elem.uuid": instance_uuid }],
+        },
+    );
+}
+
+/**
+ * Clear the reserved status for all instances of all machines
+ */
+export async function clearMachineReservations() {
+    const Machines = mongoose.model("Machine", Machine);
+    await Machines.updateMany(
+        {},
+        {
+            $set: { "instances.$[].reserved": false },
+        },
     );
 }

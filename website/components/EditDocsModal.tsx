@@ -1,73 +1,45 @@
-import {
-    Button,
-    Modal,
-    Form,
-    ModalContent,
-    Input,
-} from "@heroui/react";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { Button, Modal, Form, ModalContent, Input } from "@heroui/react";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 import React from "react";
-import axios from "axios";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import clsx from "clsx";
 
 import { TDocument } from "common/file";
-import { TCertification } from "common/certification";
+import { UUID } from "common/global";
 
 const emptyDoc: TDocument = {
     name: "",
-    link: ""
+    link: "",
 };
 
-const updateDocs = async ({
-    data,
-    docs
-}: {
-    data: TCertification;
-    docs: TDocument[];
-}) => {
-    data.documents = docs;
-    return (
-        await axios.put<TCertification>("/api/v3/certification", { certification_obj: data })
-    ).data;
-};
-
-export default function EditDocsModal({
-    cert,
-    documents,
+export default function EditDocsModal<
+    // Allow any type that has a uuid and optional documents list
+    T extends { uuid: UUID; documents?: TDocument[] },
+>({
+    element: element,
     isOpen,
     onOpenChange,
-    onSuccess,
-    onError,
+    patchMutation,
 }: {
-    cert: TCertification;
-    documents: TDocument[];
+    element: T;
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
+    patchMutation: UseMutationResult<
+        T,
+        Error,
+        {
+            uuid: UUID;
+            patch: {
+                documents?: TDocument[];
+            };
+        }
+    >;
 }) {
-    const queryClient = useQueryClient();
-    const mutation = useMutation({
-        mutationFn: updateDocs,
-        onSuccess: (obj: TCertification) => {
-            queryClient.setQueryData(["certification", cert.uuid], obj);
-            queryClient.setQueryData(["certification"], (old: TCertification[]) => {
-                return old.map((certification) =>
-                    certification.uuid === obj.uuid ? obj : certification,
-                );
-            });
-
-            onSuccess(`Successfully updated certification ${obj.name}`);
-        },
-        onError: (error) => {
-            onError(`Error: ${error.message}`);
-        },
-    });
-
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
-    const [docs, setDocs] = React.useState<TDocument[]>(documents);
+    const [docs, setDocs] = React.useState<TDocument[]>(
+        element.documents || [],
+    );
 
     const onSubmit = React.useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
@@ -76,24 +48,27 @@ export default function EditDocsModal({
 
             if (!hasEdits) return;
 
-            mutation.reset();
+            patchMutation.reset();
 
             // Run the mutation
-            mutation.mutate({data: cert, docs});
+            patchMutation.mutate({
+                uuid: element.uuid,
+                patch: { documents: docs },
+            });
         },
-        [mutation, hasEdits],
+        [patchMutation, hasEdits, docs],
     );
 
-    const wrapEdit = React.useCallback((i: number, prop: "name"|"link") => {
+    const wrapEdit = (i: number, prop: "name" | "link") => {
         return (val: any) => {
-            if (!docs[i]) docs[i] = {...emptyDoc}; // copy the emptyDoc template
+            if (!docs[i]) docs[i] = { ...emptyDoc }; // copy the emptyDoc template if necessary
 
             docs[i][prop] = val; // update the value
             setDocs([...docs]); // update the docs list
 
             setHasEdits(true);
         };
-    }, []);
+    };
 
     const isValid = React.useMemo(() => {
         for (let i = 0; i < docs.length; i++) {
@@ -104,19 +79,29 @@ export default function EditDocsModal({
 
         return hasEdits; // otherwise, invalid iff no edits made
     }, [hasEdits, docs]);
-    
+
     return (
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur">
+        <Modal
+            isOpen={isOpen}
+            onOpenChange={onOpenChange}
+            backdrop="blur"
+            size="3xl"
+        >
             <ModalContent>
                 {(onClose) => (
                     <Form
                         onSubmit={onSubmit}
                         className="flex flex-col gap-4 p-4"
                     >
-                        <div className="text-lg font-semibold">Edit Documents</div>
+                        <div className="text-lg font-semibold">
+                            Edit Documents
+                        </div>
 
                         {docs.map((doc, i) => (
-                            <div className="flex flex-row w-full gap-2 items-center" key={cert.uuid + "-doc" + i}>
+                            <div
+                                className="flex flex-row w-full gap-2 items-center"
+                                key={element.uuid + "-doc" + i}
+                            >
                                 <Input
                                     type="text"
                                     label="Name"
@@ -172,38 +157,36 @@ export default function EditDocsModal({
                             </div>
                         ))}
 
-                        <Button
-                            color="primary"
-                            className="w-full sm:w-1/3"
-                            isLoading={false}
-                            onPress={() => {
-                                setDocs([...docs, {...emptyDoc}]); // add a copy of the emptyDoc template
-                                setHasEdits(true);
-                            }}
-                        >
-                            Add document
-                        </Button>
-
-                        <div
-                            className="flex flex-row justify-between w-full"
-                        >
+                        <div className="flex flex-row justify-between w-full gap-2">
                             <Button
                                 variant="shadow"
                                 type="submit"
                                 color="primary"
                                 className="w-full sm:w-auto"
                                 isDisabled={!isValid}
-                                isLoading={mutation.isPending}
+                                isLoading={patchMutation.isPending}
                             >
                                 Submit
                             </Button>
-                            <Button
-                                variant="flat"
-                                color="danger"
-                                onPress={onClose}
-                            >
-                                Cancel
-                            </Button>
+                            <div className="flex gap-2">
+                                <Button
+                                    color="primary"
+                                    className="p-2 min-w-fit"
+                                    onPress={() => {
+                                        setDocs([...docs, { ...emptyDoc }]); // add a copy of the emptyDoc template
+                                        setHasEdits(true);
+                                    }}
+                                >
+                                    <PlusIcon className="size-6" />
+                                </Button>
+                                <Button
+                                    variant="flat"
+                                    color="danger"
+                                    onPress={onClose}
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
                         </div>
                     </Form>
                 )}

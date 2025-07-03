@@ -1,4 +1,4 @@
-import type { CertificationUUID } from "./certification";
+import type { CertificationUUID, TRequiredCertificate } from "./certification";
 import type { FileUUID, TFile } from "./file";
 import type { UnixTimestamp, UUID } from "./global";
 import type { MachineUUID } from "./machine";
@@ -9,22 +9,14 @@ export type AreaUUID = UUID;
 
 /**
  * TAreaStatus - A status about an area in the space
- * @property available - Whether the space is currently available for use
+ * @property timestamp - The timestamp this status occurred
+ * @property reserved - (optional) Whether the space is currently available for use
  * @property message - (optional) A status message about the state of the area
  */
 export type TAreaStatus = {
-    available: boolean;
-    message?: string;
-};
-
-/**
- * TAreaStatusLog - A log about a change in status for an area in the space
- * @property timestamp - The timestamp this log occurred
- * @property status - The new status of the area
- */
-export type TAreaStatusLog = {
     timestamp: UnixTimestamp;
-    status: TAreaStatus;
+    reserved?: boolean;
+    message?: string;
 };
 
 /**
@@ -39,18 +31,23 @@ export type TAreaStatusLog = {
  *      that are available in this area
  * @property images - (optional) A list of {@link TFile | File} UUIDs that are
  *     images of this area
- * @property current_statuses - A list of status objects indicating the current
- *      status of each of the `count` machines in the space
- * @property status_logs - A list of changes in status logged by timestamp
+ * @property status - The current status of the area.
+ * @property status_logs - A list of past statuses
  * @property required_certifications - (optional) UUIDs of certs required to
  *      use/reserve the area
  * @property authorized_roles - (optional) A list of UserRole UUIDs that are
  *      allowed to see this area. A user must have at least one of these
- *      roles to see this area in the area tab. If not present, this is a
- *      public area.
+ *      to reserve the area. If null, area needs to rolls to be reserved.
+ *      If set as the empty list, only admin users will be able to reserve this area.
  * @property reservable - (optional) Whether this area is allowed to be reserved.
  *      Only users with the required certifications and authorized roles can
  *      reserve this area.
+ * @property reserved - (optional) Whether this area is currently reserved.
+ *      Only users with the required certifications and authorized roles can
+ *      reserve this area.
+ * @property visible_to - (optional) A list of user roles that can view this area
+ *      on the main area page. If set to null, the area will be publicly visible
+ *      by anyone. If set to the empty list, the area will only be visible to admins.
  */
 export type TArea = {
     uuid: AreaUUID;
@@ -59,11 +56,9 @@ export type TArea = {
     documents?: TDocument[];
     equipment?: MachineUUID[];
     images?: FileUUID[];
-    current_status: TAreaStatus;
-    status_logs: TAreaStatusLog[];
-    required_certifications?: CertificationUUID[];
-    authorized_roles?: UserRoleUUID[];
+    required_certifications?: TRequiredCertificate[];
+    authorized_roles?: UserRoleUUID[] | null;
     reservable?: boolean;
+    reserved?: boolean;
+    visible_to?: UserRoleUUID[] | null;
 };
-
-export type TPublicAreaData = Omit<TArea, "uuid" | "status_logs">;

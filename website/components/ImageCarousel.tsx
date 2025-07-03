@@ -1,222 +1,289 @@
-
-import React, {useEffect, useState} from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FILE_RESOURCE_TYPE, FileUUID, TFile } from "../../common/file.ts";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 import { UUID } from "../../common/global.ts";
 import {
-   Button,
-   Modal,
-   ModalContent,
-   ModalHeader,
-   ModalFooter,
-   ModalBody,
-   useDisclosure,
+    Button,
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    useDisclosure,
 } from "@heroui/react";
 import {
-   TrashIcon,
-   PencilSquareIcon,
-   ChevronLeftIcon,
-   ChevronRightIcon,
-   PlusIcon,
+    TrashIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    PlusIcon,
+    ArrowUpTrayIcon,
+    ArrowUpOnSquareIcon,
 } from "@heroicons/react/24/outline";
 
-export default function ImageCarousel({ 
-    uuid, 
-    fileType, 
-    editable 
-}: { 
-    uuid: UUID; 
-    fileType: FILE_RESOURCE_TYPE; 
-    editable: boolean 
+async function deleteImage({
+    resource_type,
+    file_uuid,
+}: {
+    resource_type: FILE_RESOURCE_TYPE;
+    file_uuid: UUID;
 }) {
+    return (
+        await axios.delete<TFile[]>(
+            `/api/v3/file/by/${resource_type}/${file_uuid}`,
+        )
+    ).data;
+}
 
-   const [index, setIndex] = React.useState<number>(0);
-   const [images, setImages] = React.useState<TFile[]>([]);
+async function uploadImage({
+    resource_uuid,
+    resource_type,
+    file,
+}: {
+    resource_uuid: FileUUID;
+    resource_type: FILE_RESOURCE_TYPE;
+    file: File;
+}) {
+    const formData = new FormData();
+    formData.append("file", file);
+    return (
+        await await axios.post(
+            `/api/v3/file/for/${resource_type}/${resource_uuid}`,
+            formData,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            },
+        )
+    ).data;
+}
 
-   const fetchData = async () => {
-       const url = `/api/v3/file/by/${fileType}/${uuid}`;
-       const response = await axios.get(url);
-       setImages(response.data);
-   }
+export default function ImageCarousel({
+    resource_uuid,
+    resource_type,
+    editable = false,
+}: {
+    resource_uuid: UUID;
+    resource_type: FILE_RESOURCE_TYPE;
+    editable?: boolean;
+}) {
+    const {
+        data: images,
+        isLoading,
+        isFetching,
+    } = useQuery<TFile[]>({
+        queryKey: ["file", "by", resource_type, resource_uuid],
+        refetchOnWindowFocus: false,
+        placeholderData: [],
+    });
 
-   useEffect(() => {
-       fetchData();
-   }, [])
+    const [index, setIndex] = React.useState<number>(0);
 
-   //going to next slide functionality
-   const nextImage = () => {
-       setIndex((index + 1) % images.length);
-   }
-   const prevImage = () => {
-       setIndex((index - 1 + images.length) % images.length);
-   }
+    // If the files change externally, we need to reset the index
+    useEffect(() => {
+        setIndex(0);
+    }, [setIndex, isFetching]);
 
-   // Manage modal state
-   const { isOpen: editIsOpen,
-       onOpen: editOnOpen,
-       onOpenChange: editOnOpenChange,
-   } = useDisclosure();
+    //going to next slide functionality
+    const nextImage = useCallback(() => {
+        if (!images) return;
+        setIndex((index + 1) % images.length);
+    }, [index, setIndex, images?.length]);
+    const prevImage = useCallback(() => {
+        if (!images) return;
+        setIndex(index - 1 < 0 ? images.length - 1 : index - 1);
+    }, [index, setIndex, images?.length]);
 
+    // Manage modal state
+    const { isOpen: editIsOpen, onOpenChange: editOnOpenChange } =
+        useDisclosure();
 
-   const deleteImage = async (file_uuid: FileUUID, index:number) => {
-       // delete from backend functionality
-       const url = `/api/v3/file/by/${fileType}/${file_uuid}`
-       try {
-           const response = await axios.delete(url)
-       } catch (error:any) {
-           console.error('Error deleting file:', error.response?.data || error.message);
-       }
-       //reload images
-       const tempImages = [...images]
-       tempImages.splice(index, 1)
-       setImages(tempImages)
-   }
+    if (!images || isLoading) {
+        return <div></div>;
+    }
 
-
-   // letting users upload their own image
-   const uploadImage = async (file: File) => {
-       const formData = new FormData();
-       formData.append("file", file);
-
-       const url = `/api/v3/file/for/${fileType}/${uuid}`;
-
-       try {
-           const response = await axios.post(url, formData, {
-               headers: {
-                   "Content-Type": "multipart/form-data",
-               },
-           });
-           //reloading image
-           setImages([...images, response.data])
-
-           console.log("File uploaded successfully", response.data);
-       }
-       catch (error: any) {
-           console.error('Error uploading file:', error.response?.data || error.message);
-       }
-   }
-
-   // getting the image user wants
-   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-       if (e.target.files) {
-           uploadImage(e.target.files[0]);
-       }
-   };
-
-   return (
-           <div className='relative w-[100%] h-[100%]'>
-                {(images.length > 1) && 
-                    <Button 
-                    className='absolute left-[0%] top-[50%] translate-x-[50%] translate-y-[-50%]' 
-                    variant="flat" 
-                    size="sm" 
-                    isIconOnly 
-                    radius="md" 
+    return (
+        <div className="relative w-full h-full min-h-[150px] content-center">
+            {images.length > 1 && (
+                <Button
+                    className="absolute left-1 top-0 bottom-0 my-auto"
+                    variant="flat"
+                    size="sm"
+                    isIconOnly
+                    radius="md"
                     onPress={prevImage}
-                    >
-                        <ChevronLeftIcon className="size-6" />
-                    </Button>
-                }
-                {images.length > 0 ?
-                    <img className="w-[100%] h-[100%] object-cover" src={images[index] ? `/api/v3/file/download/${images[index].uuid}` : undefined} /> :
-                    
-                        <p className="text-center text-l text-bold">No Images Found</p>
-                    
-                }
-
-                   {editable &&
-                       <Button isIconOnly className='absolute bottom-2 right-2' onPress={editOnOpenChange}>
-                           <PencilSquareIcon className="size-6" />
-                       </Button>
-                   }
-                {(images.length > 1) && 
-                    <Button 
-                    className='absolute right-[0%] top-[50%] translate-x-[-50%] translate-y-[-50%]' 
-                    variant="flat" 
-                    size="sm" 
-                    isIconOnly 
-                    radius="md" 
-                    onPress={prevImage}
-                    >                   
-                        <ChevronRightIcon className="size-6" />
+                >
+                    <ChevronLeftIcon className="size-6" />
                 </Button>
-                }
-           <Modal
-               isOpen={editIsOpen}
-               placement="top-center"
-               onOpenChange={editOnOpenChange}
-               className="flex flex-col justify-center overflow-auto"
-               size="xl"
-               scrollBehavior="inside"
-               classNames={{
-                   base: "w-full max-w-3xl overflow-auto",
-               }}
-           >
-               <EditModal editOnOpenChange={editOnOpenChange} images={images} handleFileChange={handleFileChange} deleteImage={deleteImage}/>
-           </Modal>
+            )}
+            {images.length > 0 ? (
+                <img
+                    className="w-full h-full object-cover rounded-lg"
+                    src={
+                        images[index]
+                            ? `/api/v3/file/download/${images[index].uuid}`
+                            : undefined
+                    }
+                />
+            ) : (
+                <p className="text-center text-l text-bold">No Images Found</p>
+            )}
+
+            {editable && (
+                <Button
+                    isIconOnly
+                    className="absolute bottom-2 right-2"
+                    onPress={editOnOpenChange}
+                >
+                    <ArrowUpOnSquareIcon className="size-7" />
+                </Button>
+            )}
+            {images.length > 1 && (
+                <Button
+                    className="absolute right-1 top-0 bottom-0 my-auto"
+                    variant="flat"
+                    size="sm"
+                    isIconOnly
+                    radius="md"
+                    onPress={nextImage}
+                >
+                    <ChevronRightIcon className="size-6" />
+                </Button>
+            )}
+            <Modal
+                isOpen={editIsOpen}
+                placement="top-center"
+                onOpenChange={editOnOpenChange}
+                className="flex flex-col justify-center overflow-auto"
+                size="xl"
+                scrollBehavior="inside"
+                classNames={{
+                    base: "w-full max-w-3xl overflow-auto",
+                }}
+            >
+                <EditModal
+                    editOnOpenChange={editOnOpenChange}
+                    images={images}
+                    resource_type={resource_type}
+                    resource_uuid={resource_uuid}
+                />
+            </Modal>
         </div>
-   )
-  
+    );
 }
 
 //Modal for Editing
-function EditModal({ 
-    editOnOpenChange, 
-    images, 
-    handleFileChange, 
-    deleteImage
-}: { 
-    editOnOpenChange: () => void; images: TFile[]; 
-    handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
-    deleteImage: (file_uuid: FileUUID, index:number)=> void
+function EditModal({
+    editOnOpenChange,
+    images,
+    resource_type,
+    resource_uuid,
+}: {
+    editOnOpenChange: () => void;
+    images: TFile[];
+    resource_type: FILE_RESOURCE_TYPE;
+    resource_uuid: UUID;
 }) {
+    const queryClient = useQueryClient();
+
+    const deleteMutation = useMutation({
+        mutationFn: deleteImage,
+        onSuccess: (data: TFile[]) => {
+            queryClient.invalidateQueries({
+                queryKey: ["file", "by", resource_type, resource_uuid],
+            });
+        },
+    });
+
+    const uploadMutation = useMutation({
+        mutationFn: uploadImage,
+        onSuccess: (data: TFile[]) => {
+            queryClient.setQueryData(
+                ["file", "by", resource_type, resource_uuid],
+                (old: TFile[]) => old.concat(data),
+            );
+        },
+    });
+
+    // getting the image user wants
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        e.preventDefault();
+        if (e.target.files) {
+            uploadMutation.mutate({
+                resource_uuid: resource_uuid,
+                resource_type: resource_type,
+                file: e.target.files[0],
+            });
+        }
+    };
+
     return (
         <>
-            <input type="file" id="imageUpload" className="hidden" onChange={handleFileChange}/>
+            <input
+                type="file"
+                id="imageUpload"
+                className="hidden"
+                onChange={handleFileChange}
+            />
             <ModalContent className="flex flex-col justify-center">
                 <ModalHeader>Add and Delete Images</ModalHeader>
 
                 <ModalBody>
                     <div className="flex flex-row flex-wrap gap-6 items-center justify-center">
-                     
                         {images.map((image, index) => {
                             return (
-                                <div key={index} className="w-[45%] h-[30vh] flex flex-col items-center gap-4">
-                                    <img className="w-full h-3/4 object-cover" src={image.path ? `/api/v3/file/download/${images[index].uuid}` :  undefined} /> {/* change src to images[index].path*/}
+                                <div
+                                    key={index}
+                                    className="w-[45%] h-[30vh] flex flex-col items-center gap-4"
+                                >
+                                    <img
+                                        className="w-full h-3/4 object-cover"
+                                        src={
+                                            image.path
+                                                ? `/api/v3/file/download/${images[index].uuid}`
+                                                : undefined
+                                        }
+                                    />
                                     <div className="flex gap-4 flex-row items-center">
-                                        {/* <Button color="primary" isIconOnly onPress={() => {document.getElementById("imageUpload")?.click();}}>
-                                            <PencilSquareIcon className="size-6" />
-                                        </Button>  */}
-                                        <Button isIconOnly color="danger" onPress={() => deleteImage(image.uuid, index)}>
+                                        <Button
+                                            isIconOnly
+                                            color="danger"
+                                            onPress={() =>
+                                                deleteMutation.mutate({
+                                                    resource_type:
+                                                        resource_type,
+                                                    file_uuid: image.uuid,
+                                                })
+                                            }
+                                        >
                                             <TrashIcon className="size-6" />
                                         </Button>
                                     </div>
                                 </div>
-                            )
-                        }
-                        )}
-
-                        <div className={images.length % 2 ? "w-[45%] h-[7vw] flex flex-col items-center  gap-2" : "w-[45%] h-[4vw] flex flex-col items-center justify-center gap-2"}>
-                            <Button
-                              color="primary"
-                              endContent={<PlusIcon className="size-6" />}
-                              onPress={() => {document.getElementById("imageUpload")?.click();}}
-                            >
-                                Add New Images
-                            </Button>
-                        </div>
+                            );
+                        })}
                     </div>
                 </ModalBody>
-                <ModalFooter>
-                    <Button color="primary" variant="flat" onPress={editOnOpenChange} >
+                <ModalFooter className="justify-between">
+                    <Button
+                        color="primary"
+                        endContent={<PlusIcon className="size-6" />}
+                        onPress={() => {
+                            document.getElementById("imageUpload")?.click();
+                        }}
+                    >
+                        Add Image
+                    </Button>
+                    <Button
+                        color="primary"
+                        variant="flat"
+                        onPress={editOnOpenChange}
+                    >
                         Done
                     </Button>
                 </ModalFooter>
             </ModalContent>
         </>
-       
     );
 }
-

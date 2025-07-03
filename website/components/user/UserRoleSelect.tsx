@@ -7,6 +7,7 @@ import {
 import { TUserRole, UserRoleUUID } from "common/user";
 import UserRole from "./UserRole";
 import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
 
 export function UserRoleSelect({
     roles,
@@ -15,16 +16,19 @@ export function UserRoleSelect({
     defaultSelectedKeys,
     isLoading,
     isDisabled = false,
+    isRequired = false,
+    selectionMode = "multiple",
     color = "primary",
     variant = "faded",
     className = "",
     classNames = {
         label: "pl-2",
-        value: "text-default-500",
+        value: "text-default-500 min-h-[48px] content-center",
     },
     placeholder = "Select roles",
     label = "Roles",
     labelPlacement = "outside",
+    viewOnly = false,
 }: {
     roles?: TUserRole[]; // optional, if not passed will get internally
     selectedKeys?: UserRoleUUID[]; // optional, otherwise no selected roles
@@ -32,6 +36,8 @@ export function UserRoleSelect({
     defaultSelectedKeys?: UserRoleUUID[]; // optional, otherwise no default selected roles
     isLoading?: boolean; // only needed if roles is passed
     isDisabled?: boolean; // optional, defaults to false
+    isRequired?: boolean; // optional, defaults to false
+    selectionMode?: "single" | "multiple"; // optional, defaults to multiple selection
     color?:
         | "primary"
         | "default"
@@ -44,10 +50,12 @@ export function UserRoleSelect({
     classNames?: {
         label?: string;
         value?: string;
-    }; // optinal, has default styles
+        trigger?: string;
+    }; // optional, has default styles
     placeholder?: string; // optional, defaults to "Select roles"
     label?: string; // optional, defaults to "Roles"
     labelPlacement?: "outside" | "outside-left" | "inside"; // optional, defaults to "outside"
+    viewOnly?: boolean; // Whether this should only be for viewing
 }) {
     const { data: queryRoles, isLoading: queryLoading } = useQuery<TUserRole[]>(
         {
@@ -61,12 +69,14 @@ export function UserRoleSelect({
         <Select
             items={allRoles ?? []}
             name="roles"
+            aria-label={label || "Roles"}
             selectedKeys={selectedKeys}
             onSelectionChange={onSelectionChange}
             defaultSelectedKeys={defaultSelectedKeys}
             isLoading={isLoading || queryLoading}
-            isDisabled={isDisabled}
-            selectionMode="multiple"
+            isDisabled={isDisabled || viewOnly}
+            isRequired={isRequired}
+            selectionMode={selectionMode}
             isMultiline
             placeholder={placeholder}
             size="lg"
@@ -76,7 +86,9 @@ export function UserRoleSelect({
             labelPlacement={labelPlacement}
             classNames={classNames}
             // Base classes
-            className={className}
+            className={clsx(viewOnly ? "opacity-100" : "", className)}
+            selectorIcon={viewOnly ? <span /> : undefined}
+            tabIndex={viewOnly ? -1 : undefined}
             renderValue={(selectedKeys) => {
                 if (selectedKeys.length === 0) {
                     return "";
@@ -106,11 +118,7 @@ export function UserRoleSelect({
             }}
         >
             {(role) => (
-                <SelectItem
-                    key={role.uuid}
-                    value={role.uuid}
-                    textValue={role.title}
-                >
+                <SelectItem key={role.uuid} textValue={role.title}>
                     <UserRole role_uuid={role.uuid} />
                 </SelectItem>
             )}

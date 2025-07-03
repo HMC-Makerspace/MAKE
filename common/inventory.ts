@@ -1,6 +1,7 @@
 import { AreaUUID } from "./area";
-import type { CertificationUUID } from "./certification";
+import type { TRequiredCertificate } from "./certification";
 import type { UUID } from "./global";
+import { MachineUUID } from "./machine";
 import type { UserRoleUUID } from "./user";
 
 export type InventoryItemUUID = UUID;
@@ -8,7 +9,7 @@ export type InventoryItemUUID = UUID;
 /**
  * ITEM_RELATIVE_QUANTITY - The relative (high/low) of an item
  */
-enum ITEM_RELATIVE_QUANTITY {
+export enum ITEM_RELATIVE_QUANTITY {
     LOW = -1,
     HIGH = -2,
 }
@@ -26,7 +27,6 @@ export type TInventoryItemLocation = {
     area: AreaUUID;
     container?: string;
     specific?: string;
-    quantity: ItemQuantity;
 };
 
 /**
@@ -36,9 +36,11 @@ export type TInventoryItemLocation = {
  * @member Kit - a collection of multiple items
  */
 export enum ITEM_ROLE {
-    TOOL = "T",
-    MATERIAL = "M",
-    KIT = "K",
+    TOOL = "tool",
+    MATERIAL = "material",
+    KIT = "kit",
+    MACHINE = "machine",
+    AREA = "area",
 }
 
 /**
@@ -50,21 +52,41 @@ export enum ITEM_ROLE {
  * @member TAKE_HOME - can take home freely without needing to checkout
  */
 export enum ITEM_ACCESS_TYPE {
-    USE_IN_SPACE = 0,
+    USE_IN_SPACE = 1,
     CHECKOUT_IN_SPACE,
     CHECKOUT_TAKE_HOME,
     TAKE_HOME,
 }
 
 /**
- * TItemCertificate: The specification for a certification required to use an item
- * @property certification_uuid - The UUID of the required certification
- * @property required_level - The minimum cert level needed to use this item
+ * ITEM_ACCESS_DESCRIPTORS: Descriptions of the above item access types
  */
-export type TItemCertificate = {
-    certification_uuid: CertificationUUID;
-    required_level: number;
-};
+export const ITEM_ACCESS_DESCRIPTORS: {
+    type: ITEM_ACCESS_TYPE;
+    label: string;
+    description: string;
+}[] = [
+    {
+        type: ITEM_ACCESS_TYPE.TAKE_HOME,
+        label: "Take Home",
+        description: "Free to use in space or take home without checking out",
+    },
+    {
+        type: ITEM_ACCESS_TYPE.USE_IN_SPACE,
+        label: "Use In Space",
+        description: "Free to use in the space without checking out",
+    },
+    {
+        type: ITEM_ACCESS_TYPE.CHECKOUT_IN_SPACE,
+        label: "Checkout, Use In Space",
+        description: "Requires a checkout, and can only be used in the space",
+    },
+    {
+        type: ITEM_ACCESS_TYPE.CHECKOUT_TAKE_HOME,
+        label: "Checkout, Take Home",
+        description: "Requires a checkout, but can be used or taken home",
+    },
+];
 
 /**
  * TInventoryItem - Unique object for item
@@ -73,6 +95,10 @@ export type TItemCertificate = {
  * @property long_name - (optional) contains brand, exact type, etc.
  * @property role - One of T (for Tool), M (for Material), or K (for Kit)
  * @property access_type - See {@link ITEM_ACCESS_TYPE} documentation
+ * @property quantity - The quantity of the item in the space
+ * @property available - (optional) The current available quantity
+ *      after accounting for checkouts/reservations (only applicable to items
+ *      with a number quantity, not relative quantity)
  * @property locations - See {@link TLocation} documentation
  * @property reorder_url - (optional) url for reordering item
  * @property serial_number - (optional) serial number of item
@@ -81,7 +107,7 @@ export type TItemCertificate = {
  * @property required_certs - UUIDs of certs required to use item
  * @property authorized_roles - (optional) A list of UserRole UUIDs that are
  *      allowed to use this item. A user must have at least one of
- *      these roles to checkout the given item. If not present, any user may
+ *      these roles to checkout the given item. If null, any user may
  *      checkout this item.
  */
 export type TInventoryItem = {
@@ -89,12 +115,14 @@ export type TInventoryItem = {
     name: string;
     long_name?: string;
     role: ITEM_ROLE;
+    linked_uuid?: MachineUUID | AreaUUID;
     access_type: ITEM_ACCESS_TYPE;
+    quantity: ItemQuantity;
+    available: ItemQuantity;
     locations: TInventoryItemLocation[];
     reorder_url?: string;
     serial_number?: string;
-    kit_contents?: InventoryItemUUID[];
     keywords?: string[];
-    required_certifications?: TItemCertificate[];
-    authorized_roles?: UserRoleUUID[];
+    required_certifications?: TRequiredCertificate[];
+    authorized_roles?: UserRoleUUID[] | null;
 };

@@ -27,8 +27,8 @@ export enum CERTIFICATION_VISIBILITY {
  * @property documents - (optional) A list of documents that are related to this
  *     certification, such as a training manual or a Google form link.
  * @property authorized_roles - (optional) a list of UserRole UUIDs that are
- *      allowed to see this workshop. If not present, any user may see this
- *      workshop
+ *      allowed to see this certification. If not present, any user may see this
+ *      certification
  */
 export type TCertification = {
     uuid: CertificationUUID;
@@ -57,4 +57,15 @@ export type TCertificate = {
     level: number;
     timestamp_granted: UnixTimestamp;
     timestamp_expires?: UnixTimestamp;
+};
+
+/**
+ * TRequiredCertificate: The specification for a certification required to use an item,
+ *      machine, or area.
+ * @property certification_uuid - The UUID of the required certification
+ * @property required_level - The minimum cert level needed to use this item
+ */
+export type TRequiredCertificate = {
+    certification_uuid: CertificationUUID;
+    required_level: number;
 };

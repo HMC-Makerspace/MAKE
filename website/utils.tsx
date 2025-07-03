@@ -1,8 +1,9 @@
 import {
+    CalendarDateTime,
+    fromAbsolute,
+    parseDateTime,
     Time,
     ZonedDateTime,
-    parseZonedDateTime,
-    now,
 } from "@internationalized/date";
 import { TUser, TUserRole } from "common/user";
 
@@ -61,6 +62,10 @@ export function timestampToTime(timestamp: number) {
         Math.floor((timestamp / 60) % 60),
         timestamp % 3600,
     );
+}
+
+export function zonedDateTimeToTimestamp(zonedDateTime: ZonedDateTime) {
+    return zonedDateTime.toDate().getTime() / 1000;
 }
 
 export function getUserRoleHierarchy(user: TUser, roles: TUserRole[]) {

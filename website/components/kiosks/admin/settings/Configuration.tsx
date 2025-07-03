@@ -11,7 +11,7 @@ import {
 } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TConfig } from "common/config";
-import { SHIFT_DAY } from "../../../../../common/shift";
+import { SHIFT_DAY, SHIFT_DAYS } from "../../../../../common/shift";
 import { UserRoleSelect } from "../../../../components/user/UserRoleSelect";
 import axios from "axios";
 import React from "react";
@@ -119,6 +119,7 @@ export default function Configuration({ config }: { config: TConfig }) {
                 first_display_day: config.schedule.first_display_day,
                 schedulable_roles: config.schedule.schedulable_roles,
                 increment_sec: config.schedule.increment_sec,
+                timezone: config.schedule.timezone,
             },
         };
 
@@ -186,13 +187,17 @@ export default function Configuration({ config }: { config: TConfig }) {
         if (days_open.length === 0) {
             body.schedule.days_open = [0, 1, 2, 3, 4, 5, 6];
         } else {
-            body.schedule.days_open = days_open.map((day) => parseInt(day));
+            body.schedule.days_open = days_open
+                .map((day) => SHIFT_DAYS.find((d) => d.key === day)?.day)
+                .filter((d) => d != undefined);
         }
 
-        const first_display_day = parseInt(
-            formData.get("first_display_day") as string,
-        );
-        if (isNaN(first_display_day)) {
+        const first_display_key = formData.get("first_display_day") as string;
+
+        const first_display_day = SHIFT_DAYS.find(
+            (d) => d.key === first_display_key,
+        )?.day;
+        if (!first_display_day) {
             body.schedule.first_display_day = 0;
         } else {
             body.schedule.first_display_day = first_display_day;
@@ -201,6 +206,11 @@ export default function Configuration({ config }: { config: TConfig }) {
         const schedulable_roles = formData.getAll("roles") as string[];
         if (schedulable_roles.length > 0) {
             body.schedule.schedulable_roles = schedulable_roles;
+        }
+
+        const timezone = formData.get("timezone") as string;
+        if (timezone) {
+            body.schedule.timezone = timezone;
         }
 
         // Update the config
@@ -392,10 +402,11 @@ export default function Configuration({ config }: { config: TConfig }) {
                                 description="The days of the week the space is open, to display on the schedule. Defaults to all days."
                             >
                                 <Select
+                                    items={SHIFT_DAYS}
                                     name="days_open"
                                     defaultSelectedKeys={
                                         config.schedule.days_open?.map(
-                                            (day) => `${day}`,
+                                            (day) => `day${day}`,
                                         ) ?? []
                                     }
                                     selectionMode="multiple"
@@ -414,21 +425,18 @@ export default function Configuration({ config }: { config: TConfig }) {
                                             .join(", ");
                                     }}
                                 >
-                                    {[0, 1, 2, 3, 4, 5, 6].map((index) => (
+                                    {(item) => (
                                         <SelectItem
-                                            key={`${index}`}
-                                            value={SHIFT_DAY[index]}
-                                            aria-label={SHIFT_DAY[index]}
-                                            textValue={SHIFT_DAY[
-                                                index
-                                            ]?.toLowerCase()}
+                                            key={item.key}
+                                            aria-label={item.name}
+                                            textValue={item.name}
                                             classNames={{
                                                 title: "capitalize",
                                             }}
                                         >
-                                            {SHIFT_DAY[index]?.toLowerCase()}
+                                            {item.name}
                                         </SelectItem>
-                                    ))}
+                                    )}
                                 </Select>
                             </ConfigItem>
                             <ConfigItem
@@ -436,6 +444,7 @@ export default function Configuration({ config }: { config: TConfig }) {
                                 description="The first day of the week to display on the schedule. Defaults to Sunday."
                             >
                                 <Select
+                                    items={SHIFT_DAYS}
                                     name="first_display_day"
                                     defaultSelectedKeys={[
                                         `day${config.schedule.first_display_day ?? 0}`,
@@ -449,21 +458,18 @@ export default function Configuration({ config }: { config: TConfig }) {
                                         value: "capitalize",
                                     }}
                                 >
-                                    {[0, 1, 2, 3, 4, 5, 6].map((index) => (
+                                    {(item) => (
                                         <SelectItem
-                                            key={`day${index}`}
-                                            value={SHIFT_DAY[index]}
-                                            aria-label={SHIFT_DAY[index]}
-                                            textValue={SHIFT_DAY[
-                                                index
-                                            ]?.toLowerCase()}
+                                            key={item.key}
+                                            aria-label={item.name}
+                                            textValue={item.name}
                                             classNames={{
                                                 title: "capitalize",
                                             }}
                                         >
-                                            {SHIFT_DAY[index]?.toLowerCase()}
+                                            {item.name}
                                         </SelectItem>
-                                    ))}
+                                    )}
                                 </Select>
                             </ConfigItem>
                             <ConfigItem

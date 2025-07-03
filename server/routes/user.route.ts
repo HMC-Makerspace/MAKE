@@ -394,7 +394,6 @@ router.get("/self", async (req: Request, res: UserResponse) => {
 
     req.log.debug({
         msg: `Found user by uuid ${requesting_uuid}`,
-        user: user,
     });
 
     res.status(StatusCodes.OK).json(user);
