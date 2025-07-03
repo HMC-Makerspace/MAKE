@@ -5,7 +5,7 @@ import Shift from "./Shift";
 import { SHIFT_DAY } from "../../../../../common/shift";
 import { TUser, TUserRole, UserUUID } from "common/user";
 import clsx from "clsx";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function Schedule({
     schedule,
@@ -53,6 +53,25 @@ export default function Schedule({
     const selected_user = selectedUser
         ? users.find((u) => u.uuid === selectedUser)
         : undefined;
+
+    const handleKeyPress = useCallback((event: KeyboardEvent) => {
+        if (event.key === "Escape") {
+            // Clear selected
+            console.log("Clearing");
+            setSelectedUsers(new Set());
+            setSelectedShift([0, 0, 0]);
+        }
+    }, []);
+
+    useEffect(() => {
+        // attach the event listener
+        document.addEventListener("keydown", handleKeyPress);
+
+        // remove the event listener
+        return () => {
+            document.removeEventListener("keydown", handleKeyPress);
+        };
+    }, [handleKeyPress]);
 
     return (
         <Card className="w-full grow p-5 overflow-auto h-full" shadow="sm">

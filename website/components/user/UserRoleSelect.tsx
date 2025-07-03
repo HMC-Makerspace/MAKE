@@ -7,6 +7,7 @@ import {
 import { TUserRole, UserRoleUUID } from "common/user";
 import UserRole from "./UserRole";
 import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
 
 export function UserRoleSelect({
     roles,
@@ -27,6 +28,7 @@ export function UserRoleSelect({
     placeholder = "Select roles",
     label = "Roles",
     labelPlacement = "outside",
+    viewOnly = false,
 }: {
     roles?: TUserRole[]; // optional, if not passed will get internally
     selectedKeys?: UserRoleUUID[]; // optional, otherwise no selected roles
@@ -48,10 +50,12 @@ export function UserRoleSelect({
     classNames?: {
         label?: string;
         value?: string;
+        trigger?: string;
     }; // optional, has default styles
     placeholder?: string; // optional, defaults to "Select roles"
     label?: string; // optional, defaults to "Roles"
     labelPlacement?: "outside" | "outside-left" | "inside"; // optional, defaults to "outside"
+    viewOnly?: boolean; // Whether this should only be for viewing
 }) {
     const { data: queryRoles, isLoading: queryLoading } = useQuery<TUserRole[]>(
         {
@@ -65,11 +69,12 @@ export function UserRoleSelect({
         <Select
             items={allRoles ?? []}
             name="roles"
+            aria-label={label || "Roles"}
             selectedKeys={selectedKeys}
             onSelectionChange={onSelectionChange}
             defaultSelectedKeys={defaultSelectedKeys}
             isLoading={isLoading || queryLoading}
-            isDisabled={isDisabled}
+            isDisabled={isDisabled || viewOnly}
             isRequired={isRequired}
             selectionMode={selectionMode}
             isMultiline
@@ -81,7 +86,9 @@ export function UserRoleSelect({
             labelPlacement={labelPlacement}
             classNames={classNames}
             // Base classes
-            className={className}
+            className={clsx(viewOnly ? "opacity-100" : "", className)}
+            selectorIcon={viewOnly ? <span /> : undefined}
+            tabIndex={viewOnly ? -1 : undefined}
             renderValue={(selectedKeys) => {
                 if (selectedKeys.length === 0) {
                     return "";

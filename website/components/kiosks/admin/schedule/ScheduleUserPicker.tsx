@@ -2,8 +2,10 @@ import { Card, Table, TableRow, Selection } from "@heroui/react";
 import { TConfig } from "common/config";
 import { TUser, TUserRole } from "common/user";
 import UsersTable from "../users/UsersTable";
+import { ScheduleUUID } from "common/schedule";
 
 export default function ScheduleUserPicker({
+    schedule_uuid,
     users,
     roles,
     config,
@@ -11,6 +13,7 @@ export default function ScheduleUserPicker({
     selectedUsers,
     setSelectedUsers,
 }: {
+    schedule_uuid?: ScheduleUUID;
     users: TUser[];
     roles: TUserRole[];
     config: TConfig;
@@ -32,7 +35,26 @@ export default function ScheduleUserPicker({
                 onCreate={() => {}} // Not used
                 fullHeader={false}
                 // Only show columns relevant to hiring
-                defaultColumns={["name", "active_roles"]}
+                defaultColumns={["name", "active_roles", "shifts"]}
+                extraColumns={[
+                    {
+                        name: "Shift #",
+                        id: "shifts",
+                    },
+                ]}
+                emptyContent="Select a shift to see availability"
+                customColumnComponents={{
+                    shifts: (u) =>
+                        `${
+                            u.work_schedules?.find(
+                                (a) => a.schedule == schedule_uuid,
+                            )?.min_shift_count || 0
+                        } - ${
+                            u.work_schedules?.find(
+                                (a) => a.schedule == schedule_uuid,
+                            )?.max_shift_count || 0
+                        }`,
+                }}
             />
         </Card>
     );

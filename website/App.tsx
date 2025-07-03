@@ -3,13 +3,15 @@ import { Route, Routes } from "react-router-dom";
 import HomePage from "./pages/Home";
 import AdminPage from "./pages/admin/Admin";
 import UsersPage from "./pages/admin/Users";
-import CertificationsPage from "./pages/admin/Certifications"
+import CheckoutsPage from "./pages/admin/Checkouts";
+import CertificationsPage from "./pages/admin/Certifications";
 import RestockPage from "./pages/admin/Restock";
 import RolesPage from "./pages/admin/Roles";
 import SchedulePage from "./pages/admin/Schedules";
 import SettingsPage from "./pages/admin/Settings";
 import AreasPage from "./pages/admin/Areas";
 import MachinesPage from "./pages/admin/Machines";
+import InventoryPage from "./pages/admin/Inventory";
 
 const App: React.FC = () => {
     return (
@@ -17,6 +19,7 @@ const App: React.FC = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/users" element={<UsersPage />} />
+            <Route path="/admin/checkouts" element={<CheckoutsPage />} />
             <Route
                 path="/admin/certifications"
                 element={<CertificationsPage />}
@@ -27,6 +30,7 @@ const App: React.FC = () => {
             <Route path="/admin/schedule" element={<SchedulePage />} />
             <Route path="/admin/settings" element={<SettingsPage />} />
             <Route path="/admin/restocks" element={<RestockPage />} />
+            <Route path="/admin/inventory" element={<InventoryPage />} />
         </Routes>
     );
 };
