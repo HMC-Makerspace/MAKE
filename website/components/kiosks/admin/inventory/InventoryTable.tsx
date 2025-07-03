@@ -65,8 +65,10 @@ export default function InventoryTable({
     areas,
     selectedKeys,
     onSelectionChange,
+    doubleClickAction,
+    multiSelect = true,
     isLoading,
-    columns = baseColumns,
+    extraColumns = [],
     defaultColumns = [
         "role",
         "name",
@@ -86,8 +88,10 @@ export default function InventoryTable({
     areas: TArea[];
     selectedKeys: Selection;
     onSelectionChange: (selectedKeys: Selection) => void;
+    doubleClickAction?: (key: React.Key) => void;
+    multiSelect?: boolean;
     isLoading: boolean;
-    columns?: { name: string; id: string }[];
+    extraColumns?: { name: string; id: string }[];
     defaultColumns?: string[];
     customColumnComponents?: {
         [column_id: string]: (item: TInventoryItem) => React.ReactNode;
@@ -100,6 +104,8 @@ export default function InventoryTable({
         new Set(defaultColumns),
     );
     const [search, setSearch] = React.useState<string>("");
+
+    const columns = baseColumns.concat(extraColumns);
 
     // A fuse instance for filtering the content, memoized to prevent
     // unnecessary reinitialization on every render but updated when the
@@ -162,6 +168,7 @@ export default function InventoryTable({
                                             <ChevronDownIcon className="size-6 text-small" />
                                         }
                                         variant="flat"
+                                        tabIndex={-1}
                                     >
                                         Columns
                                     </Button>
@@ -210,7 +217,8 @@ export default function InventoryTable({
                 visibleColumns={visibleColumns}
                 selectedKeys={selectedKeys}
                 onSelectionChange={onSelectionChange}
-                multiSelect={true}
+                doubleClickAction={doubleClickAction}
+                multiSelect={multiSelect}
                 showSelectionCheckboxes={false}
                 customColumnComponents={{
                     // put stuff here
@@ -279,7 +287,7 @@ export default function InventoryTable({
                         </div>
                     ),
                     required_certifications: (i) => (
-                        <div className="flex flex-row gap-2 overflow-auto max-w-1/2">
+                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
                             {i.required_certifications?.map((c) => (
                                 <CertificationTag
                                     key={c.certification_uuid}
