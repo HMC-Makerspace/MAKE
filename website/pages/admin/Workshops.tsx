@@ -8,10 +8,15 @@ import { TUser, TUserRole } from "common/user";
 import { useQuery } from "@tanstack/react-query";
 import WorkshopTable from "../../components/kiosks/admin/workshops/WorkshopTable";
 import React from 'react'
+import { TConfig } from "common/config";
 
 export default function WorkshopPage() {
     // getting workshop data
-    const { data: workshops, isLoading: workshopsLoading, isError } = useQuery<TWorkshop[]>({
+    const {
+        data: workshops,
+        isLoading: workshopsLoading,
+        isError,
+    } = useQuery<TWorkshop[]>({
         queryKey: ["workshop"],
         refetchOnWindowFocus: false,
     });
@@ -23,13 +28,20 @@ export default function WorkshopPage() {
     });
 
     // Get all certification data
-    const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>({
-        queryKey: ["certification"],
-        refetchOnWindowFocus: false,
-    });
+    const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
+        {
+            queryKey: ["certification"],
+            refetchOnWindowFocus: false,
+        },
+    );
 
     const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
         queryKey: ["user", "role"],
+        refetchOnWindowFocus: false,
+    });
+
+    const { data: config, isLoading: configLoading } = useQuery<TConfig>({
+        queryKey: ["config"],
         refetchOnWindowFocus: false,
     });
 
@@ -38,10 +50,12 @@ export default function WorkshopPage() {
         certs === undefined ||
         users === undefined ||
         roles === undefined ||
+        config === undefined ||
         workshopsLoading ||
         certsLoading ||
         usersLoading ||
-        rolesLoading
+        rolesLoading ||
+        configLoading
     ) {
         return (
             <div className="w-full h-screen flex justify-center py-auto">
@@ -49,22 +63,23 @@ export default function WorkshopPage() {
             </div>
         );
     }
-    
+
     return (
         <AdminLayout pageHref={"/admin/workshops"}>
             {isError ? (
-            <div className="font-bold text-xl text-danger-400 text-center">
-                Error loading restock data
-            </div>
-        ) : (
-            <WorkshopTable 
-                workshops={workshops ?? []}  
-                isLoading={workshopsLoading}
-                users={users}
-                certs={certs}
-                roles={roles}
-            />
-        )}
+                <div className="font-bold text-xl text-danger-400 text-center">
+                    Error loading restock data
+                </div>
+            ) : (
+                <WorkshopTable
+                    workshops={workshops ?? []}
+                    users={users}
+                    certs={certs}
+                    roles={roles}
+                    config={config}
+                    isLoading={workshopsLoading}
+                />
+            )}
         </AdminLayout>
     );
 }

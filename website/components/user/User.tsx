@@ -13,6 +13,7 @@ export function MAKEUser({
         name: "hidden sm:block",
     },
     size = "lg",
+    color = "default",
     onClick = () => {},
     defaultElement = (
         <Button
@@ -39,6 +40,14 @@ export function MAKEUser({
     };
     /** The size of the user */
     size?: "sm" | "md" | "lg";
+    /** The color of the user's button */
+    color?:
+        | "default"
+        | "primary"
+        | "secondary"
+        | "success"
+        | "warning"
+        | "danger";
     /** A function to run when the user is clicked, which accepts the user's uuid */
     onClick?: (uuid: string) => void;
     defaultElement?: React.ReactNode;
@@ -68,10 +77,10 @@ export function MAKEUser({
         return (
             <Button
                 className={clsx(
-                    "bg-default-300 px-3",
-                    "justify-items-center sm:w-auto",
+                    "justify-items-center sm:w-auto px-3",
                     className,
                 )}
+                color={color}
                 onPress={() => onClick(user_uuid)}
                 size={size}
             >
