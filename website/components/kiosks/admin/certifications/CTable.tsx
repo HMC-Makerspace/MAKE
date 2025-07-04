@@ -31,19 +31,6 @@ import { TDocument } from "common/file";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const defaultCert: TCertification = {
-    uuid: "",
-    name: "",
-    description: "",
-    visibility: CERTIFICATION_VISIBILITY.PUBLIC,
-    color: "",
-    max_level: 0,
-    seconds_valid_for: 0,
-    documents: [],
-    authorized_roles: [],
-    prerequisites: [],
-};
-
 const columns = [
     { name: "UUID", id: "uuid" },
     { name: "Name", id: "name", sortable: true },
@@ -107,15 +94,14 @@ export default function CertificationsTable({
     const [isOpen, setIsOpen] = React.useState<boolean>(false); // whether modal is open
 
     // Edit docs modal
-    const [certOpenDoc, setCertOpenDoc] =
-        React.useState<TCertification>(defaultCert); // the certification with edited docs
+    const [certOpenDoc, setCertOpenDoc] = React.useState<TCertification>(); // the certification with edited docs
     const [docOpen, setDocOpen] = React.useState<boolean>(false); // whether modal is open
 
     const queryClient = useQueryClient();
     const mutation = useMutation({
         mutationFn: updateCertDocs,
         onSuccess: (obj: TCertification) => {
-            queryClient.setQueryData(["certification", certOpenDoc.uuid], obj);
+            queryClient.setQueryData(["certification", certOpenDoc?.uuid], obj);
             queryClient.setQueryData(
                 ["certification"],
                 (old: TCertification[]) => {
@@ -200,7 +186,19 @@ export default function CertificationsTable({
                             isDisabled={isLoading}
                             startContent={<PlusIcon className="size-6" />}
                             onPress={() => {
-                                setEditCert(defaultCert);
+                                setEditCert({
+                                    uuid: crypto.randomUUID(),
+                                    name: "",
+                                    description: "",
+                                    visibility:
+                                        CERTIFICATION_VISIBILITY.PRIVATE,
+                                    color: "",
+                                    max_level: 0,
+                                    seconds_valid_for: 0,
+                                    documents: [],
+                                    authorized_roles: [],
+                                    prerequisites: [],
+                                });
                                 setIsNew(true);
                                 setIsOpen(true);
                             }}
@@ -308,7 +306,7 @@ export default function CertificationsTable({
                 />
             )}
 
-            {docOpen && (
+            {docOpen && certOpenDoc && (
                 <EditDocsModal
                     key={"certdocedit-" + certOpenDoc.uuid}
                     element={certOpenDoc}
