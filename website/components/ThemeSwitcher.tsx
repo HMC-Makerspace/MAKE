@@ -1,8 +1,26 @@
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Button } from "@heroui/react";
+import { Button, SlotsToClasses, Tab, Tabs } from "@heroui/react";
+import { MoonIcon, SunIcon } from "@heroicons/react/24/solid";
+import clsx from "clsx";
 
-export function ThemeSwitcher() {
+export function ThemeSwitcher({
+    className = "",
+    classNames = {
+        tabList: "gap-0",
+    },
+}: {
+    className?: string;
+    classNames?: SlotsToClasses<
+        | "base"
+        | "tabList"
+        | "tab"
+        | "tabContent"
+        | "cursor"
+        | "panel"
+        | "tabWrapper"
+    >;
+}) {
     const [mounted, setMounted] = useState(false);
     const { theme, setTheme } = useTheme();
 
@@ -13,24 +31,23 @@ export function ThemeSwitcher() {
     if (!mounted) return null;
 
     return (
-        <div className="flex flex-row space-x-4">
-            <span>The current theme is: {theme}</span>
-            <Button
-                onPress={() => setTheme("light")}
-                variant="faded"
-                className="light"
+        <div className={clsx("flex flex-row space-x-4", className)}>
+            <Tabs
                 color="primary"
+                size="sm"
+                radius="full"
+                selectedKey={theme}
+                onSelectionChange={(key) => setTheme(key as string)}
+                classNames={classNames}
             >
-                Light Mode
-            </Button>
-            <Button
-                onPress={() => setTheme("dark")}
-                variant="faded"
-                color="primary"
-                className="dark"
-            >
-                Dark Mode
-            </Button>
+                <Tab key={"dark"} title={<MoonIcon className="size-5" />} />
+                <Tab
+                    key={"light"}
+                    title={
+                        <SunIcon className="size-6 text-background dark:text-inherit" />
+                    }
+                />
+            </Tabs>
         </div>
     );
 }

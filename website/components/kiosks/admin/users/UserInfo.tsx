@@ -14,6 +14,7 @@ export default function UserInfo({
     certs,
     className = "",
     size = "md",
+    isLoading = false,
 }: {
     user_uuid?: UserUUID;
     user?: TUser;
@@ -21,29 +22,35 @@ export default function UserInfo({
     certs?: TCertification[];
     className?: string;
     size?: "sm" | "md" | "lg";
+    isLoading?: boolean;
 }) {
-    const { data: queriedUser } = useQuery<TUser>({
+    const { data: queriedUser, isLoading: userLoading } = useQuery<TUser>({
         queryKey: ["user", user_uuid],
         refetchOnWindowFocus: false,
         enabled: !user,
         retry: false,
     });
 
-    const { data: queriedRoles } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
+    console.log(user_uuid);
+
+    const { data: queriedRoles, isLoading: rolesLoading } = useQuery<
+        TUserRole[]
+    >({
+        queryKey: ["user", user_uuid, "role"],
         refetchOnWindowFocus: false,
-        enabled: !roles,
+        enabled: !roles && !!user_uuid,
     });
 
-    const { data: queriedCerts } = useQuery<TCertification[]>({
-        queryKey: ["certification"],
-        refetchOnWindowFocus: false,
-        enabled: !certs,
-    });
+    // const { data: queriedCerts } = useQuery<TCertification[]>({
+    //     queryKey: ["certification"],
+    //     refetchOnWindowFocus: false,
+    //     enabled: !certs,
+    // });
 
     const user_data = user || queriedUser;
     const role_data = roles || queriedRoles;
-    const cert_data = certs || queriedCerts;
+    // const cert_data = certs || queriedCerts;
+    const loading = userLoading || rolesLoading || isLoading;
 
     return (
         <div
@@ -105,6 +112,7 @@ export default function UserInfo({
                 defaultSelectedKeys={
                     user_data?.active_roles?.map((r) => r.role_uuid) || []
                 }
+                isLoading={loading}
                 className="col-span-3"
                 classNames={{
                     trigger: "px-0 placeholder",
@@ -130,7 +138,7 @@ export default function UserInfo({
                     user_data.active_certificates.map((c) => (
                         <CertificationTag
                             cert_uuid={c.certification_uuid}
-                            certifications={cert_data}
+                            certifications={certs}
                             level={c.level}
                         />
                     ))

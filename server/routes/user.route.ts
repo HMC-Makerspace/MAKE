@@ -10,6 +10,7 @@ import {
     getUserByEmail,
     getUserRole,
     getUserRoles,
+    getUserRolesByUser,
     getUsers,
     getUserScopes,
     grantRoleToUser,
@@ -431,6 +432,60 @@ router.get("/self/scopes", async (req: Request, res: UserScopesResponse) => {
 });
 
 /**
+ * . This is a public route, but a
+ * `requesting_uuid` header is required to call it. If the user is not found,
+ * a status error is returned. If the user is found, a list of role objects
+ * is returned.
+ */
+/**
+ * Get all user roles for the a given user.
+ * A `requesting_uuid` header is required to access this route.
+ * If the given user is the same as the requester, the route is public.
+ * Otherwise, the requesting user must have the {@link API_SCOPE.GET_ALL_USERS}
+ * scope.
+ */
+router.get(
+    "/:user_uuid/roles",
+    async (req: Request<{ user_uuid: string }>, res: UserRolesResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = headers.requesting_uuid;
+        const user_uuid = req.params.user_uuid;
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while getting roles for user",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+        req.log.debug({
+            msg: `Getting roles for user ${user_uuid}`,
+            requesting_uuid: requesting_uuid,
+        });
+
+        // If the user is authorized, get all user information
+        if (
+            requesting_uuid === user_uuid ||
+            (await verifyRequest(requesting_uuid, API_SCOPE.GET_ALL_USERS))
+        ) {
+            const roles = (await getUserRolesByUser(requesting_uuid)) ?? [];
+            req.log.debug({
+                msg: `Returning roles for user with uuid ${requesting_uuid}`,
+            });
+
+            res.status(StatusCodes.OK).json(roles);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to get roles for other user",
+                requesting_uuid: requesting_uuid,
+                user_uuid: user_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
+
+/**
  * Get a specific user by email
  */
 router.get(
@@ -446,15 +501,12 @@ router.get(
             res.status(StatusCodes.NOT_FOUND).json({
                 error: `No user found with email \`${user_email}\`.`,
             });
-            return;
+        } else {
+            req.log.debug({
+                msg: `Found user by email ${user_email}`,
+            });
+            res.status(StatusCodes.CREATED).json(user);
         }
-
-        req.log.debug({
-            msg: `Found user by email ${user_email}`,
-            user: user,
-        });
-
-        res.status(StatusCodes.CREATED).json(user);
     },
 );
 
@@ -474,12 +526,36 @@ router.get(
             res.status(StatusCodes.NOT_FOUND).json({
                 error: `No user found with college id \`${user_id}\`.`,
             });
+        } else {
+            req.log.debug({
+                msg: `Found user by college id ${user_id}`,
+            });
+            res.status(StatusCodes.OK).json(user);
+        }
+    },
+);
+
+/**
+ * Get a specific user by UUID
+ */
+router.get(
+    "/:UUID",
+    async (req: Request<{ UUID: string }>, res: UserResponse) => {
+        const user_uuid = req.params.UUID;
+        req.log.debug(`Getting user by uuid ${user_uuid}`);
+
+        const user = await getUser(user_uuid);
+
+        if (!user) {
+            req.log.warn(`User not found by uuid ${user_uuid}`);
+            res.status(StatusCodes.NOT_FOUND).json({
+                error: `No user found with uuid \`${user_uuid}\`.`,
+            });
             return;
         }
 
         req.log.debug({
-            msg: `Found user by college id ${user_id}`,
-            user: user,
+            msg: `Found user by uuid ${user_uuid}`,
         });
 
         res.status(StatusCodes.OK).json(user);
@@ -525,33 +601,6 @@ router.get("/", async (req: UsersRequest, res: UsersResponse) => {
         res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
     }
 });
-
-/**
- * Get a specific user by UUID
- */
-router.get(
-    "/:UUID",
-    async (req: Request<{ UUID: string }>, res: UserResponse) => {
-        const user_uuid = req.params.UUID;
-        req.log.debug(`Getting user by uuid ${user_uuid}`);
-
-        const user = await getUser(user_uuid);
-
-        if (!user) {
-            req.log.warn(`User not found by uuid ${user_uuid}`);
-            res.status(StatusCodes.NOT_FOUND).json({
-                error: `No user found with uuid \`${user_uuid}\`.`,
-            });
-            return;
-        }
-
-        req.log.debug({
-            msg: `Found user by uuid ${user_uuid}`,
-        });
-
-        res.status(StatusCodes.OK).json(user);
-    },
-);
 
 /**
  * Update a specific user by UUID. Does not allow creating new users.

@@ -150,6 +150,22 @@ export async function getUserRoles(): Promise<TUserRole[]> {
 }
 
 /**
+ * Get all user roles that a given user has
+ * @returns A list {@link TUserRole} of all user roles in the db
+ */
+export async function getUserRolesByUser(user_uuid: UserUUID): Promise<TUserRole[] | null> {
+    const Users = mongoose.model("User", User);
+    const user = await Users.findOne({uuid: user_uuid})
+    if (!user) {
+        return null
+    }
+    const UserRoles = mongoose.model("UserRole", UserRole);
+    return UserRoles.find({
+        uuid: user.active_roles.map((rl) => rl.role_uuid)
+    });
+}
+
+/**
  * Get a specific user role by UUID
  * @param role_uuid The UUID of the user role to find
  * @returns The {@link TUserRole} with the given UUID. If no user role exists

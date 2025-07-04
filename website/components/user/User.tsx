@@ -1,26 +1,36 @@
 import { useQuery } from "@tanstack/react-query";
-import { TUser } from "common/user";
-import { Button, Link, User } from "@heroui/react";
+import { TUser, TUserRole } from "common/user";
+import {
+    Button,
+    Link,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+    User,
+} from "@heroui/react";
 import clsx from "clsx";
 import React from "react";
+import UserInfo from "../kiosks/admin/users/UserInfo";
 
 export function MAKEUser({
     user_uuid,
     user,
     className,
-    classNames = {
-        description: "hidden sm:block",
-        name: "hidden sm:block",
-    },
+    classNames,
+    // {
+    //     description: "hidden sm:block",
+    //     name: "hidden sm:block",
+    // },
     size = "lg",
     color = "default",
+    popoverPlacement = "top",
     onClick = () => {},
     defaultElement = (
         <Button
             as={Link}
             href="/login"
             color="default"
-            variant="shadow"
+            variant="solid"
             className="hidden sm:flex"
         >
             Login
@@ -48,6 +58,19 @@ export function MAKEUser({
         | "success"
         | "warning"
         | "danger";
+    popoverPlacement?:
+        | "top"
+        | "bottom"
+        | "right"
+        | "left"
+        | "top-start"
+        | "top-end"
+        | "bottom-start"
+        | "bottom-end"
+        | "left-start"
+        | "left-end"
+        | "right-start"
+        | "right-end";
     /** A function to run when the user is clicked, which accepts the user's uuid */
     onClick?: (uuid: string) => void;
     defaultElement?: React.ReactNode;
@@ -56,6 +79,12 @@ export function MAKEUser({
         queryKey: ["user", user_uuid],
         enabled: !!user_uuid && !user,
         refetchOnWindowFocus: false,
+    });
+
+    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
+        queryKey: ["user", user_uuid, "role"],
+        refetchOnWindowFocus: false,
+        enabled: !!user_uuid,
     });
 
     const user_data = user ? user : query.data;
@@ -75,42 +104,54 @@ export function MAKEUser({
         return defaultElement;
     } else {
         return (
-            <Button
-                className={clsx(
-                    "justify-items-center sm:w-auto px-3",
-                    className,
-                )}
-                color={color}
-                onPress={() => onClick(user_uuid)}
-                size={size}
-            >
-                {size === "lg" ? (
-                    <User
-                        name={name}
-                        description={description}
-                        classNames={classNames}
-                    />
-                ) : size === "md" ? (
-                    <User
-                        name={name}
-                        classNames={classNames}
-                        avatarProps={{
-                            size: "sm",
-                        }}
-                    />
-                ) : (
-                    <div
+            <Popover placement={popoverPlacement}>
+                <PopoverTrigger>
+                    <Button
                         className={clsx(
-                            "inline-flex outline-none",
-                            "items-center justify-center",
-                            "gap-2 rounded-xl",
-                            classNames.base,
+                            "justify-items-center px-3 bg-default-300",
+                            className,
                         )}
+                        color={color}
+                        onPress={() => onClick(user_uuid)}
+                        size={size}
                     >
-                        {name}
-                    </div>
-                )}
-            </Button>
+                        {size === "lg" ? (
+                            <User
+                                name={name}
+                                description={description}
+                                classNames={classNames}
+                            />
+                        ) : size === "md" ? (
+                            <User
+                                name={name}
+                                classNames={classNames}
+                                avatarProps={{
+                                    size: "sm",
+                                }}
+                            />
+                        ) : (
+                            <div
+                                className={clsx(
+                                    "inline-flex outline-none",
+                                    "items-center justify-center",
+                                    "gap-2 rounded-xl",
+                                    classNames?.base,
+                                )}
+                            >
+                                {name}
+                            </div>
+                        )}
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-3/4">
+                    <UserInfo
+                        user_uuid={user_uuid}
+                        user={user_data}
+                        roles={roles}
+                        isLoading={rolesLoading}
+                    />
+                </PopoverContent>
+            </Popover>
         );
     }
 
