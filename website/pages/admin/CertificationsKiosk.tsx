@@ -6,8 +6,7 @@ import { TCertification } from "common/certification";
 import React from "react";
 import { API_SCOPE } from "../../../common/global";
 
-
-export default function CertificationsPage() {
+export default function CertificationsKiosk() {
     // Get all user data
     const { data, isLoading, isError } = useQuery<TCertification[]>({
         queryKey: ["certification"],
@@ -21,7 +20,9 @@ export default function CertificationsPage() {
     const scopes = scopesQuery.data ?? [];
 
     const canEdit = scopes.some(
-        (scope) => scope === API_SCOPE.ADMIN || scope === API_SCOPE.UPDATE_CERTIFICATION,
+        (scope) =>
+            scope === API_SCOPE.ADMIN ||
+            scope === API_SCOPE.UPDATE_CERTIFICATION,
     );
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();

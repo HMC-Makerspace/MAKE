@@ -9,7 +9,7 @@ import PopupAlert from "../../components/PopupAlert";
 import { API_SCOPE } from "../../../common/global";
 import { TCertification } from "common/certification";
 
-export default function UsersPage() {
+export default function UsersKiosk() {
     // Get all user data
     const { data: users, isLoading: usersLoading } = useQuery<TUser[]>({
         queryKey: ["user"],

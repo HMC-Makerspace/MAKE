@@ -1,7 +1,11 @@
 import AdminLayout from "../../layouts/AdminLayout";
 import InventoryTable from "../../components/kiosks/admin/inventory/InventoryTable";
 import ItemEditor from "../../components/kiosks/admin/inventory/ItemEditor";
-import { ITEM_ACCESS_TYPE, ITEM_ROLE, TInventoryItem } from "../../../common/inventory";
+import {
+    ITEM_ACCESS_TYPE,
+    ITEM_ROLE,
+    TInventoryItem,
+} from "../../../common/inventory";
 import {
     Modal,
     ModalContent,
@@ -25,7 +29,7 @@ const DEFAULT_ITEM: TInventoryItem = {
     locations: [],
 };
 
-export default function InventoryPage() {
+export default function InventoryKiosk() {
     // Get all inventory data
     const { data: inventory, isLoading: inventoryLoading } = useQuery<
         TInventoryItem[]

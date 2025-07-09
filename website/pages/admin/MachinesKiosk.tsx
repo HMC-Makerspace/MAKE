@@ -31,7 +31,7 @@ const createEmptyMachine = async () => {
     ).data;
 };
 
-export default function MachinesPage() {
+export default function MachinesKiosk() {
     const { data: areas, isLoading: areasLoading } = useQuery<TArea[]>({
         queryKey: ["area"],
         refetchOnWindowFocus: false,

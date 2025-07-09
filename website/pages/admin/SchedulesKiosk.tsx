@@ -7,7 +7,7 @@ import { Spinner, Selection, user } from "@heroui/react";
 import { TUser, TUserRole, UserUUID } from "common/user";
 import React, { useEffect } from "react";
 
-export default function SchedulePage() {
+export default function ScheduleKiosk() {
     const {
         data: schedules,
         isLoading: schedulesLoading,

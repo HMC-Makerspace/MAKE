@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { TUserRole } from "common/user";
 import { API_SCOPE } from "../../../common/global";
 
-export default function RolesPage() {
+export default function RolesKiosk() {
     // Get all user data
     const { data, isLoading } = useQuery<TUserRole[]>({
         queryKey: ["user", "role"],

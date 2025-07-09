@@ -4,13 +4,12 @@ import { TWorkshop } from "common/workshop";
 import { TCertification } from "common/certification";
 import { TUser, TUserRole } from "common/user";
 
-
 import { useQuery } from "@tanstack/react-query";
 import WorkshopTable from "../../components/kiosks/admin/workshops/WorkshopTable";
-import React from 'react'
+import React from "react";
 import { TConfig } from "common/config";
 
-export default function WorkshopPage() {
+export default function WorkshopKiosk() {
     // getting workshop data
     const {
         data: workshops,
