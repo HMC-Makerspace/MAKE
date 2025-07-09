@@ -105,4 +105,4 @@ export type TShift = {
     history: TShiftEvent[];
 };
 
-export type TPublicShiftData = Omit<TShift, "uuid" | "history">;
+export type TPublicShiftData = Omit<TShift, "history">;

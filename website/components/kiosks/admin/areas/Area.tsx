@@ -523,7 +523,7 @@ export default function Area({
                                         machine={machine}
                                         roles={roles}
                                         certifications={certifications}
-                                        editable={MACHINE_EDIT_LEVEL.STATIC}
+                                        editable={editable}
                                     />
                                 );
                             } else {

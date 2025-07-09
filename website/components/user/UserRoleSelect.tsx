@@ -57,7 +57,6 @@ export function UserRoleSelect({
     labelPlacement?: "outside" | "outside-left" | "inside"; // optional, defaults to "outside"
     viewOnly?: boolean; // Whether this should only be for viewing
 }) {
-    console.log("Roles:", roles);
     const { data: queryRoles, isLoading: queryLoading } = useQuery<TUserRole[]>(
         {
             queryKey: ["user", "role"],

@@ -231,7 +231,9 @@ export default function InventoryTable({
                                 content: "capitalize",
                             }}
                         >
-                            <ItemRoleIcon role={i.role} />
+                            <div>
+                                <ItemRoleIcon role={i.role} />
+                            </div>
                         </Tooltip>
                     ),
                     quantity_ratio: (i) => {
