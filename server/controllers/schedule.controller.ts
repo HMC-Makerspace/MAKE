@@ -60,6 +60,7 @@ export async function getActivePublicSchedule(): Promise<TPublicScheduleData | n
     // Get the public version of each shift, which removes the UUID and history
     // and any active pickup/checkin event initiators as the assignee
     return {
+        uuid: current_schedule.uuid,
         shifts: current_schedule.shifts
             .map(getCurrentPublicShift)
             // Remove dropped shifts
@@ -81,6 +82,7 @@ function getCurrentPublicShift(shift: TShift): TPublicShiftData | null {
     // looking by week?
     // For now, just pass through the shift data
     return {
+        uuid: shift.uuid,
         day: shift.day,
         sec_start: shift.sec_start,
         sec_end: shift.sec_end,
@@ -248,6 +250,39 @@ export async function getActiveAlerts(): Promise<TAlert[] | null> {
                 alert.timestamp_start <= Date.now() / 1000 &&
                 alert.timestamp_end >= Date.now() / 1000),
     );
+}
+
+export async function getActiveAlert(): Promise<TAlert | null> {
+    // Get the current schedule
+    const current_schedule = await getActiveSchedule();
+    // If there is no current schedule, there can be no current alert
+    if (current_schedule === null) {
+        return null;
+    }
+    const now = Date.now() / 1000;
+    const hour = new Date().getHours();
+    // Find all alerts that are active by timestamp
+    const time_active_alerts = current_schedule.alerts.filter(
+        (alert) =>
+            alert.timestamp_start && // This should always be true when the alert is not default
+            alert.timestamp_end && // This should always be true when the alert is not default
+            alert.timestamp_start <= now &&
+            alert.timestamp_end >= now,
+    );
+    if (time_active_alerts.length > 0) {
+        // Return an active alert based on the current hour
+        return time_active_alerts[hour % time_active_alerts.length];
+    }
+    // If there are no active time alerts, look for a default alert
+    const default_alerts = current_schedule.alerts.filter(
+        (alert) => alert.default,
+    );
+    if (default_alerts.length > 0) {
+        // Return a default alert based on the current hour
+        return default_alerts[hour % default_alerts.length];
+    }
+    // Otherwise, if there are no default or active alerts, return null
+    return null;
 }
 
 /**

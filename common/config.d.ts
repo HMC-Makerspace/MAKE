@@ -54,11 +54,21 @@ export type TScheduleConfig = {
     timezone: string;
 };
 
+export type TGeneralConfig = {
+    branding_url?: string;
+    tagline?: string;
+    discord_url?: string;
+    instagram_url?: string;
+    tiktok_url?: string;
+    extra_urls?: string[];
+};
+
 /**
  * TConfig - Global configuration for the website
  */
 export type TConfig = {
     timestamp: UnixTimestamp;
+    general: TGeneralConfig;
     checkout: TCheckoutConfig;
     file: TFileConfig;
     schedule: TScheduleConfig;
