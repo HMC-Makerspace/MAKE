@@ -14,10 +14,11 @@ import {
     NavbarMenuToggle,
 } from "@heroui/react";
 import { useMAKEStore } from "../../../../store";
-import { MAKEUser } from "../../../user/User";
+import { MAKEUser } from "../../../user/MAKEUser";
 import { ThemeSwitcher } from "../../../ThemeSwitcher";
 import { AdminPage } from "../../../../layouts/AdminLayout";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import MAKE from "../../../public/home/MAKE";
 
 export default function AdminNavbar({
     pages,
@@ -35,19 +36,9 @@ export default function AdminNavbar({
             <NavbarContent justify="start">
                 {/* Branding, always visible */}
                 <NavbarBrand className="justify-start">
-                    <Button
-                        as={Link}
-                        className={clsx([
-                            "font-title font-semibold",
-                            "text-5xl",
-                            "text-background",
-                            "tracking-title pl-2 pr-0",
-                        ])}
-                        href="/"
-                        variant="light"
-                    >
-                        MAKE
-                    </Button>
+                    <div className="w-[180px]">
+                        <MAKE />
+                    </div>
                 </NavbarBrand>
             </NavbarContent>
             {/* Menu items, hide for small screens */}
@@ -55,7 +46,7 @@ export default function AdminNavbar({
                 justify="center"
                 className={clsx([
                     "hidden lg:flex",
-                    "pl-8 gap-8 overflow-x-auto",
+                    "px-8 gap-8 overflow-x-auto",
                     "data-[justify=center]:justify-start",
                 ])}
             >
@@ -117,7 +108,11 @@ export default function AdminNavbar({
                 <NavbarMenuToggle className="lg:hidden text-background" />
                 <MAKEUser
                     user_uuid={user_uuid}
-                    className="-mr-6 rounded-r-none h-[85%]"
+                    className={clsx(
+                        "-mr-6 rounded-r-none h-[85%] ",
+                        "data-[pressed=true]:translate-x-1",
+                        "aria-expanded:translate-x-1",
+                    )}
                 />
             </NavbarContent>
             {/* Menu drop down, for small screens */}

@@ -11,12 +11,22 @@ import {
 import clsx from "clsx";
 import React from "react";
 import UserInfo from "../kiosks/admin/users/UserInfo";
+import { ThemeSwitcher } from "../ThemeSwitcher";
+import { API_SCOPE } from "../../../common/global";
+import { verifyScopes } from "../../utils";
+import {
+    ArrowLeftEndOnRectangleIcon,
+    FingerPrintIcon,
+} from "@heroicons/react/24/solid";
 
 export function MAKEUser({
     user_uuid,
     user,
     className,
-    classNames,
+    classNames = {
+        name: "max-w-[130px] text-ellipsis overflow-hidden",
+        description: "max-w-[130px] text-ellipsis overflow-hidden",
+    },
     // {
     //     description: "hidden sm:block",
     //     name: "hidden sm:block",
@@ -79,12 +89,22 @@ export function MAKEUser({
         queryKey: ["user", user_uuid],
         enabled: !!user_uuid && !user,
         refetchOnWindowFocus: false,
+        refetchOnMount: false,
     });
 
     const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", user_uuid, "role"],
+        queryKey: ["user", user_uuid, "roles"],
         refetchOnWindowFocus: false,
         enabled: !!user_uuid,
+        refetchOnMount: false,
+    });
+
+    // Get the current users scopes
+    const { data: scopes, isLoading: scopesLoading } = useQuery<API_SCOPE[]>({
+        queryKey: ["user", "self", "scopes"],
+        refetchOnWindowFocus: false,
+        enabled: !!user_uuid,
+        refetchOnMount: false,
     });
 
     const user_data = user ? user : query.data;
@@ -99,6 +119,8 @@ export function MAKEUser({
             : query.isError
               ? query.error.message
               : "Unknown");
+
+    const kioskAccess = scopes && verifyScopes(scopes, [API_SCOPE.VIEW_KIOSKS]);
 
     if (!user_uuid) {
         return defaultElement;
@@ -143,42 +165,48 @@ export function MAKEUser({
                         )}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-3/4">
-                    <UserInfo
-                        user_uuid={user_uuid}
-                        user={user_data}
-                        roles={roles}
-                        isLoading={rolesLoading}
-                    />
+                <PopoverContent className="w-3/4 p-2">
+                    {user_uuid && user_data && roles && (
+                        <UserInfo
+                            user_uuid={user_uuid}
+                            user={user_data}
+                            roles={roles}
+                            isLoading={rolesLoading}
+                        />
+                    )}
+                    <div className="w-full flex flex-row gap-4 justify-center p-2">
+                        <Button
+                            variant="shadow"
+                            color="primary"
+                            startContent={
+                                <ArrowLeftEndOnRectangleIcon className="size-6" />
+                            }
+                            // onPress={}
+                        >
+                            Logout
+                        </Button>
+                        {kioskAccess && (
+                            <Button
+                                isIconOnly
+                                color="primary"
+                                variant="bordered"
+                                radius="sm"
+                                startContent={
+                                    <FingerPrintIcon className="size-6" />
+                                }
+                                as={Link}
+                                href="/admin"
+                            />
+                        )}
+                        <ThemeSwitcher
+                            className="self-center ml-auto hidden xl:block"
+                            classNames={{
+                                tabList: "bg-default-200 ",
+                            }}
+                        />
+                    </div>
                 </PopoverContent>
             </Popover>
         );
     }
-
-    return (
-        <div className="flex flex-col items-center">
-            {
-                // If the user hasn't been loaded yet, show the default element
-                !user_uuid ? (
-                    defaultElement
-                ) : (
-                    // TODO: Improve overflow to make text ellipsis
-                    // TODO: Make button open user info popup
-                    <Button
-                        className="bg-default-300 px-3 justify-items-center sm:w-auto"
-                        size="lg"
-                    >
-                        <User
-                            name={name}
-                            description={description}
-                            classNames={{
-                                description: "hidden sm:block",
-                                name: "hidden sm:block",
-                            }}
-                        />
-                    </Button>
-                )
-            }
-        </div>
-    );
 }

@@ -87,6 +87,7 @@ export default function AdminLayout({
     const { data, isLoading, isError } = useQuery<API_SCOPE[]>({
         queryKey: ["user", "self", "scopes"],
         refetchOnWindowFocus: false,
+        refetchOnMount: false,
     });
     // Determine which pages the user has access to based on their scopes
     const scopes = data ?? [];
@@ -126,7 +127,7 @@ export default function AdminLayout({
             )}
             <main
                 className={clsx(
-                    "container mx-auto flex-grow px-0 py-4 overflow-auto",
+                    "w-full mx-auto flex-grow px-12 py-4 overflow-auto",
                     className,
                 )}
             >

@@ -27,11 +27,9 @@ export default function UserInfo({
     const { data: queriedUser, isLoading: userLoading } = useQuery<TUser>({
         queryKey: ["user", user_uuid],
         refetchOnWindowFocus: false,
-        enabled: !user,
+        enabled: !user && !!user_uuid,
         retry: false,
     });
-
-    console.log(user_uuid);
 
     const { data: queriedRoles, isLoading: rolesLoading } = useQuery<
         TUserRole[]

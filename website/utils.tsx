@@ -6,6 +6,7 @@ import {
     ZonedDateTime,
     parseZonedDateTime,
 } from "@internationalized/date";
+import { API_SCOPE } from "../common/global";
 import { TUser, TUserRole } from "common/user";
 
 /**
@@ -91,5 +92,24 @@ export function getUserRoleHierarchy(user: TUser, roles: TUserRole[]) {
             })
             .map((tr) => tr.role)
             .filter((r) => !!r)
+    );
+}
+
+/**
+ * Verify that a user is allowed to perform some restricted action.
+ * @param user_scopes The user's scopes, from calling /api/v3/user/self/scopes
+ * @param allowed_scopes The list of scopes allowed, or boolean expressions.
+ * @returns Wether the user is allowed to perform the given action.
+ */
+export function verifyScopes(
+    user_scopes: API_SCOPE[],
+    allowed_scopes: (API_SCOPE | false)[],
+) {
+    const true_scopes = allowed_scopes.filter((scope) => scope !== false);
+    // Check that the user's scopes list includes any required scope,
+    // or that the user has the ADMIN scope
+    return (
+        user_scopes.includes(API_SCOPE.ADMIN) ||
+        true_scopes.some((scope) => user_scopes.includes(scope))
     );
 }

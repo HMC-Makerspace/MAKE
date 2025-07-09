@@ -10,80 +10,31 @@ import {
 } from "@heroui/react";
 import clsx from "clsx";
 import { useMAKEStore } from "../store";
-import {
-    ArchiveBoxIcon,
-    ArrowDownOnSquareIcon,
-    ArrowDownTrayIcon,
-    CalendarDaysIcon,
-    CheckBadgeIcon,
-    HomeIcon,
-    QuestionMarkCircleIcon,
-    RocketLaunchIcon,
-    ShoppingCartIcon,
-    WrenchScrewdriverIcon,
-} from "@heroicons/react/24/solid";
-import MAKE from "./MAKE";
-import Branding from "./Branding";
+import MAKE from "./public/home/MAKE";
+import Branding from "./public/home/Branding";
 import { ThemeSwitcher } from "./ThemeSwitcher";
-import { useQuery } from "@tanstack/react-query";
-import { MAKEUser } from "./user/User";
+import { MAKEUser } from "./user/MAKEUser";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
-export default function CustomNavbar() {
-    const pageIndex = useMAKEStore((state) => state.page_index);
+export default function CustomNavbar({
+    pages,
+    pageIndex,
+}: {
+    pages: {
+        name: string;
+        href: string;
+        icon: React.ForwardRefExoticComponent<
+            Omit<React.SVGProps<SVGSVGElement>, "ref"> & {
+                title?: string;
+                titleId?: string;
+            } & React.RefAttributes<SVGSVGElement>
+        >;
+    }[];
+    pageIndex: number;
+}) {
     const user_uuid = useMAKEStore((state) => state.user_uuid);
-
-    const { data: config, isLoading: configLoading } = useQuery({
-        queryKey: ["config"],
-        refetchOnWindowFocus: false,
-    });
-
-    const pages = [
-        {
-            name: "Home",
-            href: "/",
-            icon: HomeIcon,
-        },
-        {
-            name: "Certifications",
-            href: "/certifications",
-            icon: CheckBadgeIcon,
-        },
-        {
-            name: "Areas",
-            href: "/areas",
-            icon: WrenchScrewdriverIcon,
-        },
-        {
-            name: "Schedule",
-            href: "/schedule",
-            icon: CalendarDaysIcon,
-        },
-        {
-            name: "Workshops",
-            href: "/workshops",
-            icon: RocketLaunchIcon,
-        },
-        {
-            name: "Inventory",
-            href: "/inventory",
-            icon: ArchiveBoxIcon,
-        },
-        {
-            name: "Quick Transfer",
-            href: "/transfer",
-            icon: ArrowDownOnSquareIcon,
-        },
-        {
-            name: "Checkouts",
-            href: "/checkouts",
-            icon: ShoppingCartIcon,
-        },
-        {
-            name: "FAQ",
-            href: "/faq",
-            icon: QuestionMarkCircleIcon,
-        },
-    ];
+    const navigate = useNavigate();
 
     return (
         <>
@@ -93,48 +44,44 @@ export default function CustomNavbar() {
                     "bg-primary-500",
                     "dark:bg-primary-300",
                     "hidden xl:flex flex-col",
-                    "justify-start py-4",
-                    "min-w-[250px]",
+                    "justify-start py-2",
+                    "w-[224px]",
                 )}
             >
-                <MAKE className=" self-center text-5xl" />
-                <div className={clsx("pt-4 pr-4 flex flex-col")}>
+                <MAKE className="self-center text-5xl" />
+                <div className="pt-4 pr-4 flex flex-col">
                     {pages.map((page, index) => (
-                        <div
+                        <motion.div
                             key={`page-${page.name}-${index}`}
                             className={clsx(
-                                "flex gap-3 items-center pl-6 pr-4 py-3 font-bold",
+                                "flex gap-3 items-center pl-6 pr-4",
+                                "py-3 font-bold rounded-r-xl",
+                                "transition-colors text-lg text-nowrap",
+                                "hover:bg-default-100 cursor-pointer",
                                 pageIndex === index
-                                    ? "text-foreground-800 bg-default-100 rounded-r-xl"
-                                    : " text-default-100",
+                                    ? "text-foreground-800 bg-default-100"
+                                    : "text-default-100 hover:text-foreground-800",
                             )}
+                            whileTap={{
+                                scaleY: 0.97,
+                                translateX: -1,
+                            }}
+                            onClick={() => navigate(page.href)}
                         >
-                            {page.icon && (
-                                <page.icon
-                                    className={clsx(
-                                        "size-5",
-                                        pageIndex === index
-                                            ? "text-foreground-800"
-                                            : " text-default-100",
-                                    )}
-                                />
-                            )}
-                            <Link
+                            {page.icon && <page.icon className="size-5" />}
+                            {/* <Link
                                 href={page.href}
                                 className="text-lg text-inherit text-nowrap"
-                            >
-                                {page.name}
-                            </Link>
-                        </div>
+                            > */}
+                            {page.name}
+                            {/* </Link> */}
+                        </motion.div>
                     ))}
                 </div>
                 {/* Branding */}
                 <div className="self-center mt-auto pb-4">
                     <Branding />
                 </div>
-                {/* <div className="mx-auto pt-1.5">
-                    <ThemeSwitcher />
-                </div> */}
                 <div className="px-4 self-center">
                     <MAKEUser user_uuid={user_uuid} size="lg" />
                 </div>
@@ -188,7 +135,7 @@ export default function CustomNavbar() {
                                             "size-7",
                                             pageIndex === index
                                                 ? "text-primary-500"
-                                                : " text-foreground-900",
+                                                : "text-foreground-900",
                                         )}
                                         strokeWidth={
                                             pageIndex === index ? 2.5 : 1.5
