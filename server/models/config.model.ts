@@ -27,6 +27,20 @@ const ScheduleConfig = new mongoose.Schema(
     { _id: false },
 );
 
+const GeneralConfig = new mongoose.Schema(
+    {
+        branding_url: { type: String, required: false },
+        tagline: { type: String, required: false },
+        discord_url: { type: String, required: false },
+        instagram_url: { type: String, required: false },
+        tiktok_url: { type: String, required: false },
+        extra_urls: { type: [String], required: false },
+    },
+    {
+        _id: false,
+    },
+);
+
 /**
  * See {@link TConfig} documentation for type information.
  * TODO: Finish setting up config db typing
@@ -34,6 +48,7 @@ const ScheduleConfig = new mongoose.Schema(
 export const Config = new mongoose.Schema<TConfig>(
     {
         timestamp: { type: Number, required: true },
+        general: { type: GeneralConfig, required: true },
         checkout: { type: CheckoutConfig, required: true },
         file: { type: FileConfig, required: true },
         schedule: { type: ScheduleConfig, required: true },

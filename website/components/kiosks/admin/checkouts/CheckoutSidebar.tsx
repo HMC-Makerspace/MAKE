@@ -92,6 +92,8 @@ export default function CheckoutSidebar({
     roles,
     config,
     activeSchedule,
+    collegeID,
+    setCollegeID,
     setValidation,
 }: {
     cart: TCheckoutItem[];
@@ -103,10 +105,10 @@ export default function CheckoutSidebar({
     roles: TUserRole[];
     config: TConfig;
     activeSchedule: TSchedule;
+    collegeID: string;
+    setCollegeID: (id: string) => void;
     setValidation: (v: TCheckoutValidation) => void;
 }) {
-    const [collegeID, setCollegeID] = useState("");
-
     const {
         data: user,
         isLoading,
@@ -177,16 +179,22 @@ export default function CheckoutSidebar({
                     onSubmit={(e) => {
                         e.preventDefault();
                         const data = new FormData(e.currentTarget);
-                        setCollegeID((data.get("college_id") as string) || "");
-                        setRange(defaultRange);
+                        const newID = data.get("college_id") as string;
+                        setCollegeID(newID || "");
+                        if (newID) {
+                            setRange(defaultRange);
+                        }
                     }}
                 >
                     <Input
+                        key={collegeID}
                         type="text"
                         name="college_id"
                         size="lg"
                         color="primary"
                         placeholder="Enter college ID..."
+                        defaultValue={collegeID}
+                        autoFocus
                         aria-label="Enter College ID"
                         variant="bordered"
                         onClear={() => setCollegeID("")}
@@ -194,9 +202,9 @@ export default function CheckoutSidebar({
                         classNames={{
                             input: "placeholder:text-default-400",
                             inputWrapper: clsx(
-                                "border-primary-300",
+                                "border-primary-300 transition-colors-opacity",
                                 "data-[hover=true]:border-primary-200",
-                                "group-data-[focus=true]: border-primary-400",
+                                "group-data-[focus=true]:border-primary-400",
                             ),
                         }}
                     />

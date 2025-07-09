@@ -5,6 +5,7 @@ import {
     createUserRole,
     deleteUser,
     deleteUserRole,
+    getPublicUsers,
     getUser,
     getUserByCollegeID,
     getUserByEmail,
@@ -13,10 +14,12 @@ import {
     getUserRolesByUser,
     getUsers,
     getUserScopes,
+    grantCertificateToUser,
     grantRoleToUser,
     initializeAdmin,
     initializeAdminRole,
     removeUserAvailability,
+    revokeCertificateFromUser,
     updateUser,
     updateUserPublicInfo,
     updateUserRole,
@@ -31,13 +34,14 @@ import {
     VerifyRequestHeader,
     SuccessfulResponse,
 } from "common/verify";
-import { TUser, TUserRole } from "common/user";
+import { TPublicUser, TUser, TUserRole } from "common/user";
 
 // --- Request and Response Types ---
 type UserRequest = Request<{}, {}, { user_obj: TUser }>;
 type UserResponse = Response<TUser | ErrorResponse>;
 type UsersRequest = Request<{}, {}, {}>;
 type UsersResponse = Response<TUser[] | ErrorResponse>;
+type PublicUsersResponse = Response<TPublicUser[] | ErrorResponse>;
 
 type UserScopesResponse = Response<API_SCOPE[] | ErrorResponse>;
 
@@ -62,45 +66,24 @@ const router = Router();
 // --- User Role Routes, must be first to properly cascade routes ---
 
 /**
- * Get all user roles. This is a protected route, and a `requesting_uuid`
- * header is required to call it. The user must have the
- * {@link API_SCOPE.GET_ALL_USER_ROLES} scope.
+ * Get all user roles. This is a public route.
  */
 router.get("/role/", async (req: Request, res: UserRolesResponse) => {
     const headers = req.headers as VerifyRequestHeader;
     const requesting_uuid = headers.requesting_uuid;
-    // If no requesting user_uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while getting all user roles",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
     req.log.debug({
         msg: "Getting all user roles",
-        requesting_uuid: requesting_uuid,
     });
 
-    // If the user is authorized, get all user role information
-    if (await verifyRequest(requesting_uuid, API_SCOPE.GET_ALL_ROLES)) {
-        const user_roles = await getUserRoles();
-        // If no user roles are found, log an error, but still return an
-        // empty array
-        if (!user_roles) {
-            req.log.error("No user roles found in the database");
-        } else {
-            req.log.debug("Returned all user roles");
-        }
-        res.status(StatusCodes.OK).json(user_roles);
+    const user_roles = await getUserRoles();
+    // If no user roles are found, log an error, but still return an
+    // empty array
+    if (!user_roles) {
+        req.log.error("No user roles found in the database");
     } else {
-        // If the user is not authorized, provide a status error
-        req.log.warn({
-            msg: "Forbidden user attempted to get all user roles",
-            requesting_uuid: requesting_uuid,
-        });
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        req.log.debug("Returned all user roles");
     }
+    res.status(StatusCodes.OK).json(user_roles);
 });
 
 /**
@@ -282,6 +265,74 @@ router.delete(
 );
 
 router.patch(
+    "/by/id/:id/grant/certification/:cert_uuid/:level",
+    async (
+        req: Request<{ college_id: string; cert_uuid: string; level: number }>,
+        res: UserResponse,
+    ) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = headers.requesting_uuid;
+        const college_id = req.params.college_id;
+        const cert_uuid = req.params.cert_uuid;
+        const level = req.params.level ?? 1;
+        req.log.debug({
+            msg: `Granting cert to user with id ${college_id} cert with uuid ${cert_uuid}`,
+            requesting_uuid: requesting_uuid,
+        });
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while granting cert from  " +
+                    `user with id ${college_id} cert with uuid ${cert_uuid}.`,
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+        // If the user is authorized, grant the cert
+        if (
+            await verifyRequest(
+                requesting_uuid,
+                API_SCOPE.UPDATE_USER,
+                API_SCOPE.GRANT_CERTIFICATION,
+            )
+        ) {
+            const user = await getUserByCollegeID(college_id);
+            if (!user) {
+                req.log.error(`No user found`);
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `No user found by college id ${college_id}.`,
+                });
+                return;
+            }
+            const updated_user = await grantCertificateToUser(
+                user.uuid,
+                cert_uuid,
+                level,
+            );
+            if (!updated_user) {
+                req.log.error(`No cert found with uuid ${cert_uuid}`);
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `No cert found with uuid ${cert_uuid}.`,
+                });
+                return;
+            }
+            req.log.debug(
+                `Granted user with id ${college_id} cert with uuid ${cert_uuid}`,
+            );
+            // Return a the updated user object
+            res.status(StatusCodes.OK).json(updated_user);
+        } else {
+            // If the user is not authorized, provide a status error
+            req.log.warn({
+                msg: "Forbidden user attempted to grant user a cert by id",
+                requesting_uuid: requesting_uuid,
+            });
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
+
+router.patch(
     "/:user_uuid/grant/role/:role_uuid",
     async (
         req: Request<{ user_uuid: string; role_uuid: string }>,
@@ -329,6 +380,124 @@ router.patch(
             // If the user is not authorized, provide a status error
             req.log.warn({
                 msg: "Forbidden user attempted to grant user role",
+                requesting_uuid: requesting_uuid,
+            });
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
+
+router.patch(
+    "/:user_uuid/grant/certification/:cert_uuid/:level",
+    async (
+        req: Request<{ user_uuid: string; cert_uuid: string; level: number }>,
+        res: UserResponse,
+    ) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = headers.requesting_uuid;
+        const user_uuid = req.params.user_uuid;
+        const cert_uuid = req.params.cert_uuid;
+        const level = req.params.level ?? 1;
+        req.log.debug({
+            msg: `Revoking user with uuid ${user_uuid} cert with uuid ${cert_uuid}`,
+            requesting_uuid: requesting_uuid,
+        });
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while revoking cert from  " +
+                    `user with uuid ${user_uuid} cert with uuid ${cert_uuid}.`,
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+        // If the user is authorized, grant the cert
+        if (
+            await verifyRequest(
+                requesting_uuid,
+                API_SCOPE.UPDATE_USER,
+                API_SCOPE.GRANT_CERTIFICATION,
+            )
+        ) {
+            const updated_user = await grantCertificateToUser(
+                user_uuid,
+                cert_uuid,
+                level,
+            );
+            if (!updated_user) {
+                req.log.error(`No user or cert found with given uuids`);
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `Either the user or cert uuid was not found.`,
+                });
+                return;
+            }
+            req.log.debug(
+                `Revoked user with uuid ${user_uuid} cert with uuid ${cert_uuid}`,
+            );
+            // Return a the updated user object
+            res.status(StatusCodes.OK).json(updated_user);
+        } else {
+            // If the user is not authorized, provide a status error
+            req.log.warn({
+                msg: "Forbidden user attempted to revoke user cert",
+                requesting_uuid: requesting_uuid,
+            });
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
+
+router.patch(
+    "/:user_uuid/revoke/certification/:cert_uuid",
+    async (
+        req: Request<{ user_uuid: string; cert_uuid: string }>,
+        res: UserResponse,
+    ) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = headers.requesting_uuid;
+        const user_uuid = req.params.user_uuid;
+        const cert_uuid = req.params.cert_uuid;
+        req.log.debug({
+            msg: `Granting user with uuid ${user_uuid} cert with uuid ${cert_uuid}`,
+            requesting_uuid: requesting_uuid,
+        });
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while granting user " +
+                    `with uuid ${user_uuid} cert with uuid ${cert_uuid}.`,
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+        // If the user is authorized, grant the cert
+        if (
+            await verifyRequest(
+                requesting_uuid,
+                API_SCOPE.UPDATE_USER,
+                API_SCOPE.GRANT_CERTIFICATION,
+            )
+        ) {
+            const updated_user = await revokeCertificateFromUser(
+                user_uuid,
+                cert_uuid,
+            );
+            if (!updated_user) {
+                req.log.error(`No user or cert found with given uuids`);
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `Either the user or cert uuid was not found.`,
+                });
+                return;
+            }
+            req.log.debug(
+                `Granted user with uuid ${user_uuid} cert with uuid ${cert_uuid}`,
+            );
+            // Return a the updated user object
+            res.status(StatusCodes.OK).json(updated_user);
+        } else {
+            // If the user is not authorized, provide a status error
+            req.log.warn({
+                msg: "Forbidden user attempted to grant user cert",
                 requesting_uuid: requesting_uuid,
             });
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
@@ -439,10 +608,7 @@ router.get("/self/scopes", async (req: Request, res: UserScopesResponse) => {
  */
 /**
  * Get all user roles for the a given user.
- * A `requesting_uuid` header is required to access this route.
- * If the given user is the same as the requester, the route is public.
- * Otherwise, the requesting user must have the {@link API_SCOPE.GET_ALL_USERS}
- * scope.
+ * This route is public.
  */
 router.get(
     "/:user_uuid/roles",
@@ -450,38 +616,17 @@ router.get(
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = headers.requesting_uuid;
         const user_uuid = req.params.user_uuid;
-        if (!requesting_uuid) {
-            req.log.warn(
-                "No requesting_uuid was provided while getting roles for user",
-            );
-            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-            return;
-        }
         req.log.debug({
             msg: `Getting roles for user ${user_uuid}`,
             requesting_uuid: requesting_uuid,
         });
 
-        // If the user is authorized, get all user information
-        if (
-            requesting_uuid === user_uuid ||
-            (await verifyRequest(requesting_uuid, API_SCOPE.GET_ALL_USERS))
-        ) {
-            const roles = (await getUserRolesByUser(requesting_uuid)) ?? [];
-            req.log.debug({
-                msg: `Returning roles for user with uuid ${requesting_uuid}`,
-            });
+        const roles = (await getUserRolesByUser(requesting_uuid)) ?? [];
+        req.log.debug({
+            msg: `Returning roles for user with uuid ${requesting_uuid}`,
+        });
 
-            res.status(StatusCodes.OK).json(roles);
-        } else {
-            req.log.warn({
-                msg: "Forbidden user attempted to get roles for other user",
-                requesting_uuid: requesting_uuid,
-                user_uuid: user_uuid,
-            });
-            // If the user is not authorized, provide a status error
-            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-        }
+        res.status(StatusCodes.OK).json(roles);
     },
 );
 
@@ -534,6 +679,27 @@ router.get(
         }
     },
 );
+
+/**
+ * Get all public user data. This only includes names, active roles, and active
+ * certifications. This is a public route.
+ */
+router.get("/public", async (req: UsersRequest, res: PublicUsersResponse) => {
+    const headers = req.headers as VerifyRequestHeader;
+    req.log.debug({
+        msg: "Getting all public user data",
+    });
+
+    const publicUsers = await getPublicUsers();
+    // If no users are found, log an error, but still return an
+    // empty array
+    if (!publicUsers) {
+        req.log.warn("No public user data found in the database");
+    } else {
+        req.log.debug("Returned all public user data");
+    }
+    res.status(StatusCodes.OK).json(publicUsers);
+});
 
 /**
  * Get a specific user by UUID

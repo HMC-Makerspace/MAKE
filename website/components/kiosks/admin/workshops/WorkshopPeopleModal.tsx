@@ -17,7 +17,7 @@ import {
     Selection,
 } from "@heroui/react";
 import { TWorkshop } from "../../../../../common/workshop";
-import { MAKEUser } from "../../../user/User";
+import { MAKEUser } from "../../../user/MAKEUser.tsx";
 import MAKETable from '../../../Table.tsx';
 import { convertTimestampToDate } from '../../../../utils.tsx';
 import type { UUID } from "../../../../../common/global";

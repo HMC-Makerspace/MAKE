@@ -1,6 +1,12 @@
 import { CertificationUUID } from "common/certification";
 import { API_SCOPE } from "common/global";
-import { TUser, TUserRole, UserRoleUUID, UserUUID } from "common/user";
+import {
+    TPublicUser,
+    TUser,
+    TUserRole,
+    UserRoleUUID,
+    UserUUID,
+} from "common/user";
 import { Certificate, Certification } from "models/certification.model";
 import { User, UserRole } from "models/user.model";
 import mongoose from "mongoose";
@@ -14,6 +20,16 @@ import { SHIFT_DAY } from "common/shift";
 export async function getUsers(): Promise<TUser[]> {
     const Users = mongoose.model("User", User);
     return Users.find();
+}
+
+export async function getPublicUsers(): Promise<TPublicUser[]> {
+    const Users = mongoose.model("User", User);
+    return Users.find().select([
+        "uuid",
+        "name",
+        "active_roles",
+        "active_certificates",
+    ]);
 }
 
 /**

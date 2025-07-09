@@ -113,3 +113,15 @@ export type TUser = {
     files?: FileUUID[];
     work_schedules?: TUserAvailability[];
 };
+
+/**
+ * Public user data, used for displaying the public schedule.
+ * Only includes name, active roles, and active certs.
+ */
+export type TPublicUser = Pick<
+    TUser,
+    | "uuid"
+    | "name"
+    | "active_roles"
+    | "active_certificates"
+>;
