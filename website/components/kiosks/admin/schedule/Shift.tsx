@@ -146,8 +146,8 @@ export default function Shift({
     selected_user,
     setSelectedUsers = () => {},
     type = "view",
-    selectedShift = [0, 0, 0],
-    setSelectedShift = () => {},
+    selectedShifts = new Set(),
+    setSelectedShifts = () => {},
     dragging = false,
     setDragging = () => {},
 }: {
@@ -161,8 +161,8 @@ export default function Shift({
     selected_user?: TUser;
     setSelectedUsers?: (users: Selection) => void;
     type?: "view" | "edit" | "availability" | "worker";
-    selectedShift?: number[];
-    setSelectedShift?: (day_start_end: number[]) => void;
+    selectedShifts?: Set<string>;
+    setSelectedShifts?: (day_start_end: Set<string>) => void;
     dragging: boolean;
     setDragging: (dragging: boolean) => void;
 }) {
@@ -235,10 +235,9 @@ export default function Shift({
               ]
             : [];
 
-    const isShiftSelected =
-        selectedShift[0] === day &&
-        selectedShift[1] === sec_start &&
-        selectedShift[2] === sec_end;
+    const isShiftSelected = selectedShifts.has(
+        `${day},${sec_start},${sec_end}`,
+    );
 
     const [isOpen, setIsOpen] = React.useState(false);
 
@@ -367,15 +366,19 @@ export default function Shift({
                                     ).map((u) => u.uuid),
                                 ),
                             );
-                            setSelectedShift([day, sec_start, sec_end]);
+                            setSelectedShifts(
+                                new Set(`${day},${sec_start},${sec_end}`),
+                            );
                         } else if (type === "view") {
                             if (isShiftSelected) {
                                 setSelectedUsers(new Set());
-                                setSelectedShift([0, 0, 0]);
+                                setSelectedShifts(new Set(["0,0,0"]));
                             } else {
                                 // Selecting all users in this shift
                                 setSelectedUsers(new Set(assignees));
-                                setSelectedShift([day, sec_start, sec_end]);
+                                setSelectedShifts(
+                                    new Set([`${day},${sec_start},${sec_end}`]),
+                                );
                             }
                         } else if (type === "worker") {
                             setDragging(false);
@@ -453,12 +456,13 @@ export default function Shift({
                             } else if (type === "view") {
                                 return (
                                     <div
+                                        key={u.uuid}
                                         className={clsx(
                                             "w-full h-full",
                                             "flex flex-row",
                                             "items-center justify-center",
                                             "text-default-800",
-                                            "text-xs text-center",
+                                            "text-[9px] lg:text-xs text-center",
                                         )}
                                     >
                                         {u.name}

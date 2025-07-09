@@ -20,6 +20,7 @@ import {
     deleteAlertInSchedule,
     setActiveSchedule,
     patchSchedule,
+    getActiveAlert,
 } from "controllers/schedule.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
@@ -68,6 +69,7 @@ type AlertUpdateRequest = Request<
     { alert_obj: TAlert }
 >;
 type AlertsResponse = Response<TAlert[] | ErrorResponse>;
+type ActiveAlertResponse = Response<TAlert | null | ErrorResponse>;
 
 const router = Router();
 
@@ -518,19 +520,30 @@ router.patch(
 /**
  * Get the active active alerts for a schedule. This is a public route.
  */
-router.get("/active/alerts", async (req: Request, res: AlertsResponse) => {
-    req.log.debug("Getting active active alerts.");
+// router.get("/active/alerts", async (req: Request, res: AlertsResponse) => {
+//     req.log.debug("Getting active alerts.");
 
-    const alerts = await getActiveAlerts();
-    if (!alerts) {
-        req.log.warn("No active alerts found.");
-        res.status(StatusCodes.NOT_FOUND).json({
-            error: "No active alerts found.",
-        });
-    } else {
-        req.log.debug("Returned active alerts.");
-        res.status(StatusCodes.OK).json(alerts);
-    }
+//     const alerts = await getActiveAlerts();
+//     if (!alerts) {
+//         req.log.warn("No active alerts found.");
+//         res.status(StatusCodes.NOT_FOUND).json({
+//             error: "No active alerts found.",
+//         });
+//     } else {
+//         req.log.debug("Returned active alerts.");
+//         res.status(StatusCodes.OK).json(alerts);
+//     }
+// });
+
+/**
+ * Get the current active alert
+ */
+router.get("/active/alert", async (req: Request, res: ActiveAlertResponse) => {
+    req.log.debug("Getting active alert.");
+
+    const alert = await getActiveAlert();
+    req.log.debug("Returning active alert.");
+    res.status(StatusCodes.OK).json(alert);
 });
 
 /**

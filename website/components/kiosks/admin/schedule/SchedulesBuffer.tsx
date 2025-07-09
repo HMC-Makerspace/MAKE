@@ -140,7 +140,6 @@ export default function ScheduleBuffer({
                                 ? setSelectedUsers
                                 : setAvailableUsers
                         }
-                        setSelectedSchedules={setSelectedSchedules}
                         type={
                             scheduleMode === "schedule"
                                 ? "edit"

@@ -15,7 +15,8 @@ export default function Schedule({
     isLoading,
     selectedUser = null,
     setSelectedUsers = () => {},
-    setSelectedSchedules = () => {},
+    selectedShifts = new Set(),
+    setSelectedShifts,
     type = "view",
 }: {
     schedule: TSchedule | undefined;
@@ -25,7 +26,8 @@ export default function Schedule({
     isLoading: boolean;
     selectedUser?: UserUUID | null;
     setSelectedUsers?: (users: Selection) => void;
-    setSelectedSchedules?: (schedules: Selection) => void;
+    selectedShifts?: Set<string>;
+    setSelectedShifts?: (shifts: Set<string>) => void;
     type?: "view" | "edit" | "availability" | "worker";
 }) {
     if (!schedule) {
@@ -46,8 +48,6 @@ export default function Schedule({
 
     const days = config.schedule.days_open ?? [0, 1, 2, 3, 4, 5, 6];
 
-    const [selectedShift, setSelectedShift] = useState<number[]>([0, 0, 0]);
-
     const [dragging, setDragging] = useState(false);
 
     const selected_user = selectedUser
@@ -57,9 +57,8 @@ export default function Schedule({
     const handleKeyPress = useCallback((event: KeyboardEvent) => {
         if (event.key === "Escape") {
             // Clear selected
-            console.log("Clearing");
             setSelectedUsers(new Set());
-            setSelectedShift([0, 0, 0]);
+            setSelectedShifts ? setSelectedShifts(new Set()) : null;
         }
     }, []);
 
@@ -74,7 +73,7 @@ export default function Schedule({
     }, [handleKeyPress]);
 
     return (
-        <Card className="w-full grow p-5 overflow-auto h-full" shadow="sm">
+        <Card className="w-full grow p-5 pt-1 overflow-auto h-full" shadow="sm">
             <table
                 className={clsx(
                     "h-full w-full items-center justify-center",
@@ -90,8 +89,8 @@ export default function Schedule({
                             <th
                                 key={`day-${day}`}
                                 className={clsx(
-                                    "text-default-600 text-sm",
-                                    "py-1 min-w-15 capitalize",
+                                    "text-default-600 lg:text-sm",
+                                    "text-xs py-1 min-w-15 capitalize",
                                 )}
                             >
                                 <div className="flex justify-center w-full align-text-bottom">
@@ -107,24 +106,57 @@ export default function Schedule({
                         const row_end_sec =
                             schedule.daily_open_time +
                             (i + 1) * config.schedule.increment_sec;
-                        const row_time = new Date(0, 0, 0, 0, 0, row_start_sec);
-                        const row_str = row_time.toLocaleTimeString("en-US", {
-                            hour: "numeric",
-                            minute: "numeric",
-                            hour12: true,
-                        });
+                        const row_start_time = new Date(
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                            row_start_sec,
+                        );
+                        const row_end_time = new Date(
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                            row_end_sec,
+                        );
+                        const row_start_str = row_start_time.toLocaleTimeString(
+                            "en-US",
+                            {
+                                hour: "numeric",
+                                minute: "numeric",
+                                hour12: true,
+                            },
+                        );
+                        const row_end_str = row_end_time.toLocaleTimeString(
+                            "en-US",
+                            {
+                                hour: "numeric",
+                                minute: "numeric",
+                                hour12: true,
+                            },
+                        );
                         // Rows
                         return (
                             <tr key={`interval-${i}`} className="gap-2 p-1">
                                 <td
                                     className={clsx(
-                                        "flex flex-col justify-center",
-                                        "items-end text-default-600 text-sm",
-                                        "py-1 min-w-15 h-full pr-3",
+                                        "flex flex-col items-start",
+                                        "justify-end text-default-600",
+                                        "-my-3 h-full pr-3 justify-between",
+                                        "text-xs lg:text-sm text-right",
+                                        "min-w-16 lg:min-w-20",
                                     )}
                                     key={`shift-time-${i}`}
                                 >
-                                    {row_str}
+                                    <span className="w-full">
+                                        {row_start_str}
+                                    </span>
+                                    <span className="-mb-5 w-full">
+                                        {i === numIntervals - 1 && row_end_str}
+                                    </span>
                                 </td>
                                 {
                                     // Column
@@ -143,9 +175,9 @@ export default function Schedule({
                                                     setSelectedUsers
                                                 }
                                                 type={type}
-                                                selectedShift={selectedShift}
-                                                setSelectedShift={
-                                                    setSelectedShift
+                                                selectedShifts={selectedShifts}
+                                                setSelectedShifts={
+                                                    setSelectedShifts
                                                 }
                                                 dragging={dragging}
                                                 setDragging={setDragging}

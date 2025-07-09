@@ -60,6 +60,7 @@ export type TSchedule = {
  *      objects for this schedule
  */
 export type TPublicScheduleData = {
+    uuid: string;
     shifts: TPublicShiftData[];
     daily_open_time: number;
     daily_close_time: number;
