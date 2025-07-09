@@ -19,7 +19,7 @@ import { TWorkshop } from "common/workshop";
 import { TCertification } from "common/certification";
 import { TUser, TUserRole } from "common/user";
 import MAKETable from "../../../Table.tsx";
-import { MAKEUser } from "../../../user/User.tsx";
+import { MAKEUser } from "../../../user/MAKEUser.tsx";
 import UserRole from "../../../user/UserRole.tsx";
 import { convertTimestampToDate } from "../../../../utils.tsx";
 import WorkshopPeopleModal from "./WorkshopPeopleModal.tsx";

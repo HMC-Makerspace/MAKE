@@ -54,7 +54,7 @@ export default function UsersTable({
     selectedKeys: Selection;
     onSelectionChange: (selectedKeys: Selection) => void;
     isLoading: boolean;
-    onCreate: (state: boolean) => void;
+    onCreate?: (state: boolean) => void;
     fullHeader?: boolean;
     extraColumns?: { name: string; id: string }[];
     defaultColumns?: string[];
@@ -120,7 +120,7 @@ export default function UsersTable({
 
     const modifiedSelectionChange = (selectedKeys: Selection) => {
         // If the selection changes, we won't be creating a new user
-        onCreate(false);
+        if (onCreate) onCreate(false);
         if (selectedKeys === "all") {
             onSelectionChange(new Set(filteredUsers.map((user) => user.uuid)));
         } else {
@@ -130,7 +130,7 @@ export default function UsersTable({
 
     const createUser = () => {
         onSelectionChange(new Set());
-        onCreate(true);
+        if (onCreate) onCreate(true);
     };
 
     const findRole = React.useCallback(

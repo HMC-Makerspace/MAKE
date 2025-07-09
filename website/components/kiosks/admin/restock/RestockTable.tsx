@@ -27,7 +27,7 @@ import RestockType from "./RestockType";
 import RestockEditor from "./RestockEditor";
 import RestockStatusLogs from "./RestockStatusLogs";
 import React from "react";
-import { MAKEUser } from "../../../user/User";
+import { MAKEUser } from "../../../user/MAKEUser";
 import PopupAlert from "../../../PopupAlert";
 import { convertTimestampToDate } from "../../../../utils";
 

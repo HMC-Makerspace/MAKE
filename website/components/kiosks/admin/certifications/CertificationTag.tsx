@@ -47,14 +47,18 @@ export default function CertificationTag({
     cert_uuid,
     certifications,
     showVisibility = false,
-    level = undefined,
-    href = undefined,
+    level,
+    href,
+    onPress,
+    highlight = false,
 }: {
     cert_uuid: string;
     certifications?: TCertification[];
     showVisibility?: boolean;
     level?: number;
     href?: string;
+    onPress?: () => void;
+    highlight?: boolean;
 }) {
     const { data, isLoading, isError } = useQuery<TCertification>({
         queryKey: ["certification", cert_uuid],
@@ -75,10 +79,17 @@ export default function CertificationTag({
         <Card
             className={clsx(
                 "p-1.5 flex flex-row gap-1 w-fit px-2.5 rounded-sm",
-                "content-center items-center min-w-fit",
+                "content-center items-center min-w-fit border-2",
+                "transition-color",
+                highlight && "shadow-md",
             )}
-            style={{ backgroundColor: color }}
+            style={{
+                backgroundColor: highlight ? color : color + "aa",
+                borderColor: color,
+            }}
             isBlurred={!isLoading}
+            onPress={onPress}
+            isPressable={!!onPress || !!href}
             as={href ? Link : undefined}
             href={href}
         >

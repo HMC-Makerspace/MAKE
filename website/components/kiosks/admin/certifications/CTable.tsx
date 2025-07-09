@@ -13,6 +13,7 @@ import {
     ChevronDownIcon,
     PlusIcon,
     PencilSquareIcon,
+    BookmarkIcon,
 } from "@heroicons/react/24/outline";
 
 import React from "react";
@@ -30,27 +31,17 @@ import UserRole from "../../../user/UserRole";
 import { TDocument } from "common/file";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import RequiredCertsModal from "./RequiredCertsModal";
 
-const columns = [
+const baseColumns = [
     { name: "UUID", id: "uuid" },
-    { name: "Name", id: "name", sortable: true },
+    { name: "Name", id: "name" },
     { name: "Description", id: "description" },
     { name: "Max Level", id: "max_level" },
     { name: "Expires After", id: "seconds_valid_for" },
     { name: "Documents", id: "documents" },
     { name: "Prerequisites", id: "prerequisites" },
     { name: "Authorized Roles", id: "authorized_roles" },
-];
-
-const defaultColumns = [
-    "name",
-    "description",
-    "max_level",
-    "seconds_valid_for",
-    "documents",
-    "visibility",
-    "prerequisites",
-    "authorized_roles",
 ];
 
 const updateCertDocs = async ({
@@ -73,13 +64,31 @@ export default function CertificationsTable({
     onSelectionChange,
     isLoading,
     canEdit,
+    defaultColumns = [
+        "name",
+        "description",
+        "max_level",
+        "seconds_valid_for",
+        "documents",
+        "visibility",
+        "prerequisites",
+        "authorized_roles",
+    ],
+    extraColumns = [],
+    customColumnComponents = {},
 }: {
     certs: TCertification[];
     selectedKeys: Selection;
     onSelectionChange: (selectedKeys: Selection) => void;
     isLoading: boolean;
     canEdit: boolean;
+    defaultColumns?: string[];
+    extraColumns?: { name: string; id: string }[];
+    customColumnComponents?: {
+        [column_id: string]: (item: TCertification) => React.ReactNode;
+    };
 }) {
+    const columns = baseColumns.concat(extraColumns);
     // The set of columns that are visible
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
         new Set(defaultColumns),
@@ -95,7 +104,8 @@ export default function CertificationsTable({
 
     // Edit docs modal
     const [certOpenDoc, setCertOpenDoc] = React.useState<TCertification>(); // the certification with edited docs
-    const [docOpen, setDocOpen] = React.useState<boolean>(false); // whether modal is open
+    const [docOpen, setDocOpen] = React.useState<boolean>(false); // whether doc edit modal is open
+    const [prereqOpen, setPrereqOpen] = React.useState<boolean>(false); // whether prereq edit modal is open
 
     const queryClient = useQueryClient();
     const mutation = useMutation({
@@ -181,30 +191,32 @@ export default function CertificationsTable({
                             </DropdownMenu>
                         </Dropdown>
 
-                        <Button
-                            color="primary"
-                            isDisabled={isLoading}
-                            startContent={<PlusIcon className="size-6" />}
-                            onPress={() => {
-                                setEditCert({
-                                    uuid: crypto.randomUUID(),
-                                    name: "",
-                                    description: "",
-                                    visibility:
-                                        CERTIFICATION_VISIBILITY.PRIVATE,
-                                    color: "",
-                                    max_level: 0,
-                                    seconds_valid_for: 0,
-                                    documents: [],
-                                    authorized_roles: [],
-                                    prerequisites: [],
-                                });
-                                setIsNew(true);
-                                setIsOpen(true);
-                            }}
-                        >
-                            Create
-                        </Button>
+                        {canEdit && (
+                            <Button
+                                color="primary"
+                                isDisabled={isLoading}
+                                startContent={<PlusIcon className="size-6" />}
+                                onPress={() => {
+                                    setEditCert({
+                                        uuid: crypto.randomUUID(),
+                                        name: "",
+                                        description: "",
+                                        visibility:
+                                            CERTIFICATION_VISIBILITY.PRIVATE,
+                                        color: "",
+                                        max_level: 0,
+                                        seconds_valid_for: 0,
+                                        documents: [],
+                                        authorized_roles: [],
+                                        required_certifications: [],
+                                    });
+                                    setIsNew(true);
+                                    setIsOpen(true);
+                                }}
+                            >
+                                Create
+                            </Button>
+                        )}
                     </div>
                 </div>
                 <div className="flex justify-between items-center pb-2">
@@ -230,7 +242,7 @@ export default function CertificationsTable({
                 }}
                 customColumnComponents={{
                     documents: (cert: TCertification) => (
-                        <div className="flex flex-col gap-2">
+                        <div className="flex justify-center">
                             <Button
                                 variant="flat"
                                 color="secondary"
@@ -262,16 +274,42 @@ export default function CertificationsTable({
                     max_level: (cert: TCertification) => (
                         <div>{cert.max_level || "None"}</div>
                     ),
-                    prerequisites: (cert: TCertification) => (
-                        <div>
-                            {cert.prerequisites?.map((prereq) => (
-                                <CertificationTag
-                                    cert_uuid={prereq}
-                                    key={prereq}
-                                ></CertificationTag>
-                            ))}
-                        </div>
-                    ),
+                    prerequisites: (cert: TCertification) => {
+                        if (canEdit) {
+                            return (
+                                <div className="flex justify-center">
+                                    <Button
+                                        variant="flat"
+                                        color="primary"
+                                        onPress={() => {
+                                            setCertOpenDoc(cert);
+                                            setPrereqOpen(true);
+                                        }}
+                                        isIconOnly
+                                    >
+                                        <BookmarkIcon className="size-6" />
+                                    </Button>
+                                </div>
+                            );
+                        } else {
+                            return (
+                                <div>
+                                    {cert.required_certifications?.map(
+                                        (prereq) => (
+                                            <CertificationTag
+                                                key={prereq.certification_uuid}
+                                                cert_uuid={
+                                                    prereq.certification_uuid
+                                                }
+                                                certifications={certs}
+                                                level={prereq.required_level}
+                                            />
+                                        ),
+                                    )}
+                                </div>
+                            );
+                        }
+                    },
                     authorized_roles: (cert: TCertification) => (
                         <div>
                             {cert.authorized_roles?.map((role) => (
@@ -282,6 +320,7 @@ export default function CertificationsTable({
                             ))}
                         </div>
                     ),
+                    ...customColumnComponents,
                 }}
                 isLoading={isLoading}
                 loadingContent={(ref) => (
@@ -306,12 +345,23 @@ export default function CertificationsTable({
                 />
             )}
 
-            {docOpen && certOpenDoc && (
+            {certOpenDoc && (
                 <EditDocsModal
                     key={"certdocedit-" + certOpenDoc.uuid}
                     element={certOpenDoc}
                     isOpen={docOpen}
                     onOpenChange={setDocOpen}
+                    patchMutation={mutation}
+                />
+            )}
+
+            {certOpenDoc && (
+                <RequiredCertsModal
+                    key={"certdocprereq-" + certOpenDoc.uuid}
+                    certifications={certs}
+                    element={certOpenDoc}
+                    isOpen={prereqOpen}
+                    onOpenChange={setPrereqOpen}
                     patchMutation={mutation}
                 />
             )}
