@@ -33,7 +33,7 @@ export default function HomePage() {
                 </div>
                 <MAKE
                     className={clsx(
-                        "text-[10rem] tracking-widest",
+                        "text-[7rem] sm:text-[10rem] tracking-widest",
                         "font-black text-foreground-600",
                         "pl-4 -mt-8",
                     )}
@@ -44,12 +44,17 @@ export default function HomePage() {
                     <>
                         {/* Tagline */}
                         {config.general.tagline && (
-                            <div className="font-semibold text-lg -mt-4 mb-4">
+                            <div
+                                className={clsx(
+                                    "font-semibold -mt-4 mb-4 text-center",
+                                    "text-md sm:text-lg",
+                                )}
+                            >
                                 {config.general.tagline}
                             </div>
                         )}
                         {/* Socials/Home links */}
-                        <div className="flex flex-row gap-3 ">
+                        <div className="flex flex-row flex-wrap justify-center gap-3 ">
                             {config.general.discord_url && (
                                 <Button
                                     color="primary"

@@ -163,6 +163,7 @@ export default function ScheduleBuffer({
                             ? setSelectedUsers
                             : setAvailableUsers
                     }
+                    type={scheduleMode === "schedule" ? "edit" : "availability"}
                 />
             </div>
             <PopupAlert

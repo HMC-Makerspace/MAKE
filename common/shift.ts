@@ -58,12 +58,14 @@ export const SHIFT_DAYS = [
  * SHIFT_EVENT - An event regarding the status of a shift
  * @member DROP - If the shift assignee is dropping their shift
  * @member PICKUP - If the shift assignee is picking up a shift
- * @member CHECKIN - If the shift assignee has checked into their shift (present)
+ * @member CLOCK_IN - If the shift assignee has checked into their shift (present)
+ * @member CLOCK_OUT - If the shift assignee has left their shift
  */
 export enum SHIFT_EVENT_TYPE {
     DROP = "drop",
     PICKUP = "pickup",
-    CHECKIN = "checkin",
+    CLOCK_IN = "clock_in",
+    CLOCK_OUT = "clock_out",
 }
 
 /**

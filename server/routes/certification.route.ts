@@ -84,61 +84,31 @@ router.get(
 );
 
 /**
- * Get a specific certification. This is a protected route, and a `requesting_uuid`
- * header is required to call it. The user must have the
- * {@link API_SCOPE.GET_ONE_CERTIFICATION} scope.
+ * Get a specific certification. This is a public route.
  */
 router.get(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: CertificationResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
         const certification_uuid = req.params.UUID;
-
-        // If no requesting user uuid is provided, the call is not authorized
-        if (!requesting_uuid) {
-            req.log.warn(
-                "No requesting_uuid was provided while getting a certification",
-            );
-            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-            return;
-        }
 
         req.log.debug({
             msg: `Getting a certification by uuid ${certification_uuid}`,
-            requesting_uuid: requesting_uuid,
         });
 
-        // A get certification request is valid if the requesting user can get all
-        // certifications or get one certification at a time
-        if (
-            await verifyRequest(
-                requesting_uuid,
-                API_SCOPE.GET_ALL_CERTIFICATIONS,
-                API_SCOPE.GET_ONE_CERTIFICATION,
-            )
-        ) {
-            // If the user is authorized, get a certification's information
-            const certification = await getCertification(certification_uuid);
-            if (!certification) {
-                req.log.warn(
-                    `Certification not found by uuid ${certification_uuid}`,
-                );
-                res.status(StatusCodes.NOT_FOUND).json({
-                    error: `No certification found with uuid \`${certification_uuid}\`.`,
-                });
-                return;
-            }
-            req.log.debug("Returned certification.");
-            res.status(StatusCodes.OK).json(certification);
-        } else {
-            req.log.warn({
-                msg: "Forbidden user attempted to get a certification",
-                requesting_uuid: requesting_uuid,
+        // Get the certification's information
+        const certification = await getCertification(certification_uuid);
+        if (!certification) {
+            req.log.warn(
+                `Certification not found by uuid ${certification_uuid}`,
+            );
+            res.status(StatusCodes.NOT_FOUND).json({
+                error: `No certification found with uuid \`${certification_uuid}\`.`,
             });
-            // If the user is not authorized, provide a status error
-            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+            return;
         }
+        req.log.debug("Returned certification.");
+        res.status(StatusCodes.OK).json(certification);
     },
 );
 

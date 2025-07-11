@@ -18,6 +18,7 @@ export default function Schedule({
     selectedShifts = new Set(),
     setSelectedShifts,
     type = "view",
+    hideMissingShifts = false,
 }: {
     schedule: TSchedule | undefined;
     users: TUser[];
@@ -28,7 +29,13 @@ export default function Schedule({
     setSelectedUsers?: (users: Selection) => void;
     selectedShifts?: Set<string>;
     setSelectedShifts?: (shifts: Set<string>) => void;
-    type?: "view" | "edit" | "availability" | "worker";
+    type?:
+        | "view"
+        | "edit"
+        | "availability"
+        | "worker_availability"
+        | "worker_view";
+    hideMissingShifts?: boolean;
 }) {
     if (!schedule) {
         // New schedule
@@ -78,22 +85,35 @@ export default function Schedule({
                 className={clsx(
                     "h-full w-full items-center justify-center",
                     "border-separate border-spacing-1",
-                    type === "worker" ? "table-fixed" : "",
+                    type === "worker_availability" ? "table-fixed" : "",
                 )}
             >
                 <tbody>
                     {/* TODO: Think about adding tap to clear selection */}
                     <tr key="header">
-                        <td key="space" className="w-15"></td>
+                        <td
+                            key="space"
+                            className="w-[3.7rem] sm:w-16 lg:w-[4.2rem]"
+                        ></td>
                         {days.map((day) => (
                             <th
                                 key={`day-${day}`}
                                 className={clsx(
                                     "text-default-600 lg:text-sm",
-                                    "text-xs py-1 min-w-15 capitalize",
+                                    "text-xs py-1 lg:min-w-15 capitalize",
                                 )}
                             >
-                                <div className="flex justify-center w-full align-text-bottom">
+                                <div
+                                    className={clsx(
+                                        "flex w-full align-text-bottom",
+                                        type !== "worker_availability" &&
+                                            "justify-center",
+                                        type === "worker_availability" &&
+                                            "-rotate-[45deg] pt-3 pl-2 -mb-3 justify-start",
+                                        type === "worker_availability" &&
+                                            "sm:rotate-0 sm:pt-0 sm:justify-center sm:pl-0 sm:mb-0",
+                                    )}
+                                >
                                     {SHIFT_DAY[day].toLowerCase()}
                                 </div>
                             </th>
@@ -145,9 +165,10 @@ export default function Schedule({
                                     className={clsx(
                                         "flex flex-col items-start",
                                         "justify-end text-default-600",
-                                        "-my-3 h-full pr-3 justify-between",
+                                        "-my-3 h-full justify-between",
                                         "text-xs lg:text-sm text-right",
-                                        "min-w-16 lg:min-w-20",
+                                        "whitespace-nowrap mr-1",
+                                        // "min-w-16 lg:min-w-20",
                                     )}
                                     key={`shift-time-${i}`}
                                 >

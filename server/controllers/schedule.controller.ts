@@ -1,4 +1,4 @@
-import { UUID } from "common/global";
+import { UnixTimestamp, UUID } from "common/global";
 import { TAlert, TPublicScheduleData, TSchedule } from "common/schedule";
 import {
     SHIFT_EVENT_TYPE,
@@ -9,6 +9,8 @@ import {
 import { UserUUID } from "common/user";
 import { Schedule } from "models/schedule.model";
 import mongoose from "mongoose";
+import { getConfig } from "./config.controller";
+import { TConfig } from "common/config";
 
 /**
  * Get all schedules in the database
@@ -360,12 +362,69 @@ export async function deleteAlertInSchedule(
  */
 export async function getShiftsByUser(
     user_uuid: UserUUID,
-): Promise<TShift[] | null> {
+): Promise<TSchedule | null> {
+    const config = await getConfig();
     const schedule = await getActiveSchedule();
-    if (schedule === null) {
+    if (schedule === null || config === null) {
         return null;
     }
-    return schedule.shifts.filter((shift) => shift.assignee === user_uuid);
+    const user_shifts = schedule.shifts.filter(
+        (shift) =>
+            shift.assignee === user_uuid ||
+            getShiftDroppedDates(shift, config).length > 0 ||
+            isShiftPickedUpBy(shift, user_uuid, config),
+    );
+    schedule.shifts = schedule.shifts.filter((s) =>
+        user_shifts.some(
+            (us) =>
+                s.day === us.day &&
+                s.sec_start === us.sec_start &&
+                s.sec_end === us.sec_end,
+        ),
+    );
+    return schedule;
+}
+
+function getShiftDroppedDates(shift: TShift, config: TConfig): UnixTimestamp[] {
+    // Cutoff of dropped shifts is one shift after the start of the drop
+    const cutoff_timestamp = Date.now() / 1000 - config.schedule.increment_sec;
+    const drops = new Map<UnixTimestamp, number>();
+    // Shift events are in timestamp order, where the most recent event
+    // is at the end of the shift.history list
+    for (const event of shift.history) {
+        if (event.type === SHIFT_EVENT_TYPE.DROP) {
+            drops.set(event.shift_date, drops.get(event.shift_date) ?? 0 + 1);
+        } else if (event.type === SHIFT_EVENT_TYPE.PICKUP) {
+            drops.set(event.shift_date, drops.get(event.shift_date) ?? 0 - 1);
+        }
+    }
+    return drops
+        .entries()
+        .filter(
+            ([date, dropCount]) =>
+                // Find shifts that have at least one active drop
+                dropCount > 0 &&
+                // where the relevant shift hasn't happened yet
+                date + shift.sec_start >= cutoff_timestamp,
+        )
+        .map(([date, _]) => date)
+        .toArray();
+}
+
+function isShiftPickedUpBy(
+    shift: TShift,
+    user_uuid: UserUUID,
+    config: TConfig,
+) {
+    const cutoff_timestamp = Date.now() / 1000 - config.schedule.increment_sec;
+    // Shift events are in timestamp order, where the most recent event
+    // is at the end of the shift.history list
+    return shift.history.some(
+        (event) =>
+            event.initiator === user_uuid &&
+            event.type === SHIFT_EVENT_TYPE.PICKUP &&
+            event.shift_date + shift.sec_start >= cutoff_timestamp,
+    );
 }
 
 /**

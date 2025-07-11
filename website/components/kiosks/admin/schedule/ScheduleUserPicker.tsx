@@ -13,6 +13,7 @@ export default function ScheduleUserPicker({
     isLoading,
     selectedUsers,
     setSelectedUsers,
+    type,
 }: {
     schedule_uuid?: ScheduleUUID;
     users: TUser[];
@@ -21,6 +22,7 @@ export default function ScheduleUserPicker({
     isLoading: boolean;
     selectedUsers: Selection;
     setSelectedUsers: (selectedUsers: Selection) => void;
+    type: "edit" | "availability";
 }) {
     return (
         <Card
@@ -44,7 +46,11 @@ export default function ScheduleUserPicker({
                         id: "shifts",
                     },
                 ]}
-                emptyContent="Select a shift to see availability"
+                emptyContent={
+                    type === "availability"
+                        ? "Select a shift to see availability"
+                        : "No users"
+                }
                 customColumnComponents={{
                     shifts: (u) =>
                         `${

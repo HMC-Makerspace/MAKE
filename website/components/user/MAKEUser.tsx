@@ -165,7 +165,7 @@ export function MAKEUser({
                         )}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-3/4 p-2">
+                <PopoverContent className="min-w-3/4 p-2">
                     {user_uuid && user_data && roles && (
                         <UserInfo
                             user_uuid={user_uuid}
@@ -179,7 +179,7 @@ export function MAKEUser({
                             variant="shadow"
                             color="primary"
                             startContent={
-                                <ArrowLeftEndOnRectangleIcon className="size-6" />
+                                <ArrowLeftEndOnRectangleIcon className="size-6 min-w-6" />
                             }
                             // onPress={}
                         >

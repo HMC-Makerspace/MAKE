@@ -128,13 +128,14 @@ export default function UserInfo({
             <div
                 className={clsx(
                     "rounded-lg bg-default-100 border-2 border-default-200 p-2",
-                    "col-span-3 flex gap-2",
+                    "col-span-3 flex flex-wrap gap-2",
                 )}
             >
                 {user_data?.active_certificates &&
                 user_data.active_certificates.length > 0 ? (
                     user_data.active_certificates.map((c) => (
                         <CertificationTag
+                            key={c.certification_uuid}
                             cert_uuid={c.certification_uuid}
                             certifications={certs}
                             level={c.level}
