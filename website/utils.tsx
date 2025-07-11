@@ -6,8 +6,10 @@ import {
     ZonedDateTime,
     parseZonedDateTime,
 } from "@internationalized/date";
-import { API_SCOPE } from "../common/global";
+import { API_SCOPE, UnixTimestamp } from "../common/global";
 import { TUser, TUserRole } from "common/user";
+import { TConfig } from "common/config";
+import { TShift, SHIFT_EVENT_TYPE } from "../common/shift";
 
 /**
  * A file to contain useful utility functions for the website.
@@ -112,4 +114,33 @@ export function verifyScopes(
         user_scopes.includes(API_SCOPE.ADMIN) ||
         true_scopes.some((scope) => user_scopes.includes(scope))
     );
+}
+
+export function getShiftDroppedDates(
+    shift: TShift,
+    config: TConfig,
+): UnixTimestamp[] {
+    // Cutoff of dropped shifts is one shift after the start of the drop
+    const cutoff_timestamp = Date.now() / 1000 - config.schedule.increment_sec;
+    const drops = new Map<UnixTimestamp, number>();
+    // Shift events are in timestamp order, where the most recent event
+    // is at the end of the shift.history list
+    for (const event of shift.history) {
+        if (event.type === SHIFT_EVENT_TYPE.DROP) {
+            drops.set(event.shift_date, drops.get(event.shift_date) ?? 0 + 1);
+        } else if (event.type === SHIFT_EVENT_TYPE.PICKUP) {
+            drops.set(event.shift_date, drops.get(event.shift_date) ?? 0 - 1);
+        }
+    }
+    return drops
+        .entries()
+        .filter(
+            ([date, dropCount]) =>
+                // Find shifts that have at least one active drop
+                dropCount > 0 &&
+                // where the relevant shift hasn't happened yet
+                date + shift.sec_start >= cutoff_timestamp,
+        )
+        .map(([date, _]) => date)
+        .toArray();
 }
