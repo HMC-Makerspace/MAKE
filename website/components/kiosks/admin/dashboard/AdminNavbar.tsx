@@ -31,7 +31,7 @@ export default function AdminNavbar({
     return (
         <Navbar
             className="w-full bg-primary-500 dark:bg-primary-300"
-            classNames={{ wrapper: "max-w-full justify-none gap-0" }}
+            classNames={{ wrapper: "max-w-full justify-none gap-0 pr-0" }}
         >
             <NavbarContent justify="start">
                 {/* Branding, always visible */}
@@ -103,13 +103,13 @@ export default function AdminNavbar({
                     })
                 }
             </NavbarContent>
-            <NavbarContent justify="end">
+            <NavbarContent justify="end" className="pr-0">
                 {/* Menu dropdown for small screens, hide for larger */}
                 <NavbarMenuToggle className="lg:hidden text-background" />
                 <MAKEUser
                     user_uuid={user_uuid}
                     className={clsx(
-                        "-mr-6 rounded-r-none h-[85%] ",
+                        "rounded-r-none h-[85%]",
                         "data-[pressed=true]:translate-x-1",
                         "aria-expanded:translate-x-1",
                     )}

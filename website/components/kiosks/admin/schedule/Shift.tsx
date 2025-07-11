@@ -515,7 +515,15 @@ export default function Shift({
                         </div>
                     )}
                     {type === "worker_availability" && (
-                        <div className="min-h-[32px]"></div>
+                        <div
+                            className="min-h-[28px]"
+                            style={{
+                                // Keep same vertical height when switching modes
+                                height:
+                                    16 * assignees.length +
+                                    2 * (assignees.length - 1),
+                            }}
+                        ></div>
                     )}
                     {assignees.length === 0 &&
                         (type == "edit" ||

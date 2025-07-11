@@ -9,7 +9,7 @@ import {
 import { API_SCOPE, UnixTimestamp } from "../common/global";
 import { TUser, TUserRole } from "common/user";
 import { TConfig } from "common/config";
-import { TShift, SHIFT_EVENT_TYPE } from "../common/shift";
+import { TShift, SHIFT_EVENT_TYPE, TShiftEvent } from "../common/shift";
 
 /**
  * A file to contain useful utility functions for the website.
@@ -116,31 +116,47 @@ export function verifyScopes(
     );
 }
 
-export function getShiftDroppedDates(
-    shift: TShift,
-    config: TConfig,
-): UnixTimestamp[] {
+export function getActiveEvents(shift: TShift, config: TConfig): TShiftEvent[] {
     // Cutoff of dropped shifts is one shift after the start of the drop
     const cutoff_timestamp = Date.now() / 1000 - config.schedule.increment_sec;
-    const drops = new Map<UnixTimestamp, number>();
+    const last_events = new Map<UnixTimestamp, TShiftEvent>();
     // Shift events are in timestamp order, where the most recent event
     // is at the end of the shift.history list
     for (const event of shift.history) {
-        if (event.type === SHIFT_EVENT_TYPE.DROP) {
-            drops.set(event.shift_date, drops.get(event.shift_date) ?? 0 + 1);
-        } else if (event.type === SHIFT_EVENT_TYPE.PICKUP) {
-            drops.set(event.shift_date, drops.get(event.shift_date) ?? 0 - 1);
+        if (
+            event.type === SHIFT_EVENT_TYPE.DROP ||
+            event.type === SHIFT_EVENT_TYPE.PICKUP
+        ) {
+            last_events.set(event.shift_date, event);
         }
     }
-    return drops
+    return last_events
         .entries()
         .filter(
-            ([date, dropCount]) =>
-                // Find shifts that have at least one active drop
-                dropCount > 0 &&
+            ([date, event]) =>
                 // where the relevant shift hasn't happened yet
                 date + shift.sec_start >= cutoff_timestamp,
         )
-        .map(([date, _]) => date)
+        .map(([date, event]) => event)
         .toArray();
+    // const pickup_dates = pickups
+    //     .entries()
+    //     .filter(
+    //         ([date, pickupCount]) =>
+    //             // Find shifts that been picked up
+    //             pickupCount > 0 &&
+    //             // where the relevant shift hasn't happened yet
+    //             date + shift.sec_start >= cutoff_timestamp,
+    //     )
+    //     .map(([date, _]) => date)
+    //     .toArray();
+
+    // return shift.history.filter(
+    //     (event) =>
+    //         (event.initiator === shift.assignee &&
+    //             event.type === SHIFT_EVENT_TYPE.DROP &&
+    //             drop_dates.includes(event.shift_date)) ||
+    //         (event.type === SHIFT_EVENT_TYPE.PICKUP &&
+    //             pickup_dates.includes(event.shift_date)),
+    // );
 }

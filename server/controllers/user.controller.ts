@@ -3,6 +3,7 @@ import { API_SCOPE } from "common/global";
 import {
     TPublicUser,
     TUser,
+    TUserAvailability,
     TUserRole,
     UserRoleUUID,
     UserUUID,
@@ -12,6 +13,7 @@ import { User, UserRole } from "models/user.model";
 import mongoose from "mongoose";
 import { getActiveSchedule } from "./schedule.controller";
 import { SHIFT_DAY } from "common/shift";
+import { ScheduleUUID } from "common/schedule";
 
 /**
  * Get all users in the database
@@ -169,15 +171,17 @@ export async function getUserRoles(): Promise<TUserRole[]> {
  * Get all user roles that a given user has
  * @returns A list {@link TUserRole} of all user roles in the db
  */
-export async function getUserRolesByUser(user_uuid: UserUUID): Promise<TUserRole[] | null> {
+export async function getUserRolesByUser(
+    user_uuid: UserUUID,
+): Promise<TUserRole[] | null> {
     const Users = mongoose.model("User", User);
-    const user = await Users.findOne({uuid: user_uuid})
+    const user = await Users.findOne({ uuid: user_uuid });
     if (!user) {
-        return null
+        return null;
     }
     const UserRoles = mongoose.model("UserRole", UserRole);
     return UserRoles.find({
-        uuid: user.active_roles.map((rl) => rl.role_uuid)
+        uuid: user.active_roles.map((rl) => rl.role_uuid),
     });
 }
 
@@ -459,6 +463,52 @@ export async function revokeCertificateFromUser(
         }
         user.past_certificates.push(certificate);
     }
+    return user.save();
+}
+
+/**
+ * Update a user's availability based on partial changes.
+ * @param user_uuid The uuid of the user to update
+ * @param partial_availability_obj The updates to this user's availability,
+ *      which must have a schedule uuid.
+ * @returns The updated user object, or null if the user or schedule does
+ *      not exist.
+ */
+export async function patchUserAvailability(
+    user_uuid: UserUUID,
+    partial_availability_obj: Partial<TUserAvailability> & {
+        schedule: ScheduleUUID;
+    },
+) {
+    const user = await getUser(user_uuid);
+
+    if (!user) {
+        return null;
+    }
+
+    if (!user.work_schedules) {
+        user.work_schedules = [];
+    }
+
+    const existingIndex = user.work_schedules.findIndex(
+        (s) => s.schedule === partial_availability_obj.schedule,
+    );
+
+    console.log("Partial", partial_availability_obj);
+
+    if (existingIndex !== -1) {
+        const exist = {
+            ...user.toObject().work_schedules![existingIndex],
+            ...partial_availability_obj,
+        };
+        user.work_schedules[existingIndex] = exist;
+    } else {
+        user.work_schedules.push({
+            days: [], // Default to an empty list of days
+            ...partial_availability_obj,
+        });
+    }
+
     return user.save();
 }
 

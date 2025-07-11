@@ -24,6 +24,7 @@ export function MAKEUser({
     user,
     className,
     classNames = {
+        wrapper: "items-center sm:items-start",
         name: "max-w-[130px] text-ellipsis overflow-hidden",
         description: "max-w-[130px] text-ellipsis overflow-hidden",
     },
@@ -142,6 +143,9 @@ export function MAKEUser({
                                 name={name}
                                 description={description}
                                 classNames={classNames}
+                                avatarProps={{
+                                    className: "hidden sm:block",
+                                }}
                             />
                         ) : size === "md" ? (
                             <User

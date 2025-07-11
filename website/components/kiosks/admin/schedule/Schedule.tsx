@@ -106,15 +106,21 @@ export default function Schedule({
                                 <div
                                     className={clsx(
                                         "flex w-full align-text-bottom",
+                                        "justify-center",
                                         type !== "worker_availability" &&
-                                            "justify-center",
-                                        type === "worker_availability" &&
-                                            "-rotate-[45deg] pt-3 pl-2 -mb-3 justify-start",
-                                        type === "worker_availability" &&
-                                            "sm:rotate-0 sm:pt-0 sm:justify-center sm:pl-0 sm:mb-0",
+                                            "min-w-[72px]",
                                     )}
                                 >
-                                    {SHIFT_DAY[day].toLowerCase()}
+                                    <span className="sm:hidden">
+                                        {type === "worker_availability"
+                                            ? SHIFT_DAY[day]
+                                                  .toLowerCase()
+                                                  .slice(0, 2)
+                                            : SHIFT_DAY[day].toLowerCase()}
+                                    </span>
+                                    <span className="hidden sm:block">
+                                        {SHIFT_DAY[day].toLowerCase()}
+                                    </span>
                                 </div>
                             </th>
                         ))}

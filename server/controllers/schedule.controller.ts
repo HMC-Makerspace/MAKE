@@ -393,9 +393,9 @@ function getShiftDroppedDates(shift: TShift, config: TConfig): UnixTimestamp[] {
     // is at the end of the shift.history list
     for (const event of shift.history) {
         if (event.type === SHIFT_EVENT_TYPE.DROP) {
-            drops.set(event.shift_date, drops.get(event.shift_date) ?? 0 + 1);
+            drops.set(event.shift_date, (drops.get(event.shift_date) ?? 0) + 1);
         } else if (event.type === SHIFT_EVENT_TYPE.PICKUP) {
-            drops.set(event.shift_date, drops.get(event.shift_date) ?? 0 - 1);
+            drops.set(event.shift_date, (drops.get(event.shift_date) ?? 1) - 1);
         }
     }
     return drops
@@ -555,6 +555,8 @@ export async function addShiftEventInSchedule(
     event: TShiftEvent,
 ): Promise<TSchedule | null> {
     const Schedules = mongoose.model("Schedule", Schedule);
+
+    // TODO: Consider deleting drop if assignee is the initiator of a pickup
     return Schedules.findOneAndUpdate(
         // Find the schedule by UUID
         { uuid: schedule_uuid, "shifts.uuid": shift_uuid },

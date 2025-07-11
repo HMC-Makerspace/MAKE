@@ -18,6 +18,7 @@ import {
     grantRoleToUser,
     initializeAdmin,
     initializeAdminRole,
+    patchUserAvailability,
     removeUserAvailability,
     revokeCertificateFromUser,
     updateUser,
@@ -34,7 +35,8 @@ import {
     VerifyRequestHeader,
     SuccessfulResponse,
 } from "common/verify";
-import { TPublicUser, TUser, TUserRole } from "common/user";
+import { TPublicUser, TUser, TUserAvailability, TUserRole } from "common/user";
+import { ScheduleUUID } from "common/schedule";
 
 // --- Request and Response Types ---
 type UserRequest = Request<{}, {}, { user_obj: TUser }>;
@@ -1100,6 +1102,79 @@ router.patch(
             // If the user is not authorized, provide a status error
             req.log.warn({
                 msg: `Forbidden user attempted to update user availability with uuid ${user_uuid}`,
+                requesting_uuid: requesting_uuid,
+            });
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
+
+router.patch(
+    "/:user_uuid/availability",
+    async (
+        req: Request<
+            { user_uuid: string },
+            {},
+            {
+                partial_availability_obj: Partial<TUserAvailability> & {
+                    schedule: ScheduleUUID;
+                };
+            }
+        >,
+        res: UserResponse,
+    ) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = headers.requesting_uuid;
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while adding user availability",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+
+        const user_uuid = req.params.user_uuid;
+        const partial_availability_obj = req.body.partial_availability_obj;
+
+        req.log.debug({
+            msg:
+                `Patching availability in user ${user_uuid} for ` +
+                `schedule ${partial_availability_obj.schedule}`,
+            requesting_uuid: user_uuid,
+        });
+
+        // A patch request is valid if the requesting user can update any user,
+        // or if the requesting user is allowed to update their own availability
+        if (
+            await verifyRequest(
+                requesting_uuid,
+                API_SCOPE.UPDATE_USER,
+                requesting_uuid === user_uuid && API_SCOPE.UPDATE_AVAILABILITY,
+            )
+        ) {
+            // If the user is authorized, perform the update
+            const updated_user = await patchUserAvailability(
+                user_uuid,
+                partial_availability_obj,
+            );
+
+            if (!updated_user) {
+                req.log.warn(
+                    `No user found to patch availability with uuid ${user_uuid}`,
+                );
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `No user found to patch availability with uuid ${user_uuid}`,
+                });
+                return;
+            }
+            req.log.debug(`Patched user availability with uuid ${user_uuid}`);
+            // Return the updated user object
+            res.status(StatusCodes.OK).json(updated_user);
+        } else {
+            // If the user is not authorized, provide a status error
+            req.log.warn({
+                msg: `Forbidden user attempted to patch user availability with uuid ${user_uuid}`,
                 requesting_uuid: requesting_uuid,
             });
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
