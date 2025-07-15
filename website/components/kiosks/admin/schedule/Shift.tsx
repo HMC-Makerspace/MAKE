@@ -274,9 +274,10 @@ export default function Shift({
 
     const view_classes = [
         // If in view mode, cells are clickable to show info
-        "cursor-pointer",
+        "cursor-pointer ring-inset hover:ring-2",
         !isShiftSelected && baseColors[colorIndex],
-        isShiftSelected && "bg-primary-300",
+        !isShiftSelected && "hover:ring-secondary",
+        isShiftSelected && "bg-primary-300 hover:ring-primary-400",
     ];
 
     const availability_classes = [
@@ -287,7 +288,6 @@ export default function Shift({
 
     const worker_availability_classes = [
         !available && "bg-default-300",
-
         available && "bg-success-400",
     ];
 
@@ -504,10 +504,10 @@ export default function Shift({
                                             "flex flex-row",
                                             "items-center justify-center",
                                             "text-default-800",
-                                            "text-[9px] text-center",
+                                            " text-center",
                                             firstNamesOnly
-                                                ? "lg:text-sm"
-                                                : "lg:text-xs",
+                                                ? "text-xs lg:text-sm"
+                                                : "text-[9px] lg:text-xs",
                                         )}
                                     >
                                         {firstNamesOnly

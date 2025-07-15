@@ -160,3 +160,39 @@ export function getActiveEvents(shift: TShift, config: TConfig): TShiftEvent[] {
     //             pickup_dates.includes(event.shift_date)),
     // );
 }
+
+/**
+ * A simple hex to RGB converter
+ * @param hex the hex color to convert
+ * @returns A list of RGB values
+ */
+export function hexToRgb(hex: string): [number, number, number] {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+
+    return [r, g, b];
+}
+
+/**
+ * A simple function to determine the best foreground color based on the given
+ * background color, using a sRGB luma perceived brightness calculation.
+ * Based on https://css-tricks.com/switch-font-color-for-different-backgrounds-with-css/
+ * @param hex the hex background color to determine the foreground color for
+ * @returns The best foreground color (either black or white) as a hex string
+ */
+export function getForegroundColor(hex: string): string {
+    const [r, g, b] = hexToRgb(hex);
+    // Luma = (red * 0.2126 + green * 0.7152 + blue * 0.0722) / 255 */
+    const lumaRed = r * 0.2126;
+    const lumaGreen = g * 0.7152;
+    const lumaBlue = b * 0.0722;
+    const luma = (lumaRed + lumaGreen + lumaBlue) / 255;
+
+    // Color threshold
+    if (luma < 0.5) {
+        return "#ffffff";
+    } else {
+        return "#000000";
+    }
+}
