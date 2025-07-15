@@ -15,7 +15,7 @@ import Branding from "./public/home/Branding";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { MAKEUser } from "./user/MAKEUser";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouteLink } from "react-router-dom";
 
 export default function CustomNavbar({
     pages,
@@ -66,7 +66,9 @@ export default function CustomNavbar({
                                 scaleY: 0.97,
                                 translateX: -1,
                             }}
-                            onClick={() => navigate(page.href)}
+                            onClick={() =>
+                                navigate(page.href, { viewTransition: true })
+                            }
                         >
                             {page.icon && <page.icon className="size-5" />}
                             {/* <Link
@@ -142,12 +144,15 @@ export default function CustomNavbar({
                                         }
                                     />
                                 )}
-                                <Link
-                                    href={page.href}
+                                <RouteLink
+                                    to={page.href}
+                                    // href={page.href}
+                                    // as={RouteLink}
                                     className="text-3xl text-inherit"
+                                    viewTransition
                                 >
                                     {page.name}
-                                </Link>
+                                </RouteLink>
                             </div>
                         ))}
                     </div>

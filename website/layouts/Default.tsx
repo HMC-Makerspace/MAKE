@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { API_SCOPE } from "../../common/global";
 import { verifyScopes } from "../utils";
 import { useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 
 const PAGES = [
     {
@@ -113,16 +114,24 @@ export default function DefaultLayout({
     return (
         <div className="flex flex-col xl:flex-row h-screen">
             <Navbar pages={PAGES} pageIndex={pageIndex} />
-            <main
-                className={clsx(
-                    "relative mx-auto",
-                    "h-[calc(100vh-64px)] sm:h-full",
-                    "w-full flex-grow pl-8 py-4",
-                    className,
-                )}
-            >
-                {children}
-            </main>
+            <AnimatePresence mode="popLayout">
+                <motion.main
+                    key={location.pathname}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{
+                        duration: 0.125,
+                    }}
+                    className={clsx(
+                        "relative mx-auto",
+                        "h-[calc(100vh-64px)] sm:h-full",
+                        "w-full flex-grow pl-8 py-4",
+                        className,
+                    )}
+                >
+                    {children}
+                </motion.main>
+            </AnimatePresence>
         </div>
     );
 }

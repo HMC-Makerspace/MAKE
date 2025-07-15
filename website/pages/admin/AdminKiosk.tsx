@@ -303,109 +303,113 @@ export default function AdminKiosk() {
                             <div className="hidden lg:block flex-1 ml-auto" />
                         )}
                     </div>
-                    {isLoading ? (
-                        <Spinner />
-                    ) : (
-                        <div className="h-full">
-                            <Schedule
-                                schedule={schedule}
-                                users={users_with_full_self}
-                                roles={[]}
-                                config={config}
-                                isLoading={isLoading}
-                                selectedUser={user_uuid}
-                                setSelectedShifts={onShiftSelect}
-                                type={
-                                    selectedTab === "worker_availability" ||
-                                    selectedTab === "worker_view"
-                                        ? selectedTab
-                                        : undefined
-                                }
-                                hideMissingShifts
-                            />
-                        </div>
-                    )}
-                    {selectedTab === "worker_availability" && (
-                        <div
-                            className={clsx(
-                                "flex lg:hidden p-2 bg-content1",
-                                "w-full rounded-lg items-center",
-                                "gap-2 justify-between"
-                            )}
-                        >
-                            <div className="whitespace-nowrap pr-2">
-                                Requested Shift Range:
+                    {
+                        isLoading ? (
+                            <Spinner />
+                        ) : (
+                            <div className="h-full">
+                                <Schedule
+                                    schedule={schedule}
+                                    users={users_with_full_self}
+                                    roles={[]}
+                                    config={config}
+                                    isLoading={isLoading}
+                                    selectedUser={user_uuid}
+                                    setSelectedShifts={onShiftSelect}
+                                    type={
+                                        selectedTab === "worker_availability" ||
+                                        selectedTab === "worker_view"
+                                            ? selectedTab
+                                            : undefined
+                                    }
+                                    hideMissingShifts
+                                />
                             </div>
-                            <NumberInput
-                                size="sm"
-                                aria-label="Min shift count"
-                                startContent={
-                                    <div className="pl-1 text-xs">Min</div>
-                                }
-                                minValue={0}
-                                defaultValue={
-                                    self?.work_schedules?.find(
-                                        (sch) =>
-                                            sch.schedule === schedule?.uuid,
-                                    )?.min_shift_count
-                                }
-                                className="w-20 max-h-[44px]"
-                                classNames={{
-                                    inputWrapper: "p-1",
-                                    input: "text-center",
-                                }}
-                                onBlur={(blurEvent) => {
-                                    // @ts-ignore This property does exist...
-                                    const minShifts = blurEvent.target.value;
-                                    if (
-                                        !schedule ||
-                                        minShifts === undefined
-                                    ) {
-                                        return;
+                        )
+                    }
+                    {
+                        selectedTab === "worker_availability" && (
+                            <div
+                                className={clsx(
+                                    "flex lg:hidden p-2 bg-content1",
+                                    "w-full rounded-lg items-center",
+                                    "gap-2 justify-between",
+                                )}
+                            >
+                                <div className="whitespace-nowrap pr-2">
+                                    Requested Shift Range:
+                                </div>
+                                <NumberInput
+                                    size="sm"
+                                    aria-label="Min shift count"
+                                    startContent={
+                                        <div className="pl-1 text-xs">Min</div>
                                     }
-                                    shiftCountMutation.mutate({
-                                        user_uuid: user_uuid,
-                                        schedule_uuid: schedule.uuid,
-                                        min_shift_count: minShifts,
-                                    });
-                                }}
-                            />
-                            <NumberInput
-                                size="sm"
-                                aria-label="Max shift count"
-                                startContent={
-                                    <div className="pl-1 text-xs">Max</div>
-                                }
-                                minValue={0}
-                                defaultValue={
-                                    self?.work_schedules?.find(
-                                        (sch) =>
-                                            sch.schedule === schedule?.uuid,
-                                    )?.max_shift_count
-                                }
-                                className="w-20 max-h-[44px]"
-                                classNames={{
-                                    inputWrapper: "p-1",
-                                    input: "text-center",
-                                }}
-                                onBlur={(blurEvent) => {
-                                    // @ts-ignore This property does exist...
-                                    const maxShifts = blurEvent.target.value;
-                                    if (
-                                        !schedule ||
-                                        maxShifts === undefined
-                                    ) {
-                                        return;
+                                    minValue={0}
+                                    defaultValue={
+                                        self?.work_schedules?.find(
+                                            (sch) =>
+                                                sch.schedule === schedule?.uuid,
+                                        )?.min_shift_count
                                     }
-                                    shiftCountMutation.mutate({
-                                        user_uuid: user_uuid,
-                                        schedule_uuid: schedule.uuid,
-                                        max_shift_count: maxShifts,
-                                    });
-                                }}
-                            />
-                        </div>
-                    )}
+                                    className="w-20 max-h-[44px]"
+                                    classNames={{
+                                        inputWrapper: "p-1",
+                                        input: "text-center",
+                                    }}
+                                    onBlur={(blurEvent) => {
+                                        // @ts-ignore This property does exist...
+                                        const minShifts = blurEvent.target.value;
+                                        if (
+                                            !schedule ||
+                                            minShifts === undefined
+                                        ) {
+                                            return;
+                                        }
+                                        shiftCountMutation.mutate({
+                                            user_uuid: user_uuid,
+                                            schedule_uuid: schedule.uuid,
+                                            min_shift_count: minShifts,
+                                        });
+                                    }}
+                                />
+                                <NumberInput
+                                    size="sm"
+                                    aria-label="Max shift count"
+                                    startContent={
+                                        <div className="pl-1 text-xs">Max</div>
+                                    }
+                                    minValue={0}
+                                    defaultValue={
+                                        self?.work_schedules?.find(
+                                            (sch) =>
+                                                sch.schedule === schedule?.uuid,
+                                        )?.max_shift_count
+                                    }
+                                    className="w-20 max-h-[44px]"
+                                    classNames={{
+                                        inputWrapper: "p-1",
+                                        input: "text-center",
+                                    }}
+                                    onBlur={(blurEvent) => {
+                                        // @ts-ignore This property does exist...
+                                        const maxShifts = blurEvent.target.value;
+                                        if (
+                                            !schedule ||
+                                            maxShifts === undefined
+                                        ) {
+                                            return;
+                                        }
+                                        shiftCountMutation.mutate({
+                                            user_uuid: user_uuid,
+                                            schedule_uuid: schedule.uuid,
+                                            max_shift_count: maxShifts,
+                                        });
+                                    }}
+                                />
+                            </div>
+                        )
+                    }
                 </div>
                 {config && users && schedule && (
                     <Modal
@@ -420,129 +424,124 @@ export default function AdminKiosk() {
                                 Shift History
                             </ModalHeader>
                             <ModalBody className="gap-5 grid grid-cols-8">
-                                {
-                                    userShift && (
-                                        <Form
-                                            onSubmit={(e) => {
-                                                e.preventDefault();
-                                                const formData = new FormData(
-                                                    e.currentTarget,
-                                                );
-                                                const shift_date =
-                                                    parseDate(
-                                                        formData.get(
-                                                            "shift_date",
-                                                        ) as string,
-                                                    )
-                                                        .toDate(
-                                                            config.schedule
-                                                                .timezone,
-                                                        )
-                                                        .getTime() / 1000;
-                                                shiftEventMutation.mutate({
-                                                    schedule_uuid:
-                                                        schedule.uuid,
-                                                    shift_uuid: userShift.uuid,
-                                                    event: {
-                                                        timestamp:
-                                                            Date.now() / 1000,
-                                                        initiator: user_uuid,
-                                                        shift_date: shift_date,
-                                                        type: SHIFT_EVENT_TYPE.DROP,
-                                                    },
-                                                });
-                                            }}
-                                            validationBehavior="native"
-                                            className="grid grid-cols-subgrid col-span-8"
-                                        >
-                                            <div
-                                                className={clsx(
-                                                    "grid grid-cols-subgrid col-span-8",
-                                                    "items-center p-2 pl-4 gap-2",
-                                                    "bg-default-300 rounded-lg",
-                                                    "text-default-700",
-                                                )}
-                                            >
-                                                <div className="whitespace-nowrap pr-2 col-span-3">
-                                                    Drop a future shift:
-                                                </div>
-                                                <DatePicker<ZonedDateTime>
-                                                    color="primary"
-                                                    name="shift_date"
-                                                    isRequired
-                                                    aria-label="Drop date"
-                                                    className="col-span-3"
-                                                    minValue={today(
+                                {userShift && (
+                                    <Form
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            const formData = new FormData(
+                                                e.currentTarget,
+                                            );
+                                            const shift_date =
+                                                parseDate(
+                                                    formData.get(
+                                                        "shift_date",
+                                                    ) as string,
+                                                )
+                                                    .toDate(
                                                         config.schedule
                                                             .timezone,
-                                                    )}
-                                                    errorMessage={(v) => {
-                                                        if (!v.isInvalid) {
-                                                            return "";
-                                                        } else if (
-                                                            v.validationDetails
-                                                                .rangeUnderflow
-                                                        ) {
-                                                            return "Cannot drop past shifts";
-                                                        } else if (
-                                                            v.validationDetails
-                                                                .badInput
-                                                        ) {
-                                                            return "Wrong day / Already dropped";
-                                                        }
-                                                        return v.validationErrors;
-                                                    }}
-                                                    isDateUnavailable={(
-                                                        date,
-                                                    ) => {
-                                                        // Only dates on this day of the week
-                                                        if (
-                                                            date
-                                                                .toDate(
-                                                                    config
-                                                                        .schedule
-                                                                        .timezone,
-                                                                )
-                                                                .getDay() !=
-                                                            userShift.day
-                                                        ) {
-                                                            return true;
-                                                        }
-                                                        if (
-                                                            userShift.history.some(
-                                                                (event) =>
-                                                                    date
-                                                                        .toDate(
-                                                                            config
-                                                                                .schedule
-                                                                                .timezone,
-                                                                        )
-                                                                        .getTime() /
-                                                                        1000 ===
-                                                                    event.shift_date,
-                                                            )
-                                                        ) {
-                                                            return true;
-                                                        }
-                                                        return false;
-                                                    }}
-                                                />
-                                                <Button
-                                                    name="submit"
-                                                    type="submit"
-                                                    endContent={
-                                                        <UserMinusIcon className="min-w-5 size-5" />
-                                                    }
-                                                    color="primary"
-                                                    variant="bordered"
-                                                    className="col-span-2"
-                                                >
-                                                    Drop
-                                                </Button>
+                                                    )
+                                                    .getTime() / 1000;
+                                            shiftEventMutation.mutate({
+                                                schedule_uuid: schedule.uuid,
+                                                shift_uuid: userShift.uuid,
+                                                event: {
+                                                    timestamp:
+                                                        Date.now() / 1000,
+                                                    initiator: user_uuid,
+                                                    shift_date: shift_date,
+                                                    type: SHIFT_EVENT_TYPE.DROP,
+                                                },
+                                            });
+                                        }}
+                                        validationBehavior="native"
+                                        className="grid grid-cols-subgrid col-span-8"
+                                    >
+                                        <div
+                                            className={clsx(
+                                                "grid grid-cols-subgrid col-span-8",
+                                                "items-center p-2 pl-4 gap-2",
+                                                "bg-default-300 rounded-lg",
+                                                "text-default-700",
+                                            )}
+                                        >
+                                            <div className="whitespace-nowrap pr-2 col-span-3">
+                                                Drop this shift:
                                             </div>
-                                        </Form>
-                                    )
-                                }
+                                            <DatePicker<ZonedDateTime>
+                                                color="primary"
+                                                name="shift_date"
+                                                isRequired
+                                                aria-label="Drop date"
+                                                className="col-span-3"
+                                                minValue={today(
+                                                    config.schedule.timezone,
+                                                )}
+                                                errorMessage={(v) => {
+                                                    if (!v.isInvalid) {
+                                                        return "";
+                                                    } else if (
+                                                        v.validationDetails
+                                                            .rangeUnderflow
+                                                    ) {
+                                                        return "Cannot drop past shifts";
+                                                    } else if (
+                                                        v.validationDetails
+                                                            .badInput
+                                                    ) {
+                                                        return "Wrong day / Already dropped";
+                                                    }
+                                                    return v.validationErrors;
+                                                }}
+                                                isDateUnavailable={(date) => {
+                                                    // Only dates on this day of the week
+                                                    if (
+                                                        date
+                                                            .toDate(
+                                                                config.schedule
+                                                                    .timezone,
+                                                            )
+                                                            .getDay() !=
+                                                        userShift.day
+                                                    ) {
+                                                        return true;
+                                                    }
+                                                    if (
+                                                        userShift.history.some(
+                                                            (event) =>
+                                                                event.type ===
+                                                                    SHIFT_EVENT_TYPE.DROP &&
+                                                                date
+                                                                    .toDate(
+                                                                        config
+                                                                            .schedule
+                                                                            .timezone,
+                                                                    )
+                                                                    .getTime() /
+                                                                    1000 ===
+                                                                    event.shift_date,
+                                                        )
+                                                    ) {
+                                                        return true;
+                                                    }
+                                                    return false;
+                                                }}
+                                            />
+                                            <Button
+                                                name="submit"
+                                                type="submit"
+                                                endContent={
+                                                    <UserMinusIcon className="min-w-5 size-5" />
+                                                }
+                                                color="primary"
+                                                variant="bordered"
+                                                className="col-span-2"
+                                            >
+                                                Drop
+                                            </Button>
+                                        </div>
+                                    </Form>
+                                )}
                                 {
                                     <div
                                         className={clsx(

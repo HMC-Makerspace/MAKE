@@ -3,6 +3,7 @@ import AdminNavbar from "../components/kiosks/admin/dashboard/AdminNavbar";
 import { API_SCOPE } from "../../common/global";
 import { Spinner } from "@heroui/react";
 import clsx from "clsx";
+import { AnimatePresence, motion } from "framer-motion";
 // import AdminSidebar from "../components/kiosks/admin/AdminSidebar";
 
 export type AdminPage = {
@@ -112,6 +113,7 @@ export default function AdminLayout({
               return page;
           });
     const pageIndex = ADMIN_PAGES.findIndex((page) => page.href === pageHref);
+
     return (
         <div className="relative flex flex-col h-screen bg-background">
             {isLoading ? (
@@ -123,16 +125,26 @@ export default function AdminLayout({
                     </div>
                 </div>
             ) : (
-                <AdminNavbar pages={pages} pageIndex={pageIndex} />
+                <>
+                    <AdminNavbar pages={pages} pageIndex={pageIndex} />
+                    <AnimatePresence mode="popLayout">
+                        <motion.main
+                            key={location.pathname}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{
+                                duration: 0.125,
+                            }}
+                            className={clsx(
+                                "w-full mx-auto flex-grow px-12 py-4 overflow-auto",
+                                className,
+                            )}
+                        >
+                            {children}
+                        </motion.main>
+                    </AnimatePresence>
+                </>
             )}
-            <main
-                className={clsx(
-                    "w-full mx-auto flex-grow px-12 py-4 overflow-auto",
-                    className,
-                )}
-            >
-                {children}
-            </main>
         </div>
     );
 }
