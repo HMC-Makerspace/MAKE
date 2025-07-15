@@ -232,8 +232,8 @@ export default function EditCertModal({
                                     label="UUID"
                                     name="uuid"
                                     placeholder={uuid}
-                                    // UUID is not editable
-                                    isDisabled
+                                    // UUID is only editable on create
+                                    isDisabled={!isNew}
                                     value={uuid}
                                     onValueChange={wrapEdit(setUUID)}
                                     variant="faded"
@@ -366,19 +366,6 @@ export default function EditCertModal({
                                 />
                             </div>
 
-                            {/* {certifications && (
-                                <CertSelect
-                                    certifications={certifications}
-                                    selectedKeys={new Set(prereqs)}
-                                    disabledKeys={[cert?.uuid]}
-                                    onSelectionChange={wrapSetEdit(setPrereqs)}
-                                    inputName="prereqs"
-                                    placeholder="Select prerequisite certifications"
-                                    label="Prerequisites"
-                                    selectionMode="multiple"
-                                />
-                            )} */}
-
                             <UserRoleSelect
                                 selectedKeys={authRoles}
                                 onSelectionChange={wrapSetEdit(setAuthRoles)}
@@ -407,7 +394,7 @@ export default function EditCertModal({
                                             "placeholder:text-default-500",
                                             "placeholder:italic",
                                             "text-default-700",
-                                            "uppercase",
+                                            "uppercase placeholder:capitalize",
                                         ]),
                                     }}
                                 />
