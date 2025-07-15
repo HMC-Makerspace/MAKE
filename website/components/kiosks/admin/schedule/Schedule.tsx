@@ -208,6 +208,10 @@ export default function Schedule({
                                                 }
                                                 dragging={dragging}
                                                 setDragging={setDragging}
+                                                firstNamesOnly={
+                                                    config.schedule
+                                                        .first_names_only
+                                                }
                                             />
                                         </td>
                                     ))

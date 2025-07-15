@@ -99,7 +99,7 @@ export default function WorkshopEditModal({
     const sortedFilteredWorkers = users
         .filter((user) =>
             user.active_roles.some((role) =>
-                config.schedule.schedulable_roles.includes(role.role_uuid),
+                config.schedule.worker_roles.includes(role.role_uuid),
             ),
         )
         .toSorted((a, b) => a.name.localeCompare(b.name));

@@ -82,7 +82,7 @@ export default function ScheduleBuffer({
 
     const filteredUsers = users.filter((user) =>
         user.active_roles.some((role) =>
-            config.schedule.schedulable_roles.includes(role.role_uuid),
+            config.schedule.worker_roles.includes(role.role_uuid),
         ),
     );
 

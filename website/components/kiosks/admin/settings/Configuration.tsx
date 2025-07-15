@@ -8,16 +8,17 @@ import {
     Input,
     Select,
     SelectItem,
+    Switch,
 } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TConfig } from "common/config";
 import { SHIFT_DAY, SHIFT_DAYS } from "../../../../../common/shift";
 import { UserRoleSelect } from "../../../../components/user/UserRoleSelect";
 import axios from "axios";
-import React from "react";
+import React, { useState } from "react";
 import PopupAlert from "../../../../components/PopupAlert";
 import clsx from "clsx";
-import { PlusIcon } from "@heroicons/react/24/solid";
+import { PlusIcon, AcademicCapIcon } from "@heroicons/react/24/solid";
 
 function ConfigItem({
     name,
@@ -106,6 +107,12 @@ export default function Configuration({ config }: { config: TConfig }) {
         (shift_increment_sec % (60 * 60)) / 60,
     );
 
+    // For whatever reason, switch components do not store a false value,
+    // so to not override the existing setting this must be controlled.
+    const [firstNamesOnly, setFirstNamesOnly] = useState(
+        config.schedule.first_names_only ?? true,
+    );
+
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
@@ -113,11 +120,21 @@ export default function Configuration({ config }: { config: TConfig }) {
         const body: TConfig = {
             timestamp: Date.now() / 1000,
             general: {
-                branding_url: config.general.branding_url,
-                tagline: config.general.tagline,
-                discord_url: config.general.discord_url,
-                instagram_url: config.general.instagram_url,
-                tiktok_url: config.general.tiktok_url,
+                branding_url:
+                    (formData.get("branding_url") as string) ||
+                    config.general.branding_url,
+                tagline:
+                    (formData.get("tagline") as string) ||
+                    config.general.tagline,
+                discord_url:
+                    (formData.get("discord_url") as string) ||
+                    config.general.discord_url,
+                instagram_url:
+                    (formData.get("instagram_url") as string) ||
+                    config.general.instagram_url,
+                tiktok_url:
+                    (formData.get("tiktok_url") as string) ||
+                    config.general.tiktok_url,
                 extra_urls: config.general.extra_urls,
             },
             checkout: {
@@ -131,7 +148,8 @@ export default function Configuration({ config }: { config: TConfig }) {
             schedule: {
                 days_open: config.schedule.days_open,
                 first_display_day: config.schedule.first_display_day,
-                schedulable_roles: config.schedule.schedulable_roles,
+                worker_roles: config.schedule.worker_roles,
+                first_names_only: config.schedule.first_names_only,
                 increment_sec: config.schedule.increment_sec,
                 timezone: config.schedule.timezone,
             },
@@ -198,39 +216,38 @@ export default function Configuration({ config }: { config: TConfig }) {
             }
         });
 
-        body.general.branding_url = formData.get("branding_url") as string;
-        body.general.tagline = formData.get("tagline") as string;
-        body.general.discord_url = formData.get("discord_url") as string;
-        body.general.instagram_url = formData.get("instagram_url") as string;
-        body.general.tiktok_url = formData.get("tiktok_url") as string;
-        body.general.extra_urls = (formData.get("extra_urls") as string)
+        const extra_urls = ((formData.get("extra_urls") as string) ?? "")
             .replace(" ", "")
             .split(",");
+        if (extra_urls.length > 0) {
+            body.general.extra_urls = extra_urls;
+        }
 
         const days_open = formData.getAll("days_open") as string[];
-        if (days_open.length === 0) {
-            body.schedule.days_open = [0, 1, 2, 3, 4, 5, 6];
-        } else {
+        if (days_open.length > 0) {
             body.schedule.days_open = days_open
                 .map((day) => SHIFT_DAYS.find((d) => d.key === day)?.day)
                 .filter((d) => d != undefined);
         }
 
         const first_display_key = formData.get("first_display_day") as string;
-
-        const first_display_day = SHIFT_DAYS.find(
-            (d) => d.key === first_display_key,
-        )?.day;
-        if (!first_display_day) {
-            body.schedule.first_display_day = 0;
-        } else {
-            body.schedule.first_display_day = first_display_day;
+        if (first_display_key !== null) {
+            const first_display_day = SHIFT_DAYS.find(
+                (d) => d.key === first_display_key,
+            )?.day;
+            if (!first_display_day) {
+                body.schedule.first_display_day = 0;
+            } else {
+                body.schedule.first_display_day = first_display_day;
+            }
         }
 
-        const schedulable_roles = formData.getAll("roles") as string[];
-        if (schedulable_roles.length > 0) {
-            body.schedule.schedulable_roles = schedulable_roles;
+        const worker_roles = formData.getAll("roles") as string[];
+        if (worker_roles.length > 0) {
+            body.schedule.worker_roles = worker_roles;
         }
+
+        body.schedule.first_names_only = firstNamesOnly;
 
         const timezone = formData.get("timezone") as string;
         if (timezone) {
@@ -272,6 +289,9 @@ export default function Configuration({ config }: { config: TConfig }) {
                                 <Input
                                     type="text"
                                     defaultValue={config.general.branding_url}
+                                    startContent={
+                                        <AcademicCapIcon className="size-[1.1rem]" />
+                                    }
                                     name="branding_url"
                                     color="primary"
                                     variant="faded"
@@ -646,14 +666,29 @@ export default function Configuration({ config }: { config: TConfig }) {
                                 </Select>
                             </ConfigItem>
                             <ConfigItem
-                                name="Schedulable Roles"
-                                description="The roles that can be scheduled in the schedule editor."
+                                name="Workers"
+                                description="Roles visible in the schedule editor"
+                                className="flex-col"
                             >
                                 <UserRoleSelect
                                     defaultSelectedKeys={
-                                        config.schedule.schedulable_roles
+                                        config.schedule.worker_roles
                                     }
+                                    label=""
                                 />
+                                <div className="text-sm">
+                                    On the public schedule, show:
+                                </div>
+                                <div className="flex flex-row items-center justify-center gap-3">
+                                    Worker full names
+                                    <Switch
+                                        color="primary"
+                                        name="first_names_only"
+                                        isSelected={firstNamesOnly}
+                                        onValueChange={setFirstNamesOnly}
+                                    />
+                                    Only worker first names
+                                </div>
                             </ConfigItem>
                         </AccordionItem>
                     </Accordion>

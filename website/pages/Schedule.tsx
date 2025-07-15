@@ -54,9 +54,7 @@ export default function SchedulePage() {
             publicUsers
                 ? publicUsers.filter((u) =>
                       u.active_roles.some((r) =>
-                          config?.schedule.schedulable_roles.includes(
-                              r.role_uuid,
-                          ),
+                          config?.schedule.worker_roles.includes(r.role_uuid),
                       ),
                   )
                 : [],

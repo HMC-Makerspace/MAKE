@@ -41,12 +41,18 @@ export type TScheduleConfig = {
      * The list of user role UUIDs that can have scheduled shifts,
      * which will show up in in the schedule editor.
      */
-    schedulable_roles: UserRoleUUID[];
+    worker_roles: UserRoleUUID[];
 
     /**
      * The increment between shifts (in seconds).
      */
     increment_sec: number;
+
+    /**
+     * Whether to only show worker first names (before first space) on
+     * the public schedule page.
+     */
+    first_names_only?: boolean;
 
     /**
      * The IANA timezone to use for all date objects

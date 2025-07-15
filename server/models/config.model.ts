@@ -1,14 +1,20 @@
 import mongoose from "mongoose";
-import type { TConfig } from "common/config";
+import type {
+    TCheckoutConfig,
+    TConfig,
+    TFileConfig,
+    TGeneralConfig,
+    TScheduleConfig,
+} from "common/config";
 
-const CheckoutConfig = new mongoose.Schema(
+const CheckoutConfig = new mongoose.Schema<TCheckoutConfig>(
     {
         notification_interval_sec: { type: Number, required: false },
     },
     { _id: false },
 );
 
-const FileConfig = new mongoose.Schema(
+const FileConfig = new mongoose.Schema<TFileConfig>(
     {
         max_upload_capacity: { type: Number, required: false },
         max_upload_count: { type: Number, required: false },
@@ -16,18 +22,19 @@ const FileConfig = new mongoose.Schema(
     { _id: false },
 );
 
-const ScheduleConfig = new mongoose.Schema(
+const ScheduleConfig = new mongoose.Schema<TScheduleConfig>(
     {
         days_open: { type: [Number], required: false },
         first_display_day: { type: Number, required: false },
-        schedulable_roles: { type: [String], required: true },
+        worker_roles: { type: [String], required: true },
         increment_sec: { type: Number, required: true },
+        first_names_only: { type: Boolean, required: false },
         timezone: { type: String, required: true },
     },
     { _id: false },
 );
 
-const GeneralConfig = new mongoose.Schema(
+const GeneralConfig = new mongoose.Schema<TGeneralConfig>(
     {
         branding_url: { type: String, required: false },
         tagline: { type: String, required: false },

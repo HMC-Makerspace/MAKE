@@ -150,6 +150,7 @@ export default function Shift({
     setSelectedShifts = () => {},
     dragging = false,
     setDragging = () => {},
+    firstNamesOnly = true,
 }: {
     schedule_uuid: UUID;
     shifts: TShift[];
@@ -170,6 +171,7 @@ export default function Shift({
     setSelectedShifts?: (day_start_end: Set<string>) => void;
     dragging: boolean;
     setDragging: (dragging: boolean) => void;
+    firstNamesOnly?: boolean;
 }) {
     const queryClient = useQueryClient();
 
@@ -478,7 +480,7 @@ export default function Shift({
                                         </div>
                                     </Button>
                                 );
-                            } else {
+                            } else if (type === "worker_view") {
                                 return (
                                     <div
                                         key={u.uuid}
@@ -491,6 +493,26 @@ export default function Shift({
                                         )}
                                     >
                                         {u.name}
+                                    </div>
+                                );
+                            } else if (type === "view") {
+                                return (
+                                    <div
+                                        key={u.uuid}
+                                        className={clsx(
+                                            "w-full h-full",
+                                            "flex flex-row",
+                                            "items-center justify-center",
+                                            "text-default-800",
+                                            "text-[9px] text-center",
+                                            firstNamesOnly
+                                                ? "lg:text-sm"
+                                                : "lg:text-xs",
+                                        )}
+                                    >
+                                        {firstNamesOnly
+                                            ? u.name.split(" ")[0]
+                                            : u.name}
                                     </div>
                                 );
                             }
