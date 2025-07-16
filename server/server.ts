@@ -1,4 +1,5 @@
 import express, { Application } from "express";
+import ViteExpress from "vite-express";
 import compression from "compression";
 import http from "http";
 import path from "path";
@@ -38,7 +39,7 @@ import {
     checkoutEmailCron,
 } from "controllers/checkout.controller";
 
-const app: Application = express();
+const app: express.Express = express();
 
 // Setup logging
 const logger = pino();
@@ -52,11 +53,13 @@ if (process.env.NODE_ENV == "development") {
 // Connect to the database
 connectDB(logger);
 
+const PORT = process.env.VITE_SERVER_PORT || 3001;
+
 // Setup CORS
 // Add a list of allowed origins
 // If you have more origins you would like to add, you can add them to the array below.
 const allowedOrigins = [
-    `http://localhost:${process.env.VITE_SERVER_PORT || 3001}`, // Backend
+    `http://localhost:${PORT}`, // Backend
     `http://localhost:${process.env.VITE_PORT || 3000}`, // Frontend
 ];
 const options: cors.CorsOptions = {
@@ -105,17 +108,15 @@ cron.schedule("*/15 * * * *", () => {
     checkoutAvailabilityCron(logger);
 });
 
-const PORT = process.env.VITE_SERVER_PORT || 3000;
-
 if (process.env.NODE_ENV === "production") {
     // Join frontend build paths statically
-    app.use(express.static(path.join(__dirname, "../website/build")));
-    // Route all other paths to index so React Router can handle frontend routes.
-    app.get("/*path", function (req, res) {
-        res.sendFile(path.join(__dirname, "../website/build", "index.html"));
-    });
+    // app.use(express.static(path.join(__dirname, "../website/build")));
+    // // Route all other paths to index so React Router can handle frontend routes.
+    // app.get("/*path", function (req, res) {
+    //     res.sendFile(path.join(__dirname, "../website/build", "index.html"));
+    // });
 
-    http.createServer(app).listen(PORT, () => {
+    ViteExpress.listen(app, PORT, () => {
         logger.info(
             `Server running in production mode http://127.0.0.1:${PORT}`,
         );
