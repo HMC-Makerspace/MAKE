@@ -87,7 +87,7 @@ export default function QuickTransferPage() {
         isError: filesError,
     } = useQuery<TFile[]>({
         queryKey: ["file", "by", "user", "id", collegeID],
-        c
+        queryFn: () => getFiles({ college_id: collegeID }),
         refetchOnWindowFocus: false,
         enabled: !!collegeID && !!user,
         retry: false,
