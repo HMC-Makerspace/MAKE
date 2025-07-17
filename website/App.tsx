@@ -1,10 +1,12 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
+
 // Pages
 import HomePage from "./pages/Home";
 import InventoryPage from "./pages/Inventory";
 import AreasPage from "./pages/Areas";
 import SchedulePage from "./pages/Schedule";
+import QuickTransferPage from "./pages/QuickTransfer";
 
 // Kiosks
 import AdminKiosk from "./pages/admin/AdminKiosk";
@@ -27,6 +29,7 @@ const App: React.FC = () => {
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/areas" element={<AreasPage />} />
             <Route path="/schedule" element={<SchedulePage />} />
+            <Route path="/transfer" element={<QuickTransferPage />} />
             {/* Kiosks */}
             <Route path="/admin" element={<AdminKiosk />} />
             <Route path="/admin/users" element={<UsersKiosk />} />

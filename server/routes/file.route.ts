@@ -326,13 +326,13 @@ router.get(
  * This is a public route.
  */
 router.post(
-    "/for/user/:college_id",
+    "/for/user/id/:college_id",
     upload.single("file"),
     async (req: Request<{ college_id: string }>, res: FileResponse) => {
         const college_id = req.params.college_id;
         const file = req.file;
 
-        // If no file is provided, no upload occurred
+        // If no file is provided, no upload occurred--
         if (!file) {
             res.status(StatusCodes.BAD_REQUEST).json({
                 error: "No file was provided in the request.",

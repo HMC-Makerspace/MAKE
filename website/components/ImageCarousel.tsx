@@ -125,6 +125,7 @@ export default function ImageCarousel({
                             ? `/api/v3/file/download/${images[index].uuid}`
                             : undefined
                     }
+                    alt={images[index]?.name || "Image"}
                 />
             ) : (
                 <p className="text-center text-l text-bold">No Images Found</p>

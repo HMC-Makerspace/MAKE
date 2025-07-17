@@ -50,7 +50,7 @@ export default function HomePage() {
                                     "text-md sm:text-lg",
                                 )}
                             >
-                                {config.general.tagline}
+                                {config.general?.tagline}
                             </div>
                         )}
                         {/* Socials/Home links */}
