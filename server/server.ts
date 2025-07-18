@@ -16,9 +16,6 @@ import emailRoutes from "routes/email.route";
 //     plugins: [html()],
 // });
 
-// Import frontend
-import * as frontend from "../website/index";
-
 // Routes
 import areaRoutes from "./routes/area.route";
 import certificationRoutes from "./routes/certification.route";
@@ -38,6 +35,9 @@ import {
     checkoutAvailabilityCron,
     checkoutEmailCron,
 } from "controllers/checkout.controller";
+
+// @ts-expect-error Static asset loading using Vite
+import favicon from "common/favicon.ico"
 
 const app: express.Express = express();
 
@@ -95,6 +95,12 @@ app.get("/api/v3/test", (req, res) => {
     res.send("Hello World!");
 });
 
+app.get("/favicon.ico", (req, res) => {
+    res.sendFile(favicon, {
+        root: "/"
+    })
+})
+
 // Setup cron jobs
 // Query for checkout emails every minute
 checkoutEmailCron(logger);
@@ -109,13 +115,6 @@ cron.schedule("*/15 * * * *", () => {
 });
 
 if (process.env.NODE_ENV === "production") {
-    // Join frontend build paths statically
-    // app.use(express.static(path.join(__dirname, "../website/build")));
-    // // Route all other paths to index so React Router can handle frontend routes.
-    // app.get("/*path", function (req, res) {
-    //     res.sendFile(path.join(__dirname, "../website/build", "index.html"));
-    // });
-
     ViteExpress.listen(app, PORT, () => {
         logger.info(
             `Server running in production mode http://127.0.0.1:${PORT}`,
@@ -128,9 +127,6 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // Setup email client if CLI option included
-// if (Bun.argv.includes("--setup-email")) {
-//     logger.info(getOAuthURL());
-// }
 if (!(await getOAuthToken(logger))) {
     // If OAuth token is invalid, prompt the administrator to login
     logger.info({

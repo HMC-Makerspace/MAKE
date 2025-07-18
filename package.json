@@ -63,7 +63,7 @@
     "frontend:dev": "vite",
     "prettify": "pino-pretty -i hostname,req.id,req.query,req.params,req.headers,req.remoteAddress,req.remotePort,res.headers",
     "frontend:prod": "bun vite build",
-    "backend:prod": "bun run server/server.ts | bun prettify",
+    "backend:prod": "bun run server/server.ts > make.log",
     "setup": "echo 'Project setup is a WIP.'"
   }
 }
