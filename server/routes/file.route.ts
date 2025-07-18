@@ -335,7 +335,7 @@ router.post(
         // If no file is provided, no upload occurred--
         if (!file) {
             res.status(StatusCodes.BAD_REQUEST).json({
-                error: "No file was provided in the request.",
+                error: "File is larger than maximum upload size.",
             });
             return;
         }
@@ -483,7 +483,7 @@ router.post(
         // If no file is provided, no upload occurred
         if (!file) {
             res.status(StatusCodes.BAD_REQUEST).json({
-                error: "No file was provided in the request.",
+                error: "File is larger than maximum upload size.",
             });
             return;
         }
@@ -596,7 +596,7 @@ router.post(
         // If no file is provided, no upload occurred
         if (!file) {
             res.status(StatusCodes.BAD_REQUEST).json({
-                error: "No file was provided in the request.",
+                error: "File is larger than maximum upload size.",
             });
             return;
         }

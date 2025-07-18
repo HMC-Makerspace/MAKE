@@ -124,7 +124,7 @@ export default function DefaultLayout({
                     }}
                     className={clsx(
                         "relative mx-auto",
-                        "h-[calc(100vh-64px)] sm:h-full",
+                        "h-[calc(100vh_-_64px)] xl:h-full",
                         "w-full flex-grow pl-8 py-4",
                         className,
                     )}

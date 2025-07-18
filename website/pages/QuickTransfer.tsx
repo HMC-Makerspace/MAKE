@@ -9,24 +9,41 @@ import {
     Spinner,
     Input,
     Form,
+    ToastProvider,
+    closeToast,
+    addToast,
 } from "@heroui/react";
 import {
     AcademicCapIcon,
     ArrowUpTrayIcon,
     PlusIcon,
     TrashIcon,
-} from "@heroicons/react/24/solid"; //solid or outline
-import axios from "axios";
+} from "@heroicons/react/24/solid";
+import axios, { AxiosError } from "axios";
 import React from "react";
 import { TUser, UserUUID } from "common/user.js";
 import clsx from "clsx";
+import {
+    ArchiveBoxIcon,
+    CubeTransparentIcon,
+    DocumentChartBarIcon,
+    DocumentIcon,
+    DocumentTextIcon,
+    FilmIcon,
+    IdentificationIcon,
+    MusicalNoteIcon,
+    PhotoIcon,
+} from "@heroicons/react/24/outline";
+import PopupAlert from "../components/PopupAlert.tsx";
 
 async function uploadFile({
     college_id,
     file,
+    toast_key,
 }: {
     college_id: string;
     file: File;
+    toast_key: string;
 }) {
     const formData = new FormData();
     formData.append("file", file);
@@ -96,51 +113,88 @@ export default function QuickTransferPage() {
     const uploadMutation = useMutation({
         mutationFn: uploadFile,
         onSuccess: (data: TFile) => {
-            if (!user) {
+            if (!collegeID) {
                 return;
             }
             queryClient.setQueryData(
-                ["file", "by", FILE_RESOURCE_TYPE.USER, user.uuid],
+                ["file", "by", "user", "id", collegeID],
                 (old?: TFile[]) => (old ?? []).concat(data),
             );
+            addToast({
+                title: "Successfully uploaded file.",
+                timeout: 3000,
+                color: "success",
+            });
         },
-        onError: (error) => {
-            alert(error);
+        onError: (error: AxiosError<{ error: string }>) => {
+            addToast({
+                title:
+                    error.response?.data.error ??
+                    `Unknown error: ${error.message}`,
+                timeout: 5000,
+                color: "danger",
+            });
         },
     });
 
     const deleteMutation = useMutation({
         mutationFn: deleteFile,
-        onSuccess: (data: TFile) => {
-            if (!user) {
+        onSuccess: (data, variables) => {
+            if (!collegeID) {
                 return;
             }
             queryClient.setQueryData(
-                ["file", "by", FILE_RESOURCE_TYPE.USER, data.uuid],
-                (old?: TFile[]) => (old ?? []).concat(data),
+                ["file", "by", "user", "id", collegeID],
+                (old?: TFile[]) =>
+                    (old ?? []).filter(
+                        (file) => file.uuid != variables.file_uuid,
+                    ),
             );
+            addToast({
+                title: "Successfully deleted file.",
+                timeout: 1000,
+                color: "success",
+            });
         },
         onError: (error) => {
-            alert(error);
+            addToast({
+                title: error.message,
+                timeout: 5000,
+                color: "danger",
+            });
         },
     });
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files) return;
-        const file = e.target.files[0];
-        if (!user) {
+        const files = Array.from(e.target.files);
+        if (!user || !files) {
             return;
         }
-        uploadMutation.mutate({ college_id: collegeID, file: file });
+        uploadMutation.reset();
+        for (const file of files) {
+            const promise = uploadMutation.mutateAsync({
+                college_id: collegeID,
+                file: file,
+                toast_key: "",
+            });
+            const toast = addToast({
+                title: "Uploading ...",
+                timeout: 1,
+                promise: promise,
+                color: "primary",
+                hideCloseButton: true,
+            });
+        }
+        e.target.value = "";
     };
 
-    console.log("files:", files);
-    console.log("uuid:", user?.uuid);
     return (
         <DefaultLayout className="p-8" pageHref="/transfer">
+            <ToastProvider maxVisibleToasts={9}></ToastProvider>
             <div
                 id="master"
-                className="size-full p-4 flex flex-col gap-2 bg-content1 rounded-xl"
+                className="size-full p-4 flex flex-col gap-2 bg-content1 rounded-xl overflow-auto"
             >
                 <div
                     id="user-id-box"
@@ -180,7 +234,7 @@ export default function QuickTransferPage() {
                     </Form>
                     <div
                         id="name"
-                        className="justify-center flex-1 text-center text-lg font-bold text-default-700"
+                        className="justify-center flex-1 text-center md:text-lg hidden sm:flex text-md font-bold text-default-700"
                     >
                         {user?.name}
                     </div>
@@ -192,6 +246,7 @@ export default function QuickTransferPage() {
                             id="upload-trigger"
                             className="hidden"
                             type="file"
+                            multiple
                             onChange={handleUpload}
                         />
                         <Button
@@ -212,56 +267,168 @@ export default function QuickTransferPage() {
                         </Button>
                     </div>
                 </div>
-                <div id="file-cards" className="flex gap-4">
-                    {files?.map((file) => (
-                        <Card
-                            id={file.name}
-                            key={file.uuid}
-                            isFooterBlurred
-                            className="border-none w-48"
-                            radius="lg"
-                        >
-                            <Image
-                                alt={file.name}
-                                className="object-cover"
-                                height={200}
-                                src={`/api/v3/file/download/${file.uuid}`}
-                                width={200}
-                            />
-                            <CardFooter className="justify-between before:bg-white/10 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
-                                <p className="text-tiny text-white/80">
-                                    {file.name}
-                                </p>
-                                <a
-                                    href={`/api/v3/file/download/${file.uuid}`}
-                                    download
-                                >
-                                    <Button
-                                        className="text-tiny text-white bg-black/20"
-                                        color="default"
-                                        radius="lg"
-                                        size="sm"
-                                        variant="flat"
-                                    >
-                                        Download
-                                    </Button>
-                                </a>
-                            </CardFooter>
-                            <Button
-                                isIconOnly
-                                size="sm"
-                                variant="flat"
-                                className="absolute top-2 right-2 z-20 text-white"
-                                onPress={() =>
-                                    deleteMutation.mutate({
-                                        file_uuid: file.uuid,
-                                    })
-                                }
+                <div id="card-container" className="overflow-auto size-full">
+                    <div
+                        id="file-cards"
+                        className={clsx(
+                            "grid gap-4 lg:grid-cols-4 overflow-auto min-h-fit",
+                            "md:grid-cols-3",
+                            "grid-cols-2",
+                        )}
+                    >
+                        {files?.map((file) => (
+                            <Card
+                                id={`Card-${file.uuid}`}
+                                key={file.uuid}
+                                isFooterBlurred
+                                className="border-none aspect-square relative"
+                                radius="lg"
                             >
-                                <TrashIcon className="size-5" />
-                            </Button>
-                        </Card>
-                    ))}
+                                <Image
+                                    id={`Image-${file.uuid}`}
+                                    alt={file.name}
+                                    className="object-cover h-full"
+                                    classNames={{
+                                        wrapper:
+                                            "absolute size-full aspect-square flex justify-center",
+                                    }}
+                                    src={`/api/v3/file/download/${file.uuid}`}
+                                    isBlurred
+                                />
+                                <div
+                                    id="file-extension-icon"
+                                    className="flex items-center size-full justify-center pb-8 transition-colors-opacity"
+                                >
+                                    {file.name
+                                        .split(".")
+                                        .map((text, idx, arr) => {
+                                            if (idx !== arr.length - 1) {
+                                                return <></>;
+                                            } else {
+                                                switch (text.toLowerCase()) {
+                                                    case "docx":
+                                                    case "doc":
+                                                    case "pdf":
+                                                    case "txt":
+                                                        return (
+                                                            <DocumentTextIcon className="size-24" />
+                                                        );
+                                                    case "stl":
+                                                    case "3mf":
+                                                    case "obj":
+                                                    case "step":
+                                                    case "stp":
+                                                    case "f3d":
+                                                        return (
+                                                            <CubeTransparentIcon className="size-24" />
+                                                        );
+                                                    case "xlsx":
+                                                    case "xls":
+                                                    case "csv":
+                                                    case "tsv":
+                                                        return (
+                                                            <DocumentChartBarIcon className="size-24" />
+                                                        );
+                                                    case "zip":
+                                                    case "gz":
+                                                    case "7z":
+                                                    case "dmg":
+                                                    case "pkg":
+                                                        return (
+                                                            <ArchiveBoxIcon className="size-24" />
+                                                        );
+                                                    case "dng":
+                                                    case "heic":
+                                                    case "raw":
+                                                    case "heif":
+                                                        return (
+                                                            <PhotoIcon className="size-24" />
+                                                        );
+                                                    case "mov":
+                                                    case "mp4":
+                                                    case "avi":
+                                                    case "mkv":
+                                                        return (
+                                                            <FilmIcon className="size-24" />
+                                                        );
+                                                    case "mp3":
+                                                    case "wav":
+                                                    case "flac":
+                                                    case "aac":
+                                                        return (
+                                                            <MusicalNoteIcon className="size-24" />
+                                                        );
+                                                    case "png":
+                                                    case "gif":
+                                                    case "jpg":
+                                                    case "jpeg":
+                                                    case "webp":
+                                                    case "svg":
+                                                        return <></>; // So images dont have an icon behind them
+                                                    case "abe":
+                                                        return (
+                                                            <IdentificationIcon className="size-24" />
+                                                        );
+                                                }
+                                                return (
+                                                    <DocumentIcon className="size-24" />
+                                                );
+                                            }
+                                        })}
+                                </div>
+                                <CardFooter
+                                    className={clsx(
+                                        "justify-between bg-default-300/40",
+                                        "border-1 py-1 border-white/20",
+                                        "absolute before:rounded-xl",
+                                        "rounded-large bottom-1",
+                                        "w-[calc(100%_-_8px)]",
+                                        "shadow-small ml-1 z-10",
+                                    )}
+                                >
+                                    <p
+                                        className={clsx(
+                                            "text-tiny text-white/80",
+                                            "text-ellipsis overflow-hidden",
+                                            "hover:z-50 hover:overflow-visible",
+                                            "hover:bg-white/20 fixed max-w-[calc(100%_-_104px)]",
+                                            "hover:max-w-fit p-1 rounded-md transition-colors-opacity",
+                                        )}
+                                    >
+                                        {file.name}
+                                    </p>
+                                    <a
+                                        href={`/api/v3/file/download/${file.uuid}`}
+                                        download={file.name}
+                                    >
+                                        <Button
+                                            className="text-tiny text-white bg-black/20 hover:bg-black/30"
+                                            color="default"
+                                            radius="lg"
+                                            size="sm"
+                                            variant="flat"
+                                        >
+                                            Download
+                                        </Button>
+                                    </a>
+                                </CardFooter>
+                                <Button
+                                    isIconOnly
+                                    size="sm"
+                                    variant="flat"
+                                    color="danger"
+                                    className="absolute top-2 right-2 z-20 text-white"
+                                    onPress={() =>
+                                        deleteMutation.mutate({
+                                            file_uuid: file.uuid,
+                                        })
+                                    }
+                                >
+                                    <TrashIcon className="size-5" />
+                                </Button>
+                            </Card>
+                        ))}
+                    </div>
                 </div>
             </div>
         </DefaultLayout>

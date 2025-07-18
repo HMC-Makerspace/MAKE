@@ -18,6 +18,17 @@ const upload = multer({
     storage: storage,
     // Limit the file size to the maximum allowed size, and only allow one file
     // to be uploaded at a time
+    fileFilter: (req, file, cb) => {
+        const content_length = req.headers["content-length"];
+        if (
+            content_length &&
+            parseInt(content_length) > process.env.FILE_MAX_SIZE
+        ) {
+            cb(null, false);
+        } else {
+            cb(null, true);
+        }
+    },
     limits: {
         fileSize: process.env.FILE_MAX_SIZE,
         files: 1,

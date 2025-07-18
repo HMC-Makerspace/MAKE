@@ -37,6 +37,7 @@ import {
     checkoutAvailabilityCron,
     checkoutEmailCron,
 } from "controllers/checkout.controller";
+import multer from "multer";
 
 const app: Application = express();
 
