@@ -45,7 +45,7 @@ export default function CustomNavbar({
                     "dark:bg-primary-300",
                     "hidden xl:flex flex-col",
                     "justify-start py-2",
-                    "w-[224px]",
+                    "min-w-[224px]",
                 )}
             >
                 <MAKE className="self-center text-5xl" />

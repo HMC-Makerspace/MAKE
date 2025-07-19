@@ -95,6 +95,7 @@ app.get("/api/v3/test", (req, res) => {
     res.send("Hello World!");
 });
 
+// Only accessible in production mode
 app.get("/favicon.ico", (req, res) => {
     res.sendFile(favicon, {
         root: "/"
