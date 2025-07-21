@@ -196,17 +196,13 @@ export async function deleteFileOnServer(
                     msg: `Successfully deleted file`,
                     file_path: file_path,
                 });
-                res.status(StatusCodes.ACCEPTED).json({
-                    error: "Successfully deleted file",
-                });
+                return "Successfully deleted file";
             } else {
                 req.log.info({
                     msg: `File successfully deleted: ${error_message}`,
                     file_path: file_path,
                 });
-                res.status(StatusCodes.FORBIDDEN).json({
-                    error: error_message,
-                });
+                return error_message;
             }
         })
         .catch((err) => {
@@ -230,6 +226,80 @@ export async function deleteFileOnServer(
                         "and there was an error unlinking the provided file",
                     error_message: error_message,
                     file_path: file_path,
+                    error: err,
+                });
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                    error:
+                        "The requesting user is not authorized to create a " +
+                        "file, and there was an error unlinking the " +
+                        "provided file. If you are seeing this error, " +
+                        "please contact a site administrator.",
+                });
+            }
+            return Promise.reject(err); // Return a rejected promise to stop the chain
+        }); // Return the promise so more .then chains can be added
+}
+
+/**
+ * A helper function to delete/unlink a file from the server
+ * @param file_path The path to the file to delete
+ * @param req The request object to log errors and info
+ * @param res The response object to send errors to
+ * @param unauthorized_creation Whether the user was authorized to create
+ *     the file. If not, the error message will be different
+ * @returns The promise to unlink the file, which can be chained
+ */
+export async function deleteFilesOnServer(
+    file_paths: string[],
+    req: Request,
+    res: Response,
+    error_message: "authorized" | string = "authorized",
+) {
+    return Promise.all(
+        file_paths.map((file_path) =>
+            fs.unlink(file_path).then(() => file_path),
+        ),
+    )
+        .then(() => {
+            // All files deleted successfully
+            if (error_message === "authorized") {
+                req.log.info({
+                    msg: `Successfully deleted files`,
+                    file_paths: file_paths,
+                });
+                res.status(StatusCodes.ACCEPTED).json({
+                    error: "Successfully deleted files",
+                });
+            } else {
+                req.log.info({
+                    msg: `File successfully deleted: ${error_message}`,
+                    file_paths: file_paths,
+                });
+                res.status(StatusCodes.FORBIDDEN).json({
+                    error: error_message,
+                });
+            }
+        })
+        .catch((err) => {
+            // If there was an error unlinking any file, and the user was
+            // authorized to create the file, return a distinct error
+            if (error_message === "authorized") {
+                // Otherwise, if the user was authorized to delete the file, log
+                // the error and return a generic error message
+                req.log.error({
+                    msg: `Error deleting file`,
+                    error: err,
+                });
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                    error: "Error deleting file",
+                });
+            } else {
+                req.log.fatal({
+                    msg:
+                        "Requesting user was not authorized to create a file, " +
+                        "and there was an error unlinking the provided file",
+                    error_message: error_message,
+                    file_paths: file_paths,
                     error: err,
                 });
                 res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

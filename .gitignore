@@ -9,6 +9,7 @@ node_modules
 bun.lockb
 bun.lock
 temp/*
+!temp/favicon.ico
 uploads/*
 !uploads/favicon.ico
 oauthtoken.json
