@@ -7,7 +7,11 @@ import pino from "pino";
 import loggerMiddleware from "pino-http";
 import cors from "cors";
 import cron from "node-cron";
-import emailRoutes from "routes/email.route";
+import session from "express-session";
+import passport from "passport";
+import { Strategy } from "passport-saml";
+import { default as MongoDBStore } from "connect-mongodb-session";
+import fs from "fs/promises";
 
 // await Bun.build({
 //     entrypoints: ["website/index.html"],
@@ -31,15 +35,19 @@ import restockRoutes from "./routes/restock.route";
 import scheduleRoutes from "./routes/schedule.route";
 import userRoutes from "./routes/user.route";
 import workshopRoutes from "./routes/workshop.route";
+import emailRoutes from "routes/email.route";
 import { getOAuthToken, getOAuthURL } from "controllers/email.controller";
 import { reserveMachineInstance } from "controllers/machine.controller";
 import {
     checkoutAvailabilityCron,
     checkoutEmailCron,
 } from "controllers/checkout.controller";
-import multer from "multer";
 
 const app: Application = express();
+const store = new (MongoDBStore(session))({
+    uri: process.env.MONGO_URI,
+    collection: "session",
+});
 
 // Setup logging
 const logger = pino();
@@ -71,6 +79,56 @@ app.use(
     compression(),
     loggerMiddleware({ logger: logger }),
     cors(options),
+    session({
+        secret: process.env.SESSION_SECRET,
+        cookie: {
+            secure: true,
+            httpOnly: true,
+            maxAge: 1000 * 60 * 60 * 24 * 7, // One week
+        },
+        store: store,
+        proxy: true,
+        resave: false,
+        saveUninitialized: false,
+    }),
+    passport.initialize(),
+    passport.session(),
+);
+
+passport.serializeUser((user, done) => {
+    process.nextTick(() => {
+        console.log("Serializing User:", user);
+        return done(null, user);
+    });
+});
+
+passport.deserializeUser((user: Express.User, done) => {
+    process.nextTick(() => {
+        console.log("Deserializing User:", user);
+        return done(null, user);
+    });
+});
+
+// Get IDP cert
+const cert = (await fs.readFile("make-idp.crt")).toString();
+
+// Configure SAML Strategy
+passport.use(
+    new Strategy(
+        {
+            entryPoint: process.env.IDP_ENTRY_POINT,
+            callbackUrl: "/saml", // e.g., http://localhost:3000/login/callback
+            issuer: "make-saml",
+            cert: cert,
+        },
+        (req, profile, done) => {
+            // Logic to find or create user based on SAML profile data
+            // Call done(null, user) on successful authentication
+            console.log("Strategy req", req);
+            console.log("Strategy profile", profile);
+            done(null, { test: "hi" });
+        },
+    ),
 );
 
 // API Routes
@@ -93,6 +151,14 @@ app.get("/api/v3/test", (req, res) => {
     res.send("Hello World!");
 });
 
+app.post(
+    "/api/v3/saml",
+    passport.authenticate("saml", {
+        successRedirect: "/success",
+        failureRedirect: "/login",
+    }),
+);
+
 // Setup cron jobs
 // Query for checkout emails every minute
 checkoutEmailCron(logger);
@@ -112,7 +178,7 @@ if (process.env.NODE_ENV === "production") {
     // Join frontend build paths statically
     app.use(express.static(path.join(__dirname, "../website/build")));
     // Route all other paths to index so React Router can handle frontend routes.
-    app.get("/*path", function (req, res) {
+    app.get("/*path", (req, res) => {
         res.sendFile(path.join(__dirname, "../website/build", "index.html"));
     });
 

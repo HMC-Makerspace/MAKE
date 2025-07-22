@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 // Pages
 import HomePage from "./pages/Home";
@@ -30,6 +30,7 @@ const App: React.FC = () => {
             <Route path="/areas" element={<AreasPage />} />
             <Route path="/schedule" element={<SchedulePage />} />
             <Route path="/transfer" element={<QuickTransferPage />} />
+            <Route path="/saml" element={<Navigate to="/api/v3/saml" />} />
             {/* Kiosks */}
             <Route path="/admin" element={<AdminKiosk />} />
             <Route path="/admin/users" element={<UsersKiosk />} />
