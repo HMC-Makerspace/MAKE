@@ -3,6 +3,8 @@ declare module "bun" {
         MONGO_URI: string;
         SESSION_SECRET: string;
         IDP_ENTRY_POINT: string;
+        IDP_CALLBACK: string;
+        ALLOW_INSECURE_LOGIN: boolean;
 
         NODE_ENV: "development" | "production";
         VITE_SERVER_PORT?: number;

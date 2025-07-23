@@ -54,7 +54,7 @@ export default function UserInfo({
         <div
             className={clsx(
                 "w-full p-2 bg-default-100 rounded-lg gap-2",
-                "flex flex-col",
+                "flex flex-col min-w-[300px]",
                 className,
             )}
         >

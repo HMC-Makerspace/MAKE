@@ -37,7 +37,7 @@ const router = Router();
  */
 router.get("/public", async (req: Request, res: InventoryResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
 
     req.log.debug({
         msg: `Getting inventory visible to user ${requesting_uuid}`,
@@ -92,7 +92,7 @@ router.get(
  */
 router.get("/", async (req: Request, res: InventoryResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
     // If no requesting user_uuid is provided, the call is not authorized
     if (!requesting_uuid) {
         req.log.warn("No requesting_uuid was provided while getting inventory");
@@ -149,7 +149,7 @@ router.put("/", async (req: ItemRequest, res: ItemResponse) => {
 
     // Check for authorization
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
     const uuid = item_obj.uuid;
     // If no requesting user_uuid is provided, the call is not authorized
     if (!requesting_uuid) {
@@ -209,7 +209,7 @@ router.post("/", async (req: ItemRequest, res: ItemResponse) => {
 
     // Check for authorization
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
     const new_item_uuid = item_obj.uuid;
     // If no requesting user_uuid is provided, the call is not authorized
     if (!requesting_uuid) {
@@ -262,7 +262,7 @@ router.delete(
     async (req: Request<{ UUID: string }>, res: SuccessfulResponse) => {
         // Check for authorization
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         // If no requesting user_uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(

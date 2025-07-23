@@ -48,7 +48,7 @@ router.get(
     "/public",
     async (req: Request, res: Response<TPublicWorkshopData[]>) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
 
         req.log.debug({
             msg: `Getting public workshops visible to user ${requesting_uuid}.`,
@@ -80,7 +80,7 @@ router.get(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: WorkshopResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const workshop_uuid = req.params.UUID;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -140,7 +140,7 @@ router.get(
  */
 router.get("/", async (req: WorkshopRequest, res: WorkshopsResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid: string = req.user?.uuid as string;
 
     // If no requesting user uuid is provided, the call is not authorized
     if (!requesting_uuid) {
@@ -184,7 +184,7 @@ router.get("/", async (req: WorkshopRequest, res: WorkshopsResponse) => {
  */
 router.post("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid: string = req.user?.uuid as string;
     const workshop_obj = req.body.workshop_obj;
     const workshop_uuid = workshop_obj.uuid;
 
@@ -236,7 +236,7 @@ router.post("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
  */
 router.put("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid: string = req.user?.uuid as string;
     const workshop_obj = req.body.workshop_obj;
     const workshop_uuid = workshop_obj.uuid;
 
@@ -285,7 +285,7 @@ router.delete(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const workshop_uuid = req.params.UUID;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -334,7 +334,7 @@ router.patch(
     "/:workshop_uuid/rsvp/:user_uuid",
     async (req: RSVPRequest, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const workshop_uuid = req.params.workshop_uuid;
         const user_uuid = req.params.user_uuid;
 
@@ -389,7 +389,7 @@ router.patch(
     "/:workshop_uuid/cancel_rsvp/:user_uuid",
     async (req: RSVPRequest, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const workshop_uuid = req.params.workshop_uuid;
         const user_uuid = req.params.user_uuid;
 
@@ -444,7 +444,7 @@ router.patch(
     "/:workshop_uuid/sign_in/:user_uuid",
     async (req: RSVPRequest, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const workshop_uuid = req.params.workshop_uuid;
         const user_uuid = req.params.user_uuid;
 
@@ -504,7 +504,7 @@ router.patch(
         res: WorkshopResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const workshop_uuid = req.params.UUID;
         const partial_workshop = req.body.partial_workshop_obj;
 

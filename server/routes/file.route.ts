@@ -117,7 +117,7 @@ router.get(
     "/by/user/:user_uuid",
     async (req: Request<{ user_uuid: string }>, res: FilesResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const user_uuid = req.params.user_uuid;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -235,7 +235,7 @@ router.get(
  */
 router.get("/", async (req: Request, res: FilesResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
 
     // If no requesting user uuid is provided, the call is not authorized
     if (!requesting_uuid) {
@@ -279,7 +279,7 @@ router.get(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: FileResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const file_uuid = req.params.UUID;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -543,7 +543,7 @@ router.post(
     upload.single("file"),
     async (req: Request<{ user_uuid: string }>, res: FileResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const user_uuid = req.params.user_uuid;
         const file = req.file;
         console.log("File on server", file);
@@ -660,7 +660,7 @@ router.post(
     upload.single("file"),
     async (req: Request, res: Response) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         // Get the resource type and UUID from the URL
         const resource_type = req.params[0] as FILE_RESOURCE_TYPE;
         const resource_uuid = req.params[1];
@@ -778,7 +778,7 @@ router.delete(
     "/by/user/:file_uuid",
     async (req: Request<{ file_uuid: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const file_uuid = req.params.file_uuid;
 
         // Get the file to verify the request
@@ -862,7 +862,7 @@ router.delete(
     /\/by\/(workshop|area|machine)\/(.+)/,
     async (req: Request, res: Response) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         // Get the resource type and UUID from the URL
         const resource_type = req.params[0] as FILE_RESOURCE_TYPE;
         const resource_uuid = req.params[1];

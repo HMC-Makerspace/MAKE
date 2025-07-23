@@ -9,7 +9,6 @@ import {
     NavbarMenuToggle,
 } from "@heroui/react";
 import clsx from "clsx";
-import { useMAKEStore } from "../store";
 import MAKE from "./public/home/MAKE";
 import Branding from "./public/home/Branding";
 import { ThemeSwitcher } from "./ThemeSwitcher";
@@ -33,7 +32,6 @@ export default function CustomNavbar({
     }[];
     pageIndex: number;
 }) {
-    const user_uuid = useMAKEStore((state) => state.user_uuid);
     const navigate = useNavigate();
 
     return (
@@ -84,8 +82,8 @@ export default function CustomNavbar({
                 <div className="self-center mt-auto pb-4">
                     <Branding />
                 </div>
-                <div className="px-4 self-center">
-                    <MAKEUser user_uuid={user_uuid} size="lg" />
+                <div className="px-4 self-center w-full">
+                    <MAKEUser user_uuid={"self"} size="lg" />
                 </div>
             </div>
             {/* Small screen navbar */}
@@ -107,16 +105,6 @@ export default function CustomNavbar({
                 <NavbarContent justify="end" className="">
                     {/* Menu dropdown toggle */}
                     <NavbarMenuToggle className="text-content1" />
-                    {/* User info, hide for small screens
-                <Button
-                    as={Link}
-                    href="/login"
-                    color="default"
-                    variant="shadow"
-                    className="hidden sm:flex"
-                >
-                    Login
-                </Button> */}
                 </NavbarContent>
                 {/* Menu drop down, for small screens */}
                 <NavbarMenu className="gap-8">
@@ -146,8 +134,6 @@ export default function CustomNavbar({
                                 )}
                                 <RouteLink
                                     to={page.href}
-                                    // href={page.href}
-                                    // as={RouteLink}
                                     className="text-3xl text-inherit"
                                     viewTransition
                                 >
@@ -159,7 +145,7 @@ export default function CustomNavbar({
                     <Card className="bg-default-200 p-2 flex-row gap-3 w-fit self-center">
                         <Branding />
                         <div className="flex flex-col justify-between">
-                            <MAKEUser user_uuid={user_uuid} size="lg" />
+                            <MAKEUser user_uuid={"self"} size="lg" />
                             <div className="flex flex-row w-full justify-between">
                                 <ThemeSwitcher
                                     className="self-center w-full"

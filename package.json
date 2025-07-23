@@ -7,6 +7,7 @@
     "@types/bun": "latest",
     "@types/compression": "^1.8.1",
     "@types/connect-mongodb-session": "^2.4.8",
+    "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/express-session": "^1.18.2",
@@ -40,6 +41,7 @@
     "compression": "^1.8.0",
     "concurrently": "^9.2.0",
     "connect-mongodb-session": "^5.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
@@ -70,7 +72,7 @@
     "frontend:dev": "vite",
     "prettify": "pino-pretty -i hostname,req.id,req.query,req.params,req.headers,req.remoteAddress,req.remotePort,res.headers",
     "frontend:prod": "bun vite build --outDir=build",
-    "backend:prod": "bun run server/server.ts | bun prettify",
+    "backend:prod": "bun run server/server.ts",
     "setup": "echo 'Project setup is a WIP.'"
   }
 }

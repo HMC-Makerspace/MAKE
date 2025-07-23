@@ -13,7 +13,6 @@ import {
     ShoppingCartIcon,
     WrenchScrewdriverIcon,
 } from "@heroicons/react/24/solid";
-import { useMAKEStore } from "../store";
 import { useQuery } from "@tanstack/react-query";
 import { API_SCOPE } from "../../common/global";
 import { verifyScopes } from "../utils";
@@ -78,7 +77,6 @@ export default function DefaultLayout({
     pageHref: string;
     className?: string;
 }) {
-    const user_uuid = useMAKEStore((state) => state.user_uuid);
     const pageIndex = PAGES.findIndex((page) => page.href === pageHref);
     const navigate = useNavigate();
 
@@ -89,7 +87,7 @@ export default function DefaultLayout({
     } = useQuery<API_SCOPE[]>({
         queryKey: ["user", "self", "scopes"],
         refetchOnWindowFocus: false,
-        enabled: !!user_uuid,
+        retry: false,
     });
     const kioskAccess = scopes && verifyScopes(scopes, [API_SCOPE.VIEW_KIOSKS]);
     const handleKeyPress = useCallback((event: KeyboardEvent) => {
