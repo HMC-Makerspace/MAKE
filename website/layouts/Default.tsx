@@ -90,14 +90,17 @@ export default function DefaultLayout({
         retry: false,
     });
     const kioskAccess = scopes && verifyScopes(scopes, [API_SCOPE.VIEW_KIOSKS]);
-    const handleKeyPress = useCallback((event: KeyboardEvent) => {
-        if (event.key === "k") {
-            // If user is authorized, go to the kiosk page
-            if (!scopesLoading && !scopesError && kioskAccess) {
-                navigate("/admin");
+    const handleKeyPress = useCallback(
+        (event: KeyboardEvent) => {
+            if (event.key === "k") {
+                // If user is authorized, go to the kiosk page
+                if (!scopesLoading && !scopesError && kioskAccess) {
+                    navigate("/admin");
+                }
             }
-        }
-    }, []);
+        },
+        [scopesLoading, scopesError, kioskAccess],
+    );
 
     useEffect(() => {
         // attach the event listener

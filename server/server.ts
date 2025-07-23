@@ -85,35 +85,38 @@ app.use(
     session({
         secret: process.env.SESSION_SECRET,
         cookie: {
-            secure: true,
+            secure: process.env.NODE_ENV === "production",
             httpOnly: true,
             maxAge: 1000 * 60 * 60 * 24 * 7, // One week
         },
         store: store,
-        proxy: true,
+        proxy: process.env.NODE_ENV === "production",
         resave: false,
-        saveUninitialized: true,
+        saveUninitialized: false,
     }),
     passport.initialize(),
 );
 
 passport.serializeUser((user, done) => {
     process.nextTick(() => {
-        return done(null, {uuid: user.uuid});
+        return done(null, { uuid: user.uuid });
     });
 });
 
 passport.deserializeUser((user: Express.User, done) => {
     process.nextTick(() => {
-        return done(null, {uuid: user.uuid});
+        return done(null, { uuid: user.uuid });
     });
 });
 
 // Define production SAML login methods
 if (process.env.NODE_ENV === "production") {
     // Get IDP cert and clean up format
-    const cert = await fs.readFile("make-idp.crt")
-    const cert_string = cert.toString().replace(/-+(BEGIN|END) CERTIFICATE-+/g, "").replace("\n", "");
+    const cert = await fs.readFile("make-idp.crt");
+    const cert_string = cert
+        .toString()
+        .replace(/-+(BEGIN|END) CERTIFICATE-+/g, "")
+        .replace("\n", "");
 
     // Configure SAML Strategy
     passport.use(
@@ -127,13 +130,15 @@ if (process.env.NODE_ENV === "production") {
             },
             async (req, profile, done) => {
                 if (!profile || !profile.college_id) {
-                    req.log.fatal({msg: "Invalid profile", profile: profile})
-                    return
+                    req.log.fatal({ msg: "Invalid profile", profile: profile });
+                    return;
                 }
                 const college_id = profile.college_id as string;
                 const user_obj = await getUserByCollegeID(college_id);
                 if (!user_obj) {
-                    req.log.info(`User with college id ${college_id} not found, creating`)
+                    req.log.info(
+                        `User with college id ${college_id} not found, creating`,
+                    );
                     const new_user_obj = {
                         uuid: crypto.randomUUID(),
                         name: profile.name as string,
@@ -143,51 +148,52 @@ if (process.env.NODE_ENV === "production") {
                         past_roles: [],
                         active_certificates: [],
                         past_certificates: [],
-                    }
+                    };
                     await createUser(new_user_obj);
-                    done(null, {uuid: new_user_obj.uuid});
+                    done(null, { uuid: new_user_obj.uuid });
                 } else {
-                    done(null, {uuid: user_obj.uuid});
+                    done(null, { uuid: user_obj.uuid });
                 }
             },
         ),
     );
 
-    app.get(
-        "/login",
-        passport.authenticate("saml")
-    )
+    app.get("/login", passport.authenticate("saml"));
 
     app.post(
         "/saml",
-        urlencoded({extended: false}),
+        urlencoded({ extended: false }),
         passport.authenticate("saml"),
         (req, res) => {
-            res.redirect("/")
-        }
+            res.redirect("/");
+        },
     );
 }
-if (process.env.NODE_ENV === "development" || process.env.ALLOW_INSECURE_LOGIN) {
+if (
+    process.env.NODE_ENV === "development" ||
+    process.env.ALLOW_INSECURE_LOGIN
+) {
     // Define developmental login method
     app.get("/login/:user_uuid", async (req, res, next) => {
         try {
             const user_uuid = req.params.user_uuid;
             if (!user_uuid) {
-                res.redirect("/")
+                res.redirect("/");
             }
-            req.login({uuid: user_uuid}, (err) => {
+            req.login({ uuid: user_uuid }, (err) => {
+                req.log.info({ msg: "Logged in", err: err });
                 if (err) {
                     // Pass errors to Express
-                    next(err)
+                    next(err);
                 } else {
                     // If successfully logged in, redirect to the main page
-                    res.redirect("/")
+                    res.redirect("/");
                 }
-            })
+            });
         } catch (error) {
-            next(error)
+            next(error);
         }
-    })
+    });
 }
 
 // Logout route
