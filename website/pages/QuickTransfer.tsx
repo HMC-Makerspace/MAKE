@@ -34,7 +34,8 @@ import {
     MusicalNoteIcon,
     PhotoIcon,
 } from "@heroicons/react/24/outline";
-import PopupAlert from "../components/PopupAlert.tsx";
+import { API_SCOPE } from "../../common/global.ts";
+import { verifyScopes } from "../utils.tsx";
 
 async function uploadFile({
     college_id,
@@ -85,6 +86,14 @@ async function deleteFile({ file_uuid }: { file_uuid: string }) {
     return response.data;
 }
 
+const dragOverHandler = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+};
+
+const dragLeaveHandler = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+};
+
 export default function QuickTransferPage() {
     const queryClient = useQueryClient();
     const [collegeID, setCollegeID] = React.useState<string>("");
@@ -107,6 +116,15 @@ export default function QuickTransferPage() {
         queryFn: () => getFiles({ college_id: collegeID }),
         refetchOnWindowFocus: false,
         enabled: !!collegeID && !!user,
+        retry: false,
+    });
+    const {
+        data: scopes,
+        isLoading: scopesLoading,
+        isError: scopesError,
+    } = useQuery<API_SCOPE[]>({
+        queryKey: ["user", "self", "scopes"],
+        refetchOnWindowFocus: false,
         retry: false,
     });
 
@@ -189,6 +207,21 @@ export default function QuickTransferPage() {
         e.target.value = "";
     };
 
+    const dropHandler = (event: React.DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        const files = event.dataTransfer?.files;
+        if (files && files.length > 0) {
+            handleUpload({
+                target: { files },
+            } as React.ChangeEvent<HTMLInputElement>);
+        }
+    };
+
+    const uploadAccess =
+        scopes && verifyScopes(scopes, [API_SCOPE.CREATE_OWN_FILE]);
+    const deleteAccess =
+        scopes && verifyScopes(scopes, [API_SCOPE.DELETE_OWN_FILE]);
+
     return (
         <DefaultLayout className="p-8" pageHref="/transfer">
             <ToastProvider maxVisibleToasts={9}></ToastProvider>
@@ -267,7 +300,15 @@ export default function QuickTransferPage() {
                         </Button>
                     </div>
                 </div>
-                <div id="card-container" className="overflow-auto size-full">
+                <div
+                    // Drag Drop Continaner
+                    id="card-container"
+                    onDrop={dropHandler}
+                    onDragOver={dragOverHandler}
+                    onDragLeave={dragLeaveHandler}
+                    className="overflow-auto size-full"
+                    draggable="true"
+                >
                     <div
                         id="file-cards"
                         className={clsx(

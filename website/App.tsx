@@ -6,6 +6,7 @@ import HomePage from "./pages/Home";
 import InventoryPage from "./pages/Inventory";
 import AreasPage from "./pages/Areas";
 import SchedulePage from "./pages/Schedule";
+import WorkshopPage from "./pages/Workshop";
 import QuickTransferPage from "./pages/QuickTransfer";
 
 // Kiosks
@@ -29,6 +30,7 @@ const App: React.FC = () => {
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/areas" element={<AreasPage />} />
             <Route path="/schedule" element={<SchedulePage />} />
+            <Route path="/workshops" element={<WorkshopPage />} />
             <Route path="/transfer" element={<QuickTransferPage />} />
             {/* Kiosks */}
             <Route path="/admin" element={<AdminKiosk />} />
