@@ -146,10 +146,11 @@ export default function Shift({
     selected_user,
     setSelectedUsers = () => {},
     type = "view",
-    selectedShift = [0, 0, 0],
-    setSelectedShift = () => {},
+    selectedShifts = new Set(),
+    setSelectedShifts = () => {},
     dragging = false,
     setDragging = () => {},
+    firstNamesOnly = true,
 }: {
     schedule_uuid: UUID;
     shifts: TShift[];
@@ -160,11 +161,17 @@ export default function Shift({
     sec_end: number;
     selected_user?: TUser;
     setSelectedUsers?: (users: Selection) => void;
-    type?: "view" | "edit" | "availability" | "worker";
-    selectedShift?: number[];
-    setSelectedShift?: (day_start_end: number[]) => void;
+    type?:
+        | "view"
+        | "edit"
+        | "availability"
+        | "worker_availability"
+        | "worker_view";
+    selectedShifts?: Set<string>;
+    setSelectedShifts?: (day_start_end: Set<string>) => void;
     dragging: boolean;
     setDragging: (dragging: boolean) => void;
+    firstNamesOnly?: boolean;
 }) {
     const queryClient = useQueryClient();
 
@@ -218,27 +225,9 @@ export default function Shift({
 
     const colorIndex = Math.min(assignees.length, baseColors.length - 1);
 
-    const editor_classes =
-        type === "edit"
-            ? [
-                  // If in edit mode and the user is scheduled, show a + cursor,
-                  // otherwise a no-edit cursor
-                  selected_user && !scheduled
-                      ? "cursor-cell"
-                      : selected_user && "cursor-not-allowed",
-                  // Background cell color is based on if the selected user is
-                  // scheduled and or available
-                  !scheduled && available && assigneeColors[colorIndex],
-                  !scheduled && !available && baseColors[colorIndex],
-                  scheduled && available && "bg-primary-300",
-                  scheduled && !available && "bg-danger-100",
-              ]
-            : [];
-
-    const isShiftSelected =
-        selectedShift[0] === day &&
-        selectedShift[1] === sec_start &&
-        selectedShift[2] === sec_end;
+    const isShiftSelected = selectedShifts.has(
+        `${day},${sec_start},${sec_end}`,
+    );
 
     const [isOpen, setIsOpen] = React.useState(false);
 
@@ -257,7 +246,7 @@ export default function Shift({
     );
 
     const dragFn =
-        type === "worker" && !!selected_user && dragging
+        type === "worker_availability" && !!selected_user && dragging
             ? () => {
                   availabilityMutation.mutate({
                       user_uuid: selected_user.uuid,
@@ -268,6 +257,46 @@ export default function Shift({
                   });
               }
             : undefined;
+
+    const edit_classes = [
+        // If in edit mode and the user is scheduled, show a + cursor,
+        // otherwise a no-edit cursor
+        selected_user && !scheduled
+            ? "cursor-cell"
+            : selected_user && "cursor-not-allowed",
+        // Background cell color is based on if the selected user is
+        // scheduled and or available
+        !scheduled && available && assigneeColors[colorIndex],
+        !scheduled && !available && baseColors[colorIndex],
+        scheduled && available && "bg-primary-300",
+        scheduled && !available && "bg-danger-100",
+    ];
+
+    const view_classes = [
+        // If in view mode, cells are clickable to show info
+        "cursor-pointer ring-inset hover:ring-2",
+        !isShiftSelected && baseColors[colorIndex],
+        !isShiftSelected && "hover:ring-secondary",
+        isShiftSelected && "bg-primary-300 hover:ring-primary-400",
+    ];
+
+    const availability_classes = [
+        available && "bg-success-300",
+        !available && availabilityColors[availabilityColorIndex],
+        isShiftSelected && "ring-2",
+    ];
+
+    const worker_availability_classes = [
+        !available && "bg-default-300",
+        available && "bg-success-400",
+    ];
+
+    const worker_view_classes = [
+        "cursor-pointer",
+        assignees.length > 0 && !scheduled
+            ? "bg-primary-300"
+            : baseColors[colorIndex],
+    ];
 
     return (
         <Popover
@@ -285,34 +314,25 @@ export default function Shift({
             <PopoverTrigger>
                 <motion.div
                     className={clsx(
-                        "min-h-full w-full",
+                        "h-full w-full",
                         "flex flex-col",
                         "items-center justify-center",
                         "gap-1 p-2 rounded-md",
-                        // If in view mode, cells are clickable to show info
-                        type === "view" && "cursor-pointer",
-                        type === "view" &&
-                            !isShiftSelected &&
-                            baseColors[colorIndex],
-                        type === "view" && isShiftSelected && "bg-primary-300",
-                        ...editor_classes,
-                        type === "worker" && !available && "bg-default-300",
-                        type === "worker" && available && "bg-success-400",
-                        type === "availability" &&
-                            available &&
-                            "bg-success-300",
-                        type === "availability" &&
-                            !available &&
-                            availabilityColors[availabilityColorIndex],
-                        type === "availability" && isShiftSelected && "ring-2",
+                        "transition-colors-opacity duration-150",
+                        ...(type === "edit" ? edit_classes : []),
+                        ...(type === "view" ? view_classes : []),
+                        ...(type === "availability"
+                            ? availability_classes
+                            : []),
+                        ...(type === "worker_availability"
+                            ? worker_availability_classes
+                            : []),
+                        ...(type === "worker_view" ? worker_view_classes : []),
                     )}
                     animate
-                    style={{
-                        transition: "background-color 0.15s ease",
-                    }}
                     onMouseOver={dragFn}
                     onTapStart={() => {
-                        if (type === "worker") {
+                        if (type === "worker_availability") {
                             setDragging(true);
                             if (selected_user) {
                                 availabilityMutation.mutate({
@@ -367,41 +387,51 @@ export default function Shift({
                                     ).map((u) => u.uuid),
                                 ),
                             );
-                            setSelectedShift([day, sec_start, sec_end]);
-                        } else if (type === "view") {
+                            setSelectedShifts(
+                                new Set(`${day},${sec_start},${sec_end}`),
+                            );
+                        } else if (type === "view" || type === "worker_view") {
                             if (isShiftSelected) {
                                 setSelectedUsers(new Set());
-                                setSelectedShift([0, 0, 0]);
+                                setSelectedShifts(new Set(["0,0,0"]));
                             } else {
                                 // Selecting all users in this shift
                                 setSelectedUsers(new Set(assignees));
-                                setSelectedShift([day, sec_start, sec_end]);
+                                setSelectedShifts(
+                                    new Set([`${day},${sec_start},${sec_end}`]),
+                                );
                             }
-                        } else if (type === "worker") {
+                        } else if (type === "worker_availability") {
                             setDragging(false);
                         }
                     }}
                     whileTap={{
-                        scale: type !== "view" ? 0.98 : 1,
+                        scale: 0.98,
                     }}
                 >
-                    {type != "availability" &&
+                    {(type === "edit" ||
+                        type === "view" ||
+                        type === "worker_view") &&
                         assignees.map((assignee) => {
                             const u = users.find((u) => u.uuid === assignee);
                             if (!u) {
-                                return (
-                                    <div
-                                        className={clsx(
-                                            "w-full h-full",
-                                            "flex flex-row",
-                                            "items-center justify-center",
-                                            "text-danger-800",
-                                            "text-sm",
-                                        )}
-                                    >
-                                        Unknown User
-                                    </div>
-                                );
+                                if (type === "worker_view") {
+                                    return <div className="min-h-4" />;
+                                } else {
+                                    return (
+                                        <div
+                                            className={clsx(
+                                                "w-full h-full",
+                                                "flex flex-row",
+                                                "items-center justify-center",
+                                                "text-danger-800",
+                                                "text-sm",
+                                            )}
+                                        >
+                                            Unknown User
+                                        </div>
+                                    );
+                                }
                             }
                             if (type === "edit") {
                                 const hierarchical_roles = getUserRoleHierarchy(
@@ -450,18 +480,39 @@ export default function Shift({
                                         </div>
                                     </Button>
                                 );
-                            } else if (type === "view") {
+                            } else if (type === "worker_view") {
                                 return (
                                     <div
+                                        key={u.uuid}
                                         className={clsx(
                                             "w-full h-full",
                                             "flex flex-row",
                                             "items-center justify-center",
                                             "text-default-800",
-                                            "text-xs text-center",
+                                            "text-[9px] lg:text-xs text-center",
                                         )}
                                     >
                                         {u.name}
+                                    </div>
+                                );
+                            } else if (type === "view") {
+                                return (
+                                    <div
+                                        key={u.uuid}
+                                        className={clsx(
+                                            "w-full h-full",
+                                            "flex flex-row",
+                                            "items-center justify-center",
+                                            "text-default-800",
+                                            " text-center",
+                                            firstNamesOnly
+                                                ? "text-xs lg:text-sm"
+                                                : "text-[9px] lg:text-xs",
+                                        )}
+                                    >
+                                        {firstNamesOnly
+                                            ? u.name.split(" ")[0]
+                                            : u.name}
                                     </div>
                                 );
                             }
@@ -485,8 +536,21 @@ export default function Shift({
                             {`${availableUsers.length}/${users.length}`}
                         </div>
                     )}
+                    {type === "worker_availability" && (
+                        <div
+                            className="min-h-[28px]"
+                            style={{
+                                // Keep same vertical height when switching modes
+                                height:
+                                    16 * assignees.length +
+                                    2 * (assignees.length - 1),
+                            }}
+                        ></div>
+                    )}
                     {assignees.length === 0 &&
-                        (type === "edit" || type === "view") && (
+                        (type == "edit" ||
+                            type === "view" ||
+                            type === "worker_view") && (
                             <div
                                 className={clsx(
                                     "w-full h-[32px] text-sm",
@@ -500,7 +564,11 @@ export default function Shift({
                                     transition: "color 0.15s ease",
                                 }}
                             >
-                                {type === "view" ? "No shift" : "Unassigned"}
+                                {type === "view"
+                                    ? "No shift"
+                                    : type === "worker_view"
+                                      ? ""
+                                      : "Unassigned"}
                             </div>
                         )}
                 </motion.div>

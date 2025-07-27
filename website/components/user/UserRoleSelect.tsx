@@ -61,7 +61,7 @@ export function UserRoleSelect({
         {
             queryKey: ["user", "role"],
             refetchOnWindowFocus: false,
-            enabled: !roles,
+            enabled: !roles && !isLoading,
         },
     );
     const allRoles = roles || queryRoles || [];

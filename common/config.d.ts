@@ -41,7 +41,7 @@ export type TScheduleConfig = {
      * The list of user role UUIDs that can have scheduled shifts,
      * which will show up in in the schedule editor.
      */
-    schedulable_roles: UserRoleUUID[];
+    worker_roles: UserRoleUUID[];
 
     /**
      * The increment between shifts (in seconds).
@@ -49,9 +49,24 @@ export type TScheduleConfig = {
     increment_sec: number;
 
     /**
+     * Whether to only show worker first names (before first space) on
+     * the public schedule page.
+     */
+    first_names_only?: boolean;
+
+    /**
      * The IANA timezone to use for all date objects
      */
     timezone: string;
+};
+
+export type TGeneralConfig = {
+    branding_url?: string;
+    tagline?: string;
+    discord_url?: string;
+    instagram_url?: string;
+    tiktok_url?: string;
+    extra_urls?: string[];
 };
 
 /**
@@ -59,6 +74,7 @@ export type TScheduleConfig = {
  */
 export type TConfig = {
     timestamp: UnixTimestamp;
+    general: TGeneralConfig;
     checkout: TCheckoutConfig;
     file: TFileConfig;
     schedule: TScheduleConfig;

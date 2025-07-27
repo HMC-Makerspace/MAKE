@@ -3,6 +3,7 @@ import AdminNavbar from "../components/kiosks/admin/dashboard/AdminNavbar";
 import { API_SCOPE } from "../../common/global";
 import { Spinner } from "@heroui/react";
 import clsx from "clsx";
+import { AnimatePresence, motion } from "framer-motion";
 // import AdminSidebar from "../components/kiosks/admin/AdminSidebar";
 
 export type AdminPage = {
@@ -33,16 +34,6 @@ const ADMIN_PAGES: AdminPage[] = [
         scope: API_SCOPE.CHECKOUT_KIOSK,
     },
     {
-        name: "Areas",
-        href: "/admin/areas",
-        scope: API_SCOPE.AREA_KIOSK,
-    },
-    {
-        name: "Machines",
-        href: "/admin/machines",
-        scope: API_SCOPE.MACHINE_KIOSK,
-    },
-    {
         name: "Inventory",
         href: "/admin/inventory",
         scope: API_SCOPE.INVENTORY_KIOSK,
@@ -68,6 +59,16 @@ const ADMIN_PAGES: AdminPage[] = [
         scope: API_SCOPE.CERTIFICATION_KIOSK,
     },
     {
+        name: "Areas",
+        href: "/admin/areas",
+        scope: API_SCOPE.AREA_KIOSK,
+    },
+    {
+        name: "Machines",
+        href: "/admin/machines",
+        scope: API_SCOPE.MACHINE_KIOSK,
+    },
+    {
         name: "Settings",
         href: "/admin/settings",
         scope: API_SCOPE.SETTINGS_KIOSK,
@@ -87,6 +88,7 @@ export default function AdminLayout({
     const { data, isLoading, isError } = useQuery<API_SCOPE[]>({
         queryKey: ["user", "self", "scopes"],
         refetchOnWindowFocus: false,
+        refetchOnMount: false,
     });
     // Determine which pages the user has access to based on their scopes
     const scopes = data ?? [];
@@ -111,6 +113,7 @@ export default function AdminLayout({
               return page;
           });
     const pageIndex = ADMIN_PAGES.findIndex((page) => page.href === pageHref);
+
     return (
         <div className="relative flex flex-col h-screen bg-background">
             {isLoading ? (
@@ -122,16 +125,26 @@ export default function AdminLayout({
                     </div>
                 </div>
             ) : (
-                <AdminNavbar pages={pages} pageIndex={pageIndex} />
+                <>
+                    <AdminNavbar pages={pages} pageIndex={pageIndex} />
+                    <AnimatePresence mode="popLayout">
+                        <motion.main
+                            key={location.pathname}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{
+                                duration: 0.125,
+                            }}
+                            className={clsx(
+                                "w-full mx-auto flex-grow px-12 py-4 overflow-auto",
+                                className,
+                            )}
+                        >
+                            {children}
+                        </motion.main>
+                    </AnimatePresence>
+                </>
             )}
-            <main
-                className={clsx(
-                    "container mx-auto flex-grow px-0 py-4 overflow-auto",
-                    className,
-                )}
-            >
-                {children}
-            </main>
         </div>
     );
 }

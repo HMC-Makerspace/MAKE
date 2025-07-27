@@ -3,7 +3,7 @@ import RestockTable from "../../components/kiosks/admin/restock/RestockTable";
 import { useQuery } from "@tanstack/react-query";
 import { TRestockRequest } from "../../../common/restock";
 
-export default function RestockPage() {
+export default function RestockKiosk() {
     // getting restock data
     const { data, isLoading, isError } = useQuery<TRestockRequest[]>({
         queryKey: ["restock"],

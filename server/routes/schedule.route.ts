@@ -20,6 +20,7 @@ import {
     deleteAlertInSchedule,
     setActiveSchedule,
     patchSchedule,
+    getActiveAlert,
 } from "controllers/schedule.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
@@ -68,6 +69,7 @@ type AlertUpdateRequest = Request<
     { alert_obj: TAlert }
 >;
 type AlertsResponse = Response<TAlert[] | ErrorResponse>;
+type ActiveAlertResponse = Response<TAlert | null | ErrorResponse>;
 
 const router = Router();
 
@@ -84,7 +86,7 @@ const router = Router();
  */
 router.get(
     "/active/shifts/by/user/:user_uuid",
-    async (req: Request<{ user_uuid: string }>, res: ShiftsResponse) => {
+    async (req: Request<{ user_uuid: string }>, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = headers.requesting_uuid;
         const user_uuid = req.params.user_uuid;
@@ -109,20 +111,20 @@ router.get(
             await verifyRequest(
                 requesting_uuid,
                 API_SCOPE.GET_ALL_SHIFTS,
-                API_SCOPE.GET_OWN_SHIFTS,
+                API_SCOPE.GET_USER_PICKED_UP_SHIFTS,
                 requesting_uuid == user_uuid && API_SCOPE.GET_OWN_SHIFTS,
             )
         ) {
             // If authorized, get the user's shift information
-            const shifts = await getShiftsByUser(user_uuid);
-            if (shifts === null) {
-                req.log.error("No shift found");
+            const partial_schedule = await getShiftsByUser(user_uuid);
+            if (partial_schedule === null) {
+                req.log.error("No schedule found");
                 res.status(StatusCodes.NOT_FOUND).json({
-                    error: `No shift found for user ${user_uuid}.`,
+                    error: `No active schedule found.`,
                 });
             } else {
-                req.log.debug("Returned user's shifts.");
-                res.status(StatusCodes.OK).json(shifts);
+                req.log.debug("Returned user's shifts in active schedule.");
+                res.status(StatusCodes.OK).json(partial_schedule);
             }
         } else {
             req.log.warn({
@@ -518,19 +520,30 @@ router.patch(
 /**
  * Get the active active alerts for a schedule. This is a public route.
  */
-router.get("/active/alerts", async (req: Request, res: AlertsResponse) => {
-    req.log.debug("Getting active active alerts.");
+// router.get("/active/alerts", async (req: Request, res: AlertsResponse) => {
+//     req.log.debug("Getting active alerts.");
 
-    const alerts = await getActiveAlerts();
-    if (!alerts) {
-        req.log.warn("No active alerts found.");
-        res.status(StatusCodes.NOT_FOUND).json({
-            error: "No active alerts found.",
-        });
-    } else {
-        req.log.debug("Returned active alerts.");
-        res.status(StatusCodes.OK).json(alerts);
-    }
+//     const alerts = await getActiveAlerts();
+//     if (!alerts) {
+//         req.log.warn("No active alerts found.");
+//         res.status(StatusCodes.NOT_FOUND).json({
+//             error: "No active alerts found.",
+//         });
+//     } else {
+//         req.log.debug("Returned active alerts.");
+//         res.status(StatusCodes.OK).json(alerts);
+//     }
+// });
+
+/**
+ * Get the current active alert
+ */
+router.get("/active/alert", async (req: Request, res: ActiveAlertResponse) => {
+    req.log.debug("Getting active alert.");
+
+    const alert = await getActiveAlert();
+    req.log.debug("Returning active alert.");
+    res.status(StatusCodes.OK).json(alert);
 });
 
 /**

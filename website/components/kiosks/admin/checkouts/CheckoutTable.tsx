@@ -305,7 +305,7 @@ export default function CheckoutTable({
                         return user?.name || "Unknown User";
                     },
                     items: (c) => (
-                        <div className="flex flex-row gap-2 flex-wrap">
+                        <div className="flex flex-row gap-1.5 flex-wrap">
                             {c.items.map((i) => (
                                 <div
                                     key={i.item_uuid}
@@ -344,8 +344,9 @@ export default function CheckoutTable({
                             return (
                                 <Tooltip
                                     content={
-                                        undoDisabled &&
-                                        "Returns can only be undone within 2 minutes of check in."
+                                        undoDisabled
+                                            ? "Returns can only be undone within 2 minutes of check in."
+                                            : "Undo return"
                                     }
                                     className="max-w-56"
                                 >

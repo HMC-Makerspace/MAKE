@@ -1,5 +1,6 @@
 import {
     Button,
+    Card,
     Link,
     Navbar,
     NavbarBrand,
@@ -9,71 +10,104 @@ import {
 } from "@heroui/react";
 import clsx from "clsx";
 import { useMAKEStore } from "../store";
+import MAKE from "./public/home/MAKE";
+import Branding from "./public/home/Branding";
+import { ThemeSwitcher } from "./ThemeSwitcher";
+import { MAKEUser } from "./user/MAKEUser";
+import { motion } from "framer-motion";
+import { useNavigate, Link as RouteLink } from "react-router-dom";
 
-export default function CustomNavbar() {
-    const pageIndex = useMAKEStore((state) => state.page_index);
-
-    const pages = [
-        {
-            name: "Home",
-            href: "/",
-        },
-        {
-            name: "Admin",
-            href: "/admin",
-        },
-    ];
+export default function CustomNavbar({
+    pages,
+    pageIndex,
+}: {
+    pages: {
+        name: string;
+        href: string;
+        icon: React.ForwardRefExoticComponent<
+            Omit<React.SVGProps<SVGSVGElement>, "ref"> & {
+                title?: string;
+                titleId?: string;
+            } & React.RefAttributes<SVGSVGElement>
+        >;
+    }[];
+    pageIndex: number;
+}) {
+    const user_uuid = useMAKEStore((state) => state.user_uuid);
+    const navigate = useNavigate();
 
     return (
-        <Navbar
-            className={clsx([
-                "w-full",
-                "bg-primary-500",
-                "dark:bg-primary-300",
-            ])}
-            classNames={{ wrapper: "max-w-full" }}
-        >
-            <NavbarContent justify="start">
-                {/* Branding, always visible */}
-                <NavbarBrand className="justify-start">
-                    <Link
-                        className={clsx([
-                            "font-title font-semibold text-5xl",
-                            "tracking-title pl-2",
-                            "text-background",
-                            "dark:text-content1",
-                        ])}
-                        href="/"
-                    >
-                        MAKE
-                    </Link>
-                </NavbarBrand>
-            </NavbarContent>
-            {/* Menu items, hide for small screens */}
-            <NavbarContent justify="center" className="hidden sm:flex">
-                {
-                    // Iterate over the pages (excluding home) and create a link for each
-                    pages.map((page, index) =>
-                        page.name === "Home" ? null : (
-                            <Link
-                                key={`page-${page.name}-${index}`}
+        <>
+            {/* Large screen sidebar */}
+            <div
+                className={clsx(
+                    "bg-primary-500",
+                    "dark:bg-primary-300",
+                    "hidden xl:flex flex-col",
+                    "justify-start py-2",
+                    "min-w-[224px]",
+                )}
+            >
+                <MAKE className="self-center text-5xl" />
+                <div className="pt-4 pr-4 flex flex-col">
+                    {pages.map((page, index) => (
+                        <motion.div
+                            key={`page-${page.name}-${index}`}
+                            className={clsx(
+                                "flex gap-3 items-center pl-6 pr-4",
+                                "py-3 font-bold rounded-r-xl",
+                                "transition-colors text-lg text-nowrap",
+                                "hover:bg-default-100 cursor-pointer",
+                                pageIndex === index
+                                    ? "text-foreground-800 bg-default-100"
+                                    : "text-default-100 hover:text-foreground-800",
+                            )}
+                            whileTap={{
+                                scaleY: 0.97,
+                                translateX: -1,
+                            }}
+                            onClick={() =>
+                                navigate(page.href, { viewTransition: true })
+                            }
+                        >
+                            {page.icon && <page.icon className="size-5" />}
+                            {/* <Link
                                 href={page.href}
-                                className={clsx([
-                                    "text-xl font-semibold",
-                                    pageIndex === index
-                                        ? "font-bold text-primary-500"
-                                        : " text-foreground-900",
-                                ])}
-                            >
-                                {page.name}
-                            </Link>
-                        ),
-                    )
-                }
-            </NavbarContent>
-            <NavbarContent justify="end" className="">
-                {/* Menu dropdown for small screens, hide for larger */}
-                <NavbarMenuToggle className="sm:hidden text-content1" />
+                                className="text-lg text-inherit text-nowrap"
+                            > */}
+                            {page.name}
+                            {/* </Link> */}
+                        </motion.div>
+                    ))}
+                </div>
+                {/* Branding */}
+                <div className="self-center mt-auto pb-4">
+                    <Branding />
+                </div>
+                <div className="px-4 self-center">
+                    <MAKEUser user_uuid={user_uuid} size="lg" />
+                </div>
+            </div>
+            {/* Small screen navbar */}
+            <Navbar
+                className={clsx([
+                    "w-full",
+                    "bg-primary-500",
+                    "dark:bg-primary-300",
+                    "flex xl:hidden",
+                ])}
+                classNames={{ wrapper: "max-w-full" }}
+            >
+                <NavbarContent justify="start">
+                    {/* Branding */}
+                    <NavbarBrand className="justify-start">
+                        <MAKE />
+                    </NavbarBrand>
+                </NavbarContent>
+                <NavbarContent justify="end" className="">
+                    {/* Menu dropdown toggle */}
+                    <NavbarMenuToggle className="text-content1" />
+                    {/* User info, hide for small screens
                 <Button
                     as={Link}
                     href="/login"
@@ -82,51 +116,63 @@ export default function CustomNavbar() {
                     className="hidden sm:flex"
                 >
                     Login
-                </Button>
-            </NavbarContent>
-            {/* Menu drop down, for small screens */}
-            <NavbarMenu>
-                {pages.map((page, index) => (
-                    <Link
-                        key={`page-${page.name}-${index}`}
-                        href={page.href}
-                        className={clsx([
-                            pageIndex === index
-                                ? "font-bold text-primary-500"
-                                : " text-foreground-900",
-                        ])}
-                    >
-                        {page.name}
-                    </Link>
-                ))}
-            </NavbarMenu>
-        </Navbar>
+                </Button> */}
+                </NavbarContent>
+                {/* Menu drop down, for small screens */}
+                <NavbarMenu className="gap-8">
+                    <div className="flex flex-col gap-3">
+                        {pages.map((page, index) => (
+                            <div
+                                key={`page-${page.name}-${index}`}
+                                className={clsx(
+                                    "flex gap-2 text-2xl items-center",
+                                    pageIndex === index
+                                        ? "font-bold text-primary-500"
+                                        : "text-foreground-900",
+                                )}
+                            >
+                                {page.icon && (
+                                    <page.icon
+                                        className={clsx(
+                                            "size-7",
+                                            pageIndex === index
+                                                ? "text-primary-500"
+                                                : "text-foreground-900",
+                                        )}
+                                        strokeWidth={
+                                            pageIndex === index ? 2.5 : 1.5
+                                        }
+                                    />
+                                )}
+                                <RouteLink
+                                    to={page.href}
+                                    // href={page.href}
+                                    // as={RouteLink}
+                                    className="text-3xl text-inherit"
+                                    viewTransition
+                                >
+                                    {page.name}
+                                </RouteLink>
+                            </div>
+                        ))}
+                    </div>
+                    <Card className="bg-default-200 p-2 flex-row gap-3 w-fit self-center">
+                        <Branding />
+                        <div className="flex flex-col justify-between">
+                            <MAKEUser user_uuid={user_uuid} size="lg" />
+                            <div className="flex flex-row w-full justify-between">
+                                <ThemeSwitcher
+                                    className="self-center w-full"
+                                    classNames={{
+                                        base: "w-full",
+                                        tabList: "gap-0 w-full",
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </Card>
+                </NavbarMenu>
+            </Navbar>
+        </>
     );
 }
-
-// export default function Navbar() {
-//     return (
-//         <div
-//             id="navbar"
-//             className={clsx([
-//                 "flex flex-col",
-//                 "items-center",
-//                 "justify-between",
-//                 "px-4 py-4",
-//                 "bg-primary-300",
-//                 "bg-background",
-//                 "w-[210px]",
-//             ])}
-//         >
-//             <Link
-//                 className={clsx([
-//                     "text-foreground-900",
-//                     "font-title",
-//                     "text-title font-semibold tracking-title pl-2",
-//                 ])}
-//             >
-//                 MAKE
-//             </Link>
-//         </div>
-//     );
-// }

@@ -136,6 +136,28 @@ export async function updateWorkshop(
 }
 
 /**
+ * Updates a workshop with partial new information
+ * @param workshop_uuid The UUID of the workshop to modify
+ * @param partial_workshop The partial set of changes to update
+ * @returns The updated workshop
+ */
+export async function patchWorkshop(
+    workshop_uuid: UUID,
+    partial_workshop: Partial<TWorkshop>,
+) {
+    const Workshops = mongoose.model("Workshop", Workshop);
+
+    return Workshops.findOneAndUpdate(
+        { uuid: workshop_uuid },
+        {
+            // Updates the partial change
+            $set: partial_workshop,
+        },
+        { returnDocument: "after" },
+    );
+}
+
+/**
  * RSVP a user to a workshop
  * @param workshop_uuid The workshop's UUID
  * @param user_uuid The user's UUID who is RSVPing

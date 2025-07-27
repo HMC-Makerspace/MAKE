@@ -14,6 +14,7 @@ export default function UserInfo({
     certs,
     className = "",
     size = "md",
+    isLoading = false,
 }: {
     user_uuid?: UserUUID;
     user?: TUser;
@@ -21,29 +22,33 @@ export default function UserInfo({
     certs?: TCertification[];
     className?: string;
     size?: "sm" | "md" | "lg";
+    isLoading?: boolean;
 }) {
-    const { data: queriedUser } = useQuery<TUser>({
+    const { data: queriedUser, isLoading: userLoading } = useQuery<TUser>({
         queryKey: ["user", user_uuid],
         refetchOnWindowFocus: false,
-        enabled: !user,
+        enabled: !user && !!user_uuid,
         retry: false,
     });
 
-    const { data: queriedRoles } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
+    const { data: queriedRoles, isLoading: rolesLoading } = useQuery<
+        TUserRole[]
+    >({
+        queryKey: ["user", user_uuid, "role"],
         refetchOnWindowFocus: false,
-        enabled: !roles,
+        enabled: !roles && !!user_uuid,
     });
 
-    const { data: queriedCerts } = useQuery<TCertification[]>({
-        queryKey: ["certification"],
-        refetchOnWindowFocus: false,
-        enabled: !certs,
-    });
+    // const { data: queriedCerts } = useQuery<TCertification[]>({
+    //     queryKey: ["certification"],
+    //     refetchOnWindowFocus: false,
+    //     enabled: !certs,
+    // });
 
     const user_data = user || queriedUser;
     const role_data = roles || queriedRoles;
-    const cert_data = certs || queriedCerts;
+    // const cert_data = certs || queriedCerts;
+    const loading = userLoading || rolesLoading || isLoading;
 
     return (
         <div
@@ -105,6 +110,7 @@ export default function UserInfo({
                 defaultSelectedKeys={
                     user_data?.active_roles?.map((r) => r.role_uuid) || []
                 }
+                isLoading={loading}
                 className="col-span-3"
                 classNames={{
                     trigger: "px-0 placeholder",
@@ -122,15 +128,16 @@ export default function UserInfo({
             <div
                 className={clsx(
                     "rounded-lg bg-default-100 border-2 border-default-200 p-2",
-                    "col-span-3 flex gap-2",
+                    "col-span-3 flex flex-wrap gap-2",
                 )}
             >
                 {user_data?.active_certificates &&
                 user_data.active_certificates.length > 0 ? (
                     user_data.active_certificates.map((c) => (
                         <CertificationTag
+                            key={c.certification_uuid}
                             cert_uuid={c.certification_uuid}
-                            certifications={cert_data}
+                            certifications={certs}
                             level={c.level}
                         />
                     ))

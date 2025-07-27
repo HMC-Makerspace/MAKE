@@ -1,36 +1,48 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
+// Pages
 import HomePage from "./pages/Home";
-import AdminPage from "./pages/admin/Admin";
-import UsersPage from "./pages/admin/Users";
-import CheckoutsPage from "./pages/admin/Checkouts";
-import CertificationsPage from "./pages/admin/Certifications";
-import RestockPage from "./pages/admin/Restock";
-import RolesPage from "./pages/admin/Roles";
-import SchedulePage from "./pages/admin/Schedules";
-import SettingsPage from "./pages/admin/Settings";
-import AreasPage from "./pages/admin/Areas";
-import MachinesPage from "./pages/admin/Machines";
-import InventoryPage from "./pages/admin/Inventory";
+import InventoryPage from "./pages/Inventory";
+import AreasPage from "./pages/Areas";
+import SchedulePage from "./pages/Schedule";
+
+// Kiosks
+import AdminKiosk from "./pages/admin/AdminKiosk";
+import UsersKiosk from "./pages/admin/UsersKiosk";
+import CheckoutsKiosk from "./pages/admin/CheckoutsKiosk";
+import CertificationsKiosk from "./pages/admin/CertificationsKiosk";
+import RestockKiosk from "./pages/admin/RestockKiosk";
+import RolesKiosk from "./pages/admin/RolesKiosk";
+import ScheduleKiosk from "./pages/admin/SchedulesKiosk";
+import SettingsKiosk from "./pages/admin/SettingsKiosk";
+import AreasKiosk from "./pages/admin/AreasKiosk";
+import MachinesKiosk from "./pages/admin/MachinesKiosk";
+import InventoryKiosk from "./pages/admin/InventoryKiosk";
+import WorkshopKiosk from "./pages/admin/WorkshopsKiosk";
 
 const App: React.FC = () => {
     return (
         <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/admin/users" element={<UsersPage />} />
-            <Route path="/admin/checkouts" element={<CheckoutsPage />} />
+            <Route path="/inventory" element={<InventoryPage />} />
+            <Route path="/areas" element={<AreasPage />} />
+            <Route path="/schedule" element={<SchedulePage />} />
+            {/* Kiosks */}
+            <Route path="/admin" element={<AdminKiosk />} />
+            <Route path="/admin/users" element={<UsersKiosk />} />
+            <Route path="/admin/checkouts" element={<CheckoutsKiosk />} />
             <Route
                 path="/admin/certifications"
-                element={<CertificationsPage />}
+                element={<CertificationsKiosk />}
             />
-            <Route path="/admin/areas" element={<AreasPage />} />
-            <Route path="/admin/machines" element={<MachinesPage />} />
-            <Route path="/admin/roles" element={<RolesPage />} />
-            <Route path="/admin/schedule" element={<SchedulePage />} />
-            <Route path="/admin/settings" element={<SettingsPage />} />
-            <Route path="/admin/restocks" element={<RestockPage />} />
-            <Route path="/admin/inventory" element={<InventoryPage />} />
+            <Route path="/admin/areas" element={<AreasKiosk />} />
+            <Route path="/admin/machines" element={<MachinesKiosk />} />
+            <Route path="/admin/roles" element={<RolesKiosk />} />
+            <Route path="/admin/schedule" element={<ScheduleKiosk />} />
+            <Route path="/admin/settings" element={<SettingsKiosk />} />
+            <Route path="/admin/restocks" element={<RestockKiosk />} />
+            <Route path="/admin/inventory" element={<InventoryKiosk />} />
+            <Route path="/admin/workshops" element={<WorkshopKiosk />} />
         </Routes>
     );
 };

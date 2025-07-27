@@ -185,33 +185,50 @@ export async function deleteFileOnServer(
     file_path: string,
     req: Request,
     res: Response,
-    unauthorized_creation: boolean = false,
+    error_message: string = "authorized",
 ) {
     return fs
         .unlink(file_path) // Attempt to delete the file
         .then(() => {
             // If the file was successfully deleted, log accordingly
-            if (unauthorized_creation) {
+            if (error_message === "authorized") {
                 req.log.info({
-                    msg: "Unlinked forbidden file",
+                    msg: `Successfully deleted file`,
                     file_path: file_path,
                 });
+                res.status(StatusCodes.ACCEPTED).json({
+                    error: "Successfully deleted file",
+                });
             } else {
-                req.log.debug({ msg: `File at path ${file_path} deleted` });
+                req.log.info({
+                    msg: `File successfully deleted: ${error_message}`,
+                    file_path: file_path,
+                });
+                res.status(StatusCodes.FORBIDDEN).json({
+                    error: error_message,
+                });
             }
-            res.status(StatusCodes.ACCEPTED).json({
-                error: "Successfully deleted file",
-            });
         })
         .catch((err) => {
             // If there was an error unlinking the file, and the user was not
             // authorized to create the file, return a distinct error
-            if (unauthorized_creation) {
+            if (error_message === "authorized") {
+                // Otherwise, if the user was authorized to delete the file, log
+                // the error and return a generic error message
+                req.log.error({
+                    msg: `Error deleting file at ${file_path}`,
+                    error: err,
+                });
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                    error: "Error deleting file",
+                });
+            } else {
                 //
                 req.log.fatal({
                     msg:
                         "Requesting user was not authorized to create a file, " +
                         "and there was an error unlinking the provided file",
+                    error_message: error_message,
                     file_path: file_path,
                     error: err,
                 });
@@ -221,16 +238,6 @@ export async function deleteFileOnServer(
                         "file, and there was an error unlinking the " +
                         "provided file. If you are seeing this error, " +
                         "please contact a site administrator.",
-                });
-            } else {
-                // Otherwise, if the user was authorized to delete the file, log
-                // the error and return a generic error message
-                req.log.error({
-                    msg: `Error deleting file at ${file_path}`,
-                    error: err,
-                });
-                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                    error: "Error deleting file",
                 });
             }
             return Promise.reject(err); // Return a rejected promise to stop the chain

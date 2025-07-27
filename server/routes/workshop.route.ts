@@ -10,6 +10,7 @@ import {
     signInToWorkshop,
     getPublicWorkshops,
     getWorkshopsVisibleToUser,
+    patchWorkshop,
 } from "controllers/workshop.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
@@ -481,6 +482,68 @@ router.patch(
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to sign into a workshop",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
+
+/**
+ * Updates a workshop with partial information
+ */
+router.patch(
+    "/:UUID",
+    async (
+        req: Request<
+            { UUID: string },
+            {},
+            { partial_workshop_obj: Partial<TWorkshop> }
+        >,
+        res: WorkshopResponse,
+    ) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = headers.requesting_uuid;
+        const workshop_uuid = req.params.UUID;
+        const partial_workshop = req.body.partial_workshop_obj;
+
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                `No requesting_uuid was provided while patching workshop ${workshop_uuid}`,
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+
+        req.log.debug({
+            msg: `Patching workshop with uuid ${workshop_uuid}`,
+            partial_workshop_obj: partial_workshop,
+            requesting_uuid: requesting_uuid,
+        });
+
+        // If the user is authorized, delete a workshop object
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_WORKSHOP)) {
+            const workshop = await patchWorkshop(
+                workshop_uuid,
+                partial_workshop,
+            );
+            if (!workshop) {
+                req.log.warn(
+                    `Workshop with uuid ${workshop_uuid} could not be ` +
+                        `patched because it was not found.`,
+                );
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `Workshop with uuid ${workshop_uuid} could not be found`,
+                });
+                return;
+            }
+            req.log.debug(`Patched workshop ${workshop_uuid}`);
+            res.status(StatusCodes.OK).json(workshop);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to patch a workshop",
                 requesting_uuid: requesting_uuid,
             });
             // If the user is not authorized, provide a status error

@@ -21,6 +21,8 @@ import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import upload from "../core/upload";
 import path from "path";
+import { getUserByCollegeID } from "controllers/user.controller";
+import { getConfig } from "controllers/config.controller";
 
 const router = Router();
 
@@ -63,6 +65,39 @@ router.get("/download/:UUID", async (req: Request, res: Response) => {
     res.sendFile(file.path);
     return;
 });
+
+/**
+ * Get all files made by a specific user, searching by college ID.
+ * This is a public route.
+ */
+router.get(
+    "/by/user/id/:college_id",
+    async (req: Request<{ college_id: string }>, res: FilesResponse) => {
+        const college_id = req.params.college_id;
+
+        req.log.debug({
+            msg: `Getting files for user by id ${college_id}`,
+        });
+
+        const user = await getUserByCollegeID(college_id);
+
+        if (!user) {
+            req.log.warn(
+                `No user found when getting files by id ${college_id}`,
+            );
+            res.status(StatusCodes.OK).json([]);
+            return;
+        }
+
+        // If authorized, get the user's file information
+        const user_files = await getFilesByResource(
+            user.uuid,
+            FILE_RESOURCE_TYPE.USER,
+        );
+        req.log.debug("Returned user's files.");
+        res.status(StatusCodes.OK).json(user_files);
+    },
+);
 
 /**
  * Get all files made by a specific user. This is a protected route, and a
@@ -287,6 +322,148 @@ router.get(
 );
 
 /**
+ * Creates a new file for a specific user by college id.
+ * This is a public route.
+ */
+router.post(
+    "/for/user/:college_id",
+    upload.single("file"),
+    async (req: Request<{ college_id: string }>, res: FileResponse) => {
+        const college_id = req.params.college_id;
+        const file = req.file;
+
+        // If no file is provided, no upload occurred
+        if (!file) {
+            res.status(StatusCodes.BAD_REQUEST).json({
+                error: "No file was provided in the request.",
+            });
+            return;
+        }
+
+        const config = await getConfig();
+        const user = await getUserByCollegeID(college_id);
+
+        if (!user) {
+            await deleteFileOnServer(
+                file.path,
+                req,
+                res,
+                `User not found by id ${college_id}`,
+            );
+            return;
+        }
+        if (!config) {
+            await deleteFileOnServer(
+                file.path,
+                req,
+                res,
+                `Config not found. Contact an administrator.`,
+            );
+            return;
+        }
+
+        // Get existing files by user
+        const user_files = await getFilesByResource(
+            user.uuid,
+            FILE_RESOURCE_TYPE.USER,
+        );
+
+        if (
+            config.file.max_upload_count &&
+            user_files.length + 1 > config.file.max_upload_count
+        ) {
+            await deleteFileOnServer(
+                file.path,
+                req,
+                res,
+                `The maximum number of file uploads is ${config.file.max_upload_count}`,
+            );
+            return;
+        }
+
+        if (
+            config.file.max_upload_capacity &&
+            user_files.reduce((sum, f) => sum + f.size, 0) + file.size >
+                config.file.max_upload_capacity
+        ) {
+            await deleteFileOnServer(
+                file.path,
+                req,
+                res,
+                `File too large! Please delete other files before uploading.`,
+            );
+            return;
+        }
+
+        // Move the file from temp
+        const temp_path = file.path;
+        const target_path = path.resolve(UPLOAD_PATH, file.filename);
+        return (
+            moveTempFileOnServer(temp_path, target_path, req)
+                // If the file was successfully saved, create a new File object
+                // in the db
+                .then(() => {
+                    // Create a new file object
+                    const file_obj: TFile = {
+                        uuid: crypto.randomUUID(),
+                        name: file.originalname,
+                        path: target_path,
+                        timestamp_upload: Date.now() / 1000,
+                        size: file.size,
+                        resource_uuid: user.uuid,
+                        resource_type: FILE_RESOURCE_TYPE.USER,
+                    };
+                    createFile(file_obj)
+                        // Once the file has been created,
+                        .then((new_file) => {
+                            // If a file with the random uuid already exists,
+                            // return a conflict error
+                            if (!new_file) {
+                                req.log.error({
+                                    msg:
+                                        `Could not create file for user with id` +
+                                        `${college_id} because the generated` +
+                                        `file UUID already exists.`,
+                                    file_path: target_path,
+                                    file_obj: file_obj,
+                                });
+                                res.status(StatusCodes.CONFLICT).json({
+                                    error:
+                                        `Could not create file for user with id` +
+                                        `${college_id} because the generated ` +
+                                        `file UUID already exists. ` +
+                                        `Please try uploading again.`,
+                                });
+                                return;
+                            }
+                            // If the file was successfully created, log and
+                            // return the new file object
+                            req.log.debug("Returned new file for user by id.");
+                            res.status(StatusCodes.CREATED).json(new_file);
+                        })
+                        .catch((err: Error) => {
+                            // If there was an error saving the file, log it and
+                            // return an error to the user
+                            req.log.error({
+                                msg: `Error creating file for user by id ${college_id}`,
+                                err: err,
+                            });
+                            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                                error: err.message,
+                            });
+                        });
+                })
+                // If there was an error saving the file, return an error to the user
+                .catch((err) => {
+                    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                        error: "Error saving file: " + err.message,
+                    });
+                })
+        );
+    },
+);
+
+/**
  * Creates a new file for a specific user. This is a protected route, and a
  * `requesting_uuid` header is required to call it. The user must have the
  * {@link API_SCOPE.CREATE_FILE} scope or the {@link API_SCOPE.CREATE_OWN_FILE}
@@ -386,14 +563,14 @@ router.post(
                     })
             );
         } else {
+            const msg = `Forbidden user attempted to create a file for user ${user_uuid}`;
             req.log.warn({
                 msg:
-                    `Forbidden user attempted to create a file for user ` +
-                    `${user_uuid}, attempting to unlink uploaded file at ` +
-                    `path ${file.path}`,
+                    msg +
+                    `, attempting to unlink uploaded file at path ${file.path}`,
                 requesting_uuid: requesting_uuid,
             });
-            await deleteFileOnServer(file.path, req, res, true);
+            await deleteFileOnServer(file.path, req, res, msg);
         }
     },
 );
@@ -502,14 +679,12 @@ router.post(
                     });
                 });
         } else {
+            const msg = `Forbidden user attempted to create a file for ${resource_type} ${resource_uuid}`;
             req.log.warn({
-                msg:
-                    `Forbidden user attempted to create a file for ${resource_type} ` +
-                    `${resource_uuid}, attempting to unlink uploaded file at ` +
-                    `path ${file.path}`,
+                msg: `, attempting to unlink uploaded file at path ${file.path}`,
                 requesting_uuid: requesting_uuid,
             });
-            await deleteFileOnServer(file.path, req, res, true);
+            await deleteFileOnServer(file.path, req, res, msg);
         }
     },
 );

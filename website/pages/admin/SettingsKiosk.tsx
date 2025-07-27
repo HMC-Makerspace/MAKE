@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { TConfig } from "common/config";
 import Configuration from "../../components/kiosks/admin/settings/Configuration";
 
-export default function SettingsPage() {
+export default function SettingsKiosk() {
     const { data: config, isLoading: configLoading } = useQuery<TConfig>({
         queryKey: ["config"],
         refetchOnWindowFocus: false,

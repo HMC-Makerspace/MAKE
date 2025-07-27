@@ -10,12 +10,13 @@ import {
     Spinner,
     Tab,
     Tabs,
+    Tooltip,
     useDisclosure,
 } from "@heroui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { TUser, TUserRole } from "common/user";
-import { TCertification } from "common/certification";
+import { TUser, TUserRole, UserUUID } from "common/user";
+import { CertificationUUID, TCertification } from "common/certification";
 import { TArea } from "common/area";
 import {
     CHECKOUT_VALIDATION,
@@ -39,6 +40,10 @@ import axios from "axios";
 import { TConfig } from "common/config";
 import { TSchedule } from "common/schedule";
 import PopupAlert from "../../components/PopupAlert";
+import CertificationsTable from "../../components/kiosks/admin/certifications/CTable";
+import { CheckBadgeIcon, PercentBadgeIcon } from "@heroicons/react/24/solid";
+import UsersTable from "../../components/kiosks/admin/users/UsersTable";
+import GrantCertPopup from "../../components/kiosks/admin/checkouts/GrantCertPopup";
 
 async function getCartUnavailability({ cart }: { cart: TCheckoutItem[] }) {
     return (
@@ -51,7 +56,7 @@ async function getCartUnavailability({ cart }: { cart: TCheckoutItem[] }) {
     ).data;
 }
 
-export default function CheckoutsPage() {
+export default function CheckoutsKiosk() {
     // Get all data
     const { data: checkouts, isLoading: checkoutsLoading } = useQuery<
         TCheckout[]
@@ -98,6 +103,20 @@ export default function CheckoutsPage() {
     const [unavailability, setUnavailability] = useState<
         TCheckoutItemUnavailability[]
     >([]);
+
+    const [collegeID, setCollegeID] = useState("");
+    const {
+        data: user,
+        isLoading,
+        isError,
+    } = useQuery<TUser>({
+        queryKey: ["user", "by", "id", collegeID],
+        refetchOnWindowFocus: false,
+        enabled: !!collegeID,
+        retry: false,
+    });
+
+    const queryClient = useQueryClient();
 
     const validationMutation = useMutation({
         mutationFn: getCartUnavailability,
@@ -173,6 +192,15 @@ export default function CheckoutsPage() {
         onClose: closeValidationPopup,
     } = useDisclosure();
 
+    const [grantCert, setGrantCert] = useState<TCertification>();
+    const [granting, setGranting] = useState<boolean>(true);
+    const {
+        isOpen: grantPopup,
+        onOpenChange: changeGrantPopup,
+        onOpen: openGrantPopup,
+        onClose: closeGrantPopup,
+    } = useDisclosure();
+
     if (
         !checkouts ||
         !inventory ||
@@ -241,6 +269,8 @@ export default function CheckoutsPage() {
                     roles={roles}
                     config={config}
                     activeSchedule={activeSchedule}
+                    collegeID={collegeID}
+                    setCollegeID={setCollegeID}
                     setValidation={(v) => {
                         setValidation(v);
                         openValidationPopup();
@@ -250,15 +280,14 @@ export default function CheckoutsPage() {
                         setUnavailability([]);
                     }}
                 />
-                <div className="h-full w-full p-3 bg-default-50 rounded-xl overflow-auto">
+                <div className="flex flex-col h-full w-full p-3 bg-default-50 rounded-xl overflow-auto">
                     <Tabs
                         color="primary"
                         size="lg"
                         radius="full"
-                        // classNames={{
-                        //     base: "w-full bg-default-100 rounded-lg",
-                        //     tabList: "mx-auto",
-                        // }}
+                        classNames={{
+                            panel: "overflow-auto h-full",
+                        }}
                     >
                         <Tab key={"inventory"} title={"Inventory"}>
                             <InventoryTable
@@ -332,9 +361,169 @@ export default function CheckoutsPage() {
                                 isLoading={inventoryLoading}
                             />
                         </Tab>
+                        <Tab key={"users"} title={"Users"}>
+                            <UsersTable
+                                users={users}
+                                roles={roles}
+                                certs={certs}
+                                selectedKeys={new Set([user?.uuid ?? ""])}
+                                onSelectionChange={(selection) => {
+                                    if (selection === "all") return;
+                                    const selectedUsers = Array.from(
+                                        selection,
+                                    ) as string[];
+                                    const selectedUser = users.find(
+                                        (u) => u.uuid === selectedUsers[0],
+                                    );
+                                    setCollegeID(
+                                        selectedUser?.college_id || "",
+                                    );
+                                }}
+                                isLoading={usersLoading}
+                                onCreate={undefined}
+                                fullHeader={false}
+                            />
+                        </Tab>
+                        <Tab key={"certifications"} title={"Certifications"}>
+                            <CertificationsTable
+                                key={user?.active_certificates
+                                    ?.map((c) => c.certification_uuid)
+                                    .join(",")} // Update any time user's certs change
+                                certs={certs}
+                                selectedKeys={new Set()}
+                                onSelectionChange={() => {}}
+                                isLoading={certsLoading}
+                                canEdit={false}
+                                defaultColumns={[
+                                    "name",
+                                    "description",
+                                    "max_level",
+                                    "seconds_valid_for",
+                                    "prerequisites",
+                                    "authorized_roles",
+                                    "grant_revoke",
+                                ]}
+                                extraColumns={[
+                                    {
+                                        name: "Grant/Revoke",
+                                        id: "grant_revoke",
+                                    },
+                                ]}
+                                customColumnComponents={{
+                                    grant_revoke: (cert) => {
+                                        const hasCert =
+                                            (!!user &&
+                                                user.active_certificates?.some(
+                                                    (c) =>
+                                                        c.certification_uuid ===
+                                                        cert.uuid,
+                                                )) ??
+                                            false;
+                                        const certHasPrereqs =
+                                            cert.required_certifications !==
+                                                undefined &&
+                                            cert.required_certifications
+                                                .length > 0;
+                                        const userHasPrereqs =
+                                            user &&
+                                            user.active_certificates &&
+                                            cert.required_certifications &&
+                                            cert.required_certifications.every(
+                                                (prereq) =>
+                                                    user.active_certificates?.some(
+                                                        (cert) =>
+                                                            cert.certification_uuid ===
+                                                                prereq.certification_uuid &&
+                                                            cert.level >=
+                                                                prereq.required_level,
+                                                    ),
+                                            );
+                                        console.log(
+                                            "certPrereqs:",
+                                            cert.name,
+                                            certHasPrereqs,
+                                        );
+                                        console.log(
+                                            "userPrereqs:",
+                                            user?.name,
+                                            userHasPrereqs,
+                                        );
+                                        return (
+                                            <Tooltip
+                                                content={
+                                                    !user
+                                                        ? "Enter a user ID to grant certs"
+                                                        : !!user &&
+                                                            certHasPrereqs &&
+                                                            !userHasPrereqs
+                                                          ? "User is missing prerequisites"
+                                                          : ""
+                                                }
+                                                color="secondary"
+                                                isDisabled={
+                                                    !!user &&
+                                                    !(
+                                                        certHasPrereqs &&
+                                                        !userHasPrereqs
+                                                    )
+                                                }
+                                            >
+                                                <Button
+                                                    startContent={
+                                                        hasCert ? (
+                                                            <PercentBadgeIcon className="size-6" />
+                                                        ) : (
+                                                            <CheckBadgeIcon className="size-6" />
+                                                        )
+                                                    }
+                                                    color={
+                                                        hasCert
+                                                            ? "danger"
+                                                            : "secondary"
+                                                    }
+                                                    variant="flat"
+                                                    onPress={() => {
+                                                        if (
+                                                            !user ||
+                                                            (certHasPrereqs &&
+                                                                !userHasPrereqs)
+                                                        ) {
+                                                            return;
+                                                        }
+                                                        setGranting(!hasCert);
+                                                        setGrantCert(cert);
+                                                        openGrantPopup();
+                                                    }}
+                                                    className={
+                                                        !user ||
+                                                        (certHasPrereqs &&
+                                                            !userHasPrereqs)
+                                                            ? "!opacity-disabled"
+                                                            : ""
+                                                    }
+                                                >
+                                                    {hasCert
+                                                        ? "Revoke"
+                                                        : "Grant"}
+                                                </Button>
+                                            </Tooltip>
+                                        );
+                                    },
+                                }}
+                            />
+                        </Tab>
                     </Tabs>
                 </div>
             </div>
+            <GrantCertPopup
+                cert={grantCert}
+                setCert={setGrantCert}
+                user={user}
+                granting={granting}
+                setGranting={setGranting}
+                isOpen={grantPopup}
+                onOpenChange={changeGrantPopup}
+            />
             <PopupAlert
                 isOpen={validationPopup}
                 onOpenChange={changeValidationPopup}

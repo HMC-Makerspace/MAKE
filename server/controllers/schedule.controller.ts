@@ -1,4 +1,4 @@
-import { UUID } from "common/global";
+import { UnixTimestamp, UUID } from "common/global";
 import { TAlert, TPublicScheduleData, TSchedule } from "common/schedule";
 import {
     SHIFT_EVENT_TYPE,
@@ -9,6 +9,8 @@ import {
 import { UserUUID } from "common/user";
 import { Schedule } from "models/schedule.model";
 import mongoose from "mongoose";
+import { getConfig } from "./config.controller";
+import { TConfig } from "common/config";
 
 /**
  * Get all schedules in the database
@@ -60,6 +62,7 @@ export async function getActivePublicSchedule(): Promise<TPublicScheduleData | n
     // Get the public version of each shift, which removes the UUID and history
     // and any active pickup/checkin event initiators as the assignee
     return {
+        uuid: current_schedule.uuid,
         shifts: current_schedule.shifts
             .map(getCurrentPublicShift)
             // Remove dropped shifts
@@ -81,6 +84,7 @@ function getCurrentPublicShift(shift: TShift): TPublicShiftData | null {
     // looking by week?
     // For now, just pass through the shift data
     return {
+        uuid: shift.uuid,
         day: shift.day,
         sec_start: shift.sec_start,
         sec_end: shift.sec_end,
@@ -250,6 +254,39 @@ export async function getActiveAlerts(): Promise<TAlert[] | null> {
     );
 }
 
+export async function getActiveAlert(): Promise<TAlert | null> {
+    // Get the current schedule
+    const current_schedule = await getActiveSchedule();
+    // If there is no current schedule, there can be no current alert
+    if (current_schedule === null) {
+        return null;
+    }
+    const now = Date.now() / 1000;
+    const hour = new Date().getHours();
+    // Find all alerts that are active by timestamp
+    const time_active_alerts = current_schedule.alerts.filter(
+        (alert) =>
+            alert.timestamp_start && // This should always be true when the alert is not default
+            alert.timestamp_end && // This should always be true when the alert is not default
+            alert.timestamp_start <= now &&
+            alert.timestamp_end >= now,
+    );
+    if (time_active_alerts.length > 0) {
+        // Return an active alert based on the current hour
+        return time_active_alerts[hour % time_active_alerts.length];
+    }
+    // If there are no active time alerts, look for a default alert
+    const default_alerts = current_schedule.alerts.filter(
+        (alert) => alert.default,
+    );
+    if (default_alerts.length > 0) {
+        // Return a default alert based on the current hour
+        return default_alerts[hour % default_alerts.length];
+    }
+    // Otherwise, if there are no default or active alerts, return null
+    return null;
+}
+
 /**
  * Add a new alert to a schedule
  * @param schedule_uuid The UUID of the schedule to add the alert to
@@ -325,12 +362,69 @@ export async function deleteAlertInSchedule(
  */
 export async function getShiftsByUser(
     user_uuid: UserUUID,
-): Promise<TShift[] | null> {
+): Promise<TSchedule | null> {
+    const config = await getConfig();
     const schedule = await getActiveSchedule();
-    if (schedule === null) {
+    if (schedule === null || config === null) {
         return null;
     }
-    return schedule.shifts.filter((shift) => shift.assignee === user_uuid);
+    const user_shifts = schedule.shifts.filter(
+        (shift) =>
+            shift.assignee === user_uuid ||
+            getShiftDroppedDates(shift, config).length > 0 ||
+            isShiftPickedUpBy(shift, user_uuid, config),
+    );
+    schedule.shifts = schedule.shifts.filter((s) =>
+        user_shifts.some(
+            (us) =>
+                s.day === us.day &&
+                s.sec_start === us.sec_start &&
+                s.sec_end === us.sec_end,
+        ),
+    );
+    return schedule;
+}
+
+function getShiftDroppedDates(shift: TShift, config: TConfig): UnixTimestamp[] {
+    // Cutoff of dropped shifts is one shift after the start of the drop
+    const cutoff_timestamp = Date.now() / 1000 - config.schedule.increment_sec;
+    const drops = new Map<UnixTimestamp, number>();
+    // Shift events are in timestamp order, where the most recent event
+    // is at the end of the shift.history list
+    for (const event of shift.history) {
+        if (event.type === SHIFT_EVENT_TYPE.DROP) {
+            drops.set(event.shift_date, (drops.get(event.shift_date) ?? 0) + 1);
+        } else if (event.type === SHIFT_EVENT_TYPE.PICKUP) {
+            drops.set(event.shift_date, (drops.get(event.shift_date) ?? 1) - 1);
+        }
+    }
+    return drops
+        .entries()
+        .filter(
+            ([date, dropCount]) =>
+                // Find shifts that have at least one active drop
+                dropCount > 0 &&
+                // where the relevant shift hasn't happened yet
+                date + shift.sec_start >= cutoff_timestamp,
+        )
+        .map(([date, _]) => date)
+        .toArray();
+}
+
+function isShiftPickedUpBy(
+    shift: TShift,
+    user_uuid: UserUUID,
+    config: TConfig,
+) {
+    const cutoff_timestamp = Date.now() / 1000 - config.schedule.increment_sec;
+    // Shift events are in timestamp order, where the most recent event
+    // is at the end of the shift.history list
+    return shift.history.some(
+        (event) =>
+            event.initiator === user_uuid &&
+            event.type === SHIFT_EVENT_TYPE.PICKUP &&
+            event.shift_date + shift.sec_start >= cutoff_timestamp,
+    );
 }
 
 /**
@@ -461,6 +555,8 @@ export async function addShiftEventInSchedule(
     event: TShiftEvent,
 ): Promise<TSchedule | null> {
     const Schedules = mongoose.model("Schedule", Schedule);
+
+    // TODO: Consider deleting drop if assignee is the initiator of a pickup
     return Schedules.findOneAndUpdate(
         // Find the schedule by UUID
         { uuid: schedule_uuid, "shifts.uuid": shift_uuid },

@@ -29,7 +29,7 @@ export default function CheckoutUser({
             user={user}
             certs={certs}
             roles={roles}
-            size="lg"
+            size="md"
             className="h-full overflow-auto"
         />
     );

@@ -185,3 +185,57 @@ export async function saveOAuthToken(code: string, logger: Logger) {
             return false;
         });
 }
+
+// ----- Google OAuth -----
+
+export function getOAuthURL() {
+    return oAuth2Client.generateAuthUrl({
+        access_type: "offline",
+        scope: "https://mail.google.com",
+    });
+}
+
+export async function getOAuthToken(logger: Logger) {
+    return fs
+        .readFile("oauthtoken.json")
+        .then((data) => {
+            logger.debug("Found OAuth token file.");
+            try {
+                const tokenFile: {
+                    access_token: string;
+                    refresh_token: string;
+                } = JSON.parse(data.toString());
+                return tokenFile;
+            } catch (e) {
+                logger.error({
+                    msg: "Found OAuth token file but failed to parse",
+                    error: e,
+                });
+                return undefined;
+            }
+        })
+        .catch((err) => {
+            logger.fatal({
+                msg: "Error reading OAuth token file.",
+                error: err,
+            });
+            return undefined;
+        });
+}
+
+export async function saveOAuthToken(code: string, logger: Logger) {
+    const tokenResponse = await oAuth2Client.getToken(code);
+    return fs
+        .writeFile("oauthtoken.json", JSON.stringify(tokenResponse.tokens))
+        .then(() => {
+            logger.debug("Wrote OAuth token to file.");
+            return true;
+        })
+        .catch((err) => {
+            logger.fatal({
+                msg: "Error saving OAuth token file.",
+                error: err,
+            });
+            return false;
+        });
+}

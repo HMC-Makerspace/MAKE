@@ -10,20 +10,13 @@ import {
     TRestockRequest,
     RESTOCK_REQUEST_STATUS_LABELS,
 } from "../../../../../common/restock";
+import { convertTimestampToDate } from "../../../../utils";
 
 const columns = [
     { name: "Timestamp", id: "timestamp" },
     { name: "Status", id: "status" },
     { name: "Message", id: "message" },
 ];
-
-//converting timestamp to date
-function convertTimestampToDate(timestamp?: number): string {
-    if (!timestamp) {
-        return "N/A";
-    }
-    return new Date(timestamp * 1000).toLocaleString();
-}
 
 export default function RestockStatusLog({
     restock,

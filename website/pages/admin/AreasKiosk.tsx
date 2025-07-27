@@ -32,7 +32,7 @@ const createEmptyArea = async () => {
     ).data;
 };
 
-export default function AreasPage() {
+export default function AreasKiosk() {
     const { data: areas, isLoading: areasLoading } = useQuery<TArea[]>({
         queryKey: ["area"],
         refetchOnWindowFocus: false,

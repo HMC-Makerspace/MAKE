@@ -69,8 +69,6 @@ export default function CheckoutDateSelect({
 
     const errorMessage = isInvalid ? `${invalidName} is unavailable` : "";
 
-    console.log("Pairs", unavailablePairs);
-
     return (
         <div className="flex flex-col 2xl:flex-row gap-4">
             <div className="flex flex-row gap-2 justify-between">

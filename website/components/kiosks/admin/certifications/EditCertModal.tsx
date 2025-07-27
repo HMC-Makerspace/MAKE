@@ -20,7 +20,11 @@ import clsx from "clsx";
 import { motion } from "framer-motion";
 import { HexColorPicker } from "react-colorful";
 
-import { CertificationUUID, TCertification } from "common/certification";
+import {
+    CertificationUUID,
+    TCertification,
+    TRequiredCertificate,
+} from "common/certification";
 import { CERTIFICATION_VISIBILITY } from "../../../../../common/certification";
 
 import CertificationTag from "./CertificationTag";
@@ -40,17 +44,23 @@ const createUpdateCert = async ({
 }) => {
     if (isNew) {
         return (
-            await axios.post<TCertification>("/api/v3/certification", { certification_obj: data })
+            await axios.post<TCertification>("/api/v3/certification", {
+                certification_obj: data,
+            })
         ).data;
     } else {
         return (
-            await axios.put<TCertification>("/api/v3/certification", { certification_obj: data })
+            await axios.put<TCertification>("/api/v3/certification", {
+                certification_obj: data,
+            })
         ).data;
     }
 };
 
 // Cycle through valid visibilities
-function getNextVisibility(vis: CERTIFICATION_VISIBILITY) : CERTIFICATION_VISIBILITY {
+function getNextVisibility(
+    vis: CERTIFICATION_VISIBILITY,
+): CERTIFICATION_VISIBILITY {
     let vs = Object.values(CERTIFICATION_VISIBILITY);
     let oldVisIndex = vs.indexOf(vis);
     return vs[(oldVisIndex + 1) % vs.length]; // will set to public if previously invalid vis
@@ -120,8 +130,8 @@ export default function EditCertModal({
     const [secondsValidFor, setSVF] = React.useState<number>(
         cert.seconds_valid_for ?? 0,
     ); // 0: no limit
-    const [prereqs, setPrereqs] = React.useState<CertificationUUID[]>(
-        cert.prerequisites ?? [],
+    const [prereqs, setPrereqs] = React.useState<TRequiredCertificate[]>(
+        cert.required_certifications ?? [],
     );
     const [authRoles, setAuthRoles] = React.useState<UserRoleUUID[]>(
         cert.authorized_roles ?? [],
@@ -149,7 +159,7 @@ export default function EditCertModal({
                 seconds_valid_for: secondsValidFor,
                 documents: cert?.documents, // edit documents in separate modal
                 authorized_roles: authRoles,
-                prerequisites: prereqs,
+                required_certifications: prereqs,
             };
 
             // Reset the mutation (clears any previous errors)
@@ -222,8 +232,8 @@ export default function EditCertModal({
                                     label="UUID"
                                     name="uuid"
                                     placeholder={uuid}
-                                    // UUID is not editable
-                                    isDisabled
+                                    // UUID is only editable on create
+                                    isDisabled={!isNew}
                                     value={uuid}
                                     onValueChange={wrapEdit(setUUID)}
                                     variant="faded"
@@ -356,19 +366,6 @@ export default function EditCertModal({
                                 />
                             </div>
 
-                            {certifications && (
-                                <CertSelect
-                                    certifications={certifications}
-                                    selectedKeys={new Set(prereqs)}
-                                    disabledKeys={[cert?.uuid]}
-                                    onSelectionChange={wrapSetEdit(setPrereqs)}
-                                    inputName="prereqs"
-                                    placeholder="Select prerequisite certifications"
-                                    label="Prerequisites"
-                                    selectionMode="multiple"
-                                />
-                            )}
-
                             <UserRoleSelect
                                 selectedKeys={authRoles}
                                 onSelectionChange={wrapSetEdit(setAuthRoles)}
@@ -397,7 +394,7 @@ export default function EditCertModal({
                                             "placeholder:text-default-500",
                                             "placeholder:italic",
                                             "text-default-700",
-                                            "uppercase",
+                                            "uppercase placeholder:capitalize",
                                         ]),
                                     }}
                                 />

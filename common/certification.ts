@@ -26,6 +26,8 @@ export enum CERTIFICATION_VISIBILITY {
  *      will never expire.
  * @property documents - (optional) A list of documents that are related to this
  *     certification, such as a training manual or a Google form link.
+ * @property required_certifications - (optional) a list of required certificates
+ *      that are prerequisites to getting this cert
  * @property authorized_roles - (optional) a list of UserRole UUIDs that are
  *      allowed to see this certification. If not present, any user may see this
  *      certification
@@ -39,7 +41,7 @@ export type TCertification = {
     max_level?: number;
     seconds_valid_for?: number;
     documents?: TDocument[];
-    prerequisites?: CertificationUUID[];
+    required_certifications?: TRequiredCertificate[];
     authorized_roles?: UserRoleUUID[];
 };
 

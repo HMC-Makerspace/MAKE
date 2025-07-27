@@ -7,8 +7,9 @@ import { TUser, TUserRole } from "common/user";
 import React from "react";
 import PopupAlert from "../../components/PopupAlert";
 import { API_SCOPE } from "../../../common/global";
+import { TCertification } from "common/certification";
 
-export default function UsersPage() {
+export default function UsersKiosk() {
     // Get all user data
     const { data: users, isLoading: usersLoading } = useQuery<TUser[]>({
         queryKey: ["user"],
@@ -21,7 +22,14 @@ export default function UsersPage() {
         refetchOnWindowFocus: false,
     });
 
-    const isLoading = usersLoading || rolesLoading;
+    const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
+        {
+            queryKey: ["certification"],
+            refetchOnWindowFocus: false,
+        },
+    );
+
+    const isLoading = usersLoading || rolesLoading || certsLoading;
 
     const scopesQuery = useQuery<API_SCOPE[]>({
         queryKey: ["user", "self", "scopes"],
@@ -71,6 +79,7 @@ export default function UsersPage() {
                 <UsersTable
                     users={users ?? []}
                     roles={roles ?? []}
+                    certs={certs ?? []}
                     selectedKeys={selectedKeys}
                     onSelectionChange={onSelectionChange}
                     isLoading={isLoading}

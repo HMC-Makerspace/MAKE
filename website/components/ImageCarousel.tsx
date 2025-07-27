@@ -239,11 +239,7 @@ function EditModal({
                                 >
                                     <img
                                         className="w-full h-3/4 object-cover"
-                                        src={
-                                            image.path
-                                                ? `/api/v3/file/download/${images[index].uuid}`
-                                                : undefined
-                                        }
+                                        src={`/api/v3/file/download/${images[index].uuid}`}
                                         alt={image.name || "Image"}
                                     />
                                     <div className="flex gap-4 flex-row items-center">

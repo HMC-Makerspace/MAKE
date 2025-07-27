@@ -1,4 +1,5 @@
 import express, { Application } from "express";
+import ViteExpress from "vite-express";
 import compression from "compression";
 import http from "http";
 import path from "path";
@@ -7,15 +8,13 @@ import pino from "pino";
 import loggerMiddleware from "pino-http";
 import cors from "cors";
 import cron from "node-cron";
+import emailRoutes from "routes/email.route";
 
 // await Bun.build({
 //     entrypoints: ["website/index.html"],
 //     outdir: "website/build",
 //     plugins: [html()],
 // });
-
-// Import frontend
-import * as frontend from "../website/index";
 
 // Routes
 import areaRoutes from "./routes/area.route";
@@ -30,7 +29,6 @@ import restockRoutes from "./routes/restock.route";
 import scheduleRoutes from "./routes/schedule.route";
 import userRoutes from "./routes/user.route";
 import workshopRoutes from "./routes/workshop.route";
-import emailRoutes from "./routes/email.route";
 import { getOAuthToken, getOAuthURL } from "controllers/email.controller";
 import { reserveMachineInstance } from "controllers/machine.controller";
 import {
@@ -38,7 +36,10 @@ import {
     checkoutEmailCron,
 } from "controllers/checkout.controller";
 
-const app: Application = express();
+// @ts-expect-error Static asset loading using Vite
+import favicon from "common/favicon.ico"
+
+const app: express.Express = express();
 
 // Setup logging
 const logger = pino();
@@ -52,11 +53,13 @@ if (process.env.NODE_ENV == "development") {
 // Connect to the database
 connectDB(logger);
 
+const PORT = process.env.VITE_SERVER_PORT || 3001;
+
 // Setup CORS
 // Add a list of allowed origins
 // If you have more origins you would like to add, you can add them to the array below.
 const allowedOrigins = [
-    `http://localhost:${process.env.VITE_SERVER_PORT || 3001}`, // Backend
+    `http://localhost:${PORT}`, // Backend
     `http://localhost:${process.env.VITE_PORT || 3000}`, // Frontend
 ];
 const options: cors.CorsOptions = {
@@ -92,6 +95,13 @@ app.get("/api/v3/test", (req, res) => {
     res.send("Hello World!");
 });
 
+// Only accessible in production mode
+app.get("/favicon.ico", (req, res) => {
+    res.sendFile(favicon, {
+        root: "/"
+    })
+})
+
 // Setup cron jobs
 // Query for checkout emails every minute
 checkoutEmailCron(logger);
@@ -105,17 +115,8 @@ cron.schedule("*/15 * * * *", () => {
     checkoutAvailabilityCron(logger);
 });
 
-const PORT = process.env.VITE_SERVER_PORT || 3000;
-
 if (process.env.NODE_ENV === "production") {
-    // Join frontend build paths statically
-    app.use(express.static(path.join(__dirname, "../website/build")));
-    // Route all other paths to index so React Router can handle frontend routes.
-    app.get("/*path", function (req, res) {
-        res.sendFile(path.join(__dirname, "../website/build", "index.html"));
-    });
-
-    http.createServer(app).listen(PORT, () => {
+    ViteExpress.listen(app, PORT, () => {
         logger.info(
             `Server running in production mode http://127.0.0.1:${PORT}`,
         );
@@ -127,9 +128,6 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // Setup email client if CLI option included
-// if (Bun.argv.includes("--setup-email")) {
-//     logger.info(getOAuthURL());
-// }
 if (!(await getOAuthToken(logger))) {
     // If OAuth token is invalid, prompt the administrator to login
     logger.info({
