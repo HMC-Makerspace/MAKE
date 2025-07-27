@@ -47,7 +47,7 @@ const router = Router();
  */
 router.get("/public", async (req: Request, res: Response<TArea[]>) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid: string = req.user?.uuid as string;
 
     req.log.debug({
         msg: `Getting areas visible to user ${requesting_uuid}`,
@@ -73,7 +73,7 @@ router.get(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: AreaResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
 
         // If no requesting user uuid is provided, the call is not authorized
         if (!requesting_uuid) {
@@ -129,7 +129,7 @@ router.get(
  */
 router.get("/", async (req: AreaRequest, res: AreasResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid: string = req.user?.uuid as string;
 
     // If no requesting user uuid is provided, the call is not authorized
     if (!requesting_uuid) {
@@ -171,7 +171,7 @@ router.get("/", async (req: AreaRequest, res: AreasResponse) => {
  */
 router.post("/", async (req: AreaRequest, res: AreaResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid: string = req.user?.uuid as string;
     const area_obj = req.body.area_obj;
     const area_uuid = area_obj.uuid;
 
@@ -218,7 +218,7 @@ router.post("/", async (req: AreaRequest, res: AreaResponse) => {
  */
 router.put("/all", async (req: AreasRequest, res: AreasResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid: string = req.user?.uuid as string;
     const area_objs = req.body.area_objs;
 
     // If no requesting user uuid is provided, the call is not authorized
@@ -264,7 +264,7 @@ router.put("/all", async (req: AreasRequest, res: AreasResponse) => {
  */
 router.put("/", async (req: AreaRequest, res: AreaResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid: string = req.user?.uuid as string;
     const area_obj = req.body.area_obj;
     const area_uuid = area_obj.uuid;
 
@@ -311,7 +311,7 @@ router.delete(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const area_uuid = req.params.UUID;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -361,7 +361,7 @@ router.delete(
 //     "/:area_uuid/status/",
 //     async (req: AreaStatusRequest, res: AreaResponse) => {
 //         const headers = req.headers as VerifyRequestHeader;
-//         const requesting_uuid: string = headers.requesting_uuid;
+//         const requesting_uuid: string = req.user?.uuid as string;
 //         const area_uuid = req.params.area_uuid;
 //         const status = req.body.status;
 
@@ -424,7 +424,7 @@ router.patch(
         res: AreaResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const area_uuid = req.params.UUID;
         const partial_area = req.body.partial_area_obj;
 

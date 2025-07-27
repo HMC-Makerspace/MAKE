@@ -54,7 +54,7 @@ router.post("/", async (req: ConfigRequest, res: ConfigResponse) => {
         return;
     }
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
 
     // If no requesting user_uuid is provided, the call is not authorized
     if (!requesting_uuid) {

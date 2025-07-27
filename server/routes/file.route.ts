@@ -15,14 +15,17 @@ import {
     getFilesByResource,
     deleteFileOnServer,
     moveTempFileOnServer,
+    deleteFilesOnServer,
 } from "controllers/file.controller";
 import { verifyRequest } from "controllers/verify.controller";
-import { Request, Response, Router } from "express";
+import { NextFunction, Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import upload from "../core/upload";
 import path from "path";
 import { getUserByCollegeID } from "controllers/user.controller";
 import { getConfig } from "controllers/config.controller";
+import multer from "multer";
+import fs from "fs/promises";
 
 const router = Router();
 
@@ -43,6 +46,9 @@ TODO: extend one
 // --- Request & Response Types ---
 type FileResponse = Response<TFile | ErrorResponse>;
 type FilesResponse = Response<TFile[] | ErrorResponse>;
+type FilesUploadResponse = Response<
+    { files: TFile[]; upload_errors: string[] } | ErrorResponse
+>;
 
 const UPLOAD_PATH = process.env.FILE_UPLOAD_PATH || "uploads";
 
@@ -111,7 +117,7 @@ router.get(
     "/by/user/:user_uuid",
     async (req: Request<{ user_uuid: string }>, res: FilesResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const user_uuid = req.params.user_uuid;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -229,7 +235,7 @@ router.get(
  */
 router.get("/", async (req: Request, res: FilesResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
 
     // If no requesting user uuid is provided, the call is not authorized
     if (!requesting_uuid) {
@@ -273,7 +279,7 @@ router.get(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: FileResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const file_uuid = req.params.UUID;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -327,25 +333,52 @@ router.get(
  */
 router.post(
     "/for/user/id/:college_id",
-    upload.single("file"),
-    async (req: Request<{ college_id: string }>, res: FileResponse) => {
+    async (
+        req: Request<{ college_id: string }>,
+        res: Response<ErrorResponse>,
+        next: NextFunction,
+    ) =>
+        upload.array("files")(req, res, (err) => {
+            if (err instanceof multer.MulterError) {
+                // Upload error, maximum upload size exceeded
+                req.log.info({ msg: "Upload failed", err });
+                res.status(StatusCodes.INSUFFICIENT_STORAGE).json({
+                    error: "File exceeds maximum upload size",
+                });
+                next(err);
+            } else if (err) {
+                next(err);
+            } else {
+                next();
+            }
+        }),
+    async (req: Request<{ college_id: string }>, res: FilesUploadResponse) => {
         const college_id = req.params.college_id;
-        const file = req.file;
+        const files = req.files as Express.Multer.File[];
+
+        console.log("Here, files", files);
 
         // If no file is provided, no upload occurred--
-        if (!file) {
+        if (!files) {
             res.status(StatusCodes.BAD_REQUEST).json({
                 error: "File is larger than maximum upload size.",
+            });
+            return;
+        }
+        if (files.length === 0) {
+            res.status(StatusCodes.BAD_REQUEST).json({
+                error: "No file uploaded.",
             });
             return;
         }
 
         const config = await getConfig();
         const user = await getUserByCollegeID(college_id);
+        const file_paths = files.map((file) => file.path);
 
         if (!user) {
-            await deleteFileOnServer(
-                file.path,
+            await deleteFilesOnServer(
+                file_paths,
                 req,
                 res,
                 `User not found by id ${college_id}`,
@@ -353,8 +386,8 @@ router.post(
             return;
         }
         if (!config) {
-            await deleteFileOnServer(
-                file.path,
+            await deleteFilesOnServer(
+                file_paths,
                 req,
                 res,
                 `Config not found. Contact an administrator.`,
@@ -368,98 +401,132 @@ router.post(
             FILE_RESOURCE_TYPE.USER,
         );
 
-        if (
-            config.file.max_upload_count &&
-            user_files.length + 1 > config.file.max_upload_count
-        ) {
-            await deleteFileOnServer(
-                file.path,
-                req,
-                res,
-                `The maximum number of file uploads is ${config.file.max_upload_count}`,
-            );
-            return;
-        }
+        let file_size_sum = 0;
+        await Promise.allSettled(
+            files.map(async (file, i) => {
+                // Check if this upload is valid
+                file_size_sum += file.size;
+                let error_message;
+                if (
+                    config.file.max_upload_count &&
+                    config.file.max_upload_count > 0 &&
+                    user_files.length + i + 1 > config.file.max_upload_count
+                ) {
+                    error_message =
+                        `Only ${config.file.max_upload_count} file` +
+                        `${config.file.max_upload_capacity === 1 ? "" : "s"} ` +
+                        `can be uploaded at once`;
+                } else if (
+                    config.file.max_upload_capacity &&
+                    config.file.max_upload_capacity > 0 &&
+                    user_files.reduce((sum, f) => sum + f.size, 0) +
+                        files.reduce((s, file) => s + file.size, 0) >
+                        config.file.max_upload_capacity
+                ) {
+                    error_message = `File too large! Please delete other files before uploading.`;
+                }
 
-        if (
-            config.file.max_upload_capacity &&
-            user_files.reduce((sum, f) => sum + f.size, 0) + file.size >
-                config.file.max_upload_capacity
-        ) {
-            await deleteFileOnServer(
-                file.path,
-                req,
-                res,
-                `File too large! Please delete other files before uploading.`,
-            );
-            return;
-        }
+                if (error_message) {
+                    const remaining_file_paths = file_paths.slice(i);
+                    return Promise.all(
+                        remaining_file_paths.map((file_path) =>
+                            fs.unlink(file_path),
+                        ),
+                    ).then(() => Promise.reject(error_message));
+                }
 
-        // Move the file from temp
-        const temp_path = file.path;
-        const target_path = path.resolve(UPLOAD_PATH, file.filename);
-        return (
-            moveTempFileOnServer(temp_path, target_path, req)
-                // If the file was successfully saved, create a new File object
-                // in the db
-                .then(() => {
-                    // Create a new file object
-                    const file_obj: TFile = {
-                        uuid: crypto.randomUUID(),
-                        name: file.originalname,
-                        path: target_path,
-                        timestamp_upload: Date.now() / 1000,
-                        size: file.size,
-                        resource_uuid: user.uuid,
-                        resource_type: FILE_RESOURCE_TYPE.USER,
-                    };
-                    createFile(file_obj)
-                        // Once the file has been created,
-                        .then((new_file) => {
-                            // If a file with the random uuid already exists,
-                            // return a conflict error
-                            if (!new_file) {
-                                req.log.error({
-                                    msg:
-                                        `Could not create file for user with id` +
-                                        `${college_id} because the generated` +
-                                        `file UUID already exists.`,
-                                    file_path: target_path,
-                                    file_obj: file_obj,
-                                });
-                                res.status(StatusCodes.CONFLICT).json({
-                                    error:
-                                        `Could not create file for user with id` +
-                                        `${college_id} because the generated ` +
-                                        `file UUID already exists. ` +
-                                        `Please try uploading again.`,
-                                });
-                                return;
-                            }
-                            // If the file was successfully created, log and
-                            // return the new file object
-                            req.log.debug("Returned new file for user by id.");
-                            res.status(StatusCodes.CREATED).json(new_file);
+                // If upload is valid, rename it locally and create a db object
+                const temp_path = file.path;
+                const target_path = path.resolve(UPLOAD_PATH, file.filename);
+                return (
+                    moveTempFileOnServer(temp_path, target_path, req)
+                        // If the file was successfully saved, create a new File object
+                        // in the db
+                        .then(() => {
+                            // Create a new file object
+                            const file_obj: TFile = {
+                                uuid: crypto.randomUUID(),
+                                name: file.originalname,
+                                path: target_path,
+                                timestamp_upload: Date.now() / 1000,
+                                size: file.size,
+                                resource_uuid: user.uuid,
+                                resource_type: FILE_RESOURCE_TYPE.USER,
+                            };
+                            return (
+                                createFile(file_obj)
+                                    // Once the file has been created,
+                                    .then((new_file) => {
+                                        // If a file with the random uuid already exists,
+                                        // return a conflict error
+                                        if (!new_file) {
+                                            const msg =
+                                                `Could not create file for user with id` +
+                                                `${college_id} because the generated` +
+                                                `file UUID already exists.`;
+                                            req.log.error({
+                                                msg: msg,
+                                                file_path: target_path,
+                                                file_obj: file_obj,
+                                            });
+                                            res.status(
+                                                StatusCodes.CONFLICT,
+                                            ).json({
+                                                error:
+                                                    msg +
+                                                    ` Please try uploading again.`,
+                                            });
+                                            return Promise.reject(msg);
+                                        }
+                                        // If the file was successfully created, return the
+                                        // new file to the promise handler
+                                        return Promise.resolve(new_file);
+                                    })
+                                    .catch((err: Error) => {
+                                        // If there was an error saving the file, log it and
+                                        // return an error to the user
+                                        const msg = `Error creating file for user by id ${college_id}`;
+                                        req.log.error({
+                                            msg: msg,
+                                            err: err,
+                                        });
+                                        res.status(
+                                            StatusCodes.INTERNAL_SERVER_ERROR,
+                                        ).json({
+                                            error: err.message,
+                                        });
+                                        return Promise.reject(msg);
+                                    })
+                            );
                         })
-                        .catch((err: Error) => {
-                            // If there was an error saving the file, log it and
-                            // return an error to the user
-                            req.log.error({
-                                msg: `Error creating file for user by id ${college_id}`,
-                                err: err,
-                            });
+                        // If there was an error saving the file, return an error to the user
+                        .catch((err) => {
                             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                                error: err.message,
+                                error: "Error saving file: " + err.message,
                             });
-                        });
-                })
-                // If there was an error saving the file, return an error to the user
-                .catch((err) => {
-                    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                        error: "Error saving file: " + err.message,
-                    });
-                })
-        );
+                            return Promise.reject(
+                                "Error saving file: " + err.message,
+                            );
+                        })
+                );
+            }),
+        ).then((promise_responses) => {
+            const good_files = promise_responses
+                .filter((r) => r.status === "fulfilled")
+                .map((r) => r.value);
+            const errors = promise_responses
+                .filter((r) => r.status === "rejected")
+                .map((r) => r.reason);
+
+            req.log.info({
+                msg: `Finished uploading ${files.length} files`,
+                upload_errors: errors,
+            });
+            res.status(StatusCodes.OK).json({
+                files: good_files,
+                upload_errors: errors,
+            });
+        });
     },
 );
 
@@ -476,7 +543,7 @@ router.post(
     upload.single("file"),
     async (req: Request<{ user_uuid: string }>, res: FileResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const user_uuid = req.params.user_uuid;
         const file = req.file;
         console.log("File on server", file);
@@ -570,7 +637,13 @@ router.post(
                     `, attempting to unlink uploaded file at path ${file.path}`,
                 requesting_uuid: requesting_uuid,
             });
-            await deleteFileOnServer(file.path, req, res, msg);
+            await deleteFileOnServer(file.path, req, res, msg).then(
+                (error_message) => {
+                    res.status(StatusCodes.FORBIDDEN).json({
+                        error: error_message,
+                    });
+                },
+            );
         }
     },
 );
@@ -587,7 +660,7 @@ router.post(
     upload.single("file"),
     async (req: Request, res: Response) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         // Get the resource type and UUID from the URL
         const resource_type = req.params[0] as FILE_RESOURCE_TYPE;
         const resource_uuid = req.params[1];
@@ -684,7 +757,13 @@ router.post(
                 msg: `, attempting to unlink uploaded file at path ${file.path}`,
                 requesting_uuid: requesting_uuid,
             });
-            await deleteFileOnServer(file.path, req, res, msg);
+            await deleteFileOnServer(file.path, req, res, msg).then(
+                (error_message) => {
+                    res.status(StatusCodes.FORBIDDEN).json({
+                        error: error_message,
+                    });
+                },
+            );
         }
     },
 );
@@ -699,7 +778,7 @@ router.delete(
     "/by/user/:file_uuid",
     async (req: Request<{ file_uuid: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const file_uuid = req.params.file_uuid;
 
         // Get the file to verify the request
@@ -731,41 +810,37 @@ router.delete(
                     API_SCOPE.DELETE_OWN_FILE,
             )
         ) {
-            deleteFileOnServer(file.path, req, res)
-                .then(() => {
-                    deleteFile(file_uuid)
-                        .then((deleted_file) => {
-                            if (!deleted_file) {
-                                req.log.warn(
-                                    `File with uuid ${file_uuid} not found, failed to delete`,
-                                );
-                                res.status(StatusCodes.NOT_FOUND).json({
-                                    error: `File with uuid \`${file_uuid}\` not found.`,
-                                });
-                                return;
-                            }
-                            req.log.debug("Deleted file successfully.");
+            deleteFileOnServer(file.path, req, res).then((error_message) => {
+                deleteFile(file_uuid)
+                    .then((deleted_file) => {
+                        if (!deleted_file) {
+                            req.log.warn(
+                                `File with uuid ${file_uuid} not found, failed to delete`,
+                            );
+                            res.status(StatusCodes.NOT_FOUND).json({
+                                error: `File with uuid \`${file_uuid}\` not found.`,
+                            });
+                        } else if (
+                            error_message === "Successfully deleted file"
+                        ) {
+                            req.log.debug("Deleted file object successfully.");
                             res.status(StatusCodes.NO_CONTENT).json({});
-                        })
-                        .catch((err: Error) => {
-                            req.log.error({
-                                msg: `Error deleting file with uuid ${file_uuid}`,
-                                err: err,
-                            });
+                        } else {
                             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                                error: err.message,
+                                error: error_message,
                             });
+                        }
+                    })
+                    .catch((err: Error) => {
+                        req.log.error({
+                            msg: `Error deleting file with uuid ${file_uuid}`,
+                            err: err,
                         });
-                })
-                .catch((err) => {
-                    req.log.error({
-                        msg: `Error removing file with uuid ${file_uuid} off of server`,
-                        err: err,
+                        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                            error: err.message,
+                        });
                     });
-                    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                        error: "File could not be deleted off server",
-                    });
-                });
+            });
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to delete a file",
@@ -787,7 +862,7 @@ router.delete(
     /\/by\/(workshop|area|machine)\/(.+)/,
     async (req: Request, res: Response) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         // Get the resource type and UUID from the URL
         const resource_type = req.params[0] as FILE_RESOURCE_TYPE;
         const resource_uuid = req.params[1];
@@ -825,41 +900,37 @@ router.delete(
                     API_SCOPE.UPDATE_MACHINE,
             )
         ) {
-            deleteFileOnServer(file.path, req, res)
-                .then(() => {
-                    deleteFile(resource_uuid)
-                        .then((deleted_file) => {
-                            if (!deleted_file) {
-                                req.log.warn(
-                                    `File with uuid ${resource_uuid} not found, failed to delete`,
-                                );
-                                res.status(StatusCodes.NOT_FOUND).json({
-                                    error: `File with uuid \`${resource_uuid}\` not found.`,
-                                });
-                                return;
-                            }
+            deleteFileOnServer(file.path, req, res).then((error_message) => {
+                deleteFile(resource_uuid)
+                    .then((deleted_file) => {
+                        if (!deleted_file) {
+                            req.log.warn(
+                                `File with uuid ${resource_uuid} not found, failed to delete`,
+                            );
+                            res.status(StatusCodes.NOT_FOUND).json({
+                                error: `File with uuid \`${resource_uuid}\` not found.`,
+                            });
+                        } else if (
+                            error_message === "Successfully deleted file"
+                        ) {
                             req.log.debug("Deleted file successfully.");
                             res.status(StatusCodes.OK).json(deleted_file);
-                        })
-                        .catch((err: Error) => {
-                            req.log.error({
-                                msg: `Error deleting file with uuid ${resource_uuid}`,
-                                err: err,
-                            });
+                        } else {
                             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                                error: err.message,
+                                error: error_message,
                             });
+                        }
+                    })
+                    .catch((err: Error) => {
+                        req.log.error({
+                            msg: `Error deleting file with uuid ${resource_uuid}`,
+                            err: err,
                         });
-                })
-                .catch((err) => {
-                    req.log.error({
-                        msg: `Error removing file with uuid ${resource_uuid} off of server`,
-                        err: err,
+                        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                            error: err.message,
+                        });
                     });
-                    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                        error: "File could not be deleted off server",
-                    });
-                });
+            });
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to delete a file for a resource",

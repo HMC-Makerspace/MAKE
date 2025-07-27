@@ -1,4 +1,4 @@
-import express, { Application } from "express";
+import express, { Application, urlencoded } from "express";
 import compression from "compression";
 import http from "http";
 import path from "path";
@@ -7,7 +7,12 @@ import pino from "pino";
 import loggerMiddleware from "pino-http";
 import cors from "cors";
 import cron from "node-cron";
-import emailRoutes from "routes/email.route";
+import session from "express-session";
+import cookieParser from "cookie-parser";
+import passport from "passport";
+import { Strategy } from "passport-saml";
+import { default as MongoDBStore } from "connect-mongodb-session";
+import fs from "fs/promises";
 
 // await Bun.build({
 //     entrypoints: ["website/index.html"],
@@ -31,15 +36,20 @@ import restockRoutes from "./routes/restock.route";
 import scheduleRoutes from "./routes/schedule.route";
 import userRoutes from "./routes/user.route";
 import workshopRoutes from "./routes/workshop.route";
+import emailRoutes from "routes/email.route";
 import { getOAuthToken, getOAuthURL } from "controllers/email.controller";
 import { reserveMachineInstance } from "controllers/machine.controller";
 import {
     checkoutAvailabilityCron,
     checkoutEmailCron,
 } from "controllers/checkout.controller";
-import multer from "multer";
+import { createUser, getUserByCollegeID } from "controllers/user.controller";
 
 const app: Application = express();
+const store = new (MongoDBStore(session))({
+    uri: process.env.MONGO_URI,
+    collection: "session",
+});
 
 // Setup logging
 const logger = pino();
@@ -69,9 +79,138 @@ logger.debug("CORS setup");
 app.use(
     express.json(),
     compression(),
+    cookieParser(),
     loggerMiddleware({ logger: logger }),
     cors(options),
+    session({
+        secret: process.env.SESSION_SECRET,
+        cookie: {
+            secure: process.env.NODE_ENV === "production",
+            httpOnly: true,
+            maxAge: 1000 * 60 * 60 * 24 * 7, // One week
+        },
+        store: store,
+        proxy: process.env.NODE_ENV === "production",
+        resave: false,
+        saveUninitialized: false,
+    }),
+    passport.initialize(),
 );
+
+passport.serializeUser((user, done) => {
+    process.nextTick(() => {
+        return done(null, { uuid: user.uuid });
+    });
+});
+
+passport.deserializeUser((user: Express.User, done) => {
+    process.nextTick(() => {
+        return done(null, { uuid: user.uuid });
+    });
+});
+
+// Define production SAML login methods
+if (process.env.NODE_ENV === "production") {
+    // Get IDP cert and clean up format
+    const cert = await fs.readFile("make-idp.crt");
+    const cert_string = cert
+        .toString()
+        .replace(/-+(BEGIN|END) CERTIFICATE-+/g, "")
+        .replace("\n", "");
+
+    // Configure SAML Strategy
+    passport.use(
+        new Strategy(
+            {
+                passReqToCallback: true,
+                entryPoint: process.env.IDP_ENTRY_POINT,
+                callbackUrl: process.env.IDP_CALLBACK, // e.g., http://localhost:3000/login/callback
+                issuer: "make-saml",
+                cert: cert_string,
+            },
+            async (req, profile, done) => {
+                if (!profile || !profile.college_id) {
+                    req.log.fatal({ msg: "Invalid profile", profile: profile });
+                    return;
+                }
+                const college_id = profile.college_id as string;
+                const user_obj = await getUserByCollegeID(college_id);
+                if (!user_obj) {
+                    req.log.info(
+                        `User with college id ${college_id} not found, creating`,
+                    );
+                    const new_user_obj = {
+                        uuid: crypto.randomUUID(),
+                        name: profile.name as string,
+                        email: profile.email as string,
+                        college_id: profile.college_id as string,
+                        active_roles: [],
+                        past_roles: [],
+                        active_certificates: [],
+                        past_certificates: [],
+                    };
+                    await createUser(new_user_obj);
+                    done(null, { uuid: new_user_obj.uuid });
+                } else {
+                    done(null, { uuid: user_obj.uuid });
+                }
+            },
+        ),
+    );
+
+    app.get("/login", passport.authenticate("saml"));
+
+    app.post(
+        "/saml",
+        urlencoded({ extended: false }),
+        passport.authenticate("saml"),
+        (req, res) => {
+            res.redirect("/");
+        },
+    );
+}
+if (
+    process.env.NODE_ENV === "development" ||
+    process.env.ALLOW_INSECURE_LOGIN
+) {
+    // Define developmental login method
+    app.get("/login/:user_uuid", async (req, res, next) => {
+        try {
+            const user_uuid = req.params.user_uuid;
+            if (!user_uuid) {
+                res.redirect("/");
+            }
+            req.login({ uuid: user_uuid }, (err) => {
+                req.log.info({ msg: "Logged in", err: err });
+                if (err) {
+                    // Pass errors to Express
+                    next(err);
+                } else {
+                    // If successfully logged in, redirect to the main page
+                    res.redirect("/");
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
+    });
+}
+
+// Logout route
+app.get("/logout", (req, res, next) => {
+    req.logout((err) => {
+        if (err) {
+            // Pass errors to express
+            next(err)
+        } else {
+            // If successfully logged out, redirect to the main page.
+            res.redirect("/")
+        }
+    })
+})
+
+// Include user session authentication for all following routes
+app.use(passport.session())
 
 // API Routes
 app.use("/api/v3/area", areaRoutes);
@@ -112,7 +251,7 @@ if (process.env.NODE_ENV === "production") {
     // Join frontend build paths statically
     app.use(express.static(path.join(__dirname, "../website/build")));
     // Route all other paths to index so React Router can handle frontend routes.
-    app.get("/*path", function (req, res) {
+    app.get("/*path", (req, res) => {
         res.sendFile(path.join(__dirname, "../website/build", "index.html"));
     });
 

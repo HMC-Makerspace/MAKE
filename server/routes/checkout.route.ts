@@ -55,7 +55,7 @@ router.get(
     "/by/user/:user_uuid",
     async (req: Request<{ user_uuid: string }>, res: CheckoutsResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const user_uuid = req.params.user_uuid;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -104,7 +104,7 @@ router.get(
  */
 router.get("/", async (req: Request, res: CheckoutsResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
 
     // If no requesting user uuid is provided, the call is not authorized
     if (!requesting_uuid) {
@@ -150,7 +150,7 @@ router.get(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: CheckoutResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const checkout_uuid = req.params.UUID;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -207,7 +207,7 @@ router.post(
     "/unavailability",
     async (req: CheckoutItemRequest, res: CheckoutUnavailabilityResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const checkout_items = req.body.checkout_items;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -259,7 +259,7 @@ router.post(
     "/validate",
     async (req: CheckoutRequest, res: CheckoutValidationResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const checkout_obj = req.body.checkout_obj;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -310,7 +310,7 @@ router.post(
  */
 router.post("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid: string = req.user?.uuid as string;
     const checkout_obj = req.body.checkout_obj;
     const checkout_uuid = checkout_obj.uuid;
 
@@ -361,7 +361,7 @@ router.post("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
  */
 router.put("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid: string = req.user?.uuid as string;
     const checkout_obj = req.body.checkout_obj;
     const checkout_uuid = checkout_obj.uuid;
 
@@ -426,7 +426,7 @@ router.patch(
     "/:UUID/return",
     async (req: Request<{ UUID: string }>, res: CheckoutResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const checkout_uuid = req.params.UUID;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -478,7 +478,7 @@ router.patch(
     "/:UUID/turn",
     async (req: Request<{ UUID: string }>, res: CheckoutResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const checkout_uuid = req.params.UUID;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -549,7 +549,7 @@ router.patch(
         res: CheckoutResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const checkout_uuid = req.params.UUID;
         const new_timestamp_due = req.body.new_timestamp_due;
 
@@ -606,7 +606,7 @@ router.delete(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: CheckoutResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const checkout_uuid = req.params.UUID;
 
         // If no requesting user uuid is provided, the call is not authorized

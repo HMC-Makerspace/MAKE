@@ -37,19 +37,22 @@ import {
 import { API_SCOPE } from "../../common/global.ts";
 import { verifyScopes } from "../utils.tsx";
 
-async function uploadFile({
+async function uploadFiles({
     college_id,
-    file,
+    files,
     toast_key,
 }: {
     college_id: string;
-    file: File;
+    files: File[];
     toast_key: string;
 }) {
     const formData = new FormData();
-    formData.append("file", file);
+    files.forEach((file) => formData.append("files", file));
 
-    const response = await axios.post(
+    const response = await axios.post<{
+        files: TFile[];
+        upload_errors: string[];
+    }>(
         `/api/v3/file/for/${FILE_RESOURCE_TYPE.USER}/id/${college_id}`,
         formData,
         {
@@ -129,22 +132,40 @@ export default function QuickTransferPage() {
     });
 
     const uploadMutation = useMutation({
-        mutationFn: uploadFile,
-        onSuccess: (data: TFile) => {
-            if (!collegeID) {
+        mutationFn: uploadFiles,
+        onSettled: (data) => {
+            console.log("Settled", data);
+            if (!collegeID || !data || !data.files || !data.upload_errors) {
                 return;
             }
+            // Add successfully uploaded files to user's file list
             queryClient.setQueryData(
                 ["file", "by", "user", "id", collegeID],
-                (old?: TFile[]) => (old ?? []).concat(data),
+                (old?: TFile[]) => (old ?? []).concat(data.files),
             );
-            addToast({
-                title: "Successfully uploaded file.",
-                timeout: 3000,
-                color: "success",
-            });
+            if (data.files.length > 0) {
+                // At least one file uploaded successfully, show a toast
+                addToast({
+                    title:
+                        `Successfully uploaded ${data.files.length} file` +
+                        `${data.files.length === 1 ? "" : "s"}.`,
+                    timeout: 3000,
+                    color: "success",
+                    severity:
+                        data.upload_errors.length === 0 ? "success" : "warning",
+                });
+            }
+            for (const error of data.upload_errors) {
+                // Add an error toast for each upload error
+                addToast({
+                    title: error,
+                    timeout: 3000,
+                    color: "danger",
+                });
+            }
         },
         onError: (error: AxiosError<{ error: string }>) => {
+            console.log("Error", error);
             addToast({
                 title:
                     error.response?.data.error ??
@@ -190,20 +211,18 @@ export default function QuickTransferPage() {
             return;
         }
         uploadMutation.reset();
-        for (const file of files) {
-            const promise = uploadMutation.mutateAsync({
-                college_id: collegeID,
-                file: file,
-                toast_key: "",
-            });
-            const toast = addToast({
-                title: "Uploading ...",
-                timeout: 1,
-                promise: promise,
-                color: "primary",
-                hideCloseButton: true,
-            });
-        }
+        const promise = uploadMutation.mutateAsync({
+            college_id: collegeID,
+            files: files,
+            toast_key: "",
+        });
+        const toast = addToast({
+            title: "Uploading ...",
+            timeout: 1,
+            promise: promise,
+            color: "primary",
+            hideCloseButton: true,
+        });
         e.target.value = "";
     };
 
@@ -343,6 +362,7 @@ export default function QuickTransferPage() {
                                     {file.name
                                         .split(".")
                                         .map((text, idx, arr) => {
+                                            // Only return an icon based on the last file extension
                                             if (idx !== arr.length - 1) {
                                                 return <></>;
                                             } else {
@@ -405,7 +425,7 @@ export default function QuickTransferPage() {
                                                     case "jpeg":
                                                     case "webp":
                                                     case "svg":
-                                                        return <></>; // So images dont have an icon behind them
+                                                        return <></>; // No icon shown for images
                                                     case "abe":
                                                         return (
                                                             <IdentificationIcon className="size-24" />

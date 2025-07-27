@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useCallback, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import InventoryTable from "../components/kiosks/admin/inventory/InventoryTable";
@@ -12,13 +12,15 @@ import { TConfig } from "common/config";
 import Schedule from "../components/kiosks/admin/schedule/Schedule";
 import ScheduleCertSelector from "../components/public/schedule/ScheduleCertSelector";
 import clsx from "clsx";
+import { StatusCodes } from "http-status-codes";
 
 export default function SchedulePage() {
     const {
         data: schedule,
         isLoading: scheduleLoading,
         isError: scheduleUnauthorized,
-    } = useQuery<TSchedule>({
+        error
+    } = useQuery<TSchedule, AxiosError>({
         queryKey: ["schedule", "public"],
         refetchOnWindowFocus: false,
         refetchOnMount: false,
@@ -114,9 +116,6 @@ export default function SchedulePage() {
         [selectedUsers, workers, setSelectedUsers],
     );
 
-    console.log("Shifts:", selectedShifts);
-    console.log("Certs:", selectedCerts);
-
     return (
         <DefaultLayout className="px-8 py-0" pageHref="/schedule">
             <div
@@ -129,6 +128,19 @@ export default function SchedulePage() {
             >
                 {isLoading && <Spinner />}
                 {scheduleUnauthorized && (
+                    error.status === StatusCodes.UNAUTHORIZED ?
+                        <div className="w-full h-full relative">
+                            <div
+                                className={clsx(
+                                    "flex w-full h-full items-center justify-center",
+                                    "bg-default-100 rounded-lg blur-md",
+                                )}
+                            ></div>
+                            <div className="absolute left-0 right-0 bottom-[50%] text-center">
+                                Please login to view our weekly schedule.
+                            </div>
+                        </div>
+                    : error.status === StatusCodes.FORBIDDEN ? 
                     <div className="w-full h-full relative">
                         <div
                             className={clsx(
@@ -137,9 +149,21 @@ export default function SchedulePage() {
                             )}
                         ></div>
                         <div className="absolute left-0 right-0 bottom-[50%] text-center">
-                            Please login to view our weekly schedule
+                            To view our weekly schedule, please verify your account.
                         </div>
                     </div>
+                    : <div className="w-full h-full relative">
+                        <div
+                            className={clsx(
+                                "flex w-full h-full items-center justify-center",
+                                "bg-default-100 rounded-lg blur-md",
+                            )}
+                        ></div>
+                        <div className="absolute left-0 right-0 bottom-[50%] text-center">
+                            Our weekly schedule is in the works! Please check back later.
+                        </div>
+                    </div>
+                    
                 )}
                 {schedule &&
                     !scheduleUnauthorized &&

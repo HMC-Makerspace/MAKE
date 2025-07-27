@@ -19,7 +19,6 @@ import {
     Tabs,
 } from "@heroui/react";
 import { TConfig } from "common/config";
-import { useMAKEStore } from "../../store";
 import { TUser, TUserAvailability, UserUUID } from "common/user";
 import { useState } from "react";
 import {
@@ -90,15 +89,18 @@ async function patchShiftCount({
 }
 
 export default function AdminKiosk() {
-    const user_uuid = useMAKEStore((state) => state.user_uuid);
-    const { data: users } = useQuery<TUser[]>({
-        queryKey: ["user", "public"],
-        refetchOnWindowFocus: false,
-        enabled: !!user_uuid,
-    });
 
     const { data: self } = useQuery<TUser>({
-        queryKey: ["user", user_uuid],
+        queryKey: ["user", "self"],
+        refetchOnWindowFocus: false,
+        retry: false,
+    });
+
+    const user_uuid = self?.uuid
+
+
+    const { data: users } = useQuery<TUser[]>({
+        queryKey: ["user", "public"],
         refetchOnWindowFocus: false,
         enabled: !!user_uuid,
     });
@@ -231,7 +233,7 @@ export default function AdminKiosk() {
                                         // @ts-ignore This property does exist...
                                         const minShifts = blurEvent.target.value;
                                         if (
-                                            !schedule ||
+                                            !schedule || !user_uuid ||
                                             minShifts === undefined
                                         ) {
                                             return;
@@ -265,7 +267,7 @@ export default function AdminKiosk() {
                                         // @ts-ignore This property does exist...
                                         const maxShifts = blurEvent.target.value;
                                         if (
-                                            !schedule ||
+                                            !schedule || !user_uuid ||
                                             maxShifts === undefined
                                         ) {
                                             return;
@@ -361,7 +363,7 @@ export default function AdminKiosk() {
                                         // @ts-ignore This property does exist...
                                         const minShifts = blurEvent.target.value;
                                         if (
-                                            !schedule ||
+                                            !schedule || !user_uuid ||
                                             minShifts === undefined
                                         ) {
                                             return;
@@ -395,7 +397,7 @@ export default function AdminKiosk() {
                                         // @ts-ignore This property does exist...
                                         const maxShifts = blurEvent.target.value;
                                         if (
-                                            !schedule ||
+                                            !schedule || !user_uuid ||
                                             maxShifts === undefined
                                         ) {
                                             return;
@@ -427,6 +429,9 @@ export default function AdminKiosk() {
                                 {userShift && (
                                     <Form
                                         onSubmit={(e) => {
+                                            if (!user_uuid) {
+                                                return
+                                            }
                                             e.preventDefault();
                                             const formData = new FormData(
                                                 e.currentTarget,
@@ -627,6 +632,9 @@ export default function AdminKiosk() {
                                                                 variant="bordered"
                                                                 className="col-span-2"
                                                                 onPress={() => {
+                                                                    if (!user_uuid) {
+                                                                        return
+                                                                    }
                                                                     const type =
                                                                         event.type ===
                                                                         SHIFT_EVENT_TYPE.DROP

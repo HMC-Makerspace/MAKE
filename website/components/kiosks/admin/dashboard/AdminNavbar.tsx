@@ -13,7 +13,6 @@ import {
     NavbarMenu,
     NavbarMenuToggle,
 } from "@heroui/react";
-import { useMAKEStore } from "../../../../store";
 import { MAKEUser } from "../../../user/MAKEUser";
 import { ThemeSwitcher } from "../../../ThemeSwitcher";
 import { AdminPage } from "../../../../layouts/AdminLayout";
@@ -27,7 +26,6 @@ export default function AdminNavbar({
     pages: AdminPage[];
     pageIndex: number;
 }) {
-    const user_uuid = useMAKEStore((state) => state.user_uuid);
     return (
         <Navbar
             className="w-full bg-primary-500 dark:bg-primary-300"
@@ -107,7 +105,7 @@ export default function AdminNavbar({
                 {/* Menu dropdown for small screens, hide for larger */}
                 <NavbarMenuToggle className="lg:hidden text-background" />
                 <MAKEUser
-                    user_uuid={user_uuid}
+                    user_uuid={"self"}
                     className={clsx(
                         "rounded-r-none h-[85%]",
                         "data-[pressed=true]:translate-x-1",
