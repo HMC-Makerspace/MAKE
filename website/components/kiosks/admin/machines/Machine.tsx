@@ -192,8 +192,7 @@ export default function Machine({
                                                     cert.certification_uuid
                                                 }
                                                 certifications={certifications}
-                                                level={cert.required_level}
-                                            />
+                                                level={cert.required_level > 0 ? cert.required_level : undefined}                                           />
                                         ),
                                     )}
                             </div>
