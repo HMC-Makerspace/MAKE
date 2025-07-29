@@ -10,7 +10,7 @@ export default function ItemLocationChip({
     areas: TArea[];
 }) {
     const base = clsx(
-        "text-default-700 py-1 sm:py-2 px-2 sm:px-3",
+        "text-default-foreground py-1 sm:py-2 px-2 sm:px-3",
         "whitespace-nowrap text-center",
     );
     return (

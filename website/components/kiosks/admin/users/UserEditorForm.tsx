@@ -9,6 +9,7 @@ import {
     SelectedItemProps,
     Selection,
     SelectItem,
+    Snippet,
 } from "@heroui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
@@ -200,45 +201,22 @@ export default function UserEditorForm({
                 onSubmit={onSubmit}
                 className="grid grid-cols-2 gap-4 lg:flex lg:h-full"
             >
-                <div className="flex flex-row gap-4 w-full h-fit">
-                    <Input
-                        type="text"
-                        label="UUID"
-                        name="uuid"
-                        // If no user is selected, show a different placeholder
-                        placeholder={multiDisabledPlaceholder("UUID")}
-                        // UUID is not editable
-                        isDisabled
-                        // If the user exists, prefill the input with the user's uuid
-                        value={UUID}
-                        onValueChange={wrapEdit(setUUID)}
-                        variant="faded"
-                        color="primary"
-                        size="md"
-                        classNames={{
-                            input: clsx([
-                                "placeholder:text-default-500",
-                                "placeholder:italic",
-                                "text-default-700",
-                            ]),
-                        }}
-                    />
-                    <Button
-                        // Create button to copy the UUID to the clipboard
-                        size="md"
-                        radius="lg"
-                        className="my-auto"
-                        isIconOnly
-                        // Disable the button if there are multiple or no users selected
-                        isDisabled={isEmpty || isMultiple}
-                        onPress={() => {
-                            // Copy the UUID to the clipboard
-                            navigator.clipboard.writeText(UUID);
-                        }}
-                    >
-                        <ClipboardIcon className="size-6 text-primary-300" />
-                    </Button>
-                </div>
+                <Snippet
+                    // Allow user uuid to be copied
+                    variant="bordered"
+                    color="default"
+                    symbol={""}
+                    size="md"
+                    className="w-full text-default-500 relative h-14"
+                    timeout={1000}
+                    classNames={{
+                        copyButton:
+                            "absolute right-2 bg-default-200 hover:!bg-default-300",
+                    }}
+                >
+                    {UUID}
+                </Snippet>
+
                 <Input
                     type="text"
                     label="College ID"

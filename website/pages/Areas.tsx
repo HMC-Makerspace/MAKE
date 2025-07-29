@@ -38,9 +38,9 @@ export default function AreasPage() {
     const isLoading = areasLoading || rolesLoading || certsLoading;
 
     return (
-        <DefaultLayout className="px-8 py-0" pageHref="/areas">
+        <DefaultLayout className="px-8" pageHref="/areas">
             {areas && machines && roles && certs && (
-                <div className="flex flex-col h-full gap-8 p-4 sm:p-0 overflow-auto">
+                <div className="flex flex-col h-full gap-8 p-4 sm:p-0 overflow-auto rounded-xl">
                     {areas.map((area) => (
                         <Area
                             key={area.uuid}

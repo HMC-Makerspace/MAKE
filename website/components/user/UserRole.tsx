@@ -31,6 +31,7 @@ export default function UserRole({
             className="p-1.5 flex flex-row gap-1 w-fit px-2.5"
             style={{ backgroundColor: color }}
             isBlurred={!isSuccess}
+            shadow="none"
         >
             {isDefault ? (
                 <StarIcon
