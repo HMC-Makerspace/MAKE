@@ -6,13 +6,13 @@
     "module": "ESNext",
     "moduleDetection": "force",
     "jsx": "react-jsx",
-    "allowJs": true,
-    "outDir": "./dist",
+    "allowJs": false,
+    "outDir": "../website/build",
 
     // Pathing for bun
     "baseUrl": "server",
     "paths": {
-      "common/*": ["../common/*"]
+      "common/*": ["../common/*"],
     },
 
     // Bundler mode
@@ -32,6 +32,6 @@
     "noPropertyAccessFromIndexSignature": false
   },
   // Include server files and common types
-  "include": ["server/**/*", "common/**/*"],
+  "include": ["server/**/*", "common/**/*", "website/**/*"],
   "exclude": ["dist", "node_modules"],
 }
