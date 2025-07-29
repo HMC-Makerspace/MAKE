@@ -87,6 +87,7 @@ app.use(
     cors(options),
     session({
         secret: process.env.SESSION_SECRET,
+        rolling: true,
         cookie: {
             secure: process.env.NODE_ENV === "production",
             httpOnly: true,

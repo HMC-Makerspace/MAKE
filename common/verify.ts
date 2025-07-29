@@ -10,6 +10,7 @@ import type { Response } from "express";
  */
 export type VerifyRequestHeader = IncomingHttpHeaders & {
     requesting_uuid: UserUUID;
+    passkey: string;
 };
 
 /**
@@ -26,9 +27,9 @@ export type ErrorResponse = {
  */
 export const UNAUTHORIZED_ERROR: ErrorResponse = {
     error:
-        "This is a protected route, and no requesting user UUID was " +
-        "provided. Add `requesting_uuid` as a header with a user's uuid to " +
-        "make this request.",
+        "This is a protected route, and no user session was provided" +
+        "provided. Please sign in with SSO to complete this request, " +
+        "or add a requesting_uuid and passkey header as an alternate auth.",
 };
 
 /**

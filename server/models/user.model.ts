@@ -79,6 +79,7 @@ export const User = new mongoose.Schema<TUser>(
         past_certificates: { type: [Certificate], required: false },
         files: { type: [String], required: false },
         work_schedules: { type: [UserAvailability], required: false },
+        passkey: { type: String, required: false },
     },
     { collection: "users" },
 );

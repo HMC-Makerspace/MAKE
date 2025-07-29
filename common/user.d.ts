@@ -100,6 +100,8 @@ export type TUserAvailability = {
  * @property availability - (optional) A list of availabilities for each day
  *      that the space is open. Only used for hiring. If the user has never
  *      been a worker at the space, this property will not be present
+ * @property passkey - (optional) An optional string passkey used as an
+ *      alternate authorization method to SSO.
  */
 export type TUser = {
     uuid: UserUUID;
@@ -112,6 +114,7 @@ export type TUser = {
     past_certificates?: TCertificate[];
     files?: FileUUID[];
     work_schedules?: TUserAvailability[];
+    passkey?: string;
 };
 
 /**
