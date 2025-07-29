@@ -77,20 +77,22 @@ export function getUserRoleHierarchy(user: TUser, roles: TUserRole[]) {
         user.active_roles
             .map((role_log) => {
                 return {
-                    role: roles.find((r) => r.uuid == role_log.role_uuid),
+                    role: roles.find((r) => r.uuid === role_log.role_uuid),
                     timestamp: role_log.timestamp_gained,
                 };
             })
+            .filter((tr) => !!tr.role)
             // Sort by role hierarchy (if available) or otherwise timestamp in increasing order (oldest first)
             .sort((a, b) => {
-                if (!a.role || !b.role) {
-                    return a.timestamp - b.timestamp;
-                } else {
-                    const a_level = a.role.display_hierarchy ?? 0;
-                    const b_level = b.role.display_hierarchy ?? 0;
-                    // Larger hierarchical levels, but smaller (older) timestamps, appear first
-                    return b_level - a_level || a.timestamp - b.timestamp;
+                const a_level = a.role!.display_hierarchy;
+                const b_level = b.role!.display_hierarchy;
+                if (a_level === undefined) {
+                    return 1; // show b first, since a has no hierarchy level
+                } else if (b_level === undefined) {
+                    return -1; // show a first, since b has no hierarchy level
                 }
+                // Smaller hierarchical levels and smaller (older) timestamps, appear first
+                return a_level - b_level || a.timestamp - b.timestamp;
             })
             .map((tr) => tr.role)
             .filter((r) => !!r)

@@ -117,7 +117,7 @@ export default function SchedulePage() {
     );
 
     return (
-        <DefaultLayout className="px-8 py-0" pageHref="/schedule">
+        <DefaultLayout className="px-8 py-4" pageHref="/schedule">
             <div
                 className="w-full h-full"
                 onClick={() => {
@@ -127,8 +127,8 @@ export default function SchedulePage() {
                 }}
             >
                 {isLoading && <Spinner />}
-                {scheduleUnauthorized && (
-                    error.status === StatusCodes.UNAUTHORIZED ?
+                {scheduleUnauthorized &&
+                    (error.status === StatusCodes.UNAUTHORIZED ? (
                         <div className="w-full h-full relative">
                             <div
                                 className={clsx(
@@ -140,31 +140,33 @@ export default function SchedulePage() {
                                 Please login to view our weekly schedule.
                             </div>
                         </div>
-                    : error.status === StatusCodes.FORBIDDEN ? 
-                    <div className="w-full h-full relative">
-                        <div
-                            className={clsx(
-                                "flex w-full h-full items-center justify-center",
-                                "bg-default-100 rounded-lg blur-md",
-                            )}
-                        ></div>
-                        <div className="absolute left-0 right-0 bottom-[50%] text-center">
-                            To view our weekly schedule, please verify your account.
+                    ) : error.status === StatusCodes.FORBIDDEN ? (
+                        <div className="w-full h-full relative">
+                            <div
+                                className={clsx(
+                                    "flex w-full h-full items-center justify-center",
+                                    "bg-default-100 rounded-lg blur-md",
+                                )}
+                            ></div>
+                            <div className="absolute left-0 right-0 bottom-[50%] text-center">
+                                To view our weekly schedule, please verify your
+                                account.
+                            </div>
                         </div>
-                    </div>
-                    : <div className="w-full h-full relative">
-                        <div
-                            className={clsx(
-                                "flex w-full h-full items-center justify-center",
-                                "bg-default-100 rounded-lg blur-md",
-                            )}
-                        ></div>
-                        <div className="absolute left-0 right-0 bottom-[50%] text-center">
-                            Our weekly schedule is in the works! Please check back later.
+                    ) : (
+                        <div className="w-full h-full relative">
+                            <div
+                                className={clsx(
+                                    "flex w-full h-full items-center justify-center",
+                                    "bg-default-100 rounded-lg blur-md",
+                                )}
+                            ></div>
+                            <div className="absolute left-0 right-0 bottom-[50%] text-center">
+                                Our weekly schedule is in the works! Please
+                                check back later.
+                            </div>
                         </div>
-                    </div>
-                    
-                )}
+                    ))}
                 {schedule &&
                     !scheduleUnauthorized &&
                     publicUsers &&

@@ -44,6 +44,7 @@ export default function CustomNavbar({
                     "hidden xl:flex flex-col",
                     "justify-start py-2",
                     "w-[224px]",
+                    "fixed z-50 h-full",
                 )}
             >
                 <MAKE className="self-center text-5xl" />
@@ -93,6 +94,7 @@ export default function CustomNavbar({
                     "bg-primary-500",
                     "dark:bg-primary-300",
                     "flex xl:hidden",
+                    "fixed",
                 ])}
                 classNames={{ wrapper: "max-w-full" }}
             >

@@ -102,18 +102,19 @@ export default function DefaultLayout({
         [scopesLoading, scopesError, kioskAccess],
     );
 
+    // Kiosk key press listener
     useEffect(() => {
         // attach the event listener
         document.addEventListener("keydown", handleKeyPress);
 
-        // remove the event listener
+        // remove the event listener on component destroy
         return () => {
             document.removeEventListener("keydown", handleKeyPress);
         };
     }, [handleKeyPress]);
 
     return (
-        <div className="flex flex-col xl:flex-row h-screen">
+        <div className="flex flex-col xl:flex-row h-screen pt-[64px] xl:pt-0">
             <Navbar pages={PAGES} pageIndex={pageIndex} />
             <AnimatePresence mode="popLayout">
                 <motion.main
@@ -126,7 +127,7 @@ export default function DefaultLayout({
                     className={clsx(
                         "relative mx-auto",
                         "h-[calc(100vh_-_64px)] xl:h-full",
-                        "w-full flex-grow pl-8 py-4",
+                        "w-full flex-grow xl:pl-[calc(224px_+_2rem)]",
                         className,
                     )}
                 >
