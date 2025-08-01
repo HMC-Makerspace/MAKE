@@ -1,9 +1,12 @@
 declare module "bun" {
     interface Env {
         MONGO_URI: string;
+        SITE_URL: string;
         SESSION_SECRET: string;
         IDP_ENTRY_POINT: string;
         IDP_CALLBACK: string;
+        IDP_ISSUER: string;
+        IDP_ID_FORMAT: string;
         ALLOW_INSECURE_LOGIN: boolean;
 
         NODE_ENV: "development" | "production";
