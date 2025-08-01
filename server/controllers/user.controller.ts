@@ -143,6 +143,9 @@ export async function createUser(user_obj: TUser): Promise<TUser | null> {
         // If so, return null, and don't create a new user
         return null;
     }
+    if (!user_obj.college_id) {
+        user_obj.college_id = ""
+    }
     // If the user doesn't exist
     // Add the default user roles to the user unless they already have them
     const default_roles = await getDefaultUserRoles();

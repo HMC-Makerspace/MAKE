@@ -571,7 +571,7 @@ router.get("/self", async (req: Request, res: UserResponse) => {
     const requesting_uuid = req.user?.uuid;
     // const requesting_uuid = req.user?.uuid as string;
     if (!requesting_uuid) {
-        req.log.warn("No requesting_uuid was provided while getting self");
+        // req.log.warn("No requesting_uuid was provided while getting self");
         res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
         return;
     }
@@ -607,9 +607,9 @@ router.get("/self/scopes", async (req: Request, res: UserScopesResponse) => {
     const headers = req.headers as VerifyRequestHeader;
     const requesting_uuid = req.user?.uuid as string;
     if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while getting own scopes",
-        );
+        // req.log.warn(
+        //     "No requesting_uuid was provided while getting own scopes",
+        // );
         res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
         return;
     }
