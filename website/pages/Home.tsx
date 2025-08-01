@@ -26,9 +26,9 @@ export default function HomePage() {
                 </div>
                 <MAKE
                     className={clsx(
-                        "text-[7rem] sm:text-[10rem] tracking-widest",
+                        "text-[7.5rem] sm:text-[10rem] tracking-widest",
                         "font-black text-foreground-600",
-                        "pl-4 -mt-8",
+                        "-mt-8",
                     )}
                     hover={false}
                     href={""}

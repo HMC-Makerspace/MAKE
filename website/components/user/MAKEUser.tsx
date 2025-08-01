@@ -38,17 +38,19 @@ export function MAKEUser({
     color = "default",
     popoverPlacement = "top",
     onClick = () => {},
-    defaultElement = <Button
-        color="default"
-        variant="solid"
-        size="lg"
-        className="w-full font-medium"
-        onPress={() => {
-            window.location.href = "/login"
-        }}
-    >
-        Login
-    </Button>,
+    defaultElement = (
+        <Button
+            color="default"
+            variant="solid"
+            size="lg"
+            className="w-full font-medium bg-default-300"
+            onPress={() => {
+                window.location.href = "/login";
+            }}
+        >
+            Login
+        </Button>
+    ),
 }: {
     user_uuid: string;
     user?: TUser;
@@ -96,7 +98,10 @@ export function MAKEUser({
         retry: false,
     });
 
-    const loggedOut = !user_uuid || query.isPending || query.error?.status === StatusCodes.UNAUTHORIZED
+    const loggedOut =
+        !user_uuid ||
+        query.isPending ||
+        query.error?.status === StatusCodes.UNAUTHORIZED;
 
     const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
         queryKey: ["user", user_uuid, "roles"],
@@ -174,7 +179,7 @@ export function MAKEUser({
                         )}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="min-w-3/4 p-2">
+                <PopoverContent className="p-2 xl:min-w-[20vw] xl:max-w-[30vw]">
                     {user_uuid && user_data && roles && (
                         <UserInfo
                             user_uuid={user_uuid}
@@ -191,7 +196,7 @@ export function MAKEUser({
                                 <ArrowLeftEndOnRectangleIcon className="size-6 min-w-6" />
                             }
                             onPress={() => {
-                                window.location.href = "/logout"
+                                window.location.href = "/logout";
                             }}
                         >
                             Logout

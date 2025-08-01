@@ -14,10 +14,10 @@ export default function MAKE({
         <Link
             className={clsx([
                 "font-title font-semibold text-5xl",
-                "tracking-title indent-[0.175em]",
+                "tracking-title indent-[0.1em]",
                 "text-background transition-all duration-500",
                 hover && "hover:text-foreground-900",
-                hover && "hover:tracking-wide hover:indent-0",
+                hover && "hover:tracking-wide hover:-indent-[0.075em]",
                 className,
             ])}
             href={href ? href : undefined}
