@@ -94,7 +94,7 @@ export default function CustomNavbar({
                     "bg-primary-500",
                     "dark:bg-primary-300",
                     "flex xl:hidden",
-                    "fixed",
+                    "",
                 ])}
                 classNames={{ wrapper: "max-w-full" }}
             >

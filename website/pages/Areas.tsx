@@ -38,9 +38,10 @@ export default function AreasPage() {
     const isLoading = areasLoading || rolesLoading || certsLoading;
 
     return (
-        <DefaultLayout className="px-8" pageHref="/areas">
+        <DefaultLayout className="p-8" pageHref="/areas">
             {areas && machines && roles && certs && (
-                <div className="flex flex-col h-full gap-8 p-4 sm:p-0 overflow-auto rounded-xl">
+                <div className="h-full overflow-auto rounded-xl">
+                    <div className="h-fit flex flex-col gap-8 rounded-xl">
                     {areas.map((area) => (
                         <Area
                             key={area.uuid}
@@ -51,6 +52,7 @@ export default function AreasPage() {
                             editable={MACHINE_EDIT_LEVEL.BASIC}
                         />
                     ))}
+                    </div>
                 </div>
             )}
         </DefaultLayout>

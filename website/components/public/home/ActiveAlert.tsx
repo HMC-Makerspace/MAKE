@@ -29,7 +29,7 @@ export default function ActiveAlert() {
                         title={alert.header}
                         classNames={{
                             content:
-                                "text-default-content2-foreground px-2 whitespace-pre",
+                                "text-default-content2-foreground px-2 whitespace-pre-line",
                             title: "text-center text-content1-foreground",
                             trigger: "align-middle h-full",
                         }}

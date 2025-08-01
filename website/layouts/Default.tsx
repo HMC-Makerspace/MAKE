@@ -114,7 +114,7 @@ export default function DefaultLayout({
     }, [handleKeyPress]);
 
     return (
-        <div className="flex flex-col xl:flex-row h-screen pt-[64px] xl:pt-0">
+        <div className="flex flex-col xl:flex-row h-dvh">
             <Navbar pages={PAGES} pageIndex={pageIndex} />
             <AnimatePresence mode="popLayout">
                 <motion.main
@@ -125,7 +125,7 @@ export default function DefaultLayout({
                         duration: 0.125,
                     }}
                     className={clsx(
-                        "relative mx-auto",
+                        "relative mx-auto overflow-auto",
                         "h-[calc(100vh_-_64px)] xl:h-full py-4",
                         "w-full flex-grow xl:pl-[calc(224px_+_2rem)]",
                         className,

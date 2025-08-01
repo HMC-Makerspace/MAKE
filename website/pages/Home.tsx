@@ -13,8 +13,8 @@ export default function HomePage() {
         refetchOnMount: false,
     });
     return (
-        <DefaultLayout className="px-8 py-4" pageHref="/">
-            <div className="relative mx-6 flex flex-col items-center justify-center h-full">
+        <DefaultLayout className="px-4" pageHref="/">
+            <div className="relative mx-2 flex flex-col items-center justify-center h-full">
                 <ActiveAlert />
                 <div
                     className={clsx(
