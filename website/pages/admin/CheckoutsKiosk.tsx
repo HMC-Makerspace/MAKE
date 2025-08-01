@@ -10,6 +10,7 @@ import {
     Spinner,
     Tab,
     Tabs,
+    ToastProvider,
     Tooltip,
     useDisclosure,
 } from "@heroui/react";
@@ -44,6 +45,7 @@ import CertificationsTable from "../../components/kiosks/admin/certifications/CT
 import { CheckBadgeIcon, PercentBadgeIcon } from "@heroicons/react/24/solid";
 import UsersTable from "../../components/kiosks/admin/users/UsersTable";
 import GrantCertPopup from "../../components/kiosks/admin/checkouts/GrantCertPopup";
+import AssignIDPopup from "../../components/kiosks/admin/checkouts/AssignIDPopup";
 
 async function getCartUnavailability({ cart }: { cart: TCheckoutItem[] }) {
     return (
@@ -115,8 +117,6 @@ export default function CheckoutsKiosk() {
         enabled: !!collegeID,
         retry: false,
     });
-
-    const queryClient = useQueryClient();
 
     const validationMutation = useMutation({
         mutationFn: getCartUnavailability,
@@ -201,6 +201,8 @@ export default function CheckoutsKiosk() {
         onClose: closeGrantPopup,
     } = useDisclosure();
 
+    const [missingIDUser, setMissingIDUser] = useState<TUser>();
+
     if (
         !checkouts ||
         !inventory ||
@@ -258,6 +260,7 @@ export default function CheckoutsKiosk() {
 
     return (
         <AdminLayout pageHref={"/admin/checkouts"} className="max-w-full px-4">
+            <ToastProvider />
             <div className="flex flex-col lg:flex-row overflow-auto h-full gap-4 p-1">
                 <CheckoutSidebar
                     cart={cart}
@@ -375,9 +378,20 @@ export default function CheckoutsKiosk() {
                                     const selectedUser = users.find(
                                         (u) => u.uuid === selectedUsers[0],
                                     );
-                                    setCollegeID(
-                                        selectedUser?.college_id || "",
-                                    );
+                                    if (
+                                        selectedUser &&
+                                        selectedUser.college_id === "" &&
+                                        collegeID &&
+                                        !user
+                                    ) {
+                                        // Show assign college_id popup
+                                        setMissingIDUser(selectedUser);
+                                    } else if (
+                                        selectedUser &&
+                                        selectedUser.college_id
+                                    ) {
+                                        setCollegeID(selectedUser.college_id);
+                                    }
                                 }}
                                 isLoading={usersLoading}
                                 onCreate={undefined}
@@ -523,6 +537,11 @@ export default function CheckoutsKiosk() {
                 setGranting={setGranting}
                 isOpen={grantPopup}
                 onOpenChange={changeGrantPopup}
+            />
+            <AssignIDPopup
+                missingIDUser={missingIDUser}
+                setMissingIDUser={setMissingIDUser}
+                college_id={collegeID}
             />
             <PopupAlert
                 isOpen={validationPopup}
