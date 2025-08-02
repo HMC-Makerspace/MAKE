@@ -21,7 +21,7 @@ import {
 } from "@heroicons/react/24/solid";
 import axios, { AxiosError } from "axios";
 import React from "react";
-import { TUser, UserUUID } from "common/user.js";
+import { TUser, UserUUID } from "../../common/user.js";
 import clsx from "clsx";
 import {
     ArchiveBoxIcon,
@@ -36,6 +36,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { API_SCOPE } from "../../common/global.ts";
 import { verifyScopes } from "../utils.tsx";
+import FileCard from "../components/public/file/FileCard.tsx";
 
 async function uploadFiles({
     college_id,
@@ -77,9 +78,15 @@ async function getFiles({ college_id }: { college_id: string }) {
     return response.data;
 }
 
-async function deleteFile({ file_uuid }: { file_uuid: string }) {
+async function deleteFile({
+    file_uuid,
+    resource_type,
+}: {
+    file_uuid: string;
+    resource_type: FILE_RESOURCE_TYPE;
+}) {
     const response = await axios.delete(
-        `/api/v3/file/by/${FILE_RESOURCE_TYPE.USER}/${file_uuid}`,
+        `/api/v3/file/by/${resource_type}/${file_uuid}`,
         {
             headers: {
                 "Content-Type": "multipart/form-data",
@@ -337,157 +344,12 @@ export default function QuickTransferPage() {
                         )}
                     >
                         {files?.map((file) => (
-                            <Card
-                                id={`Card-${file.uuid}`}
-                                key={file.uuid}
-                                isFooterBlurred
-                                className="border-none aspect-square relative"
-                                radius="lg"
-                            >
-                                <Image
-                                    id={`Image-${file.uuid}`}
-                                    alt={file.name}
-                                    className="object-cover h-full"
-                                    classNames={{
-                                        wrapper:
-                                            "absolute size-full aspect-square flex justify-center",
-                                    }}
-                                    src={`/api/v3/file/download/${file.uuid}`}
-                                    isBlurred
-                                />
-                                <div
-                                    id="file-extension-icon"
-                                    className="flex items-center size-full justify-center pb-8 transition-colors-opacity"
-                                >
-                                    {file.name
-                                        .split(".")
-                                        .map((text, idx, arr) => {
-                                            // Only return an icon based on the last file extension
-                                            if (idx !== arr.length - 1) {
-                                                return <></>;
-                                            } else {
-                                                switch (text.toLowerCase()) {
-                                                    case "docx":
-                                                    case "doc":
-                                                    case "pdf":
-                                                    case "txt":
-                                                        return (
-                                                            <DocumentTextIcon className="size-24" />
-                                                        );
-                                                    case "stl":
-                                                    case "3mf":
-                                                    case "obj":
-                                                    case "step":
-                                                    case "stp":
-                                                    case "f3d":
-                                                        return (
-                                                            <CubeTransparentIcon className="size-24" />
-                                                        );
-                                                    case "xlsx":
-                                                    case "xls":
-                                                    case "csv":
-                                                    case "tsv":
-                                                        return (
-                                                            <DocumentChartBarIcon className="size-24" />
-                                                        );
-                                                    case "zip":
-                                                    case "gz":
-                                                    case "7z":
-                                                    case "dmg":
-                                                    case "pkg":
-                                                        return (
-                                                            <ArchiveBoxIcon className="size-24" />
-                                                        );
-                                                    case "dng":
-                                                    case "heic":
-                                                    case "raw":
-                                                    case "heif":
-                                                        return (
-                                                            <PhotoIcon className="size-24" />
-                                                        );
-                                                    case "mov":
-                                                    case "mp4":
-                                                    case "avi":
-                                                    case "mkv":
-                                                        return (
-                                                            <FilmIcon className="size-24" />
-                                                        );
-                                                    case "mp3":
-                                                    case "wav":
-                                                    case "flac":
-                                                    case "aac":
-                                                        return (
-                                                            <MusicalNoteIcon className="size-24" />
-                                                        );
-                                                    case "png":
-                                                    case "gif":
-                                                    case "jpg":
-                                                    case "jpeg":
-                                                    case "webp":
-                                                    case "svg":
-                                                        return <></>; // No icon shown for images
-                                                    case "abe":
-                                                        return (
-                                                            <IdentificationIcon className="size-24" />
-                                                        );
-                                                }
-                                                return (
-                                                    <DocumentIcon className="size-24" />
-                                                );
-                                            }
-                                        })}
-                                </div>
-                                <CardFooter
-                                    className={clsx(
-                                        "justify-between bg-default-300/40",
-                                        "border-1 py-1 border-white/20",
-                                        "absolute before:rounded-xl",
-                                        "rounded-large bottom-1",
-                                        "w-[calc(100%_-_8px)]",
-                                        "shadow-small ml-1 z-10",
-                                    )}
-                                >
-                                    <p
-                                        className={clsx(
-                                            "text-tiny text-white/80",
-                                            "text-ellipsis overflow-hidden",
-                                            "hover:z-50 hover:overflow-visible",
-                                            "hover:bg-white/20 fixed max-w-[calc(100%_-_104px)]",
-                                            "hover:max-w-fit p-1 rounded-md transition-colors-opacity",
-                                        )}
-                                    >
-                                        {file.name}
-                                    </p>
-                                    <a
-                                        href={`/api/v3/file/download/${file.uuid}`}
-                                        download={file.name}
-                                    >
-                                        <Button
-                                            className="text-tiny text-white bg-black/20 hover:bg-black/30"
-                                            color="default"
-                                            radius="lg"
-                                            size="sm"
-                                            variant="flat"
-                                        >
-                                            Download
-                                        </Button>
-                                    </a>
-                                </CardFooter>
-                                <Button
-                                    isIconOnly
-                                    size="sm"
-                                    variant="flat"
-                                    color="danger"
-                                    className="absolute top-2 right-2 z-20 text-white"
-                                    onPress={() =>
-                                        deleteMutation.mutate({
-                                            file_uuid: file.uuid,
-                                        })
-                                    }
-                                >
-                                    <TrashIcon className="size-5" />
-                                </Button>
-                            </Card>
+                            <FileCard
+                                file={file}
+                                resource_type={FILE_RESOURCE_TYPE.USER}
+                                deleteMutation={deleteMutation}
+                                showFooter
+                            />
                         ))}
                     </div>
                 </div>

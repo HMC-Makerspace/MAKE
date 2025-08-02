@@ -55,6 +55,19 @@ export default function WorkshopPage() {
                                 editable={false}
                             />
                         </div>
+                        <CardFooter>
+                            <p
+                                className={clsx(
+                                    "text-tiny text-white/80",
+                                    "text-ellipsis overflow-hidden",
+                                    "hover:z-50 hover:overflow-visible",
+                                    "hover:bg-white/20 fixed max-w-[calc(100%_-_104px)]",
+                                    "hover:max-w-fit p-1 rounded-md transition-colors-opacity",
+                                )}
+                            >
+                                {workshop.title}
+                            </p>
+                        </CardFooter>
                     </Card>
                 ))}
             </div>

@@ -148,7 +148,7 @@ export default function MachineStatus({
                     "bg-default-100 py-2 px-2 mt-2 gap-1",
                     (!machine.documents || machine.documents.length == 0) &&
                         editable != MACHINE_EDIT_LEVEL.FULL &&
-                        "md:h-[158px]",
+                        "md:h-[130px]",
                 )}
                 size="lg"
                 isDisabled={editable === MACHINE_EDIT_LEVEL.STATIC}
@@ -178,7 +178,7 @@ export default function MachineStatus({
                 )}
                 {/* If count > 1 and <= max_count, show status as a grid of colored boxes */}
                 {machine.count > 1 && machine.count <= max_count && (
-                    <div className="w-full grid p-2 gap-4 grid-cols-12 grid-rows-2">
+                    <div className="w-full grid p-2 gap-4 grid-cols-12 grid-rows-2 xl:grid-cols-6 2xl:grid-cols-12">
                         {machine.instances.map((instance, i) => (
                             <span
                                 key={`machine-${machine.uuid}-big-status-${i}-${machine.uuid}`}

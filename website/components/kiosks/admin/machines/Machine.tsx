@@ -139,7 +139,7 @@ export default function Machine({
         >
             <div
                 className={clsx(
-                    "w-full xl:w-2/5 h-full bg-default-300 rounded-md relative",
+                    "w-full xl:min-w-2/5 h-full bg-default-300 rounded-md relative",
                     !fullEdit &&
                         (!machine.required_certifications ||
                             machine.required_certifications.length == 0) &&
@@ -192,7 +192,12 @@ export default function Machine({
                                                     cert.certification_uuid
                                                 }
                                                 certifications={certifications}
-                                                level={cert.required_level > 0 ? cert.required_level : undefined}                                           />
+                                                level={
+                                                    cert.required_level > 0
+                                                        ? cert.required_level
+                                                        : undefined
+                                                }
+                                            />
                                         ),
                                     )}
                             </div>
@@ -200,7 +205,7 @@ export default function Machine({
                     </div>
                 </div>
             </div>
-            <div className="flex flex-col w-full xl:w-3/5 justify-between">
+            <div className="flex flex-col w-full justify-between">
                 {fullEdit ? (
                     <>
                         <Input

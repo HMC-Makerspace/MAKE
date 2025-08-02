@@ -860,7 +860,7 @@ router.delete(
  */
 router.delete(
     /\/by\/(workshop|area|machine)\/(.+)/,
-    async (req: Request, res: Response) => {
+    async (req: Request, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = req.user?.uuid as string;
         // Get the resource type and UUID from the URL
@@ -914,7 +914,7 @@ router.delete(
                             error_message === "Successfully deleted file"
                         ) {
                             req.log.debug("Deleted file successfully.");
-                            res.status(StatusCodes.OK).json(deleted_file);
+                            res.status(StatusCodes.OK).json({});
                         } else {
                             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                                 error: error_message,
