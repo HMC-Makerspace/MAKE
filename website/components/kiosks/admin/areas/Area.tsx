@@ -124,6 +124,7 @@ export default function Area({
                 "w-full min-h-fit h-fit p-4 gap-4 relative",
                 area.reserved && "opacity-75",
             )}
+            shadow="none"
         >
             {!fullEdit && area.reserved && (
                 <div

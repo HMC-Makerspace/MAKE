@@ -374,25 +374,20 @@ function EditRoleModal({
                                         return (
                                             // Otherwise, show the selected scopes in a flexbox
                                             <div className="flex flex-wrap gap-1 p-2">
-                                                {selectedKeys.map(
-                                                    (scope) => {
-                                                        return scope.key &&
-                                                            scope.textValue ? (
-                                                            <APIScope
-                                                                key={
-                                                                    scope.key
-                                                                }
-                                                                descriptor={{
-                                                                    scope: scope.key as API_SCOPE,
-                                                                    label: scope.textValue,
-                                                                    description:
-                                                                        "",
-                                                                }}
-                                                                size="sm"
-                                                            />
-                                                        ) : null;
-                                                    },
-                                                )}
+                                                {selectedKeys.map((scope) => {
+                                                    return scope.key &&
+                                                        scope.textValue ? (
+                                                        <APIScope
+                                                            key={scope.key}
+                                                            descriptor={{
+                                                                scope: scope.key as API_SCOPE,
+                                                                label: scope.textValue,
+                                                                description: "",
+                                                            }}
+                                                            size="sm"
+                                                        />
+                                                    ) : null;
+                                                })}
                                             </div>
                                         );
                                     }
@@ -406,9 +401,7 @@ function EditRoleModal({
                                         {section.scopes.map(
                                             (scope_descriptor) => (
                                                 <SelectItem
-                                                    key={
-                                                        scope_descriptor.scope
-                                                    }
+                                                    key={scope_descriptor.scope}
                                                     textValue={
                                                         scope_descriptor.label
                                                     }
@@ -430,7 +423,7 @@ function EditRoleModal({
                                 type="number"
                                 label="Display Hierarchy"
                                 name="display_hierarchy"
-                                placeholder="Enter a hierarchy level, larger displays above smaller..."
+                                placeholder="Enter a hierarchy level, smaller displays above larger..."
                                 value={
                                     displayHierarchy
                                         ? displayHierarchy.toString()

@@ -1,11 +1,12 @@
 import React from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 
 // Pages
 import HomePage from "./pages/Home";
-import InventoryPage from "./pages/Inventory";
+import CertificationsPage from "./pages/Certifications";
 import AreasPage from "./pages/Areas";
 import SchedulePage from "./pages/Schedule";
+import InventoryPage from "./pages/Inventory";
 import WorkshopPage from "./pages/Workshop";
 import QuickTransferPage from "./pages/QuickTransfer";
 
@@ -27,12 +28,13 @@ const App: React.FC = () => {
     return (
         <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/inventory" element={<InventoryPage />} />
+            <Route path="/certifications" element={<CertificationsPage />} />
             <Route path="/areas" element={<AreasPage />} />
             <Route path="/schedule" element={<SchedulePage />} />
+            <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/workshops" element={<WorkshopPage />} />
             <Route path="/transfer" element={<QuickTransferPage />} />
-            <Route path="/saml" element={<Navigate to="/api/v3/saml" />} />
+
             {/* Kiosks */}
             <Route path="/admin" element={<AdminKiosk />} />
             <Route path="/admin/users" element={<UsersKiosk />} />

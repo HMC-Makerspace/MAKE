@@ -175,14 +175,19 @@ export const API_SCOPE_SECTIONS: {
                 description: "Access to schedule kiosk",
             },
             {
-                scope: API_SCOPE.SHIFT_KIOSK,
-                label: "Shift Kiosk",
-                description: "Access to shift kiosk",
-            },
-            {
                 scope: API_SCOPE.WORKSHOP_KIOSK,
                 label: "Workshop Kiosk",
                 description: "Access to workshop kiosk",
+            },
+            {
+                scope: API_SCOPE.CHECKOUT_KIOSK,
+                label: "Checkout Kiosk",
+                description: "Access to checkout kiosk",
+            },
+            {
+                scope: API_SCOPE.INVENTORY_KIOSK,
+                label: "Inventory Kiosk",
+                description: "Access to inventory kiosk",
             },
             {
                 scope: API_SCOPE.RESTOCK_KIOSK,

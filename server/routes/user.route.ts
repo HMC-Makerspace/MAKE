@@ -269,12 +269,13 @@ router.delete(
 router.patch(
     "/by/id/:id/grant/certification/:cert_uuid/:level",
     async (
-        req: Request<{ college_id: string; cert_uuid: string; level: number }>,
+        req: Request<{ id: string; cert_uuid: string; level: number }>,
         res: UserResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = req.user?.uuid as string;
-        const college_id = req.params.college_id;
+        const requesting_uuid =
+            (req.user?.uuid as string) ?? headers.requesting_uuid;
+        const college_id = req.params.id;
         const cert_uuid = req.params.cert_uuid;
         const level = req.params.level ?? 1;
         req.log.debug({
@@ -284,11 +285,34 @@ router.patch(
         // If no requesting user_uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
-                "No requesting_uuid was provided while granting cert from  " +
+                "No requesting_uuid was provided while granting cert from " +
                     `user with id ${college_id} cert with uuid ${cert_uuid}.`,
             );
             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
+        }
+        console.log(req.user);
+        // No user, check passkey authorization
+        if (!req.user?.uuid) {
+            const requesting_user = await getUser(requesting_uuid, true);
+
+            if (
+                !requesting_user ||
+                !requesting_user.passkey ||
+                headers.passkey !== requesting_user.passkey
+            ) {
+                // Failed to authorize via passkey
+                req.log.warn({
+                    msg: "No user session exists, and provided passkey authorization was invalid.",
+                    requesting_uuid: requesting_uuid,
+                });
+                res.status(StatusCodes.UNAUTHORIZED).json({
+                    error:
+                        "No user session exists, and provided passkey authorization was invalid. Please" +
+                        " provide a requesting_uuid and passkey header in your request and try again",
+                });
+                return;
+            }
         }
         // If the user is authorized, grant the cert
         if (
@@ -547,7 +571,7 @@ router.get("/self", async (req: Request, res: UserResponse) => {
     const requesting_uuid = req.user?.uuid;
     // const requesting_uuid = req.user?.uuid as string;
     if (!requesting_uuid) {
-        req.log.warn("No requesting_uuid was provided while getting self");
+        // req.log.warn("No requesting_uuid was provided while getting self");
         res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
         return;
     }
@@ -583,9 +607,9 @@ router.get("/self/scopes", async (req: Request, res: UserScopesResponse) => {
     const headers = req.headers as VerifyRequestHeader;
     const requesting_uuid = req.user?.uuid as string;
     if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while getting own scopes",
-        );
+        // req.log.warn(
+        //     "No requesting_uuid was provided while getting own scopes",
+        // );
         res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
         return;
     }
@@ -603,6 +627,23 @@ router.get("/self/scopes", async (req: Request, res: UserScopesResponse) => {
 
     res.status(StatusCodes.OK).json(scopes);
 });
+
+router.get(
+    "/authorized",
+    async (req: Request, res: Response<{ isAuthorized: boolean }>) => {
+        const user_uuid = req.user?.uuid;
+
+        if (user_uuid) {
+            res.status(StatusCodes.OK).json({
+                isAuthorized: true,
+            });
+        } else {
+            res.status(StatusCodes.OK).json({
+                isAuthorized: false,
+            });
+        }
+    },
+);
 
 /**
  * . This is a public route, but a

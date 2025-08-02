@@ -15,6 +15,7 @@ export default function UserInfo({
     className = "",
     size = "md",
     isLoading = false,
+    endContent,
 }: {
     user_uuid?: UserUUID;
     user?: TUser;
@@ -23,6 +24,7 @@ export default function UserInfo({
     className?: string;
     size?: "sm" | "md" | "lg";
     isLoading?: boolean;
+    endContent?: React.ReactNode;
 }) {
     const { data: queriedUser, isLoading: userLoading } = useQuery<TUser>({
         queryKey: ["user", user_uuid],
@@ -38,12 +40,6 @@ export default function UserInfo({
         refetchOnWindowFocus: false,
         enabled: !roles && !!user_uuid,
     });
-
-    // const { data: queriedCerts } = useQuery<TCertification[]>({
-    //     queryKey: ["certification"],
-    //     refetchOnWindowFocus: false,
-    //     enabled: !certs,
-    // });
 
     const user_data = user || queriedUser;
     const role_data = roles || queriedRoles;
@@ -92,7 +88,7 @@ export default function UserInfo({
             </div>
             <div
                 className={clsx(
-                    "bg-default-200 p-2 text-center",
+                    "bg-default-200 p-2 text-center min-h-fit",
                     "col-span-full rounded-md overflow-x-auto",
                     user_uuid ? "text-default-700" : "text-default-400",
                     size === "sm"
@@ -149,6 +145,7 @@ export default function UserInfo({
                     </div>
                 )}
             </div>
+            {endContent}
         </div>
     );
 }

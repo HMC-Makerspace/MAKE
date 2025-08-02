@@ -8,6 +8,7 @@ node_modules
 .vscode/
 bun.lockb
 bun.lock
+package-lock.json
 temp/*
 !temp/favicon.ico
 uploads/*

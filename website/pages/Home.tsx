@@ -13,8 +13,8 @@ export default function HomePage() {
         refetchOnMount: false,
     });
     return (
-        <DefaultLayout className="px-8 py-0" pageHref="/">
-            <div className="relative mx-6 flex flex-col items-center justify-center h-full">
+        <DefaultLayout className="px-4" pageHref="/">
+            <div className="relative mx-2 flex flex-col items-center justify-center h-full">
                 <ActiveAlert />
                 <div
                     className={clsx(
@@ -26,9 +26,9 @@ export default function HomePage() {
                 </div>
                 <MAKE
                     className={clsx(
-                        "text-[7rem] sm:text-[10rem] tracking-widest",
+                        "text-[7.5rem] sm:text-[10rem] tracking-widest",
                         "font-black text-foreground-600",
-                        "pl-4 -mt-8",
+                        "-mt-8",
                     )}
                     hover={false}
                     href={""}
@@ -66,7 +66,8 @@ export default function HomePage() {
                                         </svg>
                                     }
                                     onPress={() => {
-                                        window.location.href = config.general.discord_url ?? ""
+                                        window.location.href =
+                                            config.general.discord_url ?? "";
                                     }}
                                     className="font-medium text-default-50"
                                 >
@@ -91,7 +92,8 @@ export default function HomePage() {
                                         </svg>
                                     }
                                     onPress={() => {
-                                        window.location.href = config.general.instagram_url ?? ""
+                                        window.location.href =
+                                            config.general.instagram_url ?? "";
                                     }}
                                     className="font-medium text-default-50"
                                 >
@@ -116,7 +118,8 @@ export default function HomePage() {
                                         </svg>
                                     }
                                     onPress={() => {
-                                        window.location.href = config.general.tiktok_url ?? ""
+                                        window.location.href =
+                                            config.general.tiktok_url ?? "";
                                     }}
                                     className="font-medium text-default-50"
                                 >

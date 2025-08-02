@@ -41,7 +41,7 @@ import {
     checkoutAvailabilityCron,
     checkoutEmailCron,
 } from "controllers/checkout.controller";
-import { createUser, getUserByCollegeID } from "controllers/user.controller";
+import { createUser, getUserByEmail } from "controllers/user.controller";
 
 // @ts-expect-error Static asset loading using Vite
 import favicon from "common/favicon.ico";
@@ -87,6 +87,7 @@ app.use(
     cors(options),
     session({
         secret: process.env.SESSION_SECRET,
+        rolling: true,
         cookie: {
             secure: process.env.NODE_ENV === "production",
             httpOnly: true,
@@ -119,7 +120,6 @@ if (process.env.NODE_ENV === "production") {
     const cert_string = cert
         .toString()
         .replace(/-+(BEGIN|END) CERTIFICATE-+/g, "")
-        .replace("\n", "");
 
     // Configure SAML Strategy
     passport.use(
@@ -128,25 +128,28 @@ if (process.env.NODE_ENV === "production") {
                 passReqToCallback: true,
                 entryPoint: process.env.IDP_ENTRY_POINT,
                 callbackUrl: process.env.IDP_CALLBACK, // e.g., http://localhost:3000/login/callback
-                issuer: "make-saml",
+                issuer: process.env.IDP_ISSUER,
                 cert: cert_string,
+                identifierFormat: process.env.IDP_ID_FORMAT,
             },
             async (req, profile, done) => {
-                if (!profile || !profile.college_id) {
-                    req.log.fatal({ msg: "Invalid profile", profile: profile });
-                    return;
+                if (!profile || !profile.email) {
+                    req.log.fatal({ msg: "Invalid profile", profile: profile, req: req });
+                    done(new Error("No profile found"))
+                    return
                 }
-                const college_id = profile.college_id as string;
-                const user_obj = await getUserByCollegeID(college_id);
+                const email = profile.email as string;
+                const user_obj = await getUserByEmail(email);
                 if (!user_obj) {
-                    req.log.info(
-                        `User with college id ${college_id} not found, creating`,
-                    );
+                    req.log.info({
+                        msg:`User with email ${email} not found, creating`,
+                        profile: profile
+                    });
                     const new_user_obj = {
                         uuid: crypto.randomUUID(),
-                        name: profile.name as string,
+                        name: profile.displayName as string,
                         email: profile.email as string,
-                        college_id: profile.college_id as string,
+                        college_id: "",  // If not provided by IDP, fill in later
                         active_roles: [],
                         past_roles: [],
                         active_certificates: [],
@@ -184,7 +187,7 @@ if (
                 res.redirect("/");
             }
             req.login({ uuid: user_uuid }, (err) => {
-                req.log.info({ msg: "Logged in", err: err });
+                req.log.info({ msg: "Insecure login used", err: err });
                 if (err) {
                     // Pass errors to Express
                     next(err);
@@ -202,13 +205,12 @@ if (
 // Logout route
 app.get("/logout", (req, res, next) => {
     req.logout((err) => {
-        if (err) {
-            // Pass errors to express
-            next(err);
-        } else {
+        if (err) { return next(err) }
+        req.session.destroy((err) => {
+            if (err) return next(err)
+            res.clearCookie('connect.sid') // express-session cookie
             // If successfully logged out, redirect to the main page.
-            res.redirect("/");
-        }
+        });
     });
 });
 
