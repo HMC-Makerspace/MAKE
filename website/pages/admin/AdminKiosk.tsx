@@ -112,10 +112,7 @@ export default function AdminKiosk() {
         refetchOnMount: false,
     });
 
-    const users_without_self = users?.filter((u) => u.uuid !== user_uuid) ?? [];
-    const users_with_full_self = self
-        ? users_without_self.concat([self])
-        : users_without_self;
+    const users_with_full_self = self ? users?.map((u) => u.uuid === user_uuid ? self : u) ?? [] : [];
 
     const { data: schedule, isLoading: scheduleLoading } = useQuery<TSchedule>({
         queryKey: ["schedule", "active", "shifts", "by", "user", user_uuid],
@@ -233,7 +230,8 @@ export default function AdminKiosk() {
                                         // @ts-ignore This property does exist...
                                         const minShifts = blurEvent.target.value;
                                         if (
-                                            !schedule || !user_uuid ||
+                                            !schedule ||
+                                            !user_uuid ||
                                             minShifts === undefined
                                         ) {
                                             return;
@@ -267,7 +265,8 @@ export default function AdminKiosk() {
                                         // @ts-ignore This property does exist...
                                         const maxShifts = blurEvent.target.value;
                                         if (
-                                            !schedule || !user_uuid ||
+                                            !schedule ||
+                                            !user_uuid ||
                                             maxShifts === undefined
                                         ) {
                                             return;
@@ -305,113 +304,111 @@ export default function AdminKiosk() {
                             <div className="hidden lg:block flex-1 ml-auto" />
                         )}
                     </div>
-                    {
-                        isLoading ? (
-                            <Spinner />
-                        ) : (
-                            <div className="h-full">
-                                <Schedule
-                                    schedule={schedule}
-                                    users={users_with_full_self}
-                                    roles={[]}
-                                    config={config}
-                                    isLoading={isLoading}
-                                    selectedUser={user_uuid}
-                                    setSelectedShifts={onShiftSelect}
-                                    type={
-                                        selectedTab === "worker_availability" ||
-                                        selectedTab === "worker_view"
-                                            ? selectedTab
-                                            : undefined
-                                    }
-                                    hideMissingShifts
-                                />
+                    {isLoading ? (
+                        <Spinner />
+                    ) : (
+                        <div className="h-full">
+                            <Schedule
+                                schedule={schedule}
+                                users={users_with_full_self}
+                                roles={[]}
+                                config={config}
+                                isLoading={isLoading}
+                                selectedUser={self}
+                                setSelectedShifts={onShiftSelect}
+                                type={
+                                    selectedTab === "worker_availability" ||
+                                    selectedTab === "worker_view"
+                                        ? selectedTab
+                                        : undefined
+                                }
+                                hideMissingShifts
+                            />
+                        </div>
+                    )}
+                    {selectedTab === "worker_availability" && (
+                        <div
+                            className={clsx(
+                                "flex lg:hidden p-2 bg-content1",
+                                "w-full rounded-lg items-center",
+                                "gap-2 justify-between",
+                            )}
+                        >
+                            <div className="whitespace-nowrap pr-2">
+                                Requested Shift Range:
                             </div>
-                        )
-                    }
-                    {
-                        selectedTab === "worker_availability" && (
-                            <div
-                                className={clsx(
-                                    "flex lg:hidden p-2 bg-content1",
-                                    "w-full rounded-lg items-center",
-                                    "gap-2 justify-between",
-                                )}
-                            >
-                                <div className="whitespace-nowrap pr-2">
-                                    Requested Shift Range:
-                                </div>
-                                <NumberInput
-                                    size="sm"
-                                    aria-label="Min shift count"
-                                    startContent={
-                                        <div className="pl-1 text-xs">Min</div>
+                            <NumberInput
+                                size="sm"
+                                aria-label="Min shift count"
+                                startContent={
+                                    <div className="pl-1 text-xs">Min</div>
+                                }
+                                minValue={0}
+                                defaultValue={
+                                    self?.work_schedules?.find(
+                                        (sch) =>
+                                            sch.schedule === schedule?.uuid,
+                                    )?.min_shift_count
+                                }
+                                className="w-20 max-h-[44px]"
+                                classNames={{
+                                    inputWrapper: "p-1",
+                                    input: "text-center",
+                                }}
+                                onBlur={(blurEvent) => {
+                                    // @ts-ignore This property does exist...
+                                    const minShifts = blurEvent.target.value;
+                                    if (
+                                        !schedule ||
+                                        !user_uuid ||
+                                        minShifts === undefined
+                                    ) {
+                                        return;
                                     }
-                                    minValue={0}
-                                    defaultValue={
-                                        self?.work_schedules?.find(
-                                            (sch) =>
-                                                sch.schedule === schedule?.uuid,
-                                        )?.min_shift_count
+                                    shiftCountMutation.mutate({
+                                        user_uuid: user_uuid,
+                                        schedule_uuid: schedule.uuid,
+                                        min_shift_count: minShifts,
+                                    });
+                                }}
+                            />
+                            <NumberInput
+                                size="sm"
+                                aria-label="Max shift count"
+                                startContent={
+                                    <div className="pl-1 text-xs">Max</div>
+                                }
+                                minValue={0}
+                                defaultValue={
+                                    self?.work_schedules?.find(
+                                        (sch) =>
+                                            sch.schedule === schedule?.uuid,
+                                    )?.max_shift_count
+                                }
+                                className="w-20 max-h-[44px]"
+                                classNames={{
+                                    inputWrapper: "p-1",
+                                    input: "text-center",
+                                }}
+                                onBlur={(blurEvent) => {
+                                    // @ts-ignore This property does exist...
+                                    const maxShifts = blurEvent.target.value;
+                                    if (
+                                        !schedule ||
+                                        !user_uuid ||
+                                        maxShifts === undefined
+                                    ) {
+                                        return;
                                     }
-                                    className="w-20 max-h-[44px]"
-                                    classNames={{
-                                        inputWrapper: "p-1",
-                                        input: "text-center",
-                                    }}
-                                    onBlur={(blurEvent) => {
-                                        // @ts-ignore This property does exist...
-                                        const minShifts = blurEvent.target.value;
-                                        if (
-                                            !schedule || !user_uuid ||
-                                            minShifts === undefined
-                                        ) {
-                                            return;
-                                        }
-                                        shiftCountMutation.mutate({
-                                            user_uuid: user_uuid,
-                                            schedule_uuid: schedule.uuid,
-                                            min_shift_count: minShifts,
-                                        });
-                                    }}
-                                />
-                                <NumberInput
-                                    size="sm"
-                                    aria-label="Max shift count"
-                                    startContent={
-                                        <div className="pl-1 text-xs">Max</div>
-                                    }
-                                    minValue={0}
-                                    defaultValue={
-                                        self?.work_schedules?.find(
-                                            (sch) =>
-                                                sch.schedule === schedule?.uuid,
-                                        )?.max_shift_count
-                                    }
-                                    className="w-20 max-h-[44px]"
-                                    classNames={{
-                                        inputWrapper: "p-1",
-                                        input: "text-center",
-                                    }}
-                                    onBlur={(blurEvent) => {
-                                        // @ts-ignore This property does exist...
-                                        const maxShifts = blurEvent.target.value;
-                                        if (
-                                            !schedule || !user_uuid ||
-                                            maxShifts === undefined
-                                        ) {
-                                            return;
-                                        }
-                                        shiftCountMutation.mutate({
-                                            user_uuid: user_uuid,
-                                            schedule_uuid: schedule.uuid,
-                                            max_shift_count: maxShifts,
-                                        });
-                                    }}
-                                />
-                            </div>
-                        )
-                    }
+                                    shiftCountMutation.mutate({
+                                        user_uuid: user_uuid,
+                                        schedule_uuid: schedule.uuid,
+                                        max_shift_count: maxShifts,
+                                    });
+                                }}
+                            />
+                        </div>
+                    )}
                 </div>
                 {config && users && schedule && (
                     <Modal
@@ -430,7 +427,7 @@ export default function AdminKiosk() {
                                     <Form
                                         onSubmit={(e) => {
                                             if (!user_uuid) {
-                                                return
+                                                return;
                                             }
                                             e.preventDefault();
                                             const formData = new FormData(
@@ -632,8 +629,10 @@ export default function AdminKiosk() {
                                                                 variant="bordered"
                                                                 className="col-span-2"
                                                                 onPress={() => {
-                                                                    if (!user_uuid) {
-                                                                        return
+                                                                    if (
+                                                                        !user_uuid
+                                                                    ) {
+                                                                        return;
                                                                     }
                                                                     const type =
                                                                         event.type ===

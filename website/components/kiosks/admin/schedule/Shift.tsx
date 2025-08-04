@@ -192,9 +192,13 @@ export default function Shift({
         mutationFn: toggleWorkerAvailability,
         onSuccess: (result: TUser) => {
             queryClient.setQueryData(["user", result.uuid], result);
-            queryClient.setQueryData(["user"], (old: TUser[]) =>
-                old.map((u) => (u.uuid === result.uuid ? result : u)),
+            queryClient.setQueryData(["user"], (old?: TUser[]) =>
+                (old ?? []).map((u) => (u.uuid === result.uuid ? result : u)),
             );
+            // Naively assume worker availability is updating self, since that
+            // is the only current use of the availability modal.
+            // TODO: Update later to add a isSelf parameter?
+            queryClient.setQueryData(["user", "self"], result);
         },
     });
 

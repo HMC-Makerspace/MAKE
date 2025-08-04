@@ -13,7 +13,7 @@ export default function Schedule({
     roles,
     config,
     isLoading,
-    selectedUser = null,
+    selectedUser,
     setSelectedUsers = () => {},
     selectedShifts = new Set(),
     setSelectedShifts,
@@ -25,7 +25,7 @@ export default function Schedule({
     roles: TUserRole[];
     config: TConfig;
     isLoading: boolean;
-    selectedUser?: UserUUID | null;
+    selectedUser?: TUser;
     setSelectedUsers?: (users: Selection) => void;
     selectedShifts?: Set<string>;
     setSelectedShifts?: (shifts: Set<string>) => void;
@@ -56,10 +56,6 @@ export default function Schedule({
     const days = config.schedule.days_open ?? [0, 1, 2, 3, 4, 5, 6];
 
     const [dragging, setDragging] = useState(false);
-
-    const selected_user = selectedUser
-        ? users.find((u) => u.uuid === selectedUser)
-        : undefined;
 
     const handleKeyPress = useCallback((event: KeyboardEvent) => {
         if (event.key === "Escape") {
@@ -197,7 +193,7 @@ export default function Schedule({
                                                 day={day}
                                                 sec_start={row_start_sec}
                                                 sec_end={row_end_sec}
-                                                selected_user={selected_user}
+                                                selected_user={selectedUser}
                                                 setSelectedUsers={
                                                     setSelectedUsers
                                                 }
