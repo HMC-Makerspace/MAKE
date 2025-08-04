@@ -39,7 +39,7 @@ export default function WorkshopPage() {
     return (
         <DefaultLayout className="p-8" pageHref="/workshops">
             <ToastProvider />
-            {!workshops && (
+            {!workshops || workshops.length == 0 && (
                 <div className="size-full flex items-center justify-center">
                     We're still finalizing our workshops for the semester,
                     please check back soon!
