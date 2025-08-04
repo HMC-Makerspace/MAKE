@@ -102,7 +102,7 @@ export default function ImageCarousel({
     }
 
     return (
-        <div className="relative h-full min-h-[150px] min-w-[150px] aspect-square content-center">
+        <div className="relative h-full min-h-[150px] min-w-[150px] content-center">
             {images.length > 1 && (
                 <Button
                     className="absolute left-1 top-0 bottom-0 my-auto"
