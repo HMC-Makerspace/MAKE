@@ -278,6 +278,7 @@ export default function QuickTransferPage() {
                         <Input
                             id="id-text-box"
                             fullWidth={false}
+                            autoFocus
                             label={
                                 <div className="flex gap-2 items-center whitespace-nowrap">
                                     <AcademicCapIcon className="size-5" />

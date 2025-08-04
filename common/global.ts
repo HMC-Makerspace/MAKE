@@ -170,16 +170,6 @@ export const API_SCOPE_SECTIONS: {
                 description: "Access to roles kiosk",
             },
             {
-                scope: API_SCOPE.SCHEDULE_KIOSK,
-                label: "Schedule Kiosk",
-                description: "Access to schedule kiosk",
-            },
-            {
-                scope: API_SCOPE.WORKSHOP_KIOSK,
-                label: "Workshop Kiosk",
-                description: "Access to workshop kiosk",
-            },
-            {
                 scope: API_SCOPE.CHECKOUT_KIOSK,
                 label: "Checkout Kiosk",
                 description: "Access to checkout kiosk",
@@ -195,9 +185,29 @@ export const API_SCOPE_SECTIONS: {
                 description: "Access to restock kiosk",
             },
             {
+                scope: API_SCOPE.WORKSHOP_KIOSK,
+                label: "Workshop Kiosk",
+                description: "Access to workshop kiosk",
+            },
+            {
+                scope: API_SCOPE.SCHEDULE_KIOSK,
+                label: "Schedule Kiosk",
+                description: "Access to schedule kiosk",
+            },
+            {
                 scope: API_SCOPE.CERTIFICATION_KIOSK,
                 label: "Certification Kiosk",
                 description: "Access to certification kiosk",
+            },
+            {
+                scope: API_SCOPE.AREA_KIOSK,
+                label: "Area Kiosk",
+                description: "Access to area kiosk",
+            },
+            {
+                scope: API_SCOPE.MACHINE_KIOSK,
+                label: "Machine Kiosk",
+                description: "Access to machine kiosk",
             },
             {
                 scope: API_SCOPE.SETTINGS_KIOSK,
@@ -447,28 +457,28 @@ export const API_SCOPE_SECTIONS: {
         scopes: [
             {
                 scope: API_SCOPE.GET_ALL_RESTOCKS,
-                label: "Get All Restock Requests",
+                label: "Get All Restocks",
                 description: "Able to view all restock request data",
             },
             {
                 scope: API_SCOPE.GET_RESTOCKS_BY_USER,
-                label: "Get User Restock Requests",
+                label: "Get User Restocks",
                 description: "Able to view all restock requests by a user",
             },
             {
                 scope: API_SCOPE.GET_RESTOCKS_BY_SELF,
-                label: "Get Own Restock Requests",
+                label: "Get Own Restocks",
                 description:
                     "Able to view all restock requests made by oneself",
             },
             {
                 scope: API_SCOPE.CREATE_RESTOCK,
-                label: "Create Restock Request",
+                label: "Create Restock",
                 description: "Able to create new restock requests",
             },
             {
                 scope: API_SCOPE.UPDATE_RESTOCK,
-                label: "Update Restock Request",
+                label: "Update Restock",
                 description: "Able to update all restock requests",
             },
             {
@@ -478,7 +488,7 @@ export const API_SCOPE_SECTIONS: {
             },
             {
                 scope: API_SCOPE.DELETE_RESTOCK,
-                label: "Delete Restock Request",
+                label: "Delete Restock",
                 description: "Able to delete restock requests",
             },
         ],

@@ -55,11 +55,12 @@ const PAGES = [
         href: "/transfer",
         icon: ArrowDownOnSquareIcon,
     },
-    {
-        name: "Checkouts",
-        href: "/checkouts",
-        icon: ShoppingCartIcon,
-    },
+    // TODO: Add back once finished
+    // {
+    //     name: "Checkouts",
+    //     href: "/checkouts",
+    //     icon: ShoppingCartIcon,
+    // },
     {
         name: "FAQ",
         href: "/faq",

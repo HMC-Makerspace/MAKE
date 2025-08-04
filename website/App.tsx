@@ -23,6 +23,7 @@ import AreasKiosk from "./pages/admin/AreasKiosk";
 import MachinesKiosk from "./pages/admin/MachinesKiosk";
 import InventoryKiosk from "./pages/admin/InventoryKiosk";
 import WorkshopKiosk from "./pages/admin/WorkshopsKiosk";
+import FAQPage from "./pages/FAQ";
 
 const App: React.FC = () => {
     return (
@@ -34,6 +35,7 @@ const App: React.FC = () => {
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/workshops" element={<WorkshopPage />} />
             <Route path="/transfer" element={<QuickTransferPage />} />
+            <Route path="/faq" element={<FAQPage />} />
 
             {/* Kiosks */}
             <Route path="/admin" element={<AdminKiosk />} />

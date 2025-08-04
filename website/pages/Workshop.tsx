@@ -39,6 +39,12 @@ export default function WorkshopPage() {
     return (
         <DefaultLayout className="p-8" pageHref="/workshops">
             <ToastProvider />
+            {!workshops && (
+                <div className="size-full flex items-center justify-center">
+                    We're still finalizing our workshops for the semester,
+                    please check back soon!
+                </div>
+            )}
             <div id="master" className="grid grid-cols-2 gap-4">
                 {workshops?.map((workshop) => (
                     <Card
