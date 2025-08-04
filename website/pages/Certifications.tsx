@@ -372,7 +372,7 @@ export default function CertificationsPage() {
                                                 <>
                                                     <div className="font-semibold w-full">
                                                         Level {activeCert.level}{" "}
-                                                        valid for:
+                                                        Certified until:
                                                     </div>
                                                     <div className="whitespace-nowrap">
                                                         {activeValidTime}
