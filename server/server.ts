@@ -210,6 +210,7 @@ app.get("/logout", (req, res, next) => {
             if (err) return next(err)
             res.clearCookie('connect.sid') // express-session cookie
             // If successfully logged out, redirect to the main page.
+            res.redirect("/")
         });
     });
 });
