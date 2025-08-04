@@ -311,7 +311,7 @@ export default function CertificationsPage() {
                         )}
                     </CardHeader>
                     <CardBody className="gap-4">
-                        <div className="md:text-lg">{cert?.description}</div>
+                        <div className="md:text-lg whitespace-pre-line">{cert?.description}</div>
                         {cert?.required_certifications &&
                             cert.required_certifications.length > 0 && (
                                 <div
@@ -398,7 +398,8 @@ export default function CertificationsPage() {
                                             key={`cert-${cert.uuid}-doc-${i}`}
                                             color="primary"
                                             variant="shadow"
-                                            className="w-full"
+                                            className="w-full font-medium"
+                                            size="lg"
                                             href={hasPrereqs ? doc.link : ""}
                                             as={Link}
                                             isExternal

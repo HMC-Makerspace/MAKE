@@ -267,26 +267,26 @@ router.delete(
 );
 
 router.patch(
-    "/by/id/:id/grant/certification/:cert_uuid/:level",
+    "/by/email/:email/grant/certification/:cert_uuid/:level",
     async (
-        req: Request<{ id: string; cert_uuid: string; level: number }>,
+        req: Request<{ email: string; cert_uuid: string; level: number }>,
         res: UserResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid =
             (req.user?.uuid as string) ?? headers.requesting_uuid;
-        const college_id = req.params.id;
+        const email = req.params.email;
         const cert_uuid = req.params.cert_uuid;
         const level = req.params.level ?? 1;
         req.log.debug({
-            msg: `Granting cert to user with id ${college_id} cert with uuid ${cert_uuid}`,
+            msg: `Granting cert to user with id ${email} cert with uuid ${cert_uuid}`,
             requesting_uuid: requesting_uuid,
         });
         // If no requesting user_uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
                 "No requesting_uuid was provided while granting cert from " +
-                    `user with id ${college_id} cert with uuid ${cert_uuid}.`,
+                    `user with id ${email} cert with uuid ${cert_uuid}.`,
             );
             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
@@ -322,20 +322,21 @@ router.patch(
                 API_SCOPE.GRANT_CERTIFICATION,
             )
         ) {
-            const user = await getUserByCollegeID(college_id);
+            const user = await getUserByEmail(email);
             if (!user) {
                 req.log.error(`No user found`);
                 res.status(StatusCodes.NOT_FOUND).json({
-                    error: `No user found by college id ${college_id}.`,
+                    error: `No user found by college id ${email}.`,
                 });
                 return;
             }
-            const updated_user = await grantCertificateToUser(
-                user.uuid,
-                cert_uuid,
-                level,
-            );
-            if (!updated_user) {
+            try {
+                const updated_user = await grantCertificateToUser(
+                    user.uuid,
+                    cert_uuid,
+                    level,
+                );
+                if (!updated_user) {
                 req.log.error(`No cert found with uuid ${cert_uuid}`);
                 res.status(StatusCodes.NOT_FOUND).json({
                     error: `No cert found with uuid ${cert_uuid}.`,
@@ -343,10 +344,19 @@ router.patch(
                 return;
             }
             req.log.debug(
-                `Granted user with id ${college_id} cert with uuid ${cert_uuid}`,
+                `Granted user with id ${email} cert with uuid ${cert_uuid}`,
             );
             // Return a the updated user object
             res.status(StatusCodes.OK).json(updated_user);
+            } catch (e: any) {
+                req.log.debug({
+                    "err": e.message
+                })
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                    "error": e.message
+                })
+            }
+            
         } else {
             // If the user is not authorized, provide a status error
             req.log.warn({

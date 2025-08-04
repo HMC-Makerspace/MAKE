@@ -410,7 +410,6 @@ export default function CheckoutsKiosk() {
                                 canEdit={false}
                                 defaultColumns={[
                                     "name",
-                                    "description",
                                     "max_level",
                                     "seconds_valid_for",
                                     "prerequisites",

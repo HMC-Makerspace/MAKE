@@ -10,6 +10,7 @@ import {
     PopoverContent,
     Select,
     SelectItem,
+    Textarea,
 } from "@heroui/react";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
@@ -303,7 +304,7 @@ export default function EditCertModal({
                                     />
                                 </motion.div>
                             </div>
-                            <Input
+                            <Textarea
                                 type="text"
                                 label="Description"
                                 name="description"
