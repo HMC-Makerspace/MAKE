@@ -19,6 +19,7 @@ export default function FileCard({
     file,
     resource_type,
     deleteMutation,
+    disableDeletion = false,
     showFooter = false,
 }: {
     file: TFile;
@@ -31,6 +32,7 @@ export default function FileCard({
             resource_type: FILE_RESOURCE_TYPE;
         }
     >;
+    disableDeletion?: boolean;
     showFooter?: boolean;
 }) {
     return (
@@ -170,6 +172,7 @@ export default function FileCard({
                         resource_type: resource_type,
                     })
                 }
+                isDisabled={disableDeletion}
             >
                 <TrashIcon className="size-5" />
             </Button>

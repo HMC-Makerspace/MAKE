@@ -137,6 +137,15 @@ export default function QuickTransferPage() {
         refetchOnWindowFocus: false,
         retry: false,
     });
+    const {
+        data: self,
+        isLoading: selfLoading,
+        isError: selfError,
+    } = useQuery<TUser>({
+        queryKey: ["user", "self"],
+        refetchOnWindowFocus: false,
+        retry: false,
+    });
 
     const uploadMutation = useMutation({
         mutationFn: uploadFiles,
@@ -244,9 +253,21 @@ export default function QuickTransferPage() {
     };
 
     const uploadAccess =
-        scopes && verifyScopes(scopes, [API_SCOPE.CREATE_OWN_FILE]);
+        scopes &&
+        verifyScopes(scopes, [
+            API_SCOPE.CREATE_FILE,
+            user && self && user.uuid === self.uuid
+                ? API_SCOPE.CREATE_OWN_FILE
+                : false,
+        ]);
     const deleteAccess =
-        scopes && verifyScopes(scopes, [API_SCOPE.DELETE_OWN_FILE]);
+        scopes &&
+        verifyScopes(scopes, [
+            API_SCOPE.DELETE_FILE,
+            user && self && user.uuid === self.uuid
+                ? API_SCOPE.DELETE_OWN_FILE
+                : false,
+        ]);
 
     return (
         <DefaultLayout className="p-8" pageHref="/transfer">
@@ -321,14 +342,13 @@ export default function QuickTransferPage() {
                                     .getElementById("upload-trigger")
                                     ?.click();
                             }}
-                            isDisabled={!user}
+                            isDisabled={!user || !uploadAccess}
                         >
                             Upload
                         </Button>
                     </div>
                 </div>
                 <div
-                    // Drag Drop Continaner
                     id="card-container"
                     onDrop={dropHandler}
                     onDragOver={dragOverHandler}
@@ -344,14 +364,26 @@ export default function QuickTransferPage() {
                             "grid-cols-2",
                         )}
                     >
-                        {files?.map((file) => (
-                            <FileCard
-                                file={file}
-                                resource_type={FILE_RESOURCE_TYPE.USER}
-                                deleteMutation={deleteMutation}
-                                showFooter
-                            />
-                        ))}
+                        {files && files.length > 0 ? (
+                            files.map((file) => (
+                                <FileCard
+                                    file={file}
+                                    resource_type={FILE_RESOURCE_TYPE.USER}
+                                    deleteMutation={deleteMutation}
+                                    disableDeletion={!deleteAccess}
+                                    showFooter
+                                />
+                            ))
+                        ) : (
+                            <div
+                                id="blurb-box"
+                                className="col-span-full pt-2 pl-2 font-mono"
+                            >
+                                To download files, please enter your college ID.
+                                Please login to upload, delete, and edit your
+                                own files.
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
