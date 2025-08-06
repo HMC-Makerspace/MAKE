@@ -9,6 +9,7 @@ import { User } from "models/user.model";
 import { Area } from "models/area.model";
 import { Workshop } from "models/workshop.model";
 import { Machine } from "models/machine.model";
+import { Logger } from "pino";
 
 /**
  * Get all files in the database
@@ -336,7 +337,9 @@ export async function deleteFile(file_uuid: UUID): Promise<TFile | null> {
             throw new Error("User not found");
         }
         // Remove the file's UUID from the user's file list and save the user
-        user.files = user.files!.filter((file_uuid) => file_uuid !== file.uuid);
+        user.files = (user.files ?? []).filter(
+            (file_uuid) => file_uuid !== file.uuid,
+        );
         await user.save();
     } else if (file.resource_type === FILE_RESOURCE_TYPE.AREA) {
         // If the file is an area image, remove the file's UUID from the area's image list
@@ -347,7 +350,7 @@ export async function deleteFile(file_uuid: UUID): Promise<TFile | null> {
             throw new Error("Area not found");
         }
         // Remove the file's UUID from the area's image list and save the area
-        area.images = area.images!.filter(
+        area.images = (area.images ?? []).filter(
             (file_uuid) => file_uuid !== file.uuid,
         );
         await area.save();
@@ -362,7 +365,7 @@ export async function deleteFile(file_uuid: UUID): Promise<TFile | null> {
             throw new Error("Machine not found");
         }
         // Remove the file's UUID from the machine's image list and save the machine
-        machine.images = machine.images!.filter(
+        machine.images = (machine.images ?? []).filter(
             (file_uuid) => file_uuid !== file.uuid,
         );
         await machine.save();
@@ -377,7 +380,7 @@ export async function deleteFile(file_uuid: UUID): Promise<TFile | null> {
             throw new Error("Workshop not found");
         }
         // Remove the file's UUID from the workshop's image list and save the workshop
-        workshop.images = workshop.images!.filter(
+        workshop.images = (workshop.images ?? []).filter(
             (file_uuid) => file_uuid !== file.uuid,
         );
         await workshop.save();
@@ -397,4 +400,34 @@ export async function updateFile(file_obj: TFile): Promise<TFile | null> {
     return Files.findOneAndReplace({ uuid: file_obj.uuid }, file_obj, {
         returnDocument: "after",
     });
+}
+
+export async function clearExpiredFilesCron(logger: Logger) {
+    logger.info("Clearing expired files.");
+    const Files = mongoose.model("File", File);
+    const now = Date.now() / 1000;
+
+    // Find all files that have expired
+    const expired_files = await Files.find({
+        timestamp_expires: { $lte: now },
+    });
+
+    for (const file of expired_files) {
+        // Delete the actual file on the server
+        await fs.unlink(file.path).catch((err) =>
+            logger.error({
+                msg: `Unable to unlink file with uuid ${file.uuid} at path ${file.path}`,
+                err: err,
+            }),
+        );
+        // Delete the file's metadata
+        try {
+            await deleteFile(file.uuid);
+        } catch (err) {
+            logger.error({
+                msg: `Error deleting file on server with uuid ${file.uuid}`,
+                err: err,
+            });
+        }
+    }
 }

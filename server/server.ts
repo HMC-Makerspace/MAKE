@@ -45,6 +45,7 @@ import { createUser, getUserByEmail } from "controllers/user.controller";
 
 // @ts-expect-error Static asset loading using Vite
 import favicon from "common/favicon.ico";
+import { clearExpiredFilesCron } from "controllers/file.controller";
 
 const app: express.Express = express();
 const store = new (MongoDBStore(session))({
@@ -119,7 +120,7 @@ if (process.env.NODE_ENV === "production") {
     const cert = await fs.readFile("make-idp.crt");
     const cert_string = cert
         .toString()
-        .replace(/-+(BEGIN|END) CERTIFICATE-+/g, "")
+        .replace(/-+(BEGIN|END) CERTIFICATE-+/g, "");
 
     // Configure SAML Strategy
     passport.use(
@@ -134,22 +135,26 @@ if (process.env.NODE_ENV === "production") {
             },
             async (req, profile, done) => {
                 if (!profile || !profile.email) {
-                    req.log.fatal({ msg: "Invalid profile", profile: profile, req: req });
-                    done(new Error("No profile found"))
-                    return
+                    req.log.fatal({
+                        msg: "Invalid profile",
+                        profile: profile,
+                        req: req,
+                    });
+                    done(new Error("No profile found"));
+                    return;
                 }
                 const email = profile.email as string;
                 const user_obj = await getUserByEmail(email);
                 if (!user_obj) {
                     req.log.info({
-                        msg:`User with email ${email} not found, creating`,
-                        profile: profile
+                        msg: `User with email ${email} not found, creating`,
+                        profile: profile,
                     });
                     const new_user_obj = {
                         uuid: crypto.randomUUID(),
                         name: profile.displayName as string,
                         email: profile.email as string,
-                        college_id: "",  // If not provided by IDP, fill in later
+                        college_id: "", // If not provided by IDP, fill in later
                         active_roles: [],
                         past_roles: [],
                         active_certificates: [],
@@ -205,12 +210,14 @@ if (
 // Logout route
 app.get("/logout", (req, res, next) => {
     req.logout((err) => {
-        if (err) { return next(err) }
+        if (err) {
+            return next(err);
+        }
         req.session.destroy((err) => {
-            if (err) return next(err)
-            res.clearCookie('connect.sid') // express-session cookie
+            if (err) return next(err);
+            res.clearCookie("connect.sid"); // express-session cookie
             // If successfully logged out, redirect to the main page.
-            res.redirect("/")
+            res.redirect("/");
         });
     });
 });
@@ -247,9 +254,15 @@ app.get("/favicon.ico", (req, res) => {
 
 // Setup cron jobs
 // Query for checkout emails every minute
-checkoutEmailCron(logger);
+await checkoutEmailCron(logger);
 cron.schedule("* * * * *", () => {
     checkoutEmailCron(logger);
+});
+
+// Delete expired user files every 10 minutes
+await clearExpiredFilesCron(logger);
+cron.schedule("*/10 * * * *", () => {
+    clearExpiredFilesCron(logger);
 });
 
 // Refresh all checkout quantities every 15 minutes

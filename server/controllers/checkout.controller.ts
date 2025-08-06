@@ -493,9 +493,11 @@ export async function updateItemAvailabilities(
         }
         // Update availability
         if (out) {
-            item.available -= checkout_item.quantity;
+            item.available =
+                (item.available ?? item.quantity) - checkout_item.quantity;
         } else {
-            item.available += checkout_item.quantity;
+            item.available =
+                (item.available ?? item.quantity) + checkout_item.quantity;
         }
         // Safety check
         if (logger && (item.available < 0 || item.available > item.quantity)) {
