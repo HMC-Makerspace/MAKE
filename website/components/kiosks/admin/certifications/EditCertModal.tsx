@@ -228,26 +228,33 @@ export default function EditCertModal({
                         >
                             <div className="text-lg font-semibold">{`${isNew ? "Create" : "Edit"} Certification`}</div>
                             <div className="flex flex-row w-full gap-2 items-center">
-                                <Input
-                                    type="text"
-                                    label="UUID"
-                                    name="uuid"
-                                    placeholder={uuid}
-                                    // UUID is only editable on create
-                                    isDisabled={!isNew}
-                                    value={uuid}
-                                    onValueChange={wrapEdit(setUUID)}
-                                    variant="faded"
-                                    color="primary"
-                                    size="md"
-                                    classNames={{
-                                        input: clsx([
-                                            "placeholder:text-default-500",
-                                            "placeholder:italic",
-                                            "text-default-700",
-                                        ]),
+                                <div
+                                    className="w-full cursor-pointer"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(uuid);
                                     }}
-                                />
+                                >
+                                    <Input
+                                        type="text"
+                                        label="UUID"
+                                        name="uuid"
+                                        placeholder={uuid}
+                                        // UUID is only editable on create
+                                        isDisabled={!isNew}
+                                        value={uuid}
+                                        onValueChange={wrapEdit(setUUID)}
+                                        variant="faded"
+                                        color="primary"
+                                        size="md"
+                                        classNames={{
+                                            input: clsx([
+                                                "placeholder:text-default-500",
+                                                "placeholder:italic",
+                                                "text-default-700",
+                                            ]),
+                                        }}
+                                    />
+                                </div>
 
                                 {
                                     // Delete button
