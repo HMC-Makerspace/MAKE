@@ -69,7 +69,7 @@ export default function CertificationsPage() {
         self?.active_certificates?.some(
             (certificate) =>
                 certificate.certification_uuid === cert.certification_uuid &&
-                certificate.level === cert.required_level,
+                certificate.level >= cert.required_level,
         ),
     );
 
