@@ -83,7 +83,7 @@ export default function CustomNavbar({
                 <div className="self-center mt-auto pb-4">
                     <Branding />
                 </div>
-                <div className="px-4 self-center w-full">
+                <div className="px-4 self-center w-full flex justify-center">
                     <MAKEUser user_uuid={"self"} size="lg" />
                 </div>
             </div>
