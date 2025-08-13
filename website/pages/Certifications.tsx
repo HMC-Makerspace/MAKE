@@ -311,7 +311,9 @@ export default function CertificationsPage() {
                         )}
                     </CardHeader>
                     <CardBody className="gap-4">
-                        <div className="md:text-lg whitespace-pre-line">{cert?.description}</div>
+                        <div className="md:text-lg whitespace-pre-line">
+                            {cert?.description}
+                        </div>
                         {cert?.required_certifications &&
                             cert.required_certifications.length > 0 && (
                                 <div
@@ -372,7 +374,7 @@ export default function CertificationsPage() {
                                                 <>
                                                     <div className="font-semibold w-full">
                                                         Level {activeCert.level}{" "}
-                                                        Certified until:
+                                                        Certified for:
                                                     </div>
                                                     <div className="whitespace-nowrap">
                                                         {activeValidTime}

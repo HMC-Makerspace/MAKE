@@ -117,7 +117,7 @@ export default function SchedulePage() {
     );
 
     return (
-        <DefaultLayout className="px-8 py-4" pageHref="/schedule">
+        <DefaultLayout className="p-4 lg:px-8" pageHref="/schedule">
             <div
                 className="w-full h-full"
                 onClick={() => {

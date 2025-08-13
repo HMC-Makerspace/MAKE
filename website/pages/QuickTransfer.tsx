@@ -270,7 +270,7 @@ export default function QuickTransferPage() {
         ]);
 
     return (
-        <DefaultLayout className="p-8" pageHref="/transfer">
+        <DefaultLayout className="p-4 lg:p-8" pageHref="/transfer">
             <ToastProvider maxVisibleToasts={9}></ToastProvider>
             <div
                 id="master"
@@ -311,11 +311,20 @@ export default function QuickTransferPage() {
                             variant="underlined"
                             color="primary"
                             name="college_id"
+                            className="pt-1 sm:pt-0"
+                            classNames={{
+                                input: "text-large sm:text-base",
+                                label: "pb-1.5 sm:pb-0.5",
+                            }}
                         />
                     </Form>
                     <div
                         id="name"
-                        className="justify-center flex-1 text-center md:text-lg hidden sm:flex text-md font-bold text-default-700"
+                        className={clsx(
+                            "justify-center flex-1 hidden sm:flex",
+                            "text-center md:text-lg text-md font-bold",
+                            "text-default-700",
+                        )}
                     >
                         {user?.name}
                     </div>
@@ -359,9 +368,9 @@ export default function QuickTransferPage() {
                     <div
                         id="file-cards"
                         className={clsx(
-                            "grid gap-4 lg:grid-cols-4 overflow-auto min-h-fit",
-                            "md:grid-cols-3",
-                            "grid-cols-2",
+                            "grid gap-4 overflow-auto min-h-fit",
+                            "grid-cols-1 sm:grid-cols-2",
+                            "md:grid-cols-3 lg:grid-cols-4",
                         )}
                     >
                         {files && files.length > 0 ? (

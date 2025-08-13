@@ -136,7 +136,7 @@ export default function AdminLayout({
                                 duration: 0.125,
                             }}
                             className={clsx(
-                                "w-full mx-auto flex-grow px-12 py-4 overflow-auto",
+                                "w-full mx-auto flex-grow px-4 sm:px-12 py-4 overflow-auto",
                                 className,
                             )}
                         >
