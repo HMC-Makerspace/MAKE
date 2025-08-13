@@ -134,223 +134,232 @@ export default function Machine({
 
     return (
         <Card
-            className="bg-default-200 w-full h-full p-2 flex-col xl:flex-row gap-2"
+            className="bg-default-200 w-full h-full p-2 flex-col gap-2"
             shadow="sm"
         >
-            <div
-                className={clsx(
-                    "w-full xl:min-w-2/5 h-full bg-default-300 rounded-md relative",
-                    !fullEdit &&
-                        (!machine.required_certifications ||
-                            machine.required_certifications.length == 0) &&
-                        (!machine.images || machine.images.length == 0) &&
-                        "hidden md:inline",
-                )}
-            >
-                <ImageCarousel
-                    resource_type={FILE_RESOURCE_TYPE.MACHINE}
-                    resource_uuid={machine.uuid}
-                    editable={fullEdit}
-                />
+            <div className="w-full h-fit flex flex-col sm:flex-row gap-2 flex-1">
+                <div
+                    className={clsx(
+                        "w-full h-full min-h-[250px] bg-default-300 rounded-md relative",
+                        !fullEdit &&
+                            (!machine.required_certifications ||
+                                machine.required_certifications.length == 0) &&
+                            (!machine.images || machine.images.length == 0) &&
+                            "hidden md:inline",
+                    )}
+                >
+                    <ImageCarousel
+                        resource_type={FILE_RESOURCE_TYPE.MACHINE}
+                        resource_uuid={machine.uuid}
+                        editable={fullEdit}
+                    />
 
-                <div className="absolute w-full h-fit top-0 box-border border-4 border-transparent">
-                    <div className="w-full h-fit p-1 overflow-auto">
-                        {fullEdit ? (
-                            <>
-                                <Button
-                                    size="sm"
-                                    variant="bordered"
-                                    color="primary"
-                                    startContent={
-                                        <PencilSquareIcon className="size-6" />
-                                    }
-                                    className="text-md bg-primary-200/30 backdrop-blur-[8px] rounded-sm gap-1 px-1.5"
-                                    onPress={certModalOpen}
-                                >
-                                    Required Certifications
+                    <div className="absolute w-full h-fit top-0 box-border border-4 border-transparent">
+                        <div className="w-full h-fit p-1 overflow-auto">
+                            {fullEdit ? (
+                                <>
+                                    <Button
+                                        size="sm"
+                                        variant="bordered"
+                                        color="primary"
+                                        startContent={
+                                            <PencilSquareIcon className="size-6" />
+                                        }
+                                        className="text-md bg-primary-200/30 backdrop-blur-[8px] rounded-sm gap-1 px-1.5"
+                                        onPress={certModalOpen}
+                                    >
+                                        Required Certifications
+                                        {machine.required_certifications &&
+                                        machine.required_certifications.length >
+                                            0
+                                            ? ` (${machine.required_certifications.length})`
+                                            : ""}
+                                    </Button>
+                                    <RequiredCertsModal
+                                        element={machine}
+                                        certifications={certifications}
+                                        isOpen={certModal}
+                                        onOpenChange={certModalOpenChange}
+                                        patchMutation={patchMutation}
+                                    />
+                                </>
+                            ) : (
+                                <div className="min-w-max flex flex-row gap-2">
                                     {machine.required_certifications &&
-                                    machine.required_certifications.length > 0
-                                        ? ` (${machine.required_certifications.length})`
-                                        : ""}
-                                </Button>
-                                <RequiredCertsModal
-                                    element={machine}
-                                    certifications={certifications}
-                                    isOpen={certModal}
-                                    onOpenChange={certModalOpenChange}
-                                    patchMutation={patchMutation}
-                                />
-                            </>
-                        ) : (
-                            <div className="min-w-max flex flex-row gap-2">
-                                {machine.required_certifications &&
-                                    machine.required_certifications.map(
-                                        (cert) => (
-                                            <CertificationTag
-                                                key={cert.certification_uuid}
-                                                cert_uuid={
-                                                    cert.certification_uuid
-                                                }
-                                                certifications={certifications}
-                                                level={
-                                                    cert.required_level > 0
-                                                        ? cert.required_level
-                                                        : undefined
-                                                }
-                                            />
-                                        ),
-                                    )}
-                            </div>
-                        )}
+                                        machine.required_certifications.map(
+                                            (cert) => (
+                                                <CertificationTag
+                                                    key={
+                                                        cert.certification_uuid
+                                                    }
+                                                    cert_uuid={
+                                                        cert.certification_uuid
+                                                    }
+                                                    certifications={
+                                                        certifications
+                                                    }
+                                                    level={
+                                                        cert.required_level > 0
+                                                            ? cert.required_level
+                                                            : undefined
+                                                    }
+                                                />
+                                            ),
+                                        )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div className="flex flex-col w-full justify-between">
-                {fullEdit ? (
-                    <>
-                        <Input
-                            placeholder="Machine Name"
-                            defaultValue={machine.name}
-                            onBlur={(blurEvent) => {
-                                // Get input value
-                                const value = blurEvent.target.value;
-                                if (value == machine.name || !value) {
-                                    return; // no update
+                <div className="flex flex-col w-full justify-between">
+                    {fullEdit ? (
+                        <>
+                            <Input
+                                placeholder="Machine Name"
+                                defaultValue={machine.name}
+                                onBlur={(blurEvent) => {
+                                    // Get input value
+                                    const value = blurEvent.target.value;
+                                    if (value == machine.name || !value) {
+                                        return; // no update
+                                    }
+                                    // Update name of machine
+                                    patchMutation.mutate({
+                                        uuid: machine.uuid,
+                                        patch: {
+                                            name: value,
+                                        },
+                                    });
+                                }}
+                                type="text"
+                                size="lg"
+                                color="primary"
+                                variant="underlined"
+                                className="w-full"
+                                classNames={{
+                                    input: "placeholder:text-default-400 font-bold text-xl text-default-800 ",
+                                }}
+                                isRequired
+                                minLength={1}
+                                errorMessage={
+                                    "Unsaved changes: please enter a name"
                                 }
-                                // Update name of machine
-                                patchMutation.mutate({
-                                    uuid: machine.uuid,
-                                    patch: {
-                                        name: value,
-                                    },
-                                });
-                            }}
-                            type="text"
-                            size="lg"
-                            color="primary"
-                            variant="underlined"
-                            className="w-full"
-                            classNames={{
-                                input: "placeholder:text-default-400 font-bold text-xl text-default-800 ",
-                            }}
-                            isRequired
-                            minLength={1}
-                            errorMessage={
-                                "Unsaved changes: please enter a name"
-                            }
-                            endContent={
-                                <div className="flex gap-3">
-                                    <Tooltip
-                                        color={
-                                            machine.reservable
-                                                ? "success"
-                                                : "danger"
-                                        }
-                                        content={
-                                            machine.reservable
-                                                ? "Reservable"
-                                                : "Not reservable"
-                                        }
-                                        placement="left"
-                                    >
-                                        <Button
-                                            isIconOnly
-                                            className="-mr-1"
-                                            startContent={
-                                                machine.reservable ? (
-                                                    <ShoppingCartIcon
-                                                        className="size-6"
-                                                        strokeWidth={1.5}
-                                                    />
-                                                ) : (
-                                                    <LinkSlashIcon
-                                                        className="size-6"
-                                                        strokeWidth={1.5}
-                                                    />
-                                                )
-                                            }
+                                endContent={
+                                    <div className="flex gap-3">
+                                        <Tooltip
                                             color={
                                                 machine.reservable
                                                     ? "success"
                                                     : "danger"
                                             }
-                                            variant="bordered"
-                                            onPress={reservableModalOpen}
+                                            content={
+                                                machine.reservable
+                                                    ? "Reservable"
+                                                    : "Not reservable"
+                                            }
+                                            placement="left"
+                                        >
+                                            <Button
+                                                isIconOnly
+                                                className="-mr-1"
+                                                startContent={
+                                                    machine.reservable ? (
+                                                        <ShoppingCartIcon
+                                                            className="size-6"
+                                                            strokeWidth={1.5}
+                                                        />
+                                                    ) : (
+                                                        <LinkSlashIcon
+                                                            className="size-6"
+                                                            strokeWidth={1.5}
+                                                        />
+                                                    )
+                                                }
+                                                color={
+                                                    machine.reservable
+                                                        ? "success"
+                                                        : "danger"
+                                                }
+                                                variant="bordered"
+                                                onPress={reservableModalOpen}
+                                            />
+                                        </Tooltip>
+                                        <Button
+                                            variant="flat"
+                                            color="danger"
+                                            onPress={deleteModalOpen}
+                                            isIconOnly
+                                        >
+                                            <TrashIcon className="size-6" />
+                                        </Button>
+                                        <DeleteModal
+                                            itemType="machine"
+                                            itemName={machine.name}
+                                            onSubmit={() =>
+                                                deleteMutation.mutate({
+                                                    uuid: machine.uuid,
+                                                })
+                                            }
+                                            isOpen={deleteModal}
+                                            onOpenChange={deleteModalOpenChange}
+                                            isLoading={deleteMutation.isPending}
                                         />
-                                    </Tooltip>
-                                    <Button
-                                        variant="flat"
-                                        color="danger"
-                                        onPress={deleteModalOpen}
-                                        isIconOnly
-                                    >
-                                        <TrashIcon className="size-6" />
-                                    </Button>
-                                    <DeleteModal
-                                        itemType="machine"
-                                        itemName={machine.name}
-                                        onSubmit={() =>
-                                            deleteMutation.mutate({
-                                                uuid: machine.uuid,
-                                            })
-                                        }
-                                        isOpen={deleteModal}
-                                        onOpenChange={deleteModalOpenChange}
-                                        isLoading={deleteMutation.isPending}
-                                    />
-                                </div>
-                            }
+                                    </div>
+                                }
+                            />
+                            <ReservableConfirmationModal
+                                key={"machineReservableModal-" + machine.uuid}
+                                machine={machine}
+                                reservable={machine.reservable ?? false}
+                                isOpen={reservableModal}
+                                onOpenChange={reservableModalOpenChange}
+                                patchMutation={patchMutation}
+                            />
+                        </>
+                    ) : (
+                        <div className="w-full font-bold text-xl p-1 pb-3 text-default-800">
+                            {machine.name}
+                        </div>
+                    )}
+                    {fullEdit ? (
+                        <Textarea
+                            placeholder="Machine description..."
+                            defaultValue={machine.description}
+                            onBlur={(blurEvent) => {
+                                // Get input value
+                                const value = blurEvent.target.value;
+                                if (value == machine.description || !value) {
+                                    return; // no update
+                                }
+                                // Update description
+                                patchMutation.mutate({
+                                    uuid: machine.uuid,
+                                    patch: {
+                                        description: value,
+                                    },
+                                });
+                            }}
+                            color="primary"
+                            variant="bordered"
+                            className="w-full h-full"
+                            size="lg"
+                            maxRows={12}
+                            classNames={{
+                                input: "placeholder:text-default-400 text-lg text-default-700",
+                                inputWrapper: "p-1",
+                            }}
                         />
-                        <ReservableConfirmationModal
-                            key={"machineReservableModal-" + machine.uuid}
-                            machine={machine}
-                            reservable={machine.reservable ?? false}
-                            isOpen={reservableModal}
-                            onOpenChange={reservableModalOpenChange}
-                            patchMutation={patchMutation}
-                        />
-                    </>
-                ) : (
-                    <div className="w-full font-bold text-xl p-1 pb-3 text-default-800">
-                        {machine.name}
-                    </div>
-                )}
-                {fullEdit ? (
-                    <Textarea
-                        placeholder="Machine description..."
-                        defaultValue={machine.description}
-                        onBlur={(blurEvent) => {
-                            // Get input value
-                            const value = blurEvent.target.value;
-                            if (value == machine.description || !value) {
-                                return; // no update
-                            }
-                            // Update description
-                            patchMutation.mutate({
-                                uuid: machine.uuid,
-                                patch: {
-                                    description: value,
-                                },
-                            });
-                        }}
-                        color="primary"
-                        variant="bordered"
-                        className="w-full"
-                        size="lg"
-                        maxRows={12}
-                        classNames={{
-                            input: "placeholder:text-default-400 text-lg text-default-700",
-                            inputWrapper: "p-1",
-                        }}
-                    />
-                ) : (
-                    <div className="w-full text-lg grow p-1 text-default-700 min-h-24 break-words">
-                        {machine.description}
-                    </div>
-                )}
+                    ) : (
+                        <div className="w-full text-lg grow p-1 text-default-700 min-h-24 break-words">
+                            {machine.description}
+                        </div>
+                    )}
+                </div>
+            </div>
+            <div className="w-full h-fit flex flex-col items-center">
                 <MachineStatus machine={machine} editable={editable} />
                 {fullEdit ? (
-                    <div className="flex flex-row gap-2 mt-2 w-full self-center">
+                    <div className="flex flex-row gap-2 w-full self-center mt-2">
                         <Button
                             color="primary"
                             className="w-4/5 sm:w-full md:w-4/5 lg:w-full self-center"

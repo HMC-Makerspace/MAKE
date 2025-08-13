@@ -96,7 +96,7 @@ export default function MachinesKiosk() {
                         "flex gap-4 items-center",
                     )}
                 >
-                    <div className="flex-1 mr-auto"></div>
+                    <div className="flex-1 mr-auto hidden sm:block"></div>
                     <span className="flex justify-center flex-1 text-xl text-default-700 font-bold">
                         Machine Editor
                     </span>
