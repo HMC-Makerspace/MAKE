@@ -80,6 +80,7 @@ export default function InventoryTable({
     ],
     customColumnComponents,
     editable = false,
+    emptyContent,
     onCreate = undefined,
 }: {
     inventory: TInventoryItem[];
@@ -96,7 +97,8 @@ export default function InventoryTable({
     customColumnComponents?: {
         [column_id: string]: (item: TInventoryItem) => React.ReactNode;
     };
-    editable?: boolean;
+    emptyContent?: string;
+    editable?: React.ReactNode;
     onCreate?: () => void;
 }) {
     // The set of columns that are visible
@@ -220,6 +222,7 @@ export default function InventoryTable({
                 doubleClickAction={doubleClickAction}
                 multiSelect={multiSelect}
                 showSelectionCheckboxes={false}
+                emptyContent={emptyContent}
                 customColumnComponents={{
                     // put stuff here
                     role: (i) => (

@@ -38,7 +38,7 @@ export default function InventoryPage() {
         inventoryLoading || rolesLoading || certsLoading || areasLoading;
 
     return (
-        <DefaultLayout className="px-8 py-0" pageHref="/inventory">
+        <DefaultLayout className="py-0 px-4 lg:px-8" pageHref="/inventory">
             {inventory && roles && certs && areas && (
                 <InventoryTable
                     inventory={inventory}
@@ -48,6 +48,11 @@ export default function InventoryPage() {
                     selectedKeys={new Set()}
                     onSelectionChange={() => {}}
                     isLoading={isLoading}
+                    emptyContent={
+                        inventory.length === 0
+                            ? "Please login to view all inventory items"
+                            : undefined
+                    }
                 />
             )}
         </DefaultLayout>
