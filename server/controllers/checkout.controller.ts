@@ -569,7 +569,7 @@ export async function checkoutEmailCron(logger: Logger) {
             const user = await getUser(checkout.checked_out_by);
 
             if (user && items) {
-                sendTemplatedEmail(
+                await sendTemplatedEmail(
                     user.email,
                     "Overdue Checkout Reminder",
                     ExpiredCheckoutTemplate(checkout, items),
