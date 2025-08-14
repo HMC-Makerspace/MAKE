@@ -20,6 +20,7 @@ import {
     ArrowUpTrayIcon,
     ArrowUpOnSquareIcon,
 } from "@heroicons/react/24/outline";
+import FileCard from "./public/file/FileCard.tsx";
 
 async function deleteImage({
     resource_type,
@@ -28,11 +29,8 @@ async function deleteImage({
     resource_type: FILE_RESOURCE_TYPE;
     file_uuid: UUID;
 }) {
-    return (
-        await axios.delete<TFile[]>(
-            `/api/v3/file/by/${resource_type}/${file_uuid}`,
-        )
-    ).data;
+    return (await axios.delete(`/api/v3/file/by/${resource_type}/${file_uuid}`))
+        .data;
 }
 
 async function uploadImage({
@@ -104,7 +102,7 @@ export default function ImageCarousel({
     }
 
     return (
-        <div className="relative w-full h-full min-h-[150px] content-center">
+        <div className="relative h-full min-h-[150px] min-w-[150px] content-center">
             {images.length > 1 && (
                 <Button
                     className="absolute left-1 top-0 bottom-0 my-auto"
@@ -125,6 +123,7 @@ export default function ImageCarousel({
                             ? `/api/v3/file/download/${images[index].uuid}`
                             : undefined
                     }
+                    alt={images[index]?.name || "Image"}
                 />
             ) : (
                 <p className="text-center text-l text-bold">No Images Found</p>
@@ -230,34 +229,14 @@ function EditModal({
                 <ModalHeader>Add and Delete Images</ModalHeader>
 
                 <ModalBody>
-                    <div className="flex flex-row flex-wrap gap-6 items-center justify-center">
-                        {images.map((image, index) => {
+                    <div className="grid grid-cols-2 min-h-fit gap-4">
+                        {images.map((image) => {
                             return (
-                                <div
-                                    key={index}
-                                    className="w-[45%] h-[30vh] flex flex-col items-center gap-4"
-                                >
-                                    <img
-                                        className="w-full h-3/4 object-cover"
-                                        src={`/api/v3/file/download/${images[index].uuid}`}
-                                        alt={image.name || "Image"}
-                                    />
-                                    <div className="flex gap-4 flex-row items-center">
-                                        <Button
-                                            isIconOnly
-                                            color="danger"
-                                            onPress={() =>
-                                                deleteMutation.mutate({
-                                                    resource_type:
-                                                        resource_type,
-                                                    file_uuid: image.uuid,
-                                                })
-                                            }
-                                        >
-                                            <TrashIcon className="size-6" />
-                                        </Button>
-                                    </div>
-                                </div>
+                                <FileCard
+                                    file={image}
+                                    resource_type={resource_type}
+                                    deleteMutation={deleteMutation}
+                                />
                             );
                         })}
                     </div>

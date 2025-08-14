@@ -47,7 +47,7 @@ router.get(
     "/public",
     async (req: Request, res: Response<TPublicMachineData[]>) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
 
         req.log.debug({
             msg: `Getting machines visible to user ${requesting_uuid}.`,
@@ -76,7 +76,7 @@ router.get(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: MachineResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
 
         // If no requesting user uuid is provided, the call is not authorized
         if (!requesting_uuid) {
@@ -132,7 +132,7 @@ router.get(
  */
 router.get("/", async (req: MachineRequest, res: MachinesResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid: string = req.user?.uuid as string;
 
     // If no requesting user uuid is provided, the call is not authorized
     if (!requesting_uuid) {
@@ -176,7 +176,7 @@ router.get("/", async (req: MachineRequest, res: MachinesResponse) => {
  */
 router.post("/", async (req: MachineRequest, res: MachineResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid: string = req.user?.uuid as string;
     const machine_obj = req.body.machine_obj;
     const machine_uuid = machine_obj.uuid;
 
@@ -228,7 +228,7 @@ router.post("/", async (req: MachineRequest, res: MachineResponse) => {
  */
 router.put("/", async (req: MachineRequest, res: MachineResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid: string = req.user?.uuid as string;
     const machine_obj = req.body.machine_obj;
     const machine_uuid = machine_obj.uuid;
 
@@ -282,7 +282,7 @@ router.patch(
         res: MachineResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const machine_uuid = req.params.UUID;
         const partial_machine = req.body.partial_machine_obj;
 
@@ -336,7 +336,7 @@ router.delete(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const machine_uuid = req.params.UUID;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -386,7 +386,7 @@ router.patch(
     "/:machine_uuid/instances/",
     async (req: MachineInstanceStatusRequest, res: MachineResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const machine_uuid = req.params.machine_uuid;
         const instances = req.body.instances;
 

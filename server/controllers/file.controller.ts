@@ -9,6 +9,7 @@ import { User } from "models/user.model";
 import { Area } from "models/area.model";
 import { Workshop } from "models/workshop.model";
 import { Machine } from "models/machine.model";
+import { Logger } from "pino";
 
 /**
  * Get all files in the database
@@ -196,17 +197,13 @@ export async function deleteFileOnServer(
                     msg: `Successfully deleted file`,
                     file_path: file_path,
                 });
-                res.status(StatusCodes.ACCEPTED).json({
-                    error: "Successfully deleted file",
-                });
+                return "Successfully deleted file";
             } else {
                 req.log.info({
                     msg: `File successfully deleted: ${error_message}`,
                     file_path: file_path,
                 });
-                res.status(StatusCodes.FORBIDDEN).json({
-                    error: error_message,
-                });
+                return error_message;
             }
         })
         .catch((err) => {
@@ -245,6 +242,80 @@ export async function deleteFileOnServer(
 }
 
 /**
+ * A helper function to delete/unlink a file from the server
+ * @param file_path The path to the file to delete
+ * @param req The request object to log errors and info
+ * @param res The response object to send errors to
+ * @param unauthorized_creation Whether the user was authorized to create
+ *     the file. If not, the error message will be different
+ * @returns The promise to unlink the file, which can be chained
+ */
+export async function deleteFilesOnServer(
+    file_paths: string[],
+    req: Request,
+    res: Response,
+    error_message: "authorized" | string = "authorized",
+) {
+    return Promise.all(
+        file_paths.map((file_path) =>
+            fs.unlink(file_path).then(() => file_path),
+        ),
+    )
+        .then(() => {
+            // All files deleted successfully
+            if (error_message === "authorized") {
+                req.log.info({
+                    msg: `Successfully deleted files`,
+                    file_paths: file_paths,
+                });
+                res.status(StatusCodes.ACCEPTED).json({
+                    error: "Successfully deleted files",
+                });
+            } else {
+                req.log.info({
+                    msg: `File successfully deleted: ${error_message}`,
+                    file_paths: file_paths,
+                });
+                res.status(StatusCodes.FORBIDDEN).json({
+                    error: error_message,
+                });
+            }
+        })
+        .catch((err) => {
+            // If there was an error unlinking any file, and the user was
+            // authorized to create the file, return a distinct error
+            if (error_message === "authorized") {
+                // Otherwise, if the user was authorized to delete the file, log
+                // the error and return a generic error message
+                req.log.error({
+                    msg: `Error deleting file`,
+                    error: err,
+                });
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                    error: "Error deleting file",
+                });
+            } else {
+                req.log.fatal({
+                    msg:
+                        "Requesting user was not authorized to create a file, " +
+                        "and there was an error unlinking the provided file",
+                    error_message: error_message,
+                    file_paths: file_paths,
+                    error: err,
+                });
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                    error:
+                        "The requesting user is not authorized to create a " +
+                        "file, and there was an error unlinking the " +
+                        "provided file. If you are seeing this error, " +
+                        "please contact a site administrator.",
+                });
+            }
+            return Promise.reject(err); // Return a rejected promise to stop the chain
+        }); // Return the promise so more .then chains can be added
+}
+
+/**
  * Delete a file in the database by UUID
  * @param file_uuid the specific file's unique id
  * @returns The deleted file object, or null if the file doesn't exist
@@ -266,7 +337,9 @@ export async function deleteFile(file_uuid: UUID): Promise<TFile | null> {
             throw new Error("User not found");
         }
         // Remove the file's UUID from the user's file list and save the user
-        user.files = user.files!.filter((file_uuid) => file_uuid !== file.uuid);
+        user.files = (user.files ?? []).filter(
+            (file_uuid) => file_uuid !== file.uuid,
+        );
         await user.save();
     } else if (file.resource_type === FILE_RESOURCE_TYPE.AREA) {
         // If the file is an area image, remove the file's UUID from the area's image list
@@ -277,7 +350,7 @@ export async function deleteFile(file_uuid: UUID): Promise<TFile | null> {
             throw new Error("Area not found");
         }
         // Remove the file's UUID from the area's image list and save the area
-        area.images = area.images!.filter(
+        area.images = (area.images ?? []).filter(
             (file_uuid) => file_uuid !== file.uuid,
         );
         await area.save();
@@ -292,7 +365,7 @@ export async function deleteFile(file_uuid: UUID): Promise<TFile | null> {
             throw new Error("Machine not found");
         }
         // Remove the file's UUID from the machine's image list and save the machine
-        machine.images = machine.images!.filter(
+        machine.images = (machine.images ?? []).filter(
             (file_uuid) => file_uuid !== file.uuid,
         );
         await machine.save();
@@ -307,7 +380,7 @@ export async function deleteFile(file_uuid: UUID): Promise<TFile | null> {
             throw new Error("Workshop not found");
         }
         // Remove the file's UUID from the workshop's image list and save the workshop
-        workshop.images = workshop.images!.filter(
+        workshop.images = (workshop.images ?? []).filter(
             (file_uuid) => file_uuid !== file.uuid,
         );
         await workshop.save();
@@ -327,4 +400,34 @@ export async function updateFile(file_obj: TFile): Promise<TFile | null> {
     return Files.findOneAndReplace({ uuid: file_obj.uuid }, file_obj, {
         returnDocument: "after",
     });
+}
+
+export async function clearExpiredFilesCron(logger: Logger) {
+    logger.info("Clearing expired files.");
+    const Files = mongoose.model("File", File);
+    const now = Date.now() / 1000;
+
+    // Find all files that have expired
+    const expired_files = await Files.find({
+        timestamp_expires: { $lte: now },
+    });
+
+    for (const file of expired_files) {
+        // Delete the actual file on the server
+        await fs.unlink(file.path).catch((err) =>
+            logger.error({
+                msg: `Unable to unlink file with uuid ${file.uuid} at path ${file.path}`,
+                err: err,
+            }),
+        );
+        // Delete the file's metadata
+        try {
+            await deleteFile(file.uuid);
+        } catch (err) {
+            logger.error({
+                msg: `Error deleting file on server with uuid ${file.uuid}`,
+                err: err,
+            });
+        }
+    }
 }

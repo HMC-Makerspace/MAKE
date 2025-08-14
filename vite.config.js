@@ -17,6 +17,18 @@ export default defineConfig(({ mode }) => {
                     target: `http://localhost:${env.VITE_SERVER_PORT ?? 3001}`,
                     changeOrigin: true,
                 },
+                "/login": {
+                    target: `http://localhost:${env.VITE_SERVER_PORT ?? 3001}`,
+                    changeOrigin: true,
+                },
+                "/logout": {
+                    target: `http://localhost:${env.VITE_SERVER_PORT ?? 3001}`,
+                    changeOrigin: true,
+                },
+                "/saml": {
+                    target: `http://localhost:${env.VITE_SERVER_PORT ?? 3001}`,
+                    changeOrigin: true,
+                },
             },
         },
         build: {

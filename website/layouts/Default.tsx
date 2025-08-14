@@ -13,7 +13,6 @@ import {
     ShoppingCartIcon,
     WrenchScrewdriverIcon,
 } from "@heroicons/react/24/solid";
-import { useMAKEStore } from "../store";
 import { useQuery } from "@tanstack/react-query";
 import { API_SCOPE } from "../../common/global";
 import { verifyScopes } from "../utils";
@@ -56,11 +55,12 @@ const PAGES = [
         href: "/transfer",
         icon: ArrowDownOnSquareIcon,
     },
-    {
-        name: "Checkouts",
-        href: "/checkouts",
-        icon: ShoppingCartIcon,
-    },
+    // TODO: Add back once finished
+    // {
+    //     name: "Checkouts",
+    //     href: "/checkouts",
+    //     icon: ShoppingCartIcon,
+    // },
     {
         name: "FAQ",
         href: "/faq",
@@ -78,7 +78,6 @@ export default function DefaultLayout({
     pageHref: string;
     className?: string;
 }) {
-    const user_uuid = useMAKEStore((state) => state.user_uuid);
     const pageIndex = PAGES.findIndex((page) => page.href === pageHref);
     const navigate = useNavigate();
 
@@ -89,30 +88,34 @@ export default function DefaultLayout({
     } = useQuery<API_SCOPE[]>({
         queryKey: ["user", "self", "scopes"],
         refetchOnWindowFocus: false,
-        enabled: !!user_uuid,
+        retry: false,
     });
     const kioskAccess = scopes && verifyScopes(scopes, [API_SCOPE.VIEW_KIOSKS]);
-    const handleKeyPress = useCallback((event: KeyboardEvent) => {
-        if (event.key === "k") {
-            // If user is authorized, go to the kiosk page
-            if (!scopesLoading && !scopesError && kioskAccess) {
-                navigate("/admin");
+    const handleKeyPress = useCallback(
+        (event: KeyboardEvent) => {
+            if (event.key === "k") {
+                // If user is authorized, go to the kiosk page
+                if (!scopesLoading && !scopesError && kioskAccess) {
+                    navigate("/admin");
+                }
             }
-        }
-    }, []);
+        },
+        [scopesLoading, scopesError, kioskAccess],
+    );
 
+    // Kiosk key press listener
     useEffect(() => {
         // attach the event listener
         document.addEventListener("keydown", handleKeyPress);
 
-        // remove the event listener
+        // remove the event listener on component destroy
         return () => {
             document.removeEventListener("keydown", handleKeyPress);
         };
     }, [handleKeyPress]);
 
     return (
-        <div className="flex flex-col xl:flex-row h-screen">
+        <div className="flex flex-col xl:flex-row h-dvh">
             <Navbar pages={PAGES} pageIndex={pageIndex} />
             <AnimatePresence mode="popLayout">
                 <motion.main
@@ -123,9 +126,9 @@ export default function DefaultLayout({
                         duration: 0.125,
                     }}
                     className={clsx(
-                        "relative mx-auto",
-                        "h-[calc(100vh-64px)] sm:h-full",
-                        "w-full flex-grow pl-8 py-4",
+                        "relative mx-auto overflow-auto",
+                        "h-[calc(100vh_-_64px)] xl:h-full py-4",
+                        "w-full flex-grow xl:pl-[calc(224px_+_2rem)]",
                         className,
                     )}
                 >

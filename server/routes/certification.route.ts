@@ -42,7 +42,7 @@ const router = Router();
  */
 router.get("/public", async (req: Request, res: CertificationsResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
 
     req.log.debug({
         msg: `Getting certifications visible to user ${requesting_uuid}`,
@@ -123,7 +123,7 @@ router.patch(
         res: CertificationResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const cert_uuid = req.params.UUID;
         const partial_cert = req.body.partial_cert_obj;
 
@@ -177,7 +177,7 @@ router.post(
     "/",
     async (req: CertificationRequest, res: CertificationResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const certification_obj = req.body.certification_obj;
         const certification_uuid = certification_obj.uuid;
 
@@ -235,7 +235,7 @@ router.put(
     "/",
     async (req: CertificationRequest, res: CertificationResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = headers.requesting_uuid;
+        const requesting_uuid: string = req.user?.uuid as string;
         const certification_obj = req.body.certification_obj;
         const certification_uuid = certification_obj.uuid;
 
@@ -292,7 +292,7 @@ router.delete(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const certification_uuid = req.params.UUID;
 
         // If no requesting user uuid is provided, the call is not authorized

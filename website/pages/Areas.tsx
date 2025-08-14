@@ -38,19 +38,21 @@ export default function AreasPage() {
     const isLoading = areasLoading || rolesLoading || certsLoading;
 
     return (
-        <DefaultLayout className="px-8 py-0" pageHref="/areas">
+        <DefaultLayout className="p-4 lg:p-8" pageHref="/areas">
             {areas && machines && roles && certs && (
-                <div className="flex flex-col h-full gap-8 p-4 sm:p-0 overflow-auto">
-                    {areas.map((area) => (
-                        <Area
-                            key={area.uuid}
-                            area={area}
-                            machines={machines}
-                            certifications={certs}
-                            roles={roles}
-                            editable={MACHINE_EDIT_LEVEL.BASIC}
-                        />
-                    ))}
+                <div className="h-full overflow-auto rounded-xl">
+                    <div className="h-fit flex flex-col gap-8 rounded-xl">
+                        {areas.map((area) => (
+                            <Area
+                                key={area.uuid}
+                                area={area}
+                                machines={machines}
+                                certifications={certs}
+                                roles={roles}
+                                editable={MACHINE_EDIT_LEVEL.BASIC}
+                            />
+                        ))}
+                    </div>
                 </div>
             )}
         </DefaultLayout>

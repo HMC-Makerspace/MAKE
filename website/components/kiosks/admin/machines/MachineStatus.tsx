@@ -143,12 +143,13 @@ export default function MachineStatus({
         <>
             <Button
                 className={clsx(
-                    "w-full h-[110px] flex flex-col opacity-100",
+                    "w-full flex flex-col opacity-100",
                     "rounded-md justify-start items-start",
-                    "bg-default-100 py-2 px-2 mt-2 gap-1",
+                    "bg-default-100 py-2 px-2 gap-1",
                     (!machine.documents || machine.documents.length == 0) &&
-                        editable != MACHINE_EDIT_LEVEL.FULL &&
-                        "md:h-[158px]",
+                        editable != MACHINE_EDIT_LEVEL.FULL
+                        ? "h-[116px] md:h-[152px] lg:h-[162px]"
+                        : "h-[116px] md:h-[104px] lg:h-[116px]",
                 )}
                 size="lg"
                 isDisabled={editable === MACHINE_EDIT_LEVEL.STATIC}
@@ -178,12 +179,19 @@ export default function MachineStatus({
                 )}
                 {/* If count > 1 and <= max_count, show status as a grid of colored boxes */}
                 {machine.count > 1 && machine.count <= max_count && (
-                    <div className="w-full grid p-2 gap-4 grid-cols-12 grid-rows-2">
+                    <div
+                        className={clsx(
+                            "grid w-full p-2",
+                            "gap-3 sm:gap-4 md:gap-1 lg:gap-4",
+                            "grid-cols-12 justify-items-center",
+                            // machine.count >= max_count && "xl:hidden 2xl:grid",
+                        )}
+                    >
                         {machine.instances.map((instance, i) => (
                             <span
                                 key={`machine-${machine.uuid}-big-status-${i}-${machine.uuid}`}
                                 className={clsx(
-                                    "size-4 rounded-sm",
+                                    "size-5 rounded-sm",
                                     MACHINE_STATUS_STYLES[instance.status],
                                 )}
                             />
@@ -195,7 +203,8 @@ export default function MachineStatus({
                     <div
                         className={clsx(
                             "w-full grid grid-rows-2 grid-cols-2 h-full gap-2",
-                            machine.count <= max_count && "hidden",
+                            // machine.count <= max_count &&
+                            //     "hidden xl:grid 2xl:hidden",
                         )}
                     >
                         {MACHINE_STATUS_LABELS.map((status) => (
@@ -207,7 +216,7 @@ export default function MachineStatus({
                                     MACHINE_STATUS_STYLES[status.key],
                                 )}
                                 classNames={{
-                                    content: "flex flex-row justify-around",
+                                    content: "grid lg:grid-cols-2 gap-4",
                                 }}
                             >
                                 <span className="hidden lg:block">{`${status.short_label}: `}</span>

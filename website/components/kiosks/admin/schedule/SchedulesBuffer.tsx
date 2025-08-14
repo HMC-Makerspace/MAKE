@@ -65,7 +65,7 @@ export default function ScheduleBuffer({
 
     // When in schedule mode, only one user can be selected at a time, so
     // we can just use the first. When in availability mode, selected users are available
-    const selectedUser =
+    const selectedUserUUID =
         selectedUsers === "all" || scheduleMode === "availability"
             ? null
             : (Array.from(selectedUsers)[0] as UserUUID);
@@ -104,6 +104,10 @@ export default function ScheduleBuffer({
             ),
         [sortedUsers, availableUsers],
     );
+
+    const selectedUser = selectedUserUUID
+        ? users.find((u) => u.uuid === selectedUserUUID)
+        : undefined;
 
     return (
         <div className="w-full h-full">

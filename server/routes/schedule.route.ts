@@ -88,7 +88,7 @@ router.get(
     "/active/shifts/by/user/:user_uuid",
     async (req: Request<{ user_uuid: string }>, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const user_uuid = req.params.user_uuid;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -144,7 +144,7 @@ router.get(
     "/active/drops/by/user/:user_uuid",
     async (req: Request<{ user_uuid: string }>, res: ShiftsResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const user_uuid = req.params.user_uuid;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -198,7 +198,7 @@ router.get(
     "/active/pickups/by/user/:user_uuid",
     async (req: Request<{ user_uuid: string }>, res: ShiftsResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const user_uuid = req.params.user_uuid;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -259,7 +259,7 @@ router.post(
     "/:schedule_uuid/shifts",
     async (req: ShiftRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const schedule_uuid = req.params.schedule_uuid;
         const shift_obj = req.body.shift_obj;
 
@@ -326,7 +326,7 @@ router.put(
     "/:schedule_uuid/shifts/:shift_uuid",
     async (req: ShiftUpdateRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const schedule_uuid = req.params.schedule_uuid;
         const shift_uuid = req.params.shift_uuid;
         const shift_obj = req.body.shift_obj;
@@ -389,7 +389,7 @@ router.delete(
     "/:schedule_uuid/shifts/:shift_uuid",
     async (req: ShiftUpdateRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const schedule_uuid = req.params.schedule_uuid;
         const shift_uuid = req.params.shift_uuid;
 
@@ -459,7 +459,7 @@ router.patch(
     "/:schedule_uuid/shifts/:shift_uuid/event",
     async (req: ShiftEventRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const schedule_uuid = req.params.schedule_uuid;
         const shift_uuid = req.params.shift_uuid;
         const event_obj = req.body.event_obj;
@@ -558,7 +558,7 @@ router.post(
     "/:schedule_uuid/alerts",
     async (req: AlertRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const schedule_uuid = req.params.schedule_uuid;
         const alert_obj = req.body.alert_obj;
 
@@ -623,7 +623,7 @@ router.put(
     "/:schedule_uuid/alerts/:alert_uuid",
     async (req: AlertUpdateRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const schedule_uuid = req.params.schedule_uuid;
         const alert_uuid = req.params.alert_uuid;
         const alert_obj = req.body.alert_obj;
@@ -695,7 +695,7 @@ router.delete(
         res: ScheduleResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const schedule_uuid = req.params.schedule_uuid;
         const alert_uuid = req.params.alert_uuid;
 
@@ -759,7 +759,7 @@ router.delete(
  */
 router.get("/", async (req: Request, res: SchedulesResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
 
     // If no requesting user uuid is provided, the call is not authorized
     if (!requesting_uuid) {
@@ -803,7 +803,7 @@ router.get("/", async (req: Request, res: SchedulesResponse) => {
  */
 router.get("/active", async (req: Request, res: ScheduleResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
 
     // If no requesting user uuid is provided, the call is not authorized
     if (!requesting_uuid) {
@@ -857,7 +857,7 @@ router.get("/active", async (req: Request, res: ScheduleResponse) => {
  */
 router.get("/public", async (req: Request, res: PublicScheduleResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
 
     // If no requesting user uuid is provided, the call is not authorized
     if (!requesting_uuid) {
@@ -915,7 +915,7 @@ router.get(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const schedule_uuid = req.params.UUID;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -970,7 +970,7 @@ router.get(
  */
 router.post("/", async (req: ScheduleRequest, res: ScheduleResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid: string = req.user?.uuid as string;
     const schedule_obj = req.body.schedule_obj;
     const schedule_uuid = schedule_obj.uuid;
 
@@ -1021,7 +1021,7 @@ router.post("/", async (req: ScheduleRequest, res: ScheduleResponse) => {
  */
 router.put("/", async (req: ScheduleRequest, res: ScheduleResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = headers.requesting_uuid;
+    const requesting_uuid: string = req.user?.uuid as string;
     const schedule_obj = req.body.schedule_obj;
     const schedule_uuid = schedule_obj.uuid;
 
@@ -1073,7 +1073,7 @@ router.patch(
     "/active/:UUID",
     async (req: Request<{ UUID: string }>, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const schedule_uuid = req.params.UUID;
 
         // If no requesting user uuid is provided, the call is not authorized
@@ -1132,7 +1132,7 @@ router.patch(
         res: ScheduleResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const schedule_uuid = req.params.UUID;
         const partial_schedule = req.body.partial_schedule_obj;
 
@@ -1191,7 +1191,7 @@ router.delete(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const schedule_uuid = req.params.UUID;
 
         // If no requesting user uuid is provided, the call is not authorized

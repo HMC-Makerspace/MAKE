@@ -72,7 +72,7 @@ const router = Router();
  */
 router.get("/role/", async (req: Request, res: UserRolesResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
     req.log.debug({
         msg: "Getting all user roles",
     });
@@ -95,7 +95,7 @@ router.get(
     "/role/:UUID",
     async (req: Request<{ UUID: string }>, res: UserRoleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const role_uuid = req.params.UUID;
         req.log.debug({
             msg: `Getting user role by uuid ${role_uuid}`,
@@ -126,7 +126,7 @@ router.get(
  */
 router.put("/role/", async (req: UserRoleRequest, res: UserRoleResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
     const role_obj = req.body.role_obj;
     const role_uuid = role_obj.uuid;
     // If no requesting user_uuid is provided, the call is not authorized
@@ -174,7 +174,7 @@ router.put("/role/", async (req: UserRoleRequest, res: UserRoleResponse) => {
  */
 router.post("/role/", async (req: UserRoleRequest, res: UserRoleResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
     const role_obj = req.body.role_obj;
     const role_uuid = role_obj.uuid;
     // If no requesting user_uuid is provided, the call is not authorized
@@ -227,7 +227,7 @@ router.delete(
     "/role/:UUID",
     async (req: Request<{ UUID: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const role_uuid = req.params.UUID;
         req.log.debug({
             msg: `Deleting user role by uuid ${role_uuid}`,
@@ -267,28 +267,51 @@ router.delete(
 );
 
 router.patch(
-    "/by/id/:id/grant/certification/:cert_uuid/:level",
+    "/by/email/:email/grant/certification/:cert_uuid/:level",
     async (
-        req: Request<{ college_id: string; cert_uuid: string; level: number }>,
+        req: Request<{ email: string; cert_uuid: string; level: number }>,
         res: UserResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
-        const college_id = req.params.college_id;
+        const requesting_uuid =
+            (req.user?.uuid as string) ?? headers.requesting_uuid;
+        const email = req.params.email;
         const cert_uuid = req.params.cert_uuid;
         const level = req.params.level ?? 1;
         req.log.debug({
-            msg: `Granting cert to user with id ${college_id} cert with uuid ${cert_uuid}`,
+            msg: `Granting cert to user with id ${email} cert with uuid ${cert_uuid}`,
             requesting_uuid: requesting_uuid,
         });
         // If no requesting user_uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
-                "No requesting_uuid was provided while granting cert from  " +
-                    `user with id ${college_id} cert with uuid ${cert_uuid}.`,
+                "No requesting_uuid was provided while granting cert from " +
+                    `user with id ${email} cert with uuid ${cert_uuid}.`,
             );
             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
+        }
+        // No user, check passkey authorization
+        if (!req.user?.uuid) {
+            const requesting_user = await getUser(requesting_uuid, true);
+
+            if (
+                !requesting_user ||
+                !requesting_user.passkey ||
+                headers.passkey !== requesting_user.passkey
+            ) {
+                // Failed to authorize via passkey
+                req.log.warn({
+                    msg: "No user session exists, and provided passkey authorization was invalid.",
+                    requesting_uuid: requesting_uuid,
+                });
+                res.status(StatusCodes.UNAUTHORIZED).json({
+                    error:
+                        "No user session exists, and provided passkey authorization was invalid. Please" +
+                        " provide a requesting_uuid and passkey header in your request and try again",
+                });
+                return;
+            }
         }
         // If the user is authorized, grant the cert
         if (
@@ -298,20 +321,21 @@ router.patch(
                 API_SCOPE.GRANT_CERTIFICATION,
             )
         ) {
-            const user = await getUserByCollegeID(college_id);
+            const user = await getUserByEmail(email);
             if (!user) {
                 req.log.error(`No user found`);
                 res.status(StatusCodes.NOT_FOUND).json({
-                    error: `No user found by college id ${college_id}.`,
+                    error: `No user found by college id ${email}.`,
                 });
                 return;
             }
-            const updated_user = await grantCertificateToUser(
-                user.uuid,
-                cert_uuid,
-                level,
-            );
-            if (!updated_user) {
+            try {
+                const updated_user = await grantCertificateToUser(
+                    user.uuid,
+                    cert_uuid,
+                    level,
+                );
+                if (!updated_user) {
                 req.log.error(`No cert found with uuid ${cert_uuid}`);
                 res.status(StatusCodes.NOT_FOUND).json({
                     error: `No cert found with uuid ${cert_uuid}.`,
@@ -319,10 +343,19 @@ router.patch(
                 return;
             }
             req.log.debug(
-                `Granted user with id ${college_id} cert with uuid ${cert_uuid}`,
+                `Granted user with id ${email} cert with uuid ${cert_uuid}`,
             );
             // Return a the updated user object
             res.status(StatusCodes.OK).json(updated_user);
+            } catch (e: any) {
+                req.log.debug({
+                    error: e.message,
+                });
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                    "error": e.message
+                })
+            }
+            
         } else {
             // If the user is not authorized, provide a status error
             req.log.warn({
@@ -341,7 +374,7 @@ router.patch(
         res: UserResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const user_uuid = req.params.user_uuid;
         const role_uuid = req.params.role_uuid;
         req.log.debug({
@@ -396,7 +429,7 @@ router.patch(
         res: UserResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const user_uuid = req.params.user_uuid;
         const cert_uuid = req.params.cert_uuid;
         const level = req.params.level ?? 1;
@@ -456,7 +489,7 @@ router.patch(
         res: UserResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const user_uuid = req.params.user_uuid;
         const cert_uuid = req.params.cert_uuid;
         req.log.debug({
@@ -543,9 +576,11 @@ router.post("/initialize_admin", async (req: Request, res: UserResponse) => {
  */
 router.get("/self", async (req: Request, res: UserResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    // @ts-ignore bleh
+    const requesting_uuid = req.user?.uuid;
+    // const requesting_uuid = req.user?.uuid as string;
     if (!requesting_uuid) {
-        req.log.warn("No requesting_uuid was provided while getting self");
+        // req.log.warn("No requesting_uuid was provided while getting self");
         res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
         return;
     }
@@ -579,11 +614,11 @@ router.get("/self", async (req: Request, res: UserResponse) => {
  */
 router.get("/self/scopes", async (req: Request, res: UserScopesResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
     if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while getting own scopes",
-        );
+        // req.log.warn(
+        //     "No requesting_uuid was provided while getting own scopes",
+        // );
         res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
         return;
     }
@@ -602,6 +637,23 @@ router.get("/self/scopes", async (req: Request, res: UserScopesResponse) => {
     res.status(StatusCodes.OK).json(scopes);
 });
 
+router.get(
+    "/authorized",
+    async (req: Request, res: Response<{ isAuthorized: boolean }>) => {
+        const user_uuid = req.user?.uuid;
+
+        if (user_uuid) {
+            res.status(StatusCodes.OK).json({
+                isAuthorized: true,
+            });
+        } else {
+            res.status(StatusCodes.OK).json({
+                isAuthorized: false,
+            });
+        }
+    },
+);
+
 /**
  * . This is a public route, but a
  * `requesting_uuid` header is required to call it. If the user is not found,
@@ -616,7 +668,7 @@ router.get(
     "/:user_uuid/roles",
     async (req: Request<{ user_uuid: string }>, res: UserRolesResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const user_uuid = req.params.user_uuid;
         req.log.debug({
             msg: `Getting roles for user ${user_uuid}`,
@@ -737,7 +789,7 @@ router.get(
  */
 router.get("/", async (req: UsersRequest, res: UsersResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
     // If no requesting user_uuid is provided, the call is not authorized
     if (!requesting_uuid) {
         req.log.warn("No requesting_uuid was provided while getting all users");
@@ -790,7 +842,7 @@ router.put("/", async (req: UserRequest, res: UserResponse) => {
 
     // Check for authorization
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
     const uuid = user_obj.uuid;
     // If no requesting user_uuid is provided, the call is not authorized
     if (!requesting_uuid) {
@@ -849,7 +901,7 @@ router.post("/", async (req: UserRequest, res: UserResponse) => {
 
     // Check for authorization
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
     const new_user_uuid = user_obj.uuid;
     // If no requesting user_uuid is provided, the call is not authorized
     if (!requesting_uuid) {
@@ -903,7 +955,7 @@ router.patch(
     "/:UUID/info",
     async (req: UserUpdateInfoRequest, res: UserResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         // If no requesting user_uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
@@ -972,7 +1024,7 @@ router.patch(
     "/:UUID/availability/add",
     async (req: UserAvailabilityRequest, res: UserResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         // If no requesting user_uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
@@ -1047,7 +1099,7 @@ router.patch(
     "/:UUID/availability/remove",
     async (req: UserAvailabilityRequest, res: UserResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         // If no requesting user_uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
@@ -1124,7 +1176,7 @@ router.patch(
         res: UserResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         // If no requesting user_uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
@@ -1195,7 +1247,7 @@ router.delete(
     async (req: Request<{ UUID: string }>, res: SuccessfulResponse) => {
         // Check for authorization
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         // If no requesting user_uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn("No requesting_uuid was provided while deleting user");

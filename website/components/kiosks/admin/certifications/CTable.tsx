@@ -32,6 +32,7 @@ import { TDocument } from "common/file";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import RequiredCertsModal from "./RequiredCertsModal";
+import { relativeTimestampToString } from "../../../../utils";
 
 const baseColumns = [
     { name: "UUID", id: "uuid" },
@@ -369,36 +370,3 @@ export default function CertificationsTable({
     );
 }
 
-// Converts a seconds-based, relative timestamp to a string, e.g. "1 year, 3 days, 16 hours, 40 minutes, 20 seconds"
-function relativeTimestampToString(timestamp: number): string {
-    // The number of seconds, minutes, etc. corresponding to the timestamp
-    let times: number[] = [0, 0, 0, 0, 0];
-
-    // Reference for the names of each division
-    let ref: string[] = ["year", "day", "hour", "minute", "second"];
-
-    // Convert the timestamp to seconds, minutes, hours, days, & years
-    times[4] = timestamp % 60; // seconds
-    let mh = (timestamp - times[4]) / 60; // after removing seconds
-    times[3] = mh % 60; // minutes
-    let hd = (mh - times[3]) / 60; // after removing minutes
-    times[2] = hd % 24; // hours
-    let dy = (hd - times[2]) / 24; // after removing hours
-    times[1] = dy % 365; // days
-    times[0] = (dy - times[1]) / 365; // years
-
-    // The properly formatted time divisions
-    let res: string[] = [];
-
-    // Formatting divisions
-    for (let i = 0; i < times.length; i++) {
-        // If that division is greater than 0, include it in the result
-        res[i] = times[i] > 0 ? `${times[i]} ${ref[i]}` : "";
-
-        // Add an "s" to pluralize the division name if necessary
-        if (times[i] > 1) res[i] += "s";
-    }
-
-    // Join the different divisions together into one string, except for the empty divisions
-    return res.filter(Boolean).join(", ");
-}

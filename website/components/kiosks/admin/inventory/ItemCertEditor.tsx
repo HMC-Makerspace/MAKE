@@ -14,25 +14,32 @@ import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 
-import { CertificationUUID, TCertification } from "../../../../../common/certification";
-import { TInventoryItem, TItemCertificate } from "../../../../../common/inventory";
+import {
+    CertificationUUID,
+    TCertification,
+    TRequiredCertificate,
+} from "common/certification";
+import { TInventoryItem } from "common/inventory";
 
-const emptyCert: TItemCertificate = {
+const emptyCert: TRequiredCertificate = {
     certification_uuid: "",
-    required_level: 0
+    required_level: 0,
 };
 
 const updateCerts = async ({
     data,
-    certs
+    certs,
 }: {
     data: TInventoryItem;
-    certs: TItemCertificate[];
+    certs: TRequiredCertificate[];
 }) => {
-    data.required_certifications = certs;
-    console.log("submitting this:", data)
     return (
-        await axios.put<TInventoryItem>("/api/v3/inventory", { item_obj: data })
+        await axios.put<TInventoryItem>("/api/v3/inventory", {
+            item_obj: {
+                ...data,
+                required_certifications: certs,
+            },
+        })
     ).data;
 };
 
@@ -45,7 +52,7 @@ export default function EditCertsModal({
     onError,
 }: {
     item: TInventoryItem;
-    certificates: TItemCertificate[];
+    certificates: TRequiredCertificate[];
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
     onSuccess: (message: string) => void;
@@ -55,12 +62,9 @@ export default function EditCertsModal({
     const mutation = useMutation({
         mutationFn: updateCerts,
         onSuccess: (obj: TInventoryItem) => {
-            // console.log(2, obj)
             queryClient.setQueryData(["inventory", item.uuid], obj);
             queryClient.setQueryData(["inventory"], (old: TInventoryItem[]) => {
-                return old.map((i) =>
-                    i.uuid === obj.uuid ? obj : i,
-                );
+                return old.map((i) => (i.uuid === obj.uuid ? obj : i));
             });
 
             onSuccess(`Successfully updated item ${obj.name}`);
@@ -77,7 +81,8 @@ export default function EditCertsModal({
     });
 
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
-    const [certs, setCerts] = React.useState<TItemCertificate[]>(certificates);
+    const [certs, setCerts] =
+        React.useState<TRequiredCertificate[]>(certificates);
 
     const onSubmit = React.useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
@@ -106,63 +111,71 @@ export default function EditCertsModal({
             mutation.reset();
 
             // Run the mutation
-            mutation.mutate({data: item, certs});
+            mutation.mutate({ data: item, certs });
         },
         [mutation, hasEdits],
     );
 
-    const wrapEdit = React.useCallback((i: number, prop: "certification_uuid"|"required_level") => {
-        return (val: any) => {
-            if (!certs[i]) certs[i] = {...emptyCert}; // copy the emptyCert template
+    const wrapEdit = React.useCallback(
+        (i: number, prop: "certification_uuid" | "required_level") => {
+            return (val: any) => {
+                if (!certs[i]) certs[i] = { ...emptyCert }; // copy the emptyCert template
 
-            // let icert: TItemCertificate = {
-            //     certification_uuid: cert.uuid,
-            //     required_level: lev
-            // }
+                // let icert: TItemCertificate = {
+                //     certification_uuid: cert.uuid,
+                //     required_level: lev
+                // }
 
-            // console.log(i, prop, val, certs)
+                // console.log(i, prop, val, certs)
 
-            let icert: TItemCertificate = certs[i];
+                let icert: TRequiredCertificate = certs[i];
 
-            if (prop == "certification_uuid") {
-                // let cuuid: CertificationUUID = `${Array.from(val)}`;
-                // //alert(Array.from(val));
-                // alert(typeof Array.from(val));
-                // console.log(Array.from(val))
-                icert.certification_uuid = ""+Array.from(val)[0];//cuuid;
-                // console.log(icert);
-            } else {
-                icert.required_level = parseInt(val);
-            }
+                if (prop == "certification_uuid") {
+                    // let cuuid: CertificationUUID = `${Array.from(val)}`;
+                    // //alert(Array.from(val));
+                    // alert(typeof Array.from(val));
+                    // console.log(Array.from(val))
+                    icert.certification_uuid = "" + Array.from(val)[0]; //cuuid;
+                    // console.log(icert);
+                } else {
+                    icert.required_level = parseInt(val);
+                }
 
-            // icert[prop] = val;
+                // icert[prop] = val;
 
-            certs[i] = icert;
+                certs[i] = icert;
 
-            //certs[i][prop] = val; // update the value
-            setCerts([...certs]); // update the certs list
+                //certs[i][prop] = val; // update the value
+                setCerts([...certs]); // update the certs list
 
-            
-            setHasEdits(true);
-        };
-    }, [certs]);
+                setHasEdits(true);
+            };
+        },
+        [certs],
+    );
 
-    const wrapSetEdit = React.useCallback((i: number, prop: "certification_uuid"|"required_level") => {
-        return (value: any) => {
-            wrapEdit(i, prop)(Array.from(value));
-        };
-    }, []);
+    const wrapSetEdit = React.useCallback(
+        (i: number, prop: "certification_uuid" | "required_level") => {
+            return (value: any) => {
+                wrapEdit(i, prop)(Array.from(value));
+            };
+        },
+        [],
+    );
 
     const isValid = React.useMemo(() => {
         for (let i = 0; i < certs.length; i++) {
-            if (certs[i].certification_uuid == "" || certs[i].required_level < 1) {
+            if (
+                certs[i].certification_uuid == "" ||
+                certs[i].required_level < 1
+            ) {
                 return false; // invalid edit
             }
         }
 
         return hasEdits; // otherwise, invalid iff no edits made
     }, [hasEdits, certs]);
-    
+
     return (
         <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur">
             <ModalContent>
@@ -171,78 +184,71 @@ export default function EditCertsModal({
                         onSubmit={onSubmit}
                         className="flex flex-col gap-4 p-4"
                     >
-                        <div className="text-lg font-semibold">Edit Required Certifications</div>
+                        <div className="text-lg font-semibold">
+                            Edit Required Certifications
+                        </div>
 
-                        {(() => {//console.log(item);
-                            return (<div></div>)})() /* mfw i want to log smth */}
+                        {
+                            (() => {
+                                //console.log(item);
+                                return <div></div>;
+                            })() /* mfw i want to log smth */
+                        }
 
                         {certs?.map((cert, i) => (
-                            <div className="flex flex-row w-full gap-2 items-center" key={item.uuid + "-cert" + i}>
-                                
-                                {(allCerts.data && (<Select<TItemCertificate> // this should probably be a separate component
-                                    label="Certification"
-                                    name={"required_certification_"+i}
-                                    placeholder="Required Certification"
-                                    onSelectionChange={wrapEdit(i, "certification_uuid")}
-                                    defaultSelectedKeys={[cert.certification_uuid]}
-                                    isRequired
-                                    size="lg"
-                                    variant="faded"
-                                    color="primary"
-                                    labelPlacement="inside"
-                                    classNames={{
-                                        value: "text-default-500",
-                                    }}
-                                    itemHeight={45}
-                                    // renderValue={(selectedKeys) => {
-                                    //     if (selectedKeys.length === 0) {
-                                    //         // If no prereqs are selected, show the placeholder
-                                    //         return "";
-                                    //     } else {
-                                    //         return (
-                                    //             // Otherwise, show the selected prereqs in a flexbox
-                                    //             <div className="flex flex-wrap gap-1 p-2">
-                                    //                 {selectedKeys.map(
-                                    //                     (c) => {
-                                    //                         return c.key &&
-                                    //                             c.textValue ? (
-                                    //                                 // <div key={item.uuid + "-prereq-" + c.key}>{c.key as string}</div>
-                                    //                                 <ItemCertTag cert_uuid={c.key as string} req_level={1} key={item.uuid + "-prereq-" + c.key} on_level_change={()=>{}} />
-                                    //                             // <CertificationTag cert_uuid={c.key as string} key={item.uuid + "-prereq-" + c.key} />
-                                    //                         ) : null;
-                                    //                     },
-                                    //                 )}
-                                    //             </div>
-                                    //         );
-                                    //     }
-                                    // }}
-                                >
-                                    {allCerts.data.map((c) => (
-                                        <SelectItem
-                                            key={
-                                                c.uuid
-                                            }
-                                            textValue={
-                                                c.name
-                                            }
-                                            value={
-                                                c.uuid
-                                            }
-                                            className="h-[45px]"
-                                        >
-                                            <div>{c.uuid /* todo cert tag here */}</div>
-                                        </SelectItem>
-                                    ))}
-                                </Select>))}
+                            <div
+                                className="flex flex-row w-full gap-2 items-center"
+                                key={item.uuid + "-cert" + i}
+                            >
+                                {allCerts.data && (
+                                    <Select<TRequiredCertificate> // this should probably be a separate component
+                                        label="Certification"
+                                        name={"required_certification_" + i}
+                                        placeholder="Required Certification"
+                                        onSelectionChange={wrapEdit(
+                                            i,
+                                            "certification_uuid",
+                                        )}
+                                        defaultSelectedKeys={[
+                                            cert.certification_uuid,
+                                        ]}
+                                        isRequired
+                                        size="lg"
+                                        variant="faded"
+                                        color="primary"
+                                        labelPlacement="inside"
+                                        classNames={{
+                                            value: "text-default-500",
+                                        }}
+                                        itemHeight={45}
+                                    >
+                                        {allCerts.data.map((c) => (
+                                            <SelectItem
+                                                key={c.uuid}
+                                                textValue={c.name}
+                                                className="h-[45px]"
+                                            >
+                                                <div>
+                                                    {
+                                                        c.uuid /* todo cert tag here */
+                                                    }
+                                                </div>
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                )}
 
                                 <Input
                                     type="number"
                                     label="Level"
-                                    name={"level_"+i}
+                                    name={"level_" + i}
                                     placeholder=""
                                     isRequired
                                     value={`${cert.required_level}`}
-                                    onValueChange={wrapEdit(i, "required_level")}
+                                    onValueChange={wrapEdit(
+                                        i,
+                                        "required_level",
+                                    )}
                                     variant="faded"
                                     color="primary"
                                     size="md"
@@ -252,7 +258,7 @@ export default function EditCertsModal({
                                             "placeholder:italic",
                                             "text-default-700",
                                         ]),
-                                        base: "w-[25%]"
+                                        base: "w-[25%]",
                                     }}
                                 />
 
@@ -277,7 +283,7 @@ export default function EditCertsModal({
                             className="w-full sm:w-1/3"
                             isLoading={false}
                             onPress={() => {
-                                setCerts([...certs, {...emptyCert}]); // add a copy of the emptyDoc template
+                                setCerts([...certs, { ...emptyCert }]); // add a copy of the emptyDoc template
                                 setHasEdits(true);
                                 // console.log("a", certs)
                             }}
@@ -285,9 +291,7 @@ export default function EditCertsModal({
                             Add certification
                         </Button>
 
-                        <div
-                            className="flex flex-row justify-between w-full"
-                        >
+                        <div className="flex flex-row justify-between w-full">
                             <Button
                                 variant="shadow"
                                 type="submit"

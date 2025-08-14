@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import type {
     TCheckoutConfig,
     TConfig,
+    TFAQItem,
     TFileConfig,
     TGeneralConfig,
     TScheduleConfig,
@@ -48,6 +49,24 @@ const GeneralConfig = new mongoose.Schema<TGeneralConfig>(
     },
 );
 
+const FAQItemConfig = new mongoose.Schema<TFAQItem>(
+    {
+        title: { type: String },
+        description: { type: String, required: false },
+        children_columns: { type: Number, required: false },
+        default_open: { type: Boolean, required: false },
+        always_open: { type: Boolean, required: false },
+        bordered: { type: Boolean, required: false },
+        title_centered: { type: Boolean, required: false },
+    },
+    {
+        _id: false,
+    },
+);
+FAQItemConfig.add({
+    children: { type: [FAQItemConfig], required: false },
+});
+
 /**
  * See {@link TConfig} documentation for type information.
  * TODO: Finish setting up config db typing
@@ -59,6 +78,7 @@ export const Config = new mongoose.Schema<TConfig>(
         checkout: { type: CheckoutConfig, required: true },
         file: { type: FileConfig, required: true },
         schedule: { type: ScheduleConfig, required: true },
+        faq: { type: FAQItemConfig, required: false },
     },
     { collection: "config" },
 );

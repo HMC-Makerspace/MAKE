@@ -8,8 +8,11 @@ node_modules
 .vscode/
 bun.lockb
 bun.lock
+package-lock.json
 temp/*
+!temp/favicon.ico
 uploads/*
 !uploads/favicon.ico
 oauthtoken.json
-make.log
+make-idp.crt
+log/*

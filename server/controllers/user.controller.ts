@@ -14,6 +14,7 @@ import mongoose from "mongoose";
 import { getActiveSchedule } from "./schedule.controller";
 import { SHIFT_DAY } from "common/shift";
 import { ScheduleUUID } from "common/schedule";
+import { getCertification } from "./certification.controller";
 
 /**
  * Get all users in the database
@@ -21,7 +22,8 @@ import { ScheduleUUID } from "common/schedule";
  */
 export async function getUsers(): Promise<TUser[]> {
     const Users = mongoose.model("User", User);
-    return Users.find();
+    // Remove passkey from all users.
+    return Users.find().select("-passkey");
 }
 
 export async function getPublicUsers(): Promise<TPublicUser[]> {
@@ -39,9 +41,19 @@ export async function getPublicUsers(): Promise<TPublicUser[]> {
  * @param uuid The user's UUID to search by
  * @returns A promise to a TUser object, or null if no user has the given UUID
  */
-export async function getUser(uuid: UserUUID) {
+export async function getUser(uuid: UserUUID, providePasskey: boolean = false) {
     const Users = mongoose.model("User", User);
-    return Users.findOne({ uuid: uuid });
+    if (typeof uuid !== "string") {
+        // Prevent NoSQL injection by only allowing string UUIDs
+        return null;
+    }
+    const user = Users.findOne({ uuid: uuid });
+    // Only provide passkey if explicitly requested
+    if (providePasskey) {
+        return user;
+    } else {
+        return user.select("-passkey");
+    }
 }
 
 /**
@@ -53,7 +65,7 @@ export async function getUser(uuid: UserUUID) {
  */
 export async function getUserByCollegeID(id: string): Promise<TUser | null> {
     const Users = mongoose.model("User", User);
-    return Users.findOne({ college_id: id });
+    return Users.findOne({ college_id: id }).select("-passkey");
 }
 
 /**
@@ -65,7 +77,7 @@ export async function getUserByCollegeID(id: string): Promise<TUser | null> {
  */
 export async function getUserByEmail(email: string): Promise<TUser | null> {
     const Users = mongoose.model("User", User);
-    return Users.findOne({ email: email });
+    return Users.findOne({ email: email }).select("-passkey");
 }
 
 /**
@@ -75,11 +87,20 @@ export async function getUserByEmail(email: string): Promise<TUser | null> {
  */
 export async function updateUser(user_obj: TUser): Promise<TUser | null> {
     const Users = mongoose.model("User", User);
+    // Validate that uuid is a string to prevent NoSQL injection
+    if (typeof user_obj.uuid !== "string") {
+        // Optionally, log the error or throw
+        return null;
+    }
     // Update the given user with a new user_obj, searching by uuid
     // and return the new user object
-    return Users.findOneAndReplace({ uuid: user_obj.uuid }, user_obj, {
-        returnDocument: "after",
-    });
+    return Users.findOneAndUpdate(
+        { uuid: user_obj.uuid },
+        { $set: user_obj },
+        {
+            returnDocument: "after",
+        },
+    ).select("-passkey");
 }
 
 /**
@@ -98,8 +119,7 @@ export async function updateUserPublicInfo(
     email?: string,
     college_id?: string,
 ): Promise<TUser | null> {
-    const Users = mongoose.model("User", User);
-    const user = await Users.findOne({ uuid: user_uuid });
+    const user = await getUser(user_uuid);
     // If the user doesn't exist, no changes are made
     if (!user) {
         return null;
@@ -132,6 +152,9 @@ export async function createUser(user_obj: TUser): Promise<TUser | null> {
         // If so, return null, and don't create a new user
         return null;
     }
+    if (!user_obj.college_id) {
+        user_obj.college_id = "";
+    }
     // If the user doesn't exist
     // Add the default user roles to the user unless they already have them
     const default_roles = await getDefaultUserRoles();
@@ -155,7 +178,7 @@ export async function createUser(user_obj: TUser): Promise<TUser | null> {
  */
 export async function deleteUser(uuid: UserUUID): Promise<TUser | null> {
     const Users = mongoose.model("User", User);
-    return Users.findOneAndDelete({ uuid: uuid });
+    return Users.findOneAndDelete({ uuid: uuid }).select("-passkey");
 }
 
 /**
@@ -286,10 +309,8 @@ export async function grantRoleToUser(
     role_uuid: UserRoleUUID,
 ): Promise<TUser | null> {
     // Find the user and the role
-    const Users = mongoose.model("User", User);
-    const UserRoles = mongoose.model("UserRole", UserRole);
-    const user = await Users.findOne({ uuid: user_uuid });
-    const role = await UserRoles.findOne({ uuid: role_uuid });
+    const user = await getUser(user_uuid);
+    const role = await getUserRole(role_uuid);
     // If either the user or role doesn't exist, we can't grant the role
     if (!user || !role) {
         return null;
@@ -320,8 +341,7 @@ export async function revokeRoleFromUser(
     role_uuid: UserRoleUUID,
 ): Promise<TUser | null> {
     // Find the user
-    const Users = mongoose.model("User", User);
-    const user = await Users.findOne({ uuid: user_uuid });
+    const user = await getUser(user_uuid);
     // If either the user or role doesn't exist, we can't revoke the role
     if (!user) {
         return null;
@@ -362,12 +382,8 @@ export async function grantCertificateToUser(
     level: number = 1,
 ): Promise<TUser | null> {
     // Find the user
-    const Users = mongoose.model("User", User);
-    const Certifications = mongoose.model("Certification", Certification);
-    const user = await Users.findOne({ uuid: user_uuid });
-    const certification = await Certifications.findOne({
-        uuid: certification_uuid,
-    });
+    const user = await getUser(user_uuid);
+    const certification = await getCertification(certification_uuid);
     // If either the user or certification doesn't exist, then there is
     // nothing to grant
     if (!user) {

@@ -69,6 +69,17 @@ export type TGeneralConfig = {
     extra_urls?: string[];
 };
 
+export type TFAQItem = {
+    title: string;
+    description?: string;
+    children?: TFAQItem[];
+    children_columns?: number;
+    default_open?: boolean;
+    always_open?: boolean;
+    bordered?: boolean;
+    title_centered?: boolean;
+};
+
 /**
  * TConfig - Global configuration for the website
  */
@@ -78,6 +89,7 @@ export type TConfig = {
     checkout: TCheckoutConfig;
     file: TFileConfig;
     schedule: TScheduleConfig;
+    faq?: TFAQItem;
 };
 
 // const DefaultConfig: TConfig = {

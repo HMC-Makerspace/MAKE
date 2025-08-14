@@ -6,10 +6,6 @@ import { Provider } from "./providers";
 import { BrowserRouter } from "react-router-dom";
 import axios from "axios";
 
-// Setup axios defaults
-axios.defaults.headers.common["requesting_uuid"] =
-    window.localStorage.getItem("requesting_uuid") ?? "";
-
 const root = createRoot(document.getElementById("root") ?? document.body);
 root.render(
     <StrictMode>

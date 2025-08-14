@@ -493,9 +493,11 @@ export async function updateItemAvailabilities(
         }
         // Update availability
         if (out) {
-            item.available -= checkout_item.quantity;
+            item.available =
+                (item.available ?? item.quantity) - checkout_item.quantity;
         } else {
-            item.available += checkout_item.quantity;
+            item.available =
+                (item.available ?? item.quantity) + checkout_item.quantity;
         }
         // Safety check
         if (logger && (item.available < 0 || item.available > item.quantity)) {
@@ -567,7 +569,7 @@ export async function checkoutEmailCron(logger: Logger) {
             const user = await getUser(checkout.checked_out_by);
 
             if (user && items) {
-                sendTemplatedEmail(
+                await sendTemplatedEmail(
                     user.email,
                     "Overdue Checkout Reminder",
                     ExpiredCheckoutTemplate(checkout, items),

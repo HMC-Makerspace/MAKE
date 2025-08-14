@@ -28,13 +28,12 @@ export default function PopupAlert({
 }) {
     // Hide the popup after 3 seconds
     React.useEffect(() => {
-        if (isOpen) {
+        if (isOpen && timeout) {
             setTimeout(() => {
                 onOpenChange(false);
             }, timeout);
         }
-    }, [isOpen]);
-
+    }, [isOpen, timeout]);
     return (
         <AnimatePresence>
             {isOpen && (

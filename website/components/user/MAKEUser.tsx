@@ -18,6 +18,8 @@ import {
     ArrowLeftEndOnRectangleIcon,
     FingerPrintIcon,
 } from "@heroicons/react/24/solid";
+import { AxiosError } from "axios";
+import { StatusCodes } from "http-status-codes";
 
 export function MAKEUser({
     user_uuid,
@@ -38,11 +40,13 @@ export function MAKEUser({
     onClick = () => {},
     defaultElement = (
         <Button
-            as={Link}
-            href="/login"
             color="default"
             variant="solid"
-            className="hidden sm:flex"
+            size="lg"
+            className="w-full font-medium bg-default-300"
+            onPress={() => {
+                window.location.href = "/login";
+            }}
         >
             Login
         </Button>
@@ -86,17 +90,23 @@ export function MAKEUser({
     onClick?: (uuid: string) => void;
     defaultElement?: React.ReactNode;
 }) {
-    const query = useQuery<TUser>({
+    const query = useQuery<TUser, AxiosError>({
         queryKey: ["user", user_uuid],
         enabled: !!user_uuid && !user,
         refetchOnWindowFocus: false,
         refetchOnMount: false,
+        retry: false,
     });
+
+    const loggedOut =
+        !user_uuid ||
+        query.isPending ||
+        query.error?.status === StatusCodes.UNAUTHORIZED;
 
     const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
         queryKey: ["user", user_uuid, "roles"],
         refetchOnWindowFocus: false,
-        enabled: !!user_uuid,
+        enabled: !loggedOut,
         refetchOnMount: false,
     });
 
@@ -104,7 +114,7 @@ export function MAKEUser({
     const { data: scopes, isLoading: scopesLoading } = useQuery<API_SCOPE[]>({
         queryKey: ["user", "self", "scopes"],
         refetchOnWindowFocus: false,
-        enabled: !!user_uuid,
+        enabled: !loggedOut,
         refetchOnMount: false,
     });
 
@@ -123,7 +133,7 @@ export function MAKEUser({
 
     const kioskAccess = scopes && verifyScopes(scopes, [API_SCOPE.VIEW_KIOSKS]);
 
-    if (!user_uuid) {
+    if (loggedOut) {
         return defaultElement;
     } else {
         return (
@@ -169,7 +179,7 @@ export function MAKEUser({
                         )}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="min-w-3/4 p-2">
+                <PopoverContent className="p-2 xl:min-w-[20vw] xl:max-w-[30vw]">
                     {user_uuid && user_data && roles && (
                         <UserInfo
                             user_uuid={user_uuid}
@@ -185,7 +195,9 @@ export function MAKEUser({
                             startContent={
                                 <ArrowLeftEndOnRectangleIcon className="size-6 min-w-6" />
                             }
-                            // onPress={}
+                            onPress={() => {
+                                window.location.href = "/logout";
+                            }}
                         >
                             Logout
                         </Button>

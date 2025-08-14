@@ -21,7 +21,6 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
-import ItemCertTag from "./ItemCertTag";
 import { CertificationUUID, TCertification } from "common/certification";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import EditCertsModal from "./ItemCertEditor";
@@ -450,96 +449,6 @@ export default function ItemEditorForm({
                         }}
                     />
                 </div>
-
-                {/* <Input
-                                type="number"
-                                className="text-sm font-semibold text-nowrap"
-                            
-            
-                            >
-                            
-                            </Input> */}
-                {/* {(allCerts.data && (<Select<TItemCertificate> // this should probably be a separate component
-
-
-
-                label="Required Certifications"
-                name="required_certifications"
-                placeholder={placeholder("Required Certifications")}
-                isDisabled={isEmpty}
-                
-
-
-                selectedKeys={requiredCerts}
-                onSelectionChange={wrapSetEdit(setRequiredCerts)}
-                selectionMode="multiple"
-                isMultiline
-                size="lg"
-                variant="faded"
-                color="primary"
-                labelPlacement="inside"
-                classNames={{
-                    value: "text-default-500",
-                }}
-                itemHeight={45}
-                renderValue={(selectedKeys) => {
-                    if (selectedKeys.length === 0) {
-                        // If no prereqs are selected, show the placeholder
-                        return "";
-                    } else {
-                        return (
-                            // Otherwise, show the selected prereqs in a flexbox
-                            <div className="flex flex-wrap gap-1 p-2">
-                                {selectedKeys.map(
-                                    (c) => {
-                                        return c.key &&
-                                            c.textValue ? (
-                                                // <div key={item.uuid + "-prereq-" + c.key}>{c.key as string}</div>
-                                                <ItemCertTag cert_uuid={c.key as string} req_level={1} key={item.uuid + "-prereq-" + c.key} on_level_change={()=>{}} />
-                                            // <CertificationTag cert_uuid={c.key as string} key={item.uuid + "-prereq-" + c.key} />
-                                        ) : null;
-                                    },
-                                )}
-                            </div>
-                        );
-                    }
-                }}
-            >
-                {allCerts.data.map((c) => (
-                    <SelectItem
-                        key={
-                            c.uuid
-                        }
-                        textValue={
-                            c.name
-                        }
-                        value={
-                            c.uuid
-                        }
-                        className="h-[45px]"
-                    >
-                        <div>{c.uuid /* todo cert tag here */
-                /*}</div>
-                    </SelectItem>
-                ))}
-            </Select>))} */}
-
-                {/* <div className="flex flex-col gap-2">
-                <Button
-                    variant="flat"
-                    color="secondary"
-                    onPress={async () => {
-                        //setItemOpenCert(item);
-                        console.log((await axios.put<TInventoryItem>("/api/v3/inventory", { item_obj: {
-                            certification_uuid: "certification-uuid-1",
-                            required_level: 1
-                        } })).data);
-                    }}
-                    isIconOnly
-                >
-                    <PencilSquareIcon className="size-6" />
-                </Button>
-            </div> */}
                 <div className="w-full mt-auto col-span-full">
                     <Button
                         size="lg"

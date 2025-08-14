@@ -8,7 +8,7 @@ import { OAuth2Client } from "google-auth-library";
 const oAuth2Client = new OAuth2Client(
     process.env.EMAIL_BOT_CLIENT_ID,
     process.env.EMAIL_BOT_CLIENT_SECRET,
-    `http://localhost:${process.env.VITE_PORT ?? 3000}/api/v3/oauth`,
+    `${process.env.SITE_URL}/api/v3/oauth`,
 );
 
 /**
@@ -98,92 +98,6 @@ export async function sendTemplatedEmail(
 ) {
     const bodyHTML = renderToString(template);
     sendEmail(to, subject, bodyHTML, logger, cc, bcc);
-}
-
-// ----- Google OAuth -----
-
-/**
- * Generate an OAuth authentication url using the client id/secret in the environment.
- * This method is called if no OAuth token exists on startup
- * @returns The authentication URL as a string.
- */
-export function getOAuthURL() {
-    return oAuth2Client.generateAuthUrl({
-        access_type: "offline", // offline access gives a refresh token, which means fewer logins
-        scope: "https://mail.google.com",
-    });
-}
-
-/**
- * Get the active OAuth access and refresh tokens from file.
- * @param logger The Pino logger to output success/warning messages to
- * @returns The token file containing the access and refresh tokens as strings
- */
-export async function getOAuthToken(logger: Logger) {
-    return fs
-        .readFile("oauthtoken.json")
-        .then((data) => {
-            logger.debug("Found OAuth token file.");
-            try {
-                const tokenFile: {
-                    access_token: string;
-                    refresh_token: string;
-                    scope: string;
-                    token_type: string;
-                    expiry_date: number;
-                } = JSON.parse(data.toString());
-                return tokenFile;
-            } catch (e) {
-                logger.error({
-                    msg: "Found OAuth token file but failed to parse",
-                    error: e,
-                });
-                return undefined;
-            }
-        })
-        .catch((err) => {
-            logger.fatal({
-                msg: "Error reading OAuth token file.",
-                error: err,
-            });
-            return undefined;
-        });
-}
-
-/**
- * Given an OAuth authentication code, save the associated token to file.
- * @param code The OAuth code sent as a query parameter from the OAuth URL
- * @param logger The Pino logger to output success/warning messages to
- * @returns A boolean indicating if the token was successfully saved or not.
- */
-export async function saveOAuthToken(code: string, logger: Logger) {
-    return oAuth2Client
-        .getToken(code)
-        .then((tokenResponse) =>
-            fs
-                .writeFile(
-                    "oauthtoken.json",
-                    JSON.stringify(tokenResponse.tokens),
-                )
-                .then(() => {
-                    logger.debug("Wrote OAuth token to file.");
-                    return true;
-                })
-                .catch((writeErr) => {
-                    logger.fatal({
-                        msg: "Error saving OAuth token file.",
-                        error: writeErr,
-                    });
-                    return false;
-                }),
-        )
-        .catch((tokenErr) => {
-            logger.fatal({
-                msg: "OAuth code did not produce a valid token.",
-                error: tokenErr,
-            });
-            return false;
-        });
 }
 
 // ----- Google OAuth -----

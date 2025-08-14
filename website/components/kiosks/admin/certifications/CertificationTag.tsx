@@ -57,6 +57,7 @@ export default function CertificationTag({
             isPressable={!!onPress || !!href}
             as={href ? Link : undefined}
             href={href}
+            shadow="none"
         >
             {showVisibility ? (
                 <CVisibilityIcon

@@ -62,7 +62,7 @@ router.get(
 
         // Check for authorization
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         if (!requesting_uuid) {
             req.log.warn(
                 "No requesting_uuid was provided while getting restock requests by user",
@@ -110,7 +110,7 @@ router.get(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: RestockResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const restock_uuid = req.params.UUID;
         req.log.debug({
             msg: `Getting restock request by uuid ${restock_uuid}`,
@@ -138,7 +138,7 @@ router.get(
  */
 router.get("/", async (req: Request, res: RestocksResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
     // If no requesting user_uuid is provided, the call is not authorized
     if (!requesting_uuid) {
         req.log.warn(
@@ -183,7 +183,7 @@ router.get("/", async (req: Request, res: RestocksResponse) => {
  */
 router.put("/", async (req: RestockRequestRequest, res: RestockResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
     const request_obj = req.body.request_obj;
     const request_uuid = request_obj.uuid;
     // If no requesting user_uuid is provided, the call is not authorized
@@ -234,7 +234,7 @@ router.patch(
             return;
         }
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const restock_uuid = req.params.UUID;
         // If no requesting user_uuid is provided, the call is not authorized
         if (!requesting_uuid) {
@@ -296,7 +296,7 @@ router.patch(
  */
 router.post("/", async (req: RestockRequestRequest, res: RestockResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = headers.requesting_uuid;
+    const requesting_uuid = req.user?.uuid as string;
     const restock_obj = req.body.request_obj;
     const restock_uuid = restock_obj.uuid;
     // If no requesting user_uuid is provided, the call is not authorized
@@ -347,7 +347,7 @@ router.delete(
     "/:UUID",
     async (req: Request<{ UUID: string }>, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = req.user?.uuid as string;
         const restock_uuid = req.params.UUID;
         // If no requesting user_uuid is provided, the call is not authorized
         if (!requesting_uuid) {

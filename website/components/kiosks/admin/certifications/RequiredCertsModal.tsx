@@ -116,7 +116,7 @@ export default function RequiredCertsModal<
                         {currentCerts.map((cert, i) => (
                             <div
                                 className="flex flex-col sm:flex-row w-full gap-2 items-top"
-                                key={element.uuid + "-cert" + i}
+                                key={element.uuid + "-cert-" + cert.certification_uuid}
                             >
                                 <CertSelect
                                     certifications={certifications}
@@ -147,6 +147,7 @@ export default function RequiredCertsModal<
 
                                 <div className="w-full h-full flex gap-2 items-center">
                                     <NumberInput
+                                        isRequired
                                         label="Minimum Level"
                                         name="required_level"
                                         placeholder="0 for any level"

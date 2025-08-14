@@ -19,6 +19,9 @@ import React, { useState } from "react";
 import PopupAlert from "../../../../components/PopupAlert";
 import clsx from "clsx";
 import { PlusIcon, AcademicCapIcon } from "@heroicons/react/24/solid";
+import EditableFAQItem from "./EditableFAQItem";
+import { AnimatePresence } from "framer-motion";
+import StaticFAQItem from "./StaticFAQItem";
 
 function ConfigItem({
     name,
@@ -113,6 +116,8 @@ export default function Configuration({ config }: { config: TConfig }) {
         config.schedule.first_names_only ?? true,
     );
 
+    const [faq, setFaq] = useState(config.faq || { title: "" });
+
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
@@ -153,6 +158,7 @@ export default function Configuration({ config }: { config: TConfig }) {
                 increment_sec: config.schedule.increment_sec,
                 timezone: config.schedule.timezone,
             },
+            faq: faq,
         };
 
         // Number values
@@ -689,6 +695,17 @@ export default function Configuration({ config }: { config: TConfig }) {
                                     />
                                     Only worker first names
                                 </div>
+                            </ConfigItem>
+                        </AccordionItem>
+                        <AccordionItem key="faq" title="FAQ">
+                            <ConfigItem
+                                name="FAQ Items"
+                                description="Create FAQ items below to display on the /faq page."
+                            >
+                                <EditableFAQItem
+                                    faq_item={faq}
+                                    setItem={setFaq}
+                                />
                             </ConfigItem>
                         </AccordionItem>
                     </Accordion>
