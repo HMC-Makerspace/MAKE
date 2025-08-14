@@ -395,21 +395,38 @@ export default function CertificationsPage() {
                                             )}
                                         </div>
                                     )}
-                                    {cert?.documents?.map((doc, i) => (
-                                        <Button
-                                            key={`cert-${cert.uuid}-doc-${i}`}
-                                            color="primary"
-                                            variant="shadow"
-                                            className="w-full font-medium"
-                                            size="lg"
-                                            href={hasPrereqs ? doc.link : ""}
-                                            as={Link}
-                                            isExternal
-                                            isDisabled={!hasPrereqs}
-                                        >
-                                            {doc.name}
-                                        </Button>
-                                    ))}
+                                    {cert?.documents?.map((doc, i) => {
+                                        let docHref = hasPrereqs
+                                            ? doc.link
+                                            : "";
+                                        docHref = docHref.replace(
+                                            "{{name}}",
+                                            encodeURI(self?.name || ""),
+                                        );
+                                        docHref = docHref.replace(
+                                            "{{college_id}}",
+                                            encodeURI(self?.college_id || ""),
+                                        );
+                                        docHref = docHref.replace(
+                                            "{{email}}",
+                                            encodeURI(self?.email || ""),
+                                        );
+                                        return (
+                                            <Button
+                                                key={`cert-${cert.uuid}-doc-${i}`}
+                                                color="primary"
+                                                variant="shadow"
+                                                className="w-full font-medium"
+                                                size="lg"
+                                                href={docHref}
+                                                as={Link}
+                                                isExternal
+                                                isDisabled={!hasPrereqs}
+                                            >
+                                                {doc.name}
+                                            </Button>
+                                        );
+                                    })}
                                 </div>
                             </Tooltip>
                         )}
