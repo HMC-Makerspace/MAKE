@@ -9,6 +9,7 @@ import loggerMiddleware from "pino-http";
 import cors from "cors";
 import cron from "node-cron";
 import session from "express-session";
+import lusca from "lusca";
 import cookieParser from "cookie-parser";
 import passport from "passport";
 import { Strategy } from "passport-saml";
@@ -99,6 +100,7 @@ app.use(
         resave: false,
         saveUninitialized: false,
     }),
+    lusca.csrf(),
     passport.initialize(),
 );
 

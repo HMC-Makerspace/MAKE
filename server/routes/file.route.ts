@@ -356,12 +356,20 @@ router.post(
         const college_id = req.params.college_id;
         const files = req.files as Express.Multer.File[];
 
-        console.log("Here, files", files);
-
         // If no file is provided, no upload occurred--
         if (!files) {
             res.status(StatusCodes.BAD_REQUEST).json({
                 error: "File is larger than maximum upload size.",
+            });
+            return;
+        }
+        // Defensive type check: ensure files is an array
+        if (!Array.isArray(files)) {
+            req.log.warn({
+                error: "File upload by id was not given an array of files.",
+            });
+            res.status(StatusCodes.BAD_REQUEST).json({
+                error: "Malformed upload: files must be an array.",
             });
             return;
         }

@@ -35,7 +35,6 @@ export default function WorkshopPage() {
         refetchOnWindowFocus: false,
         retry: false,
     });
-    console.log("workshop:", workshops);
     return (
         <DefaultLayout className="p-8" pageHref="/workshops">
             <ToastProvider />

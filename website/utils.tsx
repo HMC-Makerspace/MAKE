@@ -119,8 +119,8 @@ export function getUserRoleHierarchy(user: TUser, roles: TUserRole[]) {
             .filter((tr) => !!tr.role)
             // Sort by role hierarchy (if available) or otherwise timestamp in increasing order (oldest first)
             .sort((a, b) => {
-                const a_level = a.role!.display_hierarchy;
-                const b_level = b.role!.display_hierarchy;
+                const a_level = a.role?.display_hierarchy;
+                const b_level = b.role?.display_hierarchy;
                 if (a_level === undefined) {
                     return 1; // show b first, since a has no hierarchy level
                 } else if (b_level === undefined) {

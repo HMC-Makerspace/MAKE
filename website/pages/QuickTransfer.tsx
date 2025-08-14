@@ -151,7 +151,14 @@ export default function QuickTransferPage() {
         mutationFn: uploadFiles,
         onSettled: (data) => {
             console.log("Settled", data);
-            if (!collegeID || !data || !data.files || !data.upload_errors) {
+            if (
+                !collegeID ||
+                !data ||
+                !data.files ||
+                !data.upload_errors ||
+                data.files.length === 0 ||
+                data.upload_errors.length === 0
+            ) {
                 return;
             }
             // Add successfully uploaded files to user's file list

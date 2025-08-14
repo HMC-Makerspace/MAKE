@@ -43,6 +43,10 @@ export async function getPublicUsers(): Promise<TPublicUser[]> {
  */
 export async function getUser(uuid: UserUUID, providePasskey: boolean = false) {
     const Users = mongoose.model("User", User);
+    if (typeof uuid !== "string") {
+        // Prevent NoSQL injection by only allowing string UUIDs
+        return null;
+    }
     const user = Users.findOne({ uuid: uuid });
     // Only provide passkey if explicitly requested
     if (providePasskey) {
@@ -83,6 +87,11 @@ export async function getUserByEmail(email: string): Promise<TUser | null> {
  */
 export async function updateUser(user_obj: TUser): Promise<TUser | null> {
     const Users = mongoose.model("User", User);
+    // Validate that uuid is a string to prevent NoSQL injection
+    if (typeof user_obj.uuid !== "string") {
+        // Optionally, log the error or throw
+        return null;
+    }
     // Update the given user with a new user_obj, searching by uuid
     // and return the new user object
     return Users.findOneAndUpdate(
@@ -144,7 +153,7 @@ export async function createUser(user_obj: TUser): Promise<TUser | null> {
         return null;
     }
     if (!user_obj.college_id) {
-        user_obj.college_id = ""
+        user_obj.college_id = "";
     }
     // If the user doesn't exist
     // Add the default user roles to the user unless they already have them

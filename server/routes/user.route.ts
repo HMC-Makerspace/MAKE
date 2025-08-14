@@ -291,7 +291,6 @@ router.patch(
             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
-        console.log(req.user);
         // No user, check passkey authorization
         if (!req.user?.uuid) {
             const requesting_user = await getUser(requesting_uuid, true);
@@ -350,8 +349,8 @@ router.patch(
             res.status(StatusCodes.OK).json(updated_user);
             } catch (e: any) {
                 req.log.debug({
-                    "err": e.message
-                })
+                    error: e.message,
+                });
                 res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                     "error": e.message
                 })
