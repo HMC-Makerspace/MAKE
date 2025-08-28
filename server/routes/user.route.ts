@@ -655,7 +655,7 @@ router.get(
 );
 
 /**
- * . This is a public route, but a
+ * This is a public route, but a
  * `requesting_uuid` header is required to call it. If the user is not found,
  * a status error is returned. If the user is found, a list of role objects
  * is returned.

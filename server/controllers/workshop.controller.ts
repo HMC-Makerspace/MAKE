@@ -166,15 +166,19 @@ export async function patchWorkshop(
 export async function rsvpToWorkshop(
     workshop_uuid: UUID,
     user_uuid: UserUUID,
-): Promise<boolean> {
+): Promise<TWorkshop | null> {
     const workshop = await getWorkshop(workshop_uuid);
     // If the workshop doesn't exist, the RSVP fails
     if (!workshop) {
-        return false;
+        return null;
     }
     // If the user is already in the rsvp list, the RSVP fails
-    if (user_uuid in workshop.rsvp_list) {
-        return false;
+    if (
+        workshop.rsvp_list.some(
+            (rsvp_record) => rsvp_record.user_uuid === user_uuid,
+        )
+    ) {
+        return null;
     }
     // Add the user to the rsvp list
     workshop.rsvp_list.push({
@@ -182,8 +186,7 @@ export async function rsvpToWorkshop(
         timestamp: Date.now() / 1000,
     });
     // Update the workshop in the database
-    workshop.save();
-    return true;
+    return workshop.save();
 }
 
 /**
@@ -195,21 +198,24 @@ export async function rsvpToWorkshop(
 export async function cancelRSVPToWorkshop(
     workshop_uuid: UUID,
     user_uuid: UserUUID,
-): Promise<boolean> {
+): Promise<TWorkshop | null> {
     const workshop = await getWorkshop(workshop_uuid);
     // If the workshop doesn't exist, the cancellation fails
     if (!workshop) {
-        return false;
+        return null;
     }
     // If the user isn't in the rsvp list, the cancellation fails
-    if (!(user_uuid in workshop.rsvp_list)) {
-        return false;
+    if (
+        !workshop.rsvp_list.some(
+            (rsvp_record) => rsvp_record.user_uuid === user_uuid,
+        )
+    ) {
+        return null;
     }
     // Remove the user from the rsvp list
-    workshop.rsvp_list.filter((rsvp) => rsvp.user_uuid != user_uuid);
+    workshop.rsvp_list = workshop.rsvp_list.filter((rsvp) => rsvp.user_uuid != user_uuid);
     // Update the workshop in the database
-    workshop.save();
-    return true;
+    return workshop.save();
 }
 
 /**
