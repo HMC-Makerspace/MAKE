@@ -1,4 +1,3 @@
-import AdminLayout from "../layouts/AdminLayout";
 import {
     Button,
     Card,
@@ -7,29 +6,15 @@ import {
     CardHeader,
     Link,
     ScrollShadow,
-    Selection,
-    Spinner,
     Tooltip,
 } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import { TUser, TUserRole } from "common/user";
-import {
-    CERTIFICATION_VISIBILITY,
-    TCertification,
-} from "../../common/certification";
-import CertificationCard from "../components/public/certifications/CertificationCard";
+import { useMemo, useState } from "react";
+import { TUser } from "common/user";
+import { TCertification } from "../../common/certification";
 import DefaultLayout from "../layouts/Default";
 import CertificationTag from "../components/kiosks/admin/certifications/CertificationTag";
-import {
-    easeInOut,
-    motion,
-    useMotionValueEvent,
-    useScroll,
-    useSpring,
-    useTime,
-    useTransform,
-} from "framer-motion";
+import { motion } from "framer-motion";
 import {
     convertTimestampToDate,
     getForegroundColor,
@@ -46,14 +31,12 @@ export default function CertificationsPage() {
             refetchOnWindowFocus: false,
         },
     );
-    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
-    });
 
+    // Query self every time the page opens to get updated certifications
     const { data: self } = useQuery<TUser>({
         queryKey: ["user", "self"],
-        refetchOnWindowFocus: false,
+        refetchOnWindowFocus: true,
+        refetchOnMount: true,
         retry: false,
     });
 

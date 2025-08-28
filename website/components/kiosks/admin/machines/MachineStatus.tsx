@@ -21,11 +21,25 @@ import EditStatusModal from "./EditStatusModal";
  * Styles for machine statuses
  */
 const MACHINE_STATUS_STYLES = {
-    [MACHINE_STATUS_TYPE.OFFLINE]: "bg-danger-300 text-danger-foreground",
-    [MACHINE_STATUS_TYPE.ONLINE]: "bg-success-300 text-success-foreground",
+    [MACHINE_STATUS_TYPE.OFFLINE]:
+        "bg-danger-300 border-danger-300 text-danger-foreground",
+    [MACHINE_STATUS_TYPE.ONLINE]:
+        "bg-success-300 border-success-300 text-success-foreground",
     [MACHINE_STATUS_TYPE.FLAGGED_FOR_REPAIR]:
-        "bg-secondary-300 text-secondary-foreground",
-    [MACHINE_STATUS_TYPE.IN_REPAIR]: "bg-warning-300 text-warning-foreground",
+        "bg-secondary-300 border-secondary-300 text-secondary-foreground",
+    [MACHINE_STATUS_TYPE.IN_REPAIR]:
+        "bg-warning-300 border-warning-300 text-warning-foreground",
+} as const;
+
+const MACHINE_RESERVED_STYLES = {
+    [MACHINE_STATUS_TYPE.OFFLINE]:
+        "border-danger-300 border-4 text-danger-300 opacity-75",
+    [MACHINE_STATUS_TYPE.ONLINE]:
+        "border-success-300 border-4 text-success-300 opacity-75",
+    [MACHINE_STATUS_TYPE.FLAGGED_FOR_REPAIR]:
+        "border-secondary-300 border-4 text-secondary-300 opacity-75",
+    [MACHINE_STATUS_TYPE.IN_REPAIR]:
+        "border-warning-300 border-4 text-warning-300 opacity-75",
 } as const;
 
 function StatusModal({
@@ -155,10 +169,34 @@ export default function MachineStatus({
                 isDisabled={editable === MACHINE_EDIT_LEVEL.STATIC}
                 onPress={onOpen}
             >
-                <div className="font-semibold text-default-600">
-                    {machine.count > 1 ? "Statuses" : "Status"}
+                <div className="flex flex-row justify-between w-full">
+                    <div className="font-semibold text-default-600">
+                        {machine.count > 1 ? "Statuses" : "Status"}
+                    </div>
+                    {machine.count == 1 &&
+                        machine.reservable &&
+                        machine.instances[0].reserved && (
+                            <div className="text-secondary-400">
+                                Currently Reserved
+                            </div>
+                        )}
+                    {machine.count > 1 && machine.reservable && (
+                        <div
+                            className={clsx("text-secondary-400", "flex gap-1")}
+                        >
+                            Reserved:
+                            <span>
+                                {
+                                    machine.instances.filter((l) => l.reserved)
+                                        .length
+                                }
+                            </span>
+                            <span>/</span>
+                            <span>{machine.count}</span>
+                        </div>
+                    )}
                 </div>
-                {machine.count == 0 && (
+                {machine.count == 0 && editable === MACHINE_EDIT_LEVEL.FULL && (
                     <div className="w-full h-full text-default-500 content-center -mt-5">
                         Click to add statuses
                     </div>
@@ -168,7 +206,13 @@ export default function MachineStatus({
                         radius="sm"
                         className={clsx(
                             "min-w-full h-full text-xl",
-                            MACHINE_STATUS_STYLES[machine.instances[0].status],
+                            machine.instances[0].reserved
+                                ? MACHINE_RESERVED_STYLES[
+                                      machine.instances[0].status
+                                  ]
+                                : MACHINE_STATUS_STYLES[
+                                      machine.instances[0].status
+                                  ],
                         )}
                     >
                         {
@@ -184,7 +228,6 @@ export default function MachineStatus({
                             "grid w-full p-2",
                             "gap-3 sm:gap-4 md:gap-1 lg:gap-4",
                             "grid-cols-12 justify-items-center",
-                            // machine.count >= max_count && "xl:hidden 2xl:grid",
                         )}
                     >
                         {machine.instances.map((instance, i) => (
@@ -192,7 +235,13 @@ export default function MachineStatus({
                                 key={`machine-${machine.uuid}-big-status-${i}-${machine.uuid}`}
                                 className={clsx(
                                     "size-5 rounded-sm",
-                                    MACHINE_STATUS_STYLES[instance.status],
+                                    instance.reserved
+                                        ? MACHINE_RESERVED_STYLES[
+                                              instance.status
+                                          ]
+                                        : MACHINE_STATUS_STYLES[
+                                              instance.status
+                                          ],
                                 )}
                             />
                         ))}
@@ -203,8 +252,6 @@ export default function MachineStatus({
                     <div
                         className={clsx(
                             "w-full grid grid-rows-2 grid-cols-2 h-full gap-2",
-                            // machine.count <= max_count &&
-                            //     "hidden xl:grid 2xl:hidden",
                         )}
                     >
                         {MACHINE_STATUS_LABELS.map((status) => (
