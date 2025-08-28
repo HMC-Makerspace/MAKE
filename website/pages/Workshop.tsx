@@ -141,56 +141,56 @@ export default function WorkshopPage() {
                         please check back soon!
                     </div>
                 ))}
-            <div id="master" className="grid gap-4 flex-col">
-                {
-                    (workshops && workshops.length > 0 && (
-                        <div
-                            id="past-present-toggle"
-                            className="flex space-x-4 justify-center"
-                        >
-                            <Tabs
-                                aria-label="past-present-workshop-toggle"
-                                color="primary"
-                                variant="bordered"
-                                selectedKey={selected}
-                                onSelectionChange={(key) =>
-                                    setSelected(String(key))
-                                }
-                            >
-                                <Tab
-                                    key="current-workshops"
-                                    title={
-                                        <div className="flex items-center space-x-2">
-                                            {calendar_date_range_icon({})}
-                                            <span>Current Workshops</span>
-                                        </div>
-                                    }
-                                />
-                                <Tab
-                                    key="past-workshops"
-                                    title={
-                                        <div className="flex items-center space-x-2">
-                                            {calendar_days_icon({})}
-                                            <span>Past Workshops</span>
-                                        </div>
-                                    }
-                                />
-                            </Tabs>
-                        </div>
-                    ))}
-                <div id="card-container" className="grid grid-cols-2 gap-4">
+            <div
+                id="master"
+                className="flex gap-4 flex-col h-full items-center"
+            >
+                {workshops && workshops.length > 0 && (
+                    <Tabs
+                        aria-label="past-present-workshop-toggle"
+                        color="primary"
+                        variant="bordered"
+                        selectedKey={selected}
+                        onSelectionChange={(key) => setSelected(String(key))}
+                        className="justify-self-center"
+                    >
+                        <Tab
+                            key="current-workshops"
+                            title={
+                                <div className="flex items-center space-x-2">
+                                    {calendar_date_range_icon({})}
+                                    <span>Current Workshops</span>
+                                </div>
+                            }
+                        />
+                        <Tab
+                            key="past-workshops"
+                            title={
+                                <div className="flex items-center space-x-2">
+                                    {calendar_days_icon({})}
+                                    <span>Past Workshops</span>
+                                </div>
+                            }
+                        />
+                    </Tabs>
+                )}
+                <div
+                    id="card-container"
+                    className="grid grid-cols-2 gap-4 h-full w-full"
+                >
                     {workshops
-                        ?.filter((workshop) => {
-                            const isFuture =
-                                workshop.timestamp_end > Date.now()/1000;
-                            return selected === "past-workshops"
-                                ? !isFuture
-                                : isFuture;
-                        })
+                        // ?.filter((workshop) => {
+                        //     const isFuture =
+                        //         workshop.timestamp_end > Date.now() / 1000;
+                        //     return selected === "past-workshops"
+                        //         ? !isFuture
+                        //         : isFuture;
+                        // })
+                        ?.concat(workshops, workshops, workshops)
                         .map((workshop) => (
                             <Card
                                 id={workshop.title}
-                                key={workshop.title}    
+                                key={workshop.title}
                                 className=""
                             >
                                 <CardHeader className="flex-col items-start">
@@ -224,13 +224,14 @@ export default function WorkshopPage() {
                                             .join(", ")}
                                     </h4>
                                 </CardHeader>
-                                <CardBody className="pt-2 pb-0 h-full">
+                                <CardBody className="p-0 pb-0 h-full flex-grow-0">
                                     <ImageCarousel
                                         resource_uuid={workshop.uuid}
                                         resource_type={
                                             FILE_RESOURCE_TYPE.WORKSHOP
                                         }
                                         editable={false}
+                                        className=""
                                     />
                                     <div
                                         id="certification-tags"

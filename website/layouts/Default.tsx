@@ -93,12 +93,13 @@ export default function DefaultLayout({
     const kioskAccess = scopes && verifyScopes(scopes, [API_SCOPE.VIEW_KIOSKS]);
     const handleKeyPress = useCallback(
         (event: KeyboardEvent) => {
-            if (event.key === "k") {
+            if (event.key === "k" && event.metaKey) {
                 // If user is authorized, go to the kiosk page
                 if (!scopesLoading && !scopesError && kioskAccess) {
                     navigate("/admin");
                 }
             }
+            event.stopImmediatePropagation();
         },
         [scopesLoading, scopesError, kioskAccess],
     );
@@ -115,7 +116,7 @@ export default function DefaultLayout({
     }, [handleKeyPress]);
 
     return (
-        <div className="flex flex-col xl:flex-row h-dvh">
+        <div className="flex flex-col xl:flex-row h-dvh" tabIndex={-1}>
             <Navbar pages={PAGES} pageIndex={pageIndex} />
             <AnimatePresence mode="popLayout">
                 <motion.main

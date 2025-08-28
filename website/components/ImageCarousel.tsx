@@ -11,6 +11,7 @@ import {
     ModalFooter,
     ModalBody,
     useDisclosure,
+    Image,
 } from "@heroui/react";
 import {
     TrashIcon,
@@ -21,6 +22,7 @@ import {
     ArrowUpOnSquareIcon,
 } from "@heroicons/react/24/outline";
 import FileCard from "./public/file/FileCard.tsx";
+import clsx from "clsx";
 
 async function deleteImage({
     resource_type,
@@ -61,10 +63,12 @@ export default function ImageCarousel({
     resource_uuid,
     resource_type,
     editable = false,
+    className = "",
 }: {
     resource_uuid: UUID;
     resource_type: FILE_RESOURCE_TYPE;
     editable?: boolean;
+    className?: string;
 }) {
     const {
         data: images,
@@ -102,10 +106,30 @@ export default function ImageCarousel({
     }
 
     return (
-        <div className="relative h-full min-h-[150px] min-w-[150px] content-center">
+        <div
+            className={clsx(
+                "relative h-full min-h-[150px] min-w-[150px] w-full content-center",
+                className,
+            )}
+        >
+            <Image
+                src={
+                    images[index]
+                        ? `/api/v3/file/download/${images[index].uuid}`
+                        : undefined
+                }
+                className="h-full w-full"
+                classNames={{
+                    img: "h-full object-contain",
+                    wrapper: "h-full w-full !max-w-none",
+                    blurredImg: "translate-y-0 w-full min-w-full scale-100",
+                }}
+                isBlurred
+            />
+
             {images.length > 1 && (
                 <Button
-                    className="absolute left-1 top-0 bottom-0 my-auto"
+                    className=" absolute left-1 top-0 bottom-0 my-auto z-20"
                     variant="flat"
                     size="sm"
                     isIconOnly
@@ -116,14 +140,21 @@ export default function ImageCarousel({
                 </Button>
             )}
             {images.length > 0 ? (
-                <img
-                    className="w-full h-full object-cover rounded-lg"
+                <Image
+                    className="w-full h-full max-h-full object-contain rounded-lg"
                     src={
                         images[index]
                             ? `/api/v3/file/download/${images[index].uuid}`
                             : undefined
                     }
                     alt={images[index]?.name || "Image"}
+                    isBlurred
+                    classNames={
+                        {
+                            // wrapper: "w-full h-full max-h-full",
+                        }
+                    }
+                    removeWrapper
                 />
             ) : (
                 <p className="text-center text-l text-bold">No Images Found</p>
@@ -140,7 +171,7 @@ export default function ImageCarousel({
             )}
             {images.length > 1 && (
                 <Button
-                    className="absolute right-1 top-0 bottom-0 my-auto"
+                    className="absolute right-1 top-0 bottom-0 my-auto z-20"
                     variant="flat"
                     size="sm"
                     isIconOnly
