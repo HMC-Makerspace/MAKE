@@ -100,7 +100,7 @@ app.use(
         resave: false,
         saveUninitialized: false,
     }),
-    lusca.csrf(),
+    // lusca.csrf(),
     passport.initialize(),
 );
 
@@ -136,7 +136,7 @@ if (process.env.NODE_ENV === "production") {
                 identifierFormat: process.env.IDP_ID_FORMAT,
             },
             async (req, profile, done) => {
-                if (!profile || !profile.email) {
+                if (!profile || !profile.nameID) {
                     req.log.fatal({
                         msg: "Invalid profile",
                         profile: profile,
@@ -145,7 +145,7 @@ if (process.env.NODE_ENV === "production") {
                     done(new Error("No profile found"));
                     return;
                 }
-                const email = profile.email as string;
+                const email = profile.nameID as string;
                 const user_obj = await getUserByEmail(email);
                 if (!user_obj) {
                     req.log.info({
@@ -155,7 +155,7 @@ if (process.env.NODE_ENV === "production") {
                     const new_user_obj = {
                         uuid: crypto.randomUUID(),
                         name: profile.displayName as string,
-                        email: profile.email as string,
+                        email: email,
                         college_id: "", // If not provided by IDP, fill in later
                         active_roles: [],
                         past_roles: [],
@@ -267,9 +267,9 @@ cron.schedule("*/10 * * * *", () => {
     clearExpiredFilesCron(logger);
 });
 
-// Refresh all checkout quantities every 15 minutes
+// Refresh all checkout quantities every minute
 checkoutAvailabilityCron(logger);
-cron.schedule("*/15 * * * *", () => {
+cron.schedule("* * * * *", () => {
     checkoutAvailabilityCron(logger);
 });
 
