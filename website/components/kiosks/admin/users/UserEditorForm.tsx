@@ -20,6 +20,7 @@ import { ClipboardIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import PopupAlert from "../../../PopupAlert";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateUser = async ({
@@ -37,6 +38,14 @@ const createUpdateUser = async ({
             .data;
     }
 };
+
+const deleteUser = async ({
+    user_uuid
+}: {
+    user_uuid: string
+}) => {
+    return (await axios.delete(`/api/v3/user/${user_uuid}`)).data
+}
 
 export default function UserEditorForm({
     user,
@@ -77,6 +86,19 @@ export default function UserEditorForm({
             );
             setHasEdits(false);
             console.log(result);
+        },
+        onError: (error) => {
+            onError(`Error: ${error.message}`);
+        },
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: deleteUser,
+        onSuccess: () => {
+            onSuccess(
+                `Successfully deleted user`,
+            );
+            setHasEdits(false);
         },
         onError: (error) => {
             onError(`Error: ${error.message}`);
@@ -185,7 +207,7 @@ export default function UserEditorForm({
         return (
             hasEdits &&
             UUID.length > 0 &&
-            collegeID.length > 0 &&
+            // collegeID.length > 0 &&
             name.length > 0 &&
             email.length > 0
         );
@@ -225,8 +247,6 @@ export default function UserEditorForm({
                     placeholder={multiDisabledPlaceholder("ID #")}
                     // Disable the input if there are multiple or no users are selected
                     isDisabled={isEmpty || isMultiple}
-                    // ID must not be empty
-                    isRequired
                     // If the user exists, prefill the input with the user's id
                     value={collegeID}
                     onValueChange={wrapEdit(setCollegeID)}
@@ -309,21 +329,37 @@ export default function UserEditorForm({
                     className="col-span-2"
                 />
                 <Divider className="h-[1px] bg-default-400 col-span-2" />
-                <Button
-                    size="lg"
-                    className="w-full mt-auto col-span-2"
-                    isDisabled={isEmpty || !isValid}
-                    isLoading={mutation.isPending}
-                    color={"primary"}
-                    variant="shadow"
-                    type="submit"
-                >
-                    {isNew
-                        ? "Create User"
-                        : isMultiple
-                          ? "Apply Batch Edit"
-                          : "Update User"}
-                </Button>
+                <div className="w-full mt-auto col-span-2 flex flex-row gap-2">
+                    <Button
+                        size="lg"
+                        className="w-full"
+                        isDisabled={isEmpty || !isValid}
+                        isLoading={mutation.isPending}
+                        color={"primary"}
+                        variant="shadow"
+                        type="submit"
+                    >
+                        {isNew
+                            ? "Create User"
+                            : isMultiple
+                            ? "Apply Batch Edit"
+                            : "Update User"}
+                    </Button>
+                    <Button
+                        isIconOnly
+                        size="lg"
+                        color="danger"
+                        variant="flat"
+                        isDisabled={isEmpty}
+                        isLoading={mutation.isPending}
+                        startContent={
+                            <TrashIcon className="size-5"/>
+                        }
+                        onPress={() => deleteMutation.mutate({user_uuid: user.uuid})}
+                    >
+
+                    </Button>
+                </div>
             </Form>
         </>
     );

@@ -65,6 +65,7 @@ export async function getCertificationsVisibleToUser(
     const Certifications = mongoose.model("Certification", Certification);
     // Find all items that require no roles or which require roles that the
     // user has at least one of
+    // TODO: Remove private certs
     return await Certifications.find({
         $or: [
             { authorized_roles: null },
