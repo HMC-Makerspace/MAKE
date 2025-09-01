@@ -399,7 +399,7 @@ export default function QuickTransferPage() {
                                 own files.
                                 <br></br>
                                 <br></br>
-                                To  gain access to Quick Transfer, please visit the Makerspace during open hours and ask a steward.
+                                To gain access to Quick Transfer, please visit the Makerspace during open hours and ask a steward.
                             </div>
                         )}
                     </div>

@@ -27,6 +27,9 @@ import {
     CalendarDaysIcon,
 } from "@heroicons/react/24/solid";
 import { TCertificate, TCertification } from "common/certification.ts";
+import { TConfig } from "common/config.js";
+import { timestampToZonedDateTime } from "../utils.tsx";
+import { UnixTimestamp } from "common/global.ts";
 
 export const calendar_date_range_icon = (
     props: React.ComponentProps<typeof CalendarDateRangeIcon>,
@@ -132,6 +135,49 @@ export default function WorkshopPage() {
         },
     });
 
+    const { data: config, isLoading: configLoading } = useQuery<TConfig>({
+        queryKey: ["config"],
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+    });
+
+    const isSameDay = (
+        start_timestamp: UnixTimestamp,
+        end_timestamp: UnixTimestamp,
+    ) => {
+        const start_time = timestampToZonedDateTime(
+            start_timestamp,
+            config?.schedule.timezone,
+        );
+        const end_time = timestampToZonedDateTime(
+            end_timestamp,
+            config?.schedule.timezone,
+        );
+        if (
+            start_time.year == end_time.year &&
+            start_time.month == end_time.month &&
+            start_time.day == end_time.day
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    const display = (
+        start_timestamp: UnixTimestamp,
+        end_timestamp: UnixTimestamp,
+    ) => {
+        const start_time = timestampToZonedDateTime(
+            start_timestamp,
+            config?.schedule.timezone,
+        );
+        const end_time = timestampToZonedDateTime(
+            end_timestamp,
+            config?.schedule.timezone,
+        );
+    };
+
     return (
         <DefaultLayout className="p-8" pageHref="/workshops">
             <ToastProvider />
@@ -195,14 +241,13 @@ export default function WorkshopPage() {
                             >
                                 <CardHeader className="flex-col items-start">
                                     <p className="text-2xl font-light">
-                                        <div
-                                        className="flex">
+                                        <div className="flex">
                                             {workshop.title}
                                             <CalendarBoldIcon className="text-primary-300 size-4"></CalendarBoldIcon>
                                         </div>
                                     </p>
-                                    <div>
-                                        bleh
+                                    <div className="text-sm text-gray-500 flex items-center gap-2">
+                                        empty
                                     </div>
                                     {/* <small className="text-default-500">
                                         {workshop.capacity &&
