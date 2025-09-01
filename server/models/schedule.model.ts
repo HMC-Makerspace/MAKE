@@ -40,7 +40,8 @@ export const Alert = new mongoose.Schema<TAlert>({
     timestamp_start: { type: Number, required: false },
     timestamp_end: { type: Number, required: false },
     header: { type: String, required: true },
-    message: { type: String, required: true },
+    message: { type: String, required: false },
+    link: { type: String, required: false },
 });
 
 // --- Schedule ---

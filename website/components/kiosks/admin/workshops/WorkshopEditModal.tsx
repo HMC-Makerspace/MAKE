@@ -166,7 +166,7 @@ export default function WorkshopEditModal({
                 isNew: isNew,
             });
         },
-        [isNew],
+        [isNew, workshop],
     );
 
     return (
