@@ -19,8 +19,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { timestampToZonedDateTime } from "../../../utils";
 import { TConfig } from "common/config";
 import { DateFormatter } from "@internationalized/date";
-import { start } from "node:repl";
-import { TCertificate } from "common/certification";
+import { TCertificate, TCertification } from "common/certification";
 import { useMemo } from "react";
 
 // cancel means cancel_rsvp
@@ -57,7 +56,7 @@ export default function WorkshopCard({
     self?: TUser;
     users?: TUser[];
     config?: TConfig;
-    certifications?: TCertificate[];
+    certifications?: TCertification[];
 }) {
     const queryClient = useQueryClient();
     const rsvpMutation = useMutation({
@@ -122,17 +121,25 @@ export default function WorkshopCard({
         ? workshop.rsvp_list.length >= workshop.capacity
         : false;
 
-    const date_formatter = new Intl.DateTimeFormat(config?.schedule.timezone, {
-        month: "long",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-    });
+    const date_formatter = useMemo(
+        () =>
+            new Intl.DateTimeFormat(config?.schedule.timezone, {
+                month: "long",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+            }),
+        [config?.schedule.timezone],
+    );
 
-    const time_formatter = new Intl.DateTimeFormat(config?.schedule.timezone, {
-        hour: "numeric",
-        minute: "2-digit",
-    });
+    const time_formatter = useMemo(
+        () =>
+            new Intl.DateTimeFormat(config?.schedule.timezone, {
+                hour: "numeric",
+                minute: "2-digit",
+            }),
+        [config?.schedule.timezone],
+    );
 
     return (
         <Card id={workshop.title} key={workshop.title} className="h-[44dvh]">
@@ -207,9 +214,7 @@ export default function WorkshopCard({
                             <CertificationTag
                                 key={cert.certification_uuid}
                                 cert_uuid={cert.certification_uuid}
-                                // certifications={
-                                //     certifications
-                                // }
+                                certifications={certifications}
                                 level={
                                     cert.required_level > 0
                                         ? cert.required_level

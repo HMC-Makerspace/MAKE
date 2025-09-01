@@ -397,9 +397,11 @@ export default function QuickTransferPage() {
                                 To download files, please enter your college ID.
                                 Please login to upload, delete, and edit your
                                 own files.
-                                <br></br>
-                                <br></br>
-                                To gain access to Quick Transfer, please visit the Makerspace during open hours and ask a steward.
+                                <br />
+                                <br />
+                                To gain access to Quick Transfer, please visit
+                                the Makerspace during open hours and ask a
+                                steward.
                             </div>
                         )}
                     </div>

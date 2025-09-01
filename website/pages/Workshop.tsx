@@ -37,7 +37,7 @@ export default function WorkshopPage() {
         isLoading: certsLoading,
         isError: certsError,
     } = useQuery<TCertification[]>({
-        queryKey: ["user", "public"],
+        queryKey: ["certification", "public"],
         refetchOnWindowFocus: false,
         retry: false,
     });
@@ -111,6 +111,7 @@ export default function WorkshopPage() {
                                         workshop={workshop}
                                         self={self}
                                         users={users}
+                                        certifications={certifications}
                                     />
                                 ))}
                         </div>
