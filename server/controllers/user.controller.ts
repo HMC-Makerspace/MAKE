@@ -77,7 +77,8 @@ export async function getUserByCollegeID(id: string): Promise<TUser | null> {
  */
 export async function getUserByEmail(email: string): Promise<TUser | null> {
     const Users = mongoose.model("User", User);
-    return Users.findOne({ email: email }).select("-passkey");
+    // Get user by email with case insensitve search.
+    return Users.findOne({ email: { $regex: new RegExp(`^${email}$`, "i") }}).select("-passkey");
 }
 
 /**

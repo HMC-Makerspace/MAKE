@@ -136,16 +136,16 @@ if (process.env.NODE_ENV === "production") {
                 identifierFormat: process.env.IDP_ID_FORMAT,
             },
             async (req, profile, done) => {
-                if (!profile || !profile.nameID) {
+                if (!profile || !profile.email) {
                     req.log.fatal({
                         msg: "Invalid profile",
                         profile: profile,
                         req: req,
                     });
-                    done(new Error("No profile found"));
+                    done(new Error("No profile found" + profile));
                     return;
                 }
-                const email = profile.nameID as string;
+                const email = profile.email as string;
                 const user_obj = await getUserByEmail(email);
                 if (!user_obj) {
                     req.log.info({
@@ -165,7 +165,7 @@ if (process.env.NODE_ENV === "production") {
                         uuid: crypto.randomUUID(),
                         name: name,
                         email: email,
-                        college_id: "", // If not provided by IDP, fill in later
+                        college_id: "" , // If not provided by IDP, fill in later
                         active_roles: [],
                         past_roles: [],
                         active_certificates: [],
