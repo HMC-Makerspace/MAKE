@@ -18,6 +18,9 @@ import axios, { AxiosError } from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { timestampToZonedDateTime } from "../../../utils";
 import { TConfig } from "common/config";
+import { DateFormatter } from "@internationalized/date";
+import { start } from "node:repl";
+import { TCertificate } from "common/certification";
 
 // cancel means cancel_rsvp
 async function rsvp({
@@ -47,11 +50,13 @@ export default function WorkshopCard({
     self,
     users,
     config,
+    certifications,
 }: {
     workshop: TWorkshop;
     self?: TUser;
     users?: TUser[];
     config?: TConfig;
+    certifications?: TCertificate[];
 }) {
     const queryClient = useQueryClient();
     const rsvpMutation = useMutation({
@@ -98,10 +103,7 @@ export default function WorkshopCard({
         },
     });
 
-    const startZDT = timestampToZonedDateTime(
-        workshop.timestamp_start,
-        config?.schedule.timezone,
-    );
+    const startZDT = timestampToZonedDateTime(workshop.timestamp_start);
     const endZDT = timestampToZonedDateTime(
         workshop.timestamp_end,
         config?.schedule.timezone,
@@ -119,29 +121,61 @@ export default function WorkshopCard({
         ? workshop.rsvp_list.length >= workshop.capacity
         : false;
 
+    const date_formatter = new Intl.DateTimeFormat(
+        config?.schedule.timezone,
+        {
+            month: "long",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+        },
+    );
+
+    const time_formatter = new Intl.DateTimeFormat(
+        config?.schedule.timezone,
+        {
+            hour: "numeric",
+            minute: "2-digit",
+        },
+    );
+
     return (
         <Card id={workshop.title} key={workshop.title} className="h-[44dvh]">
             <CardHeader className="flex-col items-start">
-                <p className="text-2xl font-light flex items-center justify-between w-full">
-                    {workshop.title}
+                <div
+                    id="title-capacity-container"
+                    className="flex flex-row w-full"
+                >
+                    <p className="text-2xl font-light flex w-full">
+                        {workshop.title}
+                    </p>
+                    <div
+                        id="capacity"
+                        className="text-sm text-white-600 whitespace-nowrap ml-4"
+                    >
+                        {workshop.capacity && workshop.capacity > 0 ? (
+                            <>
+                                Capacity: {workshop.rsvp_list.length} /{" "}
+                                {workshop.capacity}
+                            </>
+                        ) : (
+                            "No RSVP Limit !"
+                        )}
+                    </div>
+                </div>
+                <div className="flex gap-1 items-center">
                     <CalendarBoldIcon className="text-primary-300 size-4" />
-                </p>
-                <div className="text-sm text-gray-500 flex items-center gap-2">
+                    {isSameDay
+                        ? `${date_formatter.format(startZDT.toDate())} – ${time_formatter.format(endZDT.toDate())}`
+                        : `${date_formatter.format(startZDT.toDate())} — ${date_formatter.format(endZDT.toDate())}`}
+                </div>
+                <div
+                    id="description"
+                    className="text-sm text-gray-500 flex items-center gap-2 text-ellipsis overflow-hidden"
+                >
                     {workshop.description}
                 </div>
-                {/* <small className="text-default-500">
-                    {workshop.capacity &&
-                    workshop.capacity > 0 ? (
-                        <div>
-                            Capacity:{" "}
-                            {workshop.rsvp_list.length} /{" "}
-                            {workshop.capacity}
-                        </div>
-                    ) : (
-                        <div>No RSVP Limit !</div>
-                    )}
-                </small> */}
-                <h4 className="font-bold text-small">
+                <div id="instructors" className="font-bold text-small">
                     {"Taught By: "}
                     {users
                         ?.filter((user) =>
@@ -153,40 +187,26 @@ export default function WorkshopCard({
                                 : user.name,
                         )
                         .join(", ")}
-                </h4>
+                </div>
             </CardHeader>
             <CardBody className="p-0 pb-0 h-full flex-grow-0">
+                <div
+                    id="certification-tags"
+                    className="absolute flex flex-col gap-2"
+                >
+                    {workshop.required_certifications?.map((cert) => (
+                        <CertificationTag
+                            key={cert.certification_uuid}
+                            cert_uuid={cert.certification_uuid}
+                        />
+                    ))}
+                </div>
                 <ImageCarousel
                     resource_uuid={workshop.uuid}
                     resource_type={FILE_RESOURCE_TYPE.WORKSHOP}
                     editable={false}
                     className=""
                 />
-                <div
-                    id="certification-tags"
-                    className={clsx(
-                        "absolute w-full h-fit top-2",
-                        "box-border border-4 border-transparent",
-                        "p-1 overflow-auto flex gap-2",
-                        "z-20",
-                    )}
-                >
-                    {workshop.required_certifications &&
-                        workshop.required_certifications.map((cert) => (
-                            <CertificationTag
-                                key={cert.certification_uuid}
-                                cert_uuid={cert.certification_uuid}
-                                // certifications={
-                                //     certifications
-                                // }
-                                level={
-                                    cert.required_level > 0
-                                        ? cert.required_level
-                                        : undefined
-                                }
-                            />
-                        ))}
-                </div>
                 <div className="absolute w-full h-fit bottom-3 flex justify-center z-20">
                     <Tooltip
                         color="primary"
@@ -220,7 +240,11 @@ export default function WorkshopCard({
                                     });
                                 }
                             }}
-                            isDisabled={!self || rsvpMutation.isPending}
+                            isDisabled={
+                                !self ||
+                                rsvpMutation.isPending ||
+                                workshop.timestamp_end < Date.now() / 1000
+                            }
                         >
                             {rsvpIndex === -1 && overCapacity
                                 ? "Join Waitlist"
@@ -234,12 +258,6 @@ export default function WorkshopCard({
                     </Tooltip>
                 </div>
             </CardBody>
-            <CardFooter>
-                {"Starts: "}
-                {new Date(workshop.timestamp_start * 1000).toLocaleString()}
-                {" Ends: "}
-                {new Date(workshop.timestamp_end * 1000).toLocaleString()}
-            </CardFooter>
         </Card>
     );
 }
