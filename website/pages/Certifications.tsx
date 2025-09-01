@@ -33,7 +33,7 @@ export default function CertificationsPage() {
     );
 
     // Query self every time the page opens to get updated certifications
-    const { data: self } = useQuery<TUser>({
+    const { data: self, refetch } = useQuery<TUser>({
         queryKey: ["user", "self"],
         refetchOnWindowFocus: true,
         refetchOnMount: true,
@@ -133,7 +133,10 @@ export default function CertificationsPage() {
                                                   "origin-left box-border cursor-pointer lg:hidden",
                                                   highlight && "shadow-md",
                                               )}
-                                              onTap={() => setIndex(i)}
+                                              onTap={async () => {
+                                                  setIndex(i);
+                                                  await refetch();
+                                              }}
                                           >
                                               <motion.div
                                                   initial={{
@@ -278,7 +281,8 @@ export default function CertificationsPage() {
                         {cert?.name ?? ""}
                         {!self ? (
                             <div className="text-center w-full">
-                                Please login to view our certifications.
+                                Please login to view certifications and take
+                                quizzes.
                             </div>
                         ) : (
                             certs &&

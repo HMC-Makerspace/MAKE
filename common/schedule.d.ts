@@ -15,7 +15,8 @@ export type ScheduleUUID = UUID;
  * @property timestamp_end - A unix timestamp for when this was alert ends.
  *     Must be present unless `default` is true
  * @property header - The header (subject) of the alert message
- * @property message - The actual, detailed alert message
+ * @property message - The an optional detailed alert message
+ * @property link - An optional link to open when the alert is pressed
  */
 export type TAlert = {
     uuid: UUID;
@@ -23,7 +24,8 @@ export type TAlert = {
     timestamp_start?: UnixTimestamp;
     timestamp_end?: UnixTimestamp;
     header: string;
-    message: string;
+    message?: string;
+    link?: string;
 };
 
 /**
