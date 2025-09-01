@@ -12,6 +12,7 @@ import {
     Tabs,
     Tab,
 } from "@heroui/react";
+import { CalendarBoldIcon } from "@heroui/shared-icons";
 import { TWorkshop } from "../../common/workshop.ts";
 import ImageCarousel from "../components/ImageCarousel.tsx";
 import { FILE_RESOURCE_TYPE } from "../../common/file.ts";
@@ -179,14 +180,13 @@ export default function WorkshopPage() {
                     className="grid grid-cols-2 gap-4 h-full w-full"
                 >
                     {workshops
-                        // ?.filter((workshop) => {
-                        //     const isFuture =
-                        //         workshop.timestamp_end > Date.now() / 1000;
-                        //     return selected === "past-workshops"
-                        //         ? !isFuture
-                        //         : isFuture;
-                        // })
-                        ?.concat(workshops, workshops, workshops)
+                        ?.filter((workshop) => {
+                            const isFuture =
+                                workshop.timestamp_end > Date.now() / 1000;
+                            return selected === "past-workshops"
+                                ? !isFuture
+                                : isFuture;
+                        })
                         .map((workshop) => (
                             <Card
                                 id={workshop.title}
@@ -194,15 +194,28 @@ export default function WorkshopPage() {
                                 className=""
                             >
                                 <CardHeader className="flex-col items-start">
-                                    <p className="text-2xl uppercase font-bold">
-                                        {workshop.title}
-                                        {workshop.timestamp_start}
-                                        {workshop.timestamp_start}
+                                    <p className="text-2xl font-light">
+                                        <div
+                                        className="flex">
+                                            {workshop.title}
+                                            <CalendarBoldIcon className="text-primary-300 size-4"></CalendarBoldIcon>
+                                        </div>
                                     </p>
-                                    <small className="text-default-500">
-                                        Capacity: {workshop.rsvp_list.length} /{" "}
-                                        {workshop.capacity}
-                                    </small>
+                                    <div>
+                                        bleh
+                                    </div>
+                                    {/* <small className="text-default-500">
+                                        {workshop.capacity &&
+                                        workshop.capacity > 0 ? (
+                                            <div>
+                                                Capacity:{" "}
+                                                {workshop.rsvp_list.length} /{" "}
+                                                {workshop.capacity}
+                                            </div>
+                                        ) : (
+                                            <div>No RSVP Limit !</div>
+                                        )}
+                                    </small> */}
                                     <h4 className="font-bold text-small">
                                         {"Taught By: "}
                                         {users
