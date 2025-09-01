@@ -3,7 +3,7 @@ import DefaultLayout from "../layouts/Default";
 import { ToastProvider, Tabs, Tab } from "@heroui/react";
 import { TWorkshop } from "../../common/workshop.ts";
 import { TUser } from "common/user.js";
-import { useState } from "react";
+import { Key, useState } from "react";
 import {
     CalendarDateRangeIcon,
     CalendarDaysIcon,
@@ -13,7 +13,7 @@ import { TConfig } from "common/config.js";
 import WorkshopCard from "../components/public/workshops/WorkshopCard.tsx";
 
 export default function WorkshopPage() {
-    const [selected, setSelected] = useState("current-workshops");
+    const [selected, setSelected] = useState<Key>("current-workshops");
     const {
         data: workshops,
         isLoading: workshopsLoading,
@@ -60,66 +60,66 @@ export default function WorkshopPage() {
     return (
         <DefaultLayout className="p-8" pageHref="/workshops">
             <ToastProvider />
-            {!workshops ||
-                (workshops.length == 0 && (
-                    <div className="size-full flex items-center justify-center">
-                        We're still finalizing our workshops for the semester,
-                        please check back soon!
-                    </div>
-                ))}
             <div
                 id="master"
                 className="flex gap-4 flex-col h-full items-center"
             >
-                {workshops && workshops.length > 0 && (
-                    <Tabs
-                        aria-label="past-present-workshop-toggle"
-                        color="primary"
-                        variant="bordered"
-                        selectedKey={selected}
-                        onSelectionChange={(key) => setSelected(String(key))}
-                        className="justify-self-center"
-                    >
-                        <Tab
-                            key="current-workshops"
-                            title={
-                                <div className="flex items-center space-x-2">
-                                    <CalendarDateRangeIcon className="size-6" />
-                                    <span>Current Workshops</span>
-                                </div>
-                            }
-                        />
-                        <Tab
-                            key="past-workshops"
-                            title={
-                                <div className="flex items-center space-x-2">
-                                    <CalendarDaysIcon className="size-6" />
-                                    <span>Past Workshops</span>
-                                </div>
-                            }
-                        />
-                    </Tabs>
-                )}
-                <div
-                    id="card-container"
-                    className="grid grid-cols-2 gap-4 h-full w-full"
+                <Tabs
+                    aria-label="past-present-workshop-toggle"
+                    color="primary"
+                    variant="bordered"
+                    selectedKey={selected as string}
+                    onSelectionChange={setSelected}
+                    className="justify-self-center"
                 >
-                    {workshops
-                        ?.filter((workshop) => {
-                            const isFuture =
-                                workshop.timestamp_end > Date.now() / 1000;
-                            return selected === "past-workshops"
-                                ? !isFuture
-                                : isFuture;
-                        })
-                        .map((workshop) => (
-                            <WorkshopCard
-                                workshop={workshop}
-                                self={self}
-                                users={users}
-                            />
-                        ))}
-                </div>
+                    <Tab
+                        key="current-workshops"
+                        title={
+                            <div className="flex items-center space-x-2">
+                                <CalendarDateRangeIcon className="size-6" />
+                                <span>Current Workshops</span>
+                            </div>
+                        }
+                    />
+                    <Tab
+                        key="past-workshops"
+                        title={
+                            <div className="flex items-center space-x-2">
+                                <CalendarDaysIcon className="size-6" />
+                                <span>Past Workshops</span>
+                            </div>
+                        }
+                    />
+                </Tabs>
+                {workshops &&
+                    (workshops.length > 0 ? (
+                        <div
+                            id="card-container"
+                            className="grid grid-cols-2 gap-4 h-full w-full"
+                        >
+                            {workshops
+                                ?.filter((workshop) => {
+                                    const isFuture =
+                                        workshop.timestamp_end >
+                                        Date.now() / 1000;
+                                    return selected === "past-workshops"
+                                        ? !isFuture
+                                        : isFuture;
+                                })
+                                .map((workshop) => (
+                                    <WorkshopCard
+                                        workshop={workshop}
+                                        self={self}
+                                        users={users}
+                                    />
+                                ))}
+                        </div>
+                    ) : (
+                        <div className="size-full flex items-center justify-center">
+                            No workshops are currently available. Please check
+                            back later!
+                        </div>
+                    ))}
             </div>
         </DefaultLayout>
     );

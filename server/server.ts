@@ -152,9 +152,18 @@ if (process.env.NODE_ENV === "production") {
                         msg: `User with email ${email} not found, creating`,
                         profile: profile,
                     });
+                    let name = profile.displayName as string;
+                    // Format names given as "last, first" to be "first last"
+                    if (name.includes(",")) {
+                        name = name
+                            .split(",")
+                            .map((word) => word.trim())
+                            .reverse()
+                            .join(" ");
+                    }
                     const new_user_obj = {
                         uuid: crypto.randomUUID(),
-                        name: profile.displayName as string,
+                        name: name,
                         email: email,
                         college_id: "", // If not provided by IDP, fill in later
                         active_roles: [],

@@ -21,6 +21,7 @@ import { TConfig } from "common/config";
 import { DateFormatter } from "@internationalized/date";
 import { start } from "node:repl";
 import { TCertificate } from "common/certification";
+import { useMemo } from "react";
 
 // cancel means cancel_rsvp
 async function rsvp({
@@ -121,37 +122,31 @@ export default function WorkshopCard({
         ? workshop.rsvp_list.length >= workshop.capacity
         : false;
 
-    const date_formatter = new Intl.DateTimeFormat(
-        config?.schedule.timezone,
-        {
-            month: "long",
-            day: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-        },
-    );
+    const date_formatter = new Intl.DateTimeFormat(config?.schedule.timezone, {
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+    });
 
-    const time_formatter = new Intl.DateTimeFormat(
-        config?.schedule.timezone,
-        {
-            hour: "numeric",
-            minute: "2-digit",
-        },
-    );
+    const time_formatter = new Intl.DateTimeFormat(config?.schedule.timezone, {
+        hour: "numeric",
+        minute: "2-digit",
+    });
 
     return (
         <Card id={workshop.title} key={workshop.title} className="h-[44dvh]">
             <CardHeader className="flex-col items-start">
                 <div
                     id="title-capacity-container"
-                    className="flex flex-row w-full"
+                    className="flex flex-row w-full items-center"
                 >
                     <p className="text-2xl font-light flex w-full">
                         {workshop.title}
                     </p>
                     <div
                         id="capacity"
-                        className="text-sm text-white-600 whitespace-nowrap ml-4"
+                        className="text-sm text-default-600 whitespace-nowrap ml-4"
                     >
                         {workshop.capacity && workshop.capacity > 0 ? (
                             <>
@@ -159,15 +154,17 @@ export default function WorkshopCard({
                                 {workshop.capacity}
                             </>
                         ) : (
-                            "No RSVP Limit !"
+                            "Open to all!"
                         )}
                     </div>
                 </div>
                 <div className="flex gap-1 items-center">
                     <CalendarBoldIcon className="text-primary-300 size-4" />
-                    {isSameDay
-                        ? `${date_formatter.format(startZDT.toDate())} – ${time_formatter.format(endZDT.toDate())}`
-                        : `${date_formatter.format(startZDT.toDate())} — ${date_formatter.format(endZDT.toDate())}`}
+                    {date_formatter &&
+                        time_formatter &&
+                        (isSameDay
+                            ? `${date_formatter.format(startZDT.toDate())} – ${time_formatter.format(endZDT.toDate())}`
+                            : `${date_formatter.format(startZDT.toDate())} — ${date_formatter.format(endZDT.toDate())}`)}
                 </div>
                 <div
                     id="description"
@@ -190,27 +187,44 @@ export default function WorkshopCard({
                 </div>
             </CardHeader>
             <CardBody className="p-0 pb-0 h-full flex-grow-0">
-                <div
-                    id="certification-tags"
-                    className="absolute flex flex-col gap-2"
-                >
-                    {workshop.required_certifications?.map((cert) => (
-                        <CertificationTag
-                            key={cert.certification_uuid}
-                            cert_uuid={cert.certification_uuid}
-                        />
-                    ))}
-                </div>
                 <ImageCarousel
                     resource_uuid={workshop.uuid}
                     resource_type={FILE_RESOURCE_TYPE.WORKSHOP}
                     editable={false}
                     className=""
                 />
+                <div
+                    id="certification-tags"
+                    className={clsx(
+                        "absolute w-full h-fit top-0",
+                        "box-border border-4 border-transparent",
+                        "p-1 overflow-auto flex gap-2",
+                        "z-20",
+                    )}
+                >
+                    {workshop.required_certifications &&
+                        workshop.required_certifications.map((cert) => (
+                            <CertificationTag
+                                key={cert.certification_uuid}
+                                cert_uuid={cert.certification_uuid}
+                                // certifications={
+                                //     certifications
+                                // }
+                                level={
+                                    cert.required_level > 0
+                                        ? cert.required_level
+                                        : undefined
+                                }
+                            />
+                        ))}
+                </div>
                 <div className="absolute w-full h-fit bottom-3 flex justify-center z-20">
                     <Tooltip
                         color="primary"
-                        content={`RSVPs are closed until ${workshop.timestamp_public}`}
+                        content={
+                            workshop.timestamp_public &&
+                            `RSVPs are closed until ${new Date(workshop.timestamp_public * 1000).toDateString()}`
+                        }
                         isDisabled={
                             workshop.timestamp_public
                                 ? workshop.timestamp_public < Date.now() / 1000

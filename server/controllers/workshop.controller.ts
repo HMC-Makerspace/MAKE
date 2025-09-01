@@ -5,6 +5,10 @@ import { Workshop } from "models/workshop.model";
 import mongoose from "mongoose";
 import { getUser } from "./user.controller";
 import { verifyRequest } from "./verify.controller";
+import { sendTemplatedEmail } from "./email.controller";
+import WorkshopReminderTemplate from "email_templates/workshop_reminder";
+import { Logger } from "pino";
+import WorkshopConfirmationTemplate from "email_templates/workshop_confirmation";
 
 /**
  * Get all workshops in the database
@@ -166,10 +170,12 @@ export async function patchWorkshop(
 export async function rsvpToWorkshop(
     workshop_uuid: UUID,
     user_uuid: UserUUID,
+    logger: Logger,
 ): Promise<TWorkshop | null> {
     const workshop = await getWorkshop(workshop_uuid);
-    // If the workshop doesn't exist, the RSVP fails
-    if (!workshop) {
+    const user = await getUser(user_uuid);
+    // If the workshop or user doesn't exist, the RSVP fails
+    if (!workshop || !user) {
         return null;
     }
     // If the workshop is not yet public, RSVP fails
@@ -192,6 +198,14 @@ export async function rsvpToWorkshop(
         user_uuid: user_uuid,
         timestamp: Date.now() / 1000,
     });
+    // Send a reminder confirmation email to the user
+    await sendTemplatedEmail(
+        user.email,
+        "Workshop RSVP Reminder",
+        WorkshopConfirmationTemplate(workshop, user),
+        logger,
+    );
+
     // Update the workshop in the database
     return workshop.save();
 }
