@@ -35,7 +35,7 @@ export type TWorkshopUserRecord = {
  *      workshop
  * @property sign_in_list - a map of user UUIDs to the timestamp that they
  *     signed in to the workshop
- * @property photos - (optional) a list UUIDs of {@link TFile | image Files} to
+ * @property images - (optional) a list UUIDs of {@link TFile | image Files} to
  *      display for this workshop
  * @property authorized_roles - (optional) a list of UserRole UUIDs that are
  *      allowed to see this workshop. If null, any user may see this

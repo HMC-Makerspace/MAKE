@@ -28,7 +28,6 @@ import { TPublicWorkshopData, TWorkshop } from "common/workshop";
 type WorkshopRequest = Request<{}, {}, { workshop_obj: TWorkshop }>;
 type RSVPRequest = Request<{
     workshop_uuid: string;
-    user_uuid: string;
 }>;
 type WorkshopResponse = Response<TWorkshop | ErrorResponse>;
 type WorkshopsResponse = Response<TWorkshop[] | ErrorResponse>;
@@ -326,17 +325,16 @@ router.delete(
 );
 
 /**
- * rsvpToWorkshop. This is a protected route and a `requesting_uuid` header
+ * SELF rsvpToWorkshop. This is a protected route and a `requesting_uuid` header
  * is required to call it. The user must have the
  * {@link API_SCOPE.RSVP_WORKSHOPS} scope.
  */
 router.patch(
-    "/:workshop_uuid/rsvp/:user_uuid",
-    async (req: RSVPRequest, res: SuccessfulResponse) => {
+    "/:workshop_uuid/rsvp",
+    async (req: RSVPRequest, res: WorkshopResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = req.user?.uuid as string;
         const workshop_uuid = req.params.workshop_uuid;
-        const user_uuid = req.params.user_uuid;
 
         // If no requesting user uuid is provided, the call is not authorized
         if (!requesting_uuid) {
@@ -354,21 +352,22 @@ router.patch(
 
         // If the user is authorized, update a workshop's information
         if (await verifyRequest(requesting_uuid, API_SCOPE.RSVP_WORKSHOP)) {
-            const rsvp_successful = await rsvpToWorkshop(
+            const updated_workshop = await rsvpToWorkshop(
                 workshop_uuid,
-                user_uuid,
+                requesting_uuid,
+                req.log,
             );
-            if (!rsvp_successful) {
+            if (!updated_workshop) {
                 req.log.warn(
-                    `Workshop with uuid ${workshop_uuid} not found, failed to RSVP`,
+                    `No public workshop found by uuid ${workshop_uuid}, failed to RSVP`,
                 );
                 res.status(StatusCodes.NOT_FOUND).json({
-                    error: `Workshop with uuid \`${workshop_uuid}\` not found.`,
+                    error: `No public workshop found with uuid \`${workshop_uuid}\`, failed to RSVP.`,
                 });
                 return;
             }
             req.log.debug("RSVP'd successfully.");
-            res.status(StatusCodes.OK);
+            res.status(StatusCodes.OK).json(updated_workshop);
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to rsvp to a workshop",
@@ -381,17 +380,16 @@ router.patch(
 );
 
 /**
- * cancelRSVPToWorkshop. This is a protected route and a `requesting_uuid` header
+ * SELF cancelRSVPToWorkshop. This is a protected route and a `requesting_uuid` header
  * is required to call it. The user must have the
  * {@link API_SCOPE.RSVP_WORKSHOPS} scope.
  */
 router.patch(
-    "/:workshop_uuid/cancel_rsvp/:user_uuid",
-    async (req: RSVPRequest, res: SuccessfulResponse) => {
+    "/:workshop_uuid/cancel_rsvp",
+    async (req: RSVPRequest, res: WorkshopResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = req.user?.uuid as string;
         const workshop_uuid = req.params.workshop_uuid;
-        const user_uuid = req.params.user_uuid;
 
         // If no requesting user uuid is provided, the call is not authorized
         if (!requesting_uuid) {
@@ -409,11 +407,11 @@ router.patch(
 
         // If the user is authorized, update a workshop's information
         if (await verifyRequest(requesting_uuid, API_SCOPE.RSVP_WORKSHOP)) {
-            const rsvp_successful = await cancelRSVPToWorkshop(
+            const updated_workshop = await cancelRSVPToWorkshop(
                 workshop_uuid,
-                user_uuid,
+                requesting_uuid,
             );
-            if (!rsvp_successful) {
+            if (!updated_workshop) {
                 req.log.warn(
                     `Workshop with uuid ${workshop_uuid} not found, failed to cancel RSVP`,
                 );
@@ -423,7 +421,7 @@ router.patch(
                 return;
             }
             req.log.debug("Canceled RSVP successfully.");
-            res.status(StatusCodes.OK);
+            res.status(StatusCodes.OK).json(updated_workshop);
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to cancel an rsvp to a workshop",
@@ -442,7 +440,10 @@ router.patch(
  */
 router.patch(
     "/:workshop_uuid/sign_in/:user_uuid",
-    async (req: RSVPRequest, res: SuccessfulResponse) => {
+    async (
+        req: Request<{ workshop_uuid: string; user_uuid: string }>,
+        res: SuccessfulResponse,
+    ) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = req.user?.uuid as string;
         const workshop_uuid = req.params.workshop_uuid;

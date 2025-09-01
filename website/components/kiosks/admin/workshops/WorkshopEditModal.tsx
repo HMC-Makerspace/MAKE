@@ -242,7 +242,7 @@ export default function WorkshopEditModal({
                                     }}
                                 />
                                 <NumberInput
-                                    minValue={1}
+                                    minValue={0}
                                     label="Capacity"
                                     name="capacity"
                                     placeholder="0 for no limit"

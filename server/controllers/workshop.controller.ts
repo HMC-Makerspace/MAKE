@@ -5,6 +5,10 @@ import { Workshop } from "models/workshop.model";
 import mongoose from "mongoose";
 import { getUser } from "./user.controller";
 import { verifyRequest } from "./verify.controller";
+import { sendTemplatedEmail } from "./email.controller";
+import WorkshopReminderTemplate from "email_templates/workshop_reminder";
+import { Logger } from "pino";
+import WorkshopConfirmationTemplate from "email_templates/workshop_confirmation";
 
 /**
  * Get all workshops in the database
@@ -166,24 +170,44 @@ export async function patchWorkshop(
 export async function rsvpToWorkshop(
     workshop_uuid: UUID,
     user_uuid: UserUUID,
-): Promise<boolean> {
+    logger: Logger,
+): Promise<TWorkshop | null> {
     const workshop = await getWorkshop(workshop_uuid);
-    // If the workshop doesn't exist, the RSVP fails
-    if (!workshop) {
-        return false;
+    const user = await getUser(user_uuid);
+    // If the workshop or user doesn't exist, the RSVP fails
+    if (!workshop || !user) {
+        return null;
+    }
+    // If the workshop is not yet public, RSVP fails
+    if (
+        workshop.timestamp_public &&
+        workshop.timestamp_public > Date.now() / 1000
+    ) {
+        return null;
     }
     // If the user is already in the rsvp list, the RSVP fails
-    if (user_uuid in workshop.rsvp_list) {
-        return false;
+    if (
+        workshop.rsvp_list.some(
+            (rsvp_record) => rsvp_record.user_uuid === user_uuid,
+        )
+    ) {
+        return null;
     }
     // Add the user to the rsvp list
     workshop.rsvp_list.push({
         user_uuid: user_uuid,
         timestamp: Date.now() / 1000,
     });
+    // Send a reminder confirmation email to the user
+    await sendTemplatedEmail(
+        user.email,
+        "Workshop RSVP Reminder",
+        WorkshopConfirmationTemplate(workshop, user),
+        logger,
+    );
+
     // Update the workshop in the database
-    workshop.save();
-    return true;
+    return workshop.save();
 }
 
 /**
@@ -195,21 +219,24 @@ export async function rsvpToWorkshop(
 export async function cancelRSVPToWorkshop(
     workshop_uuid: UUID,
     user_uuid: UserUUID,
-): Promise<boolean> {
+): Promise<TWorkshop | null> {
     const workshop = await getWorkshop(workshop_uuid);
     // If the workshop doesn't exist, the cancellation fails
     if (!workshop) {
-        return false;
+        return null;
     }
     // If the user isn't in the rsvp list, the cancellation fails
-    if (!(user_uuid in workshop.rsvp_list)) {
-        return false;
+    if (
+        !workshop.rsvp_list.some(
+            (rsvp_record) => rsvp_record.user_uuid === user_uuid,
+        )
+    ) {
+        return null;
     }
     // Remove the user from the rsvp list
-    workshop.rsvp_list.filter((rsvp) => rsvp.user_uuid != user_uuid);
+    workshop.rsvp_list = workshop.rsvp_list.filter((rsvp) => rsvp.user_uuid != user_uuid);
     // Update the workshop in the database
-    workshop.save();
-    return true;
+    return workshop.save();
 }
 
 /**
