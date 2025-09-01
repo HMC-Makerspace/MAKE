@@ -112,21 +112,6 @@ export default function ImageCarousel({
                 className,
             )}
         >
-            <Image
-                src={
-                    images[index]
-                        ? `/api/v3/file/download/${images[index].uuid}`
-                        : undefined
-                }
-                className="h-full w-full"
-                classNames={{
-                    img: "h-full object-contain",
-                    wrapper: "h-full w-full !max-w-none",
-                    blurredImg: "translate-y-0 w-full min-w-full scale-100",
-                }}
-                isBlurred
-            />
-
             {images.length > 1 && (
                 <Button
                     className=" absolute left-1 top-0 bottom-0 my-auto z-20"
@@ -141,20 +126,20 @@ export default function ImageCarousel({
             )}
             {images.length > 0 ? (
                 <Image
-                    className="w-full h-full max-h-full object-contain rounded-lg"
                     src={
                         images[index]
                             ? `/api/v3/file/download/${images[index].uuid}`
                             : undefined
                     }
-                    alt={images[index]?.name || "Image"}
+                    radius="md"
+                    className="h-full w-full"
+                    classNames={{
+                        img: "h-full object-cover w-min justify-self-center",
+                        wrapper: "h-full w-full !max-w-none",
+                        blurredImg:
+                            "translate-y-0 w-full min-w-full scale-100 rounded-3xl",
+                    }}
                     isBlurred
-                    classNames={
-                        {
-                            // wrapper: "w-full h-full max-h-full",
-                        }
-                    }
-                    removeWrapper
                 />
             ) : (
                 <p className="text-center text-l text-bold">No Images Found</p>

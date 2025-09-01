@@ -358,10 +358,10 @@ router.patch(
             );
             if (!updated_workshop) {
                 req.log.warn(
-                    `Workshop with uuid ${workshop_uuid} not found, failed to RSVP`,
+                    `No public workshop found by uuid ${workshop_uuid}, failed to RSVP`,
                 );
                 res.status(StatusCodes.NOT_FOUND).json({
-                    error: `Workshop with uuid \`${workshop_uuid}\` not found.`,
+                    error: `No public workshop found with uuid \`${workshop_uuid}\`, failed to RSVP.`,
                 });
                 return;
             }

@@ -172,6 +172,13 @@ export async function rsvpToWorkshop(
     if (!workshop) {
         return null;
     }
+    // If the workshop is not yet public, RSVP fails
+    if (
+        workshop.timestamp_public &&
+        workshop.timestamp_public > Date.now() / 1000
+    ) {
+        return null;
+    }
     // If the user is already in the rsvp list, the RSVP fails
     if (
         workshop.rsvp_list.some(

@@ -1,69 +1,18 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import DefaultLayout from "../layouts/Default";
-import {
-    Card,
-    CardFooter,
-    Button,
-    ToastProvider,
-    closeToast,
-    addToast,
-    CardBody,
-    CardHeader,
-    Tabs,
-    Tab,
-} from "@heroui/react";
-import { CalendarBoldIcon } from "@heroui/shared-icons";
+import { ToastProvider, Tabs, Tab } from "@heroui/react";
 import { TWorkshop } from "../../common/workshop.ts";
-import ImageCarousel from "../components/ImageCarousel.tsx";
-import { FILE_RESOURCE_TYPE } from "../../common/file.ts";
 import { TUser } from "common/user.js";
-import React, { useState } from "react";
-import axios, { AxiosError } from "axios";
-import CertificationTag from "../components/kiosks/admin/certifications/CertificationTag.tsx";
-import clsx from "clsx";
-import { useTheme } from "next-themes";
+import { useState } from "react";
 import {
     CalendarDateRangeIcon,
     CalendarDaysIcon,
 } from "@heroicons/react/24/solid";
-import { TCertificate, TCertification } from "common/certification.ts";
+import { TCertification } from "common/certification.ts";
 import { TConfig } from "common/config.js";
-import { timestampToZonedDateTime } from "../utils.tsx";
-import { UnixTimestamp } from "common/global.ts";
-
-export const calendar_date_range_icon = (
-    props: React.ComponentProps<typeof CalendarDateRangeIcon>,
-) => <CalendarDateRangeIcon {...props} className="w-6 h-6" />;
-
-export const calendar_days_icon = (
-    props: React.ComponentProps<typeof CalendarDaysIcon>,
-) => <CalendarDaysIcon {...props} className="w-6 h-6" />;
-
-// cancel means cancel_rsvp
-async function rsvp({
-    workshop_uuid,
-    cancel,
-}: {
-    workshop_uuid: string;
-    cancel: boolean;
-}) {
-    if (!cancel) {
-        return (
-            await axios.patch<TWorkshop>(
-                `api/v3/workshop/${workshop_uuid}/rsvp`,
-            )
-        ).data;
-    } else {
-        return (
-            await axios.patch<TWorkshop>(
-                `api/v3/workshop/${workshop_uuid}/cancel_rsvp`,
-            )
-        ).data;
-    }
-}
+import WorkshopCard from "../components/public/workshops/WorkshopCard.tsx";
 
 export default function WorkshopPage() {
-    const queryClient = useQueryClient();
     const [selected, setSelected] = useState("current-workshops");
     const {
         data: workshops,
@@ -102,81 +51,11 @@ export default function WorkshopPage() {
         retry: false,
     });
 
-    const rsvpMutation = useMutation({
-        mutationFn: rsvp,
-        onSuccess: (data) => {
-            const cancel = data.rsvp_list.every(
-                (rsvp_record) => rsvp_record.user_uuid !== self?.uuid,
-            );
-            addToast({
-                title: cancel
-                    ? `Withdrew RSVP for ${data.title}`
-                    : `RSVP'd for ${data.title}`,
-                timeout: 3000,
-                color: cancel ? "warning" : "success",
-                severity: "success",
-            });
-            queryClient.setQueryData(
-                ["workshop"],
-                (old_workshops: TWorkshop[]) =>
-                    old_workshops.map((old_workshop) =>
-                        old_workshop.uuid === data.uuid ? data : old_workshop,
-                    ),
-            );
-        },
-        onError: (error: AxiosError<{ error: string }>) => {
-            addToast({
-                title:
-                    error.response?.data.error ??
-                    `Unknown error: ${error.message}`,
-                timeout: 5000,
-                color: "danger",
-            });
-        },
-    });
-
     const { data: config, isLoading: configLoading } = useQuery<TConfig>({
         queryKey: ["config"],
         refetchOnWindowFocus: false,
         refetchOnMount: false,
     });
-
-    const isSameDay = (
-        start_timestamp: UnixTimestamp,
-        end_timestamp: UnixTimestamp,
-    ) => {
-        const start_time = timestampToZonedDateTime(
-            start_timestamp,
-            config?.schedule.timezone,
-        );
-        const end_time = timestampToZonedDateTime(
-            end_timestamp,
-            config?.schedule.timezone,
-        );
-        if (
-            start_time.year == end_time.year &&
-            start_time.month == end_time.month &&
-            start_time.day == end_time.day
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    };
-
-    const display = (
-        start_timestamp: UnixTimestamp,
-        end_timestamp: UnixTimestamp,
-    ) => {
-        const start_time = timestampToZonedDateTime(
-            start_timestamp,
-            config?.schedule.timezone,
-        );
-        const end_time = timestampToZonedDateTime(
-            end_timestamp,
-            config?.schedule.timezone,
-        );
-    };
 
     return (
         <DefaultLayout className="p-8" pageHref="/workshops">
@@ -205,7 +84,7 @@ export default function WorkshopPage() {
                             key="current-workshops"
                             title={
                                 <div className="flex items-center space-x-2">
-                                    {calendar_date_range_icon({})}
+                                    <CalendarDateRangeIcon className="size-6" />
                                     <span>Current Workshops</span>
                                 </div>
                             }
@@ -214,7 +93,7 @@ export default function WorkshopPage() {
                             key="past-workshops"
                             title={
                                 <div className="flex items-center space-x-2">
-                                    {calendar_days_icon({})}
+                                    <CalendarDaysIcon className="size-6" />
                                     <span>Past Workshops</span>
                                 </div>
                             }
@@ -234,140 +113,14 @@ export default function WorkshopPage() {
                                 : isFuture;
                         })
                         .map((workshop) => (
-                            <Card
-                                id={workshop.title}
-                                key={workshop.title}
-                                className=""
-                            >
-                                <CardHeader className="flex-col items-start">
-                                    <p className="text-2xl font-light">
-                                        <div className="flex">
-                                            {workshop.title}
-                                            <CalendarBoldIcon className="text-primary-300 size-4"></CalendarBoldIcon>
-                                        </div>
-                                    </p>
-                                    <div className="text-sm text-gray-500 flex items-center gap-2">
-                                        empty
-                                    </div>
-                                    {/* <small className="text-default-500">
-                                        {workshop.capacity &&
-                                        workshop.capacity > 0 ? (
-                                            <div>
-                                                Capacity:{" "}
-                                                {workshop.rsvp_list.length} /{" "}
-                                                {workshop.capacity}
-                                            </div>
-                                        ) : (
-                                            <div>No RSVP Limit !</div>
-                                        )}
-                                    </small> */}
-                                    <h4 className="font-bold text-small">
-                                        {"Taught By: "}
-                                        {users
-                                            ?.filter((user) =>
-                                                workshop.instructors.includes(
-                                                    user.uuid,
-                                                ),
-                                            )
-                                            .map((user) => user.name)
-                                            .join(", ")}
-                                        {", "}
-                                        {users
-                                            ?.filter((user) =>
-                                                workshop.support_instructors?.includes(
-                                                    user.uuid,
-                                                ),
-                                            )
-                                            .map((user) => user.name)
-                                            .join(", ")}
-                                    </h4>
-                                </CardHeader>
-                                <CardBody className="p-0 pb-0 h-full flex-grow-0">
-                                    <ImageCarousel
-                                        resource_uuid={workshop.uuid}
-                                        resource_type={
-                                            FILE_RESOURCE_TYPE.WORKSHOP
-                                        }
-                                        editable={false}
-                                        className=""
-                                    />
-                                    <div
-                                        id="certification-tags"
-                                        className="absolute w-full h-fit top-2 box-border border-4 border-transparent p-1 overflow-auto flex gap-2"
-                                    >
-                                        {workshop.required_certifications &&
-                                            workshop.required_certifications.map(
-                                                (cert) => (
-                                                    <CertificationTag
-                                                        key={
-                                                            cert.certification_uuid
-                                                        }
-                                                        cert_uuid={
-                                                            cert.certification_uuid
-                                                        }
-                                                        // certifications={
-                                                        //     certifications
-                                                        // }
-                                                        level={
-                                                            cert.required_level >
-                                                            0
-                                                                ? cert.required_level
-                                                                : undefined
-                                                        }
-                                                    />
-                                                ),
-                                            )}
-                                    </div>
-                                    <div className="absolute w-full h-fit bottom-3 flex justify-center">
-                                        <Button
-                                            className="text-small font-bold text-white bg-primary hover:bg-primary/50 hover:outline"
-                                            color="default"
-                                            radius="lg"
-                                            size="sm"
-                                            variant="flat"
-                                            onPress={() => {
-                                                rsvpMutation.mutate({
-                                                    workshop_uuid:
-                                                        workshop.uuid,
-                                                    cancel: workshop.rsvp_list.some(
-                                                        (rsvp_record) =>
-                                                            rsvp_record.user_uuid ===
-                                                            self?.uuid,
-                                                    ),
-                                                });
-                                            }}
-                                            isDisabled={
-                                                rsvpMutation.isPending ||
-                                                workshop.rsvp_list.length ==
-                                                    workshop.capacity ||
-                                                !self
-                                            }
-                                        >
-                                            {workshop.rsvp_list.some(
-                                                (rsvp_record) =>
-                                                    rsvp_record.user_uuid ===
-                                                    self?.uuid,
-                                            )
-                                                ? "Cancel"
-                                                : "RSVP"}
-                                        </Button>
-                                    </div>
-                                </CardBody>
-                                <CardFooter>
-                                    {"Starts: "}
-                                    {new Date(
-                                        workshop.timestamp_start * 1000,
-                                    ).toLocaleString()}
-                                    {" Ends: "}
-                                    {new Date(
-                                        workshop.timestamp_end * 1000,
-                                    ).toLocaleString()}
-                                </CardFooter>
-                            </Card>
+                            <WorkshopCard
+                                workshop={workshop}
+                                self={self}
+                                users={users}
+                            />
                         ))}
                 </div>
             </div>
         </DefaultLayout>
     );
 }
-3;
