@@ -122,14 +122,12 @@ export default function WorkshopCard({
     return (
         <Card id={workshop.title} key={workshop.title} className="h-[44dvh]">
             <CardHeader className="flex-col items-start">
-                <p className="text-2xl font-light">
-                    <div className="flex">
-                        {workshop.title}
-                        <CalendarBoldIcon className="text-primary-300 size-4" />
-                    </div>
+                <p className="text-2xl font-light flex items-center justify-between w-full">
+                    {workshop.title}
+                    <CalendarBoldIcon className="text-primary-300 size-4" />
                 </p>
                 <div className="text-sm text-gray-500 flex items-center gap-2">
-                    empty
+                    {workshop.description}
                 </div>
                 {/* <small className="text-default-500">
                     {workshop.capacity &&
@@ -149,7 +147,11 @@ export default function WorkshopCard({
                         ?.filter((user) =>
                             workshop.instructors.includes(user.uuid),
                         )
-                        .map((user) => user.name)
+                        .map((user) =>
+                            config?.schedule.first_names_only
+                                ? user.name.split(" ")[0]
+                                : user.name,
+                        )
                         .join(", ")}
                 </h4>
             </CardHeader>
