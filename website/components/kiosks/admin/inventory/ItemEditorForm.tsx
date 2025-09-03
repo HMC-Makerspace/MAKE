@@ -122,31 +122,31 @@ export default function ItemEditorForm({
 
             console.log(data.get("role"));
 
-            // const new_item: TInventoryItem = {
-            //     uuid: (data.get("UUID") as string) ?? item.uuid,
-            //     name: data.get("name") as string,
-            //     long_name: data.get("long_name") as string,
-            //     role: data.get("role") as ITEM_ROLE,
-            //     access_type: parseInt(
-            //         data.get("access_type") as string,
-            //     ) as ITEM_ACCESS_TYPE, //[0]?.key,//getAccessType(data.get("access_type") as string),//ITEM_ACCESS_TYPE[data.get("access_type") as string],// as ITEM_ACCESS_TYPE,
-            //     locations: locations, // TODO
-            //     reorder_url: data.get("reorder_url") as string,
-            //     serial_number: data.get("serial_number") as string,
-            //     keywords:
-            //         (data.get("keywords") as string)
-            //             ?.split(",")
-            //             .map((i) => i.trim()) ?? [], // TODO
-            //     required_certifications: item.required_certifications, //.map(c=>{return {certification_uuid:c,required_level:1}}), //todo
-            //     authorized_roles: authorizedRoles, // TODO
-            // };
-
-            //console.log(new_user);
+            const new_item: TInventoryItem = {
+                uuid: (data.get("UUID") as string) ?? item.uuid,
+                name: data.get("name") as string,
+                long_name: data.get("long_name") as string,
+                role: data.get("role") as ITEM_ROLE,
+                access_type: parseInt(
+                    data.get("access_type") as string,
+                ) as ITEM_ACCESS_TYPE, //[0]?.key,//getAccessType(data.get("access_type") as string),//ITEM_ACCESS_TYPE[data.get("access_type") as string],// as ITEM_ACCESS_TYPE,
+                locations: item.locations,//locations, // TODO
+                reorder_url: data.get("reorder_url") as string,
+                serial_number: data.get("serial_number") as string,
+                keywords:
+                    (data.get("keywords") as string)
+                        ?.split(",")
+                        .map((i) => i.trim()) ?? [], // TODO
+                required_certifications: item.required_certifications, //.map(c=>{return {certification_uuid:c,required_level:1}}), //todo
+                authorized_roles: item.authorized_roles,//authorizedRoles, // TODO
+                quantity: parseInt(data.get("quantity") as string),
+                available: item.available
+            };
 
             // Reset the mutation (clears any previous errors)
             mutation.reset();
             // Run the mutation
-            // mutation.mutate({ data: new_item, isNew: isNew });
+            mutation.mutate({ data: new_item, isNew: isNew });
         },
         [isDisabled],
     );
