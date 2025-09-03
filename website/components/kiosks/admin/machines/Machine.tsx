@@ -102,7 +102,7 @@ export default function Machine({
         onSuccess: (obj: TMachine) => {
             queryClient.setQueryData(["machine", machine.uuid], obj);
             queryClient.setQueryData(["machine"], (old: TMachine[]) => {
-                return old.map((machine) =>
+                return (old ?? []).map((machine) =>
                     machine.uuid === obj.uuid ? obj : machine,
                 );
             });
@@ -122,7 +122,7 @@ export default function Machine({
                 queryKey: ["machine", variables.uuid],
             });
             queryClient.setQueryData(["machine"], (old: TMachine[]) => {
-                return old.filter((m) => m.uuid !== variables.uuid);
+                return (old ?? []).filter((m) => m.uuid !== variables.uuid);
             });
         },
         onError: (error) => {

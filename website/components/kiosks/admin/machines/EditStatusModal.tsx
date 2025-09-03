@@ -232,8 +232,16 @@ export default function EditStatusModal({
         onSuccess: (obj: TMachine) => {
             queryClient.setQueryData(["machine", obj.uuid], obj);
             queryClient.setQueryData(["machine"], (old: TMachine[]) => {
-                return old.map((m) => (m.uuid === obj.uuid ? obj : m));
+                return (old ?? []).map((m) => (m.uuid === obj.uuid ? obj : m));
             });
+            queryClient.setQueryData(
+                ["machine", "public"],
+                (old: TMachine[]) => {
+                    return (old ?? []).map((m) =>
+                        m.uuid === obj.uuid ? obj : m,
+                    );
+                },
+            );
 
             onOpenChange(false);
         },
