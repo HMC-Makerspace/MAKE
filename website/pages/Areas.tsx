@@ -1,15 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
-import InventoryTable from "../components/kiosks/admin/inventory/InventoryTable";
 import DefaultLayout from "../layouts/Default";
 import { TUserRole } from "common/user";
 import { TCertification } from "common/certification";
-import { TInventoryItem } from "common/inventory";
-import { Skeleton } from "@heroui/react";
 import Area from "../components/kiosks/admin/areas/Area";
 import { MACHINE_EDIT_LEVEL, TMachine } from "../../common/machine";
 import { TArea } from "common/area";
+import { API_SCOPE } from "../../common/global";
+import { verifyScopes } from "../utils";
 
 export default function AreasPage() {
+    const {
+        data: scopes,
+        isLoading: scopesLoading,
+        isError: scopesError,
+    } = useQuery<API_SCOPE[]>({
+        queryKey: ["user", "self", "scopes"],
+        refetchOnWindowFocus: false,
+        retry: false,
+    });
     const { data: areas, isLoading: areasLoading } = useQuery<TArea[]>({
         queryKey: ["area", "public"],
         refetchOnWindowFocus: false,
@@ -37,6 +45,9 @@ export default function AreasPage() {
 
     const isLoading = areasLoading || rolesLoading || certsLoading;
 
+    const canEditMachines =
+        scopes && verifyScopes(scopes, [API_SCOPE.UPDATE_MACHINE_INSTANCES]);
+
     return (
         <DefaultLayout className="p-4 lg:p-8" pageHref="/areas">
             {areas && machines && roles && certs && (
@@ -49,7 +60,11 @@ export default function AreasPage() {
                                 machines={machines}
                                 certifications={certs}
                                 roles={roles}
-                                editable={MACHINE_EDIT_LEVEL.BASIC}
+                                editable={
+                                    canEditMachines
+                                        ? MACHINE_EDIT_LEVEL.STATUS_ALL
+                                        : MACHINE_EDIT_LEVEL.BASIC
+                                }
                             />
                         ))}
                     </div>
