@@ -6,6 +6,7 @@ import {
     getInventoryItem,
     getInventoryVisibleToUser,
     updateInventoryItem,
+    patchInventoryItem,
 } from "controllers/inventory.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
@@ -188,6 +189,62 @@ router.put("/", async (req: ItemRequest, res: ItemResponse) => {
         res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
     }
 });
+
+router.patch(
+    "/:UUID",
+    async (
+        req: Request<
+            { UUID: string },
+            {},
+            { partial_item_obj: Partial<TInventoryItem> }
+        >,
+        res: InventoryResponse,
+    ) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = req.user?.uuid as string;
+        const item_uuid = req.params.UUID;
+        const partial_item = req.body.partial_item_obj;
+
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                `No requesting_uuid was provided while updating ${item_uuid}`,
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+
+        req.log.debug({
+            msg: `Patching item with uuid ${item_uuid}`,
+            partial_item_obj: partial_item,
+            requesting_uuid: requesting_uuid,
+        });
+
+        // If the user is authorized, delete a machine object
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_ITEM)) {
+            const item = await patchInventoryItem(item_uuid, partial_item);
+            if (!item) {
+                req.log.warn(
+                    `Item with uuid ${item_uuid} could not be ` +
+                        `patched because it was not found.`,
+                );
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `Item with uuid ${item_uuid} could not be found`,
+                });
+                return;
+            }
+            req.log.debug(`Patched item ${item_uuid}`);
+            res.status(StatusCodes.OK).json([item]);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to patch an inventory item",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
 
 /**
  * Create a new inventory item.
