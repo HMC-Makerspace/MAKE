@@ -22,10 +22,12 @@ import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
 import { CertificationUUID, TCertification } from "common/certification";
-import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import { BookmarkIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import EditCertsModal from "./ItemCertEditor";
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
+import { CertSelect } from "../certifications/CertSelect";
+import RequiredCertsModal from "../certifications/RequiredCertsModal";
 
 // export
 const roles = [
@@ -63,6 +65,20 @@ const createUpdateItem = async ({
             })
         ).data;
     }
+};
+
+const updateItemReqcerts = async ({
+    uuid,
+    patch,
+}: {
+    uuid: InventoryItemUUID;
+    patch: Partial<TInventoryItem>;
+}) => {
+    return (
+        await axios.patch<TInventoryItem>(`/api/v3/inventory/${uuid}`, {
+            partial_item_obj: patch,
+        })
+    ).data;
 };
 
 export default function ItemEditorForm({
@@ -120,16 +136,17 @@ export default function ItemEditorForm({
             // Get form data as an object.
             const data = new FormData(e.currentTarget);
 
-            console.log(data.get("role"));
+            console.log(Array.from(data.getAll("authroles")) as string[]);
+            //return;
 
             const new_item: TInventoryItem = {
-                uuid: (data.get("UUID") as string) ?? item.uuid,
+                uuid: item.uuid, // change back to this if doesn't work with create : (data.get("UUID") as string) ?? item.uuid,
                 name: data.get("name") as string,
                 long_name: data.get("long_name") as string,
                 role: data.get("role") as ITEM_ROLE,
                 access_type: parseInt(
                     data.get("access_type") as string,
-                ) as ITEM_ACCESS_TYPE, //[0]?.key,//getAccessType(data.get("access_type") as string),//ITEM_ACCESS_TYPE[data.get("access_type") as string],// as ITEM_ACCESS_TYPE,
+                ) as ITEM_ACCESS_TYPE,
                 locations: item.locations,//locations, // TODO
                 reorder_url: data.get("reorder_url") as string,
                 serial_number: data.get("serial_number") as string,
@@ -138,7 +155,7 @@ export default function ItemEditorForm({
                         ?.split(",")
                         .map((i) => i.trim()) ?? [], // TODO
                 required_certifications: item.required_certifications, //.map(c=>{return {certification_uuid:c,required_level:1}}), //todo
-                authorized_roles: item.authorized_roles,//authorizedRoles, // TODO
+                authorized_roles: Array.from(data.getAll("authroles")) as string[],
                 quantity: parseInt(data.get("quantity") as string),
                 available: item.available
             };
@@ -183,6 +200,27 @@ export default function ItemEditorForm({
     //         wrapEdit(fn)(num);
     //     };
     // }, []);
+
+    const [reqcertsOpen, setReqcertsOpen] = React.useState<boolean>(false); // whether reqcerts edit modal is open
+    const reqcertsMutation = useMutation({
+            mutationFn: updateItemReqcerts,
+            onSuccess: (obj: TInventoryItem) => {
+                queryClient.setQueryData(["inventory", item.uuid], obj);
+                queryClient.setQueryData(
+                    ["inventory"],
+                    (old: TInventoryItem[]) => {
+                        return old.map((i) =>
+                            item.uuid === obj.uuid ? obj : i,
+                        );
+                    },
+                );
+    
+                setReqcertsOpen(false);
+            },
+            onError: (error) => {
+                alert(`Error: ${error.message}`);
+            },
+        });
 
     return (
         <>
@@ -230,16 +268,18 @@ export default function ItemEditorForm({
                             ]),
                         }}
                     />
-                    {/* <Select // Access Type
+                    <Select // Access Type
                     label="Access Type"
                     name="access_type"
                     placeholder={placeholder("Access Type")}
                     isDisabled={isDisabled}
-                    //value={item.access_type.toString()}
+                    isRequired
+                    value={item.access_type?.toString()}
 
                     defaultSelectedKeys={
                         isDisabled ? [] : [item.access_type + ""]
                     }
+                    onSelectionChange={defaultEdit}
                     // onSelectionChange={(value) => {
                     //     if (value == "all") {
                     //         return;
@@ -266,7 +306,7 @@ export default function ItemEditorForm({
                             {accessType.label}
                         </SelectItem>
                     ))}
-                </Select> */}
+                </Select>
                     {/* </div> */}
                     {/* <Input // Locations
                     type="text"
@@ -293,6 +333,7 @@ export default function ItemEditorForm({
                             name="quantity"
                             placeholder={placeholder("Quantity")}
                             isDisabled={isDisabled}
+                            isRequired
                             defaultValue={item.quantity}
                             onValueChange={defaultEdit}
                             variant="faded"
@@ -448,6 +489,74 @@ export default function ItemEditorForm({
                             ]),
                         }}
                     />
+                    <UserRoleSelect
+                        name="authroles"
+                        roles={roles}
+                        onSelectionChange={(selection) => {
+                            if (selection == "all") {
+                                setHasEdits(true);
+                            } else if (
+                                item.authorized_roles?.length == selection.size &&
+                                item.authorized_roles?.every((r) => selection.has(r))
+                            ) {
+                                setHasEdits(false);
+                            } else {
+                                setHasEdits(true);
+                            }
+                        }}
+                        defaultSelectedKeys={item.authorized_roles ?? []}
+                        isDisabled={isDisabled}
+                        placeholder={placeholder("Authorized Roles")}
+                        label="Authorized Roles"
+                        labelPlacement="inside"
+                        classNames={{
+                            value: clsx([
+                                "placeholder:text-default-500",
+                                "placeholder:italic",
+                                "text-default-700",
+                            ]),
+                        }}
+                        size="md"
+                    />
+                    {/* TODO if this isn't always editable */}
+                    <div className="flex justify-center">
+                        <Button
+                            variant="flat"
+                            color="primary"
+                            onPress={() => setReqcertsOpen(true)}
+                            isIconOnly
+                        >
+                            <BookmarkIcon className="size-6" />
+                        </Button>
+                    </div>
+                    {/* <CertSelect
+                        inputName="requiredcerts"
+                        certifications={certs}
+                        defaultSelectedKeys={item.required_certifications?.map(c => c.certification_uuid)}
+                        onSelectionChange={(selection) => {
+                            if (selection == "all") {
+                                setHasEdits(true);
+                            } else if (
+                                item.required_certifications?.length == selection.size &&
+                                item.required_certifications?.every((c) => selection.has(c.certification_uuid))
+                            ) {
+                                setHasEdits(false);
+                            } else {
+                                setHasEdits(true);
+                            }
+                        }}
+                        isDisabled={isDisabled}
+                        placeholder={placeholder("Required Certifications")}
+                        label="Required Certifications"
+                        classNames={{
+                            value: clsx([
+                                "placeholder:text-default-500",
+                                "placeholder:italic",
+                                "text-default-700",
+                            ]),
+                        }}
+                        size="md"
+                    /> */}
                 </div>
                 <div className="w-full mt-auto col-span-full">
                     <Button
@@ -467,6 +576,15 @@ export default function ItemEditorForm({
                     </Button>
                 </div>
             </Form>
+
+            <RequiredCertsModal
+                key={"certreq-" + item.uuid}
+                certifications={certs}
+                element={item}
+                isOpen={reqcertsOpen}
+                onOpenChange={setReqcertsOpen}
+                patchMutation={reqcertsMutation}
+            />
         </>
     );
 }
