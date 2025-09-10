@@ -112,7 +112,7 @@ export default function AdminLayout({
               }
               return page;
           });
-    const pageIndex = ADMIN_PAGES.findIndex((page) => page.href === pageHref);
+    const pageIndex = pages.findIndex((page) => page.href === pageHref);
 
     return (
         <div className="relative flex flex-col h-screen bg-background">
