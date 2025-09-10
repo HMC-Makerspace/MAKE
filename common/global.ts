@@ -41,6 +41,7 @@ export enum API_SCOPE {
     UPDATE_CERTIFICATION = "update_certification",
     DELETE_CERTIFICATION = "delete_certification",
     GRANT_CERTIFICATION = "grant_certification",
+    GRANT_SCHEDULE_CERT = "grant_schedule_cert",
     // Checkout scopes
     GET_ALL_CHECKOUTS = "get_checkouts",
     GET_ONE_CHECKOUT = "get_checkout",
@@ -284,6 +285,11 @@ export const API_SCOPE_SECTIONS: {
                 scope: API_SCOPE.GRANT_CERTIFICATION,
                 label: "Grant Certification",
                 description: "Able to grant certifications to users",
+            },
+            {
+                scope: API_SCOPE.GRANT_SCHEDULE_CERT,
+                label: "Grant Schedule Cert",
+                description: "Able to grant scheduled cert to self",
             },
         ],
     },
