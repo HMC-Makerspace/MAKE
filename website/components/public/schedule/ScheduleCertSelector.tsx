@@ -104,6 +104,9 @@ export default function ScheduleCertSelector({
         mutationFn: grantRevokeCert,
         onSuccess: (new_user) => {
             queryClient.setQueryData(["user", "self"], new_user);
+            queryClient.setQueryData(["user", "public"], (old: TUser[]) =>
+                old.map((u) => (u.uuid === new_user.uuid ? new_user : u)),
+            );
         },
         onError: (data) => {
             alert("Error!"), console.log("error data", data);
