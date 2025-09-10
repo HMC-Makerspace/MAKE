@@ -37,7 +37,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { UnixTimestamp } from "common/global";
 import PopupAlert from "../../../PopupAlert";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import {
+    InformationCircleIcon,
+    ShoppingCartIcon,
+} from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 
 async function createCheckout({
@@ -167,16 +170,23 @@ export default function CheckoutSidebar({
         onError: (error) => alert(error),
     });
 
+    const [mobileCart, setMobileCart] = useState(false);
+
     return (
         <div
             className={clsx(
-                "grid grid-cols-2 lg:flex lg:flex-col rounded-xl bg-default-50 p-4",
+                "flex flex-col rounded-xl bg-default-50 p-4",
                 "h-2/5 lg:h-full overflow-auto",
                 // "w-full lg:w-2/3 xl:w-1/2 2xl:w-1/3",
                 "w-full lg:w-[27%] flex-none gap-4",
             )}
         >
-            <div className="grow-0 h-full flex flex-col gap-4">
+            <div
+                className={clsx(
+                    "grow-0 sm:h-[50%] flex flex-col gap-4 w-full",
+                    mobileCart && "hidden sm:flex",
+                )}
+            >
                 <Form
                     onSubmit={(e) => {
                         e.preventDefault();
@@ -187,6 +197,7 @@ export default function CheckoutSidebar({
                             setRange(defaultRange);
                         }
                     }}
+                    className="flex flex-row gap-2 h-fit box-border items-center"
                 >
                     <Input
                         key={collegeID}
@@ -210,6 +221,15 @@ export default function CheckoutSidebar({
                             ),
                         }}
                     />
+                    <Button
+                        isIconOnly
+                        endContent={<ShoppingCartIcon className="size-5" />}
+                        className="sm:hidden self-center mt-2 mr-2"
+                        color="primary"
+                        variant="ghost"
+                        size="sm"
+                        onPress={() => setMobileCart(!mobileCart)}
+                    />
                 </Form>
                 <CheckoutUser
                     college_id={collegeID}
@@ -217,16 +237,38 @@ export default function CheckoutSidebar({
                     roles={roles}
                 />
             </div>
-            <div className="flex flex-col gap-4 h-full">
+            <div
+                className={clsx(
+                    "flex flex-col gap-4 h-full",
+                    !mobileCart && "hidden sm:flex",
+                )}
+            >
                 <div
                     className={clsx(
                         "flex flex-col h-full w-full bg-default-100",
                         "rounded-xl p-2 overflow-auto",
                     )}
                 >
-                    <div className="text-xl font-semibold text-center w-full pb-2">
-                        Cart
+                    <div className="flex flex-row">
+                        <div className="flex-1 w-full"></div>
+                        <div className="flex-1 text-xl font-semibold text-center w-full pb-2">
+                            Cart
+                        </div>
+                        <div className="flex-1 w-full flex justify-end">
+                            <Button
+                                isIconOnly
+                                endContent={
+                                    <ShoppingCartIcon className="size-5" />
+                                }
+                                className="sm:hidden "
+                                size="sm"
+                                color="primary"
+                                variant="ghost"
+                                onPress={() => setMobileCart(!mobileCart)}
+                            />
+                        </div>
                     </div>
+
                     <div
                         className={clsx(
                             "bg-default-200 rounded-lg w-full h-full overflow-y-auto",

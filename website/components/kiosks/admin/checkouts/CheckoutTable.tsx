@@ -34,7 +34,7 @@ import UserRole from "../../../user/UserRole";
 import { TArea } from "common/area";
 import { TCheckout } from "common/checkout";
 import { TConfig } from "common/config";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UUID } from "common/global";
 import axios from "axios";
 
@@ -65,7 +65,7 @@ async function undoReturnCheckout({ checkout_uuid }: { checkout_uuid: UUID }) {
 export default function CheckoutTable({
     checkouts,
     inventory,
-    users,
+    users: usersParam,
     config,
     selectedKeys,
     multiSelect = true,
@@ -84,7 +84,7 @@ export default function CheckoutTable({
 }: {
     checkouts: TCheckout[];
     inventory: TInventoryItem[];
-    users: TUser[];
+    users?: TUser[];
     config: TConfig;
     selectedKeys: Selection;
     multiSelect?: boolean;
@@ -95,6 +95,11 @@ export default function CheckoutTable({
         [column_id: string]: (item: TCheckout) => React.ReactNode;
     };
 }) {
+    const { data: users, isLoading: usersLoading } = useQuery<TUser[]>({
+        queryKey: ["user"],
+        refetchOnWindowFocus: false,
+        enabled: !usersParam,
+    });
     const queryClient = useQueryClient();
     const returnMutation = useMutation({
         mutationFn: returnCheckout,
@@ -139,7 +144,7 @@ export default function CheckoutTable({
                 if (path === "checked_out_by") {
                     // Get user name
                     return (
-                        users.find((u) => u.uuid === obj.checked_out_by)
+                        users?.find((u) => u.uuid === obj.checked_out_by)
                             ?.name || "Unknown User"
                     );
                 } else if (path === "items") {
@@ -299,7 +304,7 @@ export default function CheckoutTable({
                     timestamp_in: renderTimestamp("timestamp_in"),
                     // put stuff here
                     checked_out_by: (c) => {
-                        const user = users.find(
+                        const user = users?.find(
                             (u) => u.uuid === c.checked_out_by,
                         );
                         return user?.name || "Unknown User";

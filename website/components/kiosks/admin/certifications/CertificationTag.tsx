@@ -15,7 +15,7 @@ export default function CertificationTag({
     level,
     href,
     onPress,
-    highlight = false,
+    highlight,
 }: {
     cert_uuid: string;
     certifications?: TCertification[];
@@ -38,19 +38,26 @@ export default function CertificationTag({
     const color = cert ? cert.color : "gray";
     // Set the title to "Error" if isError, "Loading" if isLoading, or the title if isLoading
     const title = cert ? cert.name : isError ? "Error" : "Loading";
-    const foregroundColor = getForegroundColor(color);
+    const baseForegroundColor = getForegroundColor(color);
+    const foregroundColor =
+        highlight === false ? baseForegroundColor + "88" : baseForegroundColor;
 
     return (
         <Card
             className={clsx(
                 "p-1.5 flex flex-row gap-1 w-fit px-2.5 rounded-sm",
                 "content-center items-center min-w-fit border-2",
-                "transition-color",
-                highlight && "shadow-md",
+                "transition-colors-opacity",
+                highlight === true && "shadow-md",
             )}
             style={{
-                backgroundColor: highlight ? color : color + "aa",
-                borderColor: color,
+                backgroundColor:
+                    highlight === true
+                        ? color
+                        : highlight === false
+                          ? color + "44"
+                          : color + "aa",
+                borderColor: highlight === false ? color + "33" : color,
             }}
             isBlurred={!isLoading}
             onPress={onPress}
@@ -73,7 +80,7 @@ export default function CertificationTag({
                 />
             )}
             <h1
-                className="text-sm font-semibold text-nowrap"
+                className={clsx("text-sm text-nowrap font-semibold")}
                 style={{
                     color: foregroundColor,
                 }}

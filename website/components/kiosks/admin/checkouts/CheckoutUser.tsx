@@ -31,14 +31,15 @@ export default function CheckoutUser({
             certs={certs}
             roles={roles}
             size="md"
-            className="h-full overflow-auto"
+            className="h-full overflow-auto relative"
             endContent={
                 isError ? (
                     <div
                         className={clsx(
-                            "h-full primary shadow-md bg-primary-100/30 flex",
+                            "absolute h-[50%] primary shadow-md bg-primary-100/50 flex",
                             "items-center justify-center text-lg rounded-lg m-4",
-                            "text-default-foreground/90",
+                            "text-default-foreground/90 bottom-2 my-auto",
+                            "left-4 right-4 mx-auto",
                         )}
                     >
                         Select a user to assign this id

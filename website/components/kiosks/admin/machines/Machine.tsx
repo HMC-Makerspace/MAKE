@@ -154,7 +154,7 @@ export default function Machine({
                         editable={fullEdit}
                     />
 
-                    <div className="absolute w-full h-fit top-0 box-border border-4 border-transparent">
+                    <div className="absolute w-full h-fit top-0 box-border border-4 border-transparent z-20">
                         <div className="w-full h-fit p-1 overflow-auto">
                             {fullEdit ? (
                                 <>
