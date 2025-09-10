@@ -315,7 +315,6 @@ router.patch(
                 return;
             }
         }
-        const cert = await getCertification(cert_uuid);
 
         // If the user is authorized, grant the cert
         if (
@@ -323,8 +322,6 @@ router.patch(
                 requesting_uuid,
                 API_SCOPE.UPDATE_USER,
                 API_SCOPE.GRANT_CERTIFICATION,
-                cert?.visibility === CERTIFICATION_VISIBILITY.SCHEDULE &&
-                    API_SCOPE.GRANT_SCHEDULE_CERT,
             )
         ) {
             const user = await getUserByEmail(email);
@@ -395,6 +392,7 @@ router.patch(
             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
+
         // If the user is authorized, grant the role
         if (
             await verifyRequest(
@@ -451,12 +449,16 @@ router.patch(
             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
+        const cert = await getCertification(cert_uuid);
         // If the user is authorized, grant the cert
         if (
             await verifyRequest(
                 requesting_uuid,
                 API_SCOPE.UPDATE_USER,
                 API_SCOPE.GRANT_CERTIFICATION,
+                cert?.visibility === CERTIFICATION_VISIBILITY.SCHEDULE &&
+                    requesting_uuid === user_uuid &&
+                    API_SCOPE.GRANT_SCHEDULE_CERT,
             )
         ) {
             const updated_user = await grantCertificateToUser(
@@ -498,24 +500,28 @@ router.patch(
         const user_uuid = req.params.user_uuid;
         const cert_uuid = req.params.cert_uuid;
         req.log.debug({
-            msg: `Granting user with uuid ${user_uuid} cert with uuid ${cert_uuid}`,
+            msg: `Revoking user with uuid ${user_uuid} cert with uuid ${cert_uuid}`,
             requesting_uuid: requesting_uuid,
         });
         // If no requesting user_uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
-                "No requesting_uuid was provided while granting user " +
+                "No requesting_uuid was provided while revoking user " +
                     `with uuid ${user_uuid} cert with uuid ${cert_uuid}.`,
             );
             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
+        const cert = await getCertification(cert_uuid);
         // If the user is authorized, grant the cert
         if (
             await verifyRequest(
                 requesting_uuid,
                 API_SCOPE.UPDATE_USER,
                 API_SCOPE.GRANT_CERTIFICATION,
+                cert?.visibility === CERTIFICATION_VISIBILITY.SCHEDULE &&
+                    requesting_uuid === user_uuid &&
+                    API_SCOPE.GRANT_SCHEDULE_CERT,
             )
         ) {
             const updated_user = await revokeCertificateFromUser(
@@ -530,14 +536,14 @@ router.patch(
                 return;
             }
             req.log.debug(
-                `Granted user with uuid ${user_uuid} cert with uuid ${cert_uuid}`,
+                `Revoked user with uuid ${user_uuid} cert with uuid ${cert_uuid}`,
             );
             // Return a the updated user object
             res.status(StatusCodes.OK).json(updated_user);
         } else {
             // If the user is not authorized, provide a status error
             req.log.warn({
-                msg: "Forbidden user attempted to grant user cert",
+                msg: "Forbidden user attempted to revoke user cert",
                 requesting_uuid: requesting_uuid,
             });
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
