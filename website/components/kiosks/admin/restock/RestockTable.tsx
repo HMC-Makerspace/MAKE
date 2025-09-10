@@ -26,17 +26,19 @@ import MAKETable from "../../../Table";
 import RestockType from "./RestockType";
 import RestockEditor from "./RestockEditor";
 import RestockStatusLogs from "./RestockStatusLogs";
+import ItemInfo from "../inventory/ItemInfo";
 import React from "react";
 import { MAKEUser } from "../../../user/MAKEUser";
 import PopupAlert from "../../../PopupAlert";
 import { convertTimestampToDate } from "../../../../utils";
+import { TArea } from "common/area";
+import { TCertification } from "common/certification";
 
 const columns = [
     { name: "UUID", id: "uuid" },
     { name: "Requested Time", id: "time_requested" },
     { name: "Requesting User", id: "requesting_user" },
-    { name: "Item UUID", id: "item_uuid" },
-    { name: "Curr Quantity", id: "current_quantity" },
+    { name: "Item", id: "item_uuid" },
     { name: "Req Quantity", id: "quantity_requested" },
     { name: "Reason for Request", id: "reason" },
     { name: "Current Status", id: "current_status" },
@@ -50,7 +52,6 @@ const columns = [
 const defaultColumns = [
     "time_requested",
     "item_uuid",
-    "current_quantity",
     "quantity_requested",
     "reason",
     "requesting_user",
@@ -164,9 +165,13 @@ function PastStatusLogs({
 
 export default function RestockTable({
     restocks,
+    areas,
+    certs,
     isLoading,
 }: {
     restocks: TRestockRequest[];
+    areas: TArea[];
+    certs: TCertification[];
     isLoading: boolean;
 }) {
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
@@ -327,6 +332,11 @@ export default function RestockTable({
                     requesting_user: (restock) => (
                         <div>
                             <MAKEUser user_uuid={restock.requesting_user} />
+                        </div>
+                    ),
+                    item_uuid: (restock) => (
+                        <div>
+                            <ItemInfo item_uuid={restock.item_uuid} areas={areas} certs={certs} />
                         </div>
                     ),
                     current_status: (restock) => (
