@@ -304,7 +304,7 @@ export default function InventoryTable({
                         </div>
                     ),
                     authorized_roles: (i) => (
-                        <div className="flex flex-row gap-2 overflow-auto max-w-20">
+                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
                             {i.authorized_roles?.map((role) => (
                                 <UserRole
                                     key={role}
