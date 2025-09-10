@@ -68,7 +68,7 @@ export default function RequiredCertsModal<
             onOpenChange(false);
             setHasEdits(false);
         },
-        [patchMutation, hasEdits],
+        [patchMutation, hasEdits, currentCerts, element.uuid],
     );
 
     function wrapEdit<P extends keyof TRequiredCertificate>(

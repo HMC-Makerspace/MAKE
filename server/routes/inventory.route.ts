@@ -198,7 +198,7 @@ router.patch(
             {},
             { partial_item_obj: Partial<TInventoryItem> }
         >,
-        res: InventoryResponse,
+        res: ItemResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
@@ -234,7 +234,7 @@ router.patch(
                 return;
             }
             req.log.debug(`Patched item ${item_uuid}`);
-            res.status(StatusCodes.OK).json([item]);
+            res.status(StatusCodes.OK).json(item);
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to patch an inventory item",
