@@ -115,7 +115,7 @@ export default function ScheduleCertSelector({
 
     return (
         <div className="px-6 py-4 rounded-lg bg-content1">
-            <div className="flex flex-row flex-wrap gap-4">
+            <div className="flex flex-row sm:flex-wrap gap-4 overflow-auto max-h-28 lg:max-h-none">
                 {scheduleCerts.map((c) => {
                     const highlight = isHighlighted(c.uuid);
                     return (
@@ -137,7 +137,7 @@ export default function ScheduleCertSelector({
                     );
                 })}
             </div>
-            <div className="pt-4 flex flex-row gap-2 justify-between">
+            <div className="pt-4 flex flex-col sm:flex-row gap-2 justify-between">
                 <div className="flex flex-col gap-1">
                     <div>
                         Select a certification above to highlight shifts with a
