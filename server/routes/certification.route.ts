@@ -142,8 +142,10 @@ router.patch(
             requesting_uuid: requesting_uuid,
         });
 
-        // If the user is authorized, delete a machine object
-        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_MACHINE)) {
+        // If the user is authorized, update the certification object
+        if (
+            await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_CERTIFICATION)
+        ) {
             const cert = await patchCertification(cert_uuid, partial_cert);
             if (!cert) {
                 req.log.warn(

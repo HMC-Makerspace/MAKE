@@ -12,6 +12,7 @@ import React, { useEffect, useRef } from "react";
 import clsx from "clsx";
 import CertificationTag from "../certifications/CertificationTag";
 import { TCertification } from "common/certification";
+import { useQuery } from "@tanstack/react-query";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" }, // No need to show
@@ -64,6 +65,10 @@ export default function UsersTable({
     };
     emptyContent?: React.ReactNode;
 }) {
+    const { data: updatedUsers, isLoading: usersLoading } = useQuery<TUser[]>({
+        queryKey: ["user"],
+        refetchOnMount: false,
+    });
     const columns = [...baseColumns, ...extraColumns];
 
     // The set of columns that are visible
@@ -77,11 +82,11 @@ export default function UsersTable({
     // unnecessary reinitialization on every render but updated when the
     // content changes
     const fuse = React.useMemo(() => {
-        return new Fuse(users, {
+        return new Fuse(updatedUsers || users, {
             keys: ["name", "college_id", "email"],
             threshold: 0.3,
         });
-    }, [users]);
+    }, [updatedUsers, users]);
 
     // The list of items after filtering and sorting
     const filteredUsers = React.useMemo(() => {
@@ -92,7 +97,7 @@ export default function UsersTable({
         }
     }, [users, fuse, search]);
 
-    const numUsers = users.length;
+    const numUsers = (updatedUsers || users).length;
     const numFilteredUsers = filteredUsers.length;
 
     const onInputChange = React.useCallback((value: string) => {
