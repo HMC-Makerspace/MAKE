@@ -37,6 +37,8 @@ import {
 } from "common/verify";
 import { TPublicUser, TUser, TUserAvailability, TUserRole } from "common/user";
 import { ScheduleUUID } from "common/schedule";
+import { getCertification } from "controllers/certification.controller";
+import { CERTIFICATION_VISIBILITY } from "common/certification";
 
 // --- Request and Response Types ---
 type UserRequest = Request<{}, {}, { user_obj: TUser }>;
@@ -313,12 +315,16 @@ router.patch(
                 return;
             }
         }
+        const cert = await getCertification(cert_uuid);
+
         // If the user is authorized, grant the cert
         if (
             await verifyRequest(
                 requesting_uuid,
                 API_SCOPE.UPDATE_USER,
                 API_SCOPE.GRANT_CERTIFICATION,
+                cert?.visibility === CERTIFICATION_VISIBILITY.SCHEDULE &&
+                    API_SCOPE.GRANT_SCHEDULE_CERT,
             )
         ) {
             const user = await getUserByEmail(email);
@@ -336,26 +342,25 @@ router.patch(
                     level,
                 );
                 if (!updated_user) {
-                req.log.error(`No cert found with uuid ${cert_uuid}`);
-                res.status(StatusCodes.NOT_FOUND).json({
-                    error: `No cert found with uuid ${cert_uuid}.`,
-                });
-                return;
-            }
-            req.log.debug(
-                `Granted user with id ${email} cert with uuid ${cert_uuid}`,
-            );
-            // Return a the updated user object
-            res.status(StatusCodes.OK).json(updated_user);
+                    req.log.error(`No cert found with uuid ${cert_uuid}`);
+                    res.status(StatusCodes.NOT_FOUND).json({
+                        error: `No cert found with uuid ${cert_uuid}.`,
+                    });
+                    return;
+                }
+                req.log.debug(
+                    `Granted user with id ${email} cert with uuid ${cert_uuid}`,
+                );
+                // Return a the updated user object
+                res.status(StatusCodes.OK).json(updated_user);
             } catch (e: any) {
                 req.log.debug({
                     error: e.message,
                 });
                 res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                    "error": e.message
-                })
+                    error: e.message,
+                });
             }
-            
         } else {
             // If the user is not authorized, provide a status error
             req.log.warn({
