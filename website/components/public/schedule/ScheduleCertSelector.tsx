@@ -34,7 +34,11 @@ export default function ScheduleCertSelector({
                         cert_uuid={c.uuid}
                         certifications={certs}
                         onPress={() => onCertSelect(c.uuid)}
-                        highlight={selectedCerts.includes(c.uuid)}
+                        highlight={
+                            selectedCerts.length === 0
+                                ? undefined
+                                : selectedCerts.includes(c.uuid)
+                        }
                     />
                 ))}
             </div>

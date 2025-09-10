@@ -301,7 +301,7 @@ router.patch(
             requesting_uuid: requesting_uuid,
         });
 
-        // If the user is authorized, delete a machine object
+        // If the user is authorized, update a machine object
         if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_MACHINE)) {
             const machine = await patchMachine(machine_uuid, partial_machine);
             if (!machine) {
