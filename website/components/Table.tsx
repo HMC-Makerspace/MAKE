@@ -50,7 +50,10 @@ export default function MAKETable<Type extends { uuid: string }>({
     };
     doubleClickAction?: (item_uuid: React.Key) => void;
     isLoading: boolean;
-    loadingContent?: (ref?: React.Ref<HTMLElement>) => React.ReactNode;
+    loadingContent?: (
+        ref?: React.Ref<HTMLElement>,
+        loadMoreContent?: () => void,
+    ) => React.ReactNode;
     emptyContent?: React.ReactNode;
     color?:
         | "default"
@@ -125,7 +128,11 @@ export default function MAKETable<Type extends { uuid: string }>({
             classNames={{
                 base: "max-h-full overflow-auto",
             }}
-            bottomContent={hasMoreContent ? loadingContent(loaderRef) : null}
+            bottomContent={
+                hasMoreContent
+                    ? loadingContent(loaderRef, loadMoreContent)
+                    : null
+            }
             selectionBehavior={multiSelect ? "toggle" : "replace"}
             onRowAction={doubleClickAction}
             color={color}
@@ -145,7 +152,6 @@ export default function MAKETable<Type extends { uuid: string }>({
                 emptyContent={emptyContent}
                 items={visibleContent}
                 isLoading={isLoading}
-                loadingContent={loadingContent()}
             >
                 {(item) => (
                     <TableRow
