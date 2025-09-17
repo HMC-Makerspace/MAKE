@@ -98,6 +98,7 @@ export default function InventoryKiosk() {
                     item={item ?? DEFAULT_ITEM}
                     certs={certs}
                     roles={roles}
+                    areas={areas}
                     isDisabled={
                         !item ||
                         item.role === ITEM_ROLE.MACHINE ||

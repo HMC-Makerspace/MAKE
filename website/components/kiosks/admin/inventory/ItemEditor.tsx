@@ -9,11 +9,13 @@ import ItemEditorForm from "./ItemEditorForm";
 import { TCertification } from "common/certification";
 import { TUserRole } from "common/user";
 import clsx from "clsx";
+import { TArea } from "common/area";
 
 export default function ItemEditor({
     item,
     certs,
     roles,
+    areas,
     isNew,
     isDisabled,
     onSuccess,
@@ -22,6 +24,7 @@ export default function ItemEditor({
     item: TInventoryItem;
     certs: TCertification[];
     roles: TUserRole[];
+    areas: TArea[];
     isNew: boolean;
     isDisabled: boolean;
     onSuccess: (message: string) => void;
@@ -43,6 +46,7 @@ export default function ItemEditor({
                 item={item}
                 certs={certs}
                 roles={roles}
+                areas={areas}
                 isMultiple={false}
                 isDisabled={isDisabled}
                 isNew={isNew}

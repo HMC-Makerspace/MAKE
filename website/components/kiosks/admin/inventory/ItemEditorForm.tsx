@@ -23,7 +23,7 @@ import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
 import { CertificationUUID, TCertification } from "common/certification";
-import { BookmarkIcon, CakeIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { BookmarkIcon, CakeIcon, PencilSquareIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
 import EditCertsModal from "./ItemCertEditor";
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
@@ -32,6 +32,8 @@ import RequiredCertsModal from "../certifications/RequiredCertsModal";
 import AuthorizedRolesModal from "../certifications/AuthorizedRolesModal";
 import { motion } from "framer-motion";
 import ItemQuantityIcon from "./ItemQuantityIcon";
+import ItemLocationModal from "./ItemLocationModal";
+import { TArea } from "common/area";
 
 // export
 const roles = [
@@ -89,6 +91,7 @@ export default function ItemEditorForm({
     item,
     certs,
     roles,
+    areas,
     isMultiple,
     isDisabled,
     isNew,
@@ -98,6 +101,7 @@ export default function ItemEditorForm({
     item: TInventoryItem;
     certs: TCertification[];
     roles: TUserRole[];
+    areas: TArea[];
     isMultiple: boolean;
     isDisabled: boolean;
     isNew: boolean;
@@ -157,9 +161,9 @@ export default function ItemEditorForm({
                 keywords:
                     (data.get("keywords") as string)
                         ?.split(",")
-                        .map((i) => i.trim()) ?? [], // TODO
-                required_certifications: item.required_certifications, //.map(c=>{return {certification_uuid:c,required_level:1}}), //todo
-                authorized_roles: Array.from(data.getAll("authroles")) as string[],
+                        .map((i) => i.trim()) ?? [],
+                required_certifications: item.required_certifications,
+                authorized_roles: item.authorized_roles,
                 quantity: parseInt(data.get("quantity") as string),
                 available: item.available
             };
@@ -229,9 +233,11 @@ export default function ItemEditorForm({
 
     const [reqcertsOpen, setReqcertsOpen] = React.useState<boolean>(false); // whether reqcerts edit modal is open
     const [authrolesOpen, setAuthrolesOpen] = React.useState<boolean>(false); // whether authroles edit modal is open
+    const [locationEditorOpen, setLocationEditorOpen] = React.useState<boolean>(false); // whether location editor modal is open
 
     const reqcertsMutation = patchMutation(() => setReqcertsOpen(false));
     const authrolesMutation = patchMutation(() => setAuthrolesOpen(false));
+    const locationEditorMutation = patchMutation(() => setLocationEditorOpen(false));
 
     const [qtype, setQtype] = React.useState<boolean>(item.quantity >= 0); // type of quantity (true: numerical, false: categorical)
     
@@ -595,6 +601,15 @@ export default function ItemEditorForm({
                         >
                             <CakeIcon className="size-6" />
                         </Button>
+                        <Button
+                            variant="flat"
+                            color="primary"
+                            onPress={() => setLocationEditorOpen(true)}
+                            isIconOnly
+                            isDisabled={isDisabled}
+                        >
+                            <VideoCameraIcon className="size-6" />
+                        </Button>
                     </div>
                 </div>
                 <div className="w-full mt-auto col-span-full">
@@ -627,6 +642,13 @@ export default function ItemEditorForm({
             <AuthorizedRolesModal
                 element={item}
                 roles={roles}
+                isOpen={authrolesOpen}
+                onOpenChange={setAuthrolesOpen}
+                patchMutation={authrolesMutation}
+            />
+            <ItemLocationModal
+                element={item}
+                areas={areas}
                 isOpen={authrolesOpen}
                 onOpenChange={setAuthrolesOpen}
                 patchMutation={authrolesMutation}
