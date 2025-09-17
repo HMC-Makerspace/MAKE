@@ -16,6 +16,7 @@ import {
     TInventoryItem,
     ITEM_ROLE,
     ITEM_ACCESS_TYPE,
+    ITEM_RELATIVE_QUANTITY,
 } from "../../../../../common/inventory";
 import React, { useState } from "react";
 import axios from "axios";
@@ -29,6 +30,8 @@ import ItemRoleIcon from "./ItemRoleIcon";
 import { CertSelect } from "../certifications/CertSelect";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
 import AuthorizedRolesModal from "../certifications/AuthorizedRolesModal";
+import { motion } from "framer-motion";
+import ItemQuantityIcon from "./ItemQuantityIcon";
 
 // export
 const roles = [
@@ -229,6 +232,8 @@ export default function ItemEditorForm({
 
     const reqcertsMutation = patchMutation(() => setReqcertsOpen(false));
     const authrolesMutation = patchMutation(() => setAuthrolesOpen(false));
+
+    const [qtype, setQtype] = React.useState<boolean>(item.quantity >= 0); // type of quantity (true: numerical, false: categorical)
     
     return (
         <>
@@ -336,25 +341,98 @@ export default function ItemEditorForm({
                     }}
                 /> */}
                     <div className="grid grid-cols-2 w-full gap-4 col-span-full">
-                        <NumberInput
-                            label="Quantity"
-                            name="quantity"
-                            placeholder={placeholder("Quantity")}
-                            isDisabled={isDisabled}
-                            isRequired
-                            defaultValue={item.quantity}
-                            onValueChange={defaultEdit}
-                            variant="faded"
-                            color="primary"
-                            size="md"
-                            classNames={{
-                                input: clsx([
-                                    "placeholder:text-default-500",
-                                    "placeholder:italic",
-                                    "text-default-700",
-                                ]),
-                            }}
-                        />
+                        <div className="flex flex-row gap-1">
+                            {qtype ? (
+                                <NumberInput
+                                    label="Quantity"
+                                    name="quantity"
+                                    placeholder={placeholder("Quantity")}
+                                    isDisabled={isDisabled}
+                                    isRequired
+                                    defaultValue={item.quantity}
+                                    onValueChange={defaultEdit}
+                                    minValue={0}
+                                    variant="faded"
+                                    color="primary"
+                                    size="md"
+                                    classNames={{
+                                        input: clsx([
+                                            "placeholder:text-default-500",
+                                            "placeholder:italic",
+                                            "text-default-700",
+                                        ]),
+                                    }}
+                                />
+                            ) : (
+                                <Select
+                                    label="Quantity"
+                                    name="quantity"
+                                    placeholder={placeholder("Quantity")}
+                                    isDisabled={isDisabled}
+                                    isRequired
+                                    defaultSelectedKeys={[item.quantity + ""]}
+                                    onSelectionChange={defaultEdit}
+                                    selectionMode={"single"}
+                                    variant="faded"
+                                    color="primary"
+                                    size="md"
+                                    labelPlacement="inside"
+                                    classNames={{
+                                        value: "text-default-500 min-h-[48px] content-center",
+                                    }}
+                                    renderValue={(selectedKeys) => {
+                                        if (
+                                            selectedKeys.length === 0 ||
+                                            selectedKeys.length > 1
+                                        ) {
+                                            return ""; // Show placeholder
+                                        } else {
+                                            return (
+                                                <div className="">
+                                                    {selectedKeys[0].textValue}
+                                                </div>
+                                            );
+                                        }
+                                    }}
+                                    showScrollIndicators={false}
+                                >
+                                    <SelectItem
+                                        key={"-2" /*ITEM_RELATIVE_QUANTITY.HIGH*/}
+                                        textValue={"High"}
+                                    >
+                                        <span className="flex gap-2 items-center">
+                                            High
+                                        </span>
+                                    </SelectItem>
+                                    <SelectItem
+                                        key={"-1" /*ITEM_RELATIVE_QUANTITY.LOW*/}
+                                        textValue={"Low"}
+                                    >
+                                        <span className="flex gap-2 items-center">
+                                            Low
+                                        </span>
+                                    </SelectItem>
+                                </Select>
+                            )}
+                            
+                            <motion.div className="content-center"
+                                initial={{
+                                    color: "hsl(var(--heroui-default-500))",
+                                }}
+                                whileHover={{
+                                    color: "hsl(var(--heroui-primary-600))",
+                                }}
+                                onClick={() => {
+                                    setQtype(!qtype);
+                                    defaultEdit();
+                                }}
+                            >
+                                <ItemQuantityIcon
+                                    qtype={qtype}
+                                    className="size-7 cursor-pointer"
+                                />
+                            </motion.div>
+                        </div>
                         <Select
                             name="role"
                             placeholder={placeholder("Item type")}
