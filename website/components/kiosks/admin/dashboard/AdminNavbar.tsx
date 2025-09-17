@@ -111,6 +111,7 @@ export default function AdminNavbar({
                         "data-[pressed=true]:translate-x-1",
                         "aria-expanded:translate-x-1",
                     )}
+                    showControls={true}
                 />
             </NavbarContent>
             {/* Menu drop down, for small screens */}

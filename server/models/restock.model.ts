@@ -18,7 +18,7 @@ export const RestockRequest = new mongoose.Schema<TRestockRequest>(
     {
         uuid: { type: String, required: true },
         item_uuid: { type: String, required: true },
-        // mailing_list: { type: [String], required: true },
+        mailing_list: { type: [String], required: true },
         quantity_requested: { type: Number, required: false },
         reason: { type: String, required: false },
         requesting_user: { type: String, required: true },

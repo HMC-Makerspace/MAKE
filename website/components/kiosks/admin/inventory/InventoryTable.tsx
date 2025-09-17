@@ -9,6 +9,7 @@ import {
     DropdownItem,
     Spinner,
     Tooltip,
+    useDisclosure,
 } from "@heroui/react";
 import { useInfiniteScroll } from "@heroui/use-infinite-scroll";
 import {
@@ -40,6 +41,7 @@ import UserRole from "../../../user/UserRole";
 import { TArea } from "common/area";
 import ItemLocationChip from "./ItemLocationChip";
 import ItemRoleIcon from "./ItemRoleIcon";
+import RestockRequestModal from "../restock/RestockRequestModal";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" },
@@ -59,6 +61,7 @@ const baseColumns = [
 ];
 
 export default function InventoryTable({
+    item,
     inventory,
     roles,
     certifications,
@@ -83,6 +86,7 @@ export default function InventoryTable({
     emptyContent,
     onCreate = undefined,
 }: {
+    item: TInventoryItem;
     inventory: TInventoryItem[];
     roles: TUserRole[];
     certifications: TCertification[];
@@ -141,6 +145,14 @@ export default function InventoryTable({
         setSearch(value);
     }, []);
 
+
+    // Modal state for restock request form
+    const {
+        isOpen: restockIsOpen,
+        onOpen: restockOnOpen,
+        onOpenChange: restockOnOpenChange,
+    } = useDisclosure();
+
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
             <div
@@ -196,14 +208,26 @@ export default function InventoryTable({
                         </div>
 
                         {editable && (
-                            <Button
-                                color="primary"
-                                isDisabled={isLoading}
-                                startContent={<PlusIcon className="size-6" />}
-                                onPress={onCreate}
-                            >
-                                Create
-                            </Button>
+                            <>
+                                <Button
+                                    startContent={<PlusIcon className="size-6" />}
+                                    isDisabled={item.name === ""}
+                                    onPress={() => {
+                                        restockOnOpen();
+                                    }}
+                                >
+                                    Restock
+                                </Button>
+                                <Button
+                                    color="primary"
+                                    isDisabled={isLoading}
+                                    startContent={<PlusIcon className="size-6" />}
+                                    onPress={onCreate}
+                                >
+                                    Create
+                                </Button>
+                            </>
+                        
                         )}
                     </div>
                 </div>
@@ -328,6 +352,14 @@ export default function InventoryTable({
                         <Spinner color="white" ref={ref} />
                     </div>
                 )}
+            />
+
+            <RestockRequestModal
+                restockSelected={item ?? null}
+                editIsOpen={restockIsOpen}
+                editOnOpenChange={restockOnOpenChange}
+                onSuccess={() => {}}
+                onError={() => {}}
             />
         </div>
     );

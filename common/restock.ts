@@ -69,7 +69,7 @@ export type TRestockRequestLog = {
 /**
  * TRestockRequest - A request to restock a given item
  * @property uuid - a unique identifier for this request
- * @property mailing_list - a list of email addresses to notify when the item gets restocked
+ * @property mailing_list - a list of UUIDs of users to notify when the item gets restocked
  * @property item_uuid - a UUID of the item to be restocked
  * @property quantity_requested - (optional) The requested quantity to purchase
  * @property reason - (optional) A description for why this item needs to
@@ -82,7 +82,7 @@ export type TRestockRequestLog = {
  */
 export type TRestockRequest = {
     uuid: UUID;
-    // mailing_list: string[];
+    mailing_list: UserUUID[];
     item_uuid: InventoryItemUUID;
     quantity_requested?: number;
     reason?: string;

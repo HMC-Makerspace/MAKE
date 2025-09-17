@@ -108,6 +108,7 @@ export default function InventoryKiosk() {
                     onError={() => {}}
                 />
                 <InventoryTable
+                    item={item ?? DEFAULT_ITEM}
                     inventory={inventory ?? []}
                     roles={roles}
                     certifications={certs}

@@ -84,7 +84,7 @@ export default function CustomNavbar({
                     <Branding />
                 </div>
                 <div className="px-4 self-center w-full flex justify-center">
-                    <MAKEUser user_uuid={"self"} size="lg" />
+                    <MAKEUser user_uuid={"self"} size="lg" showControls={true}/>
                 </div>
             </div>
             {/* Small screen navbar */}
@@ -147,7 +147,7 @@ export default function CustomNavbar({
                     <Card className="bg-default-200 p-2 flex-row gap-3 w-fit self-center">
                         <Branding />
                         <div className="flex flex-col justify-between">
-                            <MAKEUser user_uuid={"self"} size="lg" />
+                            <MAKEUser user_uuid={"self"} size="lg" showControls={true}/>
                             <div className="flex flex-row w-full justify-between">
                                 <ThemeSwitcher
                                     className="self-center w-full"

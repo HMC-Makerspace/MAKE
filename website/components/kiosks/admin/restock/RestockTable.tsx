@@ -12,6 +12,8 @@ import {
     ModalBody,
     ModalFooter,
     ModalHeader,
+    Accordion,
+    AccordionItem
 } from "@heroui/react";
 import {
     ChevronDownIcon,
@@ -33,6 +35,7 @@ import PopupAlert from "../../../PopupAlert";
 import { convertTimestampToDate } from "../../../../utils";
 import { TArea } from "common/area";
 import { TCertification } from "common/certification";
+import { TInventoryItem } from "common/inventory";
 
 const columns = [
     { name: "UUID", id: "uuid" },
@@ -165,15 +168,19 @@ function PastStatusLogs({
 
 export default function RestockTable({
     restocks,
+    inventory,
     areas,
     certs,
     isLoading,
 }: {
     restocks: TRestockRequest[];
+    inventory: TInventoryItem[];
     areas: TArea[];
     certs: TCertification[];
     isLoading: boolean;
 }) {
+    console.log("restock table", inventory, areas, certs,)
+
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
         new Set(defaultColumns),
     );
@@ -263,20 +270,20 @@ export default function RestockTable({
                                 <div className="flex flex-row gap-1 m-2">
                                     {statusFilter === "all"
                                         ? statusOptions.map((status) => (
-                                              <RestockType
-                                                  request_status={status.value}
-                                                  size="sm"
-                                              />
-                                          ))
+                                            <RestockType
+                                                request_status={status.value}
+                                                size="sm"
+                                            />
+                                        ))
                                         : Array.from(statusFilter)
-                                              .map(Number)
-                                              .sort((a, b) => a - b)
-                                              .map((status) => (
-                                                  <RestockType
-                                                      request_status={status}
-                                                      size="sm"
-                                                  />
-                                              ))}
+                                            .map(Number)
+                                            .sort((a, b) => a - b)
+                                            .map((status) => (
+                                                <RestockType
+                                                    request_status={status}
+                                                    size="sm"
+                                                />
+                                            ))}
                                 </div>
                             </Button>
                         </DropdownTrigger>
@@ -330,13 +337,45 @@ export default function RestockTable({
                         </span>
                     ),
                     requesting_user: (restock) => (
-                        <div>
-                            <MAKEUser user_uuid={restock.requesting_user} />
+                        <div className='flex flex-row gap-2 items-center justify-between items-fit min-w-[10vw]'>
+                            <Accordion className='py-0' itemClasses={{ trigger: 'py-0', indicator: 'size-6' }}>
+
+                                <AccordionItem
+                                    startContent={
+                                        <MAKEUser
+                                            user_uuid={restock.requesting_user}
+                                            popoverPlacement="bottom"
+                                            className='w-full justify-start'
+                                        />
+                                    }
+                                    isCompact
+                                >
+                                    {restock.mailing_list.map((uuid, index) => {
+                                        return (
+                                            <div className='pb-1'>
+                                                <MAKEUser
+                                                    user_uuid={uuid}
+                                                    popoverPlacement="bottom"
+                                                    className='justify-start'
+                                                />
+                                            </div>
+                                        )
+                                    })}
+                                </AccordionItem>
+                            </Accordion>
+
+
                         </div>
                     ),
                     item_uuid: (restock) => (
                         <div>
-                            <ItemInfo item_uuid={restock.item_uuid} areas={areas} certs={certs} />
+                            <ItemInfo
+                                key={restock.item_uuid + '-' + inventory.length}
+                                item_uuid={restock.item_uuid}
+                                inventory={inventory}
+                                areas={areas}
+                                certs={certs}
+                            />
                         </div>
                     ),
                     current_status: (restock) => (
