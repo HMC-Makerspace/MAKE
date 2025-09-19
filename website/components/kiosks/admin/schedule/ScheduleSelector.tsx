@@ -34,6 +34,8 @@ import clsx from "clsx";
 import { TConfig } from "common/config";
 import DeleteModal from "../../../DeleteModal";
 import { timestampToTime, timeToTimestamp } from "../../../../utils";
+import AlertEditorModal from "./AlertEditorModal";
+import { ITEM_RELATIVE_QUANTITY } from "../../../../../common/inventory";
 
 const createUpdateSchedule = async ({
     schedule,
@@ -137,16 +139,6 @@ function DeleteScheduleModal({
     );
 }
 
-function AlertEditorModal({
-    selectedSchedule,
-    setSelectedSchedules,
-}: {
-    selectedSchedule: TSchedule;
-    setSelectedSchedules: (schedules: Selection) => void;
-}) {
-    return;
-}
-
 export default function ScheduleSelector({
     schedules,
     defaultSchedule,
@@ -222,7 +214,7 @@ export default function ScheduleSelector({
 
     const duplicateSchedule = (schedule?: TSchedule) => {
         if (!schedule) return;
-        const newSchedule = {
+        const newSchedule: TSchedule = {
             uuid: crypto.randomUUID(),
             name: `${schedule.name} (copy)`,
             timestamp_start: schedule.timestamp_start,
@@ -237,11 +229,11 @@ export default function ScheduleSelector({
             })),
             alerts: schedule.alerts.map((alert) => ({
                 uuid: crypto.randomUUID(),
-                default: alert.default,
                 timestamp_start: alert.timestamp_start,
                 timestamp_end: alert.timestamp_end,
                 header: alert.header,
-                message: alert.message,
+                content: alert.content,
+                hyperlink: alert.hyperlink,
             })),
             daily_open_time: schedule.daily_open_time,
             daily_close_time: schedule.daily_close_time,
@@ -302,6 +294,12 @@ export default function ScheduleSelector({
         onOpenChange: onDeleteChange,
     } = useDisclosure();
 
+    const {
+        isOpen: isAlertModalOpen,
+        onOpen: onAlertModalOpen,
+        onOpenChange: onAlertModalChange,
+    } = useDisclosure();
+
     return (
         <Card
             className="w-full p-2 pb bg-default-200 gap-2 flex-row justify-between items-center"
@@ -309,9 +307,9 @@ export default function ScheduleSelector({
         >
             <div className="flex flex-row gap-2">
                 <DateRangePicker
+                    aria-label="Date Range"
                     isRequired
                     isDisabled={!schedule}
-                    // @ts-expect-error - Not actually a type conflict
                     defaultValue={
                         schedule &&
                         schedule.timestamp_start &&
@@ -438,9 +436,7 @@ export default function ScheduleSelector({
                             variant="faded"
                             size="lg"
                             className="self-end"
-                            onPress={() => /**TODO: show alert modal */ {
-                                alert("Alert modal WIP");
-                            }}
+                            onPress={onAlertModalOpen}
                         />
                     </Tooltip>
                 )}
@@ -630,13 +626,24 @@ export default function ScheduleSelector({
                 </Dropdown>
             </div>
             {!!schedule && (
-                <DeleteScheduleModal
-                    schedule={schedule}
-                    isOpen={isDeleting}
-                    onOpenChange={onDeleteChange}
-                    onSuccess={onSuccess}
-                    onError={onError}
-                />
+                <>
+                    <DeleteScheduleModal
+                        schedule={schedule}
+                        isOpen={isDeleting}
+                        onOpenChange={onDeleteChange}
+                        onSuccess={onSuccess}
+                        onError={onError}
+                    />
+                    <AlertEditorModal
+                        schedule={schedule}
+                        patchMutation={patchMutation}
+                        config={config}
+                        isOpen={isAlertModalOpen}
+                        onOpenChange={onAlertModalChange}
+                        onSuccess={onSuccess}
+                        onError={onError}
+                    />
+                </>
             )}
         </Card>
     );

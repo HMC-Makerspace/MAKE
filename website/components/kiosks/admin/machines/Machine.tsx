@@ -401,7 +401,7 @@ export default function Machine({
                     machine.documents && (
                         <div
                             className={clsx(
-                                "self-center w-4/5 gap-3 flex flex-row",
+                                "self-center w-4/5 gap-3 flex sm:flex-row flex-col",
                                 !machine.documents ||
                                     machine.documents.length == 0
                                     ? ""
