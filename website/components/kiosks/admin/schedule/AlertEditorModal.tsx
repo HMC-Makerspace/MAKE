@@ -1,19 +1,4 @@
-import {
-    Input,
-    Button,
-    Modal,
-    Form,
-    ModalContent,
-    Switch,
-    ButtonGroup,
-    Tooltip,
-    DateRangePicker,
-    DateRangePickerField,
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-    RangeCalendar,
-} from "@heroui/react";
+import { Button, Modal, Form, ModalContent } from "@heroui/react";
 import { LinkIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 import React from "react";
@@ -67,15 +52,26 @@ export default function AlertEditorModal({
                 schedule_uuid: schedule.uuid,
                 partial_schedule: { alerts: alerts },
             });
+            onOpenChange(false);
+            onSuccess("Successfully updated alerts.");
         },
-        [hasEdits, schedule, alerts],
+        [
+            hasEdits,
+            patchMutation,
+            schedule.uuid,
+            alerts,
+            onOpenChange,
+            onSuccess,
+        ],
     );
 
     function wrapEdit<P extends keyof TAlert>(uuid: string, prop: P) {
         return (val: TAlert[P]) => {
             const i = alerts.findIndex((a) => a.uuid === uuid);
             if (i < 0) {
-                onError(`Could not find alert with uuid: ${uuid} (index: ${i})`);
+                onError(
+                    `Could not find alert with uuid: ${uuid} (index: ${i})`,
+                );
             }
             if (!alerts[i]) {
                 alerts[i] = {
@@ -123,28 +119,11 @@ export default function AlertEditorModal({
                                 className={clsx(
                                     "rounded-lg bg-default-100 p-2",
                                     "border-default-200 border-2",
-                                    "flex flex-col gap-2 w-full",
+                                    "flex flex-col gap-2 w-full ",
                                 )}
                             >
-                                {alerts.map((alert) => (
-                                    <EditableAlert
-                                        key={alert.uuid}
-                                        alert={alert}
-                                        deleteAlert={() => {
-                                            const a_index = alerts.findIndex(
-                                                (a) => a.uuid === alert.uuid,
-                                            );
-                                            alerts.splice(a_index, 1); // remove that alert
-                                            setAlerts([...alerts]);
-                                            setHasEdits(true);
-                                        }}
-                                        wrapEdit={(prop) =>
-                                            wrapEdit(alert.uuid, prop)
-                                        }
-                                        timezone={config.schedule.timezone}
-                                    />
-                                ))}
                                 <Button
+                                    key="button"
                                     className="w-full"
                                     size="sm"
                                     onPress={() => {
@@ -164,28 +143,38 @@ export default function AlertEditorModal({
                                         strokeWidth={2}
                                     />
                                 </Button>
+                                <div className="flex flex-col overflow-auto max-h-[50vh] gap-2">
+                                    {alerts.map((alert) => (
+                                        <EditableAlert
+                                            key={alert.uuid}
+                                            alert={alert}
+                                            deleteAlert={() => {
+                                                const a_index =
+                                                    alerts.findIndex(
+                                                        (a) =>
+                                                            a.uuid ===
+                                                            alert.uuid,
+                                                    );
+                                                alerts.splice(a_index, 1); // remove that alert
+                                                setAlerts([...alerts]);
+                                                setHasEdits(true);
+                                            }}
+                                            wrapEdit={(prop) =>
+                                                wrapEdit(alert.uuid, prop)
+                                            }
+                                            timezone={config.schedule.timezone}
+                                        />
+                                    ))}
+                                </div>
                             </div>
                             <div className="flex flex-row justify-between w-full">
                                 <Button
                                     variant="shadow"
-                                    // type="submit"
+                                    type="submit"
                                     color="primary"
                                     className="w-full sm:w-auto"
                                     isDisabled={!hasEdits}
                                     isLoading={patchMutation.isPending}
-                                    onPress={() => {
-                                        patchMutation.mutate(
-                                            {
-                                                schedule_uuid: schedule.uuid,
-                                                partial_schedule: {
-                                                    alerts: alerts,
-                                                },
-                                            },
-                                            {
-                                                onSuccess: onClose,
-                                            },
-                                        );
-                                    }}
                                 >
                                     Submit
                                 </Button>

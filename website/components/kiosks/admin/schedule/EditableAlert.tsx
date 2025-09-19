@@ -65,7 +65,7 @@ export default function EditableAlert({
                     onValueChange={wrapEdit("header")}
                     color="secondary"
                     endContent={
-                        <ButtonGroup>
+                        <ButtonGroup className="pl-2">
                             <Tooltip color="danger" content="Delete this alert">
                                 <Button
                                     variant="flat"
