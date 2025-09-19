@@ -67,7 +67,7 @@ export default function UsersTable({
 }) {
     const { data: updatedUsers, isLoading: usersLoading } = useQuery<TUser[]>({
         queryKey: ["user"],
-        refetchOnMount: false,
+        refetchOnMount: true,
     });
     const columns = [...baseColumns, ...extraColumns];
 
