@@ -27,7 +27,7 @@ export default function ActiveAlert() {
                 <Accordion
                     // isCompact
                     className="min-h-full"
-                    selectedKeys={!active_alert.message ? [] : undefined}
+                    selectedKeys={active_alert.hyperlink ? [] : undefined}
                 >
                     <AccordionItem
                         key="alert"
@@ -39,23 +39,21 @@ export default function ActiveAlert() {
                             trigger: "align-middle h-full pr-2",
                         }}
                         indicator={
-                            active_alert.link ? (
+                            active_alert.hyperlink ? (
                                 <LinkIcon className="size-6 text-secondary-400" />
-                            ) : active_alert.message ? (
+                            ) : active_alert.content ? (
                                 <InformationCircleIcon className="size-6 text-secondary-400" />
                             ) : (
                                 <></>
                             )
                         }
                         onPress={() =>
-                            active_alert.link && window.open(active_alert.link)
+                            active_alert.hyperlink &&
+                            window.open(active_alert.content)
                         }
-                        // isDisabled={}
-                        hideIndicator={
-                            !active_alert.message && !active_alert.link
-                        }
+                        hideIndicator={!active_alert.content}
                     >
-                        {active_alert.message}
+                        {active_alert.content}
                     </AccordionItem>
                 </Accordion>
             ) : (

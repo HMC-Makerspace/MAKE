@@ -246,7 +246,7 @@ export async function getActiveAlerts(): Promise<TAlert[] | null> {
     // Return all alerts that are default or are currently active
     return current_schedule.alerts.filter(
         (alert) =>
-            alert.default ||
+            (!alert.timestamp_start && !alert.timestamp_end) ||
             (alert.timestamp_start && // This should always be true when the alert is not default
                 alert.timestamp_end && // This should always be true when the alert is not default
                 alert.timestamp_start <= Date.now() / 1000 &&
@@ -277,7 +277,7 @@ export async function getActiveAlert(): Promise<TAlert | null> {
     }
     // If there are no active time alerts, look for a default alert
     const default_alerts = current_schedule.alerts.filter(
-        (alert) => alert.default,
+        (alert) => !alert.timestamp_start && !alert.timestamp_end,
     );
     if (default_alerts.length > 0) {
         // Return a default alert based on the current hour

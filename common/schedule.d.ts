@@ -6,26 +6,21 @@ export type ScheduleUUID = UUID;
 /**
  * TAlert - Object to store information about an alert about the space
  * @property uuid - the unique identifier for this alert
- * @property default - A flag indicating that this alert is a
- *      default alert. If there is no active alert (no timestamps with an end
- *      time before the current time), a randomly selected alert with the
- *      `default` flag will be shown
  * @property timestamp_start - (optional) A unix timestamp for when this alert
- *     begins. Must be present unless `default` is true
+ *     begins. If not present, assumed to be a default alert.
  * @property timestamp_end - A unix timestamp for when this was alert ends.
- *     Must be present unless `default` is true
+ *     If not present, assumed to be a default alert.
  * @property header - The header (subject) of the alert message
- * @property message - The an optional detailed alert message
- * @property link - An optional link to open when the alert is pressed
+ * @property content - The an optional detailed alert message or link content
+ * @property hyperlink - Whether the content should be treated as a hyperlink
  */
 export type TAlert = {
     uuid: UUID;
-    default: boolean;
     timestamp_start?: UnixTimestamp;
     timestamp_end?: UnixTimestamp;
     header: string;
-    message?: string;
-    link?: string;
+    content?: string;
+    hyperlink?: boolean;
 };
 
 /**
