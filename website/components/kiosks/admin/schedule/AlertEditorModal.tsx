@@ -75,7 +75,7 @@ export default function AlertEditorModal({
         return (val: TAlert[P]) => {
             const i = alerts.findIndex((a) => a.uuid === uuid);
             if (i < 0) {
-                alert("BAD I " + i);
+                onError(`Could not find alert with uuid: ${uuid} (index: ${i})`);
             }
             if (!alerts[i]) {
                 alerts[i] = {
@@ -87,7 +87,6 @@ export default function AlertEditorModal({
             alerts[i][prop] = val;
             setAlerts([...alerts]); // update the instance list
             setHasEdits(true);
-            console.log(alerts[i]);
         };
     }
 
@@ -175,7 +174,6 @@ export default function AlertEditorModal({
                                     isDisabled={!hasEdits}
                                     isLoading={patchMutation.isPending}
                                     onPress={() => {
-                                        console.log(alerts);
                                         patchMutation.mutate(
                                             {
                                                 schedule_uuid: schedule.uuid,

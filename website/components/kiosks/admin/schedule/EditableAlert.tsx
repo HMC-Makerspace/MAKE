@@ -143,7 +143,6 @@ export default function EditableAlert({
                                                     onValueChange={(
                                                         selected,
                                                     ) => {
-                                                        // console.log("Selected", selected)
                                                         if (selected) {
                                                             wrapEdit(
                                                                 "timestamp_start",
@@ -153,13 +152,6 @@ export default function EditableAlert({
                                                             )(undefined);
                                                         }
                                                     }}
-                                                    // startContent={
-                                                    //     isDefault ? (
-                                                    //         <CheckIcon className="size-5 -mr-1" />
-                                                    //     ) : (
-                                                    //         <XMarkIcon className="size-5 -mr-1" />
-                                                    //     )
-                                                    // }
                                                     isDisabled={isDefault}
                                                     color="success"
                                                     className={clsx(
