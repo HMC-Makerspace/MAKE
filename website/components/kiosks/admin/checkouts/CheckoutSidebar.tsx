@@ -127,24 +127,6 @@ export default function CheckoutSidebar({
 
     const [range, setRange] = useState<RangeValue<ZonedDateTime> | null>(null);
 
-    const endTime = timestampToTime(activeSchedule.daily_close_time);
-
-    const currentDate = now(config.schedule.timezone);
-    const endDate = currentDate.set({
-        hour: endTime.hour,
-        minute: endTime.minute,
-        second: endTime.second,
-        millisecond: endTime.millisecond,
-    });
-
-    const defaultRange = {
-        start: currentDate,
-        end:
-            endDate.compare(currentDate) <= 0
-                ? endDate.add({ days: 1 })
-                : endDate,
-    };
-
     const queryClient = useQueryClient();
     const createMutation = useMutation({
         mutationFn: createCheckout,
@@ -194,6 +176,24 @@ export default function CheckoutSidebar({
                         const newID = data.get("college_id") as string;
                         setCollegeID(newID || "");
                         if (newID) {
+                            const endTime = timestampToTime(
+                                activeSchedule.daily_close_time,
+                            );
+                            const currentDate = now(config.schedule.timezone);
+                            const endDate = currentDate.set({
+                                hour: endTime.hour,
+                                minute: endTime.minute,
+                                second: endTime.second,
+                                millisecond: endTime.millisecond,
+                            });
+
+                            const defaultRange = {
+                                start: currentDate,
+                                end:
+                                    endDate.compare(currentDate) <= 0
+                                        ? endDate.add({ days: 1 })
+                                        : endDate,
+                            };
                             setRange(defaultRange);
                         }
                     }}
