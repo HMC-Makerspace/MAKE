@@ -182,7 +182,12 @@ function EditRoleModal({
     } = useDisclosure();
 
     return (
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur">
+        <Modal
+            isOpen={isOpen}
+            onOpenChange={onOpenChange}
+            backdrop="blur"
+            size="2xl"
+        >
             <ModalContent>
                 {(onClose) => (
                     <>

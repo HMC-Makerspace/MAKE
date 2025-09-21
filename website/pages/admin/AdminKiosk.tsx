@@ -17,6 +17,7 @@ import {
     Spinner,
     Tab,
     Tabs,
+    useDisclosure,
 } from "@heroui/react";
 import { TConfig } from "common/config";
 import { TUser, TUserAvailability, UserUUID } from "common/user";
@@ -43,6 +44,7 @@ import {
     ZonedDateTime,
 } from "@internationalized/date";
 import axios from "axios";
+import ShiftHistoryModal from "../../components/kiosks/admin/dashboard/ShiftHistoryModal";
 
 async function createShiftEvent({
     schedule_uuid,
@@ -190,6 +192,16 @@ export default function AdminKiosk() {
         ? verifyScopes(scopes, [API_SCOPE.UPDATE_AVAILABILITY])
         : false;
 
+    const historyVisible = scopes
+        ? verifyScopes(scopes, [API_SCOPE.VIEW_SHIFT_HISTORY])
+        : false;
+
+    const {
+        isOpen: isHistoryOpen,
+        onOpenChange: historyOpenChange,
+        onOpen: openHistory,
+    } = useDisclosure();
+
     return (
         <AdminLayout pageHref={"/admin"} className="px-4 sm:px-12">
             <div className="size-full flex flex-col gap-4 pb-4">
@@ -300,8 +312,17 @@ export default function AdminKiosk() {
                                 />
                             )}
                         </Tabs>
-                        {selectedTab === "worker_availability" && (
+                        {selectedTab === "worker_availability" ? (
                             <div className="hidden lg:block flex-1 ml-auto" />
+                        ) : (selectedTab === "worker_view" && historyVisible) ? (
+                            <Button
+                                onPress={openHistory}
+                                variant="faded"
+                                color="primary">
+                                Open History
+                            </Button>
+                        ) : (
+                            <></>
                         )}
                     </div>
                     {isLoading ? (
@@ -410,275 +431,279 @@ export default function AdminKiosk() {
                         </div>
                     )}
                 </div>
-                {config && users && schedule && (
-                    <Modal
-                        isOpen={popupShifts.length > 0}
-                        onOpenChange={() => setPopupShifts([])}
-                        backdrop="transparent"
-                        size="xl"
-                        className="justify-self-center"
-                    >
-                        <ModalContent className="pb-2">
-                            <ModalHeader className="pb-0">
-                                Shift History
-                            </ModalHeader>
-                            <ModalBody className="gap-5 grid grid-cols-8">
-                                {userShift && (
-                                    <Form
-                                        onSubmit={(e) => {
-                                            if (!user_uuid) {
-                                                return;
-                                            }
-                                            e.preventDefault();
-                                            const formData = new FormData(
-                                                e.currentTarget,
-                                            );
-                                            const shift_date =
-                                                parseDate(
-                                                    formData.get(
-                                                        "shift_date",
-                                                    ) as string,
-                                                )
-                                                    .toDate(
-                                                        config.schedule
-                                                            .timezone,
-                                                    )
-                                                    .getTime() / 1000;
-                                            shiftEventMutation.mutate({
-                                                schedule_uuid: schedule.uuid,
-                                                shift_uuid: userShift.uuid,
-                                                event: {
-                                                    timestamp:
-                                                        Date.now() / 1000,
-                                                    initiator: user_uuid,
-                                                    shift_date: shift_date,
-                                                    type: SHIFT_EVENT_TYPE.DROP,
-                                                },
-                                            });
-                                        }}
-                                        validationBehavior="native"
-                                        className="grid grid-cols-subgrid col-span-8"
-                                    >
-                                        <div
-                                            className={clsx(
-                                                "grid grid-cols-subgrid col-span-8",
-                                                "items-center p-2 pl-4 gap-2",
-                                                "bg-default-300 rounded-lg",
-                                                "text-default-700",
-                                            )}
-                                        >
-                                            <div className="whitespace-nowrap pr-2 col-span-3">
-                                                Drop this shift:
-                                            </div>
-                                            <DatePicker<ZonedDateTime>
-                                                color="primary"
-                                                name="shift_date"
-                                                isRequired
-                                                aria-label="Drop date"
-                                                className="col-span-3"
-                                                minValue={today(
+            </div>
+            {config && users && schedule && (
+                <Modal
+                    isOpen={popupShifts.length > 0}
+                    onOpenChange={() => setPopupShifts([])}
+                    backdrop="transparent"
+                    size="xl"
+                    className="justify-self-center"
+                >
+                    <ModalContent className="pb-2">
+                        <ModalHeader className="pb-0">
+                            Shift History
+                        </ModalHeader>
+                        <ModalBody className="gap-5 grid grid-cols-8">
+                            {userShift && (
+                                <Form
+                                    onSubmit={(e) => {
+                                        if (!user_uuid) {
+                                            return;
+                                        }
+                                        e.preventDefault();
+                                        const formData = new FormData(
+                                            e.currentTarget,
+                                        );
+                                        const shift_date =
+                                            parseDate(
+                                                formData.get(
+                                                    "shift_date",
+                                                ) as string,
+                                            )
+                                                .toDate(
                                                     config.schedule.timezone,
-                                                )}
-                                                errorMessage={(v) => {
-                                                    if (!v.isInvalid) {
-                                                        return "";
-                                                    } else if (
-                                                        v.validationDetails
-                                                            .rangeUnderflow
-                                                    ) {
-                                                        return "Cannot drop past shifts";
-                                                    } else if (
-                                                        v.validationDetails
-                                                            .badInput
-                                                    ) {
-                                                        return "Wrong day / Already dropped";
-                                                    }
-                                                    return v.validationErrors;
-                                                }}
-                                                isDateUnavailable={(date) => {
-                                                    // Only dates on this day of the week
-                                                    if (
-                                                        date
-                                                            .toDate(
-                                                                config.schedule
-                                                                    .timezone,
-                                                            )
-                                                            .getDay() !=
-                                                        userShift.day
-                                                    ) {
-                                                        return true;
-                                                    }
-                                                    if (
-                                                        userShift.history.some(
-                                                            (event) =>
-                                                                event.type ===
-                                                                    SHIFT_EVENT_TYPE.DROP &&
-                                                                date
-                                                                    .toDate(
-                                                                        config
-                                                                            .schedule
-                                                                            .timezone,
-                                                                    )
-                                                                    .getTime() /
-                                                                    1000 ===
-                                                                    event.shift_date,
-                                                        )
-                                                    ) {
-                                                        return true;
-                                                    }
-                                                    return false;
-                                                }}
-                                            />
-                                            <Button
-                                                name="submit"
-                                                type="submit"
-                                                endContent={
-                                                    <UserMinusIcon className="min-w-5 size-5" />
-                                                }
-                                                color="primary"
-                                                variant="bordered"
-                                                className="col-span-2"
-                                            >
-                                                Drop
-                                            </Button>
-                                        </div>
-                                    </Form>
-                                )}
-                                {
+                                                )
+                                                .getTime() / 1000;
+                                        shiftEventMutation.mutate({
+                                            schedule_uuid: schedule.uuid,
+                                            shift_uuid: userShift.uuid,
+                                            event: {
+                                                timestamp: Date.now() / 1000,
+                                                initiator: user_uuid,
+                                                shift_date: shift_date,
+                                                type: SHIFT_EVENT_TYPE.DROP,
+                                            },
+                                        });
+                                    }}
+                                    validationBehavior="native"
+                                    className="grid grid-cols-subgrid col-span-8"
+                                >
                                     <div
                                         className={clsx(
                                             "grid grid-cols-subgrid col-span-8",
-                                            "empty:hidden",
-                                            "rounded-lg bg-default-200 p-2 gap-2",
+                                            "items-center p-2 pl-4 gap-2",
+                                            "bg-default-300 rounded-lg",
+                                            "text-default-700",
                                         )}
                                     >
-                                        {popupShifts.map((shift, i) => {
-                                            const activeEvents =
-                                                getActiveEvents(shift, config);
-                                            // Filter out other user's pickups
-                                            const relevantEvents =
-                                                activeEvents.filter(
-                                                    (e) =>
-                                                        !(
-                                                            e.initiator !==
-                                                                user_uuid &&
-                                                            e.type ===
-                                                                SHIFT_EVENT_TYPE.PICKUP
-                                                        ),
-                                                );
-                                            if (relevantEvents.length > 0) {
-                                                return relevantEvents.map(
-                                                    (event, i) => (
-                                                        <div
-                                                            key={`${shift.uuid}-event-${i}`}
-                                                            className={clsx(
-                                                                "grid col-span-8 gap-2",
-                                                                "grid-cols-subgrid",
-                                                            )}
-                                                        >
-                                                            <div className="col-span-4 flex flex-row gap-2 items-center">
-                                                                <div className="text-md px-2">
-                                                                    {event.type ===
-                                                                    SHIFT_EVENT_TYPE.DROP
-                                                                        ? "Drop:"
-                                                                        : "Your Pickup:"}
-                                                                </div>
-                                                                {event.type ===
-                                                                    SHIFT_EVENT_TYPE.DROP && (
-                                                                    <Input
-                                                                        aria-label="Name"
-                                                                        value={
-                                                                            users.find(
-                                                                                (
-                                                                                    u,
-                                                                                ) =>
-                                                                                    u.uuid ===
-                                                                                    shift.assignee,
-                                                                            )
-                                                                                ?.name ||
-                                                                            "Unknown User"
-                                                                        }
-                                                                        isDisabled
-                                                                        className="opacity-100 col-span-3"
-                                                                    />
-                                                                )}
-                                                            </div>
-                                                            <DateInput
-                                                                key={`date-${i}`}
-                                                                aria-label="Date"
-                                                                value={timestampToZonedDateTime(
-                                                                    event.shift_date,
+                                        <div className="whitespace-nowrap pr-2 col-span-3">
+                                            Drop this shift:
+                                        </div>
+                                        <DatePicker<ZonedDateTime>
+                                            color="primary"
+                                            name="shift_date"
+                                            isRequired
+                                            aria-label="Drop date"
+                                            className="col-span-3"
+                                            minValue={today(
+                                                config.schedule.timezone,
+                                            )}
+                                            errorMessage={(v) => {
+                                                if (!v.isInvalid) {
+                                                    return "";
+                                                } else if (
+                                                    v.validationDetails
+                                                        .rangeUnderflow
+                                                ) {
+                                                    return "Cannot drop past shifts";
+                                                } else if (
+                                                    v.validationDetails.badInput
+                                                ) {
+                                                    return "Wrong day / Already dropped";
+                                                }
+                                                return v.validationErrors;
+                                            }}
+                                            isDateUnavailable={(date) => {
+                                                // Only dates on this day of the week
+                                                if (
+                                                    date
+                                                        .toDate(
+                                                            config.schedule
+                                                                .timezone,
+                                                        )
+                                                        .getDay() !=
+                                                    userShift.day
+                                                ) {
+                                                    return true;
+                                                }
+                                                if (
+                                                    userShift.history.some(
+                                                        (event) =>
+                                                            event.type ===
+                                                                SHIFT_EVENT_TYPE.DROP &&
+                                                            date
+                                                                .toDate(
                                                                     config
                                                                         .schedule
                                                                         .timezone,
-                                                                )}
-                                                                isDisabled
-                                                                className="opacity-100 col-span-2"
-                                                                granularity="day"
-                                                            />
-                                                            <Button
-                                                                endContent={
-                                                                    event.type ===
-                                                                    SHIFT_EVENT_TYPE.DROP ? (
-                                                                        <UserPlusIcon className="min-w-5 size-5" />
-                                                                    ) : (
-                                                                        <UserMinusIcon className="min-w-5 size-5" />
-                                                                    )
-                                                                }
-                                                                color="primary"
-                                                                variant="bordered"
-                                                                className="col-span-2"
-                                                                onPress={() => {
-                                                                    if (
-                                                                        !user_uuid
-                                                                    ) {
-                                                                        return;
-                                                                    }
-                                                                    const type =
-                                                                        event.type ===
-                                                                        SHIFT_EVENT_TYPE.DROP
-                                                                            ? SHIFT_EVENT_TYPE.PICKUP
-                                                                            : SHIFT_EVENT_TYPE.DROP;
-                                                                    shiftEventMutation.mutate(
-                                                                        {
-                                                                            schedule_uuid:
-                                                                                schedule.uuid,
-                                                                            shift_uuid:
-                                                                                shift.uuid,
-                                                                            event: {
-                                                                                timestamp:
-                                                                                    Date.now() /
-                                                                                    1000,
-                                                                                initiator:
-                                                                                    user_uuid,
-                                                                                shift_date:
-                                                                                    event.shift_date,
-                                                                                type: type,
-                                                                            },
-                                                                        },
-                                                                    );
-                                                                }}
-                                                                isLoading={
-                                                                    shiftEventMutation.isPending
-                                                                }
-                                                            >
+                                                                )
+                                                                .getTime() /
+                                                                1000 ===
+                                                                event.shift_date,
+                                                    )
+                                                ) {
+                                                    return true;
+                                                }
+                                                return false;
+                                            }}
+                                        />
+                                        <Button
+                                            name="submit"
+                                            type="submit"
+                                            endContent={
+                                                <UserMinusIcon className="min-w-5 size-5" />
+                                            }
+                                            color="primary"
+                                            variant="bordered"
+                                            className="col-span-2"
+                                        >
+                                            Drop
+                                        </Button>
+                                    </div>
+                                </Form>
+                            )}
+                            {
+                                <div
+                                    className={clsx(
+                                        "grid grid-cols-subgrid col-span-8",
+                                        "empty:hidden",
+                                        "rounded-lg bg-default-200 p-2 gap-2",
+                                    )}
+                                >
+                                    {popupShifts.map((shift, i) => {
+                                        const activeEvents = getActiveEvents(
+                                            shift,
+                                            config,
+                                        );
+                                        // Filter out other user's pickups
+                                        const relevantEvents =
+                                            activeEvents.filter(
+                                                (e) =>
+                                                    !(
+                                                        e.initiator !==
+                                                            user_uuid &&
+                                                        e.type ===
+                                                            SHIFT_EVENT_TYPE.PICKUP
+                                                    ),
+                                            );
+                                        if (relevantEvents.length > 0) {
+                                            return relevantEvents.map(
+                                                (event, i) => (
+                                                    <div
+                                                        key={`${shift.uuid}-event-${i}`}
+                                                        className={clsx(
+                                                            "grid col-span-8 gap-2",
+                                                            "grid-cols-subgrid",
+                                                        )}
+                                                    >
+                                                        <div className="col-span-4 flex flex-row gap-2 items-center">
+                                                            <div className="text-md px-2">
                                                                 {event.type ===
                                                                 SHIFT_EVENT_TYPE.DROP
-                                                                    ? "Pickup"
-                                                                    : "Re-Drop"}
-                                                            </Button>
+                                                                    ? "Drop:"
+                                                                    : "Your Pickup:"}
+                                                            </div>
+                                                            {event.type ===
+                                                                SHIFT_EVENT_TYPE.DROP && (
+                                                                <Input
+                                                                    aria-label="Name"
+                                                                    value={
+                                                                        users.find(
+                                                                            (
+                                                                                u,
+                                                                            ) =>
+                                                                                u.uuid ===
+                                                                                shift.assignee,
+                                                                        )
+                                                                            ?.name ||
+                                                                        "Unknown User"
+                                                                    }
+                                                                    isDisabled
+                                                                    className="opacity-100 col-span-3"
+                                                                />
+                                                            )}
                                                         </div>
-                                                    ),
-                                                );
-                                            }
-                                        })}
-                                    </div>
-                                }
-                            </ModalBody>
-                        </ModalContent>
-                    </Modal>
-                )}
-            </div>
+                                                        <DateInput
+                                                            key={`date-${i}`}
+                                                            aria-label="Date"
+                                                            value={timestampToZonedDateTime(
+                                                                event.shift_date,
+                                                                config.schedule
+                                                                    .timezone,
+                                                            )}
+                                                            isDisabled
+                                                            className="opacity-100 col-span-2"
+                                                            granularity="day"
+                                                        />
+                                                        <Button
+                                                            endContent={
+                                                                event.type ===
+                                                                SHIFT_EVENT_TYPE.DROP ? (
+                                                                    <UserPlusIcon className="min-w-5 size-5" />
+                                                                ) : (
+                                                                    <UserMinusIcon className="min-w-5 size-5" />
+                                                                )
+                                                            }
+                                                            color="primary"
+                                                            variant="bordered"
+                                                            className="col-span-2"
+                                                            onPress={() => {
+                                                                if (
+                                                                    !user_uuid
+                                                                ) {
+                                                                    return;
+                                                                }
+                                                                const type =
+                                                                    event.type ===
+                                                                    SHIFT_EVENT_TYPE.DROP
+                                                                        ? SHIFT_EVENT_TYPE.PICKUP
+                                                                        : SHIFT_EVENT_TYPE.DROP;
+                                                                shiftEventMutation.mutate(
+                                                                    {
+                                                                        schedule_uuid:
+                                                                            schedule.uuid,
+                                                                        shift_uuid:
+                                                                            shift.uuid,
+                                                                        event: {
+                                                                            timestamp:
+                                                                                Date.now() /
+                                                                                1000,
+                                                                            initiator:
+                                                                                user_uuid,
+                                                                            shift_date:
+                                                                                event.shift_date,
+                                                                            type: type,
+                                                                        },
+                                                                    },
+                                                                );
+                                                            }}
+                                                            isLoading={
+                                                                shiftEventMutation.isPending
+                                                            }
+                                                        >
+                                                            {event.type ===
+                                                            SHIFT_EVENT_TYPE.DROP
+                                                                ? "Pickup"
+                                                                : "Re-Drop"}
+                                                        </Button>
+                                                    </div>
+                                                ),
+                                            );
+                                        }
+                                    })}
+                                </div>
+                            }
+                        </ModalBody>
+                    </ModalContent>
+                </Modal>
+            )}
+            {historyVisible && (
+                <ShiftHistoryModal
+                    isOpen={isHistoryOpen}
+                    onOpenChange={historyOpenChange}
+                />
+            )}
         </AdminLayout>
     );
 }
