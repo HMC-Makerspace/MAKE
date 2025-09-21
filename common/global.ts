@@ -114,6 +114,7 @@ export enum API_SCOPE {
     UPDATE_SHIFT = "update_shift",
     POST_SHIFT_EVENT = "post_shift_event",
     DELETE_SHIFT = "delete_shift",
+    VIEW_SHIFT_HISTORY = "view_shift_history",
     // User scopes
     GET_ALL_USERS = "get_users",
     UPDATE_USER = "update_user",
@@ -643,6 +644,11 @@ export const API_SCOPE_SECTIONS: {
                 scope: API_SCOPE.DELETE_SHIFT,
                 label: "Delete Shift",
                 description: "Able to delete shifts",
+            },
+            {
+                scope: API_SCOPE.VIEW_SHIFT_HISTORY,
+                label: "View Shift History",
+                description: "Able to see global shift history",
             },
         ],
     },
