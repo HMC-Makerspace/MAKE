@@ -356,9 +356,11 @@ export default function CheckoutsKiosk() {
                         </Tab>
                         <Tab key={"checkouts"} title={"Checkouts"}>
                             <CheckoutTable
+                                key={user?.uuid}
                                 checkouts={checkouts}
                                 inventory={inventory ?? []}
                                 users={users}
+                                selectedUser={user}
                                 config={config}
                                 selectedKeys={new Set()}
                                 isLoading={inventoryLoading}

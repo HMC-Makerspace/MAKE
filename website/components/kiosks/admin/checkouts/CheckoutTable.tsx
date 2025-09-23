@@ -8,14 +8,16 @@ import {
     DropdownItem,
     Spinner,
     Tooltip,
+    addToast,
 } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
     ChevronDownIcon,
-    PlusIcon,
     EnvelopeIcon,
     ArrowTurnDownLeftIcon,
     ArrowUturnRightIcon,
+    ClockIcon,
+    PlusIcon,
 } from "@heroicons/react/24/outline";
 import {
     ITEM_ACCESS_DESCRIPTORS,
@@ -46,7 +48,7 @@ const baseColumns = [
     { name: "User", id: "checked_out_by" },
     { name: "Items", id: "items" },
     { name: "Reminders Sent", id: "notifications_sent" },
-    // { name: "Extend", id: "extend"}, // TODO: consider extensions
+    { name: "Extend", id: "extend_checkout" },
     { name: "Return", id: "return" },
 ];
 
@@ -59,6 +61,23 @@ async function returnCheckout({ checkout_uuid }: { checkout_uuid: UUID }) {
 async function undoReturnCheckout({ checkout_uuid }: { checkout_uuid: UUID }) {
     return (
         await axios.patch<TCheckout>(`/api/v3/checkout/${checkout_uuid}/turn`)
+    ).data;
+}
+
+async function extendCheckout({
+    checkout_uuid,
+    new_timestamp_due,
+}: {
+    checkout_uuid: UUID;
+    new_timestamp_due: number;
+}) {
+    return (
+        await axios.patch<TCheckout>(
+            `/api/v3/checkout/${checkout_uuid}/extend`,
+            {
+                new_timestamp_due: new_timestamp_due,
+            },
+        )
     ).data;
 }
 
@@ -78,6 +97,7 @@ export default function CheckoutTable({
         "checked_out_by",
         "items",
         "notifications_sent",
+        "extend_checkout",
         "return",
     ],
     customColumnComponents,
@@ -123,6 +143,25 @@ export default function CheckoutTable({
             queryClient.refetchQueries({ queryKey: ["inventory"] });
         },
     });
+    const editMutation = useMutation({
+        mutationFn: extendCheckout,
+        onSuccess: (data) => {
+            const hasExtended = true;
+            queryClient.setQueryData(["checkout", data.uuid], data);
+            queryClient.setQueryData(["checkout"], (old: TCheckout[]) =>
+                old.map((c) => (c.uuid === data.uuid ? data : c)),
+            );
+            addToast({
+                title: hasExtended
+                    ? `Checkout Extended for a day`
+                    : "Failed to extend",
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
+        },
+    });
+
     // The set of columns that are visible
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
         new Set(defaultColumns),
@@ -211,18 +250,17 @@ export default function CheckoutTable({
         timestamp: "timestamp_out" | "timestamp_due" | "timestamp_in",
     ) => {
         return (checkout: TCheckout) => (
-            <h2 className="text-center whitespace-break-spaces">
+            <h2 className="text-center whitespace-pre-line">
                 {checkout[timestamp]
-                    ? new Date(checkout[timestamp] * 1000).toLocaleString(
-                          undefined,
-                          {
+                    ? new Date(checkout[timestamp] * 1000)
+                          .toLocaleString(undefined, {
                               year: "numeric",
                               month: "numeric",
                               day: "numeric",
                               hour: "numeric",
                               minute: "numeric",
-                          },
-                      )
+                          })
+                          .replace(" ", "\n")
                     : ""}
             </h2>
         );
@@ -341,6 +379,44 @@ export default function CheckoutTable({
                             {c.notifications_sent}
                         </div>
                     ),
+                    extend_checkout: (c) => {
+                        if (!c.timestamp_in) {
+                            return (
+                                <Tooltip
+                                    content={"Extends checkout by 1 Day."}
+                                    className="max-w-56 justify-center"
+                                >
+                                    <Button
+                                        isIconOnly
+                                        startContent={
+                                            <div className="relative flex items-center">
+                                                <ClockIcon className="size-5" />
+                                                <PlusIcon
+                                                    className="absolute -top-0.5 -right-0.5 size-2"
+                                                    strokeWidth={3.5}
+                                                />
+                                            </div>
+                                        }
+                                        color="warning"
+                                        variant="ghost"
+                                        isDisabled={
+                                            /*!selectedUser ||
+                                            (selectedUser &&
+                                                selectedUser.uuid !==
+                                                    c.checked_out_by)*/ false
+                                        }
+                                        onPress={() => {
+                                            editMutation.mutate({
+                                                checkout_uuid: c.uuid,
+                                                new_timestamp_due:
+                                                    c.timestamp_due + 86400,
+                                            });
+                                        }}
+                                    />
+                                </Tooltip>
+                            );
+                        }
+                    },
                     return: (c) => {
                         if (c.timestamp_in) {
                             // Undos are enabled for 2 minutes
@@ -391,6 +467,12 @@ export default function CheckoutTable({
                                     }
                                     color="secondary"
                                     variant="shadow"
+                                    isDisabled={
+                                        /*!selectedUser ||
+                                            (selectedUser &&
+                                                selectedUser.uuid !==
+                                                    c.checked_out_by)*/ false
+                                    }
                                     onPress={() =>
                                         returnMutation.mutate({
                                             checkout_uuid: c.uuid,
