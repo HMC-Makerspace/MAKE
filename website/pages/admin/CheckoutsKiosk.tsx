@@ -362,7 +362,6 @@ export default function CheckoutsKiosk() {
                                 checkouts={checkouts}
                                 inventory={inventory ?? []}
                                 users={users}
-                                selectedUser={user}
                                 config={config}
                                 selectedKeys={new Set()}
                                 isLoading={inventoryLoading}
