@@ -179,7 +179,6 @@ export default function RestockTable({
     certs: TCertification[];
     isLoading: boolean;
 }) {
-    console.log("restock table", inventory, areas, certs,)
 
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
         new Set(defaultColumns),
@@ -339,7 +338,6 @@ export default function RestockTable({
                     requesting_user: (restock) => (
                         <div className='flex flex-row gap-2 items-center justify-between items-fit min-w-[10vw]'>
                             <Accordion className='py-0' itemClasses={{ trigger: 'py-0', indicator: 'size-6' }}>
-
                                 <AccordionItem
                                     startContent={
                                         <MAKEUser
@@ -349,6 +347,7 @@ export default function RestockTable({
                                         />
                                     }
                                     isCompact
+                                    textValue="restock mailing list"
                                 >
                                     {restock.mailing_list.map((uuid, index) => {
                                         return (

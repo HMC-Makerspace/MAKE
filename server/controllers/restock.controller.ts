@@ -1,5 +1,5 @@
-import { TRestockRequest, TRestockRequestLog } from "common/restock";
-import { UserUUID } from "common/user";
+import { TRestockRequest, TRestockRequestLog, RESTOCK_REQUEST_STATUS } from "common/restock";
+import { TUser, UserUUID } from "common/user";
 import { RestockRequest } from "models/restock.model";
 import mongoose from "mongoose";
 import { Logger } from "pino";
@@ -57,6 +57,28 @@ export async function createRestockRequest(request_obj: any) {
     return newRequest.save();
 }
 
+
+/**
+ * Create a new restock request
+ * @param request_obj The complete restock request information
+ * @returns true if this is a valid new restock or false if it already exissts
+ */
+export async function validNewRestockRequest(request_obj: any) {
+    const RestockRequests = mongoose.model("RestockRequest", RestockRequest);
+    // Check if there are requests for this item already
+    const existingRequests = await RestockRequests.find({ item_uuid: request_obj.item_uuid });
+
+        // If any existing request's current_status is NOT restocked or denied, return false, restock already exists
+        const activeRestock = existingRequests.some(
+            (req) =>
+                req.current_status !== RESTOCK_REQUEST_STATUS.RESTOCKED &&
+                req.current_status !== RESTOCK_REQUEST_STATUS.DENIED
+        );
+
+        return !activeRestock;
+}
+
+
 /**
  * Delete a restock request by UUID
  * @param request_uuid The UUID of the request to delete
@@ -107,6 +129,28 @@ export async function updateRestockRequestStatus(
     return request.save();
 }
 
+/**
+ * Update the status of a restock request
+ * @param request_uuid The UUID of the request to update
+ * @param new_person: The new person to add to the mailing list
+ * @returns The updated restock request object, or null if the request doesn't exist
+ */
+export async function updateMailingList(
+    request_uuid: string,
+    new_list: [UserUUID],
+) {
+    // Find the request by UUID
+    const request = await getRestockRequest(request_uuid);
+    // If the request doesn't exist, return null
+    if (!request) {
+        return null;
+    }
+    // Update the request's mailing list
+    request.mailing_list = new_list;
+    console.log(request);
+    return request.save();
+}
+
 export async function sendRestockUpdateEmail(
     restock: TRestockRequest,
     logger: Logger,
@@ -135,5 +179,6 @@ export async function sendRestockUpdateEmail(
         `Updated Restock Request (${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()})`,
         RestockRequestTemplate(restock, user, item),
         logger,
+        restock.mailing_list
     );
 }

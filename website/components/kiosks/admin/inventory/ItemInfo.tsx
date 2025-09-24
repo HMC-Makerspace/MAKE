@@ -37,8 +37,6 @@ export default function ItemInfo({
         setItemData(inventory.find((item) => item.uuid === item_uuid));
     }, [item_uuid, inventory])
     
-    console.log("iteminfo", inventory, item_uuid, areas, certs, item_data)
-
     return (
         
         <div>
