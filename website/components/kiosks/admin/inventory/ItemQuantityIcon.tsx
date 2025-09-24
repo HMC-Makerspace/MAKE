@@ -9,10 +9,12 @@ export default function ItemQuantityIcon({
     qtype,
     color = "",
     className = "",
+    isDisabled = false,
 }: {
     qtype: boolean; // true: numerical, false: categorical
     color?: string;
     className?: string;
+    isDisabled?: boolean;
 }) {
     return (
         <Tooltip
@@ -20,6 +22,7 @@ export default function ItemQuantityIcon({
             className="w-fit p-2"
             delay={500}
             closeDelay={150}
+            isDisabled={isDisabled}
         >
             {getIcon(qtype, color, className)}
         </Tooltip>

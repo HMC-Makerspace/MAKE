@@ -423,19 +423,21 @@ export default function ItemEditorForm({
                             
                             <motion.div className="content-center"
                                 initial={{
-                                    color: "hsl(var(--heroui-default-500))",
+                                    color: isDisabled ? "hsl(var(--heroui-default-300))" : "hsl(var(--heroui-default-500))",
                                 }}
                                 whileHover={{
-                                    color: "hsl(var(--heroui-primary-600))",
+                                    color: isDisabled ? "hsl(var(--heroui-default-300))" : "hsl(var(--heroui-primary-600))",
                                 }}
                                 onClick={() => {
+                                    if (isDisabled) return;
                                     setQtype(!qtype);
                                     defaultEdit();
                                 }}
                             >
                                 <ItemQuantityIcon
                                     qtype={qtype}
-                                    className="size-7 cursor-pointer"
+                                    className={`size-7 ${!isDisabled && "cursor-pointer"}`} // we don't care about the class "false" right.
+                                    isDisabled={isDisabled}
                                 />
                             </motion.div>
                         </div>
