@@ -87,7 +87,6 @@ export default function RestockEditor({
             // Reset the mutation (clears any previous errors)
             mutation.reset();
             // Run the mutation
-            console.log(restock.uuid, new_status);
             mutation.mutate({ data: new_status, restock_uuid: restock.uuid });
             onClose();
         },

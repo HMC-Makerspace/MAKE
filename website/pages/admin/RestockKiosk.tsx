@@ -9,7 +9,11 @@ import { Spinner } from "@heroui/react";
 
 export default function RestockKiosk() {
     // getting restock data
-    const { data: restocks, isLoading: restocksLoading, isError } = useQuery<TRestockRequest[]>({
+    const {
+        data: restocks,
+        isLoading: restocksLoading,
+        isError,
+    } = useQuery<TRestockRequest[]>({
         queryKey: ["restock"],
         refetchOnWindowFocus: false,
     });
@@ -56,7 +60,13 @@ export default function RestockKiosk() {
                     Error loading restock data
                 </div>
             ) : (
-                <RestockTable restocks={restocks ?? []} inventory={inventory ?? []} areas={areas ?? []} certs={certs ?? []} isLoading={restocksLoading} />
+                <RestockTable
+                    restocks={restocks ?? []}
+                    inventory={inventory ?? []}
+                    areas={areas ?? []}
+                    certs={certs ?? []}
+                    isLoading={restocksLoading}
+                />
             )}
         </AdminLayout>
     );

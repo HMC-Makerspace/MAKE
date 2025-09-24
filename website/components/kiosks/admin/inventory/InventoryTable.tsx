@@ -67,7 +67,7 @@ const baseColumns = [
 
 export default function InventoryTable({
     requestingUser,
-    scopes,
+    scopes = [],
     inventory,
     roles,
     certifications,
@@ -93,8 +93,8 @@ export default function InventoryTable({
     emptyContent,
     onCreate = undefined,
 }: {
-    requestingUser: TUser;
-    scopes: API_SCOPE[];
+    requestingUser?: TUser;
+    scopes?: API_SCOPE[];
     inventory: TInventoryItem[];
     roles: TUserRole[];
     certifications: TCertification[];
@@ -170,10 +170,12 @@ export default function InventoryTable({
         access_type: ITEM_ACCESS_TYPE.USE_IN_SPACE,
         locations: [],
     };
- 
-    const selectedItem = selectedKeys == "all"
-        ? DEFAULT_ITEM
-        : (inventory.filter((item) => selectedKeys.has(item.uuid))[0] ?? DEFAULT_ITEM);
+
+    const selectedItem =
+        selectedKeys == "all"
+            ? DEFAULT_ITEM
+            : (inventory.filter((item) => selectedKeys.has(item.uuid))[0] ??
+              DEFAULT_ITEM);
 
     // Modal state for restock request form
     const {
@@ -182,7 +184,10 @@ export default function InventoryTable({
         onOpenChange: restockOnOpenChange,
     } = useDisclosure();
 
-    const restockButtonAccess = scopes && scopes.length !== 0 && verifyScopes(scopes, [API_SCOPE.CREATE_RESTOCK]);
+    const restockButtonAccess =
+        scopes &&
+        scopes.length !== 0 &&
+        verifyScopes(scopes, [API_SCOPE.CREATE_RESTOCK]);
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -238,7 +243,7 @@ export default function InventoryTable({
                             </Dropdown>
                         </div>
 
-                        {restockButtonAccess &&
+                        {restockButtonAccess && (
                             <Button
                                 startContent={<PlusIcon className="size-6" />}
                                 isDisabled={selectedItem.name === ""}
@@ -248,9 +253,9 @@ export default function InventoryTable({
                             >
                                 Restock
                             </Button>
-                        }
+                        )}
 
-                        {editable &&
+                        {editable && (
                             <Button
                                 color="primary"
                                 isDisabled={isLoading}
@@ -259,7 +264,7 @@ export default function InventoryTable({
                             >
                                 Create
                             </Button>
-                        }
+                        )}
                     </div>
                 </div>
                 <div className="flex justify-between items-center pb-2">

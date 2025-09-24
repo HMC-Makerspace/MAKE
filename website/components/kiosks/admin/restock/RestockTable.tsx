@@ -42,7 +42,7 @@ const columns = [
     { name: "Requested Time", id: "time_requested" },
     { name: "Requesting User", id: "requesting_user" },
     { name: "Item", id: "item_uuid" },
-    { name: "Req Quantity", id: "quantity_requested" },
+    { name: "Requested #", id: "quantity_requested" },
     { name: "Reason for Request", id: "reason" },
     { name: "Current Status", id: "current_status" },
     { name: "Updated Time", id: "time_updated" },
@@ -179,7 +179,6 @@ export default function RestockTable({
     certs: TCertification[];
     isLoading: boolean;
 }) {
-
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
         new Set(defaultColumns),
     );
@@ -269,20 +268,20 @@ export default function RestockTable({
                                 <div className="flex flex-row gap-1 m-2">
                                     {statusFilter === "all"
                                         ? statusOptions.map((status) => (
-                                            <RestockType
-                                                request_status={status.value}
-                                                size="sm"
-                                            />
-                                        ))
+                                              <RestockType
+                                                  request_status={status.value}
+                                                  size="sm"
+                                              />
+                                          ))
                                         : Array.from(statusFilter)
-                                            .map(Number)
-                                            .sort((a, b) => a - b)
-                                            .map((status) => (
-                                                <RestockType
-                                                    request_status={status}
-                                                    size="sm"
-                                                />
-                                            ))}
+                                              .map(Number)
+                                              .sort((a, b) => a - b)
+                                              .map((status) => (
+                                                  <RestockType
+                                                      request_status={status}
+                                                      size="sm"
+                                                  />
+                                              ))}
                                 </div>
                             </Button>
                         </DropdownTrigger>
@@ -336,14 +335,20 @@ export default function RestockTable({
                         </span>
                     ),
                     requesting_user: (restock) => (
-                        <div className='flex flex-row gap-2 items-center justify-between items-fit min-w-[10vw]'>
-                            <Accordion className='py-0' itemClasses={{ trigger: 'py-0', indicator: 'size-6' }}>
+                        <div className="flex flex-row gap-2 items-center justify-between items-fit min-w-[10vw]">
+                            <Accordion
+                                className="py-0"
+                                itemClasses={{
+                                    trigger: "py-0",
+                                    indicator: "size-6",
+                                }}
+                            >
                                 <AccordionItem
                                     startContent={
                                         <MAKEUser
                                             user_uuid={restock.requesting_user}
                                             popoverPlacement="bottom"
-                                            className='w-full justify-start'
+                                            className="w-full justify-start"
                                         />
                                     }
                                     isCompact
@@ -351,27 +356,26 @@ export default function RestockTable({
                                 >
                                     {restock.mailing_list.map((uuid, index) => {
                                         return (
-                                            <div className='pb-1'>
+                                            <div className="pb-1">
                                                 <MAKEUser
                                                     user_uuid={uuid}
                                                     popoverPlacement="bottom"
-                                                    className='justify-start'
+                                                    className="justify-start"
                                                 />
                                             </div>
-                                        )
+                                        );
                                     })}
                                 </AccordionItem>
                             </Accordion>
-
-
                         </div>
                     ),
                     item_uuid: (restock) => (
                         <div>
                             <ItemInfo
-                                key={restock.item_uuid + '-' + inventory.length}
-                                item_uuid={restock.item_uuid}
-                                inventory={inventory}
+                                key={restock.item_uuid + "-" + inventory.length}
+                                item_data={inventory.find(
+                                    (item) => item.uuid === restock.item_uuid,
+                                )}
                                 areas={areas}
                                 certs={certs}
                             />
