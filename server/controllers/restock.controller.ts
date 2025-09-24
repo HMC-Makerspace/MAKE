@@ -138,7 +138,7 @@ export async function updateRestockRequestStatus(
  */
 export async function updateMailingList(
     request_uuid: string,
-    new_list: [UserUUID],
+    new_list: UserUUID[],
 ) {
     // Find the request by UUID
     const request = await getRestockRequest(request_uuid);
