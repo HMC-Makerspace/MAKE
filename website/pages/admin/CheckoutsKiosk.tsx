@@ -84,6 +84,7 @@ export default function CheckoutsKiosk() {
         {
             queryKey: ["certification"],
             refetchOnWindowFocus: false,
+            staleTime: 30 * 60 * 1000, // 30 minutes in milliseconds
         },
     );
     const { data: areas, isLoading: areasLoading } = useQuery<TArea[]>({
