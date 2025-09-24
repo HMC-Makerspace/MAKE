@@ -150,15 +150,7 @@ export default function QuickTransferPage() {
     const uploadMutation = useMutation({
         mutationFn: uploadFiles,
         onSettled: (data) => {
-            console.log("Settled", data);
-            if (
-                !collegeID ||
-                !data ||
-                !data.files ||
-                !data.upload_errors ||
-                data.files.length === 0 ||
-                data.upload_errors.length === 0
-            ) {
+            if (!data || !data.files || !data.upload_errors) {
                 return;
             }
             // Add successfully uploaded files to user's file list
@@ -323,6 +315,11 @@ export default function QuickTransferPage() {
                                 input: "text-large sm:text-base",
                                 label: "pb-1.5 sm:pb-0.5",
                             }}
+                            onBlur={(blurEvent) => {
+                                // Get input value
+                                const value = blurEvent.target.value;
+                                setCollegeID(value || "");
+                            }}
                         />
                     </Form>
                     <div
@@ -382,6 +379,7 @@ export default function QuickTransferPage() {
                         {files && files.length > 0 ? (
                             files.map((file) => (
                                 <FileCard
+                                    key={file.uuid}
                                     file={file}
                                     resource_type={FILE_RESOURCE_TYPE.USER}
                                     deleteMutation={deleteMutation}
