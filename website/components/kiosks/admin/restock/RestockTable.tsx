@@ -12,6 +12,8 @@ import {
     ModalBody,
     ModalFooter,
     ModalHeader,
+    Accordion,
+    AccordionItem
 } from "@heroui/react";
 import {
     ChevronDownIcon,
@@ -26,18 +28,21 @@ import MAKETable from "../../../Table";
 import RestockType from "./RestockType";
 import RestockEditor from "./RestockEditor";
 import RestockStatusLogs from "./RestockStatusLogs";
+import ItemInfo from "../inventory/ItemInfo";
 import React from "react";
 import { MAKEUser } from "../../../user/MAKEUser";
 import PopupAlert from "../../../PopupAlert";
 import { convertTimestampToDate } from "../../../../utils";
+import { TArea } from "common/area";
+import { TCertification } from "common/certification";
+import { TInventoryItem } from "common/inventory";
 
 const columns = [
     { name: "UUID", id: "uuid" },
     { name: "Requested Time", id: "time_requested" },
     { name: "Requesting User", id: "requesting_user" },
-    { name: "Item UUID", id: "item_uuid" },
-    { name: "Curr Quantity", id: "current_quantity" },
-    { name: "Req Quantity", id: "quantity_requested" },
+    { name: "Item", id: "item_uuid" },
+    { name: "Requested #", id: "quantity_requested" },
     { name: "Reason for Request", id: "reason" },
     { name: "Current Status", id: "current_status" },
     { name: "Updated Time", id: "time_updated" },
@@ -50,7 +55,6 @@ const columns = [
 const defaultColumns = [
     "time_requested",
     "item_uuid",
-    "current_quantity",
     "quantity_requested",
     "reason",
     "requesting_user",
@@ -164,9 +168,15 @@ function PastStatusLogs({
 
 export default function RestockTable({
     restocks,
+    inventory,
+    areas,
+    certs,
     isLoading,
 }: {
     restocks: TRestockRequest[];
+    inventory: TInventoryItem[];
+    areas: TArea[];
+    certs: TCertification[];
     isLoading: boolean;
 }) {
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
@@ -325,8 +335,50 @@ export default function RestockTable({
                         </span>
                     ),
                     requesting_user: (restock) => (
+                        <div className="flex flex-row gap-2 items-center justify-between items-fit min-w-[10vw]">
+                            <Accordion
+                                className="py-0"
+                                itemClasses={{
+                                    trigger: "py-0",
+                                    indicator: "size-6",
+                                }}
+                            >
+                                <AccordionItem
+                                    startContent={
+                                        <MAKEUser
+                                            user_uuid={restock.requesting_user}
+                                            popoverPlacement="bottom"
+                                            className="w-full justify-start"
+                                        />
+                                    }
+                                    isCompact
+                                    textValue="restock mailing list"
+                                >
+                                    {restock.mailing_list.map((uuid, index) => {
+                                        return (
+                                            <div className="pb-1">
+                                                <MAKEUser
+                                                    user_uuid={uuid}
+                                                    popoverPlacement="bottom"
+                                                    className="justify-start"
+                                                />
+                                            </div>
+                                        );
+                                    })}
+                                </AccordionItem>
+                            </Accordion>
+                        </div>
+                    ),
+                    item_uuid: (restock) => (
                         <div>
-                            <MAKEUser user_uuid={restock.requesting_user} />
+                            <ItemInfo
+                                key={restock.item_uuid + "-" + inventory.length}
+                                item_data={inventory.find(
+                                    (item) => item.uuid === restock.item_uuid,
+                                )}
+                                areas={areas}
+                                certs={certs}
+                            />
                         </div>
                     ),
                     current_status: (restock) => (

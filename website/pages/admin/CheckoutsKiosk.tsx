@@ -299,6 +299,7 @@ export default function CheckoutsKiosk() {
                                 roles={roles}
                                 certifications={certs}
                                 areas={areas}
+                                restocks={[]}
                                 selectedKeys={
                                     new Set(cart.map((i) => i.item_uuid))
                                 }
