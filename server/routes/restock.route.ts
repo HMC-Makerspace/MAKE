@@ -324,7 +324,7 @@ router.post("/", async (req: RestockRequestRequest, res: RestockResponse) => {
     // If the user is authorized, create the restock request information
     if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_RESTOCK)) {
         // ensures the item uuid is not already a pending restock request
-        if (!(await validNewRestockRequest(restock_obj))) {
+        if (!(await validNewRestockRequest(restock_obj.item_uuid))) {
             req.log.warn(
                 `An attempt was made to create a restock request with item uuid ` +
                     `${restock_obj.item_uuid}, but a request with that uuid already exists`,

@@ -7,6 +7,7 @@ import { getUser } from "./user.controller";
 import { sendTemplatedEmail } from "./email.controller";
 import RestockRequestTemplate from "email_templates/restock_completion";
 import { getInventoryItem } from "./inventory.controller";
+import { InventoryItemUUID } from "common/inventory";
 
 /**
  * Get all restock requests
@@ -60,22 +61,22 @@ export async function createRestockRequest(request_obj: any) {
 
 /**
  * Create a new restock request
- * @param request_obj The complete restock request information
+ * @param item_uuid The item uuid of the requested restock
  * @returns true if this is a valid new restock or false if it already exissts
  */
-export async function validNewRestockRequest(request_obj: any) {
+export async function validNewRestockRequest(item_uuid: InventoryItemUUID) {
     const RestockRequests = mongoose.model("RestockRequest", RestockRequest);
     // Check if there are requests for this item already
-    const existingRequests = await RestockRequests.find({ item_uuid: request_obj.item_uuid });
+    const existingRequests = await RestockRequests.find({ item_uuid: item_uuid });
 
-        // If any existing request's current_status is NOT restocked or denied, return false, restock already exists
-        const activeRestock = existingRequests.some(
-            (req) =>
-                req.current_status !== RESTOCK_REQUEST_STATUS.RESTOCKED &&
-                req.current_status !== RESTOCK_REQUEST_STATUS.DENIED
-        );
+    // If any existing request's current_status is NOT restocked or denied, return false, restock already exists
+    const activeRestock = existingRequests.some(
+        (req) =>
+            req.current_status !== RESTOCK_REQUEST_STATUS.RESTOCKED &&
+            req.current_status !== RESTOCK_REQUEST_STATUS.DENIED
+    );
 
-        return !activeRestock;
+    return !activeRestock;
 }
 
 
