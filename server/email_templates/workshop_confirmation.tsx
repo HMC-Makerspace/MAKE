@@ -19,13 +19,12 @@ const WorkshopConfirmationTemplate = (
         workshop.timestamp_start,
         config.schedule.timezone,
     );
-    const dateFormatter = new DateFormatter("en-US", {
+    const dateFormatter = new DateFormatter(config.schedule.locale, {
         month: "long",
         day: "numeric",
         weekday: "long",
         hour: "numeric",
         minute: "numeric",
-        timeZone: "America/Los_Angeles",
         timeZoneName: "short",
     });
     return (
@@ -43,7 +42,7 @@ const WorkshopConfirmationTemplate = (
                 </b>
                 <br />
                 <br />
-                The workshop will start at{" "}
+                The workshop will start on{" "}
                 {dateFormatter.format(zonedStartTime.toDate())}! Please arrive
                 on time, and <b>sign in with the instructor</b>. If you're on
                 the waiting list, we will allocate spots on a first-come
