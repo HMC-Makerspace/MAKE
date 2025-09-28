@@ -540,7 +540,7 @@ export async function checkoutAvailabilityCron(logger: Logger) {
     await clearMachineReservations();
     await clearAreaReservations();
     for (const checkout of active_checkouts) {
-        updateItemAvailabilities(checkout.items, logger);
+        await updateItemAvailabilities(checkout.items, logger);
     }
 }
 
