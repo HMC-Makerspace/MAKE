@@ -24,7 +24,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
 import { CertificationUUID, TCertification } from "common/certification";
 import { BookmarkIcon, CakeIcon, PencilSquareIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
-import EditCertsModal from "./ItemCertEditor";
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
 import { CertSelect } from "../certifications/CertSelect";
@@ -213,7 +212,7 @@ export default function ItemEditorForm({
         return useMutation({
             mutationFn: patchItem,
             onSuccess: (obj: TInventoryItem) => {
-                queryClient.setQueryData(["inventory", item.uuid], obj);
+                queryClient.setQueryData(["inventory", obj.uuid], obj);
                 queryClient.setQueryData(
                     ["inventory"],
                     (old: TInventoryItem[]) => {
@@ -651,9 +650,9 @@ export default function ItemEditorForm({
             <ItemLocationModal
                 element={item}
                 areas={areas}
-                isOpen={authrolesOpen}
-                onOpenChange={setAuthrolesOpen}
-                patchMutation={authrolesMutation}
+                isOpen={locationEditorOpen}
+                onOpenChange={setLocationEditorOpen}
+                patchMutation={locationEditorMutation}
             />
         </>
     );
