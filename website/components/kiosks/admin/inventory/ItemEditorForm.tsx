@@ -145,6 +145,13 @@ export default function ItemEditorForm({
 
             console.log(Array.from(data.getAll("authroles")) as string[]);
             //return;
+            
+            let quantity = parseInt(data.get("quantity") as string);
+            let available = item.available;
+            
+            if (Math.abs(quantity)/quantity != Math.abs(item.quantity)/item.quantity) { // quantity type change
+                available = quantity;
+            }
 
             const new_item: TInventoryItem = {
                 uuid: item.uuid, // change back to this if doesn't work with create : (data.get("UUID") as string) ?? item.uuid,
@@ -163,8 +170,8 @@ export default function ItemEditorForm({
                         .map((i) => i.trim()) ?? [],
                 required_certifications: item.required_certifications,
                 authorized_roles: item.authorized_roles,
-                quantity: parseInt(data.get("quantity") as string),
-                available: item.available
+                quantity: quantity,
+                available: available
             };
 
             // Reset the mutation (clears any previous errors)
@@ -172,7 +179,7 @@ export default function ItemEditorForm({
             // Run the mutation
             mutation.mutate({ data: new_item, isNew: isNew });
         },
-        [isDisabled],
+        [isDisabled, item],
     );
 
     const placeholder = (text: string) => (item.uuid ? text : `Select an item`);
