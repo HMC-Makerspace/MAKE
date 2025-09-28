@@ -277,10 +277,21 @@ cron.schedule("*/10 * * * *", () => {
 });
 
 // Refresh all checkout quantities every minute
-checkoutAvailabilityCron(logger);
-cron.schedule("* * * * *", () => {
+await checkoutAvailabilityCron(logger);
+cron.schedule("*/1 * * * *", () => {
     checkoutAvailabilityCron(logger);
 });
+
+// Setup email client if CLI option included
+if (!(await getOAuthToken(logger))) {
+    // If OAuth token is invalid, prompt the administrator to login
+    logger.info({
+        msg: "No OAuth token found. Please authenticate with a valid OAuth account.",
+        url: getOAuthURL(),
+    });
+} else {
+    logger.debug("OAuth is enabled.");
+}
 
 if (process.env.NODE_ENV === "production") {
     ViteExpress.listen(app, PORT, () => {
@@ -292,15 +303,4 @@ if (process.env.NODE_ENV === "production") {
     app.listen(PORT, () => {
         logger.info(`Server running on http://127.0.0.1:${PORT}`);
     });
-}
-
-// Setup email client if CLI option included
-if (!(await getOAuthToken(logger))) {
-    // If OAuth token is invalid, prompt the administrator to login
-    logger.info({
-        msg: "No OAuth token found. Please authenticate with a valid OAuth account.",
-        url: getOAuthURL(),
-    });
-} else {
-    logger.debug("OAuth is enabled.");
 }
