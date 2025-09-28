@@ -101,7 +101,10 @@ export default function UserEditorForm({
 
     const deleteMutation = useMutation({
         mutationFn: deleteUser,
-        onSuccess: () => {
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(["user"], (old: TUser[]) =>
+                old.filter((u) => u.uuid !== variables.user_uuid),
+            );
             addToast({
                 title: `Successfully deleted user`,
                 timeout: 3000,
@@ -357,8 +360,8 @@ export default function UserEditorForm({
                         {isNew
                             ? "Create User"
                             : isMultiple
-                            ? "Apply Batch Edit"
-                            : "Update User"}
+                              ? "Apply Batch Edit"
+                              : "Update User"}
                     </Button>
                     <Button
                         isIconOnly
@@ -366,14 +369,12 @@ export default function UserEditorForm({
                         color="danger"
                         variant="flat"
                         isDisabled={isEmpty}
-                        isLoading={mutation.isPending}
-                        startContent={
-                            <TrashIcon className="size-5"/>
+                        isLoading={deleteMutation.isPending}
+                        startContent={<TrashIcon className="size-5" />}
+                        onPress={() =>
+                            deleteMutation.mutate({ user_uuid: user.uuid })
                         }
-                        onPress={() => deleteMutation.mutate({user_uuid: user.uuid})}
-                    >
-
-                    </Button>
+                    ></Button>
                 </div>
             </Form>
         </>
