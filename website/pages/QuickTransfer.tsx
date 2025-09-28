@@ -240,16 +240,6 @@ export default function QuickTransferPage() {
         e.target.value = "";
     };
 
-    const dropHandler = (event: React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault();
-        const files = event.dataTransfer?.files;
-        if (files && files.length > 0) {
-            handleUpload({
-                target: { files },
-            } as React.ChangeEvent<HTMLInputElement>);
-        }
-    };
-
     const uploadAccess =
         scopes &&
         verifyScopes(scopes, [
@@ -266,6 +256,16 @@ export default function QuickTransferPage() {
                 ? API_SCOPE.DELETE_OWN_FILE
                 : false,
         ]);
+
+    const dropHandler = (event: React.DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        const files = event.dataTransfer?.files;
+        if (uploadAccess && files && files.length > 0) {
+            handleUpload({
+                target: { files },
+            } as React.ChangeEvent<HTMLInputElement>);
+        }
+    };
 
     return (
         <DefaultLayout className="p-4 lg:p-8" pageHref="/transfer">
