@@ -99,6 +99,7 @@ export default function InventoryTable({
     certifications: TCertification[];
     areas: TArea[];
     restocks?: TRestockRequest[];
+    restocks?: TRestockRequest[];
     selectedKeys: Selection;
     onSelectionChange: (selectedKeys: Selection) => void;
     doubleClickAction?: (key: React.Key) => void;
