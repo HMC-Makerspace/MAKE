@@ -58,6 +58,11 @@ export type TScheduleConfig = {
      * The IANA timezone to use for all date objects
      */
     timezone: string;
+
+    /**
+     * A locale language tag for use in formatting dates, such as "en-US"
+     */
+    locale: string;
 };
 
 export type TGeneralConfig = {
