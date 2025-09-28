@@ -99,7 +99,7 @@ export default function InventoryTable({
     roles: TUserRole[];
     certifications: TCertification[];
     areas: TArea[];
-    restocks: TRestockRequest[];
+    restocks?: TRestockRequest[];
     selectedKeys: Selection;
     onSelectionChange: (selectedKeys: Selection) => void;
     doubleClickAction?: (key: React.Key) => void;
@@ -187,7 +187,7 @@ export default function InventoryTable({
     const restockButtonAccess =
         scopes &&
         scopes.length !== 0 &&
-        verifyScopes(scopes, [API_SCOPE.CREATE_RESTOCK]);
+        verifyScopes(scopes, [API_SCOPE.GET_ALL_RESTOCKS, API_SCOPE.CREATE_RESTOCK]);
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -390,21 +390,23 @@ export default function InventoryTable({
                 )}
             />
 
-            <RestockRequestModal
-                requestingUser={requestingUser}
-                restocks={restocks}
-                restockSelected={selectedItem}
-                editIsOpen={restockIsOpen}
-                editOnOpenChange={restockOnOpenChange}
-                onSuccess={() => {
-                    setPopupType("success");
-                    setPopupMessage("Restock request submitted");
-                }}
-                onError={() => {
-                    setPopupType("danger");
-                    setPopupMessage("Error submitting restock request");
-                }}
-            />
+            {restocks &&
+                <RestockRequestModal
+                    requestingUser={requestingUser}
+                    restocks={restocks}
+                    restockSelected={selectedItem}
+                    editIsOpen={restockIsOpen}
+                    editOnOpenChange={restockOnOpenChange}
+                    onSuccess={() => {
+                        setPopupType("success");
+                        setPopupMessage("Restock request submitted");
+                    }}
+                    onError={() => {
+                        setPopupType("danger");
+                        setPopupMessage("Error submitting restock request");
+                    }}
+                />
+            }
             <PopupAlert
                 isOpen={!!popupMessage}
                 onOpenChange={() => setPopupMessage(undefined)}
