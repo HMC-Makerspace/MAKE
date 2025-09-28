@@ -82,7 +82,7 @@ export default function CheckoutsKiosk() {
     });
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
-            queryKey: ["certification"],
+            queryKey: ["certification", "public"],
             refetchOnWindowFocus: false,
             staleTime: 30 * 60 * 1000, // 30 minutes in milliseconds
         },
