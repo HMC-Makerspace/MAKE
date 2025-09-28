@@ -9,6 +9,7 @@ import {
     Input,
     Textarea,
     NumberInput,
+    addToast
 } from "@heroui/react";
 import {
     TRestockRequest,
@@ -55,16 +56,12 @@ export default function RestockRequestModal({
     restockSelected,
     editIsOpen,
     editOnOpenChange,
-    onSuccess,
-    onError,
 }: {
     requestingUser?: TUser;
     restocks: TRestockRequest[];
     restockSelected: TInventoryItem;
     editIsOpen: boolean;
     editOnOpenChange: () => void;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
 }) {
     const prevRestock = restocks.findLast(
         (r) => r.item_uuid == restockSelected.uuid,
@@ -103,11 +100,21 @@ export default function RestockRequestModal({
                         old.map((w) => (w.uuid === data.uuid ? data : w)),
                 );
             }
-            onSuccess("Restock request updated successfully");
+            addToast({
+                title: `${isNew ? "Successfully created restock" : "Successfully added to mailing list"}`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
             editOnOpenChange();
         },
         onError: (error) => {
-            onError("Error updating restock request: " + error.message);
+            addToast({
+                title: `Error: ${error.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger"
+            });
         },
     });
 

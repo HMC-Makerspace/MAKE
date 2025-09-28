@@ -120,13 +120,6 @@ export default function InventoryTable({
     );
     const [search, setSearch] = React.useState<string>("");
 
-    const [popupMessage, setPopupMessage] = React.useState<string | undefined>(
-        undefined,
-    );
-    const [popupType, setPopupType] = React.useState<"success" | "danger">(
-        "success",
-    );
-
     const columns = baseColumns.concat(extraColumns);
 
     // A fuse instance for filtering the content, memoized to prevent
@@ -397,22 +390,8 @@ export default function InventoryTable({
                     restockSelected={selectedItem}
                     editIsOpen={restockIsOpen}
                     editOnOpenChange={restockOnOpenChange}
-                    onSuccess={() => {
-                        setPopupType("success");
-                        setPopupMessage("Restock request submitted");
-                    }}
-                    onError={() => {
-                        setPopupType("danger");
-                        setPopupMessage("Error submitting restock request");
-                    }}
                 />
             }
-            <PopupAlert
-                isOpen={!!popupMessage}
-                onOpenChange={() => setPopupMessage(undefined)}
-                color={popupType}
-                description={popupMessage}
-            />
         </div>
     );
 }

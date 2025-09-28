@@ -22,6 +22,7 @@ import {
     SelectItem,
     SelectSection,
     ListboxSection,
+    addToast,
 } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
@@ -83,15 +84,11 @@ function EditRoleModal({
     isNew,
     isOpen,
     onOpenChange,
-    onSuccess,
-    onError,
 }: {
     role: TUserRole;
     isNew: boolean;
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
 }) {
     const queryClient = useQueryClient();
 
@@ -106,13 +103,21 @@ function EditRoleModal({
                     return old.map((r) => (r.uuid === role.uuid ? result : r));
                 }
             });
-            onSuccess(
-                `Successfully ${isNew ? "created" : "updated"} role "${result.title}"`,
-            );
+            addToast({
+                title: `Successfully ${isNew ? "created" : "updated"} role "${result.title}"`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
             onOpenChange(false);
         },
         onError: (error) => {
-            onError(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger",
+            });
         },
     });
 
@@ -477,14 +482,6 @@ function EditRoleModal({
                             role={role}
                             isOpen={isDeleting}
                             onOpenChange={onDeleteChange}
-                            onSuccess={(message) => {
-                                onSuccess(message);
-                                onClose();
-                            }}
-                            onError={(message) => {
-                                onError(message);
-                                onClose();
-                            }}
                         />
                     </>
                 )}
@@ -497,14 +494,10 @@ function DeleteRoleModal({
     role,
     isOpen,
     onOpenChange,
-    onSuccess,
-    onError,
 }: {
     role: TUserRole;
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
 }) {
     const queryClient = useQueryClient();
     const mutation = useMutation({
@@ -512,7 +505,14 @@ function DeleteRoleModal({
             return axios.delete(`/api/v3/user/role/${role.uuid}`);
         },
         onSuccess: (obj) => {
-            onSuccess(`Successfully deleted role "${role.title}"`);
+
+            addToast({
+                title: `Successfully deleted role "${role.title}"`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
+
             // Remove the role from the query cache
             queryClient.setQueryData(["user", "role"], (old: TUserRole[]) => {
                 return old.filter((r) => r.uuid !== role.uuid);
@@ -522,7 +522,12 @@ function DeleteRoleModal({
             });
         },
         onError: (error) => {
-            onError(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger",
+            });
         },
     });
 
@@ -619,13 +624,6 @@ export default function RolesTable({
         onOpen: onEdit,
         onOpenChange: onEditChange,
     } = useDisclosure();
-
-    const [popupMessage, setPopupMessage] = React.useState<string | undefined>(
-        undefined,
-    );
-    const [popupType, setPopupType] = React.useState<
-        "success" | "warning" | "danger"
-    >("success");
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -728,22 +726,8 @@ export default function RolesTable({
                     isNew={isNew}
                     isOpen={isEditing}
                     onOpenChange={onEditChange}
-                    onSuccess={(message) => {
-                        setPopupMessage(message);
-                        setPopupType("success");
-                    }}
-                    onError={(message) => {
-                        setPopupMessage(message);
-                        setPopupType("danger");
-                    }}
                 />
             )}
-            <PopupAlert
-                isOpen={!!popupMessage}
-                onOpenChange={() => setPopupMessage(undefined)}
-                color={popupType}
-                description={popupMessage}
-            />
         </div>
     );
 }

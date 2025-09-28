@@ -9,7 +9,6 @@ import {
     Spinner,
     Input,
     Form,
-    ToastProvider,
     closeToast,
     addToast,
 } from "@heroui/react";
@@ -270,7 +269,6 @@ export default function QuickTransferPage() {
 
     return (
         <DefaultLayout className="p-4 lg:p-8" pageHref="/transfer">
-            <ToastProvider maxVisibleToasts={9}></ToastProvider>
             <div
                 id="master"
                 className="size-full p-4 flex flex-col gap-2 bg-content1 rounded-xl overflow-auto"

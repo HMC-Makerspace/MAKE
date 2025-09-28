@@ -16,16 +16,12 @@ export default function ItemEditor({
     roles,
     isNew,
     isDisabled,
-    onSuccess,
-    onError,
 }: {
     item: TInventoryItem;
     certs: TCertification[];
     roles: TUserRole[];
     isNew: boolean;
     isDisabled: boolean;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
 }) {
     const isEmpty = item.uuid != "";
 
@@ -46,8 +42,6 @@ export default function ItemEditor({
                 isMultiple={false}
                 isDisabled={isDisabled}
                 isNew={isNew}
-                onSuccess={onSuccess}
-                onError={onError}
             />
         </div>
     );

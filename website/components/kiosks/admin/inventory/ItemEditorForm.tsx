@@ -5,6 +5,7 @@ import {
     Input,
     NumberInput,
     Textarea,
+    addToast
 } from "@heroui/react";
 import { Select, SelectSection, SelectItem } from "@heroui/select";
 import { Accordion, AccordionItem } from "@heroui/accordion";
@@ -72,8 +73,6 @@ export default function ItemEditorForm({
     isMultiple,
     isDisabled,
     isNew,
-    onSuccess,
-    onError,
 }: {
     item: TInventoryItem;
     certs: TCertification[];
@@ -81,8 +80,6 @@ export default function ItemEditorForm({
     isMultiple: boolean;
     isDisabled: boolean;
     isNew: boolean;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
 }) {
     const queryClient = useQueryClient();
 
@@ -97,13 +94,21 @@ export default function ItemEditorForm({
                     return old.map((i) => (i.uuid === item.uuid ? result : i));
                 }
             });
-            onSuccess(
-                `Successfully ${isNew ? "created" : "updated"} item${isMultiple ? "s" : ""}`,
-            );
+            addToast({
+                title: `Successfully ${isNew ? "created" : "updated"} item${isMultiple ? "s" : ""}`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
             // console.log(result);
         },
         onError: (error) => {
-            onError(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger"
+            });
         },
     });
 

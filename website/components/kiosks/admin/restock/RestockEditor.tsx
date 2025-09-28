@@ -8,6 +8,7 @@ import {
     SelectItem,
     Form,
     Textarea,
+    addToast
 } from "@heroui/react";
 import React from "react";
 import {
@@ -42,13 +43,9 @@ const updateRestockRequestLogs = async ({
 export default function RestockEditor({
     onClose,
     restock,
-    onSuccess = () => {},
-    onError = () => {},
 }: {
     onClose: () => void;
     restock: TRestockRequest;
-    onSuccess?: (message: string) => void;
-    onError?: (message: string) => void;
 }) {
     const queryClient = useQueryClient();
 
@@ -60,10 +57,20 @@ export default function RestockEditor({
                 return old.map((u) => (u.uuid === restock.uuid ? result : u));
             });
             queryClient.setQueryData(["restock", restock.uuid], result);
-            onSuccess("Restock request updated successfully");
+            addToast({
+                title: `Restock request updated successfully`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
         },
         onError: (error) => {
-            onError("Error updating restock request: " + error.message);
+            addToast({
+                title: `Error: ${error.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger"
+            });
         },
     });
 

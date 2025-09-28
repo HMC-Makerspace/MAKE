@@ -129,8 +129,6 @@ export default function InventoryKiosk() {
                         item.role === ITEM_ROLE.AREA
                     }
                     isNew={false}
-                    onSuccess={() => {}}
-                    onError={() => {}}
                 />
                 <InventoryTable
                     requestingUser={requestingUser}

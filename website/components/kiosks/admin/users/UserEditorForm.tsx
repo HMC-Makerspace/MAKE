@@ -10,6 +10,7 @@ import {
     Selection,
     SelectItem,
     Snippet,
+    addToast
 } from "@heroui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
@@ -52,15 +53,11 @@ export default function UserEditorForm({
     roles,
     isMultiple,
     isNew,
-    onSuccess,
-    onError,
 }: {
     user: TUser;
     roles: TUserRole[];
     isMultiple: boolean;
     isNew: boolean;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
 }) {
     const isEmpty = !user.uuid && !isNew;
 
@@ -81,27 +78,45 @@ export default function UserEditorForm({
                     return old.map((u) => (u.uuid === UUID ? result : u));
                 }
             });
-            onSuccess(
-                `Successfully ${isNew ? "created" : "updated"} user${isMultiple ? "s" : ""}`,
-            );
+
+            addToast({
+                title: `Successfully ${isNew ? "created" : "updated"} user${isMultiple ? "s" : ""}`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
+
             setHasEdits(false);
             console.log(result);
         },
         onError: (error) => {
-            onError(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger"
+            });
         },
     });
 
     const deleteMutation = useMutation({
         mutationFn: deleteUser,
         onSuccess: () => {
-            onSuccess(
-                `Successfully deleted user`,
-            );
+            addToast({
+                title: `Successfully deleted user`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
             setHasEdits(false);
         },
         onError: (error) => {
-            onError(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger"
+            });
         },
     });
 
