@@ -83,8 +83,8 @@ export default function WorkshopEditModal({
             queryClient.setQueryData(["workshop", data.uuid], data);
             if (variables.isNew) {
                 queryClient.setQueryData(["workshop"], (old: TWorkshop[]) => [
-                    ...old,
                     data,
+                    ...old,
                 ]);
             } else {
                 queryClient.setQueryData(["workshop"], (old: TWorkshop[]) =>

@@ -142,8 +142,8 @@ export default function WorkshopTable({
     } = useDisclosure();
 
     return (
-        <>
-            <div className="flex flex-col justify-center items-center relative">
+        <div className="overflow-auto">
+            <div className="flex flex-col justify-center items-center relative overflow-auto">
                 <h1 className="text-xl font-bold text-foreground-900 mb-2">
                     Workshops
                 </h1>
@@ -175,13 +175,21 @@ export default function WorkshopTable({
                 </Button>
             </div>
             {workshops.length > 0 ? (
-                <div>
+                <div className="overflow-auto">
                     <MAKETable
                         content={workshops}
                         columns={columns}
                         visibleColumns={visibleColumns}
                         multiSelect={false}
                         isLoading={isLoading}
+                        loadingContent={(ref, loadMore) => (
+                            <Button
+                                onPress={loadMore}
+                                className="w-1/2 self-center"
+                            >
+                                Load More
+                            </Button>
+                        )}
                         customColumnComponents={{
                             title: (workshop) => {
                                 return (
@@ -403,16 +411,19 @@ export default function WorkshopTable({
             {selectedWorkshop && (
                 <>
                     <WorkshopPeopleModal
+                        key={selectedWorkshop.uuid}
                         workshop={selectedWorkshop}
                         isOpen={peopleIsOpen}
                         onOpenChange={peopleOnOpenChange}
                     />
                     <WorkshopImagesModal
+                        key={selectedWorkshop.uuid}
                         workshop={selectedWorkshop}
                         isOpen={imagesIsOpen}
                         onOpenChange={imagesOnOpenChange}
                     />
                     <WorkshopEditModal
+                        key={selectedWorkshop.uuid}
                         workshop={selectedWorkshop}
                         users={users}
                         certs={certs}
@@ -422,6 +433,7 @@ export default function WorkshopTable({
                         config={config}
                     />
                     <RequiredCertsModal
+                        key={selectedWorkshop.uuid}
                         element={selectedWorkshop}
                         certifications={certs}
                         isOpen={certsIsOpen}
@@ -430,6 +442,6 @@ export default function WorkshopTable({
                     />
                 </>
             )}
-        </>
+        </div>
     );
 }

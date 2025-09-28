@@ -57,6 +57,14 @@ export default function WorkshopPage() {
         refetchOnMount: false,
     });
 
+    let filteredWorkshops = workshops?.filter((workshop) => {
+        const isFuture = workshop.timestamp_end > Date.now() / 1000;
+        return selected === "past-workshops" ? !isFuture : isFuture;
+    });
+    if (selected === "current-workshops") {
+        filteredWorkshops = filteredWorkshops?.reverse();
+    }
+
     return (
         <DefaultLayout className="p-8" pageHref="/workshops">
             <div
@@ -90,29 +98,21 @@ export default function WorkshopPage() {
                         }
                     />
                 </Tabs>
-                {workshops &&
-                    (workshops.length > 0 ? (
+                {filteredWorkshops &&
+                    (filteredWorkshops.length > 0 ? (
                         <div
                             id="card-container"
                             className="grid grid-cols-2 gap-4 h-full w-full"
                         >
-                            {workshops
-                                ?.filter((workshop) => {
-                                    const isFuture =
-                                        workshop.timestamp_end >
-                                        Date.now() / 1000;
-                                    return selected === "past-workshops"
-                                        ? !isFuture
-                                        : isFuture;
-                                })
-                                .map((workshop) => (
-                                    <WorkshopCard
-                                        workshop={workshop}
-                                        self={self}
-                                        users={users}
-                                        certifications={certifications}
-                                    />
-                                ))}
+                            {filteredWorkshops.map((workshop) => (
+                                <WorkshopCard
+                                    workshop={workshop}
+                                    self={self}
+                                    users={users}
+                                    certifications={certifications}
+                                    config={config}
+                                />
+                            ))}
                         </div>
                     ) : (
                         <div className="size-full flex items-center justify-center">
