@@ -80,8 +80,11 @@ export default function RequiredCertsModal<
                 currentCerts[i] = emptyCert;
             }
 
-            currentCerts[i][prop] = val;
-            setCurrentCerts([...currentCerts]); // update the instance list
+            const cert = {...currentCerts[i]};
+            cert[prop] = val;
+            const certs = [...currentCerts];
+            certs[i] = cert;
+            setCurrentCerts(certs); // update the instance list
             setHasEdits(true);
         };
     }

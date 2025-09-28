@@ -72,8 +72,11 @@ export default function ReservableConfirmationModal({
                     required_level: 0,
                 };
             }
-            requiredCerts[i][prop] = val;
-            setRequiredCerts([...requiredCerts]); // update the instance list
+            const cert = {...requiredCerts[i]};
+            cert[prop] = val;
+            const certs = [...requiredCerts];
+            certs[i] = cert;
+            setRequiredCerts(certs); // update the instance list
             setHasEdits(true);
         };
     }

@@ -271,8 +271,11 @@ export default function EditStatusModal({
                 };
             }
 
-            localInstances[i][prop] = val;
-            setLocalInstances([...localInstances]); // update the instance list
+            const inst = {...localInstances[i]};
+            inst[prop] = val;
+            const insts = [...localInstances];
+            insts[i] = inst;
+            setLocalInstances(insts); // update the instance list
             setHasEdits(true);
         };
     }
