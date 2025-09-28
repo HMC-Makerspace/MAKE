@@ -18,7 +18,7 @@ import { getConfig } from "./config.controller";
  */
 export async function getWorkshops(): Promise<TWorkshop[]> {
     const Workshops = mongoose.model("Workshop", Workshop);
-    return Workshops.find();
+    return Workshops.find().sort({ timestamp_start: -1 });
 }
 
 /**
