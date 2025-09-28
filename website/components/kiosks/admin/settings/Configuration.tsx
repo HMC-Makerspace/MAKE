@@ -157,6 +157,7 @@ export default function Configuration({ config }: { config: TConfig }) {
                 first_names_only: config.schedule.first_names_only,
                 increment_sec: config.schedule.increment_sec,
                 timezone: config.schedule.timezone,
+                locale: config.schedule.locale,
             },
             faq: faq,
         };
