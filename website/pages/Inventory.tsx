@@ -70,17 +70,17 @@ export default function InventoryPage() {
     };
 
     const isLoading =
-        inventoryLoading || rolesLoading || restocksLoading || certsLoading || areasLoading || reqUserLoading || scopesLoading;
+        inventoryLoading || rolesLoading || certsLoading || areasLoading || reqUserLoading || scopesLoading;
 
     return (
         <DefaultLayout className="py-0 px-4 lg:px-8" pageHref="/inventory">
-            {inventory && requestingUser && scopes && roles && restocks && certs && areas && (
+            {inventory && requestingUser && scopes && roles && certs && areas && (
                 <InventoryTable
                     requestingUser={requestingUser}
                     scopes={scopes}
                     inventory={inventory}
                     roles={roles}
-                    restocks={restocks}
+                    restocks={restocks ?? []}
                     certifications={certs}
                     areas={areas}
                     selectedKeys={selectedItems}
