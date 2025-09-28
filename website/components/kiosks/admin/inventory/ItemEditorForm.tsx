@@ -375,7 +375,8 @@ export default function ItemEditorForm({
                                     placeholder={placeholder("Quantity")}
                                     isDisabled={isDisabled}
                                     isRequired
-                                    defaultSelectedKeys={[item.quantity + ""]}
+                                    disallowEmptySelection
+                                    defaultSelectedKeys={[(item.quantity < 0 ? item.quantity : -2) + ""]}
                                     onSelectionChange={defaultEdit}
                                     selectionMode={"single"}
                                     variant="faded"
