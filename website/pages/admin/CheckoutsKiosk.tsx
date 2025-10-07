@@ -39,7 +39,6 @@ import clsx from "clsx";
 import axios from "axios";
 import { TConfig } from "common/config";
 import { TSchedule } from "common/schedule";
-import PopupAlert from "../../components/PopupAlert";
 import CertificationsTable from "../../components/kiosks/admin/certifications/CTable";
 import { CheckBadgeIcon, PercentBadgeIcon } from "@heroicons/react/24/solid";
 import UsersTable from "../../components/kiosks/admin/users/UsersTable";

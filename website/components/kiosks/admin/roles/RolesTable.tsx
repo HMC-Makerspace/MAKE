@@ -46,7 +46,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { HexColorPicker } from "react-colorful";
-import PopupAlert from "../../../PopupAlert";
 import DeleteModal from "../../../DeleteModal";
 import APIScope from "../../../APIScope";
 

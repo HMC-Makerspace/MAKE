@@ -14,6 +14,7 @@ import {
     TimeInput,
     Tooltip,
     useDisclosure,
+    addToast
 } from "@heroui/react";
 import { TSchedule } from "common/schedule";
 import { fromAbsolute, Time } from "@internationalized/date";
@@ -89,14 +90,10 @@ function DeleteScheduleModal({
     schedule,
     isOpen,
     onOpenChange,
-    onSuccess,
-    onError,
 }: {
     schedule: TSchedule;
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
 }) {
     const queryClient = useQueryClient();
     const mutation = useMutation({
@@ -111,10 +108,20 @@ function DeleteScheduleModal({
             queryClient.removeQueries({
                 queryKey: ["schedule", schedule.uuid],
             });
-            onSuccess(`Successfully deleted schedule "${schedule.name}"`);
+            addToast({
+                title: `Successfully deleted schedule "${schedule.name}"`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
         },
         onError: (error) => {
-            onError(`Error: ${error.message}`); // consider adding an error popup
+            addToast({
+                title: `Error: ${error.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger"
+            }); 
         },
     });
 
@@ -150,8 +157,6 @@ export default function ScheduleSelector({
     scheduleMode,
     setScheduleMode,
     setSelectedUsers,
-    onSuccess,
-    onError,
 }: {
     schedules: TSchedule[];
     defaultSchedule?: TSchedule;
@@ -161,8 +166,6 @@ export default function ScheduleSelector({
     scheduleMode: "schedule" | "availability";
     setScheduleMode: (mode: "schedule" | "availability") => void;
     setSelectedUsers: (users: Selection) => void;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
 }) {
     const queryClient = useQueryClient();
 
@@ -650,8 +653,6 @@ export default function ScheduleSelector({
                         schedule={schedule}
                         isOpen={isDeleting}
                         onOpenChange={onDeleteChange}
-                        onSuccess={onSuccess}
-                        onError={onError}
                     />
                     <AlertEditorModal
                         schedule={schedule}
@@ -659,8 +660,6 @@ export default function ScheduleSelector({
                         config={config}
                         isOpen={isAlertModalOpen}
                         onOpenChange={onAlertModalChange}
-                        onSuccess={onSuccess}
-                        onError={onError}
                     />
                     <ShiftHistoryModal
                         schedule={schedule}

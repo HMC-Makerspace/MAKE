@@ -19,7 +19,6 @@ import React from "react";
 import UserRole from "../../../user/UserRole";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
-import PopupAlert from "../../../PopupAlert";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
 import { TrashIcon } from "@heroicons/react/24/outline";
 

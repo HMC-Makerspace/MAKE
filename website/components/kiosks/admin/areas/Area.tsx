@@ -9,6 +9,7 @@ import {
     Link,
     useDisclosure,
     Tooltip,
+    addToast
 } from "@heroui/react";
 import { TUserRole } from "common/user";
 import Machine from "../../../../components/kiosks/admin/machines/Machine";
@@ -73,9 +74,20 @@ export default function Area({
                 );
             });
             editDocsClose();
+            addToast({
+                title: `Successfully edited area`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger"
+            });
         },
     });
 
@@ -90,9 +102,20 @@ export default function Area({
                     (area) => area.uuid !== variables.uuid,
                 );
             });
+            addToast({
+                title: `Successfully deleted area`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger"
+            });
         },
     });
 

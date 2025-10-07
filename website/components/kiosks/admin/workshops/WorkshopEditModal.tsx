@@ -17,6 +17,7 @@ import {
     NumberInput,
     Autocomplete,
     AutocompleteItem,
+    addToast
 } from "@heroui/react";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import { TWorkshop } from "../../../../../common/workshop";
@@ -86,14 +87,34 @@ export default function WorkshopEditModal({
                     data,
                     ...old,
                 ]);
+                addToast({
+                    title: `Successfully created workshop`,
+                    timeout: 3000,
+                    color: "success",
+                    severity: "success",
+                });
+
             } else {
                 queryClient.setQueryData(["workshop"], (old: TWorkshop[]) =>
                     old.map((w) => (w.uuid === data.uuid ? data : w)),
                 );
+                addToast({
+                    title: `Successfully updated workshop`,
+                    timeout: 3000,
+                    color: "success",
+                    severity: "success",
+                });
             }
             onOpenChange(false);
         },
-        onError: (e) => alert(e),
+        onError: (e) => {
+            addToast({
+                title: `Error: ${e.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger"
+            });
+        },
     });
 
     const sortedFilteredWorkers = users

@@ -46,7 +46,6 @@ import { TArea } from "common/area";
 import ItemLocationChip from "./ItemLocationChip";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RestockRequestModal from "../restock/RestockRequestModal";
-import PopupAlert from "../../../PopupAlert";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" },

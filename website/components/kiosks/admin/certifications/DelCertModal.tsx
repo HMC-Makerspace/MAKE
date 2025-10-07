@@ -3,6 +3,7 @@ import {
     Modal,
     Form,
     ModalContent,
+    addToast
 } from "@heroui/react";
 
 import React from "react";
@@ -15,14 +16,10 @@ export default function DeleteCertModal({
     cert,
     isOpen,
     onOpenChange,
-    onSuccess,
-    onError,
 }: {
     cert: TCertification;
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
 }) {
     const queryClient = useQueryClient();
     const mutation = useMutation({
@@ -30,7 +27,12 @@ export default function DeleteCertModal({
             return axios.delete(`/api/v3/certification/${cert.uuid}`);
         },
         onSuccess: () => {
-            onSuccess(`Successfully deleted certification "${cert.name}"`);
+            addToast({
+                title: `Successfully deleted certification "${cert.name}"`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
             
             // Remove the cert from the query cache
             queryClient.setQueryData(["certification"], (old: TCertification[]) => {
@@ -41,7 +43,12 @@ export default function DeleteCertModal({
             });
         },
         onError: (error) => {
-            onError(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger"
+            });
         },
     });
 

@@ -7,6 +7,7 @@ import {
     DropdownMenu,
     DropdownItem,
     Spinner,
+    addToast
 } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
@@ -121,11 +122,22 @@ export default function CertificationsTable({
                     );
                 },
             );
+            addToast({
+                title: `Successfully updated certification ${certOpenDoc?.name}`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
 
             setDocOpen(false);
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger"
+            });
         },
     });
 
@@ -341,8 +353,6 @@ export default function CertificationsTable({
                     isNew={isNew}
                     isOpen={isOpen}
                     onOpenChange={setIsOpen}
-                    onSuccess={() => setIsOpen(false)}
-                    onError={() => alert("Error")}
                 />
             )}
 

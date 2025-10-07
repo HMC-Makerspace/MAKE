@@ -9,6 +9,7 @@ import {
     Select,
     SelectItem,
     Switch,
+    addToast
 } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TConfig } from "common/config";
@@ -16,7 +17,6 @@ import { SHIFT_DAY, SHIFT_DAYS } from "../../../../../common/shift";
 import { UserRoleSelect } from "../../../../components/user/UserRoleSelect";
 import axios from "axios";
 import React, { useState } from "react";
-import PopupAlert from "../../../../components/PopupAlert";
 import clsx from "clsx";
 import { PlusIcon, AcademicCapIcon } from "@heroicons/react/24/solid";
 import EditableFAQItem from "./EditableFAQItem";
@@ -56,23 +56,25 @@ async function updateConfig({ config }: { config: TConfig }) {
 export default function Configuration({ config }: { config: TConfig }) {
     const queryClient = useQueryClient();
 
-    const [popupMessage, setPopupMessage] = React.useState<string | undefined>(
-        undefined,
-    );
-    const [popupType, setPopupType] = React.useState<"success" | "danger">(
-        "success",
-    );
-
     const mutation = useMutation({
         mutationFn: updateConfig,
         onSuccess: (data) => {
             queryClient.setQueryData(["config"], data);
-            setPopupMessage("Configuration updated successfully.");
-            setPopupType("success");
+            addToast({
+                title: `Configuration updated successfully.`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
         },
         onError: (error) => {
-            setPopupMessage("Failed to update configuration: " + error);
-            setPopupType("danger");
+            addToast({
+                title: `Error: ${error.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger"
+            });
+
         },
     });
 
@@ -721,12 +723,6 @@ export default function Configuration({ config }: { config: TConfig }) {
                     </Button>
                 </Card>
             </Form>
-            <PopupAlert
-                isOpen={!!popupMessage}
-                onOpenChange={() => setPopupMessage(undefined)}
-                color={popupType}
-                description={popupMessage}
-            />
         </>
     );
 }

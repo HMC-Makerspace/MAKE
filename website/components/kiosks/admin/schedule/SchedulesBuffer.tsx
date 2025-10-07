@@ -5,7 +5,6 @@ import ScheduleUserPicker from "./ScheduleUserPicker";
 import ScheduleSelector from "./ScheduleSelector";
 import { Selection, useDisclosure } from "@heroui/react";
 import { TUser, TUserRole, UserUUID } from "common/user";
-import PopupAlert from "../../../PopupAlert";
 import React, { useCallback, useMemo, useState } from "react";
 
 function getUserTotalAvailableTime(user: TUser, schedule?: TSchedule) {
@@ -49,12 +48,6 @@ export default function ScheduleBuffer({
     selectedUsers: Selection;
     setSelectedUsers: (users: Selection) => void;
 }) {
-    const [popupMessage, setPopupMessage] = React.useState<string | undefined>(
-        undefined,
-    );
-    const [popupType, setPopupType] = React.useState<
-        "success" | "warning" | "danger"
-    >("success");
 
     // Opposite of schedule mode is availability mode
     const [scheduleMode, setScheduleMode] = React.useState<
@@ -122,14 +115,6 @@ export default function ScheduleBuffer({
                         scheduleMode={scheduleMode}
                         setScheduleMode={setScheduleMode}
                         setSelectedUsers={setSelectedUsers}
-                        onSuccess={(message) => {
-                            setPopupMessage(message);
-                            setPopupType("success");
-                        }}
-                        onError={(message) => {
-                            setPopupMessage(message);
-                            setPopupType("danger");
-                        }}
                         key={schedule?.uuid}
                     />
                     <Schedule
@@ -170,12 +155,6 @@ export default function ScheduleBuffer({
                     type={scheduleMode === "schedule" ? "edit" : "availability"}
                 />
             </div>
-            <PopupAlert
-                isOpen={!!popupMessage}
-                onOpenChange={() => setPopupMessage(undefined)}
-                color={popupType}
-                description={popupMessage}
-            />
         </div>
     );
 }
