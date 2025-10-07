@@ -32,6 +32,8 @@ export default function ItemEditor({
 }) {
     const isEmpty = item.uuid != "";
 
+    const key = isNew ? "new" : item.uuid;
+
     return (
         <div
             className={clsx(
@@ -42,7 +44,7 @@ export default function ItemEditor({
         >
             <h1 className="3xl font-bold text-center pb-2">Item Editor</h1>
             <ItemEditorForm
-                key={item.uuid}
+                key={key}
                 item={item}
                 certs={certs}
                 roles={roles}

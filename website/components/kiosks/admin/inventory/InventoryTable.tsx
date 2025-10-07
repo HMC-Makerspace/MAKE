@@ -99,7 +99,7 @@ export default function InventoryTable({
     };
     emptyContent?: string;
     editable?: React.ReactNode;
-    onCreate?: () => void;
+    onCreate?: (state: boolean) => void;
 }) {
     // The set of columns that are visible
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
@@ -140,6 +140,21 @@ export default function InventoryTable({
     const onInputChange = React.useCallback((value: string) => {
         setSearch(value);
     }, []);
+
+    const modifiedSelectionChange = (selectedKeys: Selection) => {
+        // If the selection changes, we won't be creating a new user
+        if (onCreate) onCreate(false);
+        if (selectedKeys === "all") {
+            onSelectionChange(new Set(filteredItems.map((i) => i.uuid)));
+        } else {
+            onSelectionChange(selectedKeys);
+        }
+    };
+
+    const createItem = () => {
+        onSelectionChange(new Set());
+        if (onCreate) onCreate(true);
+    };
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -200,7 +215,7 @@ export default function InventoryTable({
                                 color="primary"
                                 isDisabled={isLoading}
                                 startContent={<PlusIcon className="size-6" />}
-                                onPress={onCreate}
+                                onPress={createItem}
                             >
                                 Create
                             </Button>
@@ -218,7 +233,7 @@ export default function InventoryTable({
                 columns={columns}
                 visibleColumns={visibleColumns}
                 selectedKeys={selectedKeys}
-                onSelectionChange={onSelectionChange}
+                onSelectionChange={modifiedSelectionChange}
                 doubleClickAction={doubleClickAction}
                 multiSelect={multiSelect}
                 showSelectionCheckboxes={false}

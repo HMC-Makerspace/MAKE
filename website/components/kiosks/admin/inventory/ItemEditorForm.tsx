@@ -1,10 +1,13 @@
 import {
     Button,
     Checkbox,
+    Divider,
     Form,
     Input,
     NumberInput,
+    Snippet,
     Textarea,
+    Tooltip,
 } from "@heroui/react";
 import { Select, SelectSection, SelectItem } from "@heroui/select";
 import { Accordion, AccordionItem } from "@heroui/accordion";
@@ -107,22 +110,28 @@ export default function ItemEditorForm({
     onSuccess: (message: string) => void;
     onError: (message: string) => void;
 }) {
+
+    const [UUID, setUUID] = React.useState<string>(
+        isNew ? crypto.randomUUID() : item.uuid,
+    );
+
     const queryClient = useQueryClient();
 
     const mutation = useMutation({
         mutationFn: createUpdateItem,
         onSuccess: (result: TInventoryItem) => {
-            queryClient.setQueryData(["inventory", item.uuid], result);
+            queryClient.setQueryData(["inventory", UUID], result);
             queryClient.setQueryData(["inventory"], (old: TInventoryItem[]) => {
                 if (isNew) {
                     return [...old, result];
                 } else {
-                    return old.map((i) => (i.uuid === item.uuid ? result : i));
+                    return old.map((i) => (i.uuid === UUID ? result : i));
                 }
             });
             onSuccess(
                 `Successfully ${isNew ? "created" : "updated"} item${isMultiple ? "s" : ""}`,
             );
+            setHasEdits(false);
             // console.log(result);
         },
         onError: (error) => {
@@ -154,7 +163,7 @@ export default function ItemEditorForm({
             }
 
             const new_item: TInventoryItem = {
-                uuid: item.uuid, // change back to this if doesn't work with create : (data.get("UUID") as string) ?? item.uuid,
+                uuid: UUID, // change back to this if doesn't work with create : (data.get("UUID") as string) ?? item.uuid,
                 name: data.get("name") as string,
                 long_name: data.get("long_name") as string,
                 role: data.get("role") as ITEM_ROLE,
@@ -179,10 +188,10 @@ export default function ItemEditorForm({
             // Run the mutation
             mutation.mutate({ data: new_item, isNew: isNew });
         },
-        [isDisabled, item],
+        [isDisabled, item, UUID],
     );
 
-    const placeholder = (text: string) => (item.uuid ? text : `Select an item`);
+    const placeholder = (text: string) => (item.uuid || isNew ? text : `Select an item`);
 
     const [hasEdits, setHasEdits] = useState(false);
     const [openAuthorized, setOpenAuthorized] = useState(
@@ -253,6 +262,22 @@ export default function ItemEditorForm({
                 onSubmit={onSubmit}
                 className="overflow-auto h-full justify-between gap-4"
             >
+                <Snippet
+                    // Allow user uuid to be copied
+                    variant="bordered"
+                    color="default"
+                    symbol={""}
+                    size="md"
+                    className="w-full text-default-500 relative h-14"
+                    timeout={1000}
+                    classNames={{
+                        copyButton:
+                            "absolute right-2 bg-default-200 hover:!bg-default-300",
+                    }}
+                >
+                    {UUID}
+                </Snippet>
+
                 <div className="w-full grid grid-cols-2 gap-4 lg:grid-cols-1 overflow-auto">
                     <Input // Name
                         type="text"
@@ -302,7 +327,7 @@ export default function ItemEditorForm({
                     value={item.access_type?.toString()}
 
                     defaultSelectedKeys={
-                        isDisabled ? [] : [item.access_type + ""]
+                        (isDisabled || isNew) ? [] : [item.access_type + ""]
                     }
                     onSelectionChange={defaultEdit}
                     // onSelectionChange={(value) => {
@@ -451,7 +476,7 @@ export default function ItemEditorForm({
                         <Select
                             name="role"
                             placeholder={placeholder("Item type")}
-                            defaultSelectedKeys={[item.role]}
+                            defaultSelectedKeys={(isDisabled || isNew) ? [] : [item.role]}
                             onSelectionChange={defaultEdit}
                             isDisabled={isDisabled}
                             isRequired
@@ -590,36 +615,46 @@ export default function ItemEditorForm({
                             ]),
                         }}
                     />
-                    {/* TODO if this isn't always editable */}
-                    <div className="flex justify-evenly">
-                        <Button
-                            variant="flat"
-                            color="primary"
-                            onPress={() => setReqcertsOpen(true)}
-                            isIconOnly
-                            isDisabled={isDisabled}
-                        >
-                            <BookmarkIcon className="size-6" />
-                        </Button>
-                        <Button
-                            variant="flat"
-                            color="primary"
-                            onPress={() => setAuthrolesOpen(true)}
-                            isIconOnly
-                            isDisabled={isDisabled}
-                        >
-                            <CakeIcon className="size-6" />
-                        </Button>
-                        <Button
-                            variant="flat"
-                            color="primary"
-                            onPress={() => setLocationEditorOpen(true)}
-                            isIconOnly
-                            isDisabled={isDisabled}
-                        >
-                            <VideoCameraIcon className="size-6" />
-                        </Button>
-                    </div>
+                    <Divider className="h-[1px] bg-default-400" />
+                    <Tooltip
+                        content="Create the item first, before editing required certifications, authorized roles, or locations."
+                        className="w-fit p-2"
+                        delay={500}
+                        closeDelay={150}
+                        isDisabled={isDisabled || !isNew}
+                    >
+                        {/* TODO if this isn't always editable */}
+                        <div className="flex justify-evenly">
+                            <Button
+                                variant="flat"
+                                color="primary"
+                                onPress={() => setReqcertsOpen(true)}
+                                isIconOnly
+                                isDisabled={isDisabled || isNew}
+                            >
+                                <BookmarkIcon className="size-6" />
+                            </Button>
+                            
+                            <Button
+                                variant="flat"
+                                color="primary"
+                                onPress={() => setAuthrolesOpen(true)}
+                                isIconOnly
+                                isDisabled={isDisabled || isNew}
+                            >
+                                <CakeIcon className="size-6" />
+                            </Button>
+                            <Button
+                                variant="flat"
+                                color="primary"
+                                onPress={() => setLocationEditorOpen(true)}
+                                isIconOnly
+                                isDisabled={isDisabled || isNew}
+                            >
+                                <VideoCameraIcon className="size-6" />
+                            </Button>
+                        </div>
+                    </Tooltip>
                 </div>
                 <div className="w-full mt-auto col-span-full">
                     <Button

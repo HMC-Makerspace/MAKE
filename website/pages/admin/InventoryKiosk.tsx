@@ -57,6 +57,8 @@ export default function InventoryKiosk() {
         new Set([""]),
     );
 
+    const [isNewItem, setIsNewItem] = React.useState<boolean>(false);
+
     if (
         !inventory ||
         !roles ||
@@ -104,7 +106,7 @@ export default function InventoryKiosk() {
                         item.role === ITEM_ROLE.MACHINE ||
                         item.role === ITEM_ROLE.AREA
                     }
-                    isNew={false}
+                    isNew={isNewItem}
                     onSuccess={() => {}}
                     onError={() => {}}
                 />
@@ -117,7 +119,7 @@ export default function InventoryKiosk() {
                     onSelectionChange={betterSelectionChange}
                     isLoading={inventoryLoading}
                     editable
-                    onCreate={() => {}}
+                    onCreate={setIsNewItem}
                 />
             </div>
         </AdminLayout>
