@@ -386,7 +386,7 @@ export default function ItemEditorForm({
                                     placeholder={placeholder("Quantity")}
                                     isDisabled={isDisabled}
                                     isRequired
-                                    defaultValue={item.quantity}
+                                    defaultValue={isDisabled ? undefined : item.quantity}
                                     onValueChange={defaultEdit}
                                     minValue={0}
                                     variant="faded"
@@ -476,10 +476,11 @@ export default function ItemEditorForm({
                         <Select
                             name="role"
                             placeholder={placeholder("Item type")}
-                            defaultSelectedKeys={(isDisabled || isNew) ? [] : [item.role]}
+                            defaultSelectedKeys={isDisabled ? [] : isNew ? [ITEM_ROLE.MATERIAL] : [item.role]}
                             onSelectionChange={defaultEdit}
                             isDisabled={isDisabled}
                             isRequired
+                            disallowEmptySelection
                             selectionMode={"single"}
                             variant="faded"
                             color="primary"
