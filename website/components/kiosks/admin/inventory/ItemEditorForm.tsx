@@ -1,5 +1,7 @@
 import {
+    addToast,
     Button,
+    ButtonGroup,
     Checkbox,
     Divider,
     Form,
@@ -25,7 +27,12 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { TCertification } from "common/certification";
-import { BookmarkIcon, UserIcon, GlobeAltIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon } from "@heroicons/react/24/outline";
+import {
+    BookmarkIcon,
+    UserIcon,
+    GlobeAmericasIcon,
+} from "@heroicons/react/24/solid";
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
@@ -87,13 +94,9 @@ const patchItem = async ({
     ).data;
 };
 
-const deleteItem = async ({
-    item_uuid
-}: {
-    item_uuid: string
-}) => {
-    return (await axios.delete(`/api/v3/inventory/${item_uuid}`)).data
-}
+const deleteItem = async ({ item_uuid }: { item_uuid: string }) => {
+    return (await axios.delete(`/api/v3/inventory/${item_uuid}`)).data;
+};
 
 export default function ItemEditorForm({
     item,
@@ -103,8 +106,7 @@ export default function ItemEditorForm({
     isMultiple,
     isDisabled,
     isNew,
-    onSuccess,
-    onError,
+    onUpdate = () => {},
 }: {
     item: TInventoryItem;
     certs: TCertification[];
@@ -113,10 +115,8 @@ export default function ItemEditorForm({
     isMultiple: boolean;
     isDisabled: boolean;
     isNew: boolean;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
+    onUpdate?: (isNew: boolean) => void; // Function to run when the item is updated
 }) {
-
     const [UUID, setUUID] = React.useState<string>(
         isNew ? crypto.randomUUID() : item.uuid,
     );
@@ -125,7 +125,7 @@ export default function ItemEditorForm({
 
     const mutation = useMutation({
         mutationFn: createUpdateItem,
-        onSuccess: (result: TInventoryItem) => {
+        onSuccess: (result: TInventoryItem, variables) => {
             queryClient.setQueryData(["inventory", UUID], result);
             queryClient.setQueryData(["inventory"], (old: TInventoryItem[]) => {
                 if (isNew) {
@@ -134,13 +134,18 @@ export default function ItemEditorForm({
                     return old.map((i) => (i.uuid === UUID ? result : i));
                 }
             });
-            onSuccess(
-                `Successfully ${isNew ? "created" : "updated"} item${isMultiple ? "s" : ""}`,
-            );
+            console.log({
+                title: `Successfully ${variables.isNew ? "created" : "updated"} item`,
+                color: "success",
+            });
             setHasEdits(false);
+            onUpdate(variables.isNew);
         },
         onError: (error) => {
-            onError(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
         },
     });
 
@@ -150,11 +155,17 @@ export default function ItemEditorForm({
             queryClient.setQueryData(["inventory"], (old: TInventoryItem[]) =>
                 old.filter((i) => i.uuid !== variables.item_uuid),
             );
-            onSuccess(`Successfully deleted item`);
+            addToast({
+                title: `Successfully deleted item`,
+                color: "success",
+            });
             setHasEdits(false);
         },
         onError: (error) => {
-            onError(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
         },
     });
 
@@ -170,11 +181,15 @@ export default function ItemEditorForm({
 
             // Get form data as an object.
             const data = new FormData(e.currentTarget);
-            
+
             let quantity = parseInt(data.get("quantity") as string);
             let available = item.available;
-            
-            if (Math.abs(quantity)/quantity != Math.abs(item.quantity)/item.quantity) { // quantity type change
+
+            if (
+                Math.abs(quantity) / quantity !=
+                Math.abs(item.quantity) / item.quantity
+            ) {
+                // quantity type change
                 available = quantity;
             }
 
@@ -196,7 +211,7 @@ export default function ItemEditorForm({
                 required_certifications: item.required_certifications,
                 authorized_roles: item.authorized_roles,
                 quantity: quantity,
-                available: available
+                available: available,
             };
 
             // Reset the mutation (clears any previous errors)
@@ -207,7 +222,8 @@ export default function ItemEditorForm({
         [isDisabled, item, UUID],
     );
 
-    const placeholder = (text: string) => (item.uuid || isNew ? text : `Select an item`);
+    const placeholder = (text: string) =>
+        item.uuid || isNew ? text : `Select an item`;
 
     const [hasEdits, setHasEdits] = useState(false);
 
@@ -221,7 +237,7 @@ export default function ItemEditorForm({
 
     const defaultEdit = () => setHasEdits(true);
 
-    const patchMutation = function(successExtras: () => void) {
+    const patchMutation = function (successExtras: () => void) {
         return useMutation({
             mutationFn: patchItem,
             onSuccess: (obj: TInventoryItem) => {
@@ -229,9 +245,7 @@ export default function ItemEditorForm({
                 queryClient.setQueryData(
                     ["inventory"],
                     (old: TInventoryItem[]) => {
-                        return old.map((i) =>
-                            i.uuid === obj.uuid ? obj : i,
-                        );
+                        return old.map((i) => (i.uuid === obj.uuid ? obj : i));
                     },
                 );
 
@@ -241,23 +255,28 @@ export default function ItemEditorForm({
                 alert(`Error: ${error.message}`);
             },
         });
-    }
+    };
 
     const [reqcertsOpen, setReqcertsOpen] = React.useState<boolean>(false); // whether reqcerts edit modal is open
     const [authrolesOpen, setAuthrolesOpen] = React.useState<boolean>(false); // whether authroles edit modal is open
-    const [locationEditorOpen, setLocationEditorOpen] = React.useState<boolean>(false); // whether location editor modal is open
+    const [locationEditorOpen, setLocationEditorOpen] =
+        React.useState<boolean>(false); // whether location editor modal is open
 
     const reqcertsMutation = patchMutation(() => setReqcertsOpen(false));
     const authrolesMutation = patchMutation(() => setAuthrolesOpen(false));
-    const locationEditorMutation = patchMutation(() => setLocationEditorOpen(false));
+    const locationEditorMutation = patchMutation(() =>
+        setLocationEditorOpen(false),
+    );
 
-    const [qtype, setQtype] = React.useState<boolean>(item.quantity >= 0); // type of quantity (true: numerical, false: categorical)
-    
+    const [isNumericQuantity, setQtype] = React.useState<boolean>(
+        item.quantity >= 0,
+    ); // type of quantity (true: numerical, false: categorical)
+
     return (
         <>
             <Form
                 onSubmit={onSubmit}
-                className="overflow-auto h-full justify-between gap-4"
+                className="overflow-auto h-full justify-between gap-4 relative"
             >
                 <Snippet
                     // Allow user uuid to be copied
@@ -278,7 +297,7 @@ export default function ItemEditorForm({
                 <div className="w-full grid grid-cols-2 gap-4 lg:grid-cols-1 overflow-auto">
                     <Input // Name
                         type="text"
-                        label="Name"
+                        label="Item Name"
                         name="name"
                         placeholder={placeholder("Item Name")}
                         isDisabled={isDisabled}
@@ -323,7 +342,7 @@ export default function ItemEditorForm({
                         isRequired
                         value={item.access_type?.toString()}
                         defaultSelectedKeys={
-                            (isDisabled || isNew) ? [] : [item.access_type + ""]
+                            isDisabled || isNew ? [] : [item.access_type + ""]
                         }
                         onSelectionChange={defaultEdit}
                         variant="faded"
@@ -333,7 +352,7 @@ export default function ItemEditorForm({
                             value: clsx([
                                 "placeholder:text-default-500",
                                 "placeholder:italic",
-                                "text-default-700",
+                                "text-default-500",
                             ]),
                         }}
                         className="w-full"
@@ -346,14 +365,16 @@ export default function ItemEditorForm({
                     </Select>
                     <div className="grid grid-cols-2 w-full gap-4 col-span-full">
                         <div className="flex flex-row gap-1">
-                            {qtype ? (
+                            {isNumericQuantity ? (
                                 <NumberInput
                                     label="Quantity"
                                     name="quantity"
                                     placeholder={placeholder("Quantity")}
                                     isDisabled={isDisabled}
                                     isRequired
-                                    defaultValue={isDisabled ? undefined : item.quantity}
+                                    defaultValue={
+                                        isDisabled ? undefined : item.quantity
+                                    }
                                     onValueChange={defaultEdit}
                                     minValue={0}
                                     variant="faded"
@@ -375,7 +396,11 @@ export default function ItemEditorForm({
                                     isDisabled={isDisabled}
                                     isRequired
                                     disallowEmptySelection
-                                    defaultSelectedKeys={[(item.quantity < 0 ? item.quantity : -2) + ""]}
+                                    defaultSelectedKeys={[
+                                        (item.quantity < 0
+                                            ? item.quantity
+                                            : -2) + "",
+                                    ]}
                                     onSelectionChange={defaultEdit}
                                     selectionMode={"single"}
                                     variant="faded"
@@ -402,7 +427,9 @@ export default function ItemEditorForm({
                                     showScrollIndicators={false}
                                 >
                                     <SelectItem
-                                        key={"-2" /*ITEM_RELATIVE_QUANTITY.HIGH*/}
+                                        key={
+                                            "-2" /*ITEM_RELATIVE_QUANTITY.HIGH*/
+                                        }
                                         textValue={"High"}
                                     >
                                         <span className="flex gap-2 items-center">
@@ -410,7 +437,9 @@ export default function ItemEditorForm({
                                         </span>
                                     </SelectItem>
                                     <SelectItem
-                                        key={"-1" /*ITEM_RELATIVE_QUANTITY.LOW*/}
+                                        key={
+                                            "-1" /*ITEM_RELATIVE_QUANTITY.LOW*/
+                                        }
                                         textValue={"Low"}
                                     >
                                         <span className="flex gap-2 items-center">
@@ -419,22 +448,27 @@ export default function ItemEditorForm({
                                     </SelectItem>
                                 </Select>
                             )}
-                            
-                            <motion.div className="content-center"
+
+                            <motion.div
+                                className="content-center"
                                 initial={{
-                                    color: isDisabled ? "hsl(var(--heroui-default-300))" : "hsl(var(--heroui-default-500))",
+                                    color: isDisabled
+                                        ? "hsl(var(--heroui-default-300))"
+                                        : "hsl(var(--heroui-default-500))",
                                 }}
                                 whileHover={{
-                                    color: isDisabled ? "hsl(var(--heroui-default-300))" : "hsl(var(--heroui-primary-600))",
+                                    color: isDisabled
+                                        ? "hsl(var(--heroui-default-300))"
+                                        : "hsl(var(--heroui-primary-600))",
                                 }}
                                 onClick={() => {
                                     if (isDisabled) return;
-                                    setQtype(!qtype);
+                                    setQtype(!isNumericQuantity);
                                     defaultEdit();
                                 }}
                             >
                                 <ItemQuantityIcon
-                                    qtype={qtype}
+                                    qtype={isNumericQuantity}
                                     className={`size-7 ${!isDisabled && "cursor-pointer"}`} // we don't care about the class "false" right.
                                     isDisabled={isDisabled}
                                 />
@@ -443,7 +477,13 @@ export default function ItemEditorForm({
                         <Select
                             name="role"
                             placeholder={placeholder("Item type")}
-                            defaultSelectedKeys={isDisabled ? [] : isNew ? [ITEM_ROLE.MATERIAL] : [item.role]}
+                            defaultSelectedKeys={
+                                isDisabled
+                                    ? []
+                                    : isNew
+                                      ? [ITEM_ROLE.MATERIAL]
+                                      : [item.role]
+                            }
                             onSelectionChange={defaultEdit}
                             isDisabled={isDisabled}
                             isRequired
@@ -567,7 +607,9 @@ export default function ItemEditorForm({
                         type="text"
                         label="Keywords"
                         name="keywords"
-                        placeholder={placeholder("Keywords")}
+                        placeholder={placeholder(
+                            "Search keywords separated by commas",
+                        )}
                         isDisabled={isDisabled}
                         defaultValue={item.keywords?.join(", ")}
                         onValueChange={defaultEdit}
@@ -583,68 +625,92 @@ export default function ItemEditorForm({
                             ]),
                         }}
                     />
-                    <Divider className="h-[1px] bg-default-400" />
-                    <div className="flex justify-evenly">
+                    <Divider className="hidden sm:block h-[1px] bg-default-400" />
+                    <ButtonGroup
+                        size="lg"
+                        fullWidth
+                        className="min-w-full"
+                        variant="bordered"
+                    >
+                        {/* <div className="flex justify-evenly"> */}
                         <Tooltip
-                            content={isNew ? "Create the item first, before editing locations." : "Locations"}
+                            content={
+                                isNew
+                                    ? "Create the item first, before editing locations."
+                                    : "Locations"
+                            }
                             className="w-fit p-2"
                             delay={500}
                             closeDelay={150}
                             isDisabled={isDisabled}
                         >
                             <Button
-                                variant="flat"
+                                // variant="bordered"
                                 color="primary"
-                                onPress={() => !isNew && setLocationEditorOpen(true)}
-                                isIconOnly
+                                onPress={() =>
+                                    !isNew && setLocationEditorOpen(true)
+                                }
+                                // isIconOnly
                                 isDisabled={isDisabled}
                                 className={isNew ? "opacity-disabled" : ""}
                                 data-hover={!isNew && !isDisabled}
                             >
-                                <GlobeAltIcon className="size-6" />
+                                <GlobeAmericasIcon className="size-7" />
+                                {item.locations?.length ?? 0}
                             </Button>
                         </Tooltip>
 
                         <Tooltip
-                            content={isNew ? "Create the item first, before editing required certifications." : "Required Certifications"}
+                            content={
+                                isNew
+                                    ? "Create the item first, before editing required certifications."
+                                    : "Required Certifications"
+                            }
                             className="w-fit p-2"
                             delay={500}
                             closeDelay={150}
                             isDisabled={isDisabled}
                         >
                             <Button
-                                variant="flat"
+                                // variant="flat"
                                 color="primary"
                                 onPress={() => !isNew && setReqcertsOpen(true)}
-                                isIconOnly
+                                // isIconOnly
                                 isDisabled={isDisabled}
                                 className={isNew ? "opacity-disabled" : ""}
                                 data-hover={!isNew && !isDisabled}
                             >
-                                <BookmarkIcon className="size-6" />
+                                <BookmarkIcon className="size-7" />
+                                {item.required_certifications?.length ?? 0}
                             </Button>
                         </Tooltip>
-                        
+
                         <Tooltip
-                            content={isNew ? "Create the item first, before editing authorized roles." : "Authorized Roles"}
+                            content={
+                                isNew
+                                    ? "Create the item first, before editing authorized roles."
+                                    : "Authorized Roles"
+                            }
                             className="w-fit p-2"
                             delay={500}
                             closeDelay={150}
                             isDisabled={isDisabled}
                         >
                             <Button
-                                variant="flat"
+                                // variant="flat"
                                 color="primary"
                                 onPress={() => !isNew && setAuthrolesOpen(true)}
-                                isIconOnly
+                                // isIconOnly
                                 isDisabled={isDisabled}
                                 className={isNew ? "opacity-disabled" : ""}
                                 data-hover={!isNew && !isDisabled}
                             >
-                                <UserIcon className="size-6" />
+                                <UserIcon className="size-7" />
+                                {item.authorized_roles?.length ?? 0}
                             </Button>
                         </Tooltip>
-                    </div>
+                        {/* </div> */}
+                    </ButtonGroup>
                 </div>
                 <div className="w-full mt-auto col-span-2 flex flex-row gap-2">
                     <Button
@@ -669,11 +735,28 @@ export default function ItemEditorForm({
                         variant="flat"
                         isDisabled={isDisabled || isNew}
                         isLoading={deleteMutation.isPending}
-                        onPress={() => deleteMutation.mutate({item_uuid: UUID})}
+                        onPress={() =>
+                            deleteMutation.mutate({ item_uuid: UUID })
+                        }
                     >
-                        <TrashIcon className="size-5"/>
+                        <TrashIcon className="size-5" />
                     </Button>
                 </div>
+                {(item.role === ITEM_ROLE.MACHINE ||
+                    item.role === ITEM_ROLE.AREA) && (
+                    <div
+                        className={clsx(
+                            "absolute w-fit p-4 h-fit bg-primary-200/20 m-auto",
+                            "top-0 bottom-0 left-0 right-0 rounded-xl flex gap-1",
+                            "items-center justify-center font-semibold",
+                            "text-default-foreground",
+                        )}
+                    >
+                        Edit this item in the
+                        <span className="capitalize">{item.role}</span>
+                        kiosk
+                    </div>
+                )}
             </Form>
 
             <RequiredCertsModal

@@ -1,9 +1,6 @@
 import { Tooltip } from "@heroui/react";
 
-import {
-    FaceSmileIcon,
-    FaceFrownIcon
-} from "@heroicons/react/24/outline";
+import { CubeTransparentIcon, CubeIcon } from "@heroicons/react/24/outline";
 
 export default function ItemQuantityIcon({
     qtype,
@@ -18,7 +15,7 @@ export default function ItemQuantityIcon({
 }) {
     return (
         <Tooltip
-            content={`Quantity type: ${qtype ? "numerical :)" : "categorical :("}`}
+            content={`Quantity type: ${qtype ? "numerical" : "categorical"}`}
             className="w-fit p-2"
             delay={500}
             closeDelay={150}
@@ -29,22 +26,18 @@ export default function ItemQuantityIcon({
     );
 }
 
-function getIcon(
-    qtype: boolean,
-    color: string,
-    className: string,
-) {
+function getIcon(qtype: boolean, color: string, className: string) {
     // in case of future customization
     const strokeWidth = 2;
 
     return qtype ? (
-        <FaceSmileIcon
+        <CubeIcon
             className={className}
             strokeWidth={strokeWidth}
             color={color}
         />
     ) : (
-        <FaceFrownIcon
+        <CubeTransparentIcon
             className={className}
             strokeWidth={strokeWidth}
             color={color}

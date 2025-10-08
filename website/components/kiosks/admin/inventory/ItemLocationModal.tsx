@@ -104,7 +104,7 @@ export default function ItemLocationModal<
             isOpen={isOpen}
             onOpenChange={onOpenChange}
             backdrop="blur"
-            size="xl"
+            size="3xl"
         >
             <ModalContent>
                 {(onClose) => (
@@ -132,9 +132,7 @@ export default function ItemLocationModal<
                                             "area",
                                         )(Array.from(s)[0] as string);
                                     }}
-                                    defaultSelectedKeys={[
-                                        area.area
-                                    ]}
+                                    defaultSelectedKeys={[area.area]}
                                     isRequired
                                     size="lg"
                                     variant="faded"
@@ -143,6 +141,7 @@ export default function ItemLocationModal<
                                     classNames={{
                                         value: "text-default-500",
                                     }}
+                                    className="sm:w-1/2"
                                     itemHeight={45}
                                 >
                                     {areas.map((a) => (
@@ -151,22 +150,21 @@ export default function ItemLocationModal<
                                             textValue={a.name}
                                             className="h-[45px]"
                                         >
-                                            <div>
-                                                {
-                                                    a.uuid /* todo cert tag here */
-                                                }
-                                            </div>
+                                            {a.name}
                                         </SelectItem>
                                     ))}
                                 </Select>
 
-                                <div className="w-full h-full flex gap-2 items-center">
+                                <div className="w-full h-full flex flex-row gap-2 items-center">
                                     <Input
                                         type="text"
                                         label="Container"
                                         name="container"
                                         placeholder="Container"
-                                        defaultValue={(element?.locations || [])[i]?.container}
+                                        defaultValue={
+                                            (element?.locations || [])[i]
+                                                ?.container
+                                        }
                                         onValueChange={wrapEdit(i, "container")}
                                         variant="faded"
                                         color="primary"
@@ -185,7 +183,10 @@ export default function ItemLocationModal<
                                         label="Specific"
                                         name="specific"
                                         placeholder="Specific"
-                                        defaultValue={(element?.locations || [])[i]?.specific}
+                                        defaultValue={
+                                            (element?.locations || [])[i]
+                                                ?.specific
+                                        }
                                         onValueChange={wrapEdit(i, "specific")}
                                         variant="faded"
                                         color="primary"
@@ -236,7 +237,7 @@ export default function ItemLocationModal<
                                             {
                                                 area: "",
                                                 container: "",
-                                                specific: ""
+                                                specific: "",
                                             },
                                         ]); // add a copy of the emptyCert template
                                         setHasEdits(true);

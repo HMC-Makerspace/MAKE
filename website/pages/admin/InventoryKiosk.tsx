@@ -101,13 +101,13 @@ export default function InventoryKiosk() {
                     roles={roles}
                     areas={areas}
                     isDisabled={
-                        !isNewItem && (!item ||
-                        item.role === ITEM_ROLE.MACHINE ||
-                        item.role === ITEM_ROLE.AREA)
+                        !isNewItem &&
+                        (!item ||
+                            item.role === ITEM_ROLE.MACHINE ||
+                            item.role === ITEM_ROLE.AREA)
                     }
                     isNew={isNewItem}
-                    onSuccess={() => {}}
-                    onError={() => {}}
+                    onUpdate={() => setIsNewItem(false)}
                 />
                 <InventoryTable
                     inventory={inventory ?? []}

@@ -17,8 +17,7 @@ export default function ItemEditor({
     areas,
     isNew,
     isDisabled,
-    onSuccess,
-    onError,
+    onUpdate = () => {},
 }: {
     item: TInventoryItem;
     certs: TCertification[];
@@ -26,8 +25,7 @@ export default function ItemEditor({
     areas: TArea[];
     isNew: boolean;
     isDisabled: boolean;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
+    onUpdate?: (isNew: boolean) => void;
 }) {
     const key = isNew ? "new" : item.uuid;
 
@@ -49,8 +47,7 @@ export default function ItemEditor({
                 isMultiple={false}
                 isDisabled={isDisabled}
                 isNew={isNew}
-                onSuccess={onSuccess}
-                onError={onError}
+                onUpdate={onUpdate}
             />
         </div>
     );
