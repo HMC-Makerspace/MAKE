@@ -25,7 +25,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { TCertification } from "common/certification";
-import { BookmarkIcon, UserIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
+import { BookmarkIcon, UserIcon, GlobeAltIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
@@ -87,6 +87,14 @@ const patchItem = async ({
     ).data;
 };
 
+const deleteItem = async ({
+    item_uuid
+}: {
+    item_uuid: string
+}) => {
+    return (await axios.delete(`/api/v3/inventory/${item_uuid}`)).data
+}
+
 export default function ItemEditorForm({
     item,
     certs,
@@ -129,6 +137,20 @@ export default function ItemEditorForm({
             onSuccess(
                 `Successfully ${isNew ? "created" : "updated"} item${isMultiple ? "s" : ""}`,
             );
+            setHasEdits(false);
+        },
+        onError: (error) => {
+            onError(`Error: ${error.message}`);
+        },
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: deleteItem,
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(["inventory"], (old: TInventoryItem[]) =>
+                old.filter((i) => i.uuid !== variables.item_uuid),
+            );
+            onSuccess(`Successfully deleted item`);
             setHasEdits(false);
         },
         onError: (error) => {
@@ -624,7 +646,7 @@ export default function ItemEditorForm({
                         </Tooltip>
                     </div>
                 </div>
-                <div className="w-full mt-auto col-span-full">
+                <div className="w-full mt-auto col-span-2 flex flex-row gap-2">
                     <Button
                         size="lg"
                         className="w-full"
@@ -639,6 +661,17 @@ export default function ItemEditorForm({
                             : isMultiple
                               ? "Apply Batch Edit"
                               : "Update Item"}
+                    </Button>
+                    <Button
+                        isIconOnly
+                        size="lg"
+                        color="danger"
+                        variant="flat"
+                        isDisabled={isDisabled || isNew}
+                        isLoading={deleteMutation.isPending}
+                        onPress={() => deleteMutation.mutate({item_uuid: UUID})}
+                    >
+                        <TrashIcon className="size-5"/>
                     </Button>
                 </div>
             </Form>
