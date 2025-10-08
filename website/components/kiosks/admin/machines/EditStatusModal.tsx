@@ -10,6 +10,7 @@ import {
     Popover,
     PopoverTrigger,
     PopoverContent,
+    addToast,
 } from "@heroui/react";
 import clsx from "clsx";
 import {
@@ -242,11 +243,21 @@ export default function EditStatusModal({
                     );
                 },
             );
-
+            addToast({
+                title: `Successfully updated machine status`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
             onOpenChange(false);
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger"
+            });
         },
     });
 

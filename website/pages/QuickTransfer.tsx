@@ -184,7 +184,7 @@ export default function QuickTransferPage() {
                 title:
                     error.response?.data.error ??
                     `Unknown error: ${error.message}`,
-                timeout: 5000,
+                timeout: 3000,
                 color: "danger",
             });
         },

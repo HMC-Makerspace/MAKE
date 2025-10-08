@@ -59,14 +59,19 @@ export default function AssignIDPopup({
             );
             addToast({
                 title: "Successfully updated user.",
+                timeout: 3000,
                 color: "success",
+                severity: "success",
+
             });
             setMissingIDUser(undefined);
         },
         onError: (err) => {
             addToast({
                 title: "Error: " + err,
+                timeout: 3000,
                 color: "danger",
+                severity: "danger",
             });
         },
     });

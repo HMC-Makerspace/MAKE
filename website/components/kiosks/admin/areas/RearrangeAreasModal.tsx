@@ -6,6 +6,7 @@ import {
     ModalBody,
     ModalFooter,
     Button,
+    addToast
 } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -38,9 +39,20 @@ export default function RearrangeAreasModal({
         onSuccess: (obj: TArea[]) => {
             queryClient.setQueryData(["area"], obj);
             onOpenChange(false);
+            addToast({
+                title: `Successfully rearranged areas`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                timeout: 3000,
+                color: "danger",
+                severity: "danger"
+            });
         },
     });
 

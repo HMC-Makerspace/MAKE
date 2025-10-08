@@ -93,10 +93,10 @@ export default function Area({
 
     const deleteMutation = useMutation({
         mutationFn: deleteArea,
-        onSuccess: (_, variables) => {
-            queryClient.removeQueries({
-                queryKey: ["area", variables.uuid],
-            });
+        onSuccess: (_, variables) => {       
+            // queryClient.removeQueries({
+            //     queryKey: ["area", variables.uuid],
+            // });
             queryClient.setQueryData(["area"], (old: TArea[]) => {
                 return (old ?? []).filter(
                     (area) => area.uuid !== variables.uuid,

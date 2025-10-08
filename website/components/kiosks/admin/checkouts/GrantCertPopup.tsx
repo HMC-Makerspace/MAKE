@@ -1,4 +1,4 @@
-import { Button, Form, Modal, ModalContent, NumberInput } from "@heroui/react";
+import { Button, Form, Modal, ModalContent, NumberInput, addToast } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import {
@@ -71,6 +71,13 @@ export default function GrantCertPopup({
             setCert();
             setGranting(true);
             onOpenChange(false);
+            
+            addToast({
+                title: `Successfully ${granting ? "granted" : "revoked"} certificate`,
+                timeout: 3000,
+                color: `${granting ? "success" : "warning"}`,
+                severity: `${granting ? "success" : "warning"}`,
+            });
         },
         onError: (data) => {
             alert("Error!"), console.log("error data", data);

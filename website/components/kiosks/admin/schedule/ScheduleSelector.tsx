@@ -187,6 +187,12 @@ export default function ScheduleSelector({
                 }
             });
             setSelectedSchedules(new Set([data.uuid]));
+            addToast({
+                title: `Successfully created schedule`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
         },
     });
 
@@ -204,6 +210,7 @@ export default function ScheduleSelector({
                 });
             });
             setSelectedSchedules(new Set([data.uuid]));
+
         },
     });
 
@@ -453,7 +460,7 @@ export default function ScheduleSelector({
                 )}
                 <Input
                     placeholder="Select Schedule"
-                    isDisabled={!schedule}
+                    // isDisabled={!schedule}
                     value={scheduleName}
                     onValueChange={setScheduleName}
                     onBlur={(blurEvent) => {

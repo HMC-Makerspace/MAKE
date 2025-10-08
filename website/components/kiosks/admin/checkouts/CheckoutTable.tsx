@@ -8,6 +8,7 @@ import {
     DropdownItem,
     Spinner,
     Tooltip,
+    addToast,
 } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
@@ -110,6 +111,13 @@ export default function CheckoutTable({
             );
             // Update item availability
             queryClient.refetchQueries({ queryKey: ["inventory"] });
+            addToast({
+                title: `Successfully returned checkout`,
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
+
         },
     });
     const undoMutation = useMutation({
@@ -121,6 +129,12 @@ export default function CheckoutTable({
             );
             // Update item availability
             queryClient.refetchQueries({ queryKey: ["inventory"] });
+            addToast({
+                title: `Undid checkout return`,
+                timeout: 3000,
+                color: "warning",
+                severity: "warning",
+            });
         },
     });
     // The set of columns that are visible
