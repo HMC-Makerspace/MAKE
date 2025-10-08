@@ -44,17 +44,21 @@ export default function InventoryKiosk() {
         queryKey: ["user", "role"],
         refetchOnWindowFocus: false,
     });
-    const { data: requestingUser, isLoading: reqUserLoading } = useQuery<TUser>({
-        queryKey: ["user", "self"],
-        refetchOnWindowFocus: false,
-    });
-    const { data: scopes, isLoading: scopesLoading, isError: scopesError } = useQuery<API_SCOPE[]>(
+    const { data: requestingUser, isLoading: reqUserLoading } = useQuery<TUser>(
         {
-            queryKey: ["user", "self", "scopes"],
+            queryKey: ["user", "self"],
             refetchOnWindowFocus: false,
-            retry: false,
-        }
+        },
     );
+    const {
+        data: scopes,
+        isLoading: scopesLoading,
+        isError: scopesError,
+    } = useQuery<API_SCOPE[]>({
+        queryKey: ["user", "self", "scopes"],
+        refetchOnWindowFocus: false,
+        retry: false,
+    });
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
             queryKey: ["certification"],
@@ -70,10 +74,15 @@ export default function InventoryKiosk() {
         new Set([""]),
     );
 
-    const { data: restocks, isLoading: restocksLoading, isError } = useQuery<TRestockRequest[]>({
-            queryKey: ["restock"],
-            refetchOnWindowFocus: false,
-        });
+    const [isNewItem, setIsNewItem] = React.useState<boolean>(false);
+    const {
+        data: restocks,
+        isLoading: restocksLoading,
+        isError,
+    } = useQuery<TRestockRequest[]>({
+        queryKey: ["restock"],
+        refetchOnWindowFocus: false,
+    });
 
     if (
         !inventory ||
@@ -90,7 +99,6 @@ export default function InventoryKiosk() {
         restocksLoading ||
         reqUserLoading ||
         scopesLoading
-
     ) {
         return (
             <div className="w-full h-screen flex justify-center py-auto">
@@ -104,7 +112,6 @@ export default function InventoryKiosk() {
             onSelectionChange(new Set([""]));
         } else {
             const keys = Array.from(s);
-            console.log(keys);
             onSelectionChange(new Set([keys[keys.length - 1]]));
         }
     };
@@ -123,14 +130,15 @@ export default function InventoryKiosk() {
                     item={item ?? DEFAULT_ITEM}
                     certs={certs}
                     roles={roles}
+                    areas={areas}
                     isDisabled={
-                        !item ||
-                        item.role === ITEM_ROLE.MACHINE ||
-                        item.role === ITEM_ROLE.AREA
+                        !isNewItem &&
+                        (!item ||
+                            item.role === ITEM_ROLE.MACHINE ||
+                            item.role === ITEM_ROLE.AREA)
                     }
-                    isNew={false}
-                    onSuccess={() => {}}
-                    onError={() => {}}
+                    isNew={isNewItem}
+                    onUpdate={() => setIsNewItem(false)}
                 />
                 <InventoryTable
                     requestingUser={requestingUser}
@@ -144,7 +152,7 @@ export default function InventoryKiosk() {
                     onSelectionChange={betterSelectionChange}
                     isLoading={inventoryLoading}
                     editable
-                    onCreate={() => {}}
+                    onCreate={setIsNewItem}
                 />
             </div>
         </AdminLayout>

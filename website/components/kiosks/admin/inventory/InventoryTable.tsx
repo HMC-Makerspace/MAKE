@@ -16,13 +16,6 @@ import {
     MagnifyingGlassIcon as SearchIcon,
     ChevronDownIcon,
     PlusIcon,
-    PencilSquareIcon,
-    WrenchScrewdriverIcon,
-    CubeIcon,
-    BriefcaseIcon,
-    MapPinIcon,
-    RadioIcon,
-    QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
 import {
     ITEM_ACCESS_DESCRIPTORS,
@@ -112,7 +105,7 @@ export default function InventoryTable({
     };
     emptyContent?: string;
     editable?: React.ReactNode;
-    onCreate?: () => void;
+    onCreate?: (state: boolean) => void;
 }) {
     // The set of columns that are visible
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
@@ -161,6 +154,20 @@ export default function InventoryTable({
         setSearch(value);
     }, []);
 
+    const modifiedSelectionChange = (selectedKeys: Selection) => {
+        // If the selection changes, we won't be creating a new user
+        if (onCreate) onCreate(false);
+        if (selectedKeys === "all") {
+            onSelectionChange(new Set(filteredItems.map((i) => i.uuid)));
+        } else {
+            onSelectionChange(selectedKeys);
+        }
+    };
+
+    const createItem = () => {
+        onSelectionChange(new Set());
+        if (onCreate) onCreate(true);
+    };
     const DEFAULT_ITEM: TInventoryItem = {
         uuid: "",
         name: "",
@@ -260,7 +267,7 @@ export default function InventoryTable({
                                 color="primary"
                                 isDisabled={isLoading}
                                 startContent={<PlusIcon className="size-6" />}
-                                onPress={onCreate}
+                                onPress={createItem}
                             >
                                 Create
                             </Button>
@@ -278,7 +285,7 @@ export default function InventoryTable({
                 columns={columns}
                 visibleColumns={visibleColumns}
                 selectedKeys={selectedKeys}
-                onSelectionChange={onSelectionChange}
+                onSelectionChange={modifiedSelectionChange}
                 doubleClickAction={doubleClickAction}
                 multiSelect={multiSelect}
                 showSelectionCheckboxes={false}
@@ -364,7 +371,7 @@ export default function InventoryTable({
                         </div>
                     ),
                     authorized_roles: (i) => (
-                        <div className="flex flex-row gap-2 overflow-auto max-w-20">
+                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
                             {i.authorized_roles?.map((role) => (
                                 <UserRole
                                     key={role}
