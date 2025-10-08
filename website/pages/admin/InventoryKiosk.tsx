@@ -44,17 +44,21 @@ export default function InventoryKiosk() {
         queryKey: ["user", "role"],
         refetchOnWindowFocus: false,
     });
-    const { data: requestingUser, isLoading: reqUserLoading } = useQuery<TUser>({
-        queryKey: ["user", "self"],
-        refetchOnWindowFocus: false,
-    });
-    const { data: scopes, isLoading: scopesLoading, isError: scopesError } = useQuery<API_SCOPE[]>(
+    const { data: requestingUser, isLoading: reqUserLoading } = useQuery<TUser>(
         {
-            queryKey: ["user", "self", "scopes"],
+            queryKey: ["user", "self"],
             refetchOnWindowFocus: false,
-            retry: false,
-        }
+        },
     );
+    const {
+        data: scopes,
+        isLoading: scopesLoading,
+        isError: scopesError,
+    } = useQuery<API_SCOPE[]>({
+        queryKey: ["user", "self", "scopes"],
+        refetchOnWindowFocus: false,
+        retry: false,
+    });
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
             queryKey: ["certification"],
@@ -71,10 +75,14 @@ export default function InventoryKiosk() {
     );
 
     const [isNewItem, setIsNewItem] = React.useState<boolean>(false);
-    const { data: restocks, isLoading: restocksLoading, isError } = useQuery<TRestockRequest[]>({
-            queryKey: ["restock"],
-            refetchOnWindowFocus: false,
-        });
+    const {
+        data: restocks,
+        isLoading: restocksLoading,
+        isError,
+    } = useQuery<TRestockRequest[]>({
+        queryKey: ["restock"],
+        refetchOnWindowFocus: false,
+    });
 
     if (
         !inventory ||
@@ -91,7 +99,6 @@ export default function InventoryKiosk() {
         restocksLoading ||
         reqUserLoading ||
         scopesLoading
-
     ) {
         return (
             <div className="w-full h-screen flex justify-center py-auto">

@@ -9,6 +9,7 @@ import { TCertification } from "common/certification";
 import { TUserRole } from "common/user";
 import clsx from "clsx";
 import { TArea } from "common/area";
+import { motion } from "framer-motion";
 
 export default function ItemEditor({
     item,
@@ -33,7 +34,7 @@ export default function ItemEditor({
         <div
             className={clsx(
                 "flex flex-col rounded-xl bg-content1 p-4",
-                "h-1/3 lg:h-full",
+                "h-1/3 lg:h-full relative",
                 "w-full lg:w-2/3 xl:w-1/2 2xl:w-1/3",
             )}
         >
@@ -49,6 +50,30 @@ export default function ItemEditor({
                 isNew={isNew}
                 onUpdate={onUpdate}
             />
+            <motion.div
+                initial={{
+                    opacity:
+                        item.role === ITEM_ROLE.MACHINE ||
+                        item.role === ITEM_ROLE.AREA
+                            ? 100
+                            : 0,
+                }}
+                animate={{
+                    opacity:
+                        item.role === ITEM_ROLE.MACHINE ||
+                        item.role === ITEM_ROLE.AREA
+                            ? 100
+                            : 0,
+                }}
+                className={clsx(
+                    "absolute w-fit p-4 h-fit bg-primary-200/20 m-auto",
+                    "top-0 bottom-0 left-0 right-0 rounded-xl flex gap-1",
+                    "items-center justify-center font-semibold",
+                    "text-default-foreground",
+                )}
+            >
+                Edit this item in its associated kiosk
+            </motion.div>
         </div>
     );
 }

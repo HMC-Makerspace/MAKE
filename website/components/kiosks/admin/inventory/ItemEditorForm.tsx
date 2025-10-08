@@ -22,6 +22,7 @@ import {
     ITEM_ROLE,
     ITEM_ACCESS_TYPE,
     ITEM_RELATIVE_QUANTITY,
+    ITEM_ACCESS_DESCRIPTORS,
 } from "../../../../../common/inventory";
 import React, { useState } from "react";
 import axios from "axios";
@@ -41,21 +42,6 @@ import { motion } from "framer-motion";
 import ItemQuantityIcon from "./ItemQuantityIcon";
 import ItemLocationModal from "./ItemLocationModal";
 import { TArea } from "common/area";
-
-// export
-const roles = [
-    { key: "MATERIAL", label: "Material" },
-    { key: "TOOL", label: "Tool" },
-    { key: "KIT", label: "Kit" },
-];
-
-// export
-const accessTypes = [
-    { key: 0, label: "Use in Space" },
-    { key: 1, label: "Checkout in Space" },
-    { key: 2, label: "Checkout and Take Home" },
-    { key: 3, label: "Take Home" },
-];
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateItem = async ({
@@ -340,9 +326,8 @@ export default function ItemEditorForm({
                         placeholder={placeholder("Access Type")}
                         isDisabled={isDisabled}
                         isRequired
-                        value={item.access_type?.toString()}
                         defaultSelectedKeys={
-                            isDisabled || isNew ? [] : [item.access_type + ""]
+                            !item.uuid || isNew ? [] : [item.access_type + ""]
                         }
                         onSelectionChange={defaultEdit}
                         variant="faded"
@@ -357,8 +342,8 @@ export default function ItemEditorForm({
                         }}
                         className="w-full"
                     >
-                        {accessTypes.map((accessType) => (
-                            <SelectItem key={accessType.key}>
+                        {ITEM_ACCESS_DESCRIPTORS.map((accessType) => (
+                            <SelectItem key={accessType.type}>
                                 {accessType.label}
                             </SelectItem>
                         ))}
@@ -372,9 +357,7 @@ export default function ItemEditorForm({
                                     placeholder={placeholder("Quantity")}
                                     isDisabled={isDisabled}
                                     isRequired
-                                    defaultValue={
-                                        isDisabled ? undefined : item.quantity
-                                    }
+                                    defaultValue={item.quantity}
                                     onValueChange={defaultEdit}
                                     minValue={0}
                                     variant="faded"
@@ -427,9 +410,7 @@ export default function ItemEditorForm({
                                     showScrollIndicators={false}
                                 >
                                     <SelectItem
-                                        key={
-                                            "-2" /*ITEM_RELATIVE_QUANTITY.HIGH*/
-                                        }
+                                        key={ITEM_RELATIVE_QUANTITY.HIGH}
                                         textValue={"High"}
                                     >
                                         <span className="flex gap-2 items-center">
@@ -437,9 +418,7 @@ export default function ItemEditorForm({
                                         </span>
                                     </SelectItem>
                                     <SelectItem
-                                        key={
-                                            "-1" /*ITEM_RELATIVE_QUANTITY.LOW*/
-                                        }
+                                        key={ITEM_RELATIVE_QUANTITY.LOW}
                                         textValue={"Low"}
                                     >
                                         <span className="flex gap-2 items-center">
@@ -478,7 +457,7 @@ export default function ItemEditorForm({
                             name="role"
                             placeholder={placeholder("Item type")}
                             defaultSelectedKeys={
-                                isDisabled
+                                !item.uuid
                                     ? []
                                     : isNew
                                       ? [ITEM_ROLE.MATERIAL]
@@ -742,21 +721,6 @@ export default function ItemEditorForm({
                         <TrashIcon className="size-5" />
                     </Button>
                 </div>
-                {(item.role === ITEM_ROLE.MACHINE ||
-                    item.role === ITEM_ROLE.AREA) && (
-                    <div
-                        className={clsx(
-                            "absolute w-fit p-4 h-fit bg-primary-200/20 m-auto",
-                            "top-0 bottom-0 left-0 right-0 rounded-xl flex gap-1",
-                            "items-center justify-center font-semibold",
-                            "text-default-foreground",
-                        )}
-                    >
-                        Edit this item in the
-                        <span className="capitalize">{item.role}</span>
-                        kiosk
-                    </div>
-                )}
             </Form>
 
             <RequiredCertsModal
