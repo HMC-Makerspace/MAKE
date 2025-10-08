@@ -81,7 +81,6 @@ export default function InventoryKiosk() {
             onSelectionChange(new Set([""]));
         } else {
             const keys = Array.from(s);
-            console.log(keys);
             onSelectionChange(new Set([keys[keys.length - 1]]));
         }
     };
