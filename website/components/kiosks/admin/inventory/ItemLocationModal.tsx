@@ -135,7 +135,7 @@ export default function ItemLocationModal<
                                         )(Array.from(s)[0] as string);
                                     }}
                                     defaultSelectedKeys={[
-                                        (element?.locations || [])[i]?.area,
+                                        area.area
                                     ]}
                                     isRequired
                                     size="lg"
