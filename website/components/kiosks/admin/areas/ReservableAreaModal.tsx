@@ -152,7 +152,6 @@ export default function ReservableConfirmationModal({
 
                                 <div className="w-full h-full flex gap-2 items-center">
                                     <NumberInput
-                                        type="text"
                                         label="Minimum Level"
                                         name="required_level"
                                         placeholder="0 for any level"

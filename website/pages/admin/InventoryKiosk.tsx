@@ -15,9 +15,11 @@ import {
 } from "@heroui/react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import React from "react";
-import { TUserRole } from "common/user";
+import { TUser, TUserRole } from "common/user";
 import { TCertification } from "common/certification";
 import { TArea } from "common/area";
+import { TRestockRequest } from "../../../common/restock";
+import { API_SCOPE } from "common/global";
 
 const DEFAULT_ITEM: TInventoryItem = {
     uuid: "",
@@ -42,6 +44,17 @@ export default function InventoryKiosk() {
         queryKey: ["user", "role"],
         refetchOnWindowFocus: false,
     });
+    const { data: requestingUser, isLoading: reqUserLoading } = useQuery<TUser>({
+        queryKey: ["user", "self"],
+        refetchOnWindowFocus: false,
+    });
+    const { data: scopes, isLoading: scopesLoading, isError: scopesError } = useQuery<API_SCOPE[]>(
+        {
+            queryKey: ["user", "self", "scopes"],
+            refetchOnWindowFocus: false,
+            retry: false,
+        }
+    );
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
             queryKey: ["certification"],
@@ -58,16 +71,27 @@ export default function InventoryKiosk() {
     );
 
     const [isNewItem, setIsNewItem] = React.useState<boolean>(false);
+    const { data: restocks, isLoading: restocksLoading, isError } = useQuery<TRestockRequest[]>({
+            queryKey: ["restock"],
+            refetchOnWindowFocus: false,
+        });
 
     if (
         !inventory ||
         !roles ||
         !certs ||
         !areas ||
+        !restocks ||
+        !requestingUser ||
+        !scopes ||
         inventoryLoading ||
         rolesLoading ||
         certsLoading ||
-        areasLoading
+        areasLoading ||
+        restocksLoading ||
+        reqUserLoading ||
+        scopesLoading
+
     ) {
         return (
             <div className="w-full h-screen flex justify-center py-auto">
@@ -110,10 +134,13 @@ export default function InventoryKiosk() {
                     onUpdate={() => setIsNewItem(false)}
                 />
                 <InventoryTable
+                    requestingUser={requestingUser}
+                    scopes={scopes}
                     inventory={inventory ?? []}
                     roles={roles}
                     certifications={certs}
                     areas={areas}
+                    restocks={restocks}
                     selectedKeys={selectedItems}
                     onSelectionChange={betterSelectionChange}
                     isLoading={inventoryLoading}

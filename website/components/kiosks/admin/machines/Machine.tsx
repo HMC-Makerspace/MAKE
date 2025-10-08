@@ -102,7 +102,7 @@ export default function Machine({
         onSuccess: (obj: TMachine) => {
             queryClient.setQueryData(["machine", machine.uuid], obj);
             queryClient.setQueryData(["machine"], (old: TMachine[]) => {
-                return old.map((machine) =>
+                return (old ?? []).map((machine) =>
                     machine.uuid === obj.uuid ? obj : machine,
                 );
             });
@@ -122,7 +122,7 @@ export default function Machine({
                 queryKey: ["machine", variables.uuid],
             });
             queryClient.setQueryData(["machine"], (old: TMachine[]) => {
-                return old.filter((m) => m.uuid !== variables.uuid);
+                return (old ?? []).filter((m) => m.uuid !== variables.uuid);
             });
         },
         onError: (error) => {
@@ -154,7 +154,7 @@ export default function Machine({
                         editable={fullEdit}
                     />
 
-                    <div className="absolute w-full h-fit top-0 box-border border-4 border-transparent">
+                    <div className="absolute w-full h-fit top-0 box-border border-4 border-transparent z-20">
                         <div className="w-full h-fit p-1 overflow-auto">
                             {fullEdit ? (
                                 <>
@@ -401,7 +401,7 @@ export default function Machine({
                     machine.documents && (
                         <div
                             className={clsx(
-                                "self-center w-4/5 gap-3 flex flex-row",
+                                "self-center w-4/5 gap-3 flex sm:flex-row flex-col",
                                 !machine.documents ||
                                     machine.documents.length == 0
                                     ? ""

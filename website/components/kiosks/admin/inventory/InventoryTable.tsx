@@ -9,6 +9,7 @@ import {
     DropdownItem,
     Spinner,
     Tooltip,
+    useDisclosure,
 } from "@heroui/react";
 import { useInfiniteScroll } from "@heroui/use-infinite-scroll";
 import {
@@ -18,6 +19,7 @@ import {
 } from "@heroicons/react/24/outline";
 import {
     ITEM_ACCESS_DESCRIPTORS,
+    ITEM_ACCESS_TYPE,
     ITEM_RELATIVE_QUANTITY,
     ITEM_ROLE,
     TInventoryItem,
@@ -25,14 +27,19 @@ import {
 import MAKETable from "../../../Table";
 import Fuse from "fuse.js";
 import React from "react";
-import { TUserRole } from "common/user";
+import { TUser, TUserRole } from "common/user";
 import { TCertification } from "common/certification";
+import { TRestockRequest } from "../../../../../common/restock";
+import { API_SCOPE } from "../../../../../common/global.ts";
+import { verifyScopes } from "../../../../utils.tsx";
 import clsx from "clsx";
 import CertificationTag from "../certifications/CertificationTag";
 import UserRole from "../../../user/UserRole";
 import { TArea } from "common/area";
 import ItemLocationChip from "./ItemLocationChip";
 import ItemRoleIcon from "./ItemRoleIcon";
+import RestockRequestModal from "../restock/RestockRequestModal";
+import PopupAlert from "../../../PopupAlert";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" },
@@ -52,10 +59,13 @@ const baseColumns = [
 ];
 
 export default function InventoryTable({
+    requestingUser,
+    scopes = [],
     inventory,
     roles,
     certifications,
     areas,
+    restocks,
     selectedKeys,
     onSelectionChange,
     doubleClickAction,
@@ -76,10 +86,13 @@ export default function InventoryTable({
     emptyContent,
     onCreate = undefined,
 }: {
+    requestingUser?: TUser;
+    scopes?: API_SCOPE[];
     inventory: TInventoryItem[];
     roles: TUserRole[];
     certifications: TCertification[];
     areas: TArea[];
+    restocks?: TRestockRequest[];
     selectedKeys: Selection;
     onSelectionChange: (selectedKeys: Selection) => void;
     doubleClickAction?: (key: React.Key) => void;
@@ -99,6 +112,13 @@ export default function InventoryTable({
         new Set(defaultColumns),
     );
     const [search, setSearch] = React.useState<string>("");
+
+    const [popupMessage, setPopupMessage] = React.useState<string | undefined>(
+        undefined,
+    );
+    const [popupType, setPopupType] = React.useState<"success" | "danger">(
+        "success",
+    );
 
     const columns = baseColumns.concat(extraColumns);
 
@@ -148,6 +168,33 @@ export default function InventoryTable({
         onSelectionChange(new Set());
         if (onCreate) onCreate(true);
     };
+    const DEFAULT_ITEM: TInventoryItem = {
+        uuid: "",
+        name: "",
+        role: ITEM_ROLE.TOOL,
+        quantity: 0,
+        available: 0,
+        access_type: ITEM_ACCESS_TYPE.USE_IN_SPACE,
+        locations: [],
+    };
+
+    const selectedItem =
+        selectedKeys == "all"
+            ? DEFAULT_ITEM
+            : (inventory.filter((item) => selectedKeys.has(item.uuid))[0] ??
+              DEFAULT_ITEM);
+
+    // Modal state for restock request form
+    const {
+        isOpen: restockIsOpen,
+        onOpen: restockOnOpen,
+        onOpenChange: restockOnOpenChange,
+    } = useDisclosure();
+
+    const restockButtonAccess =
+        scopes &&
+        scopes.length !== 0 &&
+        verifyScopes(scopes, [API_SCOPE.GET_ALL_RESTOCKS, API_SCOPE.CREATE_RESTOCK]);
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -202,6 +249,18 @@ export default function InventoryTable({
                                 </DropdownMenu>
                             </Dropdown>
                         </div>
+
+                        {restockButtonAccess && (
+                            <Button
+                                startContent={<PlusIcon className="size-6" />}
+                                isDisabled={selectedItem.name === ""}
+                                onPress={() => {
+                                    restockOnOpen();
+                                }}
+                            >
+                                Restock
+                            </Button>
+                        )}
 
                         {editable && (
                             <Button
@@ -336,6 +395,30 @@ export default function InventoryTable({
                         <Spinner color="white" ref={ref} />
                     </div>
                 )}
+            />
+
+            {restocks &&
+                <RestockRequestModal
+                    requestingUser={requestingUser}
+                    restocks={restocks}
+                    restockSelected={selectedItem}
+                    editIsOpen={restockIsOpen}
+                    editOnOpenChange={restockOnOpenChange}
+                    onSuccess={() => {
+                        setPopupType("success");
+                        setPopupMessage("Restock request submitted");
+                    }}
+                    onError={() => {
+                        setPopupType("danger");
+                        setPopupMessage("Error submitting restock request");
+                    }}
+                />
+            }
+            <PopupAlert
+                isOpen={!!popupMessage}
+                onOpenChange={() => setPopupMessage(undefined)}
+                color={popupType}
+                description={popupMessage}
             />
         </div>
     );

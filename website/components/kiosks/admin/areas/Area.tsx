@@ -68,7 +68,9 @@ export default function Area({
         onSuccess: (obj: TArea) => {
             queryClient.setQueryData(["area", area.uuid], obj);
             queryClient.setQueryData(["area"], (old: TArea[]) => {
-                return old.map((area) => (area.uuid === obj.uuid ? obj : area));
+                return (old ?? []).map((area) =>
+                    area.uuid === obj.uuid ? obj : area,
+                );
             });
             editDocsClose();
         },
@@ -84,7 +86,9 @@ export default function Area({
                 queryKey: ["area", variables.uuid],
             });
             queryClient.setQueryData(["area"], (old: TArea[]) => {
-                return old.filter((area) => area.uuid !== variables.uuid);
+                return (old ?? []).filter(
+                    (area) => area.uuid !== variables.uuid,
+                );
             });
         },
         onError: (error) => {
@@ -536,7 +540,7 @@ export default function Area({
                                         />
                                     );
                                 } else {
-                                    return <></>;
+                                    return <div key={machine_uuid}></div>;
                                 }
                             })}
                     </div>

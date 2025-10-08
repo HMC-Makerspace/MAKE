@@ -124,7 +124,7 @@ export default function UserInfo({
             <div
                 className={clsx(
                     "rounded-lg bg-default-100 border-2 border-default-200 p-2",
-                    "col-span-3 flex flex-wrap gap-2",
+                    "col-span-3 flex flex-wrap gap-2 overflow-auto max-h-[30vh]",
                 )}
             >
                 {user_data?.active_certificates &&

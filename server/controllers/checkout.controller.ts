@@ -11,7 +11,12 @@ import mongoose from "mongoose";
 import { InventoryItem } from "models/inventory.model";
 import { Machine } from "models/machine.model";
 import { Area } from "models/area.model";
-import { InventoryItemUUID, ITEM_ROLE, TInventoryItem } from "common/inventory";
+import {
+    InventoryItemUUID,
+    ITEM_RELATIVE_QUANTITY,
+    ITEM_ROLE,
+    TInventoryItem,
+} from "common/inventory";
 import { getUser } from "./user.controller";
 import { StatusCodes } from "http-status-codes";
 import { Response } from "express";
@@ -151,14 +156,15 @@ export async function validateCheckout(
                 };
             }
         }
-        // If the item has a quantity that is less than the maximum quantity
-        // already checked out during this duration *plus* the amount requested
-        // for this checkout, it will be unavailable.
+        // If the item has a non-relative quantity that is less than the maximum
+        // quantity already checked out during this duration *plus* the amount
+        // requested for this checkout, it will be unavailable.
         if (
+            !(item.quantity in ITEM_RELATIVE_QUANTITY) &&
             item.quantity <
-            (deltas.get(item.uuid) ?? 0) +
-                (checkout_obj.items.find((c) => c.item_uuid === item.uuid)
-                    ?.quantity ?? 0)
+                (deltas.get(item.uuid) ?? 0) +
+                    (checkout_obj.items.find((c) => c.item_uuid === item.uuid)
+                        ?.quantity ?? 0)
         ) {
             // Item will be not be available some time during this reservation
             return {
@@ -534,7 +540,7 @@ export async function checkoutAvailabilityCron(logger: Logger) {
     await clearMachineReservations();
     await clearAreaReservations();
     for (const checkout of active_checkouts) {
-        updateItemAvailabilities(checkout.items, logger);
+        await updateItemAvailabilities(checkout.items, logger);
     }
 }
 

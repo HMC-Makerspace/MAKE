@@ -31,6 +31,7 @@ const ScheduleConfig = new mongoose.Schema<TScheduleConfig>(
         increment_sec: { type: Number, required: true },
         first_names_only: { type: Boolean, required: false },
         timezone: { type: String, required: true },
+        locale: { type: String, required: true },
     },
     { _id: false },
 );

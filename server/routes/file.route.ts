@@ -355,6 +355,7 @@ router.post(
     async (req: Request<{ college_id: string }>, res: FilesUploadResponse) => {
         const college_id = req.params.college_id;
         const files = req.files as Express.Multer.File[];
+        const requesting_uuid: string = req.user?.uuid as string;
 
         // If no file is provided, no upload occurred--
         if (!files) {
@@ -399,6 +400,22 @@ router.post(
                 req,
                 res,
                 `Config not found. Contact an administrator.`,
+            );
+            return;
+        }
+        // Check that the user is authorized to create a file
+        if (
+            !(await verifyRequest(
+                requesting_uuid,
+                API_SCOPE.CREATE_FILE,
+                requesting_uuid == user.uuid && API_SCOPE.CREATE_OWN_FILE,
+            ))
+        ) {
+            await deleteFilesOnServer(
+                file_paths,
+                req,
+                res,
+                `User not authorized to upload files.`,
             );
             return;
         }

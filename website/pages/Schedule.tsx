@@ -82,6 +82,8 @@ export default function SchedulePage() {
                     ),
                 )
                 .map((w) => w.uuid);
+
+            console.log(certified_workers);
             const certified_shifts = schedule?.shifts
                 .filter((s) => certified_workers.includes(s.assignee))
                 .map(

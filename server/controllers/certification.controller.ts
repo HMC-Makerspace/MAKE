@@ -1,5 +1,9 @@
 import { API_SCOPE, UUID } from "common/global";
-import { CertificationUUID, TCertification } from "common/certification";
+import {
+    CERTIFICATION_VISIBILITY,
+    CertificationUUID,
+    TCertification,
+} from "common/certification";
 import { Certification } from "models/certification.model";
 import mongoose from "mongoose";
 import { getUser } from "./user.controller";
@@ -48,6 +52,8 @@ export async function getCertificationsVisibleToUser(
         return getPublicCertifications();
     }
 
+    const Certifications = mongoose.model("Certification", Certification);
+
     // If the user is an admin or can get all certifications, return all
     if (
         await verifyRequest(
@@ -56,20 +62,25 @@ export async function getCertificationsVisibleToUser(
             API_SCOPE.GET_ALL_CERTIFICATIONS,
         )
     ) {
-        return getCertifications();
+        return await Certifications.find({
+            visibility: CERTIFICATION_VISIBILITY.PUBLIC,
+        });
     }
 
     // Otherwise, find all items that the user can access
     const role_uuids = user.active_roles.map((log) => log.role_uuid);
 
-    const Certifications = mongoose.model("Certification", Certification);
     // Find all items that require no roles or which require roles that the
     // user has at least one of
-    // TODO: Remove private certs
     return await Certifications.find({
-        $or: [
-            { authorized_roles: null },
-            { authorized_roles: { $elemMatch: { $in: role_uuids } } },
+        $and: [
+            { visibility: CERTIFICATION_VISIBILITY.PUBLIC },
+            {
+                $or: [
+                    { authorized_roles: null },
+                    { authorized_roles: { $elemMatch: { $in: role_uuids } } },
+                ],
+            },
         ],
     });
 }
@@ -83,6 +94,7 @@ async function getPublicCertifications(): Promise<TCertification[]> {
     const Certifications = mongoose.model("Certification", Certification);
     // Only return certifications that have require no roles
     return Certifications.find({
+        visibility: { $ne: CERTIFICATION_VISIBILITY.SCHEDULE },
         authorized_roles: null,
     });
 }

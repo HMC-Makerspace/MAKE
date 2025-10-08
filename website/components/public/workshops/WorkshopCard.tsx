@@ -103,7 +103,10 @@ export default function WorkshopCard({
         },
     });
 
-    const startZDT = timestampToZonedDateTime(workshop.timestamp_start);
+    const startZDT = timestampToZonedDateTime(
+        workshop.timestamp_start,
+        config?.schedule.timezone,
+    );
     const endZDT = timestampToZonedDateTime(
         workshop.timestamp_end,
         config?.schedule.timezone,
@@ -121,25 +124,21 @@ export default function WorkshopCard({
         ? workshop.rsvp_list.length >= workshop.capacity
         : false;
 
-    const date_formatter = useMemo(
-        () =>
-            new Intl.DateTimeFormat(config?.schedule.timezone, {
-                month: "long",
-                day: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-            }),
-        [config?.schedule.timezone],
-    );
+    const date_formatter =
+        config?.schedule.locale &&
+        new DateFormatter(config.schedule.locale, {
+            month: "long",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+        });
 
-    const time_formatter = useMemo(
-        () =>
-            new Intl.DateTimeFormat(config?.schedule.timezone, {
-                hour: "numeric",
-                minute: "2-digit",
-            }),
-        [config?.schedule.timezone],
-    );
+    const time_formatter =
+        config?.schedule.locale &&
+        new DateFormatter(config.schedule.locale, {
+            hour: "numeric",
+            minute: "2-digit",
+        });
 
     return (
         <Card id={workshop.title} key={workshop.title} className="h-[44dvh]">
@@ -170,8 +169,8 @@ export default function WorkshopCard({
                     {date_formatter &&
                         time_formatter &&
                         (isSameDay
-                            ? `${date_formatter.format(startZDT.toDate())} – ${time_formatter.format(endZDT.toDate())}`
-                            : `${date_formatter.format(startZDT.toDate())} — ${date_formatter.format(endZDT.toDate())}`)}
+                            ? `${date_formatter.format(startZDT.toDate())} - ${time_formatter.format(endZDT.toDate())}`
+                            : `${date_formatter.format(startZDT.toDate())} - ${date_formatter.format(endZDT.toDate())}`)}
                 </div>
                 <div
                     id="description"

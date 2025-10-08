@@ -87,114 +87,136 @@ export default function WorkshopPeopleModal({
   
 
   return (
-    <Modal
-      isOpen={isOpen}
-      placement="top-center"
-      onOpenChange={onOpenChange}
-      className="flex flex-col"
-      size="lg"
+      <Modal
+          isOpen={isOpen}
+          placement="top-center"
+          onOpenChange={onOpenChange}
+          className="flex flex-col max-h-[85%]"
+          size="lg"
       >
-        <ModalContent
-        >
-            <ModalHeader>
-                People
-            </ModalHeader>
-            
-            <ModalBody className='flex flex-col items-center gap-0'>
-                <Tabs 
-                aria-label="Options"
-                size="md"
-                >
-                    <Tab 
-                        key="signups" 
-                        title="Signups"
-                        className='w-full mb-0'
-                    >
-                        {rsvpList.length > 0 ? (
-                        <MAKETable 
-                            content={rsvpList}  
-                            columns={rsvpColumns}
-                            visibleColumns={rsvpVisibleColumns}
-                            multiSelect={false}
-                            isLoading={false}
-                            customColumnComponents={{
-                            "user": (user) => {
-                                        return (
-                                            <div>
-                                                <MAKEUser 
-                                                user_uuid={user.user}
-                                                size="lg" 
-                                                />
-                                            </div>
-                                        )
-                                },
-                                "sign_up_time": (user) => {
-                                return (
-                                    <div>
-                                    {convertTimestampToDate(user.time)}
-                                    </div>
-                                )
-                                }
-                            }}
-                        />
-                        ) : (
-                        <div className='flex items-center justify-center m-8'>
-                            <p>No Signups Found</p>
-                        </div>
-                        )}
-                    </Tab>
+          <ModalContent>
+              <ModalHeader>People</ModalHeader>
 
-                    <Tab 
-                    key="attendees" 
-                    title="Attendees"
-                    className='w-full mb-0'
-                    >
-                        {attendeesList.length > 0 ? (
-                        <MAKETable 
-                            content={attendeesList}  
-                            columns={attendeeColumns}
-                            visibleColumns={attendeeVisibleColumns}
-                            multiSelect={false}
-                            isLoading={false}
-                            customColumnComponents={{
-                            "user": (user) => {
-                                        return (
-                                            <div>
-                                                <MAKEUser 
-                                                user_uuid={user.user}
-                                                size="lg" 
-                                                />
-                                            </div>
-                                        )
-                                },
-                                "attended_time": (user) => {
-                                return (
-                                    <div>
-                                    {convertTimestampToDate(user.time)}
-                                    </div>
-                                )
-                                }
-                            }}
-                        />
-                        ) : (
-                        <div className='flex items-center justify-center m-8'>
-                            <p>No Signups Found</p>
-                        </div>
-                        )}
-                    </Tab>
-                </Tabs>
-            </ModalBody>
-            <ModalFooter className='flex flex-col items-center'>
-            <Button
-                color="primary"
-                onPress={() => {
-                onOpenChange();
-                }}
-            >
-                Done
-            </Button>
-            </ModalFooter>
-        </ModalContent>
-    </Modal>
-  )
+              <ModalBody className="flex flex-col items-center gap-0 overflow-y-auto max-h-full">
+                  <Tabs aria-label="Options" size="md">
+                      <Tab
+                          key="signups"
+                          title="Signups"
+                          className="w-full mb-0 max-h-full overflow-y-auto"
+                      >
+                          {rsvpList.length > 0 ? (
+                              <div className="h-full overflow-auto">
+                                  <MAKETable
+                                      content={rsvpList}
+                                      columns={rsvpColumns}
+                                      visibleColumns={rsvpVisibleColumns}
+                                      multiSelect={false}
+                                      isLoading={false}
+                                      loadingContent={(ref, loadMore) => (
+                                          // For some reason, the default scroll loader
+                                          // doesn't work in a modal, so we define an
+                                          // explicitly loader
+                                          <Button
+                                              onPress={loadMore}
+                                              variant="ghost"
+                                          >
+                                              Load More
+                                          </Button>
+                                      )}
+                                      customColumnComponents={{
+                                          user: (user) => {
+                                              return (
+                                                  <div>
+                                                      <MAKEUser
+                                                          user_uuid={user.user}
+                                                          size="lg"
+                                                      />
+                                                  </div>
+                                              );
+                                          },
+                                          sign_up_time: (user) => {
+                                              return (
+                                                  <div>
+                                                      {convertTimestampToDate(
+                                                          user.time,
+                                                      )}
+                                                  </div>
+                                              );
+                                          },
+                                      }}
+                                  />
+                              </div>
+                          ) : (
+                              <div className="flex items-center justify-center m-8">
+                                  <p>No Signups Found</p>
+                              </div>
+                          )}
+                      </Tab>
+
+                      <Tab
+                          key="attendees"
+                          title="Attendees"
+                          className="w-full mb-0"
+                      >
+                          {attendeesList.length > 0 ? (
+                              <MAKETable
+                                  content={attendeesList}
+                                  columns={attendeeColumns}
+                                  visibleColumns={attendeeVisibleColumns}
+                                  multiSelect={false}
+                                  isLoading={false}
+                                  loadingContent={(ref, loadMore) => (
+                                      // For some reason, the default scroll loader
+                                      // doesn't work in a modal, so we define an
+                                      // explicitly loader
+                                      <Button
+                                          onPress={loadMore}
+                                          variant="ghost"
+                                      >
+                                          Load More
+                                      </Button>
+                                  )}
+                                  customColumnComponents={{
+                                      user: (user) => {
+                                          return (
+                                              <div>
+                                                  <MAKEUser
+                                                      user_uuid={user.user}
+                                                      size="lg"
+                                                  />
+                                              </div>
+                                          );
+                                      },
+                                      attended_time: (user) => {
+                                          return (
+                                              <div>
+                                                  {convertTimestampToDate(
+                                                      user.time,
+                                                  )}
+                                              </div>
+                                          );
+                                      },
+                                  }}
+                              />
+                          ) : (
+                              <div className="flex items-center justify-center m-8">
+                                  <p>No Signups Found</p>
+                              </div>
+                          )}
+                      </Tab>
+                  </Tabs>
+              </ModalBody>
+              <ModalFooter className="flex flex-col items-center">
+                  <Button
+                      color="primary"
+                      onPress={() => {
+                          onOpenChange();
+                      }}
+                  >
+                      Done
+                  </Button>
+              </ModalFooter>
+          </ModalContent>
+      </Modal>
+  );
 }

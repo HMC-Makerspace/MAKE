@@ -9,6 +9,7 @@ import { sendTemplatedEmail } from "./email.controller";
 import WorkshopReminderTemplate from "email_templates/workshop_reminder";
 import { Logger } from "pino";
 import WorkshopConfirmationTemplate from "email_templates/workshop_confirmation";
+import { getConfig } from "./config.controller";
 
 /**
  * Get all workshops in the database
@@ -17,7 +18,7 @@ import WorkshopConfirmationTemplate from "email_templates/workshop_confirmation"
  */
 export async function getWorkshops(): Promise<TWorkshop[]> {
     const Workshops = mongoose.model("Workshop", Workshop);
-    return Workshops.find();
+    return Workshops.find().sort({ timestamp_start: -1 });
 }
 
 /**
@@ -174,8 +175,9 @@ export async function rsvpToWorkshop(
 ): Promise<TWorkshop | null> {
     const workshop = await getWorkshop(workshop_uuid);
     const user = await getUser(user_uuid);
+    const config = await getConfig();
     // If the workshop or user doesn't exist, the RSVP fails
-    if (!workshop || !user) {
+    if (!workshop || !user || !config) {
         return null;
     }
     // If the workshop is not yet public, RSVP fails
@@ -202,7 +204,7 @@ export async function rsvpToWorkshop(
     await sendTemplatedEmail(
         user.email,
         "Workshop RSVP Reminder",
-        WorkshopConfirmationTemplate(workshop, user),
+        WorkshopConfirmationTemplate(workshop, user, config),
         logger,
     );
 

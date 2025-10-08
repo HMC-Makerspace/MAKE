@@ -51,6 +51,7 @@ export function MAKEUser({
             Login
         </Button>
     ),
+    showControls = false
 }: {
     user_uuid: string;
     user?: TUser;
@@ -89,6 +90,7 @@ export function MAKEUser({
     /** A function to run when the user is clicked, which accepts the user's uuid */
     onClick?: (uuid: string) => void;
     defaultElement?: React.ReactNode;
+    showControls?: boolean;
 }) {
     const query = useQuery<TUser, AxiosError>({
         queryKey: ["user", user_uuid],
@@ -188,39 +190,41 @@ export function MAKEUser({
                             isLoading={rolesLoading}
                         />
                     )}
-                    <div className="w-full flex flex-row gap-4 justify-center p-2">
-                        <Button
-                            variant="shadow"
-                            color="primary"
-                            startContent={
-                                <ArrowLeftEndOnRectangleIcon className="size-6 min-w-6" />
-                            }
-                            onPress={() => {
-                                window.location.href = "/logout";
-                            }}
-                        >
-                            Logout
-                        </Button>
-                        {kioskAccess && (
+                    {showControls &&
+                        <div className="w-full flex flex-row gap-4 justify-center p-2">
                             <Button
-                                isIconOnly
+                                variant="shadow"
                                 color="primary"
-                                variant="bordered"
-                                radius="sm"
                                 startContent={
-                                    <FingerPrintIcon className="size-6" />
+                                    <ArrowLeftEndOnRectangleIcon className="size-6 min-w-6" />
                                 }
-                                as={Link}
-                                href="/admin"
+                                onPress={() => {
+                                    window.location.href = "/logout";
+                                }}
+                            >
+                                Logout
+                            </Button>
+                            {kioskAccess && (
+                                <Button
+                                    isIconOnly
+                                    color="primary"
+                                    variant="bordered"
+                                    radius="sm"
+                                    startContent={
+                                        <FingerPrintIcon className="size-6" />
+                                    }
+                                    as={Link}
+                                    href="/admin"
+                                />
+                            )}
+                            <ThemeSwitcher
+                                className="self-center ml-auto hidden xl:block"
+                                classNames={{
+                                    tabList: "bg-default-200 ",
+                                }}
                             />
-                        )}
-                        <ThemeSwitcher
-                            className="self-center ml-auto hidden xl:block"
-                            classNames={{
-                                tabList: "bg-default-200 ",
-                            }}
-                        />
-                    </div>
+                        </div>
+                    }
                 </PopoverContent>
             </Popover>
         );

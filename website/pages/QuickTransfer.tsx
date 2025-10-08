@@ -150,15 +150,7 @@ export default function QuickTransferPage() {
     const uploadMutation = useMutation({
         mutationFn: uploadFiles,
         onSettled: (data) => {
-            console.log("Settled", data);
-            if (
-                !collegeID ||
-                !data ||
-                !data.files ||
-                !data.upload_errors ||
-                data.files.length === 0 ||
-                data.upload_errors.length === 0
-            ) {
+            if (!data || !data.files || !data.upload_errors) {
                 return;
             }
             // Add successfully uploaded files to user's file list
@@ -249,16 +241,6 @@ export default function QuickTransferPage() {
         e.target.value = "";
     };
 
-    const dropHandler = (event: React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault();
-        const files = event.dataTransfer?.files;
-        if (files && files.length > 0) {
-            handleUpload({
-                target: { files },
-            } as React.ChangeEvent<HTMLInputElement>);
-        }
-    };
-
     const uploadAccess =
         scopes &&
         verifyScopes(scopes, [
@@ -275,6 +257,16 @@ export default function QuickTransferPage() {
                 ? API_SCOPE.DELETE_OWN_FILE
                 : false,
         ]);
+
+    const dropHandler = (event: React.DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        const files = event.dataTransfer?.files;
+        if (uploadAccess && files && files.length > 0) {
+            handleUpload({
+                target: { files },
+            } as React.ChangeEvent<HTMLInputElement>);
+        }
+    };
 
     return (
         <DefaultLayout className="p-4 lg:p-8" pageHref="/transfer">
@@ -322,6 +314,11 @@ export default function QuickTransferPage() {
                             classNames={{
                                 input: "text-large sm:text-base",
                                 label: "pb-1.5 sm:pb-0.5",
+                            }}
+                            onBlur={(blurEvent) => {
+                                // Get input value
+                                const value = blurEvent.target.value;
+                                setCollegeID(value || "");
                             }}
                         />
                     </Form>
@@ -382,6 +379,7 @@ export default function QuickTransferPage() {
                         {files && files.length > 0 ? (
                             files.map((file) => (
                                 <FileCard
+                                    key={file.uuid}
                                     file={file}
                                     resource_type={FILE_RESOURCE_TYPE.USER}
                                     deleteMutation={deleteMutation}

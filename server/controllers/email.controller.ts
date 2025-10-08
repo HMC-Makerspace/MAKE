@@ -46,6 +46,7 @@ export async function sendEmail(
             clientSecret: process.env.EMAIL_BOT_CLIENT_SECRET,
             refreshToken: tokens.refresh_token,
             accessToken: tokens.access_token,
+            expires: tokens.expiry_date,
         },
     });
 
@@ -57,6 +58,11 @@ export async function sendEmail(
         html: bodyHTML,
         cc: cc,
         bcc: bcc,
+        auth: {
+            user:  process.env.EMAIL_BOT_OAUTH_ADDRESS,
+            refreshToken: tokens.refresh_token,
+            expires: tokens.expiry_date,
+        },
     };
     logger.debug({
         msg: `Sending email to ${to}`,
@@ -106,6 +112,8 @@ export function getOAuthURL() {
     return oAuth2Client.generateAuthUrl({
         access_type: "offline",
         scope: "https://mail.google.com",
+        prompt: "consent",
+        response_type: "code",
     });
 }
 
@@ -118,6 +126,7 @@ export async function getOAuthToken(logger: Logger) {
                 const tokenFile: {
                     access_token: string;
                     refresh_token: string;
+                    expiry_date: number;
                 } = JSON.parse(data.toString());
                 return tokenFile;
             } catch (e) {

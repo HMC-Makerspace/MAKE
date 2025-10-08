@@ -1,12 +1,32 @@
+import { TConfig } from "common/config";
 import { TUser } from "common/user";
 import { TWorkshop } from "common/workshop";
+import { timestampToZonedDateTime } from "../../website/utils";
+import { DateFormatter } from "@internationalized/date";
 
-const WorkshopConfirmationTemplate = (workshop: TWorkshop, user: TUser) => {
+const WorkshopConfirmationTemplate = (
+    workshop: TWorkshop,
+    user: TUser,
+    config: TConfig,
+) => {
     const onWaitList =
         workshop.capacity &&
         workshop.capacity > 0 &&
         workshop.rsvp_list.findIndex((rs) => rs.user_uuid === user.uuid) >=
             workshop.capacity;
+
+    const zonedStartTime = timestampToZonedDateTime(
+        workshop.timestamp_start,
+        config.schedule.timezone,
+    );
+    const dateFormatter = new DateFormatter(config.schedule.locale, {
+        month: "long",
+        day: "numeric",
+        weekday: "long",
+        hour: "numeric",
+        minute: "numeric",
+        timeZoneName: "short",
+    });
     return (
         <>
             <h1>Workshop RSVP</h1>
@@ -22,13 +42,13 @@ const WorkshopConfirmationTemplate = (workshop: TWorkshop, user: TUser) => {
                 </b>
                 <br />
                 <br />
-                The workshop will start at{" "}
-                {new Date(workshop.timestamp_start * 1000).toDateString()}!
-                Please arrive on time, and <b>sign in with the instructor</b>.
-                If you're on the waiting list, we will allocate spots on a
-                first-come first-serve basis. Please show up on time to increase
-                your chances of getting in! We most likely will have some spots
-                open up.
+                The workshop will start on{" "}
+                {dateFormatter.format(zonedStartTime.toDate())}! Please arrive
+                on time, and <b>sign in with the instructor</b>. If you're on
+                the waiting list, we will allocate spots on a first-come
+                first-serve basis. Please show up on time to increase your
+                chances of getting in! We most likely will have some spots open
+                up.
                 <br />
                 <br />
                 If you are unable to attend, please cancel on{" "}

@@ -36,12 +36,11 @@ const Shift = new mongoose.Schema<TShift>({
  */
 export const Alert = new mongoose.Schema<TAlert>({
     uuid: { type: String, required: true },
-    default: { type: Boolean, required: true },
     timestamp_start: { type: Number, required: false },
     timestamp_end: { type: Number, required: false },
     header: { type: String, required: true },
-    message: { type: String, required: false },
-    link: { type: String, required: false },
+    content: { type: String, required: false },
+    hyperlink: { type: Boolean, required: false },
 });
 
 // --- Schedule ---

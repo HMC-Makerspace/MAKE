@@ -41,6 +41,7 @@ export enum API_SCOPE {
     UPDATE_CERTIFICATION = "update_certification",
     DELETE_CERTIFICATION = "delete_certification",
     GRANT_CERTIFICATION = "grant_certification",
+    GRANT_SCHEDULE_CERT = "grant_schedule_cert",
     // Checkout scopes
     GET_ALL_CHECKOUTS = "get_checkouts",
     GET_ONE_CHECKOUT = "get_checkout",
@@ -113,6 +114,7 @@ export enum API_SCOPE {
     UPDATE_SHIFT = "update_shift",
     POST_SHIFT_EVENT = "post_shift_event",
     DELETE_SHIFT = "delete_shift",
+    VIEW_SHIFT_HISTORY = "view_shift_history",
     // User scopes
     GET_ALL_USERS = "get_users",
     UPDATE_USER = "update_user",
@@ -284,6 +286,11 @@ export const API_SCOPE_SECTIONS: {
                 scope: API_SCOPE.GRANT_CERTIFICATION,
                 label: "Grant Certification",
                 description: "Able to grant certifications to users",
+            },
+            {
+                scope: API_SCOPE.GRANT_SCHEDULE_CERT,
+                label: "Grant Schedule Cert",
+                description: "Able to grant scheduled cert to self",
             },
         ],
     },
@@ -637,6 +644,11 @@ export const API_SCOPE_SECTIONS: {
                 scope: API_SCOPE.DELETE_SHIFT,
                 label: "Delete Shift",
                 description: "Able to delete shifts",
+            },
+            {
+                scope: API_SCOPE.VIEW_SHIFT_HISTORY,
+                label: "View Shift History",
+                description: "Able to see global shift history",
             },
         ],
     },
