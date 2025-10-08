@@ -3,7 +3,6 @@ import {
     ITEM_ROLE,
     ITEM_ACCESS_TYPE,
 } from "../../../../../common/inventory";
-import { Form, Input, Selection } from "@heroui/react";
 import React from "react";
 import ItemEditorForm from "./ItemEditorForm";
 import { TCertification } from "common/certification";
@@ -30,8 +29,6 @@ export default function ItemEditor({
     onSuccess: (message: string) => void;
     onError: (message: string) => void;
 }) {
-    const isEmpty = item.uuid != "";
-
     const key = isNew ? "new" : item.uuid;
 
     return (

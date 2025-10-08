@@ -4,7 +4,6 @@ import {
     Form,
     ModalContent,
     Input,
-    NumberInput,
     Select,
     SelectItem,
 } from "@heroui/react";
@@ -116,7 +115,7 @@ export default function ItemLocationModal<
                         className="flex flex-col gap-4 p-4"
                     >
                         <div className="text-lg font-semibold">
-                            Edit Required Certifications
+                            Edit Locations
                         </div>
 
                         {currentAreas.map((area, i) => (

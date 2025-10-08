@@ -24,12 +24,10 @@ import {
 import React, { useState } from "react";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { UserRoleSelect } from "../../../user/UserRoleSelect";
-import { CertificationUUID, TCertification } from "common/certification";
-import { BookmarkIcon, CakeIcon, PencilSquareIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
+import { TCertification } from "common/certification";
+import { BookmarkIcon, UserIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
-import { CertSelect } from "../certifications/CertSelect";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
 import AuthorizedRolesModal from "../certifications/AuthorizedRolesModal";
 import { motion } from "framer-motion";
@@ -132,7 +130,6 @@ export default function ItemEditorForm({
                 `Successfully ${isNew ? "created" : "updated"} item${isMultiple ? "s" : ""}`,
             );
             setHasEdits(false);
-            // console.log(result);
         },
         onError: (error) => {
             onError(`Error: ${error.message}`);
@@ -151,9 +148,6 @@ export default function ItemEditorForm({
 
             // Get form data as an object.
             const data = new FormData(e.currentTarget);
-
-            console.log(Array.from(data.getAll("authroles")) as string[]);
-            //return;
             
             let quantity = parseInt(data.get("quantity") as string);
             let available = item.available;
@@ -163,14 +157,14 @@ export default function ItemEditorForm({
             }
 
             const new_item: TInventoryItem = {
-                uuid: UUID, // change back to this if doesn't work with create : (data.get("UUID") as string) ?? item.uuid,
+                uuid: UUID,
                 name: data.get("name") as string,
                 long_name: data.get("long_name") as string,
                 role: data.get("role") as ITEM_ROLE,
                 access_type: parseInt(
                     data.get("access_type") as string,
                 ) as ITEM_ACCESS_TYPE,
-                locations: item.locations,//locations, // TODO
+                locations: item.locations,
                 reorder_url: data.get("reorder_url") as string,
                 serial_number: data.get("serial_number") as string,
                 keywords:
@@ -194,35 +188,16 @@ export default function ItemEditorForm({
     const placeholder = (text: string) => (item.uuid || isNew ? text : `Select an item`);
 
     const [hasEdits, setHasEdits] = useState(false);
-    const [openAuthorized, setOpenAuthorized] = useState(
-        item.authorized_roles === null,
-    );
 
     // A function that wraps a setter to also update the hasEdits state
-    const wrapEdit = (fn: (arg0: any) => void) => {
-        return (value: any) => {
-            fn(value);
-            setHasEdits(true);
-        };
-    };
+    // const wrapEdit = (fn: (arg0: any) => void) => {
+    //     return (value: any) => {
+    //         fn(value);
+    //         setHasEdits(true);
+    //     };
+    // };
 
     const defaultEdit = () => setHasEdits(true);
-
-    // Wrap effects for numbers specifically (e.g. validity checking)
-    // const wrapNumberEdit = React.useCallback((fn: (arg0: any) => void) => {
-    //     return (value: any) => {
-    //         let num = parseInt(value || 0);
-    //         if (
-    //             (isNaN(num) && value != "") || // not actually a number
-    //             num < 0 ||
-    //             num > 999999999999999
-    //         )
-    //             // not in the valid range of numbers
-    //             return;
-
-    //         wrapEdit(fn)(num);
-    //     };
-    // }, []);
 
     const patchMutation = function(successExtras: () => void) {
         return useMutation({
@@ -319,64 +294,34 @@ export default function ItemEditorForm({
                         }}
                     />
                     <Select // Access Type
-                    label="Access Type"
-                    name="access_type"
-                    placeholder={placeholder("Access Type")}
-                    isDisabled={isDisabled}
-                    isRequired
-                    value={item.access_type?.toString()}
-
-                    defaultSelectedKeys={
-                        (isDisabled || isNew) ? [] : [item.access_type + ""]
-                    }
-                    onSelectionChange={defaultEdit}
-                    // onSelectionChange={(value) => {
-                    //     if (value == "all") {
-                    //         return;
-                    //     } else {
-                    //         setAccessType(
-                    //             parseInt(Array.from(value)[0] as string),
-                    //         );
-                    //     }
-                    // }}
-                    variant="faded"
-                    color="primary"
-                    size="md"
-                    classNames={{
-                        value: clsx([
-                            "placeholder:text-default-500",
-                            "placeholder:italic",
-                            "text-default-700",
-                        ]),
-                    }}
-                    className="w-full"
-                >
-                    {accessTypes.map((accessType) => (
-                        <SelectItem key={accessType.key}>
-                            {accessType.label}
-                        </SelectItem>
-                    ))}
-                </Select>
-                    {/* </div> */}
-                    {/* <Input // Locations
-                    type="text"
-                    label="Locations"
-                    name="locations"
-                    placeholder={placeholder("Locations")}
-                    isDisabled={isDisabled}
-                    // value={locations.map((location) => location.area).join(", ")}
-                    // onValueChange={setReorderUrl}
-                    variant="faded"
-                    color="primary"
-                    size="md"
-                    classNames={{
-                        input: clsx([
-                            "placeholder:text-default-500",
-                            "placeholder:italic",
-                            "text-default-700",
-                        ]),
-                    }}
-                /> */}
+                        label="Access Type"
+                        name="access_type"
+                        placeholder={placeholder("Access Type")}
+                        isDisabled={isDisabled}
+                        isRequired
+                        value={item.access_type?.toString()}
+                        defaultSelectedKeys={
+                            (isDisabled || isNew) ? [] : [item.access_type + ""]
+                        }
+                        onSelectionChange={defaultEdit}
+                        variant="faded"
+                        color="primary"
+                        size="md"
+                        classNames={{
+                            value: clsx([
+                                "placeholder:text-default-500",
+                                "placeholder:italic",
+                                "text-default-700",
+                            ]),
+                        }}
+                        className="w-full"
+                    >
+                        {accessTypes.map((accessType) => (
+                            <SelectItem key={accessType.key}>
+                                {accessType.label}
+                            </SelectItem>
+                        ))}
+                    </Select>
                     <div className="grid grid-cols-2 w-full gap-4 col-span-full">
                         <div className="flex flex-row gap-1">
                             {qtype ? (
@@ -617,45 +562,67 @@ export default function ItemEditorForm({
                         }}
                     />
                     <Divider className="h-[1px] bg-default-400" />
-                    <Tooltip
-                        content="Create the item first, before editing required certifications, authorized roles, or locations."
-                        className="w-fit p-2"
-                        delay={500}
-                        closeDelay={150}
-                        isDisabled={isDisabled || !isNew}
-                    >
-                        {/* TODO if this isn't always editable */}
-                        <div className="flex justify-evenly">
+                    <div className="flex justify-evenly">
+                        <Tooltip
+                            content={isNew ? "Create the item first, before editing locations." : "Locations"}
+                            className="w-fit p-2"
+                            delay={500}
+                            closeDelay={150}
+                            isDisabled={isDisabled}
+                        >
                             <Button
                                 variant="flat"
                                 color="primary"
-                                onPress={() => setReqcertsOpen(true)}
+                                onPress={() => !isNew && setLocationEditorOpen(true)}
                                 isIconOnly
-                                isDisabled={isDisabled || isNew}
+                                isDisabled={isDisabled}
+                                className={isNew ? "opacity-disabled" : ""}
+                                data-hover={!isNew && !isDisabled}
+                            >
+                                <GlobeAltIcon className="size-6" />
+                            </Button>
+                        </Tooltip>
+
+                        <Tooltip
+                            content={isNew ? "Create the item first, before editing required certifications." : "Required Certifications"}
+                            className="w-fit p-2"
+                            delay={500}
+                            closeDelay={150}
+                            isDisabled={isDisabled}
+                        >
+                            <Button
+                                variant="flat"
+                                color="primary"
+                                onPress={() => !isNew && setReqcertsOpen(true)}
+                                isIconOnly
+                                isDisabled={isDisabled}
+                                className={isNew ? "opacity-disabled" : ""}
+                                data-hover={!isNew && !isDisabled}
                             >
                                 <BookmarkIcon className="size-6" />
                             </Button>
-                            
+                        </Tooltip>
+                        
+                        <Tooltip
+                            content={isNew ? "Create the item first, before editing authorized roles." : "Authorized Roles"}
+                            className="w-fit p-2"
+                            delay={500}
+                            closeDelay={150}
+                            isDisabled={isDisabled}
+                        >
                             <Button
                                 variant="flat"
                                 color="primary"
-                                onPress={() => setAuthrolesOpen(true)}
+                                onPress={() => !isNew && setAuthrolesOpen(true)}
                                 isIconOnly
-                                isDisabled={isDisabled || isNew}
+                                isDisabled={isDisabled}
+                                className={isNew ? "opacity-disabled" : ""}
+                                data-hover={!isNew && !isDisabled}
                             >
-                                <CakeIcon className="size-6" />
+                                <UserIcon className="size-6" />
                             </Button>
-                            <Button
-                                variant="flat"
-                                color="primary"
-                                onPress={() => setLocationEditorOpen(true)}
-                                isIconOnly
-                                isDisabled={isDisabled || isNew}
-                            >
-                                <VideoCameraIcon className="size-6" />
-                            </Button>
-                        </div>
-                    </Tooltip>
+                        </Tooltip>
+                    </div>
                 </div>
                 <div className="w-full mt-auto col-span-full">
                     <Button
@@ -685,6 +652,7 @@ export default function ItemEditorForm({
                 patchMutation={reqcertsMutation}
             />
             <AuthorizedRolesModal
+                key={"roleauth-" + item.uuid}
                 element={item}
                 roles={roles}
                 isOpen={authrolesOpen}
@@ -692,6 +660,7 @@ export default function ItemEditorForm({
                 patchMutation={authrolesMutation}
             />
             <ItemLocationModal
+                key={"locedit-" + item.uuid}
                 element={item}
                 areas={areas}
                 isOpen={locationEditorOpen}
