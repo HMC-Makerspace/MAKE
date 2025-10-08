@@ -17,12 +17,6 @@ import { UUID } from "common/global";
 import { TArea } from "common/area";
 import { TInventoryItemLocation } from "common/inventory";
 
-const emptyArea: TInventoryItemLocation = {
-    area: "",
-    container: "",
-    specific: ""
-};
-
 export default function ItemLocationModal<
     // Allow any type that has a uuid and optional required_certs list
     T extends { uuid: UUID; locations?: TInventoryItemLocation[] },
@@ -79,7 +73,11 @@ export default function ItemLocationModal<
     ) {
         return (val: TInventoryItemLocation[P]) => {
             if (!currentAreas[i]) {
-                currentAreas[i] = emptyArea;
+                currentAreas[i] = {
+                    area: "",
+                    container: "",
+                    specific: ""
+                };
             }
 
             const area = {...currentAreas[i]};
@@ -235,7 +233,11 @@ export default function ItemLocationModal<
                                     onPress={() => {
                                         setCurrentAreas([
                                             ...currentAreas,
-                                            { ...emptyArea },
+                                            {
+                                                area: "",
+                                                container: "",
+                                                specific: ""
+                                            },
                                         ]); // add a copy of the emptyCert template
                                         setHasEdits(true);
                                     }}
