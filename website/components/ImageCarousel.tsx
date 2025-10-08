@@ -249,6 +249,7 @@ function EditModal({
                         {images.map((image) => {
                             return (
                                 <FileCard
+                                    key={image.uuid}
                                     file={image}
                                     resource_type={resource_type}
                                     deleteMutation={deleteMutation}

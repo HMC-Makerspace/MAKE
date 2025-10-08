@@ -141,7 +141,11 @@ export default function WorkshopCard({
         });
 
     return (
-        <Card id={workshop.title} key={workshop.title} className="h-[44dvh]">
+        <Card
+            id={workshop.title}
+            key={workshop.title}
+            className="md:min-h-[44dvh] min-h-fit"
+        >
             <CardHeader className="flex-col items-start">
                 <div
                     id="title-capacity-container"
@@ -192,20 +196,19 @@ export default function WorkshopCard({
                         .join(", ")}
                 </div>
             </CardHeader>
-            <CardBody className="p-0 pb-0 h-full flex-grow-0">
+            <CardBody className="p-0 pb-0 h-fit md:flex-grow-0">
                 <ImageCarousel
                     resource_uuid={workshop.uuid}
                     resource_type={FILE_RESOURCE_TYPE.WORKSHOP}
                     editable={false}
-                    className=""
+                    className="min-h-[20dvh]"
                 />
                 <div
                     id="certification-tags"
                     className={clsx(
                         "absolute w-full h-fit top-0",
                         "box-border border-4 border-transparent",
-                        "p-1 overflow-auto flex gap-2",
-                        "z-20",
+                        "p-1 overflow-auto flex gap-2 z-20",
                     )}
                 >
                     {workshop.required_certifications &&

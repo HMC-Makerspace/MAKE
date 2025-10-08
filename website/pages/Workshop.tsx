@@ -103,10 +103,11 @@ export default function WorkshopPage() {
                     (filteredWorkshops.length > 0 ? (
                         <div
                             id="card-container"
-                            className="grid grid-cols-2 gap-4 h-full w-full"
+                            className="flex flex-col md:grid md:grid-cols-2 gap-4 h-full w-full"
                         >
                             {filteredWorkshops.map((workshop) => (
                                 <WorkshopCard
+                                    key={workshop.uuid}
                                     workshop={workshop}
                                     self={self}
                                     users={users}

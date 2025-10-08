@@ -411,19 +411,19 @@ export default function WorkshopTable({
             {selectedWorkshop && (
                 <>
                     <WorkshopPeopleModal
-                        key={selectedWorkshop.uuid}
+                        key={selectedWorkshop.uuid + "-people"}
                         workshop={selectedWorkshop}
                         isOpen={peopleIsOpen}
                         onOpenChange={peopleOnOpenChange}
                     />
                     <WorkshopImagesModal
-                        key={selectedWorkshop.uuid}
+                        key={selectedWorkshop.uuid + "-images"}
                         workshop={selectedWorkshop}
                         isOpen={imagesIsOpen}
                         onOpenChange={imagesOnOpenChange}
                     />
                     <WorkshopEditModal
-                        key={selectedWorkshop.uuid}
+                        key={selectedWorkshop.uuid + "-edit"}
                         workshop={selectedWorkshop}
                         users={users}
                         certs={certs}
@@ -433,7 +433,7 @@ export default function WorkshopTable({
                         config={config}
                     />
                     <RequiredCertsModal
-                        key={selectedWorkshop.uuid}
+                        key={selectedWorkshop.uuid + "-certs"}
                         element={selectedWorkshop}
                         certifications={certs}
                         isOpen={certsIsOpen}
