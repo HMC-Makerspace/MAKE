@@ -29,9 +29,7 @@ export default function DeleteCertModal({
         onSuccess: () => {
             addToast({
                 title: `Successfully deleted certification "${cert.name}"`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
             
             // Remove the cert from the query cache
@@ -45,9 +43,7 @@ export default function DeleteCertModal({
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             });
         },
     });

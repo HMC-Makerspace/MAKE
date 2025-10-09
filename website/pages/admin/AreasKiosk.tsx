@@ -67,9 +67,7 @@ export default function AreasKiosk() {
             });
             addToast({
                 title: `Successfully created area`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
         },
         onError: (error) => {

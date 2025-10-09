@@ -187,9 +187,7 @@ export default function Shift({
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             });
         },
     });

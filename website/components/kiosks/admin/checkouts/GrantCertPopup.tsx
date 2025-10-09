@@ -74,9 +74,7 @@ export default function GrantCertPopup({
             
             addToast({
                 title: `Successfully ${granting ? "granted" : "revoked"} certificate`,
-                timeout: 3000,
                 color: `${granting ? "success" : "warning"}`,
-                severity: `${granting ? "success" : "warning"}`,
             });
         },
         onError: (data) => {

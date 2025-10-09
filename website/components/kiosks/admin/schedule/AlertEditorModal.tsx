@@ -51,9 +51,7 @@ export default function AlertEditorModal({
             onOpenChange(false);
             addToast({
                 title: `Successfully updated alerts.`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
         },
         [
@@ -71,9 +69,7 @@ export default function AlertEditorModal({
             if (i < 0) {
                 addToast({
                     title: `Could not find alert with uuid: ${uuid} (index: ${i})`,
-                    timeout: 3000,
                     color: "danger",
-                    severity: "danger"
                 });
             }
             if (!alerts[i]) {

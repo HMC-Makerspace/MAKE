@@ -89,9 +89,7 @@ export default function WorkshopEditModal({
                 ]);
                 addToast({
                     title: `Successfully created workshop`,
-                    timeout: 3000,
                     color: "success",
-                    severity: "success",
                 });
 
             } else {
@@ -100,9 +98,7 @@ export default function WorkshopEditModal({
                 );
                 addToast({
                     title: `Successfully updated workshop`,
-                    timeout: 3000,
                     color: "success",
-                    severity: "success",
                 });
             }
             onOpenChange(false);
@@ -110,9 +106,7 @@ export default function WorkshopEditModal({
         onError: (e) => {
             addToast({
                 title: `Error: ${e.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             });
         },
     });

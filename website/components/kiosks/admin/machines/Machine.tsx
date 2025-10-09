@@ -110,9 +110,7 @@ export default function Machine({
 
             addToast({
                 title: `Successfully updated machines`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
 
             editDocsClose();
@@ -121,9 +119,7 @@ export default function Machine({
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             });
         },
     });
@@ -140,17 +136,13 @@ export default function Machine({
 
             addToast({
                 title: `Successfully deleted machine`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
         },
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             });
         },
     });

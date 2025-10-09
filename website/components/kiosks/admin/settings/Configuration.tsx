@@ -62,17 +62,13 @@ export default function Configuration({ config }: { config: TConfig }) {
             queryClient.setQueryData(["config"], data);
             addToast({
                 title: `Configuration updated successfully.`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
         },
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             });
 
         },

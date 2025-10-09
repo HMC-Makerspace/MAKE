@@ -110,17 +110,13 @@ export default function WorkshopTable({
             );
             addToast({
                 title: `Successfully updated workshop`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
         },
         onError: (e) => {
             addToast({
                 title: `Error: ${e.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             });
         },
     });

@@ -80,9 +80,7 @@ export default function UserEditorForm({
 
             addToast({
                 title: `Successfully ${isNew ? "created" : "updated"} user${isMultiple ? "s" : ""}`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
 
             setHasEdits(false);
@@ -91,9 +89,7 @@ export default function UserEditorForm({
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             });
         },
     });
@@ -106,18 +102,14 @@ export default function UserEditorForm({
             );
             addToast({
                 title: `Successfully deleted user`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
             setHasEdits(false);
         },
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             });
         },
     });

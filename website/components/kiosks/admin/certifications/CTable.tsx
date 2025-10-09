@@ -124,9 +124,7 @@ export default function CertificationsTable({
             );
             addToast({
                 title: `Successfully updated certification ${certOpenDoc?.name}`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
 
             setDocOpen(false);
@@ -134,9 +132,7 @@ export default function CertificationsTable({
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             });
         },
     });

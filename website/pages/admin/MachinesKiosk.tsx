@@ -68,17 +68,13 @@ export default function MachinesKiosk() {
             });
             addToast({
                 title: `Successfully created machine`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
         },
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             });
         },
     });

@@ -110,17 +110,13 @@ function DeleteScheduleModal({
             });
             addToast({
                 title: `Successfully deleted schedule "${schedule.name}"`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
         },
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             }); 
         },
     });
@@ -189,9 +185,7 @@ export default function ScheduleSelector({
             setSelectedSchedules(new Set([data.uuid]));
             addToast({
                 title: `Successfully created schedule`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
         },
     });

@@ -38,7 +38,9 @@ export function Provider({ children }: { children: React.ReactNode }) {
 
     return (
         <HeroUIProvider navigate={navigate} useHref={useHref}>
-            <ToastProvider />
+            <ToastProvider 
+                toastProps={{timeout:3000}}
+            />
             <ThemeProvider
                 attribute="class"
                 defaultTheme="dark"

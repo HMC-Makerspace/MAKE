@@ -113,9 +113,7 @@ export default function CheckoutTable({
             queryClient.refetchQueries({ queryKey: ["inventory"] });
             addToast({
                 title: `Successfully returned checkout`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
 
         },
@@ -131,9 +129,7 @@ export default function CheckoutTable({
             queryClient.refetchQueries({ queryKey: ["inventory"] });
             addToast({
                 title: `Undid checkout return`,
-                timeout: 3000,
                 color: "warning",
-                severity: "warning",
             });
         },
     });

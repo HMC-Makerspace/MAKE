@@ -102,18 +102,14 @@ export default function RestockRequestModal({
             }
             addToast({
                 title: `${isNew ? "Successfully created restock" : "Successfully added to mailing list"}`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
             editOnOpenChange();
         },
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             });
         },
     });

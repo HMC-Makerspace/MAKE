@@ -104,18 +104,14 @@ function EditRoleModal({
             });
             addToast({
                 title: `Successfully ${isNew ? "created" : "updated"} role "${result.title}"`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
             onOpenChange(false);
         },
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger",
             });
         },
     });
@@ -507,9 +503,7 @@ function DeleteRoleModal({
 
             addToast({
                 title: `Successfully deleted role "${role.title}"`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
 
             // Remove the role from the query cache
@@ -523,9 +517,7 @@ function DeleteRoleModal({
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger",
             });
         },
     });

@@ -163,7 +163,6 @@ export default function QuickTransferPage() {
                     title:
                         `Successfully uploaded ${data.files.length} file` +
                         `${data.files.length === 1 ? "" : "s"}.`,
-                    timeout: 3000,
                     color: "success",
                     severity:
                         data.upload_errors.length === 0 ? "success" : "warning",
@@ -173,7 +172,6 @@ export default function QuickTransferPage() {
                 // Add an error toast for each upload error
                 addToast({
                     title: error,
-                    timeout: 3000,
                     color: "danger",
                 });
             }
@@ -184,7 +182,6 @@ export default function QuickTransferPage() {
                 title:
                     error.response?.data.error ??
                     `Unknown error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
             });
         },
@@ -205,14 +202,12 @@ export default function QuickTransferPage() {
             );
             addToast({
                 title: "Successfully deleted file.",
-                timeout: 1000,
                 color: "success",
             });
         },
         onError: (error) => {
             addToast({
                 title: error.message,
-                timeout: 5000,
                 color: "danger",
             });
         },

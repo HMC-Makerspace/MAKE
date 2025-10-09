@@ -96,18 +96,14 @@ export default function ItemEditorForm({
             });
             addToast({
                 title: `Successfully ${isNew ? "created" : "updated"} item${isMultiple ? "s" : ""}`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
             // console.log(result);
         },
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             });
         },
     });

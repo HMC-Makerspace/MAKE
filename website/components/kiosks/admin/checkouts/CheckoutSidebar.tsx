@@ -165,14 +165,10 @@ export default function CheckoutSidebar({
 
             addToast({
                 title: `${validationError}`,
-                timeout: 3000,
                 color: 
                     validation.status === CHECKOUT_VALIDATION.VALID
                         ? "success"
-                        : "danger",
-                severity: validation.status === CHECKOUT_VALIDATION.VALID
-                        ? "success"
-                        : "danger",
+                        : "danger"
             });
 
             setValidation(data.validation);
@@ -197,9 +193,7 @@ export default function CheckoutSidebar({
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             });
         }
     });

@@ -245,18 +245,14 @@ export default function EditStatusModal({
             );
             addToast({
                 title: `Successfully updated machine status`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
             onOpenChange(false);
         },
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
-                timeout: 3000,
                 color: "danger",
-                severity: "danger"
             });
         },
     });

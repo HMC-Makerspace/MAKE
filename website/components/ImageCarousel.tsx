@@ -211,9 +211,7 @@ function EditModal({
             });
             addToast({
                 title: `Successfully deleted image`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
         },
     });
@@ -227,9 +225,7 @@ function EditModal({
             );
             addToast({
                 title: `Successfully uploaded image`,
-                timeout: 3000,
                 color: "success",
-                severity: "success",
             });
 
         },
