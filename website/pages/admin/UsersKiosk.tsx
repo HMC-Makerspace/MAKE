@@ -5,7 +5,6 @@ import { Selection } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
 import { TUser, TUserRole } from "common/user";
 import React from "react";
-import PopupAlert from "../../components/PopupAlert";
 import { API_SCOPE } from "../../../common/global";
 import { TCertification } from "common/certification";
 
@@ -47,22 +46,6 @@ export default function UsersKiosk() {
 
     const [isNewUser, setIsNewUser] = React.useState<boolean>(false);
 
-    const [popupMessage, setPopupMessage] = React.useState<string | undefined>(
-        undefined,
-    );
-    const [popupType, setPopupType] = React.useState<
-        "success" | "warning" | "danger"
-    >("success");
-
-    const onSuccess = (message: string) => {
-        setPopupMessage(message);
-        setPopupType("success");
-    };
-    const onError = (message: string) => {
-        setPopupMessage(message);
-        setPopupType("danger");
-    };
-
     return (
         <AdminLayout pageHref={"/admin/users"}>
             <div className="flex flex-col lg:flex-row overflow-auto h-full gap-8">
@@ -72,8 +55,6 @@ export default function UsersKiosk() {
                         selectedKeys={selectedKeys}
                         isLoading={isLoading}
                         isNew={isNewUser}
-                        onSuccess={onSuccess}
-                        onError={onError}
                     />
                 )}
                 <UsersTable
@@ -86,12 +67,6 @@ export default function UsersKiosk() {
                     onCreate={setIsNewUser}
                 />
             </div>
-            <PopupAlert
-                isOpen={!!popupMessage}
-                onOpenChange={() => setPopupMessage(undefined)}
-                color={popupType}
-                description={popupMessage}
-            />
         </AdminLayout>
     );
 }

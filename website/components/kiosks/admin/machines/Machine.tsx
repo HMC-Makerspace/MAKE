@@ -6,6 +6,7 @@ import {
     Textarea,
     Tooltip,
     useDisclosure,
+    addToast
 } from "@heroui/react";
 import { TUserRole } from "common/user";
 import clsx from "clsx";
@@ -107,11 +108,19 @@ export default function Machine({
                 );
             });
 
+            addToast({
+                title: `Successfully updated machines`,
+                color: "success",
+            });
+
             editDocsClose();
             reservableModalClose();
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
         },
     });
 
@@ -124,9 +133,17 @@ export default function Machine({
             queryClient.setQueryData(["machine"], (old: TMachine[]) => {
                 return (old ?? []).filter((m) => m.uuid !== variables.uuid);
             });
+
+            addToast({
+                title: `Successfully deleted machine`,
+                color: "success",
+            });
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
         },
     });
 

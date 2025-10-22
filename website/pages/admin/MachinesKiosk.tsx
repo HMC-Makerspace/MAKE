@@ -1,7 +1,7 @@
 import { TSchedule } from "common/schedule";
 import AdminLayout from "../../layouts/AdminLayout";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Spinner, Card, Button } from "@heroui/react";
+import { Spinner, Card, Button, addToast } from "@heroui/react";
 import { TUserRole } from "common/user";
 import Machine from "../../components/kiosks/admin/machines/Machine";
 import { TCertification } from "common/certification";
@@ -66,9 +66,16 @@ export default function MachinesKiosk() {
             queryClient.setQueryData(["machine"], (old: TMachine[]) => {
                 return [...old, obj];
             });
+            addToast({
+                title: `Successfully created machine`,
+                color: "success",
+            });
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
         },
     });
 

@@ -10,6 +10,7 @@ import {
     Selection,
     SelectItem,
     Snippet,
+    addToast
 } from "@heroui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
@@ -18,7 +19,6 @@ import React from "react";
 import UserRole from "../../../user/UserRole";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
-import PopupAlert from "../../../PopupAlert";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
@@ -52,15 +52,11 @@ export default function UserEditorForm({
     roles,
     isMultiple,
     isNew,
-    onSuccess,
-    onError,
 }: {
     user: TUser;
     roles: TUserRole[];
     isMultiple: boolean;
     isNew: boolean;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
 }) {
     const isEmpty = !user.uuid && !isNew;
 
@@ -81,14 +77,20 @@ export default function UserEditorForm({
                     return old.map((u) => (u.uuid === UUID ? result : u));
                 }
             });
-            onSuccess(
-                `Successfully ${isNew ? "created" : "updated"} user${isMultiple ? "s" : ""}`,
-            );
+
+            addToast({
+                title: `Successfully ${isNew ? "created" : "updated"} user${isMultiple ? "s" : ""}`,
+                color: "success",
+            });
+
             setHasEdits(false);
             console.log(result);
         },
         onError: (error) => {
-            onError(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
         },
     });
 
@@ -98,11 +100,17 @@ export default function UserEditorForm({
             queryClient.setQueryData(["user"], (old: TUser[]) =>
                 old.filter((u) => u.uuid !== variables.user_uuid),
             );
-            onSuccess(`Successfully deleted user`);
+            addToast({
+                title: `Successfully deleted user`,
+                color: "success",
+            });
             setHasEdits(false);
         },
         onError: (error) => {
-            onError(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
         },
     });
 

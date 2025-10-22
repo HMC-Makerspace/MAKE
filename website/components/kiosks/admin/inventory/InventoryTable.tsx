@@ -39,7 +39,6 @@ import { TArea } from "common/area";
 import ItemLocationChip from "./ItemLocationChip";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RestockRequestModal from "../restock/RestockRequestModal";
-import PopupAlert from "../../../PopupAlert";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" },
@@ -93,6 +92,7 @@ export default function InventoryTable({
     certifications: TCertification[];
     areas: TArea[];
     restocks?: TRestockRequest[];
+    restocks?: TRestockRequest[];
     selectedKeys: Selection;
     onSelectionChange: (selectedKeys: Selection) => void;
     doubleClickAction?: (key: React.Key) => void;
@@ -112,13 +112,6 @@ export default function InventoryTable({
         new Set(defaultColumns),
     );
     const [search, setSearch] = React.useState<string>("");
-
-    const [popupMessage, setPopupMessage] = React.useState<string | undefined>(
-        undefined,
-    );
-    const [popupType, setPopupType] = React.useState<"success" | "danger">(
-        "success",
-    );
 
     const columns = baseColumns.concat(extraColumns);
 
@@ -404,22 +397,8 @@ export default function InventoryTable({
                     restockSelected={selectedItem}
                     editIsOpen={restockIsOpen}
                     editOnOpenChange={restockOnOpenChange}
-                    onSuccess={() => {
-                        setPopupType("success");
-                        setPopupMessage("Restock request submitted");
-                    }}
-                    onError={() => {
-                        setPopupType("danger");
-                        setPopupMessage("Error submitting restock request");
-                    }}
                 />
             }
-            <PopupAlert
-                isOpen={!!popupMessage}
-                onOpenChange={() => setPopupMessage(undefined)}
-                color={popupType}
-                description={popupMessage}
-            />
         </div>
     );
 }

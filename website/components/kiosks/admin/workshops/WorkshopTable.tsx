@@ -5,6 +5,7 @@ import {
     Modal,
     ModalHeader,
     useDisclosure,
+    addToast
 } from "@heroui/react";
 import {
     PhotoIcon,
@@ -107,8 +108,17 @@ export default function WorkshopTable({
             queryClient.setQueryData(["workshop"], (old: TWorkshop[]) =>
                 old.map((w) => (w.uuid === data.uuid ? data : w)),
             );
+            addToast({
+                title: `Successfully updated workshop`,
+                color: "success",
+            });
         },
-        onError: (e) => alert(e),
+        onError: (e) => {
+            addToast({
+                title: `Error: ${e.message}`,
+                color: "danger",
+            });
+        },
     });
 
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(

@@ -36,7 +36,6 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { UnixTimestamp } from "common/global";
-import PopupAlert from "../../../PopupAlert";
 import {
     InformationCircleIcon,
     ShoppingCartIcon,
@@ -131,7 +130,49 @@ export default function CheckoutSidebar({
     const createMutation = useMutation({
         mutationFn: createCheckout,
         onSuccess: (data) => {
+
+            let validation = data.validation;
+
+            let validationError = "Checkout submitted";
+            if (validation.status === CHECKOUT_VALIDATION.NO_USER) {
+                validationError = "No user selected";
+            } else if (validation.status === CHECKOUT_VALIDATION.NO_ITEMS) {
+                validationError = "No items in cart";
+            } else if (validation.status === CHECKOUT_VALIDATION.MISSING_CERT) {
+                validationError = "User missing required certification";
+                const cert = certs.find((c) => c.uuid === validation.error_uuid);
+                if (validation.error_uuid && cert) {
+                    validationError += `\n'${cert.name}'`;
+                }
+                const item = inventory.find((i) => i.uuid === validation.item_uuid);
+                if (validation.item_uuid && item) {
+                    validationError += ` for item '${item.name}'`;
+                }
+            } else if (validation.status === CHECKOUT_VALIDATION.MISSING_ROLE) {
+                validationError = "User has no authorized roles";
+                const item = inventory.find((i) => i.uuid === validation.item_uuid);
+                if (validation.item_uuid && item) {
+                    validationError += ` for item '${item.name}'`;
+                }
+            } else if (validation.status === CHECKOUT_VALIDATION.UNAVAILABLE) {
+                validationError = "Item";
+                const item = inventory.find((i) => i.uuid === validation.item_uuid);
+                if (validation.item_uuid && item) {
+                    validationError += ` '${item.name}'`;
+                }
+                validationError += " is unavailable";
+            }   
+
+            addToast({
+                title: `${validationError}`,
+                color: 
+                    validation.status === CHECKOUT_VALIDATION.VALID
+                        ? "success"
+                        : "danger"
+            });
+
             setValidation(data.validation);
+
             if (
                 data.validation.status === CHECKOUT_VALIDATION.VALID &&
                 data.checkout
@@ -149,7 +190,12 @@ export default function CheckoutSidebar({
                 setCollegeID("");
             }
         },
-        onError: (error) => alert(error),
+        onError: (error) => {
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
+        }
     });
 
     const [mobileCart, setMobileCart] = useState(false);
