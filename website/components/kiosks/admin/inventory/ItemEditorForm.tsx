@@ -9,7 +9,6 @@ import {
     NumberInput,
     Snippet,
     Textarea,
-    addToast,
     Tooltip,
 } from "@heroui/react";
 import { Select, SelectSection, SelectItem } from "@heroui/select";
@@ -222,6 +221,26 @@ export default function ItemEditorForm({
             },
         });
     };
+
+    const deleteMutation = useMutation({
+        mutationFn: deleteItem,
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(["inventory"], (old: TInventoryItem[]) =>
+                old.filter((i) => i.uuid !== variables.item_uuid),
+            );
+            addToast({
+                title: `Successfully deleted item`,
+                color: "success",
+            });
+            setHasEdits(false);
+        },
+        onError: (error) => {
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
+        },
+    });
 
     const [reqcertsOpen, setReqcertsOpen] = React.useState<boolean>(false); // whether reqcerts edit modal is open
     const [authrolesOpen, setAuthrolesOpen] = React.useState<boolean>(false); // whether authroles edit modal is open
