@@ -4,7 +4,8 @@ import {
     Form,
     ModalContent,
     Input,
-    NumberInput,
+    Select,
+    SelectItem,
 } from "@heroui/react";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
@@ -12,27 +13,22 @@ import React from "react";
 import { UseMutationResult } from "@tanstack/react-query";
 import clsx from "clsx";
 
-import { TRequiredCertificate, TCertification } from "common/certification";
 import { UUID } from "common/global";
-import { CertSelect } from "./CertSelect";
+import { TArea } from "common/area";
+import { TInventoryItemLocation } from "common/inventory";
 
-const emptyCert: TRequiredCertificate = {
-    certification_uuid: "",
-    required_level: 0,
-};
-
-export default function RequiredCertsModal<
+export default function ItemLocationModal<
     // Allow any type that has a uuid and optional required_certs list
-    T extends { uuid: UUID; required_certifications?: TRequiredCertificate[] },
+    T extends { uuid: UUID; locations?: TInventoryItemLocation[] },
 >({
     element,
-    certifications,
+    areas,
     isOpen,
     onOpenChange,
     patchMutation,
 }: {
     element: T;
-    certifications: TCertification[];
+    areas: TArea[];
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
     patchMutation: UseMutationResult<
@@ -41,15 +37,15 @@ export default function RequiredCertsModal<
         {
             uuid: UUID;
             patch: {
-                required_certifications?: TRequiredCertificate[];
+                locations?: TInventoryItemLocation[];
             };
         }
     >;
 }) {
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
-    const [currentCerts, setCurrentCerts] = React.useState<
-        TRequiredCertificate[]
-    >(element.required_certifications || []);
+    const [currentAreas, setCurrentAreas] = React.useState<
+        TInventoryItemLocation[]
+    >(element.locations || []);
 
     const onSubmit = React.useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
@@ -63,48 +59,52 @@ export default function RequiredCertsModal<
             // Run the mutation
             patchMutation.mutate({
                 uuid: element.uuid,
-                patch: { required_certifications: currentCerts },
+                patch: { locations: currentAreas },
             });
             onOpenChange(false);
             setHasEdits(false);
         },
-        [patchMutation, hasEdits, currentCerts, element.uuid],
+        [patchMutation, hasEdits, currentAreas, element.uuid],
     );
 
-    function wrapEdit<P extends keyof TRequiredCertificate>(
+    function wrapEdit<P extends keyof TInventoryItemLocation>(
         i: number,
         prop: P,
     ) {
-        return (val: TRequiredCertificate[P]) => {
-            if (!currentCerts[i]) {
-                currentCerts[i] = emptyCert;
+        return (val: TInventoryItemLocation[P]) => {
+            if (!currentAreas[i]) {
+                currentAreas[i] = {
+                    area: "",
+                    container: "",
+                    specific: ""
+                };
             }
 
-            const cert = {...currentCerts[i]};
-            cert[prop] = val;
-            const certs = [...currentCerts];
-            certs[i] = cert;
-            setCurrentCerts(certs); // update the instance list
+            const area = {...currentAreas[i]};
+            area[prop] = val;
+            const eareas = [...currentAreas];
+            eareas[i] = area;
+            setCurrentAreas(eareas); // update the instance list
             setHasEdits(true);
         };
     }
 
     const isValid = React.useMemo(() => {
-        for (let i = 0; i < currentCerts.length; i++) {
-            if (currentCerts[i].certification_uuid == "") {
+        for (let i = 0; i < currentAreas.length; i++) {
+            if (currentAreas[i].area == "") {
                 return false; // invalid edit if either field is empty
             }
         }
 
         return hasEdits; // otherwise, invalid iff no edits made
-    }, [hasEdits, currentCerts]);
+    }, [hasEdits, currentAreas]);
 
     return (
         <Modal
             isOpen={isOpen}
             onOpenChange={onOpenChange}
             backdrop="blur"
-            size="xl"
+            size="3xl"
         >
             <ModalContent>
                 {(onClose) => (
@@ -113,59 +113,85 @@ export default function RequiredCertsModal<
                         className="flex flex-col gap-4 p-4"
                     >
                         <div className="text-lg font-semibold">
-                            Edit Required Certifications
+                            Edit Locations
                         </div>
 
-                        {currentCerts.map((cert, i) => (
+                        {currentAreas.map((area, i) => (
                             <div
                                 className="flex flex-col sm:flex-row w-full gap-2 items-top"
-                                key={element.uuid + "-cert-" + cert.certification_uuid}
+                                key={element.uuid + "-area-" + area.area}
                             >
-                                <CertSelect
-                                    certifications={certifications}
-                                    defaultSelectedKeys={[
-                                        cert.certification_uuid,
-                                    ]}
-                                    disabledKeys={currentCerts
-                                        .filter((_, j) => j != i)
-                                        .map((c) => c.certification_uuid)}
+                                <Select<TArea> // this should probably be a separate component
+                                    label="Area"
+                                    name={"area_" + i}
+                                    placeholder="Area"
                                     onSelectionChange={(s) => {
                                         if (s == "all") return;
                                         wrapEdit(
                                             i,
-                                            "certification_uuid",
+                                            "area",
                                         )(Array.from(s)[0] as string);
                                     }}
-                                    placeholder="Select a certification"
-                                    label=""
+                                    defaultSelectedKeys={[area.area]}
                                     isRequired
-                                    selectionMode="single"
+                                    size="lg"
+                                    variant="faded"
+                                    color="primary"
+                                    labelPlacement="inside"
                                     classNames={{
-                                        value: "text-default-500 min-h-[60.66px] content-center",
-                                        trigger:
-                                            "bg-default-100/50 backdrop-blur-sm",
-                                        listbox: "bg-default-100/50",
+                                        value: "text-default-500",
                                     }}
-                                />
+                                    className="sm:w-1/2"
+                                    itemHeight={45}
+                                >
+                                    {areas.map((a) => (
+                                        <SelectItem
+                                            key={a.uuid}
+                                            textValue={a.name}
+                                            className="h-[45px]"
+                                        >
+                                            {a.name}
+                                        </SelectItem>
+                                    ))}
+                                </Select>
 
-                                <div className="w-full h-full flex gap-2 items-center">
-                                    <NumberInput
-                                        isRequired
-                                        label="Minimum Level"
-                                        name="required_level"
-                                        placeholder="0 for any level"
-                                        minValue={0}
-                                        value={cert.required_level}
-                                        onValueChange={wrapEdit(
-                                            i,
-                                            "required_level",
-                                        )}
+                                <div className="w-full h-full flex flex-row gap-2 items-center">
+                                    <Input
+                                        type="text"
+                                        label="Container"
+                                        name="container"
+                                        placeholder="Container"
+                                        defaultValue={
+                                            (element?.locations || [])[i]
+                                                ?.container
+                                        }
+                                        onValueChange={wrapEdit(i, "container")}
                                         variant="faded"
                                         color="primary"
-                                        size="lg"
+                                        size="md"
                                         classNames={{
-                                            mainWrapper: "h-full",
-                                            base: "h-full",
+                                            input: clsx([
+                                                "placeholder:text-default-500",
+                                                "placeholder:italic",
+                                                "text-default-700",
+                                            ]),
+                                        }}
+                                    />
+
+                                    <Input
+                                        type="text"
+                                        label="Specific"
+                                        name="specific"
+                                        placeholder="Specific"
+                                        defaultValue={
+                                            (element?.locations || [])[i]
+                                                ?.specific
+                                        }
+                                        onValueChange={wrapEdit(i, "specific")}
+                                        variant="faded"
+                                        color="primary"
+                                        size="md"
+                                        classNames={{
                                             input: clsx([
                                                 "placeholder:text-default-500",
                                                 "placeholder:italic",
@@ -178,8 +204,8 @@ export default function RequiredCertsModal<
                                         variant="flat"
                                         color="danger"
                                         onPress={() => {
-                                            currentCerts.splice(i, 1); // remove that cert
-                                            setCurrentCerts([...currentCerts]);
+                                            currentAreas.splice(i, 1); // remove that cert
+                                            setCurrentAreas([...currentAreas]);
                                             setHasEdits(true);
                                         }}
                                         isIconOnly
@@ -206,9 +232,13 @@ export default function RequiredCertsModal<
                                     color="primary"
                                     className="p-2 min-w-fit sm:w-1/3"
                                     onPress={() => {
-                                        setCurrentCerts([
-                                            ...currentCerts,
-                                            { ...emptyCert },
+                                        setCurrentAreas([
+                                            ...currentAreas,
+                                            {
+                                                area: "",
+                                                container: "",
+                                                specific: "",
+                                            },
                                         ]); // add a copy of the emptyCert template
                                         setHasEdits(true);
                                     }}

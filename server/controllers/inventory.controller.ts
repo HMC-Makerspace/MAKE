@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 import { getUser } from "./user.controller";
 import { getPrivateAreas } from "./area.controller";
 import { verifyRequest } from "./verify.controller";
-import { API_SCOPE } from "common/global";
+import { API_SCOPE, UUID } from "common/global";
 
 /**
  * Get all inventory items
@@ -117,6 +117,29 @@ async function getPublicInventory(): Promise<TInventoryItem[]> {
         item.locations.filter((loc) => !private_areas.includes(loc.area)),
     );
     return items;
+}
+
+/**
+ * Patch part of an inventory item information given an partial TInventoryItem object.
+ * Item is found by UUID.
+ * @param partial_item_obj The item's complete and updated information
+ * @returns A promise to the updated TInventoryItem object, or null if no
+ *          checkout has the given UUID
+ */
+export async function patchInventoryItem(
+    item_uuid: UUID,
+    partial_item_obj: Partial<TInventoryItem>,
+): Promise<TInventoryItem | null> {
+    const Inventory = mongoose.model("InventoryItem", InventoryItem);
+    // Update the given item with partial changes partial_item_obj, searching by uuid
+    return await Inventory.findOneAndUpdate(
+        { uuid: item_uuid },
+        {
+            // Updates the partial change
+            $set: partial_item_obj,
+        },
+        { returnDocument: "after" },
+    );
 }
 
 /**

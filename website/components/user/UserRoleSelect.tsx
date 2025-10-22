@@ -29,6 +29,8 @@ export function UserRoleSelect({
     label = "Roles",
     labelPlacement = "outside",
     viewOnly = false,
+    size = "lg",
+    name = "roles",
 }: {
     roles?: TUserRole[]; // optional, if not passed will get internally
     selectedKeys?: UserRoleUUID[]; // optional, otherwise no selected roles
@@ -56,6 +58,8 @@ export function UserRoleSelect({
     label?: string; // optional, defaults to "Roles"
     labelPlacement?: "outside" | "outside-left" | "inside"; // optional, defaults to "outside"
     viewOnly?: boolean; // Whether this should only be for viewing
+    size?: "lg" | "sm" | "md" | undefined;
+    name?: string;
 }) {
     const { data: queryRoles, isLoading: queryLoading } = useQuery<TUserRole[]>(
         {
@@ -68,7 +72,7 @@ export function UserRoleSelect({
     return (
         <Select
             items={allRoles ?? []}
-            name="roles"
+            name={name}
             aria-label={label || "Roles"}
             selectedKeys={selectedKeys}
             onSelectionChange={onSelectionChange}
@@ -79,7 +83,7 @@ export function UserRoleSelect({
             selectionMode={selectionMode}
             isMultiline
             placeholder={placeholder}
-            size="lg"
+            size={size}
             variant={variant}
             color={color}
             label={label}
