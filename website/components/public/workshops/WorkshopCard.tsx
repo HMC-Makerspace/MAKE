@@ -81,6 +81,7 @@ export default function WorkshopCard({
                     : onWaitList
                       ? "secondary"
                       : "success",
+                severity: "success",
             });
             queryClient.setQueryData(
                 ["workshop"],
