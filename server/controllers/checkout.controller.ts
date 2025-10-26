@@ -484,7 +484,7 @@ export async function updateItemAvailabilities(
     out: boolean = true,
 ) {
     if (logger) {
-        logger.info("Updating item availabilities");
+        logger.info("Cron: Updating item availabilities");
     }
     const items =
         (await getInventoryItems(checkout_items.map((c) => c.item_uuid))) || [];
@@ -552,7 +552,7 @@ export async function checkoutEmailCron(logger: Logger) {
         return;
     }
     const reminder_frequency = config.checkout.notification_interval_sec;
-    logger.info("Sending overdue checkout emails.");
+    logger.info("Cron: Sending overdue checkout emails.");
     const timestamp = Date.now() / 1000;
     // Get active checkouts
     const Checkouts = mongoose.model("Checkouts", Checkout);

@@ -47,6 +47,7 @@ import { createUser, getUserByEmail } from "controllers/user.controller";
 // @ts-expect-error Static asset loading using Vite
 import favicon from "common/favicon.ico";
 import { clearExpiredFilesCron } from "controllers/file.controller";
+import { revokeExpiredCertificatesCron } from "controllers/certification.controller";
 
 const app: express.Express = express();
 const store = new (MongoDBStore(session))({
@@ -165,7 +166,7 @@ if (process.env.NODE_ENV === "production") {
                         uuid: crypto.randomUUID(),
                         name: name,
                         email: email,
-                        college_id: "" , // If not provided by IDP, fill in later
+                        college_id: "", // If not provided by IDP, fill in later
                         active_roles: [],
                         past_roles: [],
                         active_certificates: [],
@@ -280,6 +281,12 @@ cron.schedule("*/10 * * * *", () => {
 await checkoutAvailabilityCron(logger);
 cron.schedule("*/1 * * * *", () => {
     checkoutAvailabilityCron(logger);
+});
+
+// Revoke expired certificates every 15 minutes
+await revokeExpiredCertificatesCron(logger);
+cron.schedule("*/15 * * * *", () => {
+    revokeExpiredCertificatesCron(logger);
 });
 
 // Setup email client if CLI option included
