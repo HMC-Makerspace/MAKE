@@ -42,6 +42,7 @@ const patchMachine = async ({
     uuid: MachineUUID;
     patch: Partial<TMachine>;
 }) => {
+    console.log("HI", patch)
     return (
         await axios.patch<TMachine>(`/api/v3/machine/${uuid}`, {
             partial_machine_obj: patch,
@@ -100,7 +101,10 @@ export default function Machine({
     const patchMutation = useMutation({
         mutationFn: patchMachine,
         onSuccess: (obj: TMachine) => {
+            console.log("object returned", obj)
+
             queryClient.setQueryData(["machine", machine.uuid], obj);
+
             queryClient.setQueryData(["machine"], (old: TMachine[]) => {
                 return (old ?? []).map((machine) =>
                     machine.uuid === obj.uuid ? obj : machine,
@@ -388,6 +392,7 @@ export default function Machine({
                             isOpen={editDocs}
                             onOpenChange={editDocsModalOpenChange}
                             patchMutation={patchMutation}
+                            roleOption={true}
                         />
                         <AuthorizedRolesModal
                             element={machine}

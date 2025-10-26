@@ -35,6 +35,11 @@ export default function AreasPage() {
         refetchOnWindowFocus: false,
         refetchOnMount: false,
     });
+    const { data: roleSelf, isLoading: roleSelfLoading } = useQuery<TUserRole[]>({
+        queryKey: ["user", "role"],
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+    });
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
             queryKey: ["certification"],
@@ -42,7 +47,7 @@ export default function AreasPage() {
             refetchOnMount: false,
         },
     );
-
+    console.log(machines)
     const isLoading = areasLoading || rolesLoading || certsLoading;
 
     const canEditMachines =

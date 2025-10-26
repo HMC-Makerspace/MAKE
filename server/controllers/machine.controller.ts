@@ -66,12 +66,50 @@ export async function getMachinesVisibleToUser(
     const Machines = mongoose.model("Machine", Machine);
     // Find all machines that require no roles or which require roles that the
     // user has
+    // return Machines.aggregate([
+    //     {$match: { $or: [
+    //         { authorized_roles: null },
+    //         { authorized_roles: { $in: role_uuids } },
+    //     ],}},
+    //     {$unwind: "$documents"},
+    //     {$match: { "documents.authorized_roles": {$in: role_uuids} }},
+    //     {
+    //         $project: {
+    //             "_id": 0,
+    //             "documents.authorized_roles": "$documents.authorized_roles"
+    //         }
+    //     }
+    // ]);
+
     return Machines.find({
         $or: [
             { authorized_roles: null },
-            { authorized_roles: { $in: role_uuids } },
-        ],
-    });
+            { authorized_roles: { $in: role_uuids } }
+        ]
+    },
+    {
+        "documents": { 
+            $elemMatch: {
+                $or: [
+                    { authorized_roles: null },
+                    { authorized_roles: { $in: role_uuids } }
+                ]
+            }
+        }, 
+        "uuid": 1, 
+        "name": 1, 
+        "description": 1, 
+        "images": 1, 
+        "count": 1, 
+        "instances":  1, 
+        "status_logs": 1, 
+        "required_certifications": 1, 
+        "authorized_roles": 1, 
+        "reservable": 1, 
+        "reservation_type": 1
+    }
+    
+)
 }
 
 /**
@@ -169,7 +207,6 @@ export async function patchMachine(
     partial_machine: Partial<TMachine>,
 ): Promise<TMachine | null> {
     const Machines = mongoose.model("Machine", Machine);
-
     const updated_machine = await Machines.findOneAndUpdate(
         { uuid: machine_uuid },
         {

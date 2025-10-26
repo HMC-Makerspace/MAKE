@@ -1,16 +1,19 @@
-import { Button, Modal, Form, ModalContent, Input } from "@heroui/react";
+import { Button, Modal, Form, ModalContent, Input, Dropdown } from "@heroui/react";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 import React from "react";
 import { UseMutationResult } from "@tanstack/react-query";
 import clsx from "clsx";
 
+import { UserRoleSelect } from "./user/UserRoleSelect";
 import { TDocument } from "common/file";
 import { UUID } from "common/global";
+import { UserRoleUUID } from "common/user";
 
 const emptyDoc: TDocument = {
     name: "",
     link: "",
+    authorized_roles: null,
 };
 
 export default function EditDocsModal<
@@ -21,6 +24,7 @@ export default function EditDocsModal<
     isOpen,
     onOpenChange,
     patchMutation,
+    roleOption = false,
 }: {
     element: T;
     isOpen: boolean;
@@ -35,11 +39,13 @@ export default function EditDocsModal<
             };
         }
     >;
+    roleOption?: boolean
 }) {
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
     const [docs, setDocs] = React.useState<TDocument[]>(
         element.documents || [],
     );
+    
 
     const onSubmit = React.useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
@@ -50,6 +56,7 @@ export default function EditDocsModal<
 
             patchMutation.reset();
 
+            console.log("before mutation", docs)
             // Run the mutation
             patchMutation.mutate({
                 uuid: element.uuid,
@@ -59,16 +66,27 @@ export default function EditDocsModal<
         [patchMutation, hasEdits, docs],
     );
 
-    const wrapEdit = (i: number, prop: "name" | "link") => {
+    const wrapEdit = (i: number, prop: "name" | "link" | "authorized_roles") => {
         return (val: any) => {
             if (!docs[i]) docs[i] = { ...emptyDoc }; // copy the emptyDoc template if necessary
-
+            console.log("val", val)
             docs[i][prop] = val; // update the value
             setDocs([...docs]); // update the docs list
+            console.log(docs)
 
             setHasEdits(true);
         };
     };
+
+    const wrapRolesEdit = (i: number) => {
+        return (val: any) => {
+            if (!docs[i]) docs[i] = { ...emptyDoc }; // copy the emptyDoc template if necessary
+            docs[i]["authorized_roles"] = Array.from(val) as UserRoleUUID[]; // update the value
+            setDocs([...docs]); // update the docs list
+            console.log(docs)
+            setHasEdits(true);
+        }
+    }
 
     const isValid = React.useMemo(() => {
         for (let i = 0; i < docs.length; i++) {
@@ -120,9 +138,10 @@ export default function EditDocsModal<
                                             "text-default-700",
                                         ]),
                                     }}
+                                    className='w-full'
                                 />
-
-                                <Input
+                                
+                                    <Input
                                     type="text"
                                     label="Link"
                                     name="link"
@@ -140,8 +159,25 @@ export default function EditDocsModal<
                                             "text-default-700",
                                         ]),
                                     }}
+                                    className='w-full'
                                 />
-
+                                
+                                {roleOption &&
+                                    <div className='min-w-[15vw] max-w-full'>
+                                        <UserRoleSelect
+                                            selectedKeys={docs[i]["authorized_roles"] ?? undefined}
+                                            onSelectionChange={wrapRolesEdit(i)}
+                                            placeholder="Select authorized roles"
+                                            label="Authorized Roles"
+                                            labelPlacement="inside"
+                                            classNames={{
+                                                value: "text-default-500",                                                
+                                            }}
+                                            size="md"
+                                            multiline={false}
+                                        />
+                                    </div>
+                                }
                                 <Button
                                     variant="flat"
                                     color="danger"

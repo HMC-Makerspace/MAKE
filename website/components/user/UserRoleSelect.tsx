@@ -30,6 +30,7 @@ export function UserRoleSelect({
     labelPlacement = "outside",
     viewOnly = false,
     size = "lg",
+    multiline = true,
     name = "roles",
 }: {
     roles?: TUserRole[]; // optional, if not passed will get internally
@@ -59,6 +60,7 @@ export function UserRoleSelect({
     labelPlacement?: "outside" | "outside-left" | "inside"; // optional, defaults to "outside"
     viewOnly?: boolean; // Whether this should only be for viewing
     size?: "lg" | "sm" | "md" | undefined;
+    multiline?: boolean; // if the select allows for multiline
     name?: string;
 }) {
     const { data: queryRoles, isLoading: queryLoading } = useQuery<TUserRole[]>(
@@ -73,7 +75,7 @@ export function UserRoleSelect({
         <Select
             items={allRoles ?? []}
             name={name}
-            aria-label={label || "Roles"}
+            // aria-label={label || "Roles"}
             selectedKeys={selectedKeys}
             onSelectionChange={onSelectionChange}
             defaultSelectedKeys={defaultSelectedKeys}
@@ -81,7 +83,7 @@ export function UserRoleSelect({
             isDisabled={isDisabled || viewOnly}
             isRequired={isRequired}
             selectionMode={selectionMode}
-            isMultiline
+            isMultiline={multiline}
             placeholder={placeholder}
             size={size}
             variant={variant}
@@ -90,7 +92,9 @@ export function UserRoleSelect({
             labelPlacement={labelPlacement}
             classNames={classNames}
             // Base classes
-            className={clsx(viewOnly ? "opacity-100" : "", className)}
+            className={clsx(
+                viewOnly ? "opacity-100" : "", 
+                className)}
             selectorIcon={viewOnly ? <span /> : undefined}
             tabIndex={viewOnly ? -1 : undefined}
             renderValue={(selectedKeys) => {
@@ -98,7 +102,7 @@ export function UserRoleSelect({
                     return "";
                 } else {
                     return (
-                        <div className="flex flex-wrap gap-1 p-2">
+                        <div className="flex flex-wrap gap-1">
                             {selectedKeys.map(
                                 (
                                     selected_role: SelectedItemProps<TUserRole>,
@@ -113,6 +117,7 @@ export function UserRoleSelect({
                                                 r.uuid ==
                                                 selected_role.data?.uuid,
                                         )}
+                                        size={multiline ? "md" : "sm"}
                                     />
                                 ),
                             )}
@@ -123,7 +128,7 @@ export function UserRoleSelect({
         >
             {(role) => (
                 <SelectItem key={role.uuid} textValue={role.title}>
-                    <UserRole role_uuid={role.uuid} />
+                    <UserRole role_uuid={role.uuid} size="md" />
                 </SelectItem>
             )}
         </Select>

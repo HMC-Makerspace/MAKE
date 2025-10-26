@@ -285,6 +285,7 @@ router.patch(
         const requesting_uuid = req.user?.uuid as string;
         const machine_uuid = req.params.UUID;
         const partial_machine = req.body.partial_machine_obj;
+        
 
         // If no requesting user uuid is provided, the call is not authorized
         if (!requesting_uuid) {
@@ -304,6 +305,8 @@ router.patch(
         // If the user is authorized, update a machine object
         if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_MACHINE)) {
             const machine = await patchMachine(machine_uuid, partial_machine);
+            req.log.debug(machine)
+
             if (!machine) {
                 req.log.warn(
                     `Machine with uuid ${machine_uuid} could not be ` +

@@ -23,4 +23,5 @@ export const File = new mongoose.Schema<TFile>({
 export const Document = new mongoose.Schema<TDocument>({
     name: { type: String, required: true },
     link: { type: String, required: true },
+    authorized_roles: { type: [String], required: false },
 });
