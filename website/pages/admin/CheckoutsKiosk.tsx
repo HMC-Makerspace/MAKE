@@ -412,16 +412,6 @@ export default function CheckoutsKiosk() {
                                                                 prereq.required_level,
                                                     ),
                                             );
-                                        console.log(
-                                            "certPrereqs:",
-                                            cert.name,
-                                            certHasPrereqs,
-                                        );
-                                        console.log(
-                                            "userPrereqs:",
-                                            user?.name,
-                                            userHasPrereqs,
-                                        );
                                         return (
                                             <Tooltip
                                                 content={
@@ -503,7 +493,6 @@ export default function CheckoutsKiosk() {
                 setMissingIDUser={setMissingIDUser}
                 college_id={collegeID}
             />
-            
         </AdminLayout>
     );
 }

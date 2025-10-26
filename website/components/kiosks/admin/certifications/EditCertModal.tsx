@@ -103,6 +103,7 @@ export default function EditCertModal({
                 title: `Successfully ${isNew ? "created" : "updated"} certification ${result.name}`,
                 color: "success",
             });
+            onOpenChange(false);
         },
         onError: (error) => {
             addToast({

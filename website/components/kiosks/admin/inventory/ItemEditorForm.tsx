@@ -124,13 +124,15 @@ export default function ItemEditorForm({
                 title: `Successfully ${isNew ? "created" : "updated"} item${isMultiple ? "s" : ""}`,
                 color: "success",
             });
-            // console.log(result);
+            setHasEdits(false);
+            onUpdate(variables.isNew);
         },
         onError: (error) => {
             addToast({
                 title: `Error: ${error.message}`,
                 color: "danger",
             });
+            setHasEdits(false);
         },
     });
 
