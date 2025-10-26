@@ -2,7 +2,7 @@ import { TConfig } from "common/config";
 import { TUser } from "common/user";
 import { TWorkshop } from "common/workshop";
 import { timestampToZonedDateTime } from "../../website/utils";
-import { DateFormatter } from "@internationalized/date";
+import { DateFormatter, getLocalTimeZone } from "@internationalized/date";
 
 const WorkshopConfirmationTemplate = (
     workshop: TWorkshop,
@@ -17,7 +17,7 @@ const WorkshopConfirmationTemplate = (
 
     const zonedStartTime = timestampToZonedDateTime(
         workshop.timestamp_start,
-        config.schedule.timezone,
+        getLocalTimeZone(),
     );
     const dateFormatter = new DateFormatter(config.schedule.locale, {
         month: "long",
@@ -26,6 +26,7 @@ const WorkshopConfirmationTemplate = (
         hour: "numeric",
         minute: "numeric",
         timeZoneName: "short",
+        timeZone: config.schedule.timezone,
     });
     return (
         <>

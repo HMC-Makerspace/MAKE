@@ -469,9 +469,11 @@ export default function WorkshopEditModal({
                                         ? {
                                               start: timestampToZonedDateTime(
                                                   workshop.timestamp_start,
+                                                  config.schedule.timezone
                                               ),
                                               end: timestampToZonedDateTime(
                                                   workshop.timestamp_end,
+                                                  config.schedule.timezone
                                               ),
                                           }
                                         : undefined

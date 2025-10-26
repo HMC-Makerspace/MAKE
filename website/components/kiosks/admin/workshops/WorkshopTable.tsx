@@ -21,7 +21,7 @@ import { TUser, TUserRole } from "common/user";
 import MAKETable from "../../../Table.tsx";
 import { MAKEUser } from "../../../user/MAKEUser.tsx";
 import UserRole from "../../../user/UserRole.tsx";
-import { convertTimestampToDate } from "../../../../utils.tsx";
+import { convertTimestampToDate, zonedDateTimeToTimestamp } from "../../../../utils.tsx";
 import WorkshopPeopleModal from "./WorkshopPeopleModal.tsx";
 import WorkshopImagesModal from "./WorkshopImagesModal.tsx";
 import WorkshopEditModal from "./WorkshopEditModal.tsx";
@@ -32,6 +32,7 @@ import RequiredCertsModal from "../certifications/RequiredCertsModal.tsx";
 import { UUID } from "common/global.ts";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getLocalTimeZone, now } from "@internationalized/date";
 
 // TODO-
 // [] FIX TIME
@@ -160,9 +161,9 @@ export default function WorkshopTable({
                             uuid: crypto.randomUUID(),
                             title: "",
                             instructors: [],
-                            timestamp_public: Date.now() / 1000,
-                            timestamp_start: Date.now() / 1000,
-                            timestamp_end: Date.now() / 1000 + 60 * 60 * 24,
+                            timestamp_public: zonedDateTimeToTimestamp(now(getLocalTimeZone())),
+                            timestamp_start: zonedDateTimeToTimestamp(now(getLocalTimeZone())),
+                            timestamp_end: zonedDateTimeToTimestamp(now(getLocalTimeZone())) + 60 * 60 * 24,
                             rsvp_list: [],
                             users_notified: [],
                             sign_in_list: [],
