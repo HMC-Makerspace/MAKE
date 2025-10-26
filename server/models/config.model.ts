@@ -19,6 +19,7 @@ const FileConfig = new mongoose.Schema<TFileConfig>(
     {
         max_upload_capacity: { type: Number, required: false },
         max_upload_count: { type: Number, required: false },
+        upload_duration: { type: Number, required: false },
     },
     { _id: false },
 );

@@ -21,6 +21,10 @@ export type TFileConfig = {
      * Maximum number of uploads for each user.
      */
     max_upload_count?: number;
+    /**
+     * The duration that each user uploaded file remains on the server (in seconds).
+     */
+    upload_duration?: number;
 };
 
 export type TScheduleConfig = {
