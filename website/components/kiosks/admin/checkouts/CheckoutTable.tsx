@@ -151,13 +151,14 @@ export default function CheckoutTable({
                 if (isLoading) {
                     return obj.uuid;
                 }
-                if (path === "checked_out_by") {
+                console.log(path);
+                if (path.includes("checked_out_by")) {
                     // Get user name
                     return (
                         users?.find((u) => u.uuid === obj.checked_out_by)
                             ?.name || "Unknown User"
                     );
-                } else if (path === "items") {
+                } else if (path.includes("items")) {
                     // Get all item names, long names, and keywords
                     const item_uuids = obj.items.map((i) => i.item_uuid);
                     const items = inventory.filter((i) =>
