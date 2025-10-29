@@ -195,10 +195,10 @@ export default function CheckoutTable({
             } else if (b.timestamp_in && !a.timestamp_in) {
                 return -1;
             } else if (!a.timestamp_in && !b.timestamp_in) {
-                // If neither are checked in, sort by soonest checkout first
+                // If neither are checked in, sort by most recently checked out
                 return (
-                    a.timestamp_out - b.timestamp_out ||
-                    a.timestamp_due - b.timestamp_due
+                    b.timestamp_out - a.timestamp_out ||
+                    b.timestamp_due - a.timestamp_due
                 );
             } else if (a.timestamp_in && b.timestamp_in) {
                 // If both are checked in, sort by most recently checked in
