@@ -203,7 +203,7 @@ export async function rsvpToWorkshop(
     // Send a reminder confirmation email to the user
     await sendTemplatedEmail(
         user.email,
-        "Workshop RSVP Reminder",
+        "Workshop RSVP: " + workshop.title,
         WorkshopConfirmationTemplate(workshop, user, config),
         logger,
     );
@@ -268,4 +268,33 @@ export async function signInToWorkshop(
     // Update the workshop in the database
     workshop.save();
     return true;
+}
+
+export async function workshopReminderEmailCron(logger: Logger) {
+    logger.info("Sending workshop reminder emails.");
+
+    const timestamp = Date.now() / 1000;
+
+    const Workshops = mongoose.model("Workshop", Workshop);
+    const due_workshops = await Workshops.find({
+        // Workshops that start in approximately an hour (the period of 15 minutes centered on 1 hour from now)
+        timestamp_start: { $gte: timestamp + (60 - 15/2) * 60, $lt: timestamp + (60 + 15/2) * 60 },
+    });
+
+    for (const workshop of due_workshops) {
+        // get users on the RSVP list
+        for (let u of workshop.rsvp_list) {
+            const user = await getUser(u.user_uuid);
+
+            if (user) {
+                // send email
+                await sendTemplatedEmail(
+                    user.email,
+                    "Reminder: " + workshop.title,
+                    WorkshopReminderTemplate(workshop.title, workshop.timestamp_start - timestamp),
+                    logger,
+                );
+            }
+        }
+    }
 }

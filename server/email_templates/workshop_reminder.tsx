@@ -1,4 +1,5 @@
 import type { UnixTimestamp } from "common/global";
+import { relativeTimestampToString } from "../../website/utils";
 
 // TODO: update this with new workshop information, like WorkshopConfirmationTemplate
 const WorkshopReminderTemplate = (
@@ -18,7 +19,7 @@ const WorkshopReminderTemplate = (
                 {workshop}
                 <br />
                 <br />
-                starts in {time_until}. If you are unable to attend, please
+                starts in <b>{relativeTimestampToString(time_until - time_until % 60)}</b>. If you are unable to attend, please
                 cancel on{" "}
                 <a href="https://make.hmc.edu?p=workshop">make.hmc.edu</a>
                 .
