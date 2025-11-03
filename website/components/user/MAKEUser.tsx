@@ -51,7 +51,7 @@ export function MAKEUser({
             Login
         </Button>
     ),
-    showControls = false
+    showControls = false,
 }: {
     user_uuid: string;
     user?: TUser;
@@ -101,9 +101,10 @@ export function MAKEUser({
     });
 
     const loggedOut =
-        !user_uuid ||
-        query.isPending ||
-        query.error?.status === StatusCodes.UNAUTHORIZED;
+        !user &&
+        (!user_uuid ||
+            query.isPending ||
+            query.error?.status === StatusCodes.UNAUTHORIZED);
 
     const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
         queryKey: ["user", user_uuid, "roles"],
@@ -190,7 +191,7 @@ export function MAKEUser({
                             isLoading={rolesLoading}
                         />
                     )}
-                    {showControls &&
+                    {showControls && (
                         <div className="w-full flex flex-row gap-4 justify-center p-2">
                             <Button
                                 variant="shadow"
@@ -224,7 +225,7 @@ export function MAKEUser({
                                 }}
                             />
                         </div>
-                    }
+                    )}
                 </PopoverContent>
             </Popover>
         );

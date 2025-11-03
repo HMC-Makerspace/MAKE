@@ -13,21 +13,30 @@ import ItemLocationChip from "./ItemLocationChip";
 import { TArea } from "common/area";
 import CertificationTag from "../certifications/CertificationTag";
 import { TCertification } from "common/certification";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function ItemInfo({
     item_data,
     areas,
     certs,
+    quantity,
 }: {
     item_data?: TInventoryItem;
     areas: TArea[];
     certs: TCertification[];
+    quantity?: number;
 }) {
     return (
         <div>
             <Popover placement="bottom">
                 <PopoverTrigger>
                     <Button>
+                        {quantity && quantity > 1 ? (
+                            <>
+                                {quantity}
+                                <XMarkIcon className="size-4" />
+                            </>
+                        ) : null}
                         <h1>{item_data ? item_data.name : "Unknown Item"}</h1>
                     </Button>
                 </PopoverTrigger>

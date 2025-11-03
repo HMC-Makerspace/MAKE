@@ -46,6 +46,7 @@ import { CheckBadgeIcon, PercentBadgeIcon } from "@heroicons/react/24/solid";
 import UsersTable from "../../components/kiosks/admin/users/UsersTable";
 import GrantCertPopup from "../../components/kiosks/admin/checkouts/GrantCertPopup";
 import AssignIDPopup from "../../components/kiosks/admin/checkouts/AssignIDPopup";
+import { TPublicScheduleData } from "common/schedule";
 
 async function getCartUnavailability({ cart }: { cart: TCheckoutItem[] }) {
     return (
@@ -363,8 +364,11 @@ export default function CheckoutsKiosk() {
                                 inventory={inventory ?? []}
                                 users={users}
                                 config={config}
+                                activeSchedule={activeSchedule}
+                                areas={areas}
+                                certs={certs}
                                 selectedKeys={new Set()}
-                                isLoading={inventoryLoading}
+                                isLoading={inventoryLoading || checkoutsLoading || usersLoading || areasLoading || certsLoading}
                             />
                         </Tab>
                         <Tab key={"users"} title={"Users"}>
