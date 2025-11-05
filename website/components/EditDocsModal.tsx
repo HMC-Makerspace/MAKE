@@ -45,7 +45,6 @@ export default function EditDocsModal<
     const [docs, setDocs] = React.useState<TDocument[]>(
         element.documents || [],
     );
-    
 
     const onSubmit = React.useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
@@ -56,7 +55,6 @@ export default function EditDocsModal<
 
             patchMutation.reset();
 
-            console.log("before mutation", docs)
             // Run the mutation
             patchMutation.mutate({
                 uuid: element.uuid,
@@ -66,13 +64,12 @@ export default function EditDocsModal<
         [patchMutation, hasEdits, docs],
     );
 
-    const wrapEdit = (i: number, prop: "name" | "link" | "authorized_roles") => {
+    const wrapEdit = (i: number, prop: "name" | "link") => {
         return (val: any) => {
             if (!docs[i]) docs[i] = { ...emptyDoc }; // copy the emptyDoc template if necessary
-            console.log("val", val)
+
             docs[i][prop] = val; // update the value
             setDocs([...docs]); // update the docs list
-            console.log(docs)
 
             setHasEdits(true);
         };
@@ -84,10 +81,10 @@ export default function EditDocsModal<
             docs[i]["authorized_roles"] = Array.from(val) as UserRoleUUID[]; // update the value
             if (docs[i]["authorized_roles"].length == 0) {docs[i]["authorized_roles"] = null}; // makes sure empty lists not allowed
             setDocs([...docs]); // update the docs list
-            console.log(docs)
+
             setHasEdits(true);
-        }
-    }
+        };
+    };
 
     const isValid = React.useMemo(() => {
         for (let i = 0; i < docs.length; i++) {
@@ -140,8 +137,7 @@ export default function EditDocsModal<
                                         ]),
                                     }}
                                     className='w-full'
-                                />
-                                
+                                />  
                                     <Input
                                     type="text"
                                     label="Link"

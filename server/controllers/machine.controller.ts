@@ -187,6 +187,7 @@ export async function patchMachine(
     partial_machine: Partial<TMachine>,
 ): Promise<TMachine | null> {
     const Machines = mongoose.model("Machine", Machine);
+    
     const updated_machine = await Machines.findOneAndUpdate(
         { uuid: machine_uuid },
         {

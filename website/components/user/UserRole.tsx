@@ -31,7 +31,6 @@ export default function UserRole({
             <div
                 className={`w-5 h-5 rounded-full`}
                 style={{backgroundColor: color}}
-            
             ></div>
         );
     } else {

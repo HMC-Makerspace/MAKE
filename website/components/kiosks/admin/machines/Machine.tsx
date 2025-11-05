@@ -6,14 +6,9 @@ import {
     Textarea,
     Tooltip,
     useDisclosure,
-    addToast
+    addToast,
     Accordion,
     AccordionItem,
-    Dropdown,
-    DropdownTrigger,
-    DropdownMenu,
-    DropdownSection,
-    DropdownItem
 } from "@heroui/react";
 import { TUserRole } from "common/user";
 import clsx from "clsx";
@@ -50,7 +45,6 @@ const patchMachine = async ({
     uuid: MachineUUID;
     patch: Partial<TMachine>;
 }) => {
-    console.log("HI", patch)
     return (
         await axios.patch<TMachine>(`/api/v3/machine/${uuid}`, {
             partial_machine_obj: patch,
@@ -109,8 +103,6 @@ export default function Machine({
     const patchMutation = useMutation({
         mutationFn: patchMachine,
         onSuccess: (obj: TMachine) => {
-            console.log("object returned", obj)
-
             queryClient.setQueryData(["machine", machine.uuid], obj);
 
             queryClient.setQueryData(["machine"], (old: TMachine[]) => {
@@ -455,80 +447,36 @@ export default function Machine({
                                 ))
                             ) : (
                                 <div className='w-full'>
-
-                                <Accordion
-                                // className="py-0"
-                                itemClasses={{
-                                    // trigger: "py-0 bg-black",
-                                    // indicator: "size-6 ",
-                                }}
-                                fullWidth
-                                variant="splitted"
-                                // hideIndicator={true}
-                            >                                    
-                                <AccordionItem
-                                    // startContent={
-                                    //     // <div className='w-full items-center justify-center'>
-                                    //     //         View Documents
-                                    //     // </div>
-                                        
-                                        
-                                    // }
-                                    title="View Documents"                                    
-                                >
-                                    {
-                                        machine.documents.map((doc, i) => (
-                                            <div className='py-1'>
-                                                <Button
-                                                    key={`machine-${machine.uuid}-doc-${i}`}
-                                                    color="primary"
-                                                    className="w-full py-2"
-                                                    href={doc.link}
-                                                    as={Link}
-                                                    isExternal
-                                                >
-                                                    {doc.name}
-                                                </Button>
-                                            </div>
-                                            
-                                        ))
-                                    }
-                                </AccordionItem>
-                            </Accordion>
-                            </div>
-                                // <Button color="primary" className="w-full">
-                                //     View Documents
-                                // </Button>
-                                // <Dropdown>
-                                //     <DropdownTrigger>
-                                //        <Button color="primary" className="w-full">
-                                //             View Documents
-                                //         </Button>
-                                //     </DropdownTrigger>
-                                //     <DropdownMenu className='w-full'>
-                                //         {machine.documents.map((doc, i) => (
-                                //             <DropdownItem key={i}>
-                                //             <Button
-                                //                 key={`machine-${machine.uuid}-doc-${i}`}
-                                //                 color="primary"
-                                //                 className="w-full"
-                                //                 href={doc.link}
-                                //                 as={Link}
-                                //                 isExternal
-                                //             >
-                                //                 {doc.name}
-                                //             </Button>
-                                        
-                                //             </DropdownItem>
-                                //         ))}
-
-                                //     </DropdownMenu>
-                                // </Dropdown>
-
+                                    <Accordion
+                                        fullWidth
+                                        variant="splitted"
+                                    >                                    
+                                        <AccordionItem
+                                            title="View Documents"                                    
+                                        >
+                                            {
+                                                machine.documents.map((doc, i) => (
+                                                    <div className='py-1'>
+                                                        <Button
+                                                            key={`machine-${machine.uuid}-doc-${i}`}
+                                                            color="primary"
+                                                            className="w-full py-2"
+                                                            href={doc.link}
+                                                            as={Link}
+                                                            isExternal
+                                                        >
+                                                            {doc.name}
+                                                        </Button>
+                                                    </div>
+                                                    
+                                                ))
+                                            }
+                                        </AccordionItem>
+                                    </Accordion>
+                                </div>
                             )}
                         </div>
-                    )
-                )}
+                    ))}
             </div>
         </Card>
     );

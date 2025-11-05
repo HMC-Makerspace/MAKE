@@ -47,7 +47,7 @@ export default function AreasPage() {
             refetchOnMount: false,
         },
     );
-    console.log(machines)
+
     const isLoading = areasLoading || rolesLoading || certsLoading;
 
     const canEditMachines =
