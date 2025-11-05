@@ -82,6 +82,7 @@ export default function EditDocsModal<
         return (val: any) => {
             if (!docs[i]) docs[i] = { ...emptyDoc }; // copy the emptyDoc template if necessary
             docs[i]["authorized_roles"] = Array.from(val) as UserRoleUUID[]; // update the value
+            if (docs[i]["authorized_roles"].length == 0) {docs[i]["authorized_roles"] = null}; // makes sure empty lists not allowed
             setDocs([...docs]); // update the docs list
             console.log(docs)
             setHasEdits(true);

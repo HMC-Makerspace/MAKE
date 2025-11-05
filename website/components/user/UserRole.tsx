@@ -7,7 +7,7 @@ import { getForegroundColor } from "../../utils";
 export default function UserRole({
     role_uuid,
     role,
-    size = "sm",
+    size = "md",
 }: {
     role_uuid: string;
     role?: TUserRole;

@@ -6,6 +6,13 @@ import {
     Textarea,
     Tooltip,
     useDisclosure,
+    Accordion,
+    AccordionItem,
+    Dropdown,
+    DropdownTrigger,
+    DropdownMenu,
+    DropdownSection,
+    DropdownItem
 } from "@heroui/react";
 import { TUserRole } from "common/user";
 import clsx from "clsx";
@@ -406,11 +413,14 @@ export default function Machine({
                     machine.documents && (
                         <div
                             className={clsx(
-                                "self-center w-4/5 gap-3 flex sm:flex-row flex-col",
+                                "self-center gap-3 flex sm:flex-row flex-col",
                                 !machine.documents ||
                                     machine.documents.length == 0
                                     ? ""
                                     : "mt-2",
+                                machine.documents.length <= 2 
+                                    ? "w-4/5" 
+                                    : "w-full",
                             )}
                         >
                             {machine.documents.length <= 2 ? (
@@ -427,10 +437,77 @@ export default function Machine({
                                     </Button>
                                 ))
                             ) : (
-                                // TODO: Show all documents
-                                <Button color="primary" className="w-full">
-                                    View Documents
-                                </Button>
+                                <div className='w-full'>
+
+                                <Accordion
+                                // className="py-0"
+                                itemClasses={{
+                                    // trigger: "py-0 bg-black",
+                                    // indicator: "size-6 ",
+                                }}
+                                fullWidth
+                                variant="splitted"
+                                // hideIndicator={true}
+                            >                                    
+                                <AccordionItem
+                                    // startContent={
+                                    //     // <div className='w-full items-center justify-center'>
+                                    //     //         View Documents
+                                    //     // </div>
+                                        
+                                        
+                                    // }
+                                    title="View Documents"                                    
+                                >
+                                    {
+                                        machine.documents.map((doc, i) => (
+                                            <div className='py-1'>
+                                                <Button
+                                                    key={`machine-${machine.uuid}-doc-${i}`}
+                                                    color="primary"
+                                                    className="w-full py-2"
+                                                    href={doc.link}
+                                                    as={Link}
+                                                    isExternal
+                                                >
+                                                    {doc.name}
+                                                </Button>
+                                            </div>
+                                            
+                                        ))
+                                    }
+                                </AccordionItem>
+                            </Accordion>
+                            </div>
+                                // <Button color="primary" className="w-full">
+                                //     View Documents
+                                // </Button>
+                                // <Dropdown>
+                                //     <DropdownTrigger>
+                                //        <Button color="primary" className="w-full">
+                                //             View Documents
+                                //         </Button>
+                                //     </DropdownTrigger>
+                                //     <DropdownMenu className='w-full'>
+                                //         {machine.documents.map((doc, i) => (
+                                //             <DropdownItem key={i}>
+                                //             <Button
+                                //                 key={`machine-${machine.uuid}-doc-${i}`}
+                                //                 color="primary"
+                                //                 className="w-full"
+                                //                 href={doc.link}
+                                //                 as={Link}
+                                //                 isExternal
+                                //             >
+                                //                 {doc.name}
+                                //             </Button>
+                                        
+                                //             </DropdownItem>
+                                //         ))}
+
+                                //     </DropdownMenu>
+                                // </Dropdown>
+
                             )}
                         </div>
                     )

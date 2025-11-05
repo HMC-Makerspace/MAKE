@@ -75,7 +75,7 @@ export function UserRoleSelect({
         <Select
             items={allRoles ?? []}
             name={name}
-            // aria-label={label || "Roles"}
+            aria-label={label || "Roles"}
             selectedKeys={selectedKeys}
             onSelectionChange={onSelectionChange}
             defaultSelectedKeys={defaultSelectedKeys}
