@@ -22,7 +22,10 @@ export default function DeleteModal({
             <ModalContent>
                 {(onClose) => (
                     <Form
-                        onSubmit={onSubmit}
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            onSubmit(e);
+                        }}
                         className="flex flex-col gap-4 p-4"
                     >
                         <div className="text-lg font-semibold capitalize">

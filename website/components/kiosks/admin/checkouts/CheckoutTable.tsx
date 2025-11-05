@@ -8,14 +8,16 @@ import {
     DropdownItem,
     Spinner,
     Tooltip,
+    addToast,
 } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
     ChevronDownIcon,
-    PlusIcon,
     EnvelopeIcon,
     ArrowTurnDownLeftIcon,
     ArrowUturnRightIcon,
+    ClockIcon,
+    PlusIcon,
 } from "@heroicons/react/24/outline";
 import {
     ITEM_ACCESS_DESCRIPTORS,
@@ -27,7 +29,7 @@ import MAKETable from "../../../Table";
 import Fuse, { FuseGetFunction } from "fuse.js";
 import React from "react";
 import { TUser, TUserRole } from "common/user";
-import { TCertification } from "common/certification";
+import { TCertificate, TCertification } from "common/certification";
 import clsx from "clsx";
 import CertificationTag from "../certifications/CertificationTag";
 import UserRole from "../../../user/UserRole";
@@ -37,6 +39,16 @@ import { TConfig } from "common/config";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UUID } from "common/global";
 import axios from "axios";
+import { TSchedule } from "common/schedule";
+import ItemInfo from "../inventory/ItemInfo";
+import {
+    timestampToTime,
+    timestampToZonedDateTime,
+    zonedDateTimeToTimestamp,
+} from "../../../../utils";
+import { now, ZonedDateTime } from "@internationalized/date";
+import UserInfo from "../users/UserInfo";
+import { MAKEUser } from "../../../user/MAKEUser";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" },
@@ -46,7 +58,7 @@ const baseColumns = [
     { name: "User", id: "checked_out_by" },
     { name: "Items", id: "items" },
     { name: "Reminders Sent", id: "notifications_sent" },
-    // { name: "Extend", id: "extend"}, // TODO: consider extensions
+    { name: "Extend", id: "extend_checkout" },
     { name: "Return", id: "return" },
 ];
 
@@ -62,11 +74,31 @@ async function undoReturnCheckout({ checkout_uuid }: { checkout_uuid: UUID }) {
     ).data;
 }
 
+async function extendCheckout({
+    checkout_uuid,
+    new_timestamp_due,
+}: {
+    checkout_uuid: UUID;
+    new_timestamp_due: number;
+}) {
+    return (
+        await axios.patch<TCheckout>(
+            `/api/v3/checkout/${checkout_uuid}/extend`,
+            {
+                new_timestamp_due: new_timestamp_due,
+            },
+        )
+    ).data;
+}
+
 export default function CheckoutTable({
     checkouts,
     inventory,
     users: usersParam,
     config,
+    activeSchedule,
+    areas,
+    certs,
     selectedKeys,
     multiSelect = true,
     isLoading,
@@ -78,6 +110,7 @@ export default function CheckoutTable({
         "checked_out_by",
         "items",
         "notifications_sent",
+        "extend_checkout",
         "return",
     ],
     customColumnComponents,
@@ -86,6 +119,9 @@ export default function CheckoutTable({
     inventory: TInventoryItem[];
     users?: TUser[];
     config: TConfig;
+    activeSchedule: TSchedule;
+    areas: TArea[];
+    certs: TCertification[];
     selectedKeys: Selection;
     multiSelect?: boolean;
     isLoading: boolean;
@@ -110,6 +146,11 @@ export default function CheckoutTable({
             );
             // Update item availability
             queryClient.refetchQueries({ queryKey: ["inventory"] });
+            addToast({
+                title: `Successfully returned checkout`,
+                color: "success",
+            });
+
         },
     });
     const undoMutation = useMutation({
@@ -121,8 +162,31 @@ export default function CheckoutTable({
             );
             // Update item availability
             queryClient.refetchQueries({ queryKey: ["inventory"] });
+            addToast({
+                title: `Undid checkout return`,
+                color: "warning",
+            });
         },
     });
+    const editMutation = useMutation({
+        mutationFn: extendCheckout,
+        onSuccess: (data) => {
+            const inPast = data.timestamp_due < Date.now() / 1000;
+            queryClient.setQueryData(["checkout", data.uuid], data);
+            queryClient.setQueryData(["checkout"], (old: TCheckout[]) =>
+                old.map((c) => (c.uuid === data.uuid ? data : c)),
+            );
+            addToast({
+                title: inPast
+                    ? `Checkout extended to tomorrow`
+                    : "Checkout extended for a day",
+                timeout: 3000,
+                color: "success",
+                severity: "success",
+            });
+        },
+    });
+
     // The set of columns that are visible
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
         new Set(defaultColumns),
@@ -211,18 +275,17 @@ export default function CheckoutTable({
         timestamp: "timestamp_out" | "timestamp_due" | "timestamp_in",
     ) => {
         return (checkout: TCheckout) => (
-            <h2 className="text-center whitespace-break-spaces">
+            <h2 className="text-center whitespace-pre-line">
                 {checkout[timestamp]
-                    ? new Date(checkout[timestamp] * 1000).toLocaleString(
-                          undefined,
-                          {
+                    ? new Date(checkout[timestamp] * 1000)
+                          .toLocaleString(undefined, {
                               year: "numeric",
                               month: "numeric",
                               day: "numeric",
                               hour: "numeric",
                               minute: "numeric",
-                          },
-                      )
+                          })
+                          .replace(" ", "\n")
                     : ""}
             </h2>
         );
@@ -307,28 +370,31 @@ export default function CheckoutTable({
                         const user = users?.find(
                             (u) => u.uuid === c.checked_out_by,
                         );
-                        return user?.name || "Unknown User";
+                        console.log(c.checked_out_by, user);
+                        return (
+                            <MAKEUser
+                                key={user?.uuid}
+                                user_uuid={c.checked_out_by}
+                                user={user}
+                                size="sm"
+                            />
+                        );
                     },
                     items: (c) => (
                         <div className="flex flex-row gap-1.5 flex-wrap">
                             {c.items.map((i) => (
                                 <div
-                                    key={i.item_uuid}
-                                    className={clsx(
-                                        "flex flex-row w-fit whitespace-nowrap",
-                                        "rounded-lg bg-default-200 p-2 gap-2",
-                                        "items-center",
-                                    )}
+                                    key={i.item_uuid + "-" + inventory.length}
+                                    className="flex items-center gap-1"
                                 >
-                                    <div className="text-md">{i.quantity}</div>
-                                    <div className="text-xs text-center pt-[1px]">
-                                        {"✕"}
-                                    </div>
-                                    <div className="text-md">
-                                        {inventory.find(
+                                    <ItemInfo
+                                        item_data={inventory.find(
                                             (item) => item.uuid === i.item_uuid,
-                                        )?.name || "Unknown Item"}
-                                    </div>
+                                        )}
+                                        areas={areas}
+                                        certs={certs}
+                                        quantity={i.quantity}
+                                    />
                                 </div>
                             ))}
                         </div>
@@ -341,6 +407,83 @@ export default function CheckoutTable({
                             {c.notifications_sent}
                         </div>
                     ),
+                    extend_checkout: (c) => {
+                        if (!c.timestamp_in) {
+                            return (
+                                <Tooltip
+                                    content={"Extends checkout by 1 Day."}
+                                    className="max-w-56 justify-center"
+                                >
+                                    <Button
+                                        isIconOnly
+                                        startContent={
+                                            <div className="relative flex items-center">
+                                                <ClockIcon className="size-5" />
+                                                <PlusIcon
+                                                    className="absolute -top-0.5 -right-0.5 size-2"
+                                                    strokeWidth={3.5}
+                                                />
+                                            </div>
+                                        }
+                                        color="warning"
+                                        variant="ghost"
+                                        isDisabled={
+                                            /*!selectedUser ||
+                                            (selectedUser &&
+                                                selectedUser.uuid !==
+                                                    c.checked_out_by)*/ false
+                                        }
+                                        onPress={() => {
+                                            // if the checkout is expired, extend it to tomorrow at 10PM
+                                            // if the checkout is valid, extend it +1 day at 10PM
+                                            const current_time = now(
+                                                config.schedule.timezone,
+                                            );
+
+                                            const timestamp_due =
+                                                timestampToZonedDateTime(
+                                                    c.timestamp_due,
+                                                    config.schedule.timezone,
+                                                );
+
+                                            const is_expired =
+                                                timestamp_due.compare(
+                                                    current_time,
+                                                ) < 0;
+
+                                            let new_expiration: ZonedDateTime;
+                                            if (is_expired) {
+                                                // extend to today's closing
+                                                new_expiration =
+                                                    current_time.set(
+                                                        timestampToTime(
+                                                            activeSchedule.daily_close_time,
+                                                        ),
+                                                    );
+                                            } else {
+                                                // just to +1 day
+                                                new_expiration = timestamp_due
+                                                    .add({ days: 1 })
+                                                    .set(
+                                                        timestampToTime(
+                                                            activeSchedule.daily_close_time,
+                                                        ),
+                                                    );
+                                            }
+
+                                            editMutation.mutate({
+                                                checkout_uuid: c.uuid,
+                                                new_timestamp_due:
+                                                    zonedDateTimeToTimestamp(
+                                                        new_expiration,
+                                                    ),
+                                            });
+                                        }}
+                                    />
+                                </Tooltip>
+                            );
+                        }
+                    },
                     return: (c) => {
                         if (c.timestamp_in) {
                             // Undos are enabled for 2 minutes
@@ -391,6 +534,12 @@ export default function CheckoutTable({
                                     }
                                     color="secondary"
                                     variant="shadow"
+                                    isDisabled={
+                                        /*!selectedUser ||
+                                            (selectedUser &&
+                                                selectedUser.uuid !==
+                                                    c.checked_out_by)*/ false
+                                    }
                                     onPress={() =>
                                         returnMutation.mutate({
                                             checkout_uuid: c.uuid,
