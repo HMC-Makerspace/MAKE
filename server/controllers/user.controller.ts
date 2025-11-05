@@ -15,6 +15,7 @@ import { getActiveSchedule } from "./schedule.controller";
 import { SHIFT_DAY } from "common/shift";
 import { ScheduleUUID } from "common/schedule";
 import { getCertification } from "./certification.controller";
+import { createHash } from "crypto";
 
 /**
  * Get all users in the database
@@ -22,8 +23,7 @@ import { getCertification } from "./certification.controller";
  */
 export async function getUsers(): Promise<TUser[]> {
     const Users = mongoose.model("User", User);
-    // Remove passkey from all users.
-    return Users.find().select("-passkey");
+    return Users.find();
 }
 
 export async function getPublicUsers(): Promise<TPublicUser[]> {
@@ -41,19 +41,14 @@ export async function getPublicUsers(): Promise<TPublicUser[]> {
  * @param uuid The user's UUID to search by
  * @returns A promise to a TUser object, or null if no user has the given UUID
  */
-export async function getUser(uuid: UserUUID, providePasskey: boolean = false) {
+export async function getUser(uuid: UserUUID) {
     const Users = mongoose.model("User", User);
     if (typeof uuid !== "string") {
         // Prevent NoSQL injection by only allowing string UUIDs
         return null;
     }
     const user = Users.findOne({ uuid: uuid });
-    // Only provide passkey if explicitly requested
-    if (providePasskey) {
-        return user;
-    } else {
-        return user.select("-passkey");
-    }
+    return user;
 }
 
 /**
@@ -65,7 +60,7 @@ export async function getUser(uuid: UserUUID, providePasskey: boolean = false) {
  */
 export async function getUserByCollegeID(id: string): Promise<TUser | null> {
     const Users = mongoose.model("User", User);
-    return Users.findOne({ college_id: id }).select("-passkey");
+    return Users.findOne({ college_id: id });
 }
 
 /**
@@ -77,8 +72,8 @@ export async function getUserByCollegeID(id: string): Promise<TUser | null> {
  */
 export async function getUserByEmail(email: string): Promise<TUser | null> {
     const Users = mongoose.model("User", User);
-    // Get user by email with case insensitve search.
-    return Users.findOne({ email: { $regex: new RegExp(`^${email}$`, "i") }}).select("-passkey");
+    // Get user by email with case insensitive search.
+    return Users.findOne({ email: { $regex: new RegExp(`^${email}$`, "i") } });
 }
 
 /**
@@ -93,15 +88,34 @@ export async function updateUser(user_obj: TUser): Promise<TUser | null> {
         // Optionally, log the error or throw
         return null;
     }
-    // Update the given user with a new user_obj, searching by uuid
-    // and return the new user object
-    return Users.findOneAndUpdate(
+    const user = await Users.findOne({ uuid: user_obj.uuid });
+    if (!user) {
+        return null;
+    }
+    const hashed_passkey =
+        user_obj.passkey &&
+        createHash("sha256").update(user_obj.passkey).digest("hex");
+    if (!hashed_passkey) {
+        delete user_obj.passkey;
+    } else if (hashed_passkey !== user.passkey) {
+        // If provided a new passkey, hash it before storing
+        user_obj.passkey = hashed_passkey;
+    }
+
+    let new_user;
+    new_user = await Users.findOneAndUpdate(
         { uuid: user_obj.uuid },
         { $set: user_obj },
-        {
-            returnDocument: "after",
-        },
-    ).select("-passkey");
+        { returnDocument: "after" },
+    );
+    if (!user_obj.passkey) {
+        new_user = await Users.findOneAndUpdate(
+            { uuid: user_obj.uuid },
+            { $unset: { passkey: "" } },
+            { returnDocument: "after" },
+        );
+    }
+    return new_user;
 }
 
 /**
@@ -167,6 +181,12 @@ export async function createUser(user_obj: TUser): Promise<TUser | null> {
             });
         }
     });
+    if (user_obj.passkey) {
+        // If provided a passkey, hash it before storing
+        user_obj.passkey = createHash("sha256")
+            .update(user_obj.passkey)
+            .digest("hex");
+    }
     // Create a new user and return it
     const new_user = new Users(user_obj);
     return new_user.save();
@@ -179,7 +199,7 @@ export async function createUser(user_obj: TUser): Promise<TUser | null> {
  */
 export async function deleteUser(uuid: UserUUID): Promise<TUser | null> {
     const Users = mongoose.model("User", User);
-    return Users.findOneAndDelete({ uuid: uuid }).select("-passkey");
+    return Users.findOneAndDelete({ uuid: uuid });
 }
 
 /**

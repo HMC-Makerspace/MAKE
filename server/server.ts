@@ -1,8 +1,6 @@
-import express, { Application, urlencoded } from "express";
+import express, { Application } from "express";
 import ViteExpress from "vite-express";
 import compression from "compression";
-import http from "http";
-import path from "path";
 import connectDB from "./core/db";
 import pino from "pino";
 import loggerMiddleware from "pino-http";
@@ -12,9 +10,7 @@ import session from "express-session";
 import lusca from "lusca";
 import cookieParser from "cookie-parser";
 import passport from "passport";
-import { Strategy } from "passport-saml";
 import { default as MongoDBStore } from "connect-mongodb-session";
-import fs from "fs/promises";
 
 // await Bun.build({
 //     entrypoints: ["website/index.html"],
@@ -23,6 +19,7 @@ import fs from "fs/promises";
 // });
 
 // Routes
+import loginRoutes from "./routes/login.route";
 import areaRoutes from "./routes/area.route";
 import certificationRoutes from "./routes/certification.route";
 import checkoutRoutes from "./routes/checkout.route";
@@ -37,12 +34,10 @@ import userRoutes from "./routes/user.route";
 import workshopRoutes from "./routes/workshop.route";
 import emailRoutes from "routes/email.route";
 import { getOAuthToken, getOAuthURL } from "controllers/email.controller";
-import { reserveMachineInstance } from "controllers/machine.controller";
 import {
     checkoutAvailabilityCron,
     checkoutEmailCron,
 } from "controllers/checkout.controller";
-import { createUser, getUserByEmail } from "controllers/user.controller";
 
 // @ts-expect-error Static asset loading using Vite
 import favicon from "common/favicon.ico";
@@ -117,122 +112,7 @@ passport.deserializeUser((user: Express.User, done) => {
     });
 });
 
-// Define production SAML login methods
-if (process.env.NODE_ENV === "production") {
-    // Get IDP cert and clean up format
-    const cert = await fs.readFile("make-idp.crt");
-    const cert_string = cert
-        .toString()
-        .replace(/-+(BEGIN|END) CERTIFICATE-+/g, "");
-
-    // Configure SAML Strategy
-    passport.use(
-        new Strategy(
-            {
-                passReqToCallback: true,
-                entryPoint: process.env.IDP_ENTRY_POINT,
-                callbackUrl: process.env.IDP_CALLBACK, // e.g., http://localhost:3000/login/callback
-                issuer: process.env.IDP_ISSUER,
-                cert: cert_string,
-                identifierFormat: process.env.IDP_ID_FORMAT,
-            },
-            async (req, profile, done) => {
-                if (!profile || !profile.email) {
-                    req.log.fatal({
-                        msg: "Invalid profile",
-                        profile: profile,
-                        req: req,
-                    });
-                    done(new Error("No profile found" + profile));
-                    return;
-                }
-                const email = profile.email as string;
-                const user_obj = await getUserByEmail(email);
-                if (!user_obj) {
-                    req.log.info({
-                        msg: `User with email ${email} not found, creating`,
-                        profile: profile,
-                    });
-                    let name = profile.displayName as string;
-                    // Format names given as "last, first" to be "first last"
-                    if (name.includes(",")) {
-                        name = name
-                            .split(",")
-                            .map((word) => word.trim())
-                            .reverse()
-                            .join(" ");
-                    }
-                    const new_user_obj = {
-                        uuid: crypto.randomUUID(),
-                        name: name,
-                        email: email,
-                        college_id: "", // If not provided by IDP, fill in later
-                        active_roles: [],
-                        past_roles: [],
-                        active_certificates: [],
-                        past_certificates: [],
-                    };
-                    await createUser(new_user_obj);
-                    done(null, { uuid: new_user_obj.uuid });
-                } else {
-                    done(null, { uuid: user_obj.uuid });
-                }
-            },
-        ),
-    );
-
-    app.get("/login", passport.authenticate("saml"));
-
-    app.post(
-        "/saml",
-        urlencoded({ extended: false }),
-        passport.authenticate("saml"),
-        (req, res) => {
-            res.redirect("/");
-        },
-    );
-}
-if (
-    process.env.NODE_ENV === "development" ||
-    process.env.ALLOW_INSECURE_LOGIN
-) {
-    // Define developmental login method
-    app.get("/login/:user_uuid", async (req, res, next) => {
-        try {
-            const user_uuid = req.params.user_uuid;
-            if (!user_uuid) {
-                res.redirect("/");
-            }
-            req.login({ uuid: user_uuid }, (err) => {
-                req.log.info({ msg: "Insecure login used", err: err });
-                if (err) {
-                    // Pass errors to Express
-                    next(err);
-                } else {
-                    // If successfully logged in, redirect to the main page
-                    res.redirect("/");
-                }
-            });
-        } catch (error) {
-            next(error);
-        }
-    });
-}
-
-// Logout route
-app.get("/logout", (req, res, next) => {
-    req.logout((err) => {
-        if (err) {
-            return next(err);
-        }
-        req.session.destroy((err) => {
-            if (err) return next(err);
-            res.clearCookie("connect.sid"); // express-session cookie
-            // If successfully logged out, redirect to the main page.
-            res.redirect("/");
-        });
-    });
-});
+app.use(loginRoutes);
 
 // Include user session authentication for all following routes
 app.use(passport.session());

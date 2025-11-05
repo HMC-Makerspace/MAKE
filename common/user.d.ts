@@ -101,7 +101,7 @@ export type TUserAvailability = {
  *      that the space is open. Only used for hiring. If the user has never
  *      been a worker at the space, this property will not be present
  * @property passkey - (optional) An optional string passkey used as an
- *      alternate authorization method to SSO.
+ *      alternate authorization method to SSO. Hashed using SHA256.
  */
 export type TUser = {
     uuid: UserUUID;
