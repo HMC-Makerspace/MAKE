@@ -48,7 +48,7 @@ import {
 } from "../../../../utils";
 import { now, ZonedDateTime } from "@internationalized/date";
 import UserInfo from "../users/UserInfo";
-import { MAKEUser } from "../../../user/MAKEUser";
+import { UserChip } from "../../../user/UserChip";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" },
@@ -150,7 +150,6 @@ export default function CheckoutTable({
                 title: `Successfully returned checkout`,
                 color: "success",
             });
-
         },
     });
     const undoMutation = useMutation({
@@ -373,7 +372,7 @@ export default function CheckoutTable({
                         );
                         console.log(c.checked_out_by, user);
                         return (
-                            <MAKEUser
+                            <UserChip
                                 key={user?.uuid}
                                 user_uuid={c.checked_out_by}
                                 user={user}

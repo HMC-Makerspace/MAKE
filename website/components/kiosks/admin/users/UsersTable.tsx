@@ -6,7 +6,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { TUser, TUserRole } from "common/user";
 import MAKETable, { ColumnSelect } from "../../../Table";
-import MAKEUserRole from "../../../user/UserRole";
+import UserChipRole from "../../../user/UserRole";
 import Fuse from "fuse.js";
 import React, { useEffect, useRef } from "react";
 import clsx from "clsx";
@@ -233,7 +233,7 @@ export default function UsersTable({
                     active_roles: (user: TUser) => (
                         <div className="flex flex-row flex-wrap gap-2">
                             {user.active_roles.map((log) => (
-                                <MAKEUserRole
+                                <UserChipRole
                                     role_uuid={log.role_uuid}
                                     role={findRole(log.role_uuid)}
                                     key={log.role_uuid}
@@ -245,7 +245,7 @@ export default function UsersTable({
                     past_roles: (user: TUser) => (
                         <div className="flex flex-row flex-wrap gap-2">
                             {user.past_roles.map((log) => (
-                                <MAKEUserRole
+                                <UserChipRole
                                     role_uuid={log.role_uuid}
                                     role={findRole(log.role_uuid)}
                                     key={log.role_uuid}
