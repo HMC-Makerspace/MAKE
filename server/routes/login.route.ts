@@ -136,99 +136,6 @@ if (process.env.NODE_ENV === "production") {
 
     // Default SAML login
     router.get("/login", passport.authenticate("saml"));
-}
-
-if (true) {
-    // Admin arbitrary user login
-    router.get(
-        "/login/:user_uuid",
-        passport.session(),
-        async (req, res, next) => {
-            try {
-                const requesting_uuid = req.user?.uuid as string;
-                const user_uuid = req.params.user_uuid;
-                req.log.debug({
-                    msg: `Attempting to login as ${user_uuid} by admin ${requesting_uuid}`,
-                });
-                // If no requesting user_uuid is provided, the call is not authorized
-                if (!requesting_uuid) {
-                    req.log.warn(
-                        "No requesting_uuid was provided while logging in.",
-                    );
-                    res.status(StatusCodes.UNAUTHORIZED).json(
-                        UNAUTHORIZED_ERROR,
-                    );
-                    return;
-                }
-                // If the user is an administrator, allow them to login arbitrarily
-                if (await verifyRequest(requesting_uuid, API_SCOPE.ADMIN)) {
-                    req.login({ uuid: user_uuid }, (err) => {
-                        req.log.info({
-                            msg: `Admin arbitrary login used on user ${user_uuid}`,
-                            err: err,
-                        });
-                        // Admin logins last for 1 year
-                        req.session.cookie.maxAge = 365 * 24 * 60 * 60 * 1000;
-                        if (err) {
-                            // Pass errors to Express
-                            next(err);
-                        } else {
-                            // If successfully logged in, redirect to the main page
-                            res.redirect("/");
-                        }
-                    });
-                }
-            } catch (error) {
-                next(error);
-            }
-        },
-    );
-
-    // Passkey login
-    router.post("/login/email/", async (req: EmailLoginRequest, res, next) => {
-        const email = req.body.email;
-        const passkey = req.body.passkey;
-        if (!email || !passkey) {
-            req.log.warn({
-                msg: "No email provided when using passkey login.",
-            });
-            res.status(StatusCodes.UNAUTHORIZED).json({
-                error: "Provided passkey authorization was invalid.",
-            });
-            return;
-        }
-        const user = await getUserByEmail(email);
-        const passkey_hash = createHash("sha256").update(passkey).digest("hex");
-
-        if (!user || !user.passkey || passkey_hash !== user.passkey) {
-            // Failed to authorize via passkey
-            req.log.warn({
-                msg: "Arbitrary login used, and provided passkey authorization was invalid.",
-                provided_passkey: passkey_hash,
-                user_passkey: user?.passkey,
-            });
-            res.status(StatusCodes.UNAUTHORIZED).json({
-                error: "Provided passkey authorization was invalid.",
-            });
-            return;
-        }
-        // If passkey hashes are the same, continue with login
-        req.login({ uuid: user.uuid }, (err) => {
-            req.log.info({
-                msg: `Passkey login used by ${user.name} (${user.uuid})`,
-                err: err,
-            });
-            // Passkey logins last for 1/2 year
-            req.session.cookie.maxAge = 182 * 24 * 60 * 60 * 1000;
-            if (err) {
-                // Pass errors to Express
-                next(err);
-            } else {
-                // If successfully logged in, redirect to the main page
-                res.redirect("/");
-            }
-        });
-    });
 
     router.post(
         "/saml",
@@ -239,6 +146,89 @@ if (true) {
         },
     );
 }
+
+// Admin arbitrary user login
+router.get("/login/:user_uuid", passport.session(), async (req, res, next) => {
+    try {
+        const requesting_uuid = req.user?.uuid as string;
+        const user_uuid = req.params.user_uuid;
+        req.log.debug({
+            msg: `Attempting to login as ${user_uuid} by admin ${requesting_uuid}`,
+        });
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn("No requesting_uuid was provided while logging in.");
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+        // If the user is an administrator, allow them to login arbitrarily
+        if (await verifyRequest(requesting_uuid, API_SCOPE.ADMIN)) {
+            req.login({ uuid: user_uuid }, (err) => {
+                req.log.info({
+                    msg: `Admin arbitrary login used on user ${user_uuid}`,
+                    err: err,
+                });
+                // Admin logins last for 1 year
+                req.session.cookie.maxAge = 365 * 24 * 60 * 60 * 1000;
+                if (err) {
+                    // Pass errors to Express
+                    next(err);
+                } else {
+                    // If successfully logged in, redirect to the main page
+                    res.redirect("/");
+                }
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Passkey login
+router.post("/login/email/", async (req: EmailLoginRequest, res, next) => {
+    const email = req.body.email;
+    const passkey = req.body.passkey;
+    if (!email || !passkey) {
+        req.log.warn({
+            msg: "No email provided when using passkey login.",
+        });
+        res.status(StatusCodes.UNAUTHORIZED).json({
+            error: "Provided passkey authorization was invalid.",
+        });
+        return;
+    }
+    const user = await getUserByEmail(email);
+    const passkey_hash = createHash("sha256").update(passkey).digest("hex");
+
+    if (!user || !user.passkey || passkey_hash !== user.passkey) {
+        // Failed to authorize via passkey
+        req.log.warn({
+            msg: "Arbitrary login used, and provided passkey authorization was invalid.",
+            provided_passkey: passkey_hash,
+            user_passkey: user?.passkey,
+        });
+        res.status(StatusCodes.UNAUTHORIZED).json({
+            error: "Provided passkey authorization was invalid.",
+        });
+        return;
+    }
+    // If passkey hashes are the same, continue with login
+    req.login({ uuid: user.uuid }, (err) => {
+        req.log.info({
+            msg: `Passkey login used by ${user.name} (${user.uuid})`,
+            err: err,
+        });
+        // Passkey logins last for 1/2 year
+        req.session.cookie.maxAge = 182 * 24 * 60 * 60 * 1000;
+        if (err) {
+            // Pass errors to Express
+            next(err);
+        } else {
+            // If successfully logged in, redirect to the main page
+            res.redirect("/");
+        }
+    });
+});
 
 // Logout route
 router.get("/logout", (req, res, next) => {
