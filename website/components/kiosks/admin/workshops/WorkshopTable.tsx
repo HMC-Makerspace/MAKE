@@ -165,7 +165,7 @@ export default function WorkshopTable({
                             timestamp_start: zonedDateTimeToTimestamp(now(getLocalTimeZone())),
                             timestamp_end: zonedDateTimeToTimestamp(now(getLocalTimeZone())) + 60 * 60 * 24,
                             rsvp_list: [],
-                            users_notified: [],
+                            reminder_emails_sent: [],
                             sign_in_list: [],
                         });
                         editOnOpen();

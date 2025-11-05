@@ -273,26 +273,42 @@ export async function signInToWorkshop(
 export async function workshopReminderEmailCron(logger: Logger) {
     logger.info("Sending workshop reminder emails.");
 
+    const config = await getConfig();
     const timestamp = Date.now() / 1000;
+
+    if (!config) return null;
 
     const Workshops = mongoose.model("Workshop", Workshop);
     const due_workshops = await Workshops.find({
-        // Workshops that start in approximately an hour (the period of 15 minutes centered on 1 hour from now)
-        timestamp_start: { $gte: timestamp + (60 - 15/2) * 60, $lt: timestamp + (60 + 15/2) * 60 },
+        // Workshops that haven't started yet
+        timestamp_start: { $gte: timestamp },
     });
 
     for (const workshop of due_workshops) {
-        // get users on the RSVP list
-        for (let u of workshop.rsvp_list) {
-            const user = await getUser(u.user_uuid);
+        for (const reminder of config.workshop.reminder_times.filter(r => !workshop.reminder_emails_sent?.includes(r))) {
+            if (workshop.timestamp_start <= timestamp + reminder) {
+                // get users on the RSVP list
+                for (let u of workshop.rsvp_list) {
+                    const user = await getUser(u.user_uuid);
 
-            if (user) {
-                // send email
-                await sendTemplatedEmail(
-                    user.email,
-                    "Reminder: " + workshop.title,
-                    WorkshopReminderTemplate(workshop.title, workshop.timestamp_start - timestamp),
-                    logger,
+                    if (user) {
+                        // send email
+                        await sendTemplatedEmail(
+                            user.email,
+                            "Reminder: " + workshop.title,
+                            WorkshopReminderTemplate(workshop.title, workshop.timestamp_start - timestamp),
+                            logger,
+                        );
+                    }
+                }
+
+                await Workshops.updateOne(
+                    {
+                        uuid: workshop.uuid,
+                    },
+                    {
+                        reminder_emails_sent: [...workshop.reminder_emails_sent, reminder]
+                    },
                 );
             }
         }

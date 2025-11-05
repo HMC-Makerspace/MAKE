@@ -283,9 +283,9 @@ cron.schedule("*/1 * * * *", () => {
     checkoutAvailabilityCron(logger);
 });
 
-// Query for workshop reminder emails every 15 minutes
+// Query for workshop reminder emails every minute
 await workshopReminderEmailCron(logger);
-cron.schedule("*/15 * * * *", () => {
+cron.schedule("* * * * *", () => {
     workshopReminderEmailCron(logger);
 });
 

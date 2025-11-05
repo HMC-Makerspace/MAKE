@@ -151,7 +151,7 @@ export default function WorkshopEditModal({
                         .getTime() / 1000 || workshop.timestamp_public,
                 required_certifications: workshop.required_certifications,
                 rsvp_list: workshop.rsvp_list,
-                users_notified: workshop.users_notified,
+                reminder_emails_sent: workshop.reminder_emails_sent,
                 sign_in_list: workshop.sign_in_list,
                 images: workshop.images,
                 authorized_roles: workshop.authorized_roles,

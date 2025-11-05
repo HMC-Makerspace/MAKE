@@ -65,6 +65,10 @@ export type TScheduleConfig = {
     locale: string;
 };
 
+export type TWorkshopConfig = {
+    reminder_times: number[];
+}
+
 export type TGeneralConfig = {
     branding_url?: string;
     tagline?: string;
@@ -94,6 +98,7 @@ export type TConfig = {
     checkout: TCheckoutConfig;
     file: TFileConfig;
     schedule: TScheduleConfig;
+    workshop: TWorkshopConfig;
     faq?: TFAQItem;
 };
 
