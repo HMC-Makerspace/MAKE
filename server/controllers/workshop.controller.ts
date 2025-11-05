@@ -296,7 +296,7 @@ export async function workshopReminderEmailCron(logger: Logger) {
                         await sendTemplatedEmail(
                             user.email,
                             "Reminder: " + workshop.title,
-                            WorkshopReminderTemplate(workshop.title, workshop.timestamp_start - timestamp),
+                            WorkshopReminderTemplate(workshop.title, Math.round(workshop.timestamp_start - timestamp)),
                             logger,
                         );
                     }

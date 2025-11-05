@@ -156,14 +156,15 @@ export default function WorkshopTable({
                     isDisabled={isLoading}
                     startContent={<PlusIcon className="size-6" />}
                     onPress={() => {
+                        let t = zonedDateTimeToTimestamp(now(getLocalTimeZone()));
                         setIsNew(true);
                         setSelectedWorkshop({
                             uuid: crypto.randomUUID(),
                             title: "",
                             instructors: [],
-                            timestamp_public: zonedDateTimeToTimestamp(now(getLocalTimeZone())),
-                            timestamp_start: zonedDateTimeToTimestamp(now(getLocalTimeZone())),
-                            timestamp_end: zonedDateTimeToTimestamp(now(getLocalTimeZone())) + 60 * 60 * 24,
+                            timestamp_public: t - t % 60,
+                            timestamp_start: t - t % 60,
+                            timestamp_end: t - t % 60 + 60 * 60 * 24,
                             rsvp_list: [],
                             reminder_emails_sent: [],
                             sign_in_list: [],
