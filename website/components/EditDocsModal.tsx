@@ -1,16 +1,19 @@
-import { Button, Modal, Form, ModalContent, Input } from "@heroui/react";
+import { Button, Modal, Form, ModalContent, Input, Dropdown } from "@heroui/react";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 import React from "react";
 import { UseMutationResult } from "@tanstack/react-query";
 import clsx from "clsx";
 
+import { UserRoleSelect } from "./user/UserRoleSelect";
 import { TDocument } from "common/file";
 import { UUID } from "common/global";
+import { UserRoleUUID } from "common/user";
 
 const emptyDoc: TDocument = {
     name: "",
     link: "",
+    authorized_roles: null,
 };
 
 export default function EditDocsModal<
@@ -21,6 +24,7 @@ export default function EditDocsModal<
     isOpen,
     onOpenChange,
     patchMutation,
+    roleOption = false,
 }: {
     element: T;
     isOpen: boolean;
@@ -35,6 +39,7 @@ export default function EditDocsModal<
             };
         }
     >;
+    roleOption?: boolean
 }) {
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
     const [docs, setDocs] = React.useState<TDocument[]>(
@@ -64,6 +69,17 @@ export default function EditDocsModal<
             if (!docs[i]) docs[i] = { ...emptyDoc }; // copy the emptyDoc template if necessary
 
             docs[i][prop] = val; // update the value
+            setDocs([...docs]); // update the docs list
+
+            setHasEdits(true);
+        };
+    };
+
+    const wrapRolesEdit = (i: number) => {
+        return (val: any) => {
+            if (!docs[i]) docs[i] = { ...emptyDoc }; // copy the emptyDoc template if necessary
+            docs[i]["authorized_roles"] = Array.from(val) as UserRoleUUID[]; // update the value
+            if (docs[i]["authorized_roles"].length == 0) {docs[i]["authorized_roles"] = null}; // makes sure empty lists not allowed
             setDocs([...docs]); // update the docs list
 
             setHasEdits(true);
@@ -120,9 +136,9 @@ export default function EditDocsModal<
                                             "text-default-700",
                                         ]),
                                     }}
-                                />
-
-                                <Input
+                                    className='w-full'
+                                />  
+                                    <Input
                                     type="text"
                                     label="Link"
                                     name="link"
@@ -140,8 +156,25 @@ export default function EditDocsModal<
                                             "text-default-700",
                                         ]),
                                     }}
+                                    className='w-full'
                                 />
-
+                                
+                                {roleOption &&
+                                    <div className='min-w-[15vw] max-w-full'>
+                                        <UserRoleSelect
+                                            selectedKeys={docs[i]["authorized_roles"] ?? undefined}
+                                            onSelectionChange={wrapRolesEdit(i)}
+                                            placeholder="Select authorized roles"
+                                            label="Authorized Roles"
+                                            labelPlacement="inside"
+                                            classNames={{
+                                                value: "text-default-500",                                                
+                                            }}
+                                            size="md"
+                                            multiline={false}
+                                        />
+                                    </div>
+                                }
                                 <Button
                                     variant="flat"
                                     color="danger"

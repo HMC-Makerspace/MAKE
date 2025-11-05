@@ -304,6 +304,7 @@ router.patch(
         // If the user is authorized, update a machine object
         if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_MACHINE)) {
             const machine = await patchMachine(machine_uuid, partial_machine);
+
             if (!machine) {
                 req.log.warn(
                     `Machine with uuid ${machine_uuid} could not be ` +
