@@ -20,7 +20,7 @@ import { TWorkshop } from "common/workshop";
 import { TCertification } from "common/certification";
 import { TUser, TUserRole } from "common/user";
 import MAKETable from "../../../Table.tsx";
-import { MAKEUser } from "../../../user/MAKEUser.tsx";
+import { UserChip } from "../../../user/UserChip.tsx";
 import UserRole from "../../../user/UserRole.tsx";
 import { convertTimestampToDate } from "../../../../utils.tsx";
 import WorkshopPeopleModal from "./WorkshopPeopleModal.tsx";
@@ -228,31 +228,39 @@ export default function WorkshopTable({
                                 return (
                                     <div className="flex flex-col gap-2 my-2">
                                         {workshop.instructors.map(
-                                            (instructor) => {
-                                                return (
-                                                    <MAKEUser
-                                                        key={instructor}
-                                                        size="sm"
-                                                        user_uuid={instructor}
-                                                        color="secondary"
-                                                    />
-                                                );
-                                            },
+                                            (instructor) => (
+                                                <UserChip
+                                                    key={instructor}
+                                                    size="sm"
+                                                    user_uuid={instructor}
+                                                    user={users.find(
+                                                        (u) =>
+                                                            u.uuid ===
+                                                            instructor,
+                                                    )}
+                                                    roles={roles}
+                                                    color="secondary"
+                                                />
+                                            ),
                                         )}
                                         {workshop.support_instructors && (
                                             <>
                                                 {workshop.support_instructors.map(
-                                                    (instructor) => {
-                                                        return (
-                                                            <MAKEUser
-                                                                key={instructor}
-                                                                size="sm"
-                                                                user_uuid={
-                                                                    instructor
-                                                                }
-                                                            />
-                                                        );
-                                                    },
+                                                    (instructor) => (
+                                                        <UserChip
+                                                            key={instructor}
+                                                            size="sm"
+                                                            user_uuid={
+                                                                instructor
+                                                            }
+                                                            user={users.find(
+                                                                (u) =>
+                                                                    u.uuid ===
+                                                                    instructor,
+                                                            )}
+                                                            roles={roles}
+                                                        />
+                                                    ),
                                                 )}
                                             </>
                                         )}
@@ -421,19 +429,19 @@ export default function WorkshopTable({
             {selectedWorkshop && (
                 <>
                     <WorkshopPeopleModal
-                        key={selectedWorkshop.uuid}
+                        key={`${selectedWorkshop.uuid}-people`}
                         workshop={selectedWorkshop}
                         isOpen={peopleIsOpen}
                         onOpenChange={peopleOnOpenChange}
                     />
                     <WorkshopImagesModal
-                        key={selectedWorkshop.uuid}
+                        key={`${selectedWorkshop.uuid}-images`}
                         workshop={selectedWorkshop}
                         isOpen={imagesIsOpen}
                         onOpenChange={imagesOnOpenChange}
                     />
                     <WorkshopEditModal
-                        key={selectedWorkshop.uuid}
+                        key={`${selectedWorkshop.uuid}-edit`}
                         workshop={selectedWorkshop}
                         users={users}
                         certs={certs}

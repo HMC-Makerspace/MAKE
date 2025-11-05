@@ -212,23 +212,6 @@ export default function RestockRequestModal({
                                                     }}
                                                 />
                                             </div>
-
-                                            <ModalFooter className="w-full justify-between">
-                                                <Button
-                                                    variant="shadow"
-                                                    color="primary"
-                                                    type="submit"
-                                                >
-                                                    Submit
-                                                </Button>
-                                                <Button
-                                                    variant="flat"
-                                                    color="danger"
-                                                    onPress={onClose}
-                                                >
-                                                    Cancel
-                                                </Button>
-                                            </ModalFooter>
                                         </>
                                     ) : (
                                         <div>
@@ -276,25 +259,31 @@ export default function RestockRequestModal({
                                                     </div>
                                                 )}
                                             </div>
-                                            <ModalFooter className="w-full justify-between">
-                                                <Button
-                                                    variant="shadow"
-                                                    color="primary"
-                                                    type="submit"
-                                                    isDisabled={!userCanRequest}
-                                                >
-                                                    Join Mailing List
-                                                </Button>
-                                                <Button
-                                                    variant="flat"
-                                                    color="danger"
-                                                    onPress={onClose}
-                                                >
-                                                    Cancel
-                                                </Button>
-                                            </ModalFooter>
                                         </div>
                                     )}
+                                    <ModalFooter className="w-full justify-between">
+                                        <Button
+                                            variant="shadow"
+                                            color="primary"
+                                            type="submit"
+                                            isDisabled={
+                                                !userCanRequest ||
+                                                mutation.isPending
+                                            }
+                                            isLoading={mutation.isPending}
+                                        >
+                                            {isNew
+                                                ? "Submit"
+                                                : "Join Mailing List"}
+                                        </Button>
+                                        <Button
+                                            variant="flat"
+                                            color="danger"
+                                            onPress={onClose}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </ModalFooter>
                                 </Form>
                             </ModalBody>
                         </div>

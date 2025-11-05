@@ -123,8 +123,16 @@ export default function CheckoutSidebar({
         enabled: !!collegeID,
         retry: false,
     });
-
-    const [range, setRange] = useState<RangeValue<ZonedDateTime> | null>(null);
+    const initialTime = timestampToTime(activeSchedule.daily_close_time);
+    const [range, setRange] = useState<RangeValue<ZonedDateTime> | null>({
+        start: now(config.schedule.timezone),
+        end: now(config.schedule.timezone).set({
+            hour: initialTime.hour,
+            minute: initialTime.minute,
+            second: initialTime.second,
+            millisecond: initialTime.millisecond,
+        }),
+    });
 
     const queryClient = useQueryClient();
     const createMutation = useMutation({
@@ -345,6 +353,7 @@ export default function CheckoutSidebar({
                     setRange={setRange}
                     unavailability={unavailability}
                     isDisabled={!collegeID}
+                    dailyCloseTime={activeSchedule.daily_close_time}
                     cart={cart}
                     config={config}
                     inventory={inventory}

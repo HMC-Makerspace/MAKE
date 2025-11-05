@@ -9,7 +9,7 @@ import {
     User,
 } from "@heroui/react";
 import clsx from "clsx";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import UserInfo from "../kiosks/admin/users/UserInfo";
 import { ThemeSwitcher } from "../ThemeSwitcher";
 import { API_SCOPE } from "../../../common/global";
@@ -20,41 +20,28 @@ import {
 } from "@heroicons/react/24/solid";
 import { AxiosError } from "axios";
 import { StatusCodes } from "http-status-codes";
+import {
+    AtSymbolIcon,
+    ChevronDownIcon,
+    ChevronRightIcon,
+} from "@heroicons/react/24/outline";
+import { useNavigate } from "react-router-dom";
 
-export function MAKEUser({
+export function UserLoginChip({
     user_uuid,
-    user,
     className,
     classNames = {
         wrapper: "items-center sm:items-start",
         name: "max-w-[130px] text-ellipsis overflow-hidden",
         description: "max-w-[130px] text-ellipsis overflow-hidden",
     },
-    // {
-    //     description: "hidden sm:block",
-    //     name: "hidden sm:block",
-    // },
     size = "lg",
     color = "default",
     popoverPlacement = "top",
+    loginColor = "default",
     onClick = () => {},
-    defaultElement = (
-        <Button
-            color="default"
-            variant="solid"
-            size="lg"
-            className="w-full font-medium bg-default-300"
-            onPress={() => {
-                window.location.href = "/login";
-            }}
-        >
-            Login
-        </Button>
-    ),
-    showControls = false,
 }: {
     user_uuid: string;
-    user?: TUser;
     /** The classes to add to the button wrapper */
     className?: string;
     /** The classnames applied to the internal HeroUI User Object slots */
@@ -74,6 +61,13 @@ export function MAKEUser({
         | "success"
         | "warning"
         | "danger";
+    loginColor?:
+        | "default"
+        | "primary"
+        | "secondary"
+        | "success"
+        | "warning"
+        | "danger";
     popoverPlacement?:
         | "top"
         | "bottom"
@@ -87,29 +81,46 @@ export function MAKEUser({
         | "left-end"
         | "right-start"
         | "right-end";
-    /** A function to run when the user is clicked, which accepts the user's uuid */
-    onClick?: (uuid: string) => void;
-    defaultElement?: React.ReactNode;
-    showControls?: boolean;
+    /** A function to run when logging in by email */
+    onClick?: () => void;
 }) {
-    const query = useQuery<TUser, AxiosError>({
+    const [ctrlMode, setCtrlMode] = useState(false);
+
+    useEffect(() => {
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Alt") {
+                setCtrlMode(true);
+            }
+        });
+    }, []);
+
+    useEffect(() => {
+        document.addEventListener("keyup", (e) => {
+            if (e.key === "Alt") {
+                setCtrlMode(false);
+            }
+        });
+    }, []);
+
+    const {
+        data: user,
+        isLoading,
+        isError,
+        error,
+    } = useQuery<TUser, AxiosError>({
         queryKey: ["user", user_uuid],
-        enabled: !!user_uuid && !user,
         refetchOnWindowFocus: false,
         refetchOnMount: false,
         retry: false,
     });
 
     const loggedOut =
-        !user &&
-        (!user_uuid ||
-            query.isPending ||
-            query.error?.status === StatusCodes.UNAUTHORIZED);
+        !user_uuid || isLoading || error?.status === StatusCodes.UNAUTHORIZED;
 
     const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", user_uuid, "roles"],
+        queryKey: ["user", user?.uuid, "roles"],
         refetchOnWindowFocus: false,
-        enabled: !loggedOut,
+        // enabled: !loggedOut,
         refetchOnMount: false,
     });
 
@@ -121,23 +132,45 @@ export function MAKEUser({
         refetchOnMount: false,
     });
 
-    const user_data = user ? user : query.data;
-
     const name =
-        user_data?.name ??
-        (query.isLoading ? "Loading..." : query.isError ? "ERROR" : "Unknown");
+        user?.name ??
+        (isLoading ? "Loading..." : isError ? "ERROR" : "Unknown");
     const description =
-        user_data?.email ??
-        (query.isLoading
-            ? "Loading..."
-            : query.isError
-              ? query.error.message
-              : "Unknown");
+        user?.email ??
+        (isLoading ? "Loading..." : isError ? error.message : "Unknown");
 
     const kioskAccess = scopes && verifyScopes(scopes, [API_SCOPE.VIEW_KIOSKS]);
 
     if (loggedOut) {
-        return defaultElement;
+        return (
+            <Button
+                color={loginColor}
+                variant="solid"
+                size="lg"
+                className="w-full font-medium relative"
+                onPress={() => {
+                    if (!ctrlMode) {
+                        window.location.href = "/login";
+                    } else {
+                        onClick();
+                    }
+                }}
+                endContent={
+                    <div className="flex gap-0 absolute right-3">
+                        <AtSymbolIcon
+                            className="size-5 transition-opacity text-default-500"
+                            style={{ opacity: ctrlMode ? 100 : 0 }}
+                        />
+                        <ChevronRightIcon
+                            className="size-5 transition-opacity text-default-500"
+                            style={{ opacity: ctrlMode ? 100 : 0 }}
+                        />
+                    </div>
+                }
+            >
+                Login
+            </Button>
+        );
     } else {
         return (
             <Popover placement={popoverPlacement}>
@@ -148,7 +181,6 @@ export function MAKEUser({
                             className,
                         )}
                         color={color}
-                        onPress={() => onClick(user_uuid)}
                         size={size}
                     >
                         {size === "lg" ? (
@@ -183,49 +215,46 @@ export function MAKEUser({
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="p-2 xl:min-w-[20vw] xl:max-w-[30vw]">
-                    {user_uuid && user_data && roles && (
+                    {user_uuid && user && roles && (
                         <UserInfo
-                            user_uuid={user_uuid}
-                            user={user_data}
+                            user={user}
                             roles={roles}
                             isLoading={rolesLoading}
                         />
                     )}
-                    {showControls && (
-                        <div className="w-full flex flex-row gap-4 justify-center p-2">
+                    <div className="w-full flex flex-row gap-4 justify-center p-2">
+                        <Button
+                            variant="shadow"
+                            color="primary"
+                            startContent={
+                                <ArrowLeftEndOnRectangleIcon className="size-6 min-w-6" />
+                            }
+                            onPress={() => {
+                                window.location.href = "/logout";
+                            }}
+                        >
+                            Logout
+                        </Button>
+                        {kioskAccess && (
                             <Button
-                                variant="shadow"
+                                isIconOnly
                                 color="primary"
+                                variant="bordered"
+                                radius="sm"
                                 startContent={
-                                    <ArrowLeftEndOnRectangleIcon className="size-6 min-w-6" />
+                                    <FingerPrintIcon className="size-6" />
                                 }
-                                onPress={() => {
-                                    window.location.href = "/logout";
-                                }}
-                            >
-                                Logout
-                            </Button>
-                            {kioskAccess && (
-                                <Button
-                                    isIconOnly
-                                    color="primary"
-                                    variant="bordered"
-                                    radius="sm"
-                                    startContent={
-                                        <FingerPrintIcon className="size-6" />
-                                    }
-                                    as={Link}
-                                    href="/admin"
-                                />
-                            )}
-                            <ThemeSwitcher
-                                className="self-center ml-auto hidden xl:block"
-                                classNames={{
-                                    tabList: "bg-default-200 ",
-                                }}
+                                as={Link}
+                                href="/admin"
                             />
-                        </div>
-                    )}
+                        )}
+                        <ThemeSwitcher
+                            className="self-center ml-auto hidden xl:block"
+                            classNames={{
+                                tabList: "bg-default-200 ",
+                            }}
+                        />
+                    </div>
                 </PopoverContent>
             </Popover>
         );

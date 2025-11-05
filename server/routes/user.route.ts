@@ -39,6 +39,7 @@ import { TPublicUser, TUser, TUserAvailability, TUserRole } from "common/user";
 import { ScheduleUUID } from "common/schedule";
 import { getCertification } from "controllers/certification.controller";
 import { CERTIFICATION_VISIBILITY } from "common/certification";
+import { createHash } from "crypto";
 
 // --- Request and Response Types ---
 type UserRequest = Request<{}, {}, { user_obj: TUser }>;
@@ -295,17 +296,24 @@ router.patch(
         }
         // No user, check passkey authorization
         if (!req.user?.uuid) {
-            const requesting_user = await getUser(requesting_uuid, true);
+            const requesting_user = await getUser(requesting_uuid);
+
+            const passkey_hash = createHash("sha256")
+                .update(headers.passkey)
+                .digest("hex");
 
             if (
                 !requesting_user ||
                 !requesting_user.passkey ||
-                headers.passkey !== requesting_user.passkey
+                passkey_hash !== requesting_user.passkey
             ) {
                 // Failed to authorize via passkey
                 req.log.warn({
                     msg: "No user session exists, and provided passkey authorization was invalid.",
                     requesting_uuid: requesting_uuid,
+                    passkey: headers.passkey,
+                    passkey_hash: passkey_hash,
+                    user_hash: requesting_user?.passkey,
                 });
                 res.status(StatusCodes.UNAUTHORIZED).json({
                     error:
@@ -686,9 +694,9 @@ router.get(
             requesting_uuid: requesting_uuid,
         });
 
-        const roles = (await getUserRolesByUser(requesting_uuid)) ?? [];
+        const roles = (await getUserRolesByUser(user_uuid)) ?? [];
         req.log.debug({
-            msg: `Returning roles for user with uuid ${requesting_uuid}`,
+            msg: `Returning roles for user with uuid ${user_uuid}`,
         });
 
         res.status(StatusCodes.OK).json(roles);

@@ -66,6 +66,11 @@ export default function CertificationsTable({
     onSelectionChange,
     isLoading,
     canEdit,
+    visibilities = [
+        CERTIFICATION_VISIBILITY.PUBLIC,
+        CERTIFICATION_VISIBILITY.PRIVATE,
+        CERTIFICATION_VISIBILITY.SCHEDULE,
+    ],
     defaultColumns = [
         "name",
         "description",
@@ -84,6 +89,7 @@ export default function CertificationsTable({
     onSelectionChange: (selectedKeys: Selection) => void;
     isLoading: boolean;
     canEdit: boolean;
+    visibilities: CERTIFICATION_VISIBILITY[];
     defaultColumns?: string[];
     extraColumns?: { name: string; id: string }[];
     customColumnComponents?: {
@@ -235,7 +241,9 @@ export default function CertificationsTable({
                 </div>
             </div>
             <MAKETable
-                content={certs}
+                content={certs.filter((c) =>
+                    visibilities.includes(c.visibility),
+                )}
                 columns={columns}
                 visibleColumns={visibleColumns}
                 selectedKeys={selectedKeys}

@@ -24,14 +24,17 @@ export default function CheckoutUser({
         retry: false,
     });
 
+    console.log(roles);
+
     return (
         <UserInfo
+            key={user?.uuid}
             user_uuid={isError ? "none" : user?.uuid}
             user={user}
             certs={certs}
             roles={roles}
             size="md"
-            className="h-full overflow-auto relative"
+            className="h-full overflow-auto relative min-w-0"
             endContent={
                 isError ? (
                     <div
@@ -39,7 +42,7 @@ export default function CheckoutUser({
                             "absolute h-[50%] primary shadow-md bg-primary-100/50 flex",
                             "items-center justify-center text-lg rounded-lg m-4",
                             "text-default-foreground/90 bottom-2 my-auto",
-                            "left-4 right-4 mx-auto",
+                            "left-4 right-4 mx-auto text-center p-4",
                         )}
                     >
                         Select a user to assign this id

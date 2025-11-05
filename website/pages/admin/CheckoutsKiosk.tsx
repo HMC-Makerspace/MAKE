@@ -16,7 +16,11 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { TUser, TUserRole, UserUUID } from "common/user";
-import { CertificationUUID, TCertification } from "common/certification";
+import {
+    CERTIFICATION_VISIBILITY,
+    CertificationUUID,
+    TCertification,
+} from "../../../common/certification";
 import { TArea } from "common/area";
 import {
     CHECKOUT_VALIDATION,
@@ -81,7 +85,7 @@ export default function CheckoutsKiosk() {
     });
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
-            queryKey: ["certification", "public"],
+            queryKey: ["certification"],
             refetchOnWindowFocus: false,
             staleTime: 30 * 60 * 1000, // 30 minutes in milliseconds
         },
@@ -388,6 +392,10 @@ export default function CheckoutsKiosk() {
                                         id: "grant_revoke",
                                     },
                                 ]}
+                                visibilities={[
+                                    CERTIFICATION_VISIBILITY.PUBLIC,
+                                    CERTIFICATION_VISIBILITY.PRIVATE,
+                                ]}
                                 customColumnComponents={{
                                     grant_revoke: (cert) => {
                                         const hasCert =
@@ -417,16 +425,6 @@ export default function CheckoutsKiosk() {
                                                                 prereq.required_level,
                                                     ),
                                             );
-                                        console.log(
-                                            "certPrereqs:",
-                                            cert.name,
-                                            certHasPrereqs,
-                                        );
-                                        console.log(
-                                            "userPrereqs:",
-                                            user?.name,
-                                            userHasPrereqs,
-                                        );
                                         return (
                                             <Tooltip
                                                 content={
@@ -508,7 +506,6 @@ export default function CheckoutsKiosk() {
                 setMissingIDUser={setMissingIDUser}
                 college_id={collegeID}
             />
-            
         </AdminLayout>
     );
 }

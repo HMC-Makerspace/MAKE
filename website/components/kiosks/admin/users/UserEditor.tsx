@@ -1,15 +1,17 @@
-import { TUser } from "common/user";
+import { TUser, TUserRole } from "common/user";
 import { Form, Input, Selection } from "@heroui/react";
 import React from "react";
 import UserEditorForm from "./UserEditorForm";
 
 export default function UserEditor({
     users,
+    roles,
     selectedKeys,
     isNew,
     isLoading,
 }: {
     users: TUser[];
+    roles: TUserRole[];
     selectedKeys: Selection;
     isNew: boolean;
     isLoading: boolean;
@@ -48,6 +50,7 @@ export default function UserEditor({
                                   past_roles: [],
                               }
                     }
+                    roles={roles}
                     isMultiple={isMultiple}
                     isNew={isNew}
                 />

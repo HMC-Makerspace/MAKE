@@ -8,44 +8,26 @@ import { CertSelect } from "../certifications/CertSelect";
 import CertificationTag from "../certifications/CertificationTag";
 
 export default function UserInfo({
-    user_uuid,
     user,
     roles,
     certs,
     className = "",
     size = "md",
     isLoading = false,
+    unknownPlaceholders = false,
     endContent,
 }: {
-    user_uuid?: UserUUID;
     user?: TUser;
-    roles?: TUserRole[];
+    user_uuid?: UserUUID;
+    roles: TUserRole[];
     certs?: TCertification[];
     className?: string;
     size?: "sm" | "md" | "lg";
     isLoading?: boolean;
+    /* Whether placeholders should show as unknown */
+    unknownPlaceholders?: boolean;
     endContent?: React.ReactNode;
 }) {
-    const { data: queriedUser, isLoading: userLoading } = useQuery<TUser>({
-        queryKey: ["user", user_uuid],
-        refetchOnWindowFocus: false,
-        enabled: !user && !!user_uuid,
-        retry: false,
-    });
-
-    const { data: queriedRoles, isLoading: rolesLoading } = useQuery<
-        TUserRole[]
-    >({
-        queryKey: ["user", user_uuid, "role"],
-        refetchOnWindowFocus: false,
-        enabled: !roles && !!user_uuid,
-    });
-
-    const user_data = user || queriedUser;
-    const role_data = roles || queriedRoles;
-    // const cert_data = certs || queriedCerts;
-    const loading = userLoading || rolesLoading || isLoading;
-
     return (
         <div
             className={clsx(
@@ -60,7 +42,7 @@ export default function UserInfo({
                         "bg-default-200 p-2 h-fit",
                         "w-1/2 rounded-md text-center",
                         "xl:w-2/3 whitespace-nowrap overflow-x-auto",
-                        user_uuid ? "text-default-700" : "text-default-400",
+                        user ? "text-default-700" : "text-default-400",
                         size === "sm"
                             ? "text-sm"
                             : size === "md"
@@ -68,14 +50,15 @@ export default function UserInfo({
                               : "text-lg",
                     )}
                 >
-                    {user_data?.name || (user_uuid ? "Unknown User" : "Name")}
+                    {user?.name ||
+                        (unknownPlaceholders ? "Unknown User" : "Name")}
                 </div>
                 <div
                     className={clsx(
                         "bg-default-200 p-2 h-fit",
                         "w-1/2 rounded-md text-center",
                         "xl:w-1/3 overflow-x-auto",
-                        user_uuid ? "text-default-700" : "text-default-400",
+                        user ? "text-default-700" : "text-default-400",
                         size === "sm"
                             ? "text-sm"
                             : size === "md"
@@ -83,14 +66,14 @@ export default function UserInfo({
                               : "text-lg",
                     )}
                 >
-                    {user_data?.college_id || (user_uuid ? "No ID" : "ID")}
+                    {user?.college_id || (unknownPlaceholders ? "No ID" : "ID")}
                 </div>
             </div>
             <div
                 className={clsx(
                     "bg-default-200 p-2 text-center min-h-fit",
                     "col-span-full rounded-md overflow-x-auto",
-                    user_uuid ? "text-default-700" : "text-default-400",
+                    user ? "text-default-700" : "text-default-400",
                     size === "sm"
                         ? "text-sm"
                         : size === "md"
@@ -98,27 +81,32 @@ export default function UserInfo({
                           : "text-lg",
                 )}
             >
-                {user_data?.email || (user_uuid ? "No Email" : "Email")}
+                {user?.email || (unknownPlaceholders ? "No Email" : "Email")}
             </div>
             <UserRoleSelect
-                roles={role_data}
-                key={user_uuid}
+                roles={roles}
                 defaultSelectedKeys={
-                    user_data?.active_roles?.map((r) => r.role_uuid) || []
+                    user?.active_roles?.map((r) => r.role_uuid) || []
                 }
-                isLoading={loading}
+                isLoading={isLoading}
                 className="col-span-3"
                 classNames={{
-                    trigger: "px-0 placeholder",
+                    trigger:
+                        !user ||
+                        !user.active_roles ||
+                        user.active_roles.length === 0
+                            ? "px-0"
+                            : "pl-2 pr-0",
                     value: clsx(
                         "text-default-400",
-                        (!user_data?.active_roles ||
-                            user_data.active_roles.length === 0) &&
+                        (!user ||
+                            !user.active_roles ||
+                            user.active_roles.length === 0) &&
                             "pl-2",
                     ),
                 }}
                 label=""
-                placeholder={user_uuid ? "No active roles" : "Roles"}
+                placeholder={user ? "No active roles" : "Roles"}
                 viewOnly
             />
             <div
@@ -127,9 +115,9 @@ export default function UserInfo({
                     "col-span-3 flex flex-wrap gap-2 overflow-auto max-h-[30vh]",
                 )}
             >
-                {user_data?.active_certificates &&
-                user_data.active_certificates.length > 0 ? (
-                    user_data.active_certificates.map((c) => (
+                {user?.active_certificates &&
+                user.active_certificates.length > 0 ? (
+                    user.active_certificates.map((c) => (
                         <CertificationTag
                             key={c.certification_uuid}
                             cert_uuid={c.certification_uuid}
@@ -139,7 +127,7 @@ export default function UserInfo({
                     ))
                 ) : (
                     <div className="text-default-400 text-center w-full">
-                        {user_uuid
+                        {unknownPlaceholders
                             ? "No active certifications"
                             : "Certifications"}
                     </div>

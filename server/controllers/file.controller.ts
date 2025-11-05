@@ -403,7 +403,7 @@ export async function updateFile(file_obj: TFile): Promise<TFile | null> {
 }
 
 export async function clearExpiredFilesCron(logger: Logger) {
-    logger.info("Clearing expired files.");
+    logger.info("Cron: Clearing expired files.");
     const Files = mongoose.model("File", File);
     const now = Date.now() / 1000;
 

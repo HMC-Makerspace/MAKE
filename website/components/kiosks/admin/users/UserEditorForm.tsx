@@ -1,26 +1,14 @@
-import {
-    Alert,
-    Button,
-    Divider,
-    Form,
-    Input,
-    select,
-    Select,
-    SelectedItemProps,
-    Selection,
-    SelectItem,
-    Snippet,
-    addToast
-} from "@heroui/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button, Divider, Form, Input, Snippet, addToast } from "@heroui/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { TUser, TUserRole, TUserRoleLog, UserRoleUUID } from "common/user";
 import React from "react";
-import UserRole from "../../../user/UserRole";
-import { ClipboardIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import {
+    ArrowRightEndOnRectangleIcon,
+    TrashIcon,
+} from "@heroicons/react/24/outline";
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateUser = async ({
@@ -39,13 +27,9 @@ const createUpdateUser = async ({
     }
 };
 
-const deleteUser = async ({
-    user_uuid
-}: {
-    user_uuid: string
-}) => {
-    return (await axios.delete(`/api/v3/user/${user_uuid}`)).data
-}
+const deleteUser = async ({ user_uuid }: { user_uuid: string }) => {
+    return (await axios.delete(`/api/v3/user/${user_uuid}`)).data;
+};
 
 export default function UserEditorForm({
     user,
@@ -60,9 +44,7 @@ export default function UserEditorForm({
 }) {
     const isEmpty = !user.uuid && !isNew;
 
-    const [UUID, setUUID] = React.useState<string>(
-        isNew ? crypto.randomUUID() : user.uuid,
-    );
+    const UUID = isNew ? crypto.randomUUID() : user.uuid;
 
     const queryClient = useQueryClient();
 
@@ -77,14 +59,18 @@ export default function UserEditorForm({
                     return old.map((u) => (u.uuid === UUID ? result : u));
                 }
             });
-
+            console.log("New user", result);
             addToast({
                 title: `Successfully ${isNew ? "created" : "updated"} user${isMultiple ? "s" : ""}`,
                 color: "success",
             });
-
-            setHasEdits(false);
-            console.log(result);
+            setHasEdits({
+                name: false,
+                college_id: false,
+                email: false,
+                roles: false,
+                passkey: false,
+            });
         },
         onError: (error) => {
             addToast({
@@ -104,7 +90,13 @@ export default function UserEditorForm({
                 title: `Successfully deleted user`,
                 color: "success",
             });
-            setHasEdits(false);
+            setHasEdits({
+                name: false,
+                college_id: false,
+                email: false,
+                roles: false,
+                passkey: false,
+            });
         },
         onError: (error) => {
             addToast({
@@ -118,8 +110,6 @@ export default function UserEditorForm({
         (e: React.FormEvent<HTMLFormElement>) => {
             // Prevent default browser page refresh.
             e.preventDefault();
-
-            console.log("submitting form");
 
             // If something is wrong, don't submit.
             if (isEmpty) return;
@@ -184,6 +174,7 @@ export default function UserEditorForm({
                 past_certificates: user.past_certificates,
                 files: user.files,
                 work_schedules: user.work_schedules,
+                passkey: data.get("passkey") as string,
             };
 
             // Reset the mutation (clears any previous errors)
@@ -194,37 +185,33 @@ export default function UserEditorForm({
         [user, UUID, isEmpty],
     );
 
-    const [hasEdits, setHasEdits] = React.useState<boolean>(false);
+    type editableKeys = "name" | "college_id" | "email" | "roles" | "passkey";
 
-    const [collegeID, setCollegeID] = React.useState<string>(user.college_id);
-    const [name, setName] = React.useState<string>(user.name);
-    const [email, setEmail] = React.useState<string>(user.email);
+    const [hasEdits, setHasEdits] = React.useState<{
+        [key in editableKeys]: boolean;
+    }>({
+        name: false,
+        college_id: false,
+        email: false,
+        roles: false,
+        passkey: false,
+    });
 
     const placeholder = (text: string) => (isEmpty ? `Select a user` : text);
     const multiDisabledPlaceholder = (text: string) =>
         isMultiple ? `Disabled for batch edit` : placeholder(text);
-
-    // A function that wraps a setter to also update the hasEdits state
-    const wrapEdit = React.useCallback((fn: (arg0: any) => void) => {
-        return (value: any) => {
-            fn(value);
-            setHasEdits(true);
-        };
-    }, []);
-
-    const isValid = React.useMemo(() => {
-        return (
-            hasEdits &&
-            UUID.length > 0 &&
-            // collegeID.length > 0 &&
-            name.length > 0 &&
-            email.length > 0
-        );
-    }, [hasEdits, UUID, collegeID, name, email]);
+    const patchEdits = (key: editableKeys, value: boolean) => {
+        const new_edits = { ...hasEdits };
+        new_edits[key] = value;
+        setHasEdits(new_edits);
+    };
 
     const user_roles = user.active_roles.map(
         (role: TUserRoleLog) => role.role_uuid,
     );
+
+    // If any input has edits, the form is submittable.
+    const isSubmittable = Object.values(hasEdits).some(Boolean);
 
     return (
         <>
@@ -257,8 +244,14 @@ export default function UserEditorForm({
                     // Disable the input if there are multiple or no users are selected
                     isDisabled={isEmpty || isMultiple}
                     // If the user exists, prefill the input with the user's id
-                    value={collegeID}
-                    onValueChange={wrapEdit(setCollegeID)}
+                    defaultValue={user.college_id}
+                    onValueChange={(value) =>
+                        patchEdits(
+                            "college_id",
+                            // Not technically required
+                            value !== user.college_id,
+                        )
+                    }
                     variant="faded"
                     color="primary"
                     size="md"
@@ -281,8 +274,10 @@ export default function UserEditorForm({
                     // Name must not be empty
                     isRequired
                     // If the user exists, prefill the input with the user's name
-                    value={name}
-                    onValueChange={wrapEdit(setName)}
+                    defaultValue={user.name}
+                    onValueChange={(value) =>
+                        patchEdits("name", !!value && value !== user.name)
+                    }
                     variant="faded"
                     color="primary"
                     size="md"
@@ -305,8 +300,10 @@ export default function UserEditorForm({
                     // Email must not be empty
                     isRequired
                     // If the user exists, prefill the input with the user's email
-                    value={email}
-                    onValueChange={wrapEdit(setEmail)}
+                    defaultValue={user.email}
+                    onValueChange={(value) =>
+                        patchEdits("email", !!value && value !== user.email)
+                    }
                     variant="faded"
                     color="primary"
                     size="md"
@@ -323,14 +320,14 @@ export default function UserEditorForm({
                     roles={roles}
                     onSelectionChange={(selection) => {
                         if (selection == "all") {
-                            setHasEdits(true);
+                            patchEdits("roles", true);
                         } else if (
                             user_roles.length == selection.size &&
                             user_roles.every((r) => selection.has(r))
                         ) {
-                            setHasEdits(false);
+                            patchEdits("roles", false);
                         } else {
-                            setHasEdits(true);
+                            patchEdits("roles", true);
                         }
                     }}
                     defaultSelectedKeys={user_roles}
@@ -338,11 +335,45 @@ export default function UserEditorForm({
                     className="col-span-2"
                 />
                 <Divider className="h-[1px] bg-default-400 col-span-2" />
+                <Input
+                    description="Used as an alternate auth method via request headers or opt login"
+                    type="password"
+                    label="Passkey"
+                    name="passkey"
+                    size="lg"
+                    isDisabled={isEmpty || isMultiple}
+                    defaultValue={user.passkey}
+                    onValueChange={(value) => {
+                        let nullish_value: string | null = value || null;
+                        patchEdits("passkey", nullish_value != user.passkey);
+                    }}
+                    color="primary"
+                    variant="faded"
+                    classNames={{
+                        description: "text-default-500 pl-2",
+                    }}
+                />
+                <Button
+                    fullWidth
+                    isDisabled={isEmpty || isMultiple}
+                    variant="flat"
+                    color="primary"
+                    startContent={
+                        <ArrowRightEndOnRectangleIcon className="size-6" />
+                    }
+                    onPress={async () =>
+                        await axios
+                            .get(`/login/${user.uuid}`)
+                            .then(() => (window.location.href = "/"))
+                    }
+                >
+                    Login as User
+                </Button>
                 <div className="w-full mt-auto col-span-2 flex flex-row gap-2">
                     <Button
                         size="lg"
                         className="w-full"
-                        isDisabled={isEmpty || !isValid}
+                        isDisabled={isEmpty || !isSubmittable}
                         isLoading={mutation.isPending}
                         color={"primary"}
                         variant="shadow"

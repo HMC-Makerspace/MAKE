@@ -1,4 +1,4 @@
-import { Input, Selection, Button, Spinner } from "@heroui/react";
+import { Input, Selection, Button, Spinner, Checkbox } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
     PlusIcon,
@@ -23,7 +23,7 @@ const baseColumns = [
     { name: "Past Roles", id: "past_roles" },
     { name: "Certificates", id: "active_certificates" },
     { name: "Past Certificates", id: "past_certificates" },
-    // Skip files and availability, not useful right now
+    { name: "Has Passkey", id: "has_passkey" },
 ];
 
 const defaultUserColumns: string[] = [
@@ -198,14 +198,18 @@ export default function UsersTable({
                                 </Button>
                             )}
 
-                            <Button
-                                color="primary"
-                                isDisabled={isLoading}
-                                startContent={<PlusIcon className="size-6" />}
-                                onPress={createUser}
-                            >
-                                Create
-                            </Button>
+                            {onCreate && (
+                                <Button
+                                    color="primary"
+                                    isDisabled={isLoading}
+                                    startContent={
+                                        <PlusIcon className="size-6" />
+                                    }
+                                    onPress={createUser}
+                                >
+                                    Create
+                                </Button>
+                            )}
                         </div>
                     )}
                 </div>
@@ -272,6 +276,15 @@ export default function UsersTable({
                                     level={c.level}
                                 />
                             ))}
+                        </div>
+                    ),
+                    has_passkey: (user: TUser) => (
+                        <div className="flex justify-center">
+                            <Checkbox
+                                isSelected={!!user.passkey}
+                                isDisabled
+                                className="opacity-100"
+                            />
                         </div>
                     ),
                     ...customColumnComponents,

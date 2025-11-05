@@ -323,7 +323,7 @@ export default function QuickTransferPage() {
                             "text-default-700",
                         )}
                     >
-                        {user?.name}
+                        {user ? user.name : userError ? "No user found" : ""}
                     </div>
                     <div
                         id="padding"
@@ -390,9 +390,8 @@ export default function QuickTransferPage() {
                                 own files.
                                 <br />
                                 <br />
-                                To gain access to Quick Transfer, please visit
-                                the Makerspace during open hours and ask a
-                                steward.
+                                To gain access to Quick Transfer, your ID must
+                                first be assigned to your account.
                             </div>
                         )}
                     </div>
