@@ -259,7 +259,7 @@ export default function CheckoutSidebar({
                         name="college_id"
                         size="lg"
                         color="primary"
-                        placeholder="Enter college ID..."
+                        placeholder="Enter College ID..."
                         defaultValue={collegeID}
                         autoFocus
                         aria-label="Enter College ID"

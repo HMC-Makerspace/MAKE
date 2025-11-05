@@ -459,9 +459,11 @@ export async function extendCheckout(
     new_timestamp_due: number,
 ): Promise<TCheckout | null> {
     const Checkouts = mongoose.model("Checkout", Checkout);
-    return Checkouts.findOneAndReplace(
+    return Checkouts.findOneAndUpdate(
         { uuid: checkout_uuid },
-        { timestamp_due: new_timestamp_due },
+        { $set: {
+            timestamp_due: new_timestamp_due }
+        },
         { returnDocument: "after" },
     );
 }
