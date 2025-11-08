@@ -174,7 +174,7 @@ export default function FileCard({
                         resource_type: resource_type,
                     })
                 }
-                isDisabled={disableDeletion}
+                isDisabled={disableDeletion || deleteMutation.isPending}
             >
                 <TrashIcon className="size-5" />
             </Button>
