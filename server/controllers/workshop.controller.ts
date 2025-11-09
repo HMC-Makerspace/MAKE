@@ -10,6 +10,7 @@ import WorkshopReminderTemplate from "email_templates/workshop_reminder";
 import { Logger } from "pino";
 import WorkshopConfirmationTemplate from "email_templates/workshop_confirmation";
 import { getConfig } from "./config.controller";
+import WorkshopWaitlistTemplate from "email_templates/workshop_waitlist_move";
 
 /**
  * Get all workshops in the database
@@ -221,6 +222,7 @@ export async function rsvpToWorkshop(
 export async function cancelRSVPToWorkshop(
     workshop_uuid: UUID,
     user_uuid: UserUUID,
+    logger: Logger,
 ): Promise<TWorkshop | null> {
     const workshop = await getWorkshop(workshop_uuid);
     // If the workshop doesn't exist, the cancellation fails
@@ -237,6 +239,28 @@ export async function cancelRSVPToWorkshop(
     }
     // Remove the user from the rsvp list
     workshop.rsvp_list = workshop.rsvp_list.filter((rsvp) => rsvp.user_uuid != user_uuid);
+
+    // Send email to user moved off the waitlist
+    const firstUserOnWaitlist =
+        workshop.capacity &&
+        workshop.capacity > 0 &&
+        workshop.rsvp_list.length >= workshop.capacity ?
+        workshop.rsvp_list[workshop.capacity-1].user_uuid : null;
+    
+    if (firstUserOnWaitlist) {
+        const user = await getUser(firstUserOnWaitlist);
+        const config = await getConfig();
+
+        if (user && config) {
+            await sendTemplatedEmail(
+                user.email,
+                "Workshop Waitlist Update: " + workshop.title,
+                WorkshopWaitlistTemplate(workshop, user, config),
+                logger,
+            );
+        }
+    }
+
     // Update the workshop in the database
     return workshop.save();
 }
@@ -313,7 +337,7 @@ export async function workshopReminderEmailCron(logger: Logger) {
                 new_sent_times.push(reminder);
             }
         }
-        
+
         if (new_sent_times.length != workshop.reminder_emails_sent.length) {
             await Workshops.updateOne(
                 {
