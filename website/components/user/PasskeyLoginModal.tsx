@@ -80,7 +80,17 @@ export default function PasskeyLoginModal({
         >
             <ModalContent className="flex flex-col gap-4 p-4">
                 {(onClose) => (
-                    <>
+                    <Form
+                        validationBehavior="native"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+
+                            mutation.mutate({
+                                email: email,
+                                passkey: passkey,
+                            });
+                        }}
+                    >
                         <div className="text-lg font-semibold">
                             Login with Email
                         </div>
@@ -90,6 +100,7 @@ export default function PasskeyLoginModal({
                             onValueChange={setEmail}
                             label="Email"
                             type="email"
+                            minLength={1}
                             fullWidth
                             classNames={{
                                 mainWrapper: "w-full",
@@ -100,6 +111,7 @@ export default function PasskeyLoginModal({
                             value={passkey}
                             onValueChange={setPasskey}
                             label="Passkey"
+                            minLength={1}
                             type="password"
                             fullWidth
                             classNames={{
@@ -110,6 +122,16 @@ export default function PasskeyLoginModal({
 
                         <ModalFooter className="flex flex-row justify-between w-full gap-2">
                             <Button
+                                variant="shadow"
+                                color="primary"
+                                fullWidth
+                                isDisabled={!isValid}
+                                isLoading={mutation.isPending}
+                                type="submit"
+                            >
+                                Submit
+                            </Button>
+                            <Button
                                 variant="flat"
                                 color="default"
                                 fullWidth
@@ -117,23 +139,8 @@ export default function PasskeyLoginModal({
                             >
                                 Close
                             </Button>
-                            <Button
-                                variant="shadow"
-                                color="primary"
-                                fullWidth
-                                isDisabled={!isValid}
-                                isLoading={mutation.isPending}
-                                onPress={() =>
-                                    mutation.mutate({
-                                        email: email,
-                                        passkey: passkey,
-                                    })
-                                }
-                            >
-                                Submit
-                            </Button>
                         </ModalFooter>
-                    </>
+                    </Form>
                 )}
             </ModalContent>
         </Modal>

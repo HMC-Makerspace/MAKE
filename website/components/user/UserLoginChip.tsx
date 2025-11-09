@@ -118,9 +118,9 @@ export function UserLoginChip({
         !user_uuid || isLoading || error?.status === StatusCodes.UNAUTHORIZED;
 
     const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", user?.uuid, "roles"],
+        queryKey: ["user", user?.uuid || "self", "roles"],
         refetchOnWindowFocus: false,
-        // enabled: !loggedOut,
+        enabled: !loggedOut,
         refetchOnMount: false,
     });
 
