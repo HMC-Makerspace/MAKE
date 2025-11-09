@@ -26,7 +26,7 @@ const WorkshopReminderTemplate = (
                 <br />
                 <br />
                 When you arrive, please{" "}
-                <b>sign into the Workshop Kiosk Computer</b>.
+                <b>sign in with the instructor</b>.
             </p>
 
             <footer>
