@@ -8,6 +8,8 @@ import { Certification } from "models/certification.model";
 import mongoose from "mongoose";
 import { getUser } from "./user.controller";
 import { verifyRequest } from "./verify.controller";
+import { Logger } from "pino";
+import { User } from "models/user.model";
 
 // --- Certification Controls ---
 
@@ -175,4 +177,36 @@ export async function deleteCertification(
 ): Promise<TCertification | null> {
     const Certifications = mongoose.model("Certification", Certification);
     return Certifications.findOneAndDelete({ uuid: uuid });
+}
+
+/**
+ * A regularly scheduled operation to revoke expired certificates from users.
+ * @param logger The global logger to send status messages to
+ */
+export async function revokeExpiredCertificatesCron(logger: Logger) {
+    const Users = mongoose.model("User", User);
+    const now = Date.now() / 1000;
+    // Get all users with an expired certificate
+    const relevantUsers = await Users.find({
+        "active_certificates.timestamp_expires": { $lte: now },
+    });
+    let expiration_count = 0;
+    for (const user of relevantUsers) {
+        const expired_certs = user.active_certificates?.filter(
+            (cert) => cert.timestamp_expires && cert.timestamp_expires <= now,
+        );
+        user.active_certificates = user.active_certificates?.filter(
+            (cert) =>
+                !expired_certs?.some(
+                    (c) => c.certification_uuid === cert.certification_uuid,
+                ),
+        );
+        if (!user.past_certificates) {
+            user.past_certificates = [];
+        }
+        user.past_certificates.concat(expired_certs ?? []);
+        expiration_count += (expired_certs ?? []).length;
+        user.save();
+    }
+    logger.info(`Cron: Revoked ${expiration_count} certificates.`);
 }

@@ -76,7 +76,6 @@ export default function WorkshopCard({
                     : onWaitList
                       ? `Joined waitlist for ${data.title}`
                       : `RSVP'd for ${data.title}`,
-                timeout: 3000,
                 color: hasCancelled
                     ? "warning"
                     : onWaitList
@@ -97,7 +96,6 @@ export default function WorkshopCard({
                 title:
                     error.response?.data.error ??
                     `Unknown error: ${error.message}`,
-                timeout: 5000,
                 color: "danger",
             });
         },

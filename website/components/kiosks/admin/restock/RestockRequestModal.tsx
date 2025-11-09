@@ -9,6 +9,7 @@ import {
     Input,
     Textarea,
     NumberInput,
+    addToast
 } from "@heroui/react";
 import {
     TRestockRequest,
@@ -55,16 +56,12 @@ export default function RestockRequestModal({
     restockSelected,
     editIsOpen,
     editOnOpenChange,
-    onSuccess,
-    onError,
 }: {
     requestingUser?: TUser;
     restocks: TRestockRequest[];
     restockSelected: TInventoryItem;
     editIsOpen: boolean;
     editOnOpenChange: () => void;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
 }) {
     const prevRestock = restocks.findLast(
         (r) => r.item_uuid == restockSelected.uuid,
@@ -103,11 +100,17 @@ export default function RestockRequestModal({
                         old.map((w) => (w.uuid === data.uuid ? data : w)),
                 );
             }
-            onSuccess("Restock request updated successfully");
+            addToast({
+                title: `${isNew ? "Successfully created restock" : "Successfully added to mailing list"}`,
+                color: "success",
+            });
             editOnOpenChange();
         },
         onError: (error) => {
-            onError("Error updating restock request: " + error.message);
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
         },
     });
 
@@ -209,23 +212,6 @@ export default function RestockRequestModal({
                                                     }}
                                                 />
                                             </div>
-
-                                            <ModalFooter className="w-full justify-between">
-                                                <Button
-                                                    variant="shadow"
-                                                    color="primary"
-                                                    type="submit"
-                                                >
-                                                    Submit
-                                                </Button>
-                                                <Button
-                                                    variant="flat"
-                                                    color="danger"
-                                                    onPress={onClose}
-                                                >
-                                                    Cancel
-                                                </Button>
-                                            </ModalFooter>
                                         </>
                                     ) : (
                                         <div>
@@ -273,25 +259,31 @@ export default function RestockRequestModal({
                                                     </div>
                                                 )}
                                             </div>
-                                            <ModalFooter className="w-full justify-between">
-                                                <Button
-                                                    variant="shadow"
-                                                    color="primary"
-                                                    type="submit"
-                                                    isDisabled={!userCanRequest}
-                                                >
-                                                    Join Mailing List
-                                                </Button>
-                                                <Button
-                                                    variant="flat"
-                                                    color="danger"
-                                                    onPress={onClose}
-                                                >
-                                                    Cancel
-                                                </Button>
-                                            </ModalFooter>
                                         </div>
                                     )}
+                                    <ModalFooter className="w-full justify-between">
+                                        <Button
+                                            variant="shadow"
+                                            color="primary"
+                                            type="submit"
+                                            isDisabled={
+                                                !userCanRequest ||
+                                                mutation.isPending
+                                            }
+                                            isLoading={mutation.isPending}
+                                        >
+                                            {isNew
+                                                ? "Submit"
+                                                : "Join Mailing List"}
+                                        </Button>
+                                        <Button
+                                            variant="flat"
+                                            color="danger"
+                                            onPress={onClose}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </ModalFooter>
                                 </Form>
                             </ModalBody>
                         </div>

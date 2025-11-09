@@ -9,6 +9,7 @@ import {
     Link,
     useDisclosure,
     Tooltip,
+    addToast
 } from "@heroui/react";
 import { TUserRole } from "common/user";
 import Machine from "../../../../components/kiosks/admin/machines/Machine";
@@ -73,26 +74,40 @@ export default function Area({
                 );
             });
             editDocsClose();
+            addToast({
+                title: `Successfully edited area`,
+                color: "success",
+            });
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
         },
     });
 
     const deleteMutation = useMutation({
         mutationFn: deleteArea,
-        onSuccess: (_, variables) => {
-            queryClient.removeQueries({
-                queryKey: ["area", variables.uuid],
-            });
+        onSuccess: (_, variables) => {       
+            // queryClient.removeQueries({
+            //     queryKey: ["area", variables.uuid],
+            // });
             queryClient.setQueryData(["area"], (old: TArea[]) => {
                 return (old ?? []).filter(
                     (area) => area.uuid !== variables.uuid,
                 );
             });
+            addToast({
+                title: `Successfully deleted area`,
+                color: "success",
+            });
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
         },
     });
 

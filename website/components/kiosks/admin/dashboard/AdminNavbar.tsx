@@ -13,11 +13,11 @@ import {
     NavbarMenu,
     NavbarMenuToggle,
 } from "@heroui/react";
-import { MAKEUser } from "../../../user/MAKEUser";
 import { ThemeSwitcher } from "../../../ThemeSwitcher";
 import { AdminPage } from "../../../../layouts/AdminLayout";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import MAKE from "../../../public/home/MAKE";
+import { UserLoginChip } from "../../../user/UserLoginChip";
 
 export default function AdminNavbar({
     pages,
@@ -104,14 +104,13 @@ export default function AdminNavbar({
             <NavbarContent justify="end" className="pr-0">
                 {/* Menu dropdown for small screens, hide for larger */}
                 <NavbarMenuToggle className="lg:hidden text-background" />
-                <MAKEUser
+                <UserLoginChip
                     user_uuid={"self"}
                     className={clsx(
                         "rounded-r-none h-[85%]",
                         "data-[pressed=true]:translate-x-1",
                         "aria-expanded:translate-x-1",
                     )}
-                    showControls={true}
                 />
             </NavbarContent>
             {/* Menu drop down, for small screens */}

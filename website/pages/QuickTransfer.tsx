@@ -9,7 +9,6 @@ import {
     Spinner,
     Input,
     Form,
-    ToastProvider,
     closeToast,
     addToast,
 } from "@heroui/react";
@@ -164,7 +163,6 @@ export default function QuickTransferPage() {
                     title:
                         `Successfully uploaded ${data.files.length} file` +
                         `${data.files.length === 1 ? "" : "s"}.`,
-                    timeout: 3000,
                     color: "success",
                     severity:
                         data.upload_errors.length === 0 ? "success" : "warning",
@@ -174,7 +172,6 @@ export default function QuickTransferPage() {
                 // Add an error toast for each upload error
                 addToast({
                     title: error,
-                    timeout: 3000,
                     color: "danger",
                 });
             }
@@ -185,7 +182,6 @@ export default function QuickTransferPage() {
                 title:
                     error.response?.data.error ??
                     `Unknown error: ${error.message}`,
-                timeout: 5000,
                 color: "danger",
             });
         },
@@ -206,14 +202,12 @@ export default function QuickTransferPage() {
             );
             addToast({
                 title: "Successfully deleted file.",
-                timeout: 1000,
                 color: "success",
             });
         },
         onError: (error) => {
             addToast({
                 title: error.message,
-                timeout: 5000,
                 color: "danger",
             });
         },
@@ -270,7 +264,6 @@ export default function QuickTransferPage() {
 
     return (
         <DefaultLayout className="p-4 lg:p-8" pageHref="/transfer">
-            <ToastProvider maxVisibleToasts={9}></ToastProvider>
             <div
                 id="master"
                 className="size-full p-4 flex flex-col gap-2 bg-content1 rounded-xl overflow-auto"
@@ -330,7 +323,7 @@ export default function QuickTransferPage() {
                             "text-default-700",
                         )}
                     >
-                        {user?.name}
+                        {user ? user.name : userError ? "No user found" : ""}
                     </div>
                     <div
                         id="padding"
@@ -397,9 +390,8 @@ export default function QuickTransferPage() {
                                 own files.
                                 <br />
                                 <br />
-                                To gain access to Quick Transfer, please visit
-                                the Makerspace during open hours and ask a
-                                steward.
+                                To gain access to Quick Transfer, your ID must
+                                first be assigned to your account.
                             </div>
                         )}
                     </div>

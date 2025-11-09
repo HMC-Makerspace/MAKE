@@ -5,6 +5,7 @@ import type { NavigateOptions } from "react-router-dom";
 import { HeroUIProvider } from "@heroui/system";
 import { useHref, useNavigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
+import { ToastProvider } from "@heroui/react";
 
 import {
     QueryClient,
@@ -37,6 +38,9 @@ export function Provider({ children }: { children: React.ReactNode }) {
 
     return (
         <HeroUIProvider navigate={navigate} useHref={useHref}>
+            <ToastProvider 
+                toastProps={{timeout:3000}}
+            />
             <ThemeProvider
                 attribute="class"
                 defaultTheme="dark"

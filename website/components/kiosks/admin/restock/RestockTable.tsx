@@ -30,8 +30,7 @@ import RestockEditor from "./RestockEditor";
 import RestockStatusLogs from "./RestockStatusLogs";
 import ItemInfo from "../inventory/ItemInfo";
 import React from "react";
-import { MAKEUser } from "../../../user/MAKEUser";
-import PopupAlert from "../../../PopupAlert";
+import { UserChip } from "../../../user/UserChip";
 import { convertTimestampToDate } from "../../../../utils";
 import { TArea } from "common/area";
 import { TCertification } from "common/certification";
@@ -87,14 +86,10 @@ function ModifyRestockModal({
     restockSelected,
     editIsOpen,
     editOnOpenChange,
-    onSuccess,
-    onError,
 }: {
     restockSelected: TRestockRequest | null;
     editIsOpen: boolean;
     editOnOpenChange: () => void;
-    onSuccess?: (message: string) => void;
-    onError?: (message: string) => void;
 }) {
     return (
         <Modal
@@ -109,8 +104,6 @@ function ModifyRestockModal({
                         <RestockEditor
                             onClose={onClose}
                             restock={restockSelected}
-                            onSuccess={onSuccess}
-                            onError={onError}
                         />
                     ) : null
                 }
@@ -236,14 +229,6 @@ export default function RestockTable({
         onOpenChange: logsOnOpenChange,
     } = useDisclosure();
 
-    // Popup alert state
-    const [popupMessage, setPopupMessage] = React.useState<string | undefined>(
-        undefined,
-    );
-    const [popupType, setPopupType] = React.useState<"success" | "danger">(
-        "success",
-    );
-
     // table returned
     return (
         <div>
@@ -345,7 +330,7 @@ export default function RestockTable({
                             >
                                 <AccordionItem
                                     startContent={
-                                        <MAKEUser
+                                        <UserChip
                                             user_uuid={restock.requesting_user}
                                             popoverPlacement="bottom"
                                             className="w-full justify-start"
@@ -357,7 +342,7 @@ export default function RestockTable({
                                     {restock.mailing_list.map((uuid, index) => {
                                         return (
                                             <div className="pb-1">
-                                                <MAKEUser
+                                                <UserChip
                                                     user_uuid={uuid}
                                                     popoverPlacement="bottom"
                                                     className="justify-start"
@@ -426,25 +411,11 @@ export default function RestockTable({
                 restockSelected={restockSelected}
                 editIsOpen={editIsOpen}
                 editOnOpenChange={editOnOpenChange}
-                onSuccess={(message) => {
-                    setPopupMessage(message);
-                    setPopupType("success");
-                }}
-                onError={(message) => {
-                    setPopupMessage(message);
-                    setPopupType("danger");
-                }}
             />
             <PastStatusLogs
                 restockSelected={restockSelected}
                 logsIsOpen={logsIsOpen}
                 logsOnOpenChange={logsOnOpenChange}
-            />
-            <PopupAlert
-                isOpen={!!popupMessage}
-                onOpenChange={() => setPopupMessage(undefined)}
-                color={popupType}
-                description={popupMessage}
             />
         </div>
     );

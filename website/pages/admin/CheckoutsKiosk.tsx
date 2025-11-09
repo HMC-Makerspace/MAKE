@@ -10,14 +10,17 @@ import {
     Spinner,
     Tab,
     Tabs,
-    ToastProvider,
     Tooltip,
     useDisclosure,
 } from "@heroui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { TUser, TUserRole, UserUUID } from "common/user";
-import { CertificationUUID, TCertification } from "common/certification";
+import {
+    CERTIFICATION_VISIBILITY,
+    CertificationUUID,
+    TCertification,
+} from "../../../common/certification";
 import { TArea } from "common/area";
 import {
     CHECKOUT_VALIDATION,
@@ -40,12 +43,12 @@ import clsx from "clsx";
 import axios from "axios";
 import { TConfig } from "common/config";
 import { TSchedule } from "common/schedule";
-import PopupAlert from "../../components/PopupAlert";
 import CertificationsTable from "../../components/kiosks/admin/certifications/CTable";
 import { CheckBadgeIcon, PercentBadgeIcon } from "@heroicons/react/24/solid";
 import UsersTable from "../../components/kiosks/admin/users/UsersTable";
 import GrantCertPopup from "../../components/kiosks/admin/checkouts/GrantCertPopup";
 import AssignIDPopup from "../../components/kiosks/admin/checkouts/AssignIDPopup";
+import { TPublicScheduleData } from "common/schedule";
 
 async function getCartUnavailability({ cart }: { cart: TCheckoutItem[] }) {
     return (
@@ -82,7 +85,7 @@ export default function CheckoutsKiosk() {
     });
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
-            queryKey: ["certification", "public"],
+            queryKey: ["certification"],
             refetchOnWindowFocus: false,
             staleTime: 30 * 60 * 1000, // 30 minutes in milliseconds
         },
@@ -186,13 +189,6 @@ export default function CheckoutsKiosk() {
         status: CHECKOUT_VALIDATION.VALID,
     });
 
-    const {
-        isOpen: validationPopup,
-        onOpenChange: changeValidationPopup,
-        onOpen: openValidationPopup,
-        onClose: closeValidationPopup,
-    } = useDisclosure();
-
     const [grantCert, setGrantCert] = useState<TCertification>();
     const [granting, setGranting] = useState<boolean>(true);
     const {
@@ -229,39 +225,8 @@ export default function CheckoutsKiosk() {
         );
     }
 
-    let validationError = "Checkout submitted";
-    if (validation.status === CHECKOUT_VALIDATION.NO_USER) {
-        validationError = "No user selected";
-    } else if (validation.status === CHECKOUT_VALIDATION.NO_ITEMS) {
-        validationError = "No items in cart";
-    } else if (validation.status === CHECKOUT_VALIDATION.MISSING_CERT) {
-        validationError = "User missing required certification";
-        const cert = certs.find((c) => c.uuid === validation.error_uuid);
-        if (validation.error_uuid && cert) {
-            validationError += `\n'${cert.name}'`;
-        }
-        const item = inventory.find((i) => i.uuid === validation.item_uuid);
-        if (validation.item_uuid && item) {
-            validationError += ` for item '${item.name}'`;
-        }
-    } else if (validation.status === CHECKOUT_VALIDATION.MISSING_ROLE) {
-        validationError = "User has no authorized roles";
-        const item = inventory.find((i) => i.uuid === validation.item_uuid);
-        if (validation.item_uuid && item) {
-            validationError += ` for item '${item.name}'`;
-        }
-    } else if (validation.status === CHECKOUT_VALIDATION.UNAVAILABLE) {
-        validationError = "Item";
-        const item = inventory.find((i) => i.uuid === validation.item_uuid);
-        if (validation.item_uuid && item) {
-            validationError += ` '${item.name}'`;
-        }
-        validationError += " is unavailable";
-    }
-
     return (
         <AdminLayout pageHref={"/admin/checkouts"} className="max-w-full px-4">
-            <ToastProvider />
             <div className="flex flex-col lg:flex-row overflow-auto h-full gap-4 p-1">
                 <CheckoutSidebar
                     cart={cart}
@@ -277,7 +242,6 @@ export default function CheckoutsKiosk() {
                     setCollegeID={setCollegeID}
                     setValidation={(v) => {
                         setValidation(v);
-                        openValidationPopup();
                         if (v.status === CHECKOUT_VALIDATION.VALID) {
                             setCart([]);
                         }
@@ -358,12 +322,16 @@ export default function CheckoutsKiosk() {
                         </Tab>
                         <Tab key={"checkouts"} title={"Checkouts"}>
                             <CheckoutTable
+                                key={user?.uuid}
                                 checkouts={checkouts}
                                 inventory={inventory ?? []}
                                 users={users}
                                 config={config}
+                                activeSchedule={activeSchedule}
+                                areas={areas}
+                                certs={certs}
                                 selectedKeys={new Set()}
-                                isLoading={inventoryLoading}
+                                isLoading={inventoryLoading || checkoutsLoading || usersLoading || areasLoading || certsLoading}
                             />
                         </Tab>
                         <Tab key={"users"} title={"Users"}>
@@ -424,6 +392,10 @@ export default function CheckoutsKiosk() {
                                         id: "grant_revoke",
                                     },
                                 ]}
+                                visibilities={[
+                                    CERTIFICATION_VISIBILITY.PUBLIC,
+                                    CERTIFICATION_VISIBILITY.PRIVATE,
+                                ]}
                                 customColumnComponents={{
                                     grant_revoke: (cert) => {
                                         const hasCert =
@@ -453,16 +425,6 @@ export default function CheckoutsKiosk() {
                                                                 prereq.required_level,
                                                     ),
                                             );
-                                        console.log(
-                                            "certPrereqs:",
-                                            cert.name,
-                                            certHasPrereqs,
-                                        );
-                                        console.log(
-                                            "userPrereqs:",
-                                            user?.name,
-                                            userHasPrereqs,
-                                        );
                                         return (
                                             <Tooltip
                                                 content={
@@ -543,18 +505,6 @@ export default function CheckoutsKiosk() {
                 missingIDUser={missingIDUser}
                 setMissingIDUser={setMissingIDUser}
                 college_id={collegeID}
-            />
-            <PopupAlert
-                isOpen={validationPopup}
-                onOpenChange={changeValidationPopup}
-                color={
-                    validation.status === CHECKOUT_VALIDATION.VALID
-                        ? "success"
-                        : "danger"
-                }
-                description={validationError}
-                className="sm:w-1/3"
-                timeout={5000}
             />
         </AdminLayout>
     );

@@ -469,11 +469,18 @@ router.post(
                         // in the db
                         .then(() => {
                             // Create a new file object
+                            const upload_time = Date.now() / 1000;
+                            const expiration_time =
+                                config.file.upload_duration &&
+                                !verifyRequest(user.uuid, API_SCOPE.ADMIN)
+                                    ? upload_time + config.file.upload_duration
+                                    : undefined;
                             const file_obj: TFile = {
                                 uuid: crypto.randomUUID(),
                                 name: file.originalname,
                                 path: target_path,
-                                timestamp_upload: Date.now() / 1000,
+                                timestamp_upload: upload_time,
+                                timestamp_expires: expiration_time,
                                 size: file.size,
                                 resource_uuid: user.uuid,
                                 resource_type: FILE_RESOURCE_TYPE.USER,

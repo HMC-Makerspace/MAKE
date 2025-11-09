@@ -11,6 +11,7 @@ import {
     Select,
     SelectItem,
     Textarea,
+    addToast
 } from "@heroui/react";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
@@ -73,16 +74,12 @@ export default function EditCertModal({
     isNew,
     isOpen,
     onOpenChange,
-    onSuccess,
-    onError,
 }: {
     cert: TCertification;
     certifications: TCertification[];
     isNew: boolean;
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
 }) {
     const queryClient = useQueryClient();
 
@@ -102,12 +99,17 @@ export default function EditCertModal({
                     }
                 },
             );
-            onSuccess(
-                `Successfully ${isNew ? "created" : "updated"} certification ${result.name}`,
-            );
+            addToast({
+                title: `Successfully ${isNew ? "created" : "updated"} certification ${result.name}`,
+                color: "success",
+            });
+            onOpenChange(false);
         },
         onError: (error) => {
-            onError(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
         },
     });
 
@@ -455,14 +457,6 @@ export default function EditCertModal({
                             cert={cert}
                             isOpen={isDeleting}
                             onOpenChange={onDeleteChange}
-                            onSuccess={(message) => {
-                                onSuccess(message);
-                                onClose();
-                            }}
-                            onError={(message) => {
-                                onError(message);
-                                onClose();
-                            }}
                         />
                     </>
                 )}

@@ -1,4 +1,4 @@
-import { Button, Modal, Form, ModalContent } from "@heroui/react";
+import { Button, Modal, Form, ModalContent, addToast } from "@heroui/react";
 import { LinkIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 import React from "react";
@@ -15,8 +15,6 @@ export default function AlertEditorModal({
     config,
     isOpen,
     onOpenChange,
-    onSuccess,
-    onError,
 }: {
     schedule: TSchedule;
     patchMutation: UseMutationResult<
@@ -30,8 +28,6 @@ export default function AlertEditorModal({
     config: TConfig;
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
-    onSuccess: (message: string) => void;
-    onError: (message: string) => void;
 }) {
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
 
@@ -53,7 +49,10 @@ export default function AlertEditorModal({
                 partial_schedule: { alerts: alerts },
             });
             onOpenChange(false);
-            onSuccess("Successfully updated alerts.");
+            addToast({
+                title: `Successfully updated alerts.`,
+                color: "success",
+            });
         },
         [
             hasEdits,
@@ -61,7 +60,6 @@ export default function AlertEditorModal({
             schedule.uuid,
             alerts,
             onOpenChange,
-            onSuccess,
         ],
     );
 
@@ -69,9 +67,10 @@ export default function AlertEditorModal({
         return (val: TAlert[P]) => {
             const i = alerts.findIndex((a) => a.uuid === uuid);
             if (i < 0) {
-                onError(
-                    `Could not find alert with uuid: ${uuid} (index: ${i})`,
-                );
+                addToast({
+                    title: `Could not find alert with uuid: ${uuid} (index: ${i})`,
+                    color: "danger",
+                });
             }
             if (!alerts[i]) {
                 alerts[i] = {

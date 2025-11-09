@@ -6,6 +6,9 @@ import {
     Textarea,
     Tooltip,
     useDisclosure,
+    addToast,
+    Accordion,
+    AccordionItem,
 } from "@heroui/react";
 import { TUserRole } from "common/user";
 import clsx from "clsx";
@@ -101,17 +104,26 @@ export default function Machine({
         mutationFn: patchMachine,
         onSuccess: (obj: TMachine) => {
             queryClient.setQueryData(["machine", machine.uuid], obj);
+
             queryClient.setQueryData(["machine"], (old: TMachine[]) => {
                 return (old ?? []).map((machine) =>
                     machine.uuid === obj.uuid ? obj : machine,
                 );
             });
 
+            addToast({
+                title: `Successfully updated machines`,
+                color: "success",
+            });
+
             editDocsClose();
             reservableModalClose();
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
         },
     });
 
@@ -124,9 +136,17 @@ export default function Machine({
             queryClient.setQueryData(["machine"], (old: TMachine[]) => {
                 return (old ?? []).filter((m) => m.uuid !== variables.uuid);
             });
+
+            addToast({
+                title: `Successfully deleted machine`,
+                color: "success",
+            });
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
         },
     });
 
@@ -388,6 +408,7 @@ export default function Machine({
                             isOpen={editDocs}
                             onOpenChange={editDocsModalOpenChange}
                             patchMutation={patchMutation}
+                            roleOption={true}
                         />
                         <AuthorizedRolesModal
                             element={machine}
@@ -401,11 +422,14 @@ export default function Machine({
                     machine.documents && (
                         <div
                             className={clsx(
-                                "self-center w-4/5 gap-3 flex sm:flex-row flex-col",
+                                "self-center gap-3 flex sm:flex-row flex-col",
                                 !machine.documents ||
                                     machine.documents.length == 0
                                     ? ""
                                     : "mt-2",
+                                machine.documents.length <= 2 
+                                    ? "w-4/5" 
+                                    : "w-full",
                             )}
                         >
                             {machine.documents.length <= 2 ? (
@@ -422,14 +446,37 @@ export default function Machine({
                                     </Button>
                                 ))
                             ) : (
-                                // TODO: Show all documents
-                                <Button color="primary" className="w-full">
-                                    View Documents
-                                </Button>
+                                <div className='w-full'>
+                                    <Accordion
+                                        fullWidth
+                                        variant="splitted"
+                                    >                                    
+                                        <AccordionItem
+                                            title="View Documents"                                    
+                                        >
+                                            {
+                                                machine.documents.map((doc, i) => (
+                                                    <div className='py-1'>
+                                                        <Button
+                                                            key={`machine-${machine.uuid}-doc-${i}`}
+                                                            color="primary"
+                                                            className="w-full py-2"
+                                                            href={doc.link}
+                                                            as={Link}
+                                                            isExternal
+                                                        >
+                                                            {doc.name}
+                                                        </Button>
+                                                    </div>
+                                                    
+                                                ))
+                                            }
+                                        </AccordionItem>
+                                    </Accordion>
+                                </div>
                             )}
                         </div>
-                    )
-                )}
+                    ))}
             </div>
         </Card>
     );

@@ -12,6 +12,7 @@ import {
     PopoverContent,
     PopoverTrigger,
     Selection,
+    addToast
 } from "@heroui/react";
 import React from "react";
 import UserRole from "../../../user/UserRole";
@@ -184,7 +185,10 @@ export default function Shift({
             );
         },
         onError: (error) => {
-            console.log(error);
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
         },
     });
 

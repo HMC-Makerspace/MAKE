@@ -7,7 +7,7 @@ import { getForegroundColor } from "../../utils";
 export default function UserRole({
     role_uuid,
     role,
-    size = "sm",
+    size = "md",
 }: {
     role_uuid: string;
     role?: TUserRole;
@@ -26,28 +26,38 @@ export default function UserRole({
         role?.title ?? (isSuccess ? data.title : isError ? "Error" : "Loading");
     const foregroundColor = getForegroundColor(color);
     const isDefault = role?.default ?? data?.default;
-    return (
-        <Card
-            className="p-1.5 flex flex-row gap-1 w-fit px-2.5"
-            style={{ backgroundColor: color }}
-            isBlurred={!isSuccess}
-            shadow="none"
-        >
-            {isDefault ? (
-                <StarIcon
-                    className={`size-4 mt-[1.5px] -ml-0.5`}
-                    strokeWidth={2.5}
-                    color={foregroundColor}
-                />
-            ) : null}
-            <h1
-                className="text-sm font-semibold text-nowrap"
-                style={{
-                    color: foregroundColor,
-                }}
+    if (size == "sm") {
+        return (
+            <div
+                className={`w-5 h-5 rounded-full`}
+                style={{backgroundColor: color}}
+            ></div>
+        );
+    } else {
+        return (
+            
+            <Card
+                className="p-1.5 flex flex-row gap-1 w-fit px-2.5"
+                style={{ backgroundColor: color }}
+                isBlurred={!isSuccess}
+                shadow="none"
             >
-                {title}
-            </h1>
-        </Card>
-    );
+                {isDefault ? (
+                    <StarIcon
+                        className={`size-4 mt-[1.5px] -ml-0.5`}
+                        strokeWidth={2.5}
+                        color={foregroundColor}
+                    />
+                ) : null}
+                <h1
+                    className="text-sm font-semibold text-nowrap"
+                    style={{
+                        color: foregroundColor,
+                    }}
+                >
+                    {title}
+                </h1>
+            </Card>
+        );
+    }
 }

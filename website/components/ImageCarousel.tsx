@@ -12,6 +12,7 @@ import {
     ModalBody,
     useDisclosure,
     Image,
+    addToast
 } from "@heroui/react";
 import {
     TrashIcon,
@@ -208,6 +209,10 @@ function EditModal({
             queryClient.invalidateQueries({
                 queryKey: ["file", "by", resource_type, resource_uuid],
             });
+            addToast({
+                title: `Successfully deleted image`,
+                color: "success",
+            });
         },
     });
 
@@ -218,6 +223,11 @@ function EditModal({
                 ["file", "by", resource_type, resource_uuid],
                 (old: TFile[]) => old.concat(data),
             );
+            addToast({
+                title: `Successfully uploaded image`,
+                color: "success",
+            });
+
         },
     });
 

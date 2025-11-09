@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import DefaultLayout from "../layouts/Default";
-import { ToastProvider, Tabs, Tab } from "@heroui/react";
+import { Tabs, Tab } from "@heroui/react";
 import { TWorkshop } from "../../common/workshop.ts";
 import { TUser } from "common/user.js";
 import { Key, useState } from "react";
@@ -67,7 +67,6 @@ export default function WorkshopPage() {
 
     return (
         <DefaultLayout className="p-8" pageHref="/workshops">
-            <ToastProvider />
             <div
                 id="master"
                 className="flex gap-4 flex-col h-full items-center"

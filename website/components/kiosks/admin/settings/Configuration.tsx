@@ -9,6 +9,7 @@ import {
     Select,
     SelectItem,
     Switch,
+    addToast
 } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TConfig } from "common/config";
@@ -16,7 +17,6 @@ import { SHIFT_DAY, SHIFT_DAYS } from "../../../../../common/shift";
 import { UserRoleSelect } from "../../../../components/user/UserRoleSelect";
 import axios from "axios";
 import React, { useState } from "react";
-import PopupAlert from "../../../../components/PopupAlert";
 import clsx from "clsx";
 import { PlusIcon, AcademicCapIcon } from "@heroicons/react/24/solid";
 import EditableFAQItem from "./EditableFAQItem";
@@ -56,23 +56,20 @@ async function updateConfig({ config }: { config: TConfig }) {
 export default function Configuration({ config }: { config: TConfig }) {
     const queryClient = useQueryClient();
 
-    const [popupMessage, setPopupMessage] = React.useState<string | undefined>(
-        undefined,
-    );
-    const [popupType, setPopupType] = React.useState<"success" | "danger">(
-        "success",
-    );
-
     const mutation = useMutation({
         mutationFn: updateConfig,
         onSuccess: (data) => {
             queryClient.setQueryData(["config"], data);
-            setPopupMessage("Configuration updated successfully.");
-            setPopupType("success");
+            addToast({
+                title: `Configuration updated successfully.`,
+                color: "success",
+            });
         },
         onError: (error) => {
-            setPopupMessage("Failed to update configuration: " + error);
-            setPopupType("danger");
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
         },
     });
 
@@ -89,6 +86,19 @@ export default function Configuration({ config }: { config: TConfig }) {
         (notification_interval_sec % (60 * 60)) / 60,
     );
     const notification_interval_secs = notification_interval_sec % 60;
+
+    // Calculate intermediary file upload duration values
+    const upload_duration_sec = config.file.upload_duration ?? 0;
+    const upload_duration_days = Math.floor(
+        upload_duration_sec / (24 * 60 * 60),
+    );
+    const upload_duration_hours = Math.floor(
+        (upload_duration_sec % (24 * 60 * 60)) / (60 * 60),
+    );
+    const upload_duration_mins = Math.floor(
+        (upload_duration_sec % (60 * 60)) / 60,
+    );
+    const upload_duration_secs = upload_duration_sec % 60;
 
     // Calculate intermediary capacity values
     const max_upload_capacity = config.file.max_upload_capacity ?? 0;
@@ -186,6 +196,26 @@ export default function Configuration({ config }: { config: TConfig }) {
                     body.checkout.notification_interval_sec =
                         (body.checkout.notification_interval_sec ?? 0) +
                         (num_value - notification_interval_secs);
+                    break;
+                case "upload_duration_days":
+                    body.file.upload_duration =
+                        (body.file.upload_duration ?? 0) +
+                        (num_value - upload_duration_days) * 24 * 60 * 60;
+                    break;
+                case "upload_duration_hours":
+                    body.file.upload_duration =
+                        (body.file.upload_duration ?? 0) +
+                        (num_value - upload_duration_hours) * 60 * 60;
+                    break;
+                case "upload_duration_mins":
+                    body.file.upload_duration =
+                        (body.file.upload_duration ?? 0) +
+                        (num_value - upload_duration_mins) * 60;
+                    break;
+                case "upload_duration_secs":
+                    body.file.upload_duration =
+                        (body.file.upload_duration ?? 0) +
+                        (num_value - upload_duration_secs);
                     break;
                 case "max_upload_gb":
                     body.file.max_upload_capacity =
@@ -543,7 +573,10 @@ export default function Configuration({ config }: { config: TConfig }) {
                             </ConfigItem>
                             <ConfigItem
                                 name="Max Upload Count per User"
-                                description="The maximum number of files a user can upload at a time. If not set, there is no limit."
+                                description={
+                                    "The maximum number of files a user can upload at a time. " +
+                                    "If not set, there is no limit."
+                                }
                             >
                                 <Input
                                     type="number"
@@ -556,6 +589,51 @@ export default function Configuration({ config }: { config: TConfig }) {
                                     color="primary"
                                     variant="faded"
                                     endContent="files"
+                                />
+                            </ConfigItem>
+                            <ConfigItem
+                                name="User Upload Duration"
+                                description={
+                                    "The duration that user files will remain on the server. " +
+                                    "If not set, user files will not expire and will remain on " +
+                                    "the server until deleted."
+                                }
+                            >
+                                <Input
+                                    type="number"
+                                    defaultValue={upload_duration_days.toString()}
+                                    min={0}
+                                    name="upload_duration_days"
+                                    color="primary"
+                                    variant="faded"
+                                    endContent="days"
+                                />
+                                <Input
+                                    type="number"
+                                    defaultValue={upload_duration_hours.toString()}
+                                    min={0}
+                                    name="upload_duration_hours"
+                                    color="primary"
+                                    variant="faded"
+                                    endContent="hours"
+                                />
+                                <Input
+                                    type="number"
+                                    defaultValue={upload_duration_mins.toString()}
+                                    min={0}
+                                    name="upload_duration_mins"
+                                    color="primary"
+                                    variant="faded"
+                                    endContent="minutes"
+                                />
+                                <Input
+                                    type="number"
+                                    defaultValue={upload_duration_secs.toString()}
+                                    min={0}
+                                    name="upload_duration_secs"
+                                    color="primary"
+                                    variant="faded"
+                                    endContent="seconds"
                                 />
                             </ConfigItem>
                         </AccordionItem>
@@ -582,20 +660,7 @@ export default function Configuration({ config }: { config: TConfig }) {
                                     variant="faded"
                                     endContent="minutes"
                                 />
-                                {/* no seconds
-                                    <Input  
-                                    type="number"
-                                    defaultValue={notification_interval_secs.toString()}
-                                    validate={(v) =>
-                                        parseInt(v) >= 0
-                                            ? true
-                                            : "Must be a positive number"
-                                    }
-                                    name="shift_increment_secs"
-                                    color="primary"
-                                    variant="faded"
-                                    endContent="seconds"
-                                /> */}
+                                {/* no seconds */}
                             </ConfigItem>
                             <ConfigItem
                                 name="Open days"
@@ -721,12 +786,6 @@ export default function Configuration({ config }: { config: TConfig }) {
                     </Button>
                 </Card>
             </Form>
-            <PopupAlert
-                isOpen={!!popupMessage}
-                onOpenChange={() => setPopupMessage(undefined)}
-                color={popupType}
-                description={popupMessage}
-            />
         </>
     );
 }
