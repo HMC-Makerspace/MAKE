@@ -100,7 +100,7 @@ export function relativeTimestampToString(timestamp: number): string {
     }
 
     // Join the different divisions together into one string, except for the empty divisions
-    return res.filter(Boolean).join(", ");
+    return res.filter(Boolean).join(", ") || "0 seconds";
 }
 
 

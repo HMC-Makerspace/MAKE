@@ -274,7 +274,7 @@ export async function workshopReminderEmailCron(logger: Logger) {
     logger.info("Sending workshop reminder emails.");
 
     const config = await getConfig();
-    const timestamp = Date.now() / 1000;
+    const timestamp = Math.round(Date.now() / 1000);
 
     if (!config) return null;
 
@@ -285,32 +285,44 @@ export async function workshopReminderEmailCron(logger: Logger) {
     });
 
     for (const workshop of due_workshops) {
-        for (const reminder of config.workshop.reminder_times.filter(r => !workshop.reminder_emails_sent?.includes(r))) {
-            if (workshop.timestamp_start <= timestamp + reminder) {
-                // get users on the RSVP list
-                for (let u of workshop.rsvp_list) {
-                    const user = await getUser(u.user_uuid);
+        let sent = false;
+        const new_sent_times = [...workshop.reminder_emails_sent];
 
-                    if (user) {
-                        // send email
-                        await sendTemplatedEmail(
-                            user.email,
-                            "Reminder: " + workshop.title,
-                            WorkshopReminderTemplate(workshop.title, Math.round(workshop.timestamp_start - timestamp)),
-                            logger,
-                        );
+        for (const reminder of config.workshop.reminder_times.filter(r => !new_sent_times?.includes(r))) {
+            if (workshop.timestamp_start <= timestamp + reminder) {
+                if (!sent) { // only send one email per cycle so we're not making up 3000 emails at once if they haven't sent for some reason
+
+                    // get users on the RSVP list
+                    for (let u of workshop.rsvp_list) {
+                        const user = await getUser(u.user_uuid);
+
+                        if (user) {
+                            // send email
+                            await sendTemplatedEmail(
+                                user.email,
+                                "Reminder: " + workshop.title,
+                                WorkshopReminderTemplate(workshop.title, Math.round(workshop.timestamp_start - timestamp)),
+                                logger,
+                            );
+                        }
                     }
+
+                    sent = true;
                 }
 
-                await Workshops.updateOne(
-                    {
-                        uuid: workshop.uuid,
-                    },
-                    {
-                        reminder_emails_sent: [...workshop.reminder_emails_sent, reminder]
-                    },
-                );
+                new_sent_times.push(reminder);
             }
+        }
+        
+        if (new_sent_times.length != workshop.reminder_emails_sent.length) {
+            await Workshops.updateOne(
+                {
+                    uuid: workshop.uuid,
+                },
+                {
+                    reminder_emails_sent: new_sent_times
+                },
+            );
         }
     }
 }
