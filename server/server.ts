@@ -38,6 +38,8 @@ import {
     checkoutAvailabilityCron,
     checkoutEmailCron,
 } from "controllers/checkout.controller";
+import { workshopReminderEmailCron } from "controllers/workshop.controller";
+import { createUser, getUserByEmail } from "controllers/user.controller";
 
 // @ts-expect-error Static asset loading using Vite
 import favicon from "common/favicon.ico";
@@ -161,6 +163,12 @@ cron.schedule("*/10 * * * *", () => {
 await checkoutAvailabilityCron(logger);
 cron.schedule("*/1 * * * *", () => {
     checkoutAvailabilityCron(logger);
+});
+
+// Query for workshop reminder emails every minute
+await workshopReminderEmailCron(logger);
+cron.schedule("*/1 * * * *", () => {
+    workshopReminderEmailCron(logger);
 });
 
 // Revoke expired certificates every 15 minutes

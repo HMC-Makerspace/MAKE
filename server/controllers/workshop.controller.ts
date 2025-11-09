@@ -203,7 +203,7 @@ export async function rsvpToWorkshop(
     // Send a reminder confirmation email to the user
     await sendTemplatedEmail(
         user.email,
-        "Workshop RSVP Reminder",
+        "Workshop RSVP: " + workshop.title,
         WorkshopConfirmationTemplate(workshop, user, config),
         logger,
     );
@@ -268,4 +268,61 @@ export async function signInToWorkshop(
     // Update the workshop in the database
     workshop.save();
     return true;
+}
+
+export async function workshopReminderEmailCron(logger: Logger) {
+    logger.info("Sending workshop reminder emails.");
+
+    const config = await getConfig();
+    const timestamp = Math.round(Date.now() / 1000);
+
+    if (!config) return null;
+
+    const Workshops = mongoose.model("Workshop", Workshop);
+    const due_workshops = await Workshops.find({
+        // Workshops that haven't started yet
+        timestamp_start: { $gte: timestamp },
+    });
+
+    for (const workshop of due_workshops) {
+        let sent = false;
+        const new_sent_times = [...workshop.reminder_emails_sent];
+
+        for (const reminder of config.workshop.reminder_times.filter(r => !new_sent_times?.includes(r))) {
+            if (workshop.timestamp_start <= timestamp + reminder) {
+                if (!sent) { // only send one email per cycle so we're not making up 3000 emails at once if they haven't sent for some reason
+
+                    // get users on the RSVP list
+                    for (let u of workshop.rsvp_list) {
+                        const user = await getUser(u.user_uuid);
+
+                        if (user) {
+                            // send email
+                            await sendTemplatedEmail(
+                                user.email,
+                                "Reminder: " + workshop.title,
+                                WorkshopReminderTemplate(workshop.title, Math.round(workshop.timestamp_start - timestamp)),
+                                logger,
+                            );
+                        }
+                    }
+
+                    sent = true;
+                }
+
+                new_sent_times.push(reminder);
+            }
+        }
+        
+        if (new_sent_times.length != workshop.reminder_emails_sent.length) {
+            await Workshops.updateOne(
+                {
+                    uuid: workshop.uuid,
+                },
+                {
+                    reminder_emails_sent: new_sent_times
+                },
+            );
+        }
+    }
 }

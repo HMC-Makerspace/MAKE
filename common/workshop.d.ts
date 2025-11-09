@@ -53,7 +53,7 @@ export type TWorkshop = {
     timestamp_public?: UnixTimestamp;
     required_certifications?: TRequiredCertificate[];
     rsvp_list: TWorkshopUserRecord[];
-    users_notified: UserUUID[];
+    reminder_emails_sent: number[];
     sign_in_list: TWorkshopUserRecord[];
     images?: FileUUID[];
     authorized_roles?: UserRoleUUID[] | null;
@@ -71,4 +71,5 @@ export type TPublicWorkshopData = Omit<
     | "rsvp_list"
     | "users_notified"
     | "sign_in_list"
+    | "reminder_emails_sent"
 >;

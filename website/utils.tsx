@@ -48,10 +48,7 @@ export function timestampToZonedDateTime(
     timestamp: number,
     timeZone: string = "America/Los_Angeles",
 ): ZonedDateTime {
-    const date = new Date(timestamp * 1000);
-    return parseZonedDateTime(
-        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}:${String(date.getSeconds()).padStart(2, "0")}[${timeZone}]`,
-    );
+    return fromAbsolute(timestamp * 1000, timeZone);
 }
 
 /** Convert an internationalized Time object to a UNIX second timestamp */
@@ -103,7 +100,7 @@ export function relativeTimestampToString(timestamp: number): string {
     }
 
     // Join the different divisions together into one string, except for the empty divisions
-    return res.filter(Boolean).join(", ");
+    return res.filter(Boolean).join(", ") || "0 seconds";
 }
 
 

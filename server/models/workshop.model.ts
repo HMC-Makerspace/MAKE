@@ -26,7 +26,7 @@ export const Workshop = new mongoose.Schema<TWorkshop>(
             required: false,
         },
         rsvp_list: { type: [WorkshopUserRecord], required: true },
-        users_notified: { type: [String], required: true },
+        reminder_emails_sent: { type: [Number], required: true },
         sign_in_list: { type: [WorkshopUserRecord], required: true },
         images: { type: [String], required: false },
         authorized_roles: { type: [String], required: false },
