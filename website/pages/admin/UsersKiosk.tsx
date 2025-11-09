@@ -56,6 +56,14 @@ export default function UsersKiosk() {
                         selectedKeys={selectedKeys}
                         isLoading={isLoading}
                         isNew={isNewUser}
+                        onCreate={
+                            canEdit
+                                ? (newUser) => {
+                                      setIsNewUser(false);
+                                      onSelectionChange(new Set([newUser]));
+                                  }
+                                : undefined
+                        }
                     />
                 )}
                 <UsersTable

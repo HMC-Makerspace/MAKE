@@ -1,7 +1,28 @@
-import { Button, Divider, Form, Input, Snippet, addToast } from "@heroui/react";
+import {
+    Button,
+    Chip,
+    Divider,
+    Form,
+    Input,
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    Snippet,
+    Tooltip,
+    addToast,
+    useDisclosure,
+} from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { TUser, TUserRole, TUserRoleLog, UserRoleUUID } from "common/user";
+import {
+    TUser,
+    TUserRole,
+    TUserRoleLog,
+    UserRoleUUID,
+    UserUUID,
+} from "common/user";
 import React from "react";
 import axios from "axios";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
@@ -9,6 +30,12 @@ import {
     ArrowRightEndOnRectangleIcon,
     TrashIcon,
 } from "@heroicons/react/24/outline";
+import {
+    CheckCircleIcon,
+    LockClosedIcon,
+    LockOpenIcon,
+    XCircleIcon,
+} from "@heroicons/react/24/solid";
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateUser = async ({
@@ -36,15 +63,17 @@ export default function UserEditorForm({
     roles,
     isMultiple,
     isNew,
+    onCreate,
 }: {
     user: TUser;
     roles: TUserRole[];
     isMultiple: boolean;
     isNew: boolean;
+    onCreate?: (newUser: UserUUID) => void;
 }) {
     const isEmpty = !user.uuid && !isNew;
 
-    const UUID = isNew ? crypto.randomUUID() : user.uuid;
+    const UUID = user.uuid;
 
     const queryClient = useQueryClient();
 
@@ -59,7 +88,6 @@ export default function UserEditorForm({
                     return old.map((u) => (u.uuid === UUID ? result : u));
                 }
             });
-            console.log("New user", result);
             addToast({
                 title: `Successfully ${isNew ? "created" : "updated"} user${isMultiple ? "s" : ""}`,
                 color: "success",
@@ -71,6 +99,9 @@ export default function UserEditorForm({
                 roles: false,
                 passkey: false,
             });
+            if (onCreate && isNew) {
+                onCreate(UUID);
+            }
         },
         onError: (error) => {
             addToast({
@@ -213,6 +244,8 @@ export default function UserEditorForm({
     // If any input has edits, the form is submittable.
     const isSubmittable = Object.values(hasEdits).some(Boolean);
 
+    const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
+
     return (
         <>
             <Form
@@ -335,27 +368,52 @@ export default function UserEditorForm({
                     className="col-span-2"
                 />
                 <Divider className="h-[1px] bg-default-400 col-span-2" />
-                <Input
-                    description="Used as an alternate auth method via request headers or opt login"
-                    type="password"
-                    label="Passkey"
-                    name="passkey"
-                    size="lg"
-                    isDisabled={isEmpty || isMultiple}
-                    defaultValue={user.passkey}
-                    onValueChange={(value) => {
-                        let nullish_value: string | null = value || null;
-                        patchEdits("passkey", nullish_value != user.passkey);
-                    }}
-                    color="primary"
-                    variant="faded"
-                    classNames={{
-                        description: "text-default-500 pl-2",
-                    }}
-                />
+                <div className="flex flex-row w-full gap-2 items-center">
+                    <div
+                        className={clsx(
+                            "flex flex-col gap-1",
+                            (isEmpty || isMultiple) && "opacity-disabled",
+                        )}
+                    >
+                        <div className="text-primary text-small pl-2 flex-1">
+                            Passkey
+                        </div>
+                        <div className="text-tiny text-default-500 pl-2">
+                            Used as an alternate auth method via request headers
+                            or by holding alt when logging in.
+                        </div>
+                    </div>
+                    <Tooltip
+                        content={"Create this user before assigning a passkey."}
+                        isDisabled={!isNew}
+                        color="primary"
+                    >
+                        <Button
+                            className={clsx(
+                                "flex-1 px-2 max-w-10",
+                                isNew && "!opacity-disabled",
+                            )}
+                            variant="faded"
+                            isDisabled={isEmpty || isMultiple}
+                            onPress={() => (!isNew ? onOpen() : undefined)}
+                        >
+                            {user.passkey || isEmpty ? (
+                                <>
+                                    <LockClosedIcon className="size-5 flex-1" />
+                                    <CheckCircleIcon className="flex-1 size-4 text-success-300" />
+                                </>
+                            ) : (
+                                <>
+                                    <LockOpenIcon className="size-5 flex-1" />
+                                    <XCircleIcon className="flex-1 size-4 text-danger-300" />
+                                </>
+                            )}
+                        </Button>
+                    </Tooltip>
+                </div>
                 <Button
                     fullWidth
-                    isDisabled={isEmpty || isMultiple}
+                    isDisabled={isEmpty || isMultiple || isNew}
                     variant="flat"
                     color="primary"
                     startContent={
@@ -390,7 +448,7 @@ export default function UserEditorForm({
                         size="lg"
                         color="danger"
                         variant="flat"
-                        isDisabled={isEmpty}
+                        isDisabled={isEmpty || isMultiple}
                         isLoading={deleteMutation.isPending}
                         startContent={<TrashIcon className="size-5" />}
                         onPress={() =>
@@ -399,6 +457,82 @@ export default function UserEditorForm({
                     ></Button>
                 </div>
             </Form>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                <ModalContent>
+                    <Form
+                        validationBehavior="native"
+                        onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
+                            // Prevent default browser page refresh.
+                            e.preventDefault();
+
+                            // If something is wrong, don't submit.
+                            if (isEmpty || isNew) return;
+
+                            // Get form data as an object.
+                            const data = new FormData(e.currentTarget);
+
+                            const passkey = data.get("passkey") as string;
+
+                            const new_user: TUser = {
+                                ...user,
+                                passkey: passkey,
+                            };
+
+                            // Reset the mutation (clears any previous errors)
+                            mutation.reset();
+                            // Run the mutation
+                            mutation.mutate(
+                                { data: new_user, isNew: isNew },
+                                {
+                                    onSettled: onClose,
+                                },
+                            );
+                        }}
+                    >
+                        <ModalHeader>
+                            {user.passkey ? "Overwrite Passkey" : "Set Passkey"}
+                        </ModalHeader>
+                        <ModalBody className="pt-0">
+                            <Input
+                                description={
+                                    "Used as an alternate auth method via request headers " +
+                                    "or by holding alt when logging in. Passkeys are immediately " +
+                                    "hashed on the server and are not retrievable."
+                                }
+                                type="password"
+                                label="New Passkey"
+                                name="passkey"
+                                size="lg"
+                                minLength={1}
+                                isDisabled={isEmpty || isMultiple}
+                                color="primary"
+                                variant="faded"
+                                classNames={{
+                                    description: "text-default-500 pl-2",
+                                }}
+                            />
+                        </ModalBody>
+                        <ModalFooter className="pt-0 flex flex-row justify-around w-full">
+                            <Button
+                                color="primary"
+                                type="submit"
+                                className="w-1/3"
+                                isDisabled={mutation.isPending}
+                            >
+                                Submit
+                            </Button>
+                            <Button
+                                color="danger"
+                                variant="flat"
+                                onPress={onClose}
+                                className="w-1/3"
+                            >
+                                Cancel
+                            </Button>
+                        </ModalFooter>
+                    </Form>
+                </ModalContent>
+            </Modal>
         </>
     );
 }
