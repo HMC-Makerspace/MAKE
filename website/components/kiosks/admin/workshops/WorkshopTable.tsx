@@ -85,6 +85,14 @@ async function patchWorkshop({
     ).data;
 }
 
+const deleteWorkshop = async ({
+    workshop_uuid
+}: {
+    workshop_uuid: string
+}) => {
+    return (await axios.delete(`/api/v3/workshop/${workshop_uuid}`)).data
+}
+
 export default function WorkshopTable({
     workshops,
     users,
@@ -120,6 +128,17 @@ export default function WorkshopTable({
         TWorkshop | undefined
     >(undefined);
     const [isNew, setIsNew] = React.useState<boolean>(false);
+
+    const deleteMutation = useMutation({
+        mutationFn: deleteWorkshop,
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(["workshop"], (old: TWorkshop[]) =>
+                old.filter((w) => w.uuid !== variables.workshop_uuid),
+            );
+            // onSuccess(`Successfully deleted workshop`);
+        },
+        onError: (e) => alert(e),
+    });
 
     const {
         isOpen: peopleIsOpen,
@@ -398,7 +417,7 @@ export default function WorkshopTable({
                                                 <TrashIcon className="size-6" />
                                             }
                                             onPress={() => {
-                                                setSelectedWorkshop(workshop);
+                                                deleteMutation.mutate({ workshop_uuid: workshop.uuid })
                                             }}
                                         ></Button>
                                     </>
