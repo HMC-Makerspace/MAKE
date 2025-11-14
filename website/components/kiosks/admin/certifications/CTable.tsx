@@ -34,6 +34,7 @@ import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import RequiredCertsModal from "./RequiredCertsModal";
 import { relativeTimestampToString } from "../../../../utils";
+import { TUserRole } from "common/user";
 
 const baseColumns = [
     { name: "UUID", id: "uuid" },
@@ -62,6 +63,7 @@ const updateCertDocs = async ({
 
 export default function CertificationsTable({
     certs,
+    roles,
     selectedKeys,
     onSelectionChange,
     isLoading,
@@ -85,11 +87,12 @@ export default function CertificationsTable({
     customColumnComponents = {},
 }: {
     certs: TCertification[];
+    roles?: TUserRole[];
     selectedKeys: Selection;
     onSelectionChange: (selectedKeys: Selection) => void;
     isLoading: boolean;
     canEdit: boolean;
-    visibilities: CERTIFICATION_VISIBILITY[];
+    visibilities?: CERTIFICATION_VISIBILITY[];
     defaultColumns?: string[];
     extraColumns?: { name: string; id: string }[];
     customColumnComponents?: {
@@ -277,7 +280,8 @@ export default function CertificationsTable({
                         <CertificationTag
                             cert_uuid={cert.uuid}
                             showVisibility
-                        ></CertificationTag>
+                            certifications={certs}
+                        />
                     ),
                     seconds_valid_for: (cert: TCertification) => (
                         <div>
@@ -333,7 +337,8 @@ export default function CertificationsTable({
                                 <UserRole
                                     role_uuid={role}
                                     key={role}
-                                ></UserRole>
+                                    role={roles?.find((r) => r.uuid === role)}
+                                />
                             ))}
                         </div>
                     ),

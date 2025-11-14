@@ -331,7 +331,13 @@ export default function CheckoutsKiosk() {
                                 areas={areas}
                                 certs={certs}
                                 selectedKeys={new Set()}
-                                isLoading={inventoryLoading || checkoutsLoading || usersLoading || areasLoading || certsLoading}
+                                isLoading={
+                                    inventoryLoading ||
+                                    checkoutsLoading ||
+                                    usersLoading ||
+                                    areasLoading ||
+                                    certsLoading
+                                }
                             />
                         </Tab>
                         <Tab key={"users"} title={"Users"}>
@@ -374,6 +380,7 @@ export default function CheckoutsKiosk() {
                                     ?.map((c) => c.certification_uuid)
                                     .join(",")} // Update any time user's certs change
                                 certs={certs}
+                                roles={roles}
                                 selectedKeys={new Set()}
                                 onSelectionChange={() => {}}
                                 isLoading={certsLoading}

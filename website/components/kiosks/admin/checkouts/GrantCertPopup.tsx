@@ -92,7 +92,7 @@ export default function GrantCertPopup({
             if (!user || !cert) return;
 
             var newLevel = level;
-            if (!level) {
+            if (!level || !isMultiLevel) {
                 newLevel = granting ? 1 : 0;
             }
 
