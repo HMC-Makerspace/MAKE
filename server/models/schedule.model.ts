@@ -58,4 +58,5 @@ export const Schedule = new mongoose.Schema<TSchedule>({
     daily_open_time: { type: Number, required: true },
     daily_close_time: { type: Number, required: true },
     active: { type: Boolean, required: true },
+    staged: { type: Boolean, required: false },
 });

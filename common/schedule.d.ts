@@ -49,6 +49,7 @@ export type TSchedule = {
     daily_open_time: number;
     daily_close_time: number;
     active: boolean;
+    staged?: boolean;
 };
 
 /**

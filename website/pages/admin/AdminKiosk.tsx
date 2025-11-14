@@ -122,6 +122,14 @@ export default function AdminKiosk() {
         enabled: !!user_uuid,
     });
 
+    const { data: availabilitySchedule } = useQuery<TSchedule>({
+        queryKey: ["schedule", "staging"],
+        refetchOnWindowFocus: false,
+        enabled: !!user_uuid,
+    });
+
+    console.log("staging", availabilitySchedule);
+
     const { data: config } = useQuery<TConfig>({
         queryKey: ["config"],
         refetchOnWindowFocus: false,
@@ -215,7 +223,7 @@ export default function AdminKiosk() {
                             "w-full rounded-lg items-center",
                         )}
                     >
-                        {selectedTab === "worker_availability" && (
+                        {selectedTab === "worker_availability" ? (
                             <div className="hidden lg:flex flex-1 mr-auto gap-2 items-center">
                                 <div className="whitespace-nowrap pr-2">
                                     Requested Shift Range:
@@ -239,8 +247,9 @@ export default function AdminKiosk() {
                                         input: "text-center",
                                     }}
                                     onBlur={(blurEvent) => {
-                                        // @ts-ignore This property does exist...
-                                        const minShifts = blurEvent.target.value;
+                                        const minShifts =
+                                            // @ts-ignore This property does exist...
+                                            blurEvent.target.value;
                                         if (
                                             !schedule ||
                                             !user_uuid ||
@@ -274,8 +283,9 @@ export default function AdminKiosk() {
                                         input: "text-center",
                                     }}
                                     onBlur={(blurEvent) => {
-                                        // @ts-ignore This property does exist...
-                                        const maxShifts = blurEvent.target.value;
+                                        const maxShifts =
+                                            // @ts-ignore This property does exist...
+                                            blurEvent.target.value;
                                         if (
                                             !schedule ||
                                             !user_uuid ||
@@ -291,6 +301,8 @@ export default function AdminKiosk() {
                                     }}
                                 />
                             </div>
+                        ) : (
+                            <div className="flex-1"></div>
                         )}
                         <Tabs
                             size="lg"
@@ -313,16 +325,26 @@ export default function AdminKiosk() {
                             )}
                         </Tabs>
                         {selectedTab === "worker_availability" ? (
-                            <div className="hidden lg:block flex-1 ml-auto" />
-                        ) : (selectedTab === "worker_view" && historyVisible) ? (
-                            <Button
-                                onPress={openHistory}
-                                variant="faded"
-                                color="primary">
-                                Open History
-                            </Button>
+                            <div
+                                className={clsx(
+                                    "hidden lg:block flex-1 ml-auto",
+                                    "text-center font-semibold text-lg",
+                                )}
+                            >
+                                {availabilitySchedule?.name}
+                            </div>
+                        ) : selectedTab === "worker_view" && historyVisible ? (
+                            <div className="flex flex-1 justify-end">
+                                <Button
+                                    onPress={openHistory}
+                                    variant="faded"
+                                    color="primary"
+                                >
+                                    Open History
+                                </Button>
+                            </div>
                         ) : (
-                            <></>
+                            <div className="flex-1"></div>
                         )}
                     </div>
                     {isLoading ? (
@@ -330,7 +352,11 @@ export default function AdminKiosk() {
                     ) : (
                         <div className="h-full">
                             <Schedule
-                                schedule={schedule}
+                                schedule={
+                                    selectedTab === "worker_availability"
+                                        ? availabilitySchedule
+                                        : schedule
+                                }
                                 users={users_with_full_self}
                                 roles={[]}
                                 config={config}
@@ -368,7 +394,8 @@ export default function AdminKiosk() {
                                 defaultValue={
                                     self?.work_schedules?.find(
                                         (sch) =>
-                                            sch.schedule === schedule?.uuid,
+                                            sch.schedule ===
+                                            availabilitySchedule?.uuid,
                                     )?.min_shift_count
                                 }
                                 className="w-20 max-h-[44px]"
@@ -380,6 +407,7 @@ export default function AdminKiosk() {
                                     // @ts-ignore This property does exist...
                                     const minShifts = blurEvent.target.value;
                                     if (
+                                        !availabilitySchedule ||
                                         !schedule ||
                                         !user_uuid ||
                                         minShifts === undefined
@@ -388,7 +416,8 @@ export default function AdminKiosk() {
                                     }
                                     shiftCountMutation.mutate({
                                         user_uuid: user_uuid,
-                                        schedule_uuid: schedule.uuid,
+                                        schedule_uuid:
+                                            availabilitySchedule.uuid,
                                         min_shift_count: minShifts,
                                     });
                                 }}
@@ -403,7 +432,8 @@ export default function AdminKiosk() {
                                 defaultValue={
                                     self?.work_schedules?.find(
                                         (sch) =>
-                                            sch.schedule === schedule?.uuid,
+                                            sch.schedule ===
+                                            availabilitySchedule?.uuid,
                                     )?.max_shift_count
                                 }
                                 className="w-20 max-h-[44px]"
@@ -415,7 +445,7 @@ export default function AdminKiosk() {
                                     // @ts-ignore This property does exist...
                                     const maxShifts = blurEvent.target.value;
                                     if (
-                                        !schedule ||
+                                        !availabilitySchedule ||
                                         !user_uuid ||
                                         maxShifts === undefined
                                     ) {
@@ -423,7 +453,8 @@ export default function AdminKiosk() {
                                     }
                                     shiftCountMutation.mutate({
                                         user_uuid: user_uuid,
-                                        schedule_uuid: schedule.uuid,
+                                        schedule_uuid:
+                                            availabilitySchedule.uuid,
                                         max_shift_count: maxShifts,
                                     });
                                 }}
