@@ -368,7 +368,7 @@ export default function UserEditorForm({
                     className="col-span-2"
                 />
                 <Divider className="h-[1px] bg-default-400 col-span-2" />
-                <div className="flex flex-row w-full gap-2 items-center">
+                <div className="flex flex-row w-full gap-2 items-center justify-between">
                     <div
                         className={clsx(
                             "flex flex-col gap-1",
@@ -378,7 +378,7 @@ export default function UserEditorForm({
                         <div className="text-primary text-small pl-2 flex-1">
                             Passkey
                         </div>
-                        <div className="text-tiny text-default-500 pl-2">
+                        <div className="hidden sm:block text-tiny text-default-500 pl-2">
                             Used as an alternate auth method via request headers
                             or by holding alt when logging in.
                         </div>
