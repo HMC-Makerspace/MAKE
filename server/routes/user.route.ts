@@ -445,13 +445,13 @@ router.patch(
         const cert_uuid = req.params.cert_uuid;
         const level = req.params.level ?? 1;
         req.log.debug({
-            msg: `Revoking user with uuid ${user_uuid} cert with uuid ${cert_uuid}`,
+            msg: `Granting user with uuid ${user_uuid} cert with uuid ${cert_uuid}`,
             requesting_uuid: requesting_uuid,
         });
         // If no requesting user_uuid is provided, the call is not authorized
         if (!requesting_uuid) {
             req.log.warn(
-                "No requesting_uuid was provided while revoking cert from  " +
+                "No requesting_uuid was provided while granting cert from  " +
                     `user with uuid ${user_uuid} cert with uuid ${cert_uuid}.`,
             );
             res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
@@ -482,14 +482,14 @@ router.patch(
                 return;
             }
             req.log.debug(
-                `Revoked user with uuid ${user_uuid} cert with uuid ${cert_uuid}`,
+                `Granted user with uuid ${user_uuid} cert with uuid ${cert_uuid}`,
             );
             // Return a the updated user object
             res.status(StatusCodes.OK).json(updated_user);
         } else {
             // If the user is not authorized, provide a status error
             req.log.warn({
-                msg: "Forbidden user attempted to revoke user cert",
+                msg: "Forbidden user attempted to grant user cert",
                 requesting_uuid: requesting_uuid,
             });
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);

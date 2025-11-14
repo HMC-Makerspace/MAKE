@@ -9,7 +9,7 @@ import {
     Select,
     SelectItem,
     Switch,
-    addToast
+    addToast,
 } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TConfig } from "common/config";
@@ -170,6 +170,7 @@ export default function Configuration({ config }: { config: TConfig }) {
                 locale: config.schedule.locale,
             },
             faq: faq,
+            workshop: config.workshop,
         };
 
         // Number values
@@ -289,6 +290,16 @@ export default function Configuration({ config }: { config: TConfig }) {
         const timezone = formData.get("timezone") as string;
         if (timezone) {
             body.schedule.timezone = timezone;
+        }
+
+        const reminder_times = formData.get(
+            "workshop_reminder_times",
+        ) as string;
+        if (reminder_times) {
+            body.workshop.reminder_times = reminder_times
+                .replace(/\s+/, "")
+                .split(",")
+                .map((s) => parseInt(s));
         }
 
         // Update the config
@@ -761,6 +772,37 @@ export default function Configuration({ config }: { config: TConfig }) {
                                     />
                                     Only worker first names
                                 </div>
+                            </ConfigItem>
+                        </AccordionItem>
+                        <AccordionItem key="workshop" title="Workshop Config">
+                            <ConfigItem
+                                name="Email Reminder Times"
+                                description={
+                                    "The times (in seconds prior to a workshop, " +
+                                    "separated by commas) that reminder emails " +
+                                    "should be sent to RSVP'd users. If blank, " +
+                                    "no reminder emails will be sent."
+                                }
+                            >
+                                <Input
+                                    defaultValue={config.workshop.reminder_times.join(
+                                        ", ",
+                                    )}
+                                    name="workshop_reminder_times"
+                                    color="primary"
+                                    variant="faded"
+                                    placeholder="e.g. 3600, 86400"
+                                    classNames={{
+                                        input: "placeholder:text-default-400 text-default-700",
+                                    }}
+                                    validate={(value) => {
+                                        if (value.match(/^\d+(,\s*\d+)*$/)) {
+                                            return true;
+                                        } else {
+                                            return "Please enter integers separated by commas";
+                                        }
+                                    }}
+                                />
                             </ConfigItem>
                         </AccordionItem>
                         <AccordionItem key="faq" title="FAQ">

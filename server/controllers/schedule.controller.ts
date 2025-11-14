@@ -47,6 +47,20 @@ export async function getActiveSchedule() {
 }
 
 /**
+ * Get the schedule that is currently in staging mode.
+ * As a note, there should only be one staging schedule at a time.
+ * @returns A promise to the TSchedule object representing the staging
+ *      schedule, or null if no schedule is currently in staging
+ */
+export async function getStagingSchedule() {
+    const Schedules = mongoose.model("Schedule", Schedule, "schedules");
+    // Get the schedule that is currently active (should only be one)
+    return Schedules.findOne({
+        staged: true,
+    });
+}
+
+/**
  * Get the public version of the current schedule
  * @returns A promise to the TPublicScheduleData object representing the
  *      current schedule, or null if no schedule is currently active
@@ -150,6 +164,38 @@ export async function setActiveSchedule(
             // Set as active
             $set: {
                 active: true,
+            },
+        },
+        { returnDocument: "after" },
+    );
+}
+
+/**
+ * Set the current staging schedule, replacing the previous staging schedule.
+ * @param schedule_uuid The schedule to set as in staging
+ * @returns The updated schedule object
+ */
+export async function setStagingSchedule(
+    schedule_uuid: UUID,
+): Promise<TSchedule | null> {
+    const Schedules = mongoose.model("Schedule", Schedule);
+
+    await Schedules.updateMany(
+        { staged: true },
+        {
+            // Set as not in staging
+            $set: {
+                staged: false,
+            },
+        },
+    );
+
+    return await Schedules.findOneAndUpdate(
+        { uuid: schedule_uuid },
+        {
+            // Set as in staging
+            $set: {
+                staged: true,
             },
         },
         { returnDocument: "after" },

@@ -11,7 +11,7 @@ import {
 import { Certificate, Certification } from "models/certification.model";
 import { User, UserRole } from "models/user.model";
 import mongoose from "mongoose";
-import { getActiveSchedule } from "./schedule.controller";
+import { getActiveSchedule, getStagingSchedule } from "./schedule.controller";
 import { SHIFT_DAY } from "common/shift";
 import { ScheduleUUID } from "common/schedule";
 import { getCertification } from "./certification.controller";
@@ -566,10 +566,10 @@ export async function addUserAvailability(
 ) {
     const user = await getUser(user_uuid);
 
-    const active_schedule = await getActiveSchedule();
+    const stagingSchedule = await getStagingSchedule();
 
     // If the user or schedule doesn't exist, we cannot update availability
-    if (!user || !active_schedule) {
+    if (!user || !stagingSchedule) {
         return null;
     }
 
@@ -578,10 +578,10 @@ export async function addUserAvailability(
     }
 
     const work = user.work_schedules.find(
-        (s) => s.schedule === active_schedule.uuid,
+        (s) => s.schedule === stagingSchedule.uuid,
     ) ?? {
         days: [],
-        schedule: active_schedule.uuid,
+        schedule: stagingSchedule.uuid,
     };
 
     const work_day = work.days.find((d) => d.day === day) ?? {
@@ -594,7 +594,7 @@ export async function addUserAvailability(
     work.days = work.days.filter((d) => d.day !== day).concat(work_day);
 
     user.work_schedules = user.work_schedules
-        .filter((w) => w.schedule !== active_schedule.uuid)
+        .filter((w) => w.schedule !== stagingSchedule.uuid)
         .concat(work);
 
     return user.save();
@@ -617,10 +617,10 @@ export async function removeUserAvailability(
 ) {
     const user = await getUser(user_uuid);
 
-    const active_schedule = await getActiveSchedule();
+    const stagingSchedule = await getStagingSchedule();
 
     // If the user or schedule doesn't exist, we cannot update availability
-    if (!user || !active_schedule) {
+    if (!user || !stagingSchedule) {
         return null;
     }
 
@@ -629,7 +629,7 @@ export async function removeUserAvailability(
     }
 
     const work = user.work_schedules.find(
-        (s) => s.schedule === active_schedule.uuid,
+        (s) => s.schedule === stagingSchedule.uuid,
     );
 
     if (!work) {
@@ -649,7 +649,7 @@ export async function removeUserAvailability(
     work.days = work.days.filter((d) => d.day !== day).concat(work_day);
 
     user.work_schedules = user.work_schedules
-        .filter((w) => w.schedule !== active_schedule.uuid)
+        .filter((w) => w.schedule !== stagingSchedule.uuid)
         .concat(work);
 
     return user.save();

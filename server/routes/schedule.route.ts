@@ -21,6 +21,8 @@ import {
     setActiveSchedule,
     patchSchedule,
     getActiveAlert,
+    getStagingSchedule,
+    setStagingSchedule,
 } from "controllers/schedule.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
@@ -907,6 +909,52 @@ router.get("/public", async (req: Request, res: PublicScheduleResponse) => {
 });
 
 /**
+ * Get the current staging schedule. This is a protected route, and a `requesting_uuid`
+ * header is required to call it. The user must have the
+ * {@link API_SCOPE.UPDATE_AVAILABILITY} scope.
+ */
+router.get("/staging", async (req: Request, res: PublicScheduleResponse) => {
+    const requesting_uuid = req.user?.uuid as string;
+    // If no requesting user uuid is provided, the call is not authorized
+    if (!requesting_uuid) {
+        req.log.warn(
+            "No requesting_uuid was provided while getting the active public schedule.",
+        );
+        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+        return;
+    }
+
+    req.log.debug({
+        msg: `Getting the active public schedule.`,
+        requesting_uuid: requesting_uuid,
+    });
+
+    // A get active public schedule request is valid if the requesting user
+    // can get all schedules or get one schedule or get the active schedule
+    // or get the active public schedule at a time
+    if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_AVAILABILITY)) {
+        // If the user is authorized, get a schedule's information
+        const schedule = await getStagingSchedule();
+        if (!schedule) {
+            req.log.warn(`Staging public schedule not found.`);
+            res.status(StatusCodes.NOT_FOUND).json({
+                error: `Staging public schedule not found.`,
+            });
+            return;
+        }
+        req.log.debug("Returned staging schedule.");
+        res.status(StatusCodes.OK).json(schedule);
+    } else {
+        req.log.warn({
+            msg: "Forbidden user attempted to get the staging schedule",
+            requesting_uuid: requesting_uuid,
+        });
+        // If the user is not authorized, provide a status error
+        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+    }
+});
+
+/**
  * Get a specific schedule. This is a protected route, and a `requesting_uuid`
  * header is required to call it. The user must have the
  * {@link API_SCOPE.GET_ONE_SCHEDULE} scope.
@@ -1070,7 +1118,7 @@ router.put("/", async (req: ScheduleRequest, res: ScheduleResponse) => {
  * Set the active schedule by uuid. Requires the {@link API_SCOPE.UPDATE_SCHEDULE} scope.
  */
 router.patch(
-    "/active/:UUID",
+    "/activate/:UUID",
     async (req: Request<{ UUID: string }>, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
@@ -1110,6 +1158,57 @@ router.patch(
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to activate a schedule",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
+
+/**
+ * Set the staging schedule by uuid. Requires the {@link API_SCOPE.UPDATE_SCHEDULE} scope.
+ */
+router.patch(
+    "/stage/:UUID",
+    async (req: Request<{ UUID: string }>, res: ScheduleResponse) => {
+        const requesting_uuid = req.user?.uuid as string;
+        const schedule_uuid = req.params.UUID;
+
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while updating staging schedule",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+
+        req.log.debug({
+            msg: `Setting staging schedule to uuid ${schedule_uuid}`,
+            requesting_uuid: requesting_uuid,
+        });
+
+        // If the user is authorized, delete a schedule object
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_SCHEDULE)) {
+            const schedule = await setStagingSchedule(schedule_uuid);
+            if (!schedule) {
+                req.log.warn(
+                    `Schedule with uuid ${schedule_uuid} could not be ` +
+                        `staged because it was not found.`,
+                );
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error:
+                        `Schedule with uuid ${schedule_uuid} could not be ` +
+                        `staged because it was not found.`,
+                });
+                return;
+            }
+            req.log.debug(`Staged schedule ${schedule_uuid}`);
+            res.status(StatusCodes.OK).json(schedule);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to stage a schedule",
                 requesting_uuid: requesting_uuid,
             });
             // If the user is not authorized, provide a status error
