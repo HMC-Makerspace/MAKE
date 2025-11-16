@@ -60,7 +60,7 @@ export default function RestockUserList({
                     old.map((w) => (w.uuid === data.uuid ? data : w)),
             );
             addToast({
-                title: `${"Successfully added to mailing list"}`,
+                title: "Successfully added to mailing list",
                 color: "success",
             });
             onClose();
@@ -125,7 +125,7 @@ export default function RestockUserList({
 
                         <h1>Add</h1>
                         <h1 className='font-bold'>{ selectedUsers.length > 0 ? selectedUsers[0].name : "-" }</h1>
-                        <h1> to resock mailing list</h1>
+                        <h1> to restock mailing list</h1>
                     </div>
 
                     <ModalFooter>
