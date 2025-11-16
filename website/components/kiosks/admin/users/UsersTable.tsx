@@ -4,7 +4,7 @@ import {
     PlusIcon,
     PencilSquareIcon,
 } from "@heroicons/react/24/outline";
-import { TUser, TUserRole } from "common/user";
+import { TUser, TUserRole, UserUUID } from "common/user";
 import MAKETable, { ColumnSelect } from "../../../Table";
 import UserChipRole from "../../../user/UserRole";
 import Fuse from "fuse.js";
@@ -48,6 +48,7 @@ export default function UsersTable({
     doubleClickAction = () => {},
     customColumnComponents = {},
     emptyContent = undefined,
+    unselectableUsers = [],
 }: {
     users: TUser[];
     roles: TUserRole[];
@@ -64,6 +65,7 @@ export default function UsersTable({
         [column_id: string]: (item: TUser) => React.ReactNode;
     };
     emptyContent?: React.ReactNode;
+    unselectableUsers?: UserUUID[];
 }) {
     const { data: queryUsers, isLoading: usersLoading } = useQuery<TUser[]>({
         queryKey: ["user"],
@@ -231,6 +233,7 @@ export default function UsersTable({
                 multiSelect={multiSelect}
                 doubleClickAction={doubleClickAction}
                 emptyContent={emptyContent}
+                disabledRows={unselectableUsers}
                 customColumnComponents={{
                     active_roles: (user: TUser) => (
                         <div className="flex flex-row flex-wrap gap-2">

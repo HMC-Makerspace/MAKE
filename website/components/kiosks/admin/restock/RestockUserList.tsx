@@ -117,6 +117,7 @@ export default function RestockUserList({
                                 onCreate={() => {}} // Not used
                                 fullHeader={false}
                                 defaultColumns={["college_id", "name", "email"]}
+                                unselectableUsers={prevRestock.mailing_list}
                             />
                         </div>
                     </div>
