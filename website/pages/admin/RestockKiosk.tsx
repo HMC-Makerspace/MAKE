@@ -46,6 +46,8 @@ export default function RestockKiosk() {
         },
     );
 
+    const isLoading = inventoryLoading || areasLoading || usersLoading || restocksLoading || certsLoading;
+
 
     if (
         !inventory ||
@@ -79,7 +81,7 @@ export default function RestockKiosk() {
                     users={users ?? []}
                     areas={areas ?? []}
                     certs={certs ?? []}
-                    isLoading={restocksLoading}
+                    isLoading={isLoading}
                 />
             )}
         </AdminLayout>

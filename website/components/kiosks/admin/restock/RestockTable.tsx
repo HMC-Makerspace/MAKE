@@ -284,7 +284,7 @@ export default function RestockTable({
 
     // table returned
     return (
-        <div>
+        <div className='flex flex-col max-h-full overflow-auto w-full'>
             <div className="flex  flex-col content-center items-center">
                 <h1 className="text-xl font-bold text-foreground-900 mb-2">
                     Restocks
@@ -306,20 +306,20 @@ export default function RestockTable({
                                 <div className="flex flex-row gap-1 m-2">
                                     {statusFilter === "all"
                                         ? statusOptions.map((status) => (
-                                              <RestockType
-                                                  request_status={status.value}
-                                                  size="sm"
-                                              />
-                                          ))
+                                            <RestockType
+                                                request_status={status.value}
+                                                size="sm"
+                                            />
+                                        ))
                                         : Array.from(statusFilter)
-                                              .map(Number)
-                                              .sort((a, b) => a - b)
-                                              .map((status) => (
-                                                  <RestockType
-                                                      request_status={status}
-                                                      size="sm"
-                                                  />
-                                              ))}
+                                            .map(Number)
+                                            .sort((a, b) => a - b)
+                                            .map((status) => (
+                                                <RestockType
+                                                    request_status={status}
+                                                    size="sm"
+                                                />
+                                            ))}
                                 </div>
                             </Button>
                         </DropdownTrigger>
@@ -345,8 +345,8 @@ export default function RestockTable({
                     </Dropdown>
                 </div>
             </div>
-
             <MAKETable
+                key={filteredRestocks.length}
                 content={filteredRestocks}
                 columns={columns}
                 visibleColumns={visibleColumns}
@@ -394,7 +394,7 @@ export default function RestockTable({
                                 >
                                     {restock.mailing_list.map((uuid, index) => {
                                         return (
-                                            <div className="pb-1">
+                                            <div className="pb-1 w-[80%]">
                                                 <UserChip
                                                     user_uuid={uuid}
                                                     popoverPlacement="bottom"
@@ -404,7 +404,7 @@ export default function RestockTable({
                                         );
                                     })}
                                     <div className='w-full flex  py-1'>
-                                        <Button 
+                                        <Button
                                             color="primary"
                                             size="sm"
                                             onPress={() => {
@@ -417,7 +417,7 @@ export default function RestockTable({
                                             Add User
                                         </Button>
                                     </div>
-                                    
+
                                 </AccordionItem>
                             </Accordion>
                         </div>
@@ -475,6 +475,7 @@ export default function RestockTable({
                     </div>
                 )}
             />
+
             <ModifyRestockModal
                 restockSelected={restockSelected}
                 editIsOpen={editIsOpen}
@@ -485,8 +486,7 @@ export default function RestockTable({
                 logsIsOpen={logsIsOpen}
                 logsOnOpenChange={logsOnOpenChange}
             />
-
-            <RestockUserSelect 
+            <RestockUserSelect
                 restockSelected={restockSelected}
                 restockUserIsOpen={restockUserIsOpen}
                 restockUserOnOpenChange={restockUserOnOpenChange}

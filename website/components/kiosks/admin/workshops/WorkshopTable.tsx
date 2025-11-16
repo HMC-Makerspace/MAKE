@@ -5,7 +5,8 @@ import {
     Modal,
     ModalHeader,
     useDisclosure,
-    addToast
+    addToast,
+    Spinner
 } from "@heroui/react";
 import {
     PhotoIcon,
@@ -153,8 +154,8 @@ export default function WorkshopTable({
     } = useDisclosure();
 
     return (
-        <div className="overflow-auto">
-            <div className="flex flex-col justify-center items-center relative overflow-auto">
+        <div className="flex flex-col max-h-full overflow-auto">
+            <div className="flex flex-col justify-center items-center relative">
                 <h1 className="text-xl font-bold text-foreground-900 mb-2">
                     Workshops
                 </h1>
@@ -187,20 +188,17 @@ export default function WorkshopTable({
                 </Button>
             </div>
             {workshops.length > 0 ? (
-                <div className="overflow-auto">
+                // <div className="flex flex-col max-h-full overflow-auto w-full">
                     <MAKETable
                         content={workshops}
                         columns={columns}
                         visibleColumns={visibleColumns}
                         multiSelect={false}
                         isLoading={isLoading}
-                        loadingContent={(ref, loadMore) => (
-                            <Button
-                                onPress={loadMore}
-                                className="w-1/2 self-center"
-                            >
-                                Load More
-                            </Button>
+                        loadingContent={(ref) => (
+                            <div className="flex w-full justify-center">
+                                <Spinner color="white" ref={ref} />
+                            </div>
                         )}
                         customColumnComponents={{
                             title: (workshop) => {
@@ -424,7 +422,7 @@ export default function WorkshopTable({
                             },
                         }}
                     />
-                </div>
+                // </div> 
             ) : (
                 <p>No Workshops Found</p>
             )}
