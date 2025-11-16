@@ -5,6 +5,8 @@ import { TRestockRequest } from "../../../common/restock";
 import { TArea } from "common/area";
 import { TCertification } from "common/certification";
 import { TInventoryItem } from "../../../common/inventory";
+import { TUser } from "common/user";
+import { TUserRole } from "common/user";
 import { Spinner } from "@heroui/react";
 
 export default function RestockKiosk() {
@@ -30,21 +32,34 @@ export default function RestockKiosk() {
         refetchOnWindowFocus: false,
     });
 
+    const { data: users, isLoading: usersLoading } = useQuery<
+        TUser[]
+    >({
+        queryKey: ["user"],
+        refetchOnWindowFocus: false,
+    });
+
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
             queryKey: ["certification"],
             refetchOnWindowFocus: false,
         },
     );
+
+    const isLoading = inventoryLoading || areasLoading || usersLoading || restocksLoading || certsLoading;
+
+
     if (
         !inventory ||
         !restocks ||
         !certs ||
         !areas ||
+        !users ||
         inventoryLoading ||
         restocksLoading ||
         certsLoading ||
-        areasLoading
+        areasLoading || 
+        usersLoading
     ) {
         return (
             <div className="w-full h-screen flex justify-center py-auto">
@@ -63,9 +78,10 @@ export default function RestockKiosk() {
                 <RestockTable
                     restocks={restocks ?? []}
                     inventory={inventory ?? []}
+                    users={users ?? []}
                     areas={areas ?? []}
                     certs={certs ?? []}
-                    isLoading={restocksLoading}
+                    isLoading={isLoading}
                 />
             )}
         </AdminLayout>

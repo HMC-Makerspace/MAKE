@@ -33,6 +33,7 @@ export default function MAKETable<Type extends { uuid: string }>({
     emptyContent = "No content",
     color = "primary",
     showSelectionCheckboxes = true, // Only applies if multiSelect is true
+    disabledRows = [],
 }: {
     content: Type[];
     columns: {
@@ -63,6 +64,7 @@ export default function MAKETable<Type extends { uuid: string }>({
         | "warning"
         | "danger";
     showSelectionCheckboxes?: boolean;
+    disabledRows?: string[]
 }) {
     // The current number of items in content that are loaded in the DOM and
     // are visible to the user
@@ -127,6 +129,7 @@ export default function MAKETable<Type extends { uuid: string }>({
             baseRef={scrollerRef}
             classNames={{
                 base: "max-h-full overflow-auto",
+                tbody: "[&>tr[data-disabled='true']]:opacity-50"
             }}
             bottomContent={
                 hasMoreContent
@@ -136,6 +139,7 @@ export default function MAKETable<Type extends { uuid: string }>({
             selectionBehavior={multiSelect ? "toggle" : "replace"}
             onRowAction={doubleClickAction}
             color={color}
+            disabledKeys={disabledRows}
         >
             <TableHeader columns={headerColumns}>
                 {(column) => (
@@ -154,14 +158,14 @@ export default function MAKETable<Type extends { uuid: string }>({
                 isLoading={isLoading}
             >
                 {(item) => (
-                    <TableRow
-                        key={item.uuid}
+                        <TableRow
+                            key={item.uuid}
                         // className="data-[selected=true]:bg-default-400"
-                    >
-                        {(columnKey) => (
-                            <TableCell>{renderCell(item, columnKey)}</TableCell>
-                        )}
-                    </TableRow>
+                        >
+                            {(columnKey) => (
+                                <TableCell>{renderCell(item, columnKey)}</TableCell>
+                            )}
+                        </TableRow>
                 )}
             </TableBody>
         </Table>

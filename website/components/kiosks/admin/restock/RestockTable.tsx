@@ -19,6 +19,7 @@ import {
     ChevronDownIcon,
     ArrowPathRoundedSquareIcon,
     PencilSquareIcon,
+    UserPlusIcon
 } from "@heroicons/react/24/outline";
 import {
     RESTOCK_REQUEST_STATUS,
@@ -27,6 +28,7 @@ import {
 import MAKETable from "../../../Table";
 import RestockType from "./RestockType";
 import RestockEditor from "./RestockEditor";
+import RestockUserList from "./RestockUserList";
 import RestockStatusLogs from "./RestockStatusLogs";
 import ItemInfo from "../inventory/ItemInfo";
 import React from "react";
@@ -35,6 +37,7 @@ import { convertTimestampToDate } from "../../../../utils";
 import { TArea } from "common/area";
 import { TCertification } from "common/certification";
 import { TInventoryItem } from "common/inventory";
+import { TUser, TUserRole } from "common/user";
 
 const columns = [
     { name: "UUID", id: "uuid" },
@@ -159,15 +162,57 @@ function PastStatusLogs({
     );
 }
 
+function RestockUserSelect({
+    restockSelected,
+    restockUserIsOpen,
+    restockUserOnOpenChange,
+    users,
+    isLoading,
+}: {
+    restockSelected: TRestockRequest | null;
+    restockUserIsOpen: boolean;
+    restockUserOnOpenChange: () => void;
+    users: TUser[];
+    isLoading: boolean;
+}) {
+    return (
+        <Modal
+            isOpen={restockUserIsOpen}
+            placement="top-center"
+            onOpenChange={restockUserOnOpenChange}
+            size="3xl"
+            scrollBehavior="inside"
+            className="flex flex-col justify-center"
+        >
+            <ModalContent className="flex flex-col justify-center">
+                {(onClose) =>
+                    restockSelected ? (
+                        <RestockUserList
+                            users={users}
+                            onClose={onClose}
+                            prevRestock={restockSelected}
+                            isLoading={isLoading}
+                        />
+                    ) : null
+                }
+            </ModalContent>
+        </Modal>
+    );
+}
+
+
+
 export default function RestockTable({
     restocks,
     inventory,
+    users,
     areas,
     certs,
     isLoading,
 }: {
     restocks: TRestockRequest[];
     inventory: TInventoryItem[];
+    users: TUser[];
     areas: TArea[];
     certs: TCertification[];
     isLoading: boolean;
@@ -229,9 +274,17 @@ export default function RestockTable({
         onOpenChange: logsOnOpenChange,
     } = useDisclosure();
 
+    // Past status logs section
+    // Modal state for logs
+    const {
+        isOpen: restockUserIsOpen,
+        onOpen: restockUserOnOpen,
+        onOpenChange: restockUserOnOpenChange,
+    } = useDisclosure();
+
     // table returned
     return (
-        <div>
+        <div className='flex flex-col max-h-full overflow-auto w-full'>
             <div className="flex  flex-col content-center items-center">
                 <h1 className="text-xl font-bold text-foreground-900 mb-2">
                     Restocks
@@ -253,20 +306,20 @@ export default function RestockTable({
                                 <div className="flex flex-row gap-1 m-2">
                                     {statusFilter === "all"
                                         ? statusOptions.map((status) => (
-                                              <RestockType
-                                                  request_status={status.value}
-                                                  size="sm"
-                                              />
-                                          ))
+                                            <RestockType
+                                                request_status={status.value}
+                                                size="sm"
+                                            />
+                                        ))
                                         : Array.from(statusFilter)
-                                              .map(Number)
-                                              .sort((a, b) => a - b)
-                                              .map((status) => (
-                                                  <RestockType
-                                                      request_status={status}
-                                                      size="sm"
-                                                  />
-                                              ))}
+                                            .map(Number)
+                                            .sort((a, b) => a - b)
+                                            .map((status) => (
+                                                <RestockType
+                                                    request_status={status}
+                                                    size="sm"
+                                                />
+                                            ))}
                                 </div>
                             </Button>
                         </DropdownTrigger>
@@ -292,8 +345,8 @@ export default function RestockTable({
                     </Dropdown>
                 </div>
             </div>
-
             <MAKETable
+                key={filteredRestocks.length}
                 content={filteredRestocks}
                 columns={columns}
                 visibleColumns={visibleColumns}
@@ -341,15 +394,30 @@ export default function RestockTable({
                                 >
                                     {restock.mailing_list.map((uuid, index) => {
                                         return (
-                                            <div className="pb-1">
+                                            <div className="pb-1 w-[80%]">
                                                 <UserChip
                                                     user_uuid={uuid}
                                                     popoverPlacement="bottom"
-                                                    className="justify-start"
+                                                    className="justify-start w-full"
                                                 />
                                             </div>
                                         );
                                     })}
+                                    <div className='w-full flex  py-1'>
+                                        <Button
+                                            color="primary"
+                                            size="sm"
+                                            onPress={() => {
+                                                setRestockSelected(restock);
+                                                restockUserOnOpen();
+                                            }}
+                                            className="w-full"
+                                            startContent={<UserPlusIcon className='size-5' />}
+                                        >
+                                            Add User
+                                        </Button>
+                                    </div>
+
                                 </AccordionItem>
                             </Accordion>
                         </div>
@@ -407,6 +475,7 @@ export default function RestockTable({
                     </div>
                 )}
             />
+
             <ModifyRestockModal
                 restockSelected={restockSelected}
                 editIsOpen={editIsOpen}
@@ -416,6 +485,13 @@ export default function RestockTable({
                 restockSelected={restockSelected}
                 logsIsOpen={logsIsOpen}
                 logsOnOpenChange={logsOnOpenChange}
+            />
+            <RestockUserSelect
+                restockSelected={restockSelected}
+                restockUserIsOpen={restockUserIsOpen}
+                restockUserOnOpenChange={restockUserOnOpenChange}
+                users={users}
+                isLoading={isLoading}
             />
         </div>
     );
