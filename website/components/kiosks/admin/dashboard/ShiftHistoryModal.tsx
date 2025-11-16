@@ -6,7 +6,7 @@ import clsx from "clsx";
 import { SHIFT_EVENT_TYPE } from "../../../../../common/shift";
 import { useQuery } from "@tanstack/react-query";
 import { convertTimestampToDate } from "../../../../utils";
-import { MAKEUser } from "../../../user/MAKEUser";
+import { UserChip } from "../../../user/UserChip";
 
 export default function ShiftHistoryModal({
     schedule: scheduleProp,
@@ -161,7 +161,7 @@ export default function ShiftHistoryModal({
                                               </div>
                                               <div className="flex items-center gap-2">
                                                   Drop:{" "}
-                                                  <MAKEUser
+                                                  <UserChip
                                                       user_uuid={s.dropped_by}
                                                       size="md"
                                                       className="bg-default-200 pl-1"
@@ -170,7 +170,7 @@ export default function ShiftHistoryModal({
                                               <div className="flex items-center gap-2">
                                                   Pickup:{" "}
                                                   {s.picked_up_by && (
-                                                      <MAKEUser
+                                                      <UserChip
                                                           user_uuid={
                                                               s.picked_up_by
                                                           }

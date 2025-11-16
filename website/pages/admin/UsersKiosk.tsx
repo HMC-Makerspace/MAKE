@@ -52,9 +52,18 @@ export default function UsersKiosk() {
                 {canEdit && (
                     <UserEditor
                         users={users ?? []}
+                        roles={roles ?? []}
                         selectedKeys={selectedKeys}
                         isLoading={isLoading}
                         isNew={isNewUser}
+                        onCreate={
+                            canEdit
+                                ? (newUser) => {
+                                      setIsNewUser(false);
+                                      onSelectionChange(new Set([newUser]));
+                                  }
+                                : undefined
+                        }
                     />
                 )}
                 <UsersTable
@@ -64,7 +73,7 @@ export default function UsersKiosk() {
                     selectedKeys={selectedKeys}
                     onSelectionChange={onSelectionChange}
                     isLoading={isLoading}
-                    onCreate={setIsNewUser}
+                    onCreate={canEdit ? setIsNewUser : undefined}
                 />
             </div>
         </AdminLayout>

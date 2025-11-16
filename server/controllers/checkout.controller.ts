@@ -416,7 +416,7 @@ export async function checkInCheckout(
     checkout.timestamp_in = Date.now() / 1000;
     // Update item available counts if checkout was active
     if (checkout.timestamp_out < checkout.timestamp_in) {
-        updateItemAvailabilities(checkout.items, undefined, false);
+        updateItemAvailabilities(checkout.items, undefined, undefined, false);
     }
 
     // Return updated checkout
@@ -461,8 +461,10 @@ export async function extendCheckout(
     const Checkouts = mongoose.model("Checkout", Checkout);
     return Checkouts.findOneAndUpdate(
         { uuid: checkout_uuid },
-        { $set: {
-            timestamp_due: new_timestamp_due }
+        {
+            $set: {
+                timestamp_due: new_timestamp_due,
+            },
         },
         { returnDocument: "after" },
     );
@@ -482,11 +484,14 @@ export async function deleteCheckout(
 
 export async function updateItemAvailabilities(
     checkout_items: TCheckoutItem[],
+    checkout_uuid?: UUID,
     logger?: Logger,
     out: boolean = true,
 ) {
     if (logger) {
-        logger.info("Updating item availabilities");
+        logger.info(
+            `Cron: Updating item availabilities for checkout ${checkout_uuid}`,
+        );
     }
     const items =
         (await getInventoryItems(checkout_items.map((c) => c.item_uuid))) || [];
@@ -542,7 +547,7 @@ export async function checkoutAvailabilityCron(logger: Logger) {
     await clearMachineReservations();
     await clearAreaReservations();
     for (const checkout of active_checkouts) {
-        await updateItemAvailabilities(checkout.items, logger);
+        await updateItemAvailabilities(checkout.items, checkout.uuid, logger);
     }
 }
 
@@ -554,7 +559,7 @@ export async function checkoutEmailCron(logger: Logger) {
         return;
     }
     const reminder_frequency = config.checkout.notification_interval_sec;
-    logger.info("Sending overdue checkout emails.");
+    logger.info("Cron: Sending overdue checkout emails.");
     const timestamp = Date.now() / 1000;
     // Get active checkouts
     const Checkouts = mongoose.model("Checkouts", Checkout);

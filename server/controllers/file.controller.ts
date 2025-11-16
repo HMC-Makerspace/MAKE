@@ -189,54 +189,66 @@ export async function deleteFileOnServer(
     error_message: string = "authorized",
 ) {
     return fs
-        .unlink(file_path) // Attempt to delete the file
-        .then(() => {
-            // If the file was successfully deleted, log accordingly
-            if (error_message === "authorized") {
-                req.log.info({
-                    msg: `Successfully deleted file`,
-                    file_path: file_path,
-                });
-                return "Successfully deleted file";
-            } else {
-                req.log.info({
-                    msg: `File successfully deleted: ${error_message}`,
-                    file_path: file_path,
-                });
-                return error_message;
-            }
-        })
-        .catch((err) => {
-            // If there was an error unlinking the file, and the user was not
-            // authorized to create the file, return a distinct error
-            if (error_message === "authorized") {
-                // Otherwise, if the user was authorized to delete the file, log
-                // the error and return a generic error message
-                req.log.error({
-                    msg: `Error deleting file at ${file_path}`,
-                    error: err,
-                });
-                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                    error: "Error deleting file",
-                });
-            } else {
-                //
-                req.log.fatal({
-                    msg:
-                        "Requesting user was not authorized to create a file, " +
-                        "and there was an error unlinking the provided file",
-                    error_message: error_message,
-                    file_path: file_path,
-                    error: err,
-                });
-                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                    error:
-                        "The requesting user is not authorized to create a " +
-                        "file, and there was an error unlinking the " +
-                        "provided file. If you are seeing this error, " +
-                        "please contact a site administrator.",
-                });
-            }
+        .exists(file_path) // Check that the file exists first
+        .then(() => fs.unlink(file_path) // Attempt to delete the file
+            .then(() => {
+                // If the file was successfully deleted, log accordingly
+                if (error_message === "authorized") {
+                    req.log.info({
+                        msg: `Successfully deleted file`,
+                        file_path: file_path,
+                    });
+                    return "Successfully deleted file";
+                } else {
+                    req.log.info({
+                        msg: `File successfully deleted: ${error_message}`,
+                        file_path: file_path,
+                    });
+                    return error_message;
+                }
+            })
+            .catch((err) => {
+                // If there was an error unlinking the file, and the user was not
+                // authorized to create the file, return a distinct error
+                if (error_message === "authorized") {
+                    // Otherwise, if the user was authorized to delete the file, log
+                    // the error and return a generic error message
+                    req.log.error({
+                        msg: `Error deleting file at ${file_path}`,
+                        error: err,
+                    });
+                    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                        error: "Error deleting file",
+                    });
+                } else {
+                    //
+                    req.log.fatal({
+                        msg:
+                            "Requesting user was not authorized to create a file, " +
+                            "and there was an error unlinking the provided file",
+                        error_message: error_message,
+                        file_path: file_path,
+                        error: err,
+                    });
+                    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                        error:
+                            "The requesting user is not authorized to create a " +
+                            "file, and there was an error unlinking the " +
+                            "provided file. If you are seeing this error, " +
+                            "please contact a site administrator.",
+                    });
+                }
+                return Promise.reject(err); // Return a rejected promise to stop the chain
+            })
+        ).catch((err) => {
+            // If the file does not exist, log an error.
+            req.log.error({
+                msg: `File not found: ${file_path}`,
+                error: err,
+            })
+            res.status(StatusCodes.NOT_FOUND).json({
+                error: "File not found",
+            });
             return Promise.reject(err); // Return a rejected promise to stop the chain
         }); // Return the promise so more .then chains can be added
 }
@@ -403,7 +415,7 @@ export async function updateFile(file_obj: TFile): Promise<TFile | null> {
 }
 
 export async function clearExpiredFilesCron(logger: Logger) {
-    logger.info("Clearing expired files.");
+    logger.info("Cron: Clearing expired files.");
     const Files = mongoose.model("File", File);
     const now = Date.now() / 1000;
 

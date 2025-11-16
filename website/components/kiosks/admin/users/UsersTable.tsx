@@ -1,4 +1,4 @@
-import { Input, Selection, Button, Spinner } from "@heroui/react";
+import { Input, Selection, Button, Spinner, Checkbox } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
     PlusIcon,
@@ -6,7 +6,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { TUser, TUserRole } from "common/user";
 import MAKETable, { ColumnSelect } from "../../../Table";
-import MAKEUserRole from "../../../user/UserRole";
+import UserChipRole from "../../../user/UserRole";
 import Fuse from "fuse.js";
 import React, { useEffect, useRef } from "react";
 import clsx from "clsx";
@@ -23,7 +23,7 @@ const baseColumns = [
     { name: "Past Roles", id: "past_roles" },
     { name: "Certificates", id: "active_certificates" },
     { name: "Past Certificates", id: "past_certificates" },
-    // Skip files and availability, not useful right now
+    { name: "Has Passkey", id: "has_passkey" },
 ];
 
 const defaultUserColumns: string[] = [
@@ -35,7 +35,7 @@ const defaultUserColumns: string[] = [
 ];
 
 export default function UsersTable({
-    users,
+    users: propUsers,
     roles,
     certs,
     selectedKeys,
@@ -65,10 +65,12 @@ export default function UsersTable({
     };
     emptyContent?: React.ReactNode;
 }) {
-    const { data: updatedUsers, isLoading: usersLoading } = useQuery<TUser[]>({
+    const { data: queryUsers, isLoading: usersLoading } = useQuery<TUser[]>({
         queryKey: ["user"],
         refetchOnMount: true,
+        enabled: !propUsers,
     });
+    const users = propUsers || queryUsers;
     const columns = [...baseColumns, ...extraColumns];
 
     // The set of columns that are visible
@@ -82,11 +84,11 @@ export default function UsersTable({
     // unnecessary reinitialization on every render but updated when the
     // content changes
     const fuse = React.useMemo(() => {
-        return new Fuse(updatedUsers || users, {
+        return new Fuse(users, {
             keys: ["name", "college_id", "email"],
             threshold: 0.3,
         });
-    }, [updatedUsers, users]);
+    }, [users]);
 
     // The list of items after filtering and sorting
     const filteredUsers = React.useMemo(() => {
@@ -97,7 +99,7 @@ export default function UsersTable({
         }
     }, [users, fuse, search]);
 
-    const numUsers = (updatedUsers || users).length;
+    const numUsers = users.length;
     const numFilteredUsers = filteredUsers.length;
 
     const onInputChange = React.useCallback((value: string) => {
@@ -198,14 +200,18 @@ export default function UsersTable({
                                 </Button>
                             )}
 
-                            <Button
-                                color="primary"
-                                isDisabled={isLoading}
-                                startContent={<PlusIcon className="size-6" />}
-                                onPress={createUser}
-                            >
-                                Create
-                            </Button>
+                            {onCreate && (
+                                <Button
+                                    color="primary"
+                                    isDisabled={isLoading}
+                                    startContent={
+                                        <PlusIcon className="size-6" />
+                                    }
+                                    onPress={createUser}
+                                >
+                                    Create
+                                </Button>
+                            )}
                         </div>
                     )}
                 </div>
@@ -229,7 +235,7 @@ export default function UsersTable({
                     active_roles: (user: TUser) => (
                         <div className="flex flex-row flex-wrap gap-2">
                             {user.active_roles.map((log) => (
-                                <MAKEUserRole
+                                <UserChipRole
                                     role_uuid={log.role_uuid}
                                     role={findRole(log.role_uuid)}
                                     key={log.role_uuid}
@@ -241,7 +247,7 @@ export default function UsersTable({
                     past_roles: (user: TUser) => (
                         <div className="flex flex-row flex-wrap gap-2">
                             {user.past_roles.map((log) => (
-                                <MAKEUserRole
+                                <UserChipRole
                                     role_uuid={log.role_uuid}
                                     role={findRole(log.role_uuid)}
                                     key={log.role_uuid}
@@ -272,6 +278,15 @@ export default function UsersTable({
                                     level={c.level}
                                 />
                             ))}
+                        </div>
+                    ),
+                    has_passkey: (user: TUser) => (
+                        <div className="flex justify-center">
+                            <Checkbox
+                                isSelected={!!user.passkey}
+                                isDisabled
+                                className="opacity-100"
+                            />
                         </div>
                     ),
                     ...customColumnComponents,

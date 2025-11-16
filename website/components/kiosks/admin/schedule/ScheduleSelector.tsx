@@ -82,7 +82,15 @@ const activateSchedule = async ({
     schedule_uuid: string;
 }) => {
     return (
-        await axios.patch<TSchedule>(`/api/v3/schedule/active/${schedule_uuid}`)
+        await axios.patch<TSchedule>(
+            `/api/v3/schedule/activate/${schedule_uuid}`,
+        )
+    ).data;
+};
+
+const stageSchedule = async ({ schedule_uuid }: { schedule_uuid: string }) => {
+    return (
+        await axios.patch<TSchedule>(`/api/v3/schedule/stage/${schedule_uuid}`)
     ).data;
 };
 
@@ -117,7 +125,7 @@ function DeleteScheduleModal({
             addToast({
                 title: `Error: ${error.message}`,
                 color: "danger",
-            }); 
+            });
         },
     });
 
@@ -204,12 +212,21 @@ export default function ScheduleSelector({
                 });
             });
             setSelectedSchedules(new Set([data.uuid]));
-
         },
     });
 
     const activateMutation = useMutation({
         mutationFn: activateSchedule,
+        onSuccess: (data: TSchedule) => {
+            // Refresh queries
+            queryClient.invalidateQueries({
+                queryKey: ["schedule"],
+            });
+        },
+    });
+
+    const stageMutation = useMutation({
+        mutationFn: stageSchedule,
         onSuccess: (data: TSchedule) => {
             // Refresh queries
             queryClient.invalidateQueries({
@@ -244,6 +261,7 @@ export default function ScheduleSelector({
             daily_open_time: schedule.daily_open_time,
             daily_close_time: schedule.daily_close_time,
             active: false, // all schedules start inactive
+            staged: false, // all schedules start unstaged
         };
         createReplaceMutation.mutate({ schedule: newSchedule, isNew: true });
     };
@@ -259,6 +277,7 @@ export default function ScheduleSelector({
             daily_open_time: 12 * 60 * 60, // noon
             daily_close_time: 22 * 60 * 60, // 10pm
             active: false,
+            staged: false,
         };
         createReplaceMutation.mutate({
             schedule: schedule,
@@ -370,9 +389,11 @@ export default function ScheduleSelector({
                 {schedule && (
                     <Tooltip
                         content={
-                            schedule?.active
+                            schedule.active
                                 ? "Schedule is active"
-                                : "Click to set as active schedule"
+                                : schedule.staged
+                                  ? "Schedule is staged, click to activate"
+                                  : "Click to stage for workers"
                         }
                         delay={250}
                         color={schedule.active ? "success" : "primary"}
@@ -383,20 +404,34 @@ export default function ScheduleSelector({
                             startContent={
                                 schedule.active ? (
                                     <EyeIcon className="size-6" />
+                                ) : schedule.staged ? (
+                                    <EyeIcon className="size-6" />
                                 ) : (
                                     <EyeSlashIcon className="size-6" />
                                 )
                             }
                             disableRipple={schedule.active}
                             variant="ghost"
-                            color={schedule.active ? "success" : "danger"}
+                            color={
+                                schedule.active
+                                    ? "success"
+                                    : schedule.staged
+                                      ? "primary"
+                                      : "danger"
+                            }
                             size="lg"
                             className="self-end m-1"
                             onPress={() => {
                                 if (!schedule.active) {
-                                    activateMutation.mutate({
-                                        schedule_uuid: schedule.uuid,
-                                    });
+                                    if (!schedule.staged) {
+                                        stageMutation.mutate({
+                                            schedule_uuid: schedule.uuid,
+                                        });
+                                    } else {
+                                        activateMutation.mutate({
+                                            schedule_uuid: schedule.uuid,
+                                        });
+                                    }
                                 }
                             }}
                         />
@@ -507,7 +542,9 @@ export default function ScheduleSelector({
                                             className={
                                                 item.active
                                                     ? "text-success-300"
-                                                    : ""
+                                                    : item.staged
+                                                      ? "text-primary-300"
+                                                      : ""
                                             }
                                         >
                                             {item.name}

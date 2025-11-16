@@ -9,7 +9,7 @@ import {
     Select,
     SelectItem,
     Switch,
-    addToast
+    addToast,
 } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TConfig } from "common/config";
@@ -70,7 +70,6 @@ export default function Configuration({ config }: { config: TConfig }) {
                 title: `Error: ${error.message}`,
                 color: "danger",
             });
-
         },
     });
 
@@ -87,6 +86,19 @@ export default function Configuration({ config }: { config: TConfig }) {
         (notification_interval_sec % (60 * 60)) / 60,
     );
     const notification_interval_secs = notification_interval_sec % 60;
+
+    // Calculate intermediary file upload duration values
+    const upload_duration_sec = config.file.upload_duration ?? 0;
+    const upload_duration_days = Math.floor(
+        upload_duration_sec / (24 * 60 * 60),
+    );
+    const upload_duration_hours = Math.floor(
+        (upload_duration_sec % (24 * 60 * 60)) / (60 * 60),
+    );
+    const upload_duration_mins = Math.floor(
+        (upload_duration_sec % (60 * 60)) / 60,
+    );
+    const upload_duration_secs = upload_duration_sec % 60;
 
     // Calculate intermediary capacity values
     const max_upload_capacity = config.file.max_upload_capacity ?? 0;
@@ -158,6 +170,7 @@ export default function Configuration({ config }: { config: TConfig }) {
                 locale: config.schedule.locale,
             },
             faq: faq,
+            workshop: config.workshop,
         };
 
         // Number values
@@ -184,6 +197,26 @@ export default function Configuration({ config }: { config: TConfig }) {
                     body.checkout.notification_interval_sec =
                         (body.checkout.notification_interval_sec ?? 0) +
                         (num_value - notification_interval_secs);
+                    break;
+                case "upload_duration_days":
+                    body.file.upload_duration =
+                        (body.file.upload_duration ?? 0) +
+                        (num_value - upload_duration_days) * 24 * 60 * 60;
+                    break;
+                case "upload_duration_hours":
+                    body.file.upload_duration =
+                        (body.file.upload_duration ?? 0) +
+                        (num_value - upload_duration_hours) * 60 * 60;
+                    break;
+                case "upload_duration_mins":
+                    body.file.upload_duration =
+                        (body.file.upload_duration ?? 0) +
+                        (num_value - upload_duration_mins) * 60;
+                    break;
+                case "upload_duration_secs":
+                    body.file.upload_duration =
+                        (body.file.upload_duration ?? 0) +
+                        (num_value - upload_duration_secs);
                     break;
                 case "max_upload_gb":
                     body.file.max_upload_capacity =
@@ -257,6 +290,16 @@ export default function Configuration({ config }: { config: TConfig }) {
         const timezone = formData.get("timezone") as string;
         if (timezone) {
             body.schedule.timezone = timezone;
+        }
+
+        const reminder_times = formData.get(
+            "workshop_reminder_times",
+        ) as string;
+        if (reminder_times) {
+            body.workshop.reminder_times = reminder_times
+                .replace(/\s+/, "")
+                .split(",")
+                .map((s) => parseInt(s));
         }
 
         // Update the config
@@ -541,7 +584,10 @@ export default function Configuration({ config }: { config: TConfig }) {
                             </ConfigItem>
                             <ConfigItem
                                 name="Max Upload Count per User"
-                                description="The maximum number of files a user can upload at a time. If not set, there is no limit."
+                                description={
+                                    "The maximum number of files a user can upload at a time. " +
+                                    "If not set, there is no limit."
+                                }
                             >
                                 <Input
                                     type="number"
@@ -554,6 +600,51 @@ export default function Configuration({ config }: { config: TConfig }) {
                                     color="primary"
                                     variant="faded"
                                     endContent="files"
+                                />
+                            </ConfigItem>
+                            <ConfigItem
+                                name="User Upload Duration"
+                                description={
+                                    "The duration that user files will remain on the server. " +
+                                    "If not set, user files will not expire and will remain on " +
+                                    "the server until deleted."
+                                }
+                            >
+                                <Input
+                                    type="number"
+                                    defaultValue={upload_duration_days.toString()}
+                                    min={0}
+                                    name="upload_duration_days"
+                                    color="primary"
+                                    variant="faded"
+                                    endContent="days"
+                                />
+                                <Input
+                                    type="number"
+                                    defaultValue={upload_duration_hours.toString()}
+                                    min={0}
+                                    name="upload_duration_hours"
+                                    color="primary"
+                                    variant="faded"
+                                    endContent="hours"
+                                />
+                                <Input
+                                    type="number"
+                                    defaultValue={upload_duration_mins.toString()}
+                                    min={0}
+                                    name="upload_duration_mins"
+                                    color="primary"
+                                    variant="faded"
+                                    endContent="minutes"
+                                />
+                                <Input
+                                    type="number"
+                                    defaultValue={upload_duration_secs.toString()}
+                                    min={0}
+                                    name="upload_duration_secs"
+                                    color="primary"
+                                    variant="faded"
+                                    endContent="seconds"
                                 />
                             </ConfigItem>
                         </AccordionItem>
@@ -580,20 +671,7 @@ export default function Configuration({ config }: { config: TConfig }) {
                                     variant="faded"
                                     endContent="minutes"
                                 />
-                                {/* no seconds
-                                    <Input  
-                                    type="number"
-                                    defaultValue={notification_interval_secs.toString()}
-                                    validate={(v) =>
-                                        parseInt(v) >= 0
-                                            ? true
-                                            : "Must be a positive number"
-                                    }
-                                    name="shift_increment_secs"
-                                    color="primary"
-                                    variant="faded"
-                                    endContent="seconds"
-                                /> */}
+                                {/* no seconds */}
                             </ConfigItem>
                             <ConfigItem
                                 name="Open days"
@@ -694,6 +772,37 @@ export default function Configuration({ config }: { config: TConfig }) {
                                     />
                                     Only worker first names
                                 </div>
+                            </ConfigItem>
+                        </AccordionItem>
+                        <AccordionItem key="workshop" title="Workshop Config">
+                            <ConfigItem
+                                name="Email Reminder Times"
+                                description={
+                                    "The times (in seconds prior to a workshop, " +
+                                    "separated by commas) that reminder emails " +
+                                    "should be sent to RSVP'd users. If blank, " +
+                                    "no reminder emails will be sent."
+                                }
+                            >
+                                <Input
+                                    defaultValue={config.workshop.reminder_times.join(
+                                        ", ",
+                                    )}
+                                    name="workshop_reminder_times"
+                                    color="primary"
+                                    variant="faded"
+                                    placeholder="e.g. 3600, 86400"
+                                    classNames={{
+                                        input: "placeholder:text-default-400 text-default-700",
+                                    }}
+                                    validate={(value) => {
+                                        if (value.match(/^\d+(,\s*\d+)*$/)) {
+                                            return true;
+                                        } else {
+                                            return "Please enter integers separated by commas";
+                                        }
+                                    }}
+                                />
                             </ConfigItem>
                         </AccordionItem>
                         <AccordionItem key="faq" title="FAQ">

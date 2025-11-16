@@ -1,18 +1,22 @@
-import { TUser } from "common/user";
+import { TUser, TUserRole, UserUUID } from "common/user";
 import { Form, Input, Selection } from "@heroui/react";
 import React from "react";
 import UserEditorForm from "./UserEditorForm";
 
 export default function UserEditor({
     users,
+    roles,
     selectedKeys,
     isNew,
     isLoading,
+    onCreate,
 }: {
     users: TUser[];
+    roles: TUserRole[];
     selectedKeys: Selection;
     isNew: boolean;
     isLoading: boolean;
+    onCreate?: (newUser: UserUUID) => void;
 }) {
     const selectedUsers = React.useMemo(
         () =>
@@ -40,7 +44,7 @@ export default function UserEditor({
                         isSingle
                             ? selectedUsers[0]
                             : {
-                                  uuid: "",
+                                  uuid: isNew ? crypto.randomUUID() : "",
                                   name: "",
                                   email: "",
                                   college_id: "",
@@ -48,8 +52,10 @@ export default function UserEditor({
                                   past_roles: [],
                               }
                     }
+                    roles={roles}
                     isMultiple={isMultiple}
                     isNew={isNew}
+                    onCreate={onCreate}
                 />
             )}
         </div>

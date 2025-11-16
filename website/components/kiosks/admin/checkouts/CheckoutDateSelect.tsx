@@ -10,12 +10,19 @@ import {
     TCheckoutItem,
     TCheckoutItemUnavailability,
 } from "common/checkout";
-import { timestampToZonedDateTime } from "../../../../utils";
-import { Button, DateInput, DateRangePicker, RangeValue } from "@heroui/react";
+import { timestampToTime, timestampToZonedDateTime } from "../../../../utils";
+import {
+    Button,
+    ButtonGroup,
+    DateInput,
+    DateRangePicker,
+    RangeValue,
+} from "@heroui/react";
 import {
     ZonedDateTime,
     today,
     getLocalTimeZone,
+    now,
 } from "@internationalized/date";
 import { TConfig } from "common/config";
 import { TInventoryItem } from "common/inventory";
@@ -29,6 +36,7 @@ export default function CheckoutDateSelect({
     setRange,
     unavailability,
     isDisabled,
+    dailyCloseTime,
     cart,
     config,
     inventory,
@@ -39,6 +47,7 @@ export default function CheckoutDateSelect({
     setRange: (value: RangeValue<ZonedDateTime> | null) => void;
     unavailability: TCheckoutItemUnavailability[];
     isDisabled: boolean;
+    dailyCloseTime: UnixTimestamp;
     cart: TCheckoutItem[];
     config: TConfig;
     inventory: TInventoryItem[];
@@ -69,6 +78,21 @@ export default function CheckoutDateSelect({
 
     const errorMessage = isInvalid ? `${invalidName} is unavailable` : "";
 
+    const setDayRange = (days: number) => {
+        const endTime = timestampToTime(dailyCloseTime);
+        const currentDate = now(config.schedule.timezone);
+        const endDate = currentDate.add({ days: days }).set({
+            hour: endTime.hour,
+            minute: endTime.minute,
+            second: endTime.second,
+            millisecond: endTime.millisecond,
+        });
+        setRange({
+            start: currentDate,
+            end: endDate,
+        });
+    };
+
     return (
         <div className="flex flex-col 2xl:flex-row gap-4">
             <div className="flex flex-row gap-2 justify-between">
@@ -94,44 +118,41 @@ export default function CheckoutDateSelect({
                     // TODO: Fix error message formatting
                     classNames={{
                         // label: "text-md",
-                        base: "w-fit",
-                        inputWrapper: "max-w-fit",
-                        innerWrapper: "gap-0",
-                        segment: "hidden",
-                        separator: "hidden",
+                        // base: "w-fit",
+                        inputWrapper: " bg-default-200",
+                        // segment: "hidden",
+                        // separator: "hidden",
                         selectorIcon: "size-6",
-                        calendarContent: "h-[275px]",
+                        selectorButton: "order-first mr-0",
+                        calendarContent: "h-[300px]",
+                        timeInput: "pb-2 flex",
+                        bottomContent: "gap-0",
+                        input: "[&>*:nth-child(n+6)]:hidden",
                     }}
-                    // TODO: Consider adding quick 3 day button?
-                    // CalendarBottomContent={
-                    //     <div className="w-full p-2">
-
-                    //     </div>
-                    // }
+                    CalendarBottomContent={
+                        <div className="px-5">
+                            <ButtonGroup size="sm" fullWidth>
+                                <Button
+                                    variant="faded"
+                                    className="font-medium"
+                                    onPress={() => setDayRange(1)}
+                                >
+                                    1 Day
+                                </Button>
+                                <Button
+                                    variant="faded"
+                                    className="font-medium"
+                                    onPress={() => setDayRange(3)}
+                                >
+                                    3 Days
+                                </Button>
+                            </ButtonGroup>
+                        </div>
+                    }
                     calendarProps={{
                         content: "h-[300px]",
                     }}
                 />
-                <div className="flex flex-col sm:flex-row gap-2">
-                    <DateInput<ZonedDateTime>
-                        aria-label="Checkout Start Date"
-                        isReadOnly
-                        isDisabled={isDisabled}
-                        value={range?.start}
-                        granularity="day"
-                        hideTimeZone
-                        className="w-fit"
-                    />
-                    <DateInput<ZonedDateTime>
-                        aria-label="Checkout End Date"
-                        isReadOnly
-                        isDisabled={isDisabled}
-                        value={range?.end}
-                        granularity="day"
-                        hideTimeZone
-                        className="w-fit"
-                    />
-                </div>
             </div>
 
             <Button

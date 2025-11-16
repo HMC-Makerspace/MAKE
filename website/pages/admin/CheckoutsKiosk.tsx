@@ -16,7 +16,11 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { TUser, TUserRole, UserUUID } from "common/user";
-import { CertificationUUID, TCertification } from "common/certification";
+import {
+    CERTIFICATION_VISIBILITY,
+    CertificationUUID,
+    TCertification,
+} from "../../../common/certification";
 import { TArea } from "common/area";
 import {
     CHECKOUT_VALIDATION,
@@ -81,7 +85,7 @@ export default function CheckoutsKiosk() {
     });
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
-            queryKey: ["certification", "public"],
+            queryKey: ["certification"],
             refetchOnWindowFocus: false,
             staleTime: 30 * 60 * 1000, // 30 minutes in milliseconds
         },
@@ -327,7 +331,13 @@ export default function CheckoutsKiosk() {
                                 areas={areas}
                                 certs={certs}
                                 selectedKeys={new Set()}
-                                isLoading={inventoryLoading || checkoutsLoading || usersLoading || areasLoading || certsLoading}
+                                isLoading={
+                                    inventoryLoading ||
+                                    checkoutsLoading ||
+                                    usersLoading ||
+                                    areasLoading ||
+                                    certsLoading
+                                }
                             />
                         </Tab>
                         <Tab key={"users"} title={"Users"}>
@@ -370,6 +380,7 @@ export default function CheckoutsKiosk() {
                                     ?.map((c) => c.certification_uuid)
                                     .join(",")} // Update any time user's certs change
                                 certs={certs}
+                                roles={roles}
                                 selectedKeys={new Set()}
                                 onSelectionChange={() => {}}
                                 isLoading={certsLoading}
@@ -387,6 +398,10 @@ export default function CheckoutsKiosk() {
                                         name: "Grant/Revoke",
                                         id: "grant_revoke",
                                     },
+                                ]}
+                                visibilities={[
+                                    CERTIFICATION_VISIBILITY.PUBLIC,
+                                    CERTIFICATION_VISIBILITY.PRIVATE,
                                 ]}
                                 customColumnComponents={{
                                     grant_revoke: (cert) => {
@@ -417,16 +432,6 @@ export default function CheckoutsKiosk() {
                                                                 prereq.required_level,
                                                     ),
                                             );
-                                        console.log(
-                                            "certPrereqs:",
-                                            cert.name,
-                                            certHasPrereqs,
-                                        );
-                                        console.log(
-                                            "userPrereqs:",
-                                            user?.name,
-                                            userHasPrereqs,
-                                        );
                                         return (
                                             <Tooltip
                                                 content={
@@ -508,7 +513,6 @@ export default function CheckoutsKiosk() {
                 setMissingIDUser={setMissingIDUser}
                 college_id={collegeID}
             />
-            
         </AdminLayout>
     );
 }

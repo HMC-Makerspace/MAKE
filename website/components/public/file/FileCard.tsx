@@ -9,11 +9,13 @@ import {
     IdentificationIcon,
     DocumentIcon,
     TrashIcon,
+    ClockIcon,
 } from "@heroicons/react/24/solid";
-import { Card, CardFooter, Button, Image } from "@heroui/react";
+import { Card, CardFooter, Button, Image, Tooltip } from "@heroui/react";
 import { UseMutationResult } from "@tanstack/react-query";
 import clsx from "clsx";
 import { FILE_RESOURCE_TYPE, FileUUID, TFile } from "../../../../common/file";
+import { relativeTimestampToString } from "../../../utils";
 
 export default function FileCard({
     file,
@@ -172,10 +174,41 @@ export default function FileCard({
                         resource_type: resource_type,
                     })
                 }
-                isDisabled={disableDeletion}
+                isDisabled={disableDeletion || deleteMutation.isPending}
             >
                 <TrashIcon className="size-5" />
             </Button>
+            {file.timestamp_expires && (
+                <Tooltip
+                    content={`Expires in ${
+                        relativeTimestampToString(
+                            file.timestamp_expires - Date.now() / 1000,
+                        ).split(", ")[0]
+                    }`}
+                    color={
+                        file.timestamp_expires - Date.now() / 1000 <
+                        60 * 60 * 24 * 1 // Show a highlight if expiring in < 1 day
+                            ? "danger"
+                            : "default"
+                    }
+                >
+                    <Button
+                        isIconOnly
+                        size="sm"
+                        variant="flat"
+                        // Show a warning if less than 2 days remaining
+                        color={
+                            file.timestamp_expires - Date.now() / 1000 <
+                            60 * 60 * 24 * 1 // Show a highlight if expiring in < 1 day
+                                ? "danger"
+                                : "default"
+                        }
+                        className="absolute top-2 left-2 z-20"
+                    >
+                        <ClockIcon className="size-5" />
+                    </Button>
+                </Tooltip>
+            )}
         </Card>
     );
 }

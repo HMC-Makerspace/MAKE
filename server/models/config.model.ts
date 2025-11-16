@@ -6,6 +6,7 @@ import type {
     TFileConfig,
     TGeneralConfig,
     TScheduleConfig,
+    TWorkshopConfig,
 } from "common/config";
 
 const CheckoutConfig = new mongoose.Schema<TCheckoutConfig>(
@@ -19,6 +20,7 @@ const FileConfig = new mongoose.Schema<TFileConfig>(
     {
         max_upload_capacity: { type: Number, required: false },
         max_upload_count: { type: Number, required: false },
+        upload_duration: { type: Number, required: false },
     },
     { _id: false },
 );
@@ -32,6 +34,13 @@ const ScheduleConfig = new mongoose.Schema<TScheduleConfig>(
         first_names_only: { type: Boolean, required: false },
         timezone: { type: String, required: true },
         locale: { type: String, required: true },
+    },
+    { _id: false },
+);
+
+const WorkshopConfig = new mongoose.Schema<TWorkshopConfig>(
+    {
+        reminder_times: { type: [Number], required: true },
     },
     { _id: false },
 );
@@ -79,6 +88,7 @@ export const Config = new mongoose.Schema<TConfig>(
         checkout: { type: CheckoutConfig, required: true },
         file: { type: FileConfig, required: true },
         schedule: { type: ScheduleConfig, required: true },
+        workshop: { type: WorkshopConfig, required: true },
         faq: { type: FAQItemConfig, required: false },
     },
     { collection: "config" },

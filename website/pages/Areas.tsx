@@ -35,11 +35,6 @@ export default function AreasPage() {
         refetchOnWindowFocus: false,
         refetchOnMount: false,
     });
-    const { data: roleSelf, isLoading: roleSelfLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-    });
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
             queryKey: ["certification"],

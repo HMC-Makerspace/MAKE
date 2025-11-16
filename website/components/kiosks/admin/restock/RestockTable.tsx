@@ -32,7 +32,7 @@ import RestockUserList from "./RestockUserList";
 import RestockStatusLogs from "./RestockStatusLogs";
 import ItemInfo from "../inventory/ItemInfo";
 import React from "react";
-import { MAKEUser } from "../../../user/MAKEUser";
+import { UserChip } from "../../../user/UserChip";
 import { convertTimestampToDate } from "../../../../utils";
 import { TArea } from "common/area";
 import { TCertification } from "common/certification";
@@ -383,7 +383,7 @@ export default function RestockTable({
                             >
                                 <AccordionItem
                                     startContent={
-                                        <MAKEUser
+                                        <UserChip
                                             user_uuid={restock.requesting_user}
                                             popoverPlacement="bottom"
                                             className="w-full justify-start"
@@ -394,8 +394,8 @@ export default function RestockTable({
                                 >
                                     {restock.mailing_list.map((uuid, index) => {
                                         return (
-                                            <div className="pb-1 w-[80%]">
-                                                <MAKEUser
+                                            <div className="pb-1">
+                                                <UserChip
                                                     user_uuid={uuid}
                                                     popoverPlacement="bottom"
                                                     className="justify-start w-full"

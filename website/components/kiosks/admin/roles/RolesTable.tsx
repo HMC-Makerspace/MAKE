@@ -33,7 +33,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { TUserRole, UserRoleUUID } from "common/user";
 import MAKETable, { ColumnSelect } from "../../../Table";
-import MAKEUserRole from "../../../user/UserRole";
+import UserChipRole from "../../../user/UserRole";
 import Fuse from "fuse.js";
 import React from "react";
 import {
@@ -41,8 +41,12 @@ import {
     API_SCOPE_DESCRIPTOR,
     API_SCOPE_SECTIONS,
 } from "../../../../../common/global";
-import axios from "axios";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axios, { AxiosResponse } from "axios";
+import {
+    useMutation,
+    UseMutationResult,
+    useQueryClient,
+} from "@tanstack/react-query";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { HexColorPicker } from "react-colorful";
@@ -90,6 +94,7 @@ function EditRoleModal({
     onOpenChange: (isOpen: boolean) => void;
 }) {
     const queryClient = useQueryClient();
+    const [hasEdits, setHasEdits] = React.useState<boolean>(false);
 
     const mutation = useMutation({
         mutationFn: createUpdateRole,
@@ -107,6 +112,7 @@ function EditRoleModal({
                 color: "success",
             });
             onOpenChange(false);
+            setHasEdits(false);
         },
         onError: (error) => {
             addToast({
@@ -116,7 +122,6 @@ function EditRoleModal({
         },
     });
 
-    const [hasEdits, setHasEdits] = React.useState<boolean>(false);
     const [title, setTitle] = React.useState<string>(role?.title ?? "");
     const [description, setDescription] = React.useState<string>(
         role?.description ?? "",
@@ -160,7 +165,16 @@ function EditRoleModal({
             // Run the mutation
             mutation.mutate({ data: new_role, isNew: isNew });
         },
-        [hasEdits, role.uuid, title, description, color, scopes, isDefault, displayHierarchy],
+        [
+            hasEdits,
+            role.uuid,
+            title,
+            description,
+            color,
+            scopes,
+            isDefault,
+            displayHierarchy,
+        ],
     );
 
     // A function that wraps a setter to also update the hasEdits state
@@ -180,6 +194,33 @@ function EditRoleModal({
         onOpen: onDelete,
         onOpenChange: onDeleteChange,
     } = useDisclosure();
+
+    const deleteMutation = useMutation({
+        mutationFn: async () => {
+            return axios.delete(`/api/v3/user/role/${role.uuid}`);
+        },
+        onSuccess: (obj) => {
+            addToast({
+                title: `Successfully deleted role "${role.title}"`,
+                color: "success",
+            });
+
+            // Remove the role from the query cache
+            queryClient.setQueryData(["user", "role"], (old: TUserRole[]) => {
+                return old.filter((r) => r.uuid !== role.uuid);
+            });
+            queryClient.removeQueries({
+                queryKey: ["user", "role", role.uuid],
+            });
+            onOpenChange(false);
+        },
+        onError: (error) => {
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
+        },
+    });
 
     return (
         <Modal
@@ -457,7 +498,9 @@ function EditRoleModal({
                                     type="submit"
                                     color="primary"
                                     className="w-full sm:w-1/4"
-                                    isDisabled={!isValid}
+                                    isDisabled={
+                                        !isValid || deleteMutation.isPending
+                                    }
                                     isLoading={mutation.isPending}
                                 >
                                     {isNew ? "Create" : "Save"}
@@ -477,6 +520,7 @@ function EditRoleModal({
                             role={role}
                             isOpen={isDeleting}
                             onOpenChange={onDeleteChange}
+                            deleteMutation={deleteMutation}
                         />
                     </>
                 )}
@@ -489,38 +533,14 @@ function DeleteRoleModal({
     role,
     isOpen,
     onOpenChange,
+    deleteMutation,
 }: {
     role: TUserRole;
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
+    deleteMutation: UseMutationResult<unknown, Error, void, unknown>;
 }) {
     const queryClient = useQueryClient();
-    const mutation = useMutation({
-        mutationFn: async () => {
-            return axios.delete(`/api/v3/user/role/${role.uuid}`);
-        },
-        onSuccess: (obj) => {
-
-            addToast({
-                title: `Successfully deleted role "${role.title}"`,
-                color: "success",
-            });
-
-            // Remove the role from the query cache
-            queryClient.setQueryData(["user", "role"], (old: TUserRole[]) => {
-                return old.filter((r) => r.uuid !== role.uuid);
-            });
-            queryClient.removeQueries({
-                queryKey: ["user", "role", role.uuid],
-            });
-        },
-        onError: (error) => {
-            addToast({
-                title: `Error: ${error.message}`,
-                color: "danger",
-            });
-        },
-    });
 
     const onSubmit = React.useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
@@ -528,9 +548,10 @@ function DeleteRoleModal({
             e.preventDefault();
 
             // Run the mutation
-            mutation.mutate();
+            deleteMutation.mutate();
+            onOpenChange(false);
         },
-        [mutation],
+        [deleteMutation],
     );
 
     return (
@@ -540,7 +561,7 @@ function DeleteRoleModal({
             onSubmit={onSubmit}
             isOpen={isOpen}
             onOpenChange={onOpenChange}
-            isLoading={mutation.isPending}
+            isLoading={deleteMutation.isPending}
         />
     );
 }
@@ -683,7 +704,7 @@ export default function RolesTable({
                 multiSelect={false}
                 customColumnComponents={{
                     title: (role: TUserRole) => (
-                        <MAKEUserRole role_uuid={role.uuid} role={role} />
+                        <UserChipRole role_uuid={role.uuid} role={role} />
                     ),
                     default: (role: TUserRole) =>
                         role.default ? (

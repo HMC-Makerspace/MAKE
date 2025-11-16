@@ -93,7 +93,7 @@ export default function DefaultLayout({
     const kioskAccess = scopes && verifyScopes(scopes, [API_SCOPE.VIEW_KIOSKS]);
     const handleKeyPress = useCallback(
         (event: KeyboardEvent) => {
-            if (event.key === "k" && event.metaKey) {
+            if (event.key === "k" && (event.metaKey || event.ctrlKey)) {
                 // If user is authorized, go to the kiosk page
                 if (!scopesLoading && !scopesError && kioskAccess) {
                     navigate("/admin");

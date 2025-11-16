@@ -7,14 +7,16 @@ import {
     NavbarContent,
     NavbarMenu,
     NavbarMenuToggle,
+    useDisclosure,
 } from "@heroui/react";
 import clsx from "clsx";
 import MAKE from "./public/home/MAKE";
 import Branding from "./public/home/Branding";
 import { ThemeSwitcher } from "./ThemeSwitcher";
-import { MAKEUser } from "./user/MAKEUser";
 import { motion } from "framer-motion";
 import { useNavigate, Link as RouteLink } from "react-router-dom";
+import { UserLoginChip } from "./user/UserLoginChip";
+import PasskeyLoginModal from "./user/PasskeyLoginModal";
 
 export default function CustomNavbar({
     pages,
@@ -33,6 +35,8 @@ export default function CustomNavbar({
     pageIndex: number;
 }) {
     const navigate = useNavigate();
+
+    const { isOpen, onOpenChange, onOpen } = useDisclosure();
 
     return (
         <>
@@ -84,7 +88,11 @@ export default function CustomNavbar({
                     <Branding />
                 </div>
                 <div className="px-4 self-center w-full flex justify-center">
-                    <MAKEUser user_uuid={"self"} size="lg" showControls={true}/>
+                    <UserLoginChip
+                        user_uuid="self"
+                        size="lg"
+                        onClick={onOpen}
+                    />
                 </div>
             </div>
             {/* Small screen navbar */}
@@ -147,7 +155,12 @@ export default function CustomNavbar({
                     <Card className="bg-default-200 p-2 flex-row gap-3 w-fit self-center">
                         <Branding />
                         <div className="flex flex-col justify-between">
-                            <MAKEUser user_uuid={"self"} size="lg" showControls={true}/>
+                            <UserLoginChip
+                                user_uuid="self"
+                                size="lg"
+                                loginColor="primary"
+                                onClick={onOpen}
+                            />
                             <div className="flex flex-row w-full justify-between">
                                 <ThemeSwitcher
                                     className="self-center w-full"
@@ -161,6 +174,7 @@ export default function CustomNavbar({
                     </Card>
                 </NavbarMenu>
             </Navbar>
+            <PasskeyLoginModal isOpen={isOpen} onOpenChange={onOpenChange} />
         </>
     );
 }

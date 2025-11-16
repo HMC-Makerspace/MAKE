@@ -102,7 +102,7 @@ export default function WorkshopPage() {
                     (filteredWorkshops.length > 0 ? (
                         <div
                             id="card-container"
-                            className="grid grid-cols-2 gap-4 h-full w-full"
+                            className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full w-full"
                         >
                             {filteredWorkshops.map((workshop) => (
                                 <WorkshopCard

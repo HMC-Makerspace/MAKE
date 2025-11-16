@@ -82,12 +82,19 @@ export default function GrantCertPopup({
         },
     });
 
+    const [level, setLevel] = useState<number>();
+
     const onSubmit = React.useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
             // Prevent default browser page refresh.
             e.preventDefault();
 
             if (!user || !cert) return;
+
+            var newLevel = level;
+            if (!level || !isMultiLevel) {
+                newLevel = granting ? 1 : 0;
+            }
 
             grantRevokeMutation.reset();
 
@@ -96,17 +103,17 @@ export default function GrantCertPopup({
                 user_uuid: user.uuid,
                 cert_uuid: cert.uuid,
                 grant: granting,
-                level: level,
+                level: newLevel,
             });
         },
-        [grantRevokeMutation],
+        [grantRevokeMutation, granting, cert, user, level],
     );
-
-    const [level, setLevel] = useState<number>();
 
     const user_cert = user?.active_certificates?.find(
         (c) => c.certification_uuid === cert?.uuid,
     );
+
+    const isMultiLevel = !!(cert && cert.max_level && cert.max_level !== 1);
 
     return (
         <Modal
@@ -137,8 +144,12 @@ export default function GrantCertPopup({
                                 {granting ? " grant " : " revoke "}
                                 {user.name + " "}the {` ${cert.name} `}
                                 certification?
-                                {granting && <br />}
-                                {granting && "If so, select a level to grant."}
+                                {granting && isMultiLevel && (
+                                    <>
+                                        <br />
+                                        If so, select a level to grant.
+                                    </>
+                                )}
                             </div>
 
                             <div className="flex items-end gap-2 w-full justify-center">
@@ -154,7 +165,7 @@ export default function GrantCertPopup({
                                         }
                                     />
                                 </div>
-                                {granting && (
+                                {granting && isMultiLevel && (
                                     <NumberInput
                                         label="Level"
                                         name="level"
@@ -206,6 +217,7 @@ export default function GrantCertPopup({
                                     className="w-full sm:w-auto"
                                     isDisabled={
                                         granting &&
+                                        isMultiLevel &&
                                         (!level ||
                                             level < 1 ||
                                             (cert.max_level

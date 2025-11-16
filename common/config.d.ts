@@ -21,6 +21,10 @@ export type TFileConfig = {
      * Maximum number of uploads for each user.
      */
     max_upload_count?: number;
+    /**
+     * The duration that each user uploaded file remains on the server (in seconds).
+     */
+    upload_duration?: number;
 };
 
 export type TScheduleConfig = {
@@ -65,6 +69,10 @@ export type TScheduleConfig = {
     locale: string;
 };
 
+export type TWorkshopConfig = {
+    reminder_times: number[];
+}
+
 export type TGeneralConfig = {
     branding_url?: string;
     tagline?: string;
@@ -94,6 +102,7 @@ export type TConfig = {
     checkout: TCheckoutConfig;
     file: TFileConfig;
     schedule: TScheduleConfig;
+    workshop: TWorkshopConfig;
     faq?: TFAQItem;
 };
 
