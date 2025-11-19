@@ -14,6 +14,7 @@ import {
     TrashIcon,
     PlusIcon,
     TagIcon,
+    DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
 import { TWorkshop } from "common/workshop";
 import { TCertification } from "common/certification";
@@ -50,8 +51,9 @@ const columns = [
     // {name: 'Sign-In List', id:'sign_in_list'},
     { name: "People", id: "signups" },
     { name: "Photos", id: "photos" },
-    { name: "Authorized Roles", id: "authorized_roles" },
+    // { name: "Authorized Roles", id: "authorized_roles" },
     { name: "Edit", id: "edit" },
+    { name: "Duplicate", id: "duplicate" },
     { name: "Delete", id: "delete" },
 ];
 const defaultColumns = [
@@ -66,8 +68,9 @@ const defaultColumns = [
     // 'rsvp_list',
     // 'sign_in_list',
     "photos",
-    "authorized_roles",
+    // "authorized_roles",
     "edit",
+    "duplicate",
     "delete",
 ];
 
@@ -91,6 +94,36 @@ const deleteWorkshop = async ({
     workshop_uuid: string
 }) => {
     return (await axios.delete(`/api/v3/workshop/${workshop_uuid}`)).data
+}
+
+const duplicateWorkshop = async ({
+    workshop
+}: {
+    workshop: TWorkshop
+}) => {
+    const new_workshop: TWorkshop = {
+        uuid: crypto.randomUUID(),
+        title: workshop.title,
+        description: workshop.description,
+        instructors: workshop.instructors,
+        support_instructors: workshop.support_instructors,
+        capacity: workshop.capacity,
+        timestamp_start: workshop.timestamp_start,
+        timestamp_end: workshop.timestamp_end,
+        timestamp_public: undefined,
+        required_certifications: workshop.required_certifications,
+        rsvp_list: [],
+        reminder_emails_sent: [],
+        sign_in_list: [],
+        images: [], // Exclude images in duplication
+        authorized_roles: workshop.authorized_roles,
+    };
+
+    return (
+        await axios.post<TWorkshop>("/api/v3/workshop/", {
+            workshop_obj: new_workshop,
+        })
+    ).data;
 }
 
 export default function WorkshopTable({
@@ -136,6 +169,17 @@ export default function WorkshopTable({
                 old.filter((w) => w.uuid !== variables.workshop_uuid),
             );
             // onSuccess(`Successfully deleted workshop`);
+        },
+        onError: (e) => alert(e),
+    });
+    const duplicateMutation = useMutation({
+        mutationFn: duplicateWorkshop,
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(["workshop", data.uuid], data);
+            queryClient.setQueryData(["workshop"], (old: TWorkshop[]) => [
+                data,
+                ...old,
+            ]);
         },
         onError: (e) => alert(e),
     });
@@ -402,6 +446,22 @@ export default function WorkshopTable({
                                                 setSelectedWorkshop(workshop);
                                                 setIsNew(false);
                                                 editOnOpen();
+                                            }}
+                                        ></Button>
+                                    </>
+                                );
+                            },
+                            duplicate: (workshop) => {
+                                return (
+                                    <>
+                                        <Button
+                                            isIconOnly
+                                            color="primary"
+                                            startContent={
+                                                <DocumentDuplicateIcon className="size-6" />
+                                            }
+                                            onPress={() => {
+                                                duplicateMutation.mutate({ workshop: workshop })
                                             }}
                                         ></Button>
                                     </>
