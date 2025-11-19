@@ -26,6 +26,7 @@ export async function sendEmail(
     logger: Logger,
     cc?: string[],
     bcc?: string[],
+    hasTriedBefore?: boolean,
 ) {
     const tokens = await getOAuthToken(logger);
 
@@ -75,6 +76,12 @@ export async function sendEmail(
                 msg: `Error sending email to ${to}`,
                 error: error,
             });
+
+            if (!hasTriedBefore) {
+                setTimeout(() => {
+                    sendEmail(to, subject, bodyHTML, logger, cc, bcc, true); // recursion yippee
+                }, 5000);
+            }
         } else {
             // Otherwise, just log information about the successful message
             logger.info({
