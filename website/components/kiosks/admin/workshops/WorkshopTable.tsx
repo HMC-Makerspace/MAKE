@@ -6,7 +6,7 @@ import {
     ModalHeader,
     useDisclosure,
     addToast,
-    Spinner
+    Spinner,
 } from "@heroui/react";
 import {
     PhotoIcon,
@@ -16,6 +16,7 @@ import {
     TrashIcon,
     PlusIcon,
     TagIcon,
+    DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
 import { TWorkshop } from "common/workshop";
 import { TCertification } from "common/certification";
@@ -23,7 +24,10 @@ import { TUser, TUserRole } from "common/user";
 import MAKETable from "../../../Table.tsx";
 import { UserChip } from "../../../user/UserChip.tsx";
 import UserRole from "../../../user/UserRole.tsx";
-import { convertTimestampToDate, zonedDateTimeToTimestamp } from "../../../../utils.tsx";
+import {
+    convertTimestampToDate,
+    zonedDateTimeToTimestamp,
+} from "../../../../utils.tsx";
 import WorkshopPeopleModal from "./WorkshopPeopleModal.tsx";
 import WorkshopImagesModal from "./WorkshopImagesModal.tsx";
 import WorkshopEditModal from "./WorkshopEditModal.tsx";
@@ -52,8 +56,9 @@ const columns = [
     // {name: 'Sign-In List', id:'sign_in_list'},
     { name: "People", id: "signups" },
     { name: "Photos", id: "photos" },
-    { name: "Authorized Roles", id: "authorized_roles" },
+    // { name: "Authorized Roles", id: "authorized_roles" },
     { name: "Edit", id: "edit" },
+    { name: "Duplicate", id: "duplicate" },
     { name: "Delete", id: "delete" },
 ];
 const defaultColumns = [
@@ -68,8 +73,9 @@ const defaultColumns = [
     // 'rsvp_list',
     // 'sign_in_list',
     "photos",
-    "authorized_roles",
+    // "authorized_roles",
     "edit",
+    "duplicate",
     "delete",
 ];
 
@@ -86,6 +92,36 @@ async function patchWorkshop({
         })
     ).data;
 }
+
+const deleteWorkshop = async ({ workshop_uuid }: { workshop_uuid: string }) => {
+    return (await axios.delete(`/api/v3/workshop/${workshop_uuid}`)).data;
+};
+
+const duplicateWorkshop = async ({ workshop }: { workshop: TWorkshop }) => {
+    const new_workshop: TWorkshop = {
+        uuid: crypto.randomUUID(),
+        title: workshop.title,
+        description: workshop.description,
+        instructors: workshop.instructors,
+        support_instructors: workshop.support_instructors,
+        capacity: workshop.capacity,
+        timestamp_start: workshop.timestamp_start,
+        timestamp_end: workshop.timestamp_end,
+        timestamp_public: undefined,
+        required_certifications: workshop.required_certifications,
+        rsvp_list: [],
+        reminder_emails_sent: [],
+        sign_in_list: [],
+        images: [], // Exclude images in duplication
+        authorized_roles: workshop.authorized_roles,
+    };
+
+    return (
+        await axios.post<TWorkshop>("/api/v3/workshop/", {
+            workshop_obj: new_workshop,
+        })
+    ).data;
+};
 
 export default function WorkshopTable({
     workshops,
@@ -118,6 +154,45 @@ export default function WorkshopTable({
         onError: (e) => {
             addToast({
                 title: `Error: ${e.message}`,
+                color: "danger",
+            });
+        },
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: deleteWorkshop,
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(["workshop"], (old: TWorkshop[]) =>
+                old.filter((w) => w.uuid !== variables.workshop_uuid),
+            );
+            addToast({
+                title: "Successfully deleted workshop",
+                color: "success",
+            });
+        },
+        onError: (e) => {
+            addToast({
+                title: `Deletion error: ${e}`,
+                color: "danger",
+            });
+        },
+    });
+    const duplicateMutation = useMutation({
+        mutationFn: duplicateWorkshop,
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(["workshop", data.uuid], data);
+            queryClient.setQueryData(["workshop"], (old: TWorkshop[]) => [
+                data,
+                ...old,
+            ]);
+            addToast({
+                title: "Successfully duplicated workshop",
+                color: "success",
+            });
+        },
+        onError: (e) => {
+            addToast({
+                title: `Duplication error: ${e}`,
                 color: "danger",
             });
         },
@@ -167,15 +242,17 @@ export default function WorkshopTable({
                     isDisabled={isLoading}
                     startContent={<PlusIcon className="size-6" />}
                     onPress={() => {
-                        let t = zonedDateTimeToTimestamp(now(getLocalTimeZone()));
+                        let t = zonedDateTimeToTimestamp(
+                            now(getLocalTimeZone()),
+                        );
                         setIsNew(true);
                         setSelectedWorkshop({
                             uuid: crypto.randomUUID(),
                             title: "",
                             instructors: [],
-                            timestamp_public: t - t % 60,
-                            timestamp_start: t - t % 60,
-                            timestamp_end: t - t % 60 + 60 * 60 * 24,
+                            timestamp_public: t - (t % 60),
+                            timestamp_start: t - (t % 60),
+                            timestamp_end: t - (t % 60) + 60 * 60 * 24,
                             rsvp_list: [],
                             reminder_emails_sent: [],
                             sign_in_list: [],
@@ -188,241 +265,242 @@ export default function WorkshopTable({
                 </Button>
             </div>
             {workshops.length > 0 ? (
-                // <div className="flex flex-col max-h-full overflow-auto w-full">
-                    <MAKETable
-                        content={workshops}
-                        columns={columns}
-                        visibleColumns={visibleColumns}
-                        multiSelect={false}
-                        isLoading={isLoading}
-                        loadingContent={(ref) => (
-                            <div className="flex w-full justify-center">
-                                <Spinner color="white" ref={ref} />
-                            </div>
-                        )}
-                        customColumnComponents={{
-                            title: (workshop) => {
-                                return (
-                                    <div>
-                                        <h2 className="font-bold text-color[#403c38]">
-                                            {workshop.title}
-                                        </h2>
-                                    </div>
-                                );
-                            },
-                            description: (workshop) => {
-                                return (
-                                    <div className="min-w-[15vw]">
-                                        {workshop.description ? (
-                                            <p>{workshop.description}</p>
-                                        ) : (
-                                            <p>
-                                                Come join the Makerspace for a
-                                                fun workshop!
-                                            </p>
-                                        )}
-                                    </div>
-                                );
-                            },
-                            instructors: (workshop) => {
-                                return (
-                                    <div className="flex flex-col gap-2 my-2">
-                                        {workshop.instructors.map(
-                                            (instructor) => (
-                                                <UserChip
-                                                    key={instructor}
-                                                    size="sm"
-                                                    user_uuid={instructor}
-                                                    user={users.find(
-                                                        (u) =>
-                                                            u.uuid ===
-                                                            instructor,
-                                                    )}
-                                                    roles={roles}
-                                                    color="secondary"
-                                                />
-                                            ),
-                                        )}
-                                        {workshop.support_instructors && (
-                                            <>
-                                                {workshop.support_instructors.map(
-                                                    (instructor) => (
-                                                        <UserChip
-                                                            key={instructor}
-                                                            size="sm"
-                                                            user_uuid={
-                                                                instructor
-                                                            }
-                                                            user={users.find(
-                                                                (u) =>
-                                                                    u.uuid ===
-                                                                    instructor,
-                                                            )}
-                                                            roles={roles}
-                                                        />
-                                                    ),
+                <MAKETable
+                    content={workshops}
+                    columns={columns}
+                    visibleColumns={visibleColumns}
+                    multiSelect={false}
+                    isLoading={isLoading}
+                    loadingContent={(ref) => (
+                        <div className="flex w-full justify-center">
+                            <Spinner color="white" ref={ref} />
+                        </div>
+                    )}
+                    customColumnComponents={{
+                        title: (workshop) => {
+                            return (
+                                <div>
+                                    <h2 className="font-bold text-color[#403c38]">
+                                        {workshop.title}
+                                    </h2>
+                                </div>
+                            );
+                        },
+                        description: (workshop) => {
+                            return (
+                                <div className="min-w-[15vw]">
+                                    {workshop.description}
+                                </div>
+                            );
+                        },
+                        instructors: (workshop) => {
+                            return (
+                                <div className="flex flex-col gap-2 my-2">
+                                    {workshop.instructors.map((instructor) => (
+                                        <UserChip
+                                            key={instructor}
+                                            size="sm"
+                                            user_uuid={instructor}
+                                            user={users.find(
+                                                (u) => u.uuid === instructor,
+                                            )}
+                                            roles={roles}
+                                            color="secondary"
+                                        />
+                                    ))}
+                                    {workshop.support_instructors && (
+                                        <>
+                                            {workshop.support_instructors.map(
+                                                (instructor) => (
+                                                    <UserChip
+                                                        key={instructor}
+                                                        size="sm"
+                                                        user_uuid={instructor}
+                                                        user={users.find(
+                                                            (u) =>
+                                                                u.uuid ===
+                                                                instructor,
+                                                        )}
+                                                        roles={roles}
+                                                    />
+                                                ),
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            );
+                        },
+                        ws_time: (workshop) => {
+                            return (
+                                <div className="flex flex-col min-w-[6vw]">
+                                    <h2 className=" text-center">
+                                        {new Date(
+                                            workshop.timestamp_start * 1000,
+                                        ).toLocaleDateString()}
+                                        ,
+                                    </h2>
+                                    <h2 className="text-sm">
+                                        {new Date(
+                                            workshop.timestamp_start * 1000,
+                                        ).toLocaleTimeString()}{" "}
+                                        -{" "}
+                                        {new Date(
+                                            workshop.timestamp_end * 1000,
+                                        ).toLocaleTimeString()}
+                                    </h2>
+                                </div>
+                            );
+                        },
+                        timestamp_public: (workshop) => {
+                            return (
+                                <>
+                                    {workshop.timestamp_public &&
+                                    workshop.timestamp_public >
+                                        Date.now() / 1000 ? (
+                                        <div className="min-w-[6vw]">
+                                            <h2 className="text-center">
+                                                {convertTimestampToDate(
+                                                    workshop.timestamp_public,
                                                 )}
-                                            </>
-                                        )}
-                                    </div>
-                                );
-                            },
-                            ws_time: (workshop) => {
-                                return (
-                                    <div className="flex flex-col min-w-[6vw]">
-                                        <h2 className=" text-center">
-                                            {new Date(
-                                                workshop.timestamp_start * 1000,
-                                            ).toLocaleDateString()}
-                                            ,
-                                        </h2>
-                                        <h2 className="text-sm">
-                                            {new Date(
-                                                workshop.timestamp_start * 1000,
-                                            ).toLocaleTimeString()}{" "}
-                                            -{" "}
-                                            {new Date(
-                                                workshop.timestamp_end * 1000,
-                                            ).toLocaleTimeString()}
-                                        </h2>
-                                    </div>
-                                );
-                            },
-                            timestamp_public: (workshop) => {
-                                return (
-                                    <>
-                                        {workshop.timestamp_public &&
-                                        workshop.timestamp_public >
-                                            Date.now() / 1000 ? (
-                                            <div className="min-w-[6vw]">
-                                                <h2 className="text-center">
-                                                    {convertTimestampToDate(
-                                                        workshop.timestamp_public,
-                                                    )}
-                                                </h2>
-                                            </div>
-                                        ) : (
-                                            <div className="flex justify-center">
-                                                <Button
-                                                    isIconOnly
-                                                    color="success"
-                                                    radius="full"
-                                                    startContent={
-                                                        <CheckIcon className="size-6" />
-                                                    }
-                                                />
-                                            </div>
-                                        )}
-                                    </>
-                                );
-                            },
-                            capacity: (workshop) => {
-                                return (
-                                    <div className="text-center">
-                                        {workshop.capacity ? (
-                                            <p>{workshop.capacity}</p>
-                                        ) : (
-                                            <p>No Max Capacity</p>
-                                        )}
-                                    </div>
-                                );
-                            },
-                            required_certifications: (workshop) => (
-                                <div className="flex w-full justify-center">
+                                            </h2>
+                                        </div>
+                                    ) : (
+                                        <div className="flex justify-center">
+                                            <Button
+                                                isIconOnly
+                                                color="success"
+                                                radius="full"
+                                                startContent={
+                                                    <CheckIcon className="size-6" />
+                                                }
+                                            />
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        },
+                        capacity: (workshop) => {
+                            return (
+                                <div className="text-center">
+                                    {workshop.capacity ? (
+                                        <p>{workshop.capacity}</p>
+                                    ) : (
+                                        <p>No Max Capacity</p>
+                                    )}
+                                </div>
+                            );
+                        },
+                        required_certifications: (workshop) => (
+                            <div className="flex w-full justify-center">
+                                <Button
+                                    isIconOnly
+                                    className="bg-default-300 mx-auto"
+                                    startContent={
+                                        <TagIcon className="size-6" />
+                                    }
+                                    onPress={() => {
+                                        setSelectedWorkshop(workshop);
+                                        certsOnOpen();
+                                    }}
+                                />
+                            </div>
+                        ),
+                        signups: (workshop) => (
+                            <Button
+                                isIconOnly
+                                className="bg-default-300"
+                                startContent={<UserIcon className="size-6" />}
+                                onPress={() => {
+                                    setSelectedWorkshop(workshop);
+                                    peopleOnOpen();
+                                }}
+                            />
+                        ),
+                        photos: (workshop) => (
+                            <Button
+                                isIconOnly
+                                className="bg-default-300"
+                                startContent={<PhotoIcon className="size-6" />}
+                                onPress={() => {
+                                    setSelectedWorkshop(workshop);
+                                    imagesOnOpen();
+                                }}
+                            />
+                        ),
+                        // TODO: Add roles
+                        // "authorized_roles": (workshop) => {
+                        //     return (
+                        //         <div>
+                        //             {
+                        //                 workshop.authorized_roles ?
+
+                        //                 workshop.authorized_roles.map((roleUUID) => {
+                        //                     return <UserRole
+                        //                     role_uuid={workshop.authorized_roles}
+                        //                   />
+                        //                 })
+
+                        //             }
+
+                        //         </div>
+                        //     )
+                        // },
+                        edit: (workshop) => {
+                            return (
+                                <>
                                     <Button
                                         isIconOnly
-                                        className="bg-default-300 mx-auto"
+                                        color="primary"
                                         startContent={
-                                            <TagIcon className="size-6" />
+                                            <PencilSquareIcon className="size-6" />
                                         }
                                         onPress={() => {
                                             setSelectedWorkshop(workshop);
-                                            certsOnOpen();
+                                            setIsNew(false);
+                                            editOnOpen();
                                         }}
-                                    />
-                                </div>
-                            ),
-                            signups: (workshop) => (
-                                <Button
-                                    isIconOnly
-                                    className="bg-default-300"
-                                    startContent={
-                                        <UserIcon className="size-6" />
-                                    }
-                                    onPress={() => {
-                                        setSelectedWorkshop(workshop);
-                                        peopleOnOpen();
-                                    }}
-                                />
-                            ),
-                            photos: (workshop) => (
-                                <Button
-                                    isIconOnly
-                                    className="bg-default-300"
-                                    startContent={
-                                        <PhotoIcon className="size-6" />
-                                    }
-                                    onPress={() => {
-                                        setSelectedWorkshop(workshop);
-                                        imagesOnOpen();
-                                    }}
-                                />
-                            ),
-                            // TODO: Add roles
-                            // "authorized_roles": (workshop) => {
-                            //     return (
-                            //         <div>
-                            //             {
-                            //                 workshop.authorized_roles ?
-
-                            //                 workshop.authorized_roles.map((roleUUID) => {
-                            //                     return <UserRole
-                            //                     role_uuid={workshop.authorized_roles}
-                            //                   />
-                            //                 })
-
-                            //             }
-
-                            //         </div>
-                            //     )
-                            // },
-                            edit: (workshop) => {
-                                return (
-                                    <>
-                                        <Button
-                                            isIconOnly
-                                            color="primary"
-                                            startContent={
-                                                <PencilSquareIcon className="size-6" />
-                                            }
-                                            onPress={() => {
-                                                setSelectedWorkshop(workshop);
-                                                setIsNew(false);
-                                                editOnOpen();
-                                            }}
-                                        ></Button>
-                                    </>
-                                );
-                            },
-                            delete: (workshop) => {
-                                return (
-                                    <>
-                                        <Button
-                                            isIconOnly
-                                            color="danger"
-                                            startContent={
-                                                <TrashIcon className="size-6" />
-                                            }
-                                            onPress={() => {
-                                                setSelectedWorkshop(workshop);
-                                            }}
-                                        ></Button>
-                                    </>
-                                );
-                            },
-                        }}
-                    />
-                // </div> 
+                                    ></Button>
+                                </>
+                            );
+                        },
+                        duplicate: (workshop) => {
+                            return (
+                                <>
+                                    <Button
+                                        isIconOnly
+                                        color="primary"
+                                        startContent={
+                                            <DocumentDuplicateIcon className="size-6" />
+                                        }
+                                        onPress={() => {
+                                            duplicateMutation.mutate({
+                                                workshop: workshop,
+                                            });
+                                        }}
+                                    ></Button>
+                                </>
+                            );
+                        },
+                        delete: (workshop) => {
+                            return (
+                                <>
+                                    <Button
+                                        isIconOnly
+                                        color="danger"
+                                        startContent={
+                                            <TrashIcon className="size-6" />
+                                        }
+                                        onPress={() => {
+                                            deleteMutation.mutate({
+                                                workshop_uuid: workshop.uuid,
+                                            });
+                                        }}
+                                    ></Button>
+                                </>
+                            );
+                        },
+                    }}
+                />
             ) : (
                 <p>No Workshops Found</p>
             )}
