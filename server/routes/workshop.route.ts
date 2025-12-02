@@ -410,6 +410,7 @@ router.patch(
             const updated_workshop = await cancelRSVPToWorkshop(
                 workshop_uuid,
                 requesting_uuid,
+                req.log,
             );
             if (!updated_workshop) {
                 req.log.warn(

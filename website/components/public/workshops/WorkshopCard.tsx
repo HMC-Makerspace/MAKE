@@ -266,7 +266,7 @@ export default function WorkshopCard({
                                 ? "Join Waitlist"
                                 : rsvpIndex === -1 && !overCapacity
                                   ? "RSVP"
-                                  : workshop.capacity &&
+                                  : !workshop.capacity ||
                                       rsvpIndex < workshop.capacity
                                     ? "Cancel RSVP"
                                     : "Leave Waitlist"}
