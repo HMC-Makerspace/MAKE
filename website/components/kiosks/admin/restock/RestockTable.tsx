@@ -284,7 +284,7 @@ export default function RestockTable({
 
     // table returned
     return (
-        <div className='flex flex-col max-h-full overflow-auto w-full'>
+        <div className="flex flex-col max-h-full overflow-auto w-full">
             <div className="flex  flex-col content-center items-center">
                 <h1 className="text-xl font-bold text-foreground-900 mb-2">
                     Restocks
@@ -306,20 +306,20 @@ export default function RestockTable({
                                 <div className="flex flex-row gap-1 m-2">
                                     {statusFilter === "all"
                                         ? statusOptions.map((status) => (
-                                            <RestockType
-                                                request_status={status.value}
-                                                size="sm"
-                                            />
-                                        ))
+                                              <RestockType
+                                                  request_status={status.value}
+                                                  size="sm"
+                                              />
+                                          ))
                                         : Array.from(statusFilter)
-                                            .map(Number)
-                                            .sort((a, b) => a - b)
-                                            .map((status) => (
-                                                <RestockType
-                                                    request_status={status}
-                                                    size="sm"
-                                                />
-                                            ))}
+                                              .map(Number)
+                                              .sort((a, b) => a - b)
+                                              .map((status) => (
+                                                  <RestockType
+                                                      request_status={status}
+                                                      size="sm"
+                                                  />
+                                              ))}
                                 </div>
                             </Button>
                         </DropdownTrigger>
@@ -353,6 +353,11 @@ export default function RestockTable({
                 multiSelect={false}
                 emptyContent={"No Restock Requests Found"}
                 customColumnComponents={{
+                    reason: (restock) => (
+                        <div className="max-w-[15vw] break-words overflow-auto">
+                            {restock.reason}
+                        </div>
+                    ),
                     time_requested: (restock) => (
                         <span>
                             {convertTimestampToDate(
@@ -403,7 +408,7 @@ export default function RestockTable({
                                             </div>
                                         );
                                     })}
-                                    <div className='w-full flex  py-1'>
+                                    <div className="w-full flex  py-1">
                                         <Button
                                             color="primary"
                                             size="sm"
@@ -412,12 +417,13 @@ export default function RestockTable({
                                                 restockUserOnOpen();
                                             }}
                                             className="w-full"
-                                            startContent={<UserPlusIcon className='size-5' />}
+                                            startContent={
+                                                <UserPlusIcon className="size-5" />
+                                            }
                                         >
                                             Add User
                                         </Button>
                                     </div>
-
                                 </AccordionItem>
                             </Accordion>
                         </div>
