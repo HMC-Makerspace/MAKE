@@ -15,12 +15,13 @@ import CertificationTag from "../../kiosks/admin/certifications/CertificationTag
 import { CalendarBoldIcon } from "@heroui/shared-icons";
 import { TUser } from "common/user";
 import axios, { AxiosError } from "axios";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { timestampToZonedDateTime } from "../../../utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { timestampToZonedDateTime, verifyScopes } from "../../../utils";
 import { TConfig } from "common/config";
 import { DateFormatter } from "@internationalized/date";
 import { TCertificate, TCertification } from "common/certification";
 import { useMemo } from "react";
+import { API_SCOPE } from "../../../../common/global";
 
 // cancel means cancel_rsvp
 async function rsvp({
@@ -101,6 +102,16 @@ export default function WorkshopCard({
         },
     });
 
+    const {
+        data: scopes,
+        isLoading: scopesLoading,
+        isError: scopesError,
+    } = useQuery<API_SCOPE[]>({
+        queryKey: ["user", "self", "scopes"],
+        refetchOnWindowFocus: false,
+        retry: false,
+    });
+
     const startZDT = timestampToZonedDateTime(
         workshop.timestamp_start,
         config?.schedule.timezone,
@@ -137,6 +148,11 @@ export default function WorkshopCard({
             hour: "numeric",
             minute: "2-digit",
         });
+    
+    const canRSVP =
+        scopes && verifyScopes(scopes, [API_SCOPE.RSVP_WORKSHOP]);
+    const canSignIn =
+        scopes && verifyScopes(scopes, [API_SCOPE.SIGN_IN_WORKSHOP]);
 
     return (
         <Card id={workshop.title} key={workshop.title} className="h-[44dvh]">
@@ -220,8 +236,9 @@ export default function WorkshopCard({
                             />
                         ))}
                 </div>
-                <div className="absolute w-full h-fit bottom-3 flex justify-center z-20">
-                    <Tooltip
+
+                <div className="absolute w-full h-fit bottom-3 flex justify-evenly z-20">
+                    {canRSVP && (<Tooltip
                         color="primary"
                         content={
                             workshop.timestamp_public &&
@@ -265,13 +282,58 @@ export default function WorkshopCard({
                             {rsvpIndex === -1 && overCapacity
                                 ? "Join Waitlist"
                                 : rsvpIndex === -1 && !overCapacity
-                                  ? "RSVP"
-                                  : !workshop.capacity ||
-                                      rsvpIndex < workshop.capacity
+                                ? "RSVP"
+                                : !workshop.capacity ||
+                                    rsvpIndex < workshop.capacity
                                     ? "Cancel RSVP"
                                     : "Leave Waitlist"}
                         </Button>
-                    </Tooltip>
+                    </Tooltip>)}
+                    
+                    {canSignIn && (<Tooltip
+                        color="primary"
+                        content={
+                            workshop.timestamp_start && config?.workshop.sign_in_enabled_within &&
+                            `Sign ins are closed until ${new Date((workshop.timestamp_start - config.workshop.sign_in_enabled_within) * 1000).toDateString()}`
+                        }
+                        isDisabled={
+                            workshop.timestamp_start && config?.workshop.sign_in_enabled_within
+                                ? workshop.timestamp_start - config.workshop.sign_in_enabled_within < Date.now() / 1000
+                                : true
+                        }
+                    >
+                        <Button
+                            className="text-small font-bold text-white bg-primary hover:bg-primary/50 hover:outline"
+                            color="default"
+                            radius="lg"
+                            size="sm"
+                            variant="flat"
+                            onPress={() => {
+                                // Only sign in if workshop is public
+                                if (
+                                    workshop.timestamp_start && config?.workshop.sign_in_enabled_within &&
+                                    workshop.timestamp_start - config.workshop.sign_in_enabled_within < Date.now() / 1000
+                                ) {
+                                    // rsvpMutation.mutate({
+                                    //     workshop_uuid: workshop.uuid,
+                                    //     cancel: workshop.rsvp_list.some(
+                                    //         (rsvp_record) =>
+                                    //             rsvp_record.user_uuid ===
+                                    //             self?.uuid,
+                                    //     ),
+                                    // });
+                                    console.log("signing in")
+                                }
+                            }}
+                            isDisabled={
+                                !self ||
+                                //rsvpMutation.isPending ||
+                                workshop.timestamp_end < Date.now() / 1000
+                            }
+                        >
+                            Sign in
+                        </Button>
+                    </Tooltip>)}
                 </div>
             </CardBody>
         </Card>
