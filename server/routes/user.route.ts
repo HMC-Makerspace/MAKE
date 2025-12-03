@@ -25,7 +25,7 @@ import {
     updateUserPublicInfo,
     updateUserRole,
 } from "controllers/user.controller";
-import { verifyRequest } from "controllers/verify.controller";
+import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -40,6 +40,7 @@ import { ScheduleUUID } from "common/schedule";
 import { getCertification } from "controllers/certification.controller";
 import { CERTIFICATION_VISIBILITY } from "common/certification";
 import { createHash } from "crypto";
+import { UserSchema } from "models/user.model";
 
 // --- Request and Response Types ---
 type UserRequest = Request<{}, {}, { user_obj: TUser }>;
@@ -937,20 +938,26 @@ router.post("/", async (req: UserRequest, res: UserResponse) => {
 
     // If the user is authorized, perform the creation
     if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_USER)) {
-        const user = await createUser(user_obj);
-        if (!user) {
-            req.log.warn(
-                `An attempt was made to create a user with uuid ` +
-                    `${new_user_uuid}, but a user with that uuid already exists`,
-            );
-            res.status(StatusCodes.CONFLICT).json({
-                error: `A user with uuid \`${new_user_uuid}\` already exists.`,
-            });
-            return;
+        req.log.info(user_obj)
+        const verified_user_obj = await verifySchema(UserSchema, user_obj, req, res, "user");
+
+        if (verified_user_obj) {
+            const user = await createUser(verified_user_obj);
+            if (!user) {
+                req.log.warn(
+                    `An attempt was made to create a user with uuid ` +
+                        `${new_user_uuid}, but a user with that uuid already exists`,
+                );
+                res.status(StatusCodes.CONFLICT).json({
+                    error: `A user with uuid \`${new_user_uuid}\` already exists.`,
+                });
+                return;
+            }
+            req.log.debug(`Created user with uuid ${new_user_uuid}`);
+            // Return the new user object
+            res.status(StatusCodes.CREATED).json(user);
         }
-        req.log.debug(`Created user with uuid ${new_user_uuid}`);
-        // Return the new user object
-        res.status(StatusCodes.CREATED).json(user);
+
     } else {
         // If the user is not authorized, provide a status error
         req.log.warn({

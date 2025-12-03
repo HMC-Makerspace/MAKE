@@ -8,6 +8,7 @@ import type {
     TUserRoleLog,
 } from "common/user";
 import { Certificate } from "./certification.model";
+import Joi from 'joi';
 
 /**
  * See {@link TUserRole} documentation for type information.
@@ -54,6 +55,20 @@ const UserAvailabilityDay = new mongoose.Schema<TUserAvailabilityDay>({
 });
 
 /**
+ * User Availability Day Schema through joi
+ */
+const UserAvailabilityDaySchema = Joi.object({
+    day: Joi.number().required(),
+    availability: Joi.array().items(
+        Joi.object({
+            sec_start: Joi.number().required(),
+            sec_end: Joi.number().required()
+        })
+    ).required()
+});
+
+
+/**
  * See {@link TUserAvailability} documentation for type information.
  * Stored as children of {@link User}.
  */
@@ -63,6 +78,7 @@ const UserAvailability = new mongoose.Schema<TUserAvailability>({
     min_shift_count: { type: Number, required: false },
     max_shift_count: { type: Number, required: false },
 });
+
 
 /**
  * See {@link TUser} documentation for type information.
@@ -83,3 +99,86 @@ export const User = new mongoose.Schema<TUser>(
     },
     { collection: "users" },
 );
+
+/**
+ * User Schema through joi
+ */
+export const UserSchema = Joi.object<TUser>({
+    uuid: Joi.string()
+        .required(),
+    name: Joi.string()
+        .required(),
+    email: Joi.string()
+        .email()
+        .required(),
+    college_id: Joi.string()
+    // maybe consider validating this, here is where ids could be validated!
+        .allow('')
+        .optional(),
+    active_roles: Joi.array()
+        .items(
+            // user role log schema
+            Joi.object({ 
+                role_uuid: Joi.string().required(),
+                timestamp_gained: Joi.number().required(),
+                timestamp_revoked: Joi.number().optional()
+            })
+        )
+        .required(),
+    past_roles: Joi.array()
+        .items(
+            // user role log schema
+            Joi.object({ 
+                role_uuid: Joi.string().required(),
+                timestamp_gained: Joi.number().required(),
+                timestamp_revoked: Joi.number().optional()
+            })
+        )
+        .required(),
+    active_certificates: Joi.array()
+        .items(
+            // certificate schema
+            Joi.object({
+                certification_uuid: Joi.string().required(),
+                level: Joi.number().required(),
+                timestamp_granted: Joi.number().required(),
+                timestamp_expires: Joi.number().optional()
+            })
+        )
+        .optional(),
+    past_certificates: Joi.array()
+        .items(
+            // certificate schema
+            Joi.object({
+                certification_uuid: Joi.string().required(),
+                level: Joi.number().required(),
+                timestamp_granted: Joi.number().required(),
+                timestamp_expires: Joi.number().optional()
+            })
+        )
+        .optional(),
+    files: Joi.array()
+        .items(
+            Joi.string()
+        )
+        .optional(),
+    work_schedules: Joi.array()
+        .items(
+            // user availability object
+            Joi.object({
+                schedule: Joi.string().required(),
+                days: Joi.array()
+                    .items(
+                        UserAvailabilityDaySchema
+                    )
+                    .required(),
+                min_shift_count: Joi.number().optional(),
+                max_shift_count: Joi.number().optional()
+            })
+        )
+        .optional(),
+    passkey: Joi.string()
+        .allow('')
+        .allow(null)
+        .optional()
+});
