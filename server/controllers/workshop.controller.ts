@@ -340,7 +340,7 @@ export async function workshopReminderEmailCron(logger: Logger) {
                 new_sent_times.push(reminder);
             }
         }
-        
+
         if (new_sent_times.length != workshop.reminder_emails_sent.length) {
             await Workshops.updateOne(
                 {
