@@ -51,6 +51,7 @@
     "fuse.js": "^7.1.0",
     "google-auth-library": "^9.15.1",
     "http-status-codes": "^2.3.0",
+    "joi": "^18.0.1",
     "lusca": "^1.7.0",
     "mongoose": "^8.16.3",
     "multer": "^1.4.5-lts.2",
