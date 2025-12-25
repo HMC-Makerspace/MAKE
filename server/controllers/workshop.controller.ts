@@ -11,6 +11,8 @@ import { Logger } from "pino";
 import WorkshopConfirmationTemplate from "email_templates/workshop_confirmation";
 import { getConfig } from "./config.controller";
 import WorkshopWaitlistTemplate from "email_templates/workshop_waitlist_move";
+import { Response } from "express";
+import { StatusCodes } from "http-status-codes";
 
 /**
  * Get all workshops in the database
@@ -173,12 +175,19 @@ export async function rsvpToWorkshop(
     workshop_uuid: UUID,
     user_uuid: UserUUID,
     logger: Logger,
+    res: Response,
 ): Promise<TWorkshop | null> {
     const workshop = await getWorkshop(workshop_uuid);
     const user = await getUser(user_uuid);
     const config = await getConfig();
     // If the workshop or user doesn't exist, the RSVP fails
     if (!workshop || !user || !config) {
+        logger.warn(
+            `Failed to find ${(workshop ?? "workshop") || (user ?? "user") || (config ?? "config")}`,
+        );
+        res.status(StatusCodes.NOT_FOUND).json({
+            error: `Error finding workshop.`,
+        });
         return null;
     }
     // If the workshop is not yet public, RSVP fails
@@ -186,6 +195,12 @@ export async function rsvpToWorkshop(
         workshop.timestamp_public &&
         workshop.timestamp_public > Date.now() / 1000
     ) {
+        logger.warn(
+            `No public workshop found by uuid ${workshop_uuid}, failed to RSVP`,
+        );
+        res.status(StatusCodes.FORBIDDEN).json({
+            error: `\"${workshop.title}\" is not public, failed to RSVP.`,
+        });
         return null;
     }
     // If the user is already in the rsvp list, the RSVP fails
@@ -194,6 +209,29 @@ export async function rsvpToWorkshop(
             (rsvp_record) => rsvp_record.user_uuid === user_uuid,
         )
     ) {
+        logger.warn(`User ${user.uuid} already RSVPd to workshop `);
+        res.status(StatusCodes.FORBIDDEN).json({
+            error: `Already RSVPd to \"${workshop.title}\"!`,
+        });
+        return null;
+    }
+    // If the user does not have all necessary certifications, the RSVP fails
+    if (
+        !workshop.required_certifications?.every((workshop_cert) =>
+            user.active_certificates?.some(
+                (user_cert) =>
+                    user_cert.certification_uuid ===
+                        workshop_cert.certification_uuid &&
+                    user_cert.level >= workshop_cert.required_level,
+            ),
+        )
+    ) {
+        logger.info(
+            `User ${user.uuid} was missing required certifications for workshop ${workshop.uuid}.`,
+        );
+        res.status(StatusCodes.FORBIDDEN).json({
+            error: `Missing one or more required certifications!`,
+        });
         return null;
     }
     // Add the user to the rsvp list
