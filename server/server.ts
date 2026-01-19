@@ -1,4 +1,5 @@
 import express, { Application } from "express";
+import fs from "fs";
 import ViteExpress from "vite-express";
 import compression from "compression";
 import connectDB from "./core/db";
@@ -39,22 +40,28 @@ import {
     checkoutEmailCron,
 } from "controllers/checkout.controller";
 import { workshopReminderEmailCron } from "controllers/workshop.controller";
-import { createUser, getUserByEmail } from "controllers/user.controller";
 
 // @ts-expect-error Static asset loading using Vite
 import favicon from "common/favicon.ico";
 import { clearExpiredFilesCron } from "controllers/file.controller";
 import { revokeExpiredCertificatesCron } from "controllers/certification.controller";
 
+// Setup logging
+const logger = pino();
+logger.info("Begin logging");
+
+if (!fs.existsSync(".env")) {
+    logger.fatal(
+        "\n>>>>>>>>>>>>>\nNo .env file found, please run " +
+            "`bun setup` to initialize.\n>>>>>>>>>>>>>",
+    );
+}
+
 const app: express.Express = express();
 const store = new (MongoDBStore(session))({
     uri: process.env.MONGO_URI,
     collection: "session",
 });
-
-// Setup logging
-const logger = pino();
-logger.info("Begin logging");
 
 if (process.env.NODE_ENV == "development") {
     logger.level = "debug";
