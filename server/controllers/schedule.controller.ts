@@ -54,10 +54,18 @@ export async function getActiveSchedule() {
  */
 export async function getStagingSchedule() {
     const Schedules = mongoose.model("Schedule", Schedule, "schedules");
-    // Get the schedule that is currently active (should only be one)
-    return Schedules.findOne({
+    // Get the schedule that is currently staged (should only be one)
+    const stagingSchedule = await Schedules.findOne({
         staged: true,
     });
+    if (stagingSchedule) {
+        return stagingSchedule;
+    } else {
+        // Backup in case there is no staging schedule.
+        return Schedules.findOne({
+            active: true,
+        });
+    }
 }
 
 /**
