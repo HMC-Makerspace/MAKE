@@ -40,7 +40,7 @@ import { ScheduleUUID } from "common/schedule";
 import { getCertification } from "controllers/certification.controller";
 import { CERTIFICATION_VISIBILITY } from "common/certification";
 import { createHash } from "crypto";
-import { UserSchema } from "models/user.model";
+import { UserSchema, UserRole, UserRoleSchema } from "models/user.model";
 
 // --- Request and Response Types ---
 type UserRequest = Request<{}, {}, { user_obj: TUser }>;
@@ -197,19 +197,24 @@ router.post("/role/", async (req: UserRoleRequest, res: UserRoleResponse) => {
 
     // If the user is authorized, create the role
     if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_ROLE)) {
-        const user_role = await createUserRole(role_obj);
-        if (!user_role) {
-            req.log.warn(
-                `An attempt was made to create a user role with uuid ` +
-                    `${role_uuid}, but a role with that uuid already exists`,
-            );
-            res.status(StatusCodes.CONFLICT).json({
-                error: `A user role with uuid \`${role_uuid}\` already exists.`,
-            });
-            return;
+        console.info(role_obj)
+        const verified_role_obj = await verifySchema(UserRoleSchema, role_obj, req, res, "role");
+
+        if (verified_role_obj) {
+            const user_role = await createUserRole(verified_role_obj);
+            if (!user_role) {
+                req.log.warn(
+                    `An attempt was made to create a user role with uuid ` +
+                        `${role_uuid}, but a role with that uuid already exists`,
+                );
+                res.status(StatusCodes.CONFLICT).json({
+                    error: `A user role with uuid \`${role_uuid}\` already exists.`,
+                });
+                return;
+            }
+            req.log.debug(`Created user role with uuid ${role_uuid}`);
+            res.status(StatusCodes.CREATED).json(user_role);
         }
-        req.log.debug(`Created user role with uuid ${role_uuid}`);
-        res.status(StatusCodes.CREATED).json(user_role);
     } else {
         // If the user is not authorized, provide a status error
         req.log.warn({
@@ -938,7 +943,6 @@ router.post("/", async (req: UserRequest, res: UserResponse) => {
 
     // If the user is authorized, perform the creation
     if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_USER)) {
-        req.log.info(user_obj)
         const verified_user_obj = await verifySchema(UserSchema, user_obj, req, res, "user");
 
         if (verified_user_obj) {

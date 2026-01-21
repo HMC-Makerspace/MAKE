@@ -24,7 +24,7 @@ import {
     getStagingSchedule,
     setStagingSchedule,
 } from "controllers/schedule.controller";
-import { verifyRequest } from "controllers/verify.controller";
+import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -36,6 +36,7 @@ import {
 } from "common/verify";
 import { TAlert, TPublicScheduleData, TSchedule } from "common/schedule";
 import { TShift, TShiftEvent } from "common/shift";
+import { ScheduleSchema, ShiftSchema, AlertSchema } from "models/schedule.model";
 
 // --- Request and Response Types ---
 type ScheduleRequest = Request<{}, {}, { schedule_obj: TSchedule }>;
@@ -288,22 +289,26 @@ router.post(
                 API_SCOPE.UPDATE_SCHEDULE,
             )
         ) {
-            const new_schedule = await createShiftInSchedule(
-                schedule_uuid,
-                shift_obj,
-            );
-            if (!new_schedule) {
-                req.log.warn(
-                    `An attempt was made to create a shift with uuid ` +
-                        `${shift_obj.uuid}, but a shift with that uuid already exists`,
+            const verified_shift_obj = await verifySchema(ShiftSchema, shift_obj, req, res, "shift");
+
+            if (verified_shift_obj) {
+                const new_schedule = await createShiftInSchedule(
+                    schedule_uuid,
+                    verified_shift_obj,
                 );
-                res.status(StatusCodes.CONFLICT).json({
-                    error: `A shift with uuid \`${shift_obj.uuid}\` already exists.`,
-                });
-                return;
+                if (!new_schedule) {
+                    req.log.warn(
+                        `An attempt was made to create a shift with uuid ` +
+                            `${shift_obj.uuid}, but a shift with that uuid already exists`,
+                    );
+                    res.status(StatusCodes.CONFLICT).json({
+                        error: `A shift with uuid \`${shift_obj.uuid}\` already exists.`,
+                    });
+                    return;
+                }
+                req.log.debug(`Created shift with uuid ${shift_obj.uuid}`);
+                res.status(StatusCodes.CREATED).json(new_schedule);
             }
-            req.log.debug(`Created shift with uuid ${shift_obj.uuid}`);
-            res.status(StatusCodes.CREATED).json(new_schedule);
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to create a shift",
@@ -586,22 +591,26 @@ router.post(
                 API_SCOPE.CREATE_ALERT,
             )
         ) {
-            const new_schedule = await createAlertInSchedule(
-                schedule_uuid,
-                alert_obj,
-            );
-            if (!new_schedule) {
-                req.log.warn(
-                    `An attempt was made to create an alert in the schedule ` +
-                        `with uuid ${schedule_uuid}, but that schedule was not found`,
+            const verified_alert_obj = await verifySchema(AlertSchema, alert_obj, req, res, "alert")
+
+            if (verified_alert_obj) {
+                const new_schedule = await createAlertInSchedule(
+                    schedule_uuid,
+                    verified_alert_obj,
                 );
-                res.status(StatusCodes.NOT_FOUND).json({
-                    error: `Schedule with uuid \`${schedule_uuid}\` not found.`,
-                });
-                return;
+                if (!new_schedule) {
+                    req.log.warn(
+                        `An attempt was made to create an alert in the schedule ` +
+                            `with uuid ${schedule_uuid}, but that schedule was not found`,
+                    );
+                    res.status(StatusCodes.NOT_FOUND).json({
+                        error: `Schedule with uuid \`${schedule_uuid}\` not found.`,
+                    });
+                    return;
+                }
+                req.log.debug(`Created alert in schedule ${schedule_uuid}`);
+                res.status(StatusCodes.CREATED).json(new_schedule);
             }
-            req.log.debug(`Created alert in schedule ${schedule_uuid}`);
-            res.status(StatusCodes.CREATED).json(new_schedule);
         } else {
             req.log.warn({
                 msg: `Forbidden user attempted to create an alert in schedule ${schedule_uuid}`,
@@ -1038,19 +1047,23 @@ router.post("/", async (req: ScheduleRequest, res: ScheduleResponse) => {
 
     // If the user is authorized, create a schedule
     if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_SCHEDULE)) {
-        const schedule = await createSchedule(schedule_obj);
-        if (!schedule) {
-            req.log.warn(
-                `An attempt was made to create a schedule with uuid ` +
-                    `${schedule_uuid}, but a schedule with that uuid already exists`,
-            );
-            res.status(StatusCodes.CONFLICT).json({
-                error: `A schedule with uuid \`${schedule_uuid}\` already exists.`,
-            });
-            return;
+        const verified_schedule_obj = await verifySchema(ScheduleSchema, schedule_obj, req, res, "schedule");
+        
+        if (verified_schedule_obj) {
+            const schedule = await createSchedule(verified_schedule_obj);
+            if (!schedule) {
+                req.log.warn(
+                    `An attempt was made to create a schedule with uuid ` +
+                        `${schedule_uuid}, but a schedule with that uuid already exists`,
+                );
+                res.status(StatusCodes.CONFLICT).json({
+                    error: `A schedule with uuid \`${schedule_uuid}\` already exists.`,
+                });
+                return;
+            }
+            req.log.debug(`Created schedule with uuid ${schedule_uuid}`);
+            res.status(StatusCodes.CREATED).json(schedule);
         }
-        req.log.debug(`Created schedule with uuid ${schedule_uuid}`);
-        res.status(StatusCodes.CREATED).json(schedule);
     } else {
         req.log.warn({
             msg: "Forbidden user attempted to create a schedule",

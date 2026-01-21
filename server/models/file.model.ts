@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import type { TDocument, TFile } from "common/file";
+import Joi from "joi";
 
 /**
  * See {@link TFile} documentation for type information.
@@ -24,4 +25,12 @@ export const Document = new mongoose.Schema<TDocument>({
     name: { type: String, required: true },
     link: { type: String, required: true },
     authorized_roles: { type: [String], required: false },
+});
+
+export const DocumentSchema = Joi.object<TDocument>({
+    name: Joi.string().required(),
+    link: Joi.string().required(),
+    authorized_roles: Joi.array().items(
+        Joi.string()
+    ).optional()
 });

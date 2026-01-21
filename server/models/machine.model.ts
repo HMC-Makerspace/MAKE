@@ -4,8 +4,9 @@ import {
     TMachine,
 } from "common/machine";
 import mongoose from "mongoose";
-import { Document } from "./file.model";
-import { RequiredCertificate } from "./certification.model";
+import { Document, DocumentSchema } from "./file.model";
+import { RequiredCertificate, RequiredCertificateSchema } from "./certification.model";
+import Joi from 'joi';
 
 /**
  * See {@link TMachineInstance} documentation for type information.
@@ -17,6 +18,14 @@ const MachineInstance = new mongoose.Schema<TMachineInstance>({
     status: { type: Number, required: true },
     reserved: { type: Boolean, required: true },
     message: { type: String, required: false },
+});
+
+const MachineInstanceSchema = Joi.object<TMachineInstance>({
+    uuid: Joi.string().required(),
+    name: Joi.string().optional().allow(""),
+    status: Joi.number().required(),
+    reserved: Joi.boolean().required(),
+    message: Joi.string().optional()
 });
 
 /**
@@ -31,6 +40,13 @@ const MachineInstanceStatusLog = new mongoose.Schema<TMachineInstanceStatusLog>(
         message: { type: String, required: false },
     },
 );
+
+const MachineInstanceStatusLogSchema = Joi.object<TMachineInstanceStatusLog>({
+    timestamp: Joi.number().required(),
+    instance_uuid: Joi.string().optional().allow(""),
+    status: Joi.number().required(),
+    message: Joi.string().optional().allow("")
+});
 
 /**
  * See {@link TMachine} documentation for type information.
@@ -55,3 +71,30 @@ export const Machine = new mongoose.Schema<TMachine>(
     },
     { collection: "machines" },
 );
+
+export const MachineSchema = Joi.object<TMachine>({
+    uuid: Joi.string().required(),
+    name: Joi.string().required(),
+    description: Joi.string().optional().allow(""),
+    images: Joi.array().items(
+        Joi.string
+    ).optional(),
+    count: Joi.number().required(),
+    instances: Joi.array().items(
+        MachineInstanceSchema
+    ).required(),
+    status_logs: Joi.array().items(
+        MachineInstanceStatusLogSchema
+    ).required(),
+    documents: Joi.array().items(
+        DocumentSchema
+    ).optional(),
+    required_certifications: Joi.array().items(
+        RequiredCertificateSchema
+    ).optional(),
+    authorized_roles: Joi.array().items(
+        Joi.string()
+    ).required(),
+    reservable: Joi.boolean().optional(),
+    reservation_type: Joi.number().optional()
+});

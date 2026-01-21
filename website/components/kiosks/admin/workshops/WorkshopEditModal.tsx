@@ -172,8 +172,6 @@ export default function WorkshopEditModal({
                 authorized_roles: workshop.authorized_roles,
             };
 
-            console.log("here");
-
             updateCreateMutation.reset();
 
             updateCreateMutation.mutate({

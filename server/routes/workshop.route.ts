@@ -12,7 +12,7 @@ import {
     getWorkshopsVisibleToUser,
     patchWorkshop,
 } from "controllers/workshop.controller";
-import { verifyRequest } from "controllers/verify.controller";
+import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -23,6 +23,7 @@ import {
     SuccessfulResponse,
 } from "common/verify";
 import { TPublicWorkshopData, TWorkshop } from "common/workshop";
+import { WorkshopSchema } from "models/workshop.model";
 
 // --- Request and Response Types ---
 type WorkshopRequest = Request<{}, {}, { workshop_obj: TWorkshop }>;
@@ -203,19 +204,23 @@ router.post("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
 
     // If the user is authorized, create a workshop
     if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_WORKSHOP)) {
-        const workshop = await createWorkshop(workshop_obj);
-        if (!workshop) {
-            req.log.warn(
-                `An attempt was made to create a workshop with uuid ` +
-                    `${workshop_uuid}, but a workshop with that uuid already exists`,
-            );
-            res.status(StatusCodes.CONFLICT).json({
-                error: `A workshop with uuid \`${workshop_uuid}\` already exists.`,
-            });
-            return;
+        const verified_workshop_obj = await verifySchema(WorkshopSchema, workshop_obj, req, res, "workshop");
+
+        if (verified_workshop_obj) {
+            const workshop = await createWorkshop(verified_workshop_obj);
+            if (!workshop) {
+                req.log.warn(
+                    `An attempt was made to create a workshop with uuid ` +
+                        `${workshop_uuid}, but a workshop with that uuid already exists`,
+                );
+                res.status(StatusCodes.CONFLICT).json({
+                    error: `A workshop with uuid \`${workshop_uuid}\` already exists.`,
+                });
+                return;
+            }
+            req.log.debug(`Created workshop with uuid ${workshop_uuid}`);
+            res.status(StatusCodes.CREATED).json(workshop);
         }
-        req.log.debug(`Created workshop with uuid ${workshop_uuid}`);
-        res.status(StatusCodes.CREATED).json(workshop);
     } else {
         req.log.warn({
             msg: "Forbidden user attempted to create a workshop",

@@ -5,6 +5,7 @@ import type {
     TRequiredCertificate,
 } from "common/certification";
 import { Document } from "./file.model";
+import Joi from "joi"
 
 /**
  * See {@link TCertificate} documentation for type information.
@@ -18,6 +19,16 @@ export const Certificate = new mongoose.Schema<TCertificate>({
 });
 
 /**
+ * Certificate schema through joi
+ */
+export const CertificateSchema = Joi.object<TCertificate>({
+    certification_uuid: Joi.string().required(),
+    level: Joi.number().required(),
+    timestamp_granted: Joi.number().required(),
+    timestamp_expires: Joi.number().optional()
+});
+
+/**
  * See {@link TRequiredCertificate} documentation for type information.
  * Stored as children of {@link User}.
  */
@@ -25,6 +36,15 @@ export const RequiredCertificate = new mongoose.Schema<TRequiredCertificate>({
     certification_uuid: { type: String, required: true },
     required_level: { type: Number, required: true },
 });
+
+/**
+ * RequiredCertificate Joi Schema
+ */
+
+export const RequiredCertificateSchema = Joi.object<TRequiredCertificate>({
+    certification_uuid: Joi.string().required(),
+    required_level: Joi.number().required()
+})
 
 /**
  * See {@link TCertification} documentation for type information.

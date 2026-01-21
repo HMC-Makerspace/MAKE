@@ -64,6 +64,8 @@ export async function verifySchema<T>(
     obj_des: string,
 ): Promise<T | undefined> {
     const { error, value } = schema.validate(obj);
+    req.log.debug(`Validating ${obj_des} schema data`)
+    req.log.debug(obj)
 
     if (error) {
         req.log.error(

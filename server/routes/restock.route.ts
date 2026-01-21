@@ -1,5 +1,5 @@
 import { API_SCOPE } from "common/global";
-import { verifyRequest } from "controllers/verify.controller";
+import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -23,6 +23,7 @@ import {
     updateMailingList,
     validNewRestockRequest,
 } from "controllers/restock.controller";
+import { RestockRequestSchema } from "models/restock.model";
 
 // --- Request and Response Types ---
 // ok, this is a bad name but its a request related to restock requests,
@@ -335,20 +336,25 @@ router.post("/", async (req: RestockRequestRequest, res: RestockResponse) => {
             return;
         }
 
-        const restock = await createRestockRequest(restock_obj);
-        if (!restock) {
-            req.log.warn(
-                `An attempt was made to create a restock request with uuid ` +
-                    `${restock_uuid}, but a request with that uuid already exists`,
-            );
-            res.status(StatusCodes.CONFLICT).json({
-                error: `A restock request with uuid \`${restock_uuid}\` already exists.`,
-            });
-            return;
+        const verified_restock_obj = await verifySchema(RestockRequestSchema, restock_obj, req, res, "restock");
+
+        if (verified_restock_obj) {
+            const restock = await createRestockRequest(verified_restock_obj);
+            if (!restock) {
+                req.log.warn(
+                    `An attempt was made to create a restock request with uuid ` +
+                        `${restock_uuid}, but a request with that uuid already exists`,
+                );
+                res.status(StatusCodes.CONFLICT).json({
+                    error: `A restock request with uuid \`${restock_uuid}\` already exists.`,
+                });
+                return;
+            }
+            
+            req.log.debug(`Created restock request with uuid ${restock_uuid}`);
+            res.status(StatusCodes.CREATED).json(restock);
         }
-        
-        req.log.debug(`Created restock request with uuid ${restock_uuid}`);
-        res.status(StatusCodes.CREATED).json(restock);
+
     } else {
         req.log.warn({
             msg: "Forbidden user attempted to create restock request",

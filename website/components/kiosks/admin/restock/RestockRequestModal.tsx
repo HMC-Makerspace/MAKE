@@ -77,12 +77,13 @@ export default function RestockRequestModal({
     // Whether the user is able to be added to the restock's mailing list
     // (e.g. they are not already on the list)
     const userCanRequest =
-        prevRestock && requestingUser
+        isNew ||
+        (prevRestock && requestingUser
             ? !(
                   prevRestock.mailing_list.includes(requestingUser.uuid) ||
                   prevRestock.requesting_user == requestingUser.uuid
               )
-            : true;
+            : true);
 
     const queryClient = useQueryClient();
     const mutation = useMutation({

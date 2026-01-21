@@ -8,7 +8,7 @@ import {
     updateInventoryItem,
     patchInventoryItem,
 } from "controllers/inventory.controller";
-import { verifyRequest } from "controllers/verify.controller";
+import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -19,6 +19,7 @@ import {
     SuccessfulResponse,
 } from "common/verify";
 import { TInventoryItem } from "common/inventory";
+import { InventoryItemSchema } from "models/inventory.model";
 
 // --- Request and Response Types ---
 type ItemRequest = Request<{}, {}, { item_obj: TInventoryItem }>;
@@ -283,6 +284,9 @@ router.post("/", async (req: ItemRequest, res: ItemResponse) => {
 
     // If the user is authorized, perform the creation
     if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_ITEM)) {
+        
+        // const verified_item_obj = verifySchema()
+
         const item = await createInventoryItem(item_obj);
         if (!item) {
             req.log.warn(
