@@ -480,7 +480,7 @@ router.patch(
                 return;
             }
             req.log.debug("Signed in successfully!");
-            res.status(StatusCodes.OK);
+            res.status(StatusCodes.OK).json({});
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to sign into a workshop",

@@ -6,6 +6,7 @@ import {
     Button,
     CardFooter,
     addToast,
+    useDisclosure,
 } from "@heroui/react";
 import clsx from "clsx";
 import { FILE_RESOURCE_TYPE } from "../../../../common/file";
@@ -22,6 +23,7 @@ import { DateFormatter } from "@internationalized/date";
 import { TCertificate, TCertification } from "common/certification";
 import { useMemo } from "react";
 import { API_SCOPE } from "../../../../common/global";
+import WorkshopSigninModal from "./WorkshopSigninModal";
 
 // cancel means cancel_rsvp
 async function rsvp({
@@ -154,7 +156,14 @@ export default function WorkshopCard({
     const canSignIn =
         scopes && verifyScopes(scopes, [API_SCOPE.SIGN_IN_WORKSHOP]);
 
+    const {
+        isOpen: signinIsOpen,
+        onOpen: signinOnOpen,
+        onOpenChange: signinOnOpenChange,
+    } = useDisclosure();
+
     return (
+        <>
         <Card id={workshop.title} key={workshop.title} className="h-[44dvh]">
             <CardHeader className="flex-col items-start">
                 <div
@@ -323,6 +332,8 @@ export default function WorkshopCard({
                                     //     ),
                                     // });
                                     console.log("signing in")
+                                    signinOnOpen();
+                                    //.
                                 }
                             }}
                             isDisabled={
@@ -337,5 +348,13 @@ export default function WorkshopCard({
                 </div>
             </CardBody>
         </Card>
+
+        <WorkshopSigninModal
+            key={`${workshop.uuid}-signin`}
+            workshop={workshop}
+            isOpen={signinIsOpen}
+            onOpenChange={signinOnOpenChange}
+        />
+        </>
     );
 }
