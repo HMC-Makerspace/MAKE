@@ -32,7 +32,11 @@ import prompt from "prompt";
 import colors from "@colors/colors/safe";
 import connectDB from "core/db";
 import dotenv from "dotenv";
-import { getConfig, setConfig } from "controllers/config.controller";
+import {
+    createConfig,
+    getConfig,
+    setConfig,
+} from "controllers/config.controller";
 import {
     TCheckoutConfig,
     TConfig,
@@ -205,12 +209,12 @@ const { interactiveConfig } = await prompt.get([
 
 const existingConfig = await getConfig();
 
-if (existingConfig && false) {
+if (existingConfig) {
     // Config already exists, skip
     console.log(colors.yellow("WARN: Config already exists, continuing"));
 } else if (interactiveConfig === "n") {
     // Create default config
-    await setConfig({
+    await createConfig({
         timestamp: Date.now() / 1000,
         general: {
             tagline: "Welcome to MAKE!",
@@ -240,6 +244,7 @@ if (existingConfig && false) {
             reminder_times: [], // No workshop reminder emails
         },
     });
+    console.log(colors.green("Created default config."));
 } else {
     // Interactive config setup
     console.log(colors.cyan("\n--- GENERAL ---"));
@@ -556,7 +561,7 @@ if (existingConfig && false) {
         workshop: workshopConfig,
     };
 
-    await setConfig(config);
+    await createConfig(config);
 
     console.log(colors.green("Configuration complete."));
 }
@@ -599,6 +604,7 @@ if (createBlankSchedule === "y") {
     // Stage and activate schedule
     await setStagingSchedule(blankSchedule.uuid);
     await setActiveSchedule(blankSchedule.uuid);
+    console.log(colors.green("Created blank schedule."));
 }
 
 console.log(colors.magenta("\nProject setup complete!"));
