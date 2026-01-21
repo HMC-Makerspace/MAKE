@@ -166,14 +166,14 @@ export default function CheckoutsKiosk() {
     );
 
     const removeItemFromCart = React.useCallback(
-        (item: TInventoryItem) => {
-            if (!item) return;
+        (item_uuid: InventoryItemUUID, all?: boolean) => {
+            if (!item_uuid) return;
             const existing_item = cart.findIndex(
-                (c) => c.item_uuid === item.uuid,
+                (c) => c.item_uuid === item_uuid,
             );
             if (existing_item === -1) {
                 // Item not in cart, nothing to change
-            } else if (cart[existing_item].quantity === 1) {
+            } else if (cart[existing_item].quantity === 1 || all) {
                 // Remove item entirely
                 cart.splice(existing_item, 1);
             } else {
@@ -247,6 +247,7 @@ export default function CheckoutsKiosk() {
                         }
                         setUnavailability([]);
                     }}
+                    removeItemFromCart={removeItemFromCart}
                 />
                 <div className="flex flex-col h-full w-full p-3 bg-default-50 rounded-xl overflow-auto">
                     <Tabs
@@ -312,7 +313,7 @@ export default function CheckoutsKiosk() {
                                                     <MinusIcon className="size-5" />
                                                 }
                                                 onPress={() =>
-                                                    removeItemFromCart(i)
+                                                    removeItemFromCart(i.uuid)
                                                 }
                                             />
                                         </div>
