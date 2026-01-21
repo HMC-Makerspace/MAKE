@@ -17,9 +17,10 @@ import {
     setMachineInstances,
     patchMachine,
 } from "controllers/machine.controller";
-import { verifyRequest } from "controllers/verify.controller";
+import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
+import { MachineSchema } from "models/machine.model";
 
 // --- Request and Response Types ---
 type MachineRequest = Request<{}, {}, { machine_obj: TMachine }>;
@@ -196,19 +197,23 @@ router.post("/", async (req: MachineRequest, res: MachineResponse) => {
 
     // If the user is authorized, create a machine
     if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_MACHINE)) {
-        const machine = await createMachine(machine_obj);
-        if (!machine) {
-            req.log.warn(
-                `An attempt was made to create a machine with uuid ` +
-                    `${machine_uuid}, but a machine with that uuid already exists`,
-            );
-            res.status(StatusCodes.CONFLICT).json({
-                error: `A machine with uuid \`${machine_uuid}\` already exists.`,
-            });
-            return;
+        const verified_machine_obj = await verifySchema(MachineSchema, machine_obj, req, res, "machine");
+
+        if (verified_machine_obj) {
+            const machine = await createMachine(verified_machine_obj);
+            if (!machine) {
+                req.log.warn(
+                    `An attempt was made to create a machine with uuid ` +
+                        `${machine_uuid}, but a machine with that uuid already exists`,
+                );
+                res.status(StatusCodes.CONFLICT).json({
+                    error: `A machine with uuid \`${machine_uuid}\` already exists.`,
+                });
+                return;
+            }
+            req.log.debug(`Created machine with uuid ${machine_uuid}`);
+            res.status(StatusCodes.CREATED).json(machine);
         }
-        req.log.debug(`Created machine with uuid ${machine_uuid}`);
-        res.status(StatusCodes.CREATED).json(machine);
     } else {
         req.log.warn({
             msg: "Forbidden user attempted to create a machine",

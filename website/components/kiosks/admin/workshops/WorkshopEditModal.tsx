@@ -174,8 +174,6 @@ export default function WorkshopEditModal({
                 visible_to: workshop.visible_to,
             };
 
-            console.log("here");
-
             updateCreateMutation.reset();
 
             updateCreateMutation.mutate({
