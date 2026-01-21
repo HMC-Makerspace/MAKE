@@ -2,6 +2,7 @@ import {
     TInventoryItem,
     ITEM_ROLE,
     ITEM_ACCESS_TYPE,
+    InventoryItemUUID,
 } from "../../../../../common/inventory";
 import {
     addToast,
@@ -36,11 +37,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { UnixTimestamp } from "common/global";
-import {
-    InformationCircleIcon,
-    ShoppingCartIcon,
-} from "@heroicons/react/24/outline";
-import { AnimatePresence, motion } from "framer-motion";
+import { ShoppingCartIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 async function createCheckout({
     user_uuid,
@@ -99,6 +96,7 @@ export default function CheckoutSidebar({
     collegeID,
     setCollegeID,
     setValidation,
+    removeItemFromCart,
 }: {
     cart: TCheckoutItem[];
     setCart: (items: TCheckoutItem[]) => void;
@@ -112,6 +110,7 @@ export default function CheckoutSidebar({
     collegeID: string;
     setCollegeID: (id: string) => void;
     setValidation: (v: TCheckoutValidation) => void;
+    removeItemFromCart: (item_uuid: InventoryItemUUID, all?: boolean) => void;
 }) {
     const {
         data: user,
@@ -138,7 +137,6 @@ export default function CheckoutSidebar({
     const createMutation = useMutation({
         mutationFn: createCheckout,
         onSuccess: (data) => {
-
             let validation = data.validation;
 
             let validationError = "Checkout submitted";
@@ -148,35 +146,43 @@ export default function CheckoutSidebar({
                 validationError = "No items in cart";
             } else if (validation.status === CHECKOUT_VALIDATION.MISSING_CERT) {
                 validationError = "User missing required certification";
-                const cert = certs.find((c) => c.uuid === validation.error_uuid);
+                const cert = certs.find(
+                    (c) => c.uuid === validation.error_uuid,
+                );
                 if (validation.error_uuid && cert) {
                     validationError += `\n'${cert.name}'`;
                 }
-                const item = inventory.find((i) => i.uuid === validation.item_uuid);
+                const item = inventory.find(
+                    (i) => i.uuid === validation.item_uuid,
+                );
                 if (validation.item_uuid && item) {
                     validationError += ` for item '${item.name}'`;
                 }
             } else if (validation.status === CHECKOUT_VALIDATION.MISSING_ROLE) {
                 validationError = "User has no authorized roles";
-                const item = inventory.find((i) => i.uuid === validation.item_uuid);
+                const item = inventory.find(
+                    (i) => i.uuid === validation.item_uuid,
+                );
                 if (validation.item_uuid && item) {
                     validationError += ` for item '${item.name}'`;
                 }
             } else if (validation.status === CHECKOUT_VALIDATION.UNAVAILABLE) {
                 validationError = "Item";
-                const item = inventory.find((i) => i.uuid === validation.item_uuid);
+                const item = inventory.find(
+                    (i) => i.uuid === validation.item_uuid,
+                );
                 if (validation.item_uuid && item) {
                     validationError += ` '${item.name}'`;
                 }
                 validationError += " is unavailable";
-            }   
+            }
 
             addToast({
                 title: `${validationError}`,
-                color: 
+                color:
                     validation.status === CHECKOUT_VALIDATION.VALID
                         ? "success"
-                        : "danger"
+                        : "danger",
             });
 
             setValidation(data.validation);
@@ -203,7 +209,7 @@ export default function CheckoutSidebar({
                 title: `Error: ${error.message}`,
                 color: "danger",
             });
-        }
+        },
     });
 
     const [mobileCart, setMobileCart] = useState(false);
@@ -341,9 +347,32 @@ export default function CheckoutSidebar({
                                 {inventory.find(
                                     (i) => i.uuid === item.item_uuid,
                                 )?.name || "Unknown Item"}
-                                <div className="bg-default-100 text-default-700 rounded-sm py-2 px-3 aspect-square text-center">
-                                    {item.quantity}
-                                </div>
+                                <Button
+                                    isIconOnly
+                                    size="lg"
+                                    radius="sm"
+                                    color="danger"
+                                    variant="flat"
+                                    onPress={() =>
+                                        removeItemFromCart(item.item_uuid, true)
+                                    }
+                                    className="hover:bg-danger/20 bg-default-100"
+                                >
+                                    <TrashIcon
+                                        className={clsx(
+                                            "group-hover:opacity-100 opacity-0",
+                                            "transition-opacity size-5",
+                                        )}
+                                    />
+                                    <div
+                                        className={clsx(
+                                            "absolute group-hover:opacity-0",
+                                            "transition-opacity text-default-700",
+                                        )}
+                                    >
+                                        {item.quantity}
+                                    </div>
+                                </Button>
                             </div>
                         ))}
                     </div>
