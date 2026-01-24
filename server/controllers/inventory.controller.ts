@@ -21,9 +21,7 @@ export async function getInventory(): Promise<TInventoryItem[]> {
  * @param item_uuid The UUID of the item to search for
  * @returns A promise to an inventory item, or null if no item has the given UUID
  */
-export async function getInventoryItem(
-    item_uuid: InventoryItemUUID,
-): Promise<TInventoryItem | null> {
+export async function getInventoryItem(item_uuid: InventoryItemUUID) {
     const Inventory = mongoose.model("InventoryItem", InventoryItem);
     return Inventory.findOne({ uuid: item_uuid });
 }
