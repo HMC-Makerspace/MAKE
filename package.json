@@ -17,9 +17,11 @@
     "@types/nodemailer": "^6.4.17",
     "@types/passport": "^1.0.17",
     "@types/passport-saml": "^1.1.7",
+    "@types/prompt": "^1.1.9",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
+    "dotenv": "^17.2.3",
     "pino-pretty": "^13.0.0",
     "postcss": "8.4.38",
     "prettier": "3.3.3",
@@ -30,6 +32,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@colors/colors": "^1.6.0",
     "@heroicons/react": "^2.2.0",
     "@heroui/react": "^2.8.1",
     "@heroui/use-infinite-scroll": "^2.2.10",
@@ -62,6 +65,7 @@
     "passport-saml": "^3.2.4",
     "pino": "^9.7.0",
     "pino-http": "^10.5.0",
+    "prompt": "^1.3.0",
     "react": "^19.1.0",
     "react-colorful": "^5.6.1",
     "react-dom": "^19.1.0",
@@ -72,12 +76,12 @@
     "zustand": "^5.0.6"
   },
   "scripts": {
-    "start": "concurrently \"bun backend:dev\" \"bun frontend:dev\" --prefix none | bun prettify",
-    "backend:dev": "bun run --watch server/server.ts",
-    "frontend:dev": "vite",
+    "start": "concurrently \"bun dev:backend\" \"bun dev:frontend\" --prefix none | bun prettify",
+    "dev:backend": "bun run --watch server/server.ts",
+    "dev:frontend": "vite",
     "prettify": "pino-pretty -i hostname,req.id,req.query,req.params,req.headers,req.remoteAddress,req.remotePort,res.headers",
-    "frontend:prod": "bun vite build --outDir=build",
-    "backend:prod": "bun run server/server.ts",
-    "setup": "echo 'Project setup is a WIP.'"
+    "build": "bun vite build --outDir=build",
+    "prod": "bun run server/server.ts",
+    "setup": "bun run server/setup.ts"
   }
 }

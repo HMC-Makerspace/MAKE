@@ -1,17 +1,16 @@
 declare module "bun" {
     interface Env {
+        NODE_ENV: "development" | "production";
         MONGO_URI: string;
+        VITE_SERVER_PORT?: number;
+        VITE_PORT?: number;
         SITE_URL: string;
+
         SESSION_SECRET: string;
         IDP_ENTRY_POINT: string;
         IDP_CALLBACK: string;
         IDP_ISSUER: string;
         IDP_ID_FORMAT: string;
-        ALLOW_INSECURE_LOGIN: boolean;
-
-        NODE_ENV: "development" | "production";
-        VITE_SERVER_PORT?: number;
-        VITE_PORT?: number;
 
         EMAIL_BOT_HOST: string;
         EMAIL_BOT_PORT: number;
