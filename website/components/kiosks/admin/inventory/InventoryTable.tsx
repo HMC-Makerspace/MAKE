@@ -39,6 +39,7 @@ import { TArea } from "common/area";
 import ItemLocationChip from "./ItemLocationChip";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RestockRequestModal from "../restock/RestockRequestModal";
+import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" },
@@ -92,7 +93,6 @@ export default function InventoryTable({
     certifications: TCertification[];
     areas: TArea[];
     restocks?: TRestockRequest[];
-    restocks?: TRestockRequest[];
     selectedKeys: Selection;
     onSelectionChange: (selectedKeys: Selection) => void;
     doubleClickAction?: (key: React.Key) => void;
@@ -110,6 +110,10 @@ export default function InventoryTable({
     // The set of columns that are visible
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
         new Set(defaultColumns),
+    );
+    // Location filtering dropdown menu
+    const [searchableLocations, setSearchableLocations] = React.useState<Selection>(
+        new Set(),
     );
     const [search, setSearch] = React.useState<string>("");
 
@@ -134,12 +138,22 @@ export default function InventoryTable({
 
     // The list of items after filtering and sorting
     const filteredItems = React.useMemo(() => {
+        let tempInventory: TInventoryItem[];
         if (search) {
-            return fuse.search(search).map((result) => result.item);
+            tempInventory = fuse.search(search).map((result) => result.item);
         } else {
-            return inventory;
+            tempInventory = inventory;
         }
-    }, [inventory, fuse, search]);
+        // All items are shown if either all or no locations are selected
+        if (searchableLocations === "all") {
+            return tempInventory;
+        } else if (searchableLocations.size === 0) {
+            return tempInventory;
+        } else {
+            // Iterates through searchableLocations array to find math with item location uuid
+            return tempInventory.filter((item) => item.locations.some((location) => searchableLocations.has(location.area)))
+        }
+    }, [inventory, fuse, search, searchableLocations]);
 
     const numItems = inventory.length;
 
@@ -210,7 +224,36 @@ export default function InventoryTable({
                         }}
                     />
                     <div className="gap-3 flex">
-                        <div className="hidden sm:block">
+                        <div className="hidden sm:flex gap-3">
+                            <Dropdown isDisabled={isLoading}>
+                                <DropdownTrigger>
+                                    <Button
+                                        endContent={
+                                            <GlobeAmericasIcon className="size-6 text-small" />
+                                        }
+                                        variant="flat"
+                                        tabIndex={-1}
+                                    >
+                                        Locations
+                                    </Button>
+                                </DropdownTrigger>
+                                <DropdownMenu
+                                    aria-label="Locations"
+                                    closeOnSelect={false}
+                                    selectionMode="multiple"
+                                    selectedKeys={searchableLocations}
+                                    onSelectionChange={setSearchableLocations}
+                                >
+                                    {areas.map((area) => (
+                                        <DropdownItem
+                                            key={area.uuid}
+                                            className="capitalize"
+                                        >
+                                            {area.name}
+                                        </DropdownItem>
+                                    ))}
+                                </DropdownMenu>
+                            </Dropdown>
                             <Dropdown isDisabled={isLoading}>
                                 <DropdownTrigger>
                                     <Button
