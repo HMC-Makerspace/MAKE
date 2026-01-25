@@ -7,7 +7,7 @@ import { getUser } from "./user.controller";
 import { sendTemplatedEmail } from "./email.controller";
 import RestockRequestTemplate from "email_templates/restock_completion";
 import { getInventoryItem } from "./inventory.controller";
-import { InventoryItemUUID } from "common/inventory";
+import { InventoryItemUUID, ITEM_RELATIVE_QUANTITY } from "common/inventory";
 
 /**
  * Get all restock requests
@@ -123,6 +123,15 @@ export async function updateRestockRequestStatus(
     // If the request doesn't exist, return null
     if (!request) {
         return null;
+    }
+    // If the item is restocked, update its quantity
+    if (new_status.status === RESTOCK_REQUEST_STATUS.RESTOCKED) {
+        // Update the item's quantity from low to high, as necessary
+        const item = await getInventoryItem(request.item_uuid);
+        if (item?.quantity === ITEM_RELATIVE_QUANTITY.LOW) {
+            item.quantity = ITEM_RELATIVE_QUANTITY.HIGH;
+            await item.save();
+        }
     }
     // Update the request's current status and status logs
     request.current_status = new_status.status;
