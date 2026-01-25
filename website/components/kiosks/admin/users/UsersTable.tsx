@@ -219,8 +219,9 @@ export default function UsersTable({
                 </div>
                 <div className="flex justify-between items-center pb-2">
                     <span className="text-default-400 text-small">
-                        Total {numUsers} users
-                    </span>
+                        {filteredUsers.length === numUsers
+                            ? `Total ${numUsers} items`
+                            : `Showing ${filteredUsers.length} of ${numUsers} items`}                    </span>
                 </div>
             </div>
             <MAKETable

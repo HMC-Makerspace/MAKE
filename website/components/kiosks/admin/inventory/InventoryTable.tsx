@@ -112,9 +112,8 @@ export default function InventoryTable({
         new Set(defaultColumns),
     );
     // Location filtering dropdown menu
-    const [searchableLocations, setSearchableLocations] = React.useState<Selection>(
-        new Set(),
-    );
+    const [searchableLocations, setSearchableLocations] =
+        React.useState<Selection>(new Set());
     const [search, setSearch] = React.useState<string>("");
 
     const columns = baseColumns.concat(extraColumns);
@@ -151,7 +150,11 @@ export default function InventoryTable({
             return tempInventory;
         } else {
             // Iterates through searchableLocations array to find math with item location uuid
-            return tempInventory.filter((item) => item.locations.some((location) => searchableLocations.has(location.area)))
+            return tempInventory.filter((item) =>
+                item.locations.some((location) =>
+                    searchableLocations.has(location.area),
+                ),
+            );
         }
     }, [inventory, fuse, search, searchableLocations]);
 
@@ -201,7 +204,10 @@ export default function InventoryTable({
     const restockButtonAccess =
         scopes &&
         scopes.length !== 0 &&
-        verifyScopes(scopes, [API_SCOPE.GET_ALL_RESTOCKS, API_SCOPE.CREATE_RESTOCK]);
+        verifyScopes(scopes, [
+            API_SCOPE.GET_ALL_RESTOCKS,
+            API_SCOPE.CREATE_RESTOCK,
+        ]);
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -312,7 +318,9 @@ export default function InventoryTable({
                 </div>
                 <div className="flex justify-between items-center pb-2">
                     <span className="text-default-400 text-small">
-                        Total {numItems} items
+                        {filteredItems.length === numItems
+                            ? `Total ${numItems} items`
+                            : `Showing ${filteredItems.length} of ${numItems} items`}
                     </span>
                 </div>
             </div>
@@ -433,7 +441,7 @@ export default function InventoryTable({
                 )}
             />
 
-            {restocks &&
+            {restocks && (
                 <RestockRequestModal
                     requestingUser={requestingUser}
                     restocks={restocks}
@@ -441,7 +449,7 @@ export default function InventoryTable({
                     editIsOpen={restockIsOpen}
                     editOnOpenChange={restockOnOpenChange}
                 />
-            }
+            )}
         </div>
     );
 }
