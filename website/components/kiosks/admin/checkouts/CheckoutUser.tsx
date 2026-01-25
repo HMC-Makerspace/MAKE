@@ -24,8 +24,6 @@ export default function CheckoutUser({
         retry: false,
     });
 
-    console.log(roles);
-
     return (
         <UserInfo
             key={user?.uuid}
