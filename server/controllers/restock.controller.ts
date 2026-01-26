@@ -8,6 +8,7 @@ import { sendTemplatedEmail } from "./email.controller";
 import RestockRequestTemplate from "email_templates/restock_completion";
 import { getInventoryItem } from "./inventory.controller";
 import { InventoryItemUUID, ITEM_RELATIVE_QUANTITY } from "common/inventory";
+import { UUID } from "common/global";
 
 /**
  * Get all restock requests
@@ -117,6 +118,7 @@ export async function updateRestockRequest(request_obj: any) {
 export async function updateRestockRequestStatus(
     request_uuid: string,
     new_status: TRestockRequestLog,
+    logger: Logger,
 ) {
     // Find the request by UUID
     const request = await getRestockRequest(request_uuid);
@@ -133,10 +135,30 @@ export async function updateRestockRequestStatus(
             await item.save();
         }
     }
+    sendRestockUpdateEmail(request, logger);
     // Update the request's current status and status logs
     request.current_status = new_status.status;
     request.status_logs.push(new_status);
     return request.save();
+}
+
+export async function updateRestockRequestStatuses(
+    restocks: UUID[],
+    new_status: TRestockRequestLog,
+    logger: Logger,
+) {
+    let new_restocks: TRestockRequest[] = [];
+    for (const restock of restocks) {
+        const new_restock = await updateRestockRequestStatus(
+            restock,
+            new_status,
+            logger,
+        );
+        if (new_restock) {
+            new_restocks.push(new_restock);
+        }
+    }
+    return new_restocks;
 }
 
 /**
