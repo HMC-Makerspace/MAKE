@@ -303,43 +303,43 @@ router.patch(
  * not authorized, a status error is returned. If the user is authorized, the
  * updated user role object is returned.
  */
-router.post("/", async (req: RestockRequestRequest, res: RestockResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = req.user?.uuid as string;
-    const restock_obj = req.body.request_obj;
-    const restock_uuid = restock_obj.uuid;
-    // If no requesting user_uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while creating restock request " +
-                `with uuid ${restock_uuid}.`,
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-    req.log.debug({
-        msg: `Creating restock request by uuid ${restock_uuid}`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, create the restock request information
-    if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_RESTOCK)) {
-        // ensures the item uuid is not already a pending restock request
-        if (!(await validNewRestockRequest(restock_obj.item_uuid))) {
+router.post("/", 
+    verifySchema(RestockRequestSchema, "request_obj"),
+    async (req: RestockRequestRequest, res: RestockResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = req.user?.uuid as string;
+        const restock_obj = req.body.request_obj;
+        const restock_uuid = restock_obj.uuid;
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
             req.log.warn(
-                `An attempt was made to create a restock request with item uuid ` +
-                    `${restock_obj.item_uuid}, but a request with that uuid already exists`,
+                "No requesting_uuid was provided while creating restock request " +
+                    `with uuid ${restock_uuid}.`,
             );
-            res.status(StatusCodes.CONFLICT).json({
-                error: `A restock request with item \`${restock_obj.item_uuid}\` already exists.`,
-            });
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
+        req.log.debug({
+            msg: `Creating restock request by uuid ${restock_uuid}`,
+            requesting_uuid: requesting_uuid,
+        });
 
-        const verified_restock_obj = await verifySchema(RestockRequestSchema, restock_obj, req, res, "restock");
+        // If the user is authorized, create the restock request information
+        if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_RESTOCK)) {
+            // ensures the item uuid is not already a pending restock request
+            if (!(await validNewRestockRequest(restock_obj.item_uuid))) {
+                req.log.warn(
+                    `An attempt was made to create a restock request with item uuid ` +
+                        `${restock_obj.item_uuid}, but a request with that uuid already exists`,
+                );
+                res.status(StatusCodes.CONFLICT).json({
+                    error: `A restock request with item \`${restock_obj.item_uuid}\` already exists.`,
+                });
+                return;
+            }
 
-        if (verified_restock_obj) {
-            const restock = await createRestockRequest(verified_restock_obj);
+
+            const restock = await createRestockRequest(restock_obj);
             if (!restock) {
                 req.log.warn(
                     `An attempt was made to create a restock request with uuid ` +
@@ -353,16 +353,16 @@ router.post("/", async (req: RestockRequestRequest, res: RestockResponse) => {
             
             req.log.debug(`Created restock request with uuid ${restock_uuid}`);
             res.status(StatusCodes.CREATED).json(restock);
-        }
+        
 
-    } else {
-        req.log.warn({
-            msg: "Forbidden user attempted to create restock request",
-            requesting_uuid: requesting_uuid,
-        });
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to create restock request",
+                requesting_uuid: requesting_uuid,
+            });
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 
 /**

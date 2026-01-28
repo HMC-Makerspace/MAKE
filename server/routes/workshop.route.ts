@@ -182,52 +182,50 @@ router.get("/", async (req: WorkshopRequest, res: WorkshopsResponse) => {
  * header is required to call it. The user must have the
  * {@link API_SCOPE.CREATE_WORKSHOP} scope.
  */
-router.post("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = req.user?.uuid as string;
-    const workshop_obj = req.body.workshop_obj;
-    const workshop_uuid = workshop_obj.uuid;
+router.post("/", 
+    verifySchema(WorkshopSchema, "workshop_obj"),
+    async (req: WorkshopRequest, res: WorkshopResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = req.user?.uuid as string;
+        const workshop_obj = req.body.workshop_obj;
+        const workshop_uuid = workshop_obj.uuid;
 
-    // If no requesting user uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while creating a workshop",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-
-    req.log.debug({
-        msg: `Creating a workshop.`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, create a workshop
-    if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_WORKSHOP)) {
-        const verified_workshop_obj = await verifySchema(WorkshopSchema, workshop_obj, req, res, "workshop");
-
-        if (verified_workshop_obj) {
-            const workshop = await createWorkshop(verified_workshop_obj);
-            if (!workshop) {
-                req.log.warn(
-                    `An attempt was made to create a workshop with uuid ` +
-                        `${workshop_uuid}, but a workshop with that uuid already exists`,
-                );
-                res.status(StatusCodes.CONFLICT).json({
-                    error: `A workshop with uuid \`${workshop_uuid}\` already exists.`,
-                });
-                return;
-            }
-            req.log.debug(`Created workshop with uuid ${workshop_uuid}`);
-            res.status(StatusCodes.CREATED).json(workshop);
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while creating a workshop",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
         }
-    } else {
-        req.log.warn({
-            msg: "Forbidden user attempted to create a workshop",
+
+        req.log.debug({
+            msg: `Creating a workshop.`,
             requesting_uuid: requesting_uuid,
         });
-        // If the user is not authorized, provide a status error
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+
+        // If the user is authorized, create a workshop
+        if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_WORKSHOP)) {
+                const workshop = await createWorkshop(workshop_obj);
+                if (!workshop) {
+                    req.log.warn(
+                        `An attempt was made to create a workshop with uuid ` +
+                            `${workshop_uuid}, but a workshop with that uuid already exists`,
+                    );
+                    res.status(StatusCodes.CONFLICT).json({
+                        error: `A workshop with uuid \`${workshop_uuid}\` already exists.`,
+                    });
+                    return;
+                }
+                req.log.debug(`Created workshop with uuid ${workshop_uuid}`);
+                res.status(StatusCodes.CREATED).json(workshop);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to create a workshop",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
     }
 });
 

@@ -260,6 +260,7 @@ router.get(
  */
 router.post(
     "/:schedule_uuid/shifts",
+    verifySchema(ShiftSchema, "shift_obj"),
     async (req: ShiftRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
@@ -289,12 +290,11 @@ router.post(
                 API_SCOPE.UPDATE_SCHEDULE,
             )
         ) {
-            const verified_shift_obj = await verifySchema(ShiftSchema, shift_obj, req, res, "shift");
 
-            if (verified_shift_obj) {
+            if (shift_obj) {
                 const new_schedule = await createShiftInSchedule(
                     schedule_uuid,
-                    verified_shift_obj,
+                    shift_obj,
                 );
                 if (!new_schedule) {
                     req.log.warn(
@@ -309,6 +309,7 @@ router.post(
                 req.log.debug(`Created shift with uuid ${shift_obj.uuid}`);
                 res.status(StatusCodes.CREATED).json(new_schedule);
             }
+
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to create a shift",
@@ -563,6 +564,7 @@ router.get("/active/alert", async (req: Request, res: ActiveAlertResponse) => {
  */
 router.post(
     "/:schedule_uuid/alerts",
+    verifySchema(AlertSchema, "alert_obj"),
     async (req: AlertRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
@@ -591,12 +593,11 @@ router.post(
                 API_SCOPE.CREATE_ALERT,
             )
         ) {
-            const verified_alert_obj = await verifySchema(AlertSchema, alert_obj, req, res, "alert")
 
-            if (verified_alert_obj) {
+            if (alert_obj) {
                 const new_schedule = await createAlertInSchedule(
                     schedule_uuid,
-                    verified_alert_obj,
+                    alert_obj,
                 );
                 if (!new_schedule) {
                     req.log.warn(
@@ -1025,54 +1026,55 @@ router.get(
  * header is required to call it. The user must have the
  * {@link API_SCOPE.CREATE_SCHEDULE} scope.
  */
-router.post("/", async (req: ScheduleRequest, res: ScheduleResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = req.user?.uuid as string;
-    const schedule_obj = req.body.schedule_obj;
-    const schedule_uuid = schedule_obj.uuid;
+router.post("/",
+    verifySchema(ScheduleSchema, "schedule_obj"),
+    async (req: ScheduleRequest, res: ScheduleResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = req.user?.uuid as string;
+        const schedule_obj = req.body.schedule_obj;
+        const schedule_uuid = schedule_obj.uuid;
 
-    // If no requesting user uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while creating a schedule",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-
-    req.log.debug({
-        msg: `Creating a schedule.`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, create a schedule
-    if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_SCHEDULE)) {
-        const verified_schedule_obj = await verifySchema(ScheduleSchema, schedule_obj, req, res, "schedule");
-        
-        if (verified_schedule_obj) {
-            const schedule = await createSchedule(verified_schedule_obj);
-            if (!schedule) {
-                req.log.warn(
-                    `An attempt was made to create a schedule with uuid ` +
-                        `${schedule_uuid}, but a schedule with that uuid already exists`,
-                );
-                res.status(StatusCodes.CONFLICT).json({
-                    error: `A schedule with uuid \`${schedule_uuid}\` already exists.`,
-                });
-                return;
-            }
-            req.log.debug(`Created schedule with uuid ${schedule_uuid}`);
-            res.status(StatusCodes.CREATED).json(schedule);
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while creating a schedule",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
         }
-    } else {
-        req.log.warn({
-            msg: "Forbidden user attempted to create a schedule",
+
+        req.log.debug({
+            msg: `Creating a schedule.`,
             requesting_uuid: requesting_uuid,
         });
-        // If the user is not authorized, provide a status error
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+
+        // If the user is authorized, create a schedule
+        if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_SCHEDULE)) {
+            
+            if (schedule_obj) {
+                const schedule = await createSchedule(schedule_obj);
+                if (!schedule) {
+                    req.log.warn(
+                        `An attempt was made to create a schedule with uuid ` +
+                            `${schedule_uuid}, but a schedule with that uuid already exists`,
+                    );
+                    res.status(StatusCodes.CONFLICT).json({
+                        error: `A schedule with uuid \`${schedule_uuid}\` already exists.`,
+                    });
+                    return;
+                }
+                req.log.debug(`Created schedule with uuid ${schedule_uuid}`);
+                res.status(StatusCodes.CREATED).json(schedule);
+            }
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to create a schedule",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 /**
  * Update a specific schedule. This route will not create a new schedule if the
