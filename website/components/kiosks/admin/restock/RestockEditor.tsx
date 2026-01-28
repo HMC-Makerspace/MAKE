@@ -25,38 +25,42 @@ import RestockType from "./RestockType";
 // Define the mutation function that will run when the form is submitted
 const updateRestockRequestLogs = async ({
     data,
-    restock_uuid,
+    restock_uuids,
 }: {
     data: TRestockRequestLog;
-    restock_uuid: UUID;
+    restock_uuids: UUID[];
 }) => {
     return (
-        await axios.patch<TRestockRequest>(
-            `/api/v3/restock/status/${restock_uuid}`,
-            {
-                status_obj: data,
-            },
-        )
+        await axios.patch<TRestockRequest[]>(`/api/v3/restock/statuses`, {
+            status_obj: data,
+            restock_uuids,
+        })
     ).data;
 };
 
 export default function RestockEditor({
     onClose,
-    restock,
+    restocks,
 }: {
     onClose: () => void;
-    restock: TRestockRequest;
+    restocks: TRestockRequest[];
 }) {
     const queryClient = useQueryClient();
 
     const mutation = useMutation({
         mutationFn: updateRestockRequestLogs,
-        onSuccess: (result: TRestockRequest) => {
+        onSuccess: (result: TRestockRequest[]) => {
             // Update the restock request in the query cache
             queryClient.setQueryData(["restock"], (old: TRestockRequest[]) => {
-                return old.map((u) => (u.uuid === restock.uuid ? result : u));
+                return old.map((old_restock) => {
+                    for (const new_restock of result) {
+                        if (new_restock.uuid === old_restock.uuid) {
+                            return new_restock;
+                        }
+                    }
+                    return old_restock;
+                });
             });
-            queryClient.setQueryData(["restock", restock.uuid], result);
             addToast({
                 title: `Restock request updated successfully`,
                 color: "success",
@@ -70,31 +74,31 @@ export default function RestockEditor({
         },
     });
 
-    const onSubmit = React.useCallback(
-        (e: React.FormEvent<HTMLFormElement>) => {
-            // Prevent default browser page refresh.
-            e.preventDefault();
+    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        // Prevent default browser page refresh.
+        e.preventDefault();
 
-            // Get form data as an object.
-            const data = new FormData(e.currentTarget);
+        // Get form data as an object.
+        const data = new FormData(e.currentTarget);
 
-            // Create a new status log object
-            const new_status: TRestockRequestLog = {
-                timestamp: Math.floor(Date.now() / 1000),
-                status:
-                    parseInt(data.get("status") as string) ||
-                    RESTOCK_REQUEST_STATUS.PENDING_APPROVAL,
-                message: (data.get("completion_note") as string) || undefined,
-            };
+        // Create a new status log object
+        const new_status: TRestockRequestLog = {
+            timestamp: Math.floor(Date.now() / 1000),
+            status:
+                parseInt(data.get("status") as string) ||
+                RESTOCK_REQUEST_STATUS.PENDING_APPROVAL,
+            message: (data.get("completion_note") as string) || undefined,
+        };
 
-            // Reset the mutation (clears any previous errors)
-            mutation.reset();
-            // Run the mutation
-            mutation.mutate({ data: new_status, restock_uuid: restock.uuid });
-            onClose();
-        },
-        [restock.uuid],
-    );
+        // Reset the mutation (clears any previous errors)
+        mutation.reset();
+        // Run the mutation
+        mutation.mutate({
+            data: new_status,
+            restock_uuids: restocks.map((r) => r.uuid),
+        });
+        onClose();
+    };
 
     return (
         <>
@@ -109,9 +113,11 @@ export default function RestockEditor({
                         color="primary"
                         variant="bordered"
                         labelPlacement="outside"
-                        defaultSelectedKeys={[
-                            restock.current_status.toString(),
-                        ]}
+                        defaultSelectedKeys={
+                            restocks.length === 1
+                                ? [restocks[0].current_status.toString()]
+                                : undefined
+                        }
                         isRequired
                         renderValue={(items) =>
                             items.map((item) => (
