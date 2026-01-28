@@ -137,7 +137,7 @@ export default function MAKETable<Type extends { uuid: string }>({
                     : null
             }
             selectionBehavior={multiSelect ? "toggle" : "replace"}
-            onRowAction={doubleClickAction}
+            onRowAction={multiSelect ? undefined : doubleClickAction}
             color={color}
             disabledKeys={disabledRows}
         >
