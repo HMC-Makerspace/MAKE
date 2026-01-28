@@ -16,6 +16,17 @@ export const File = new mongoose.Schema<TFile>({
     resource_type: { type: String, required: true },
 });
 
+export const FileSchema = Joi.object<TFile>({
+    uuid: Joi.string().required(),
+    name: Joi.string().required(),
+    path: Joi.string().required(),
+    timestamp_upload: Joi.number().required(),
+    timestamp_expires: Joi.number().optional(),
+    size: Joi.number().required(),
+    resource_uuid: Joi.string().required(),
+    resource_type: Joi.string().required()
+});
+
 /**
  * See {@link TDocument} documentation for type information.
  * Stored as children of {@link Area} and {@link Machine},

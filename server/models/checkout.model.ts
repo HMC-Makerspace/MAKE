@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import type { TCheckout, TCheckoutItem } from "common/checkout";
+import Joi from 'joi';
 
 /**
  * See {@link TCheckoutItem} documentation for type information.
@@ -10,6 +11,13 @@ const CheckoutItem = new mongoose.Schema<TCheckoutItem>({
     quantity: { type: Number, required: true },
     role: { type: String, required: true },
     linked_uuid: { type: String, required: false },
+});
+
+const CheckoutItemSchema = Joi.object<TCheckoutItem>({
+    item_uuid: Joi.string().required(),
+    quantity: Joi.number().required(),
+    role: Joi.string().required(),
+    linked_uuid: Joi.string().optional()
 });
 
 /**
@@ -27,3 +35,15 @@ export const Checkout = new mongoose.Schema<TCheckout>(
     },
     { collection: "checkouts" }, // Collection name
 );
+
+export const CheckoutSchema = Joi.object<TCheckout>({
+    uuid: Joi.string().required(),
+    items: Joi.array().items(
+        CheckoutItemSchema
+    ).required(),
+    checked_out_by: Joi.string().required(),
+    timestamp_out: Joi.number().required(),
+    timestamp_due: Joi.number().required(),
+    timestamp_in: Joi.number().optional(),
+    notifications_sent: Joi.number().optional()
+});

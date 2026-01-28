@@ -4,7 +4,7 @@ import type {
     TCertification,
     TRequiredCertificate,
 } from "common/certification";
-import { Document } from "./file.model";
+import { Document, DocumentSchema } from "./file.model";
 import Joi from "joi"
 
 /**
@@ -64,3 +64,22 @@ export const Certification = new mongoose.Schema<TCertification>(
     },
     { collection: "certifications" },
 );
+
+export const CertificationSchema = Joi.object<TCertification>({
+    uuid: Joi.string().required(),
+    name: Joi.string().required(),
+    description: Joi.string().optional().allow(""),
+    visibility: Joi.string().required(),
+    color: Joi.string().required(),
+    max_level: Joi.number().optional(),
+    seconds_valid_for: Joi.number().optional(),
+    documents: Joi.array().items(
+        DocumentSchema
+    ).optional(),
+    required_certifications: Joi.array().items(
+        RequiredCertificateSchema
+    ).optional(),
+    authorized_roles: Joi.array().items(
+        Joi.string()
+    ).optional()
+});

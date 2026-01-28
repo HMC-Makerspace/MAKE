@@ -116,7 +116,7 @@ export default function MAKETable<Type extends { uuid: string }>({
             // Otherwise, just return the cell value as a string
             return item[columnKey as keyof Type] as string;
         }
-    }, []);
+    }, [customColumnComponents]);
 
     return (
         <Table

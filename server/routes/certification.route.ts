@@ -8,7 +8,7 @@ import {
     getCertificationsVisibleToUser,
     patchCertification,
 } from "controllers/certification.controller";
-import { verifyRequest } from "controllers/verify.controller";
+import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -19,6 +19,7 @@ import {
     SuccessfulResponse,
 } from "common/verify";
 import { TCertification } from "common/certification";
+import { CertificationSchema } from "models/certification.model";
 
 // --- Request and Response Types ---
 type CertificationRequest = Request<
@@ -177,6 +178,7 @@ router.patch(
  */
 router.post(
     "/",
+    verifySchema(CertificationSchema, "certification_obj"),
     async (req: CertificationRequest, res: CertificationResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = req.user?.uuid as string;

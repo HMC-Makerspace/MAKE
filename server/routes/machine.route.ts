@@ -21,6 +21,7 @@ import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import { MachineSchema } from "models/machine.model";
+import { machine } from "os";
 
 // --- Request and Response Types ---
 type MachineRequest = Request<{}, {}, { machine_obj: TMachine }>;
@@ -175,32 +176,31 @@ router.get("/", async (req: MachineRequest, res: MachinesResponse) => {
  * header is required to call it. The user must have the
  * {@link API_SCOPE.CREATE_MACHINE} scope.
  */
-router.post("/", async (req: MachineRequest, res: MachineResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = req.user?.uuid as string;
-    const machine_obj = req.body.machine_obj;
-    const machine_uuid = machine_obj.uuid;
+router.post("/", 
+    verifySchema(MachineSchema, "machine_obj"),
+    async (req: MachineRequest, res: MachineResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = req.user?.uuid as string;
+        const machine_obj = req.body.machine_obj;
+        const machine_uuid = machine_obj.uuid;
 
-    // If no requesting user uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while creating a machine",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while creating a machine",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
 
-    req.log.debug({
-        msg: `Creating a machine.`,
-        requesting_uuid: requesting_uuid,
-    });
+        req.log.debug({
+            msg: `Creating a machine.`,
+            requesting_uuid: requesting_uuid,
+        });
 
-    // If the user is authorized, create a machine
-    if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_MACHINE)) {
-        const verified_machine_obj = await verifySchema(MachineSchema, machine_obj, req, res, "machine");
-
-        if (verified_machine_obj) {
-            const machine = await createMachine(verified_machine_obj);
+        // If the user is authorized, create a machine
+        if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_MACHINE)) {
+            const machine = await createMachine(machine_obj);
             if (!machine) {
                 req.log.warn(
                     `An attempt was made to create a machine with uuid ` +
@@ -213,16 +213,16 @@ router.post("/", async (req: MachineRequest, res: MachineResponse) => {
             }
             req.log.debug(`Created machine with uuid ${machine_uuid}`);
             res.status(StatusCodes.CREATED).json(machine);
-        }
+
     } else {
-        req.log.warn({
-            msg: "Forbidden user attempted to create a machine",
-            requesting_uuid: requesting_uuid,
-        });
-        // If the user is not authorized, provide a status error
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+            req.log.warn({
+                msg: "Forbidden user attempted to create a machine",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 /**
  * Update a specific machine. This route will not create a new machine if the
