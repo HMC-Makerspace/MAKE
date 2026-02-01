@@ -20,7 +20,7 @@ import {
 import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
-import { MachineSchema } from "models/machine.model";
+import { MachineSchema, MachineSchemaOptional, MachineInstanceSchema } from "models/machine.model";
 import { machine } from "os";
 
 // --- Request and Response Types ---
@@ -231,53 +231,56 @@ router.post("/",
  * header is required to call it. The user must have the
  * {@link API_SCOPE.UPDATE_MACHINE} scope.
  */
-router.put("/", async (req: MachineRequest, res: MachineResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = req.user?.uuid as string;
-    const machine_obj = req.body.machine_obj;
-    const machine_uuid = machine_obj.uuid;
+router.put("/", 
+    verifySchema(MachineSchema, "machine_obj"),
+    async (req: MachineRequest, res: MachineResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = req.user?.uuid as string;
+        const machine_obj = req.body.machine_obj;
+        const machine_uuid = machine_obj.uuid;
 
-    // If no requesting user uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while updating a machine",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-
-    req.log.debug({
-        msg: `Updating a machine by uuid ${machine_uuid}`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, update a machine's information
-    if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_MACHINE)) {
-        const machine = await updateMachine(machine_obj);
-        if (!machine) {
-            req.log.warn(`Machine ${machine_uuid} failed to update`);
-            res.status(StatusCodes.NOT_FOUND).json({
-                error: `Machine \`${machine_uuid}\` failed to update.`,
-            });
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while updating a machine",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
-        req.log.debug("Returned updated machine.");
-        res.status(StatusCodes.OK).json(machine);
-    } else {
-        req.log.warn({
-            msg: "Forbidden user attempted to update a machine",
+
+        req.log.debug({
+            msg: `Updating a machine by uuid ${machine_uuid}`,
             requesting_uuid: requesting_uuid,
         });
-        // If the user is not authorized, provide a status error
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+
+        // If the user is authorized, update a machine's information
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_MACHINE)) {
+            const machine = await updateMachine(machine_obj);
+            if (!machine) {
+                req.log.warn(`Machine ${machine_uuid} failed to update`);
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `Machine \`${machine_uuid}\` failed to update.`,
+                });
+                return;
+            }
+            req.log.debug("Returned updated machine.");
+            res.status(StatusCodes.OK).json(machine);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to update a machine",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 /**
  * Updates the machine with partial machine
  */
 router.patch(
     "/:UUID",
+    verifySchema(MachineSchemaOptional, "partial_machine_obj"),
     async (
         req: Request<
             { UUID: string },

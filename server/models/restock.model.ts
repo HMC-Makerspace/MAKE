@@ -48,4 +48,9 @@ export const RestockRequestSchema = Joi.object<TRestockRequest>({
     status_logs: Joi.array().items(
         RestockRequestLogSchema
     ).required()
-})
+});
+
+export const RestockRequestSchemaOptional = RestockRequestSchema.fork(
+    Object.keys(RestockRequestSchema.describe().keys), 
+    (schema) => schema.optional()
+);

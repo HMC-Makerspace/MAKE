@@ -1,45 +1,50 @@
 import mongoose from "mongoose";
 import type { TWorkshop, TWorkshopUserRecord } from "common/workshop";
-import { RequiredCertificate, RequiredCertificateSchema } from "./certification.model";
-import Joi from 'joi';
-import { authorize } from "passport";
+import {
+  RequiredCertificate,
+  RequiredCertificateSchema,
+} from "./certification.model";
+import Joi from "joi";
 
-const WorkshopUserRecord = new mongoose.Schema<TWorkshopUserRecord>({
+const WorkshopUserRecord = new mongoose.Schema<TWorkshopUserRecord>(
+  {
     user_uuid: { type: String, required: true },
     timestamp: { type: Number, required: true },
-});
+  },
+  { _id: false },
+);
 
 const WorkshopUserRecordSchema = Joi.object<TWorkshopUserRecord>({
-    user_uuid: Joi.string().required(),
-    timestamp: Joi.number().required()
-})
+  user_uuid: Joi.string().required(),
+  timestamp: Joi.number().required(),
+});
 
 /**
  * See {@link TWorkshop} documentation for type information.
  */
 export const Workshop = new mongoose.Schema<TWorkshop>(
-    {
-        uuid: { type: String, required: true },
-        title: { type: String, required: true },
-        description: { type: String, required: false },
-        instructors: { type: [String], required: true },
-        support_instructors: { type: [String], required: false },
-        capacity: { type: Number, required: false },
-        timestamp_start: { type: Number, required: true },
-        timestamp_end: { type: Number, required: true },
-        timestamp_public: { type: Number, required: false },
-        required_certifications: {
-            type: [RequiredCertificate],
-            required: false,
-        },
-        rsvp_list: { type: [WorkshopUserRecord], required: true },
-        reminder_emails_sent: { type: [Number], required: true },
-        sign_in_list: { type: [WorkshopUserRecord], required: true },
-        images: { type: [String], required: false },
-        available_to: { type: [String], required: false },
-        visible_to: { type: [String], required: false },
+  {
+    uuid: { type: String, required: true },
+    title: { type: String, required: true },
+    description: { type: String, required: false },
+    instructors: { type: [String], required: true },
+    support_instructors: { type: [String], required: false },
+    capacity: { type: Number, required: false },
+    timestamp_start: { type: Number, required: true },
+    timestamp_end: { type: Number, required: true },
+    timestamp_public: { type: Number, required: false },
+    required_certifications: {
+      type: [RequiredCertificate],
+      required: false,
     },
-    { collection: "workshops" }, // Collection name
+    rsvp_list: { type: [WorkshopUserRecord], required: true },
+    reminder_emails_sent: { type: [Number], required: true },
+    sign_in_list: { type: [WorkshopUserRecord], required: true },
+    images: { type: [String], required: false },
+    available_to: { type: [String], required: false },
+    visible_to: { type: [String], required: false },
+  },
+  { collection: "workshops" }, // Collection name
 );
 
 /**
@@ -48,6 +53,7 @@ export const Workshop = new mongoose.Schema<TWorkshop>(
 export const WorkshopSchema = Joi.object<TWorkshop>({
   uuid: Joi.string().required(),
   title: Joi.string().required(),
+  description: Joi.string().required(),
   instructors: Joi.array().items(Joi.string()).required(),
   support_instructors: Joi.array().items(Joi.string()).optional(),
   capacity: Joi.number().optional(),
@@ -64,3 +70,8 @@ export const WorkshopSchema = Joi.object<TWorkshop>({
   available_to: Joi.array().items(Joi.string()).optional(),
   visible_to: Joi.array().items(Joi.string()).optional(),
 });
+
+export const WorkshopSchemaOptional = WorkshopSchema.fork(
+  Object.keys(WorkshopSchema.describe().keys),
+  (schema) => schema.optional(),
+);
