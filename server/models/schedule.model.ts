@@ -16,12 +16,13 @@ const ShiftEvent = new mongoose.Schema<TShiftEvent>({
     initiator: { type: String, required: true },
 });
 
-const ShiftEventSchema = Joi.object<TShiftEvent>({
+export const ShiftEventSchema = Joi.object<TShiftEvent>({
     timestamp: Joi.number().required(),
     shift_date: Joi.number().required(),
     type: Joi.string().required(),
     initiator: Joi.string().required()
 });
+
 
 /**
  * See {@link TShift} documentation for type information.
@@ -47,6 +48,11 @@ export const ShiftSchema = Joi.object<TShift>({
     ).required()
 });
 
+export const ShiftSchemaOptional = ShiftSchema.fork(
+    Object.keys(ShiftSchema.describe().keys), 
+    (schema) => schema.optional()
+);
+
 // --- Alert ---
 
 /**
@@ -70,6 +76,11 @@ export const AlertSchema = Joi.object<TAlert>({
     content: Joi.string().optional().allow(""),
     hyperlink: Joi.boolean().optional()
 });
+
+export const AlertSchemaOptional = AlertSchema.fork(
+    Object.keys(AlertSchema.describe().keys), 
+    (schema) => schema.optional()
+);
 
 // --- Schedule ---
 
@@ -109,3 +120,8 @@ export const ScheduleSchema = Joi.object<TSchedule>({
     active: Joi.boolean().required(),
     staged: Joi.boolean().optional()
 }); 
+
+export const ScheduleSchemaOptional = ScheduleSchema.fork(
+    Object.keys(ScheduleSchema.describe().keys), 
+    (schema) => schema.optional()
+);

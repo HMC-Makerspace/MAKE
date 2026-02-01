@@ -16,7 +16,7 @@ export const Certificate = new mongoose.Schema<TCertificate>({
     level: { type: Number, required: true },
     timestamp_granted: { type: Number, required: true },
     timestamp_expires: { type: Number, required: false },
-});
+}, { _id: false });
 
 /**
  * Certificate schema through joi
@@ -35,7 +35,7 @@ export const CertificateSchema = Joi.object<TCertificate>({
 export const RequiredCertificate = new mongoose.Schema<TRequiredCertificate>({
     certification_uuid: { type: String, required: true },
     required_level: { type: Number, required: true },
-});
+}, { _id: false });
 
 /**
  * RequiredCertificate Joi Schema
@@ -44,7 +44,7 @@ export const RequiredCertificate = new mongoose.Schema<TRequiredCertificate>({
 export const RequiredCertificateSchema = Joi.object<TRequiredCertificate>({
     certification_uuid: Joi.string().required(),
     required_level: Joi.number().required()
-})
+});
 
 /**
  * See {@link TCertification} documentation for type information.

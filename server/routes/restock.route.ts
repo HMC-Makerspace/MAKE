@@ -24,7 +24,7 @@ import {
     validNewRestockRequest,
     updateRestockRequestStatuses,
 } from "controllers/restock.controller";
-import { RestockRequestSchema } from "models/restock.model";
+import { RestockRequestSchema, RestockRequestSchemaOptional, RestockRequestLogSchema } from "models/restock.model";
 
 // --- Request and Response Types ---
 // ok, this is a bad name but its a request related to restock requests,
@@ -196,52 +196,55 @@ router.get("/", async (req: Request, res: RestocksResponse) => {
  * a status error is returned. If the user is authorized, the updated restock
  * request object is returned.
  */
-router.put("/", async (req: RestockRequestRequest, res: RestockResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = req.user?.uuid as string;
-    const request_obj = req.body.request_obj;
-    const request_uuid = request_obj.uuid;
-    // If no requesting user_uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while updating restock request " +
-                `with uuid ${request_uuid}.`,
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-    req.log.debug({
-        msg: `Updating restock request by uuid ${request_uuid}`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, perform the update
-    if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_RESTOCK)) {
-        const restock = await updateRestockRequest(request_obj);
-        if (!restock) {
-            req.log.warn(`No restock request found with uuid ${request_uuid}`);
-            res.status(StatusCodes.NOT_FOUND).json({
-                error: `No restock request found with uuid \`${request_uuid}\`.`,
-            });
+router.put("/", 
+    verifySchema(RestockRequestSchema, "request_obj"),
+    async (req: RestockRequestRequest, res: RestockResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = req.user?.uuid as string;
+        const request_obj = req.body.request_obj;
+        const request_uuid = request_obj.uuid;
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while updating restock request " +
+                    `with uuid ${request_uuid}.`,
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
-        req.log.debug(`Updated restock request with uuid ${request_uuid}`);
-        res.status(StatusCodes.OK).json(restock);
-    } else {
-        // If the user is not authorized, provide a status error
-        req.log.warn({
-            msg: "Forbidden user attempted to update restock request",
+        req.log.debug({
+            msg: `Updating restock request by uuid ${request_uuid}`,
             requesting_uuid: requesting_uuid,
         });
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+
+        // If the user is authorized, perform the update
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_RESTOCK)) {
+            const restock = await updateRestockRequest(request_obj);
+            if (!restock) {
+                req.log.warn(`No restock request found with uuid ${request_uuid}`);
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `No restock request found with uuid \`${request_uuid}\`.`,
+                });
+                return;
+            }
+            req.log.debug(`Updated restock request with uuid ${request_uuid}`);
+            res.status(StatusCodes.OK).json(restock);
+        } else {
+            // If the user is not authorized, provide a status error
+            req.log.warn({
+                msg: "Forbidden user attempted to update restock request",
+                requesting_uuid: requesting_uuid,
+            });
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 /**
  * Update the status of a single restock request
  */
 router.patch(
     "/status/:UUID",
+    verifySchema(RestockRequestLogSchema, "status_obj"),
     async (req: RestockLogRequest, res: RestockResponse) => {
         const status_obj = req.body.status_obj;
         if (!status_obj) {
@@ -307,6 +310,7 @@ router.patch(
 
 router.patch(
     "/statuses/",
+    verifySchema(RestockRequestLogSchema, "status_obj"),
     async (req: BatchRestockLogRequest, res: RestocksResponse) => {
         const status_obj = req.body.status_obj;
         if (!status_obj) {

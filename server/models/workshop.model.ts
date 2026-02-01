@@ -7,7 +7,9 @@ import { authorize } from "passport";
 const WorkshopUserRecord = new mongoose.Schema<TWorkshopUserRecord>({
     user_uuid: { type: String, required: true },
     timestamp: { type: Number, required: true },
-});
+},     
+    { _id: false }
+);
 
 const WorkshopUserRecordSchema = Joi.object<TWorkshopUserRecord>({
     user_uuid: Joi.string().required(),
@@ -47,6 +49,7 @@ export const Workshop = new mongoose.Schema<TWorkshop>(
 export const WorkshopSchema = Joi.object<TWorkshop>({
     uuid: Joi.string().required(),
     title: Joi.string().required(),
+    description: Joi.string().required(),
     instructors: Joi.array()
         .items(
             Joi.string()
@@ -78,3 +81,8 @@ export const WorkshopSchema = Joi.object<TWorkshop>({
         Joi.string()
     ).optional()
 });
+
+export const WorkshopSchemaOptional = WorkshopSchema.fork(
+    Object.keys(WorkshopSchema.describe().keys), 
+    (schema) => schema.optional()
+);

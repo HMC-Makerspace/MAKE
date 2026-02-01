@@ -20,7 +20,7 @@ const MachineInstance = new mongoose.Schema<TMachineInstance>({
     message: { type: String, required: false },
 });
 
-const MachineInstanceSchema = Joi.object<TMachineInstance>({
+export const MachineInstanceSchema = Joi.object<TMachineInstance>({
     uuid: Joi.string().required(),
     name: Joi.string().optional().allow(""),
     status: Joi.number().required(),
@@ -98,3 +98,9 @@ export const MachineSchema = Joi.object<TMachine>({
     reservable: Joi.boolean().optional(),
     reservation_type: Joi.number().optional()
 });
+
+export const MachineSchemaOptional = MachineSchema.fork(
+    Object.keys(MachineSchema.describe().keys), 
+    (schema) => schema.optional()
+);
+

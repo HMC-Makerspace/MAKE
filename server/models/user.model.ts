@@ -43,6 +43,11 @@ export const UserRoleSchema = Joi.object<TUserRole>({
     display_hierarchy: Joi.number().optional()
 });
 
+export const UserRoleSchemaOptional = UserRoleSchema.fork(
+    Object.keys(UserRoleSchema.describe().keys), 
+    (schema) => schema.optional()
+);
+
 /**
  * See {@link TUserRoleLog} documentation for type information.
  * Stored as children of {@link User}.
@@ -51,7 +56,9 @@ const UserRoleLog = new mongoose.Schema<TUserRoleLog>({
     role_uuid: { type: String, required: true },
     timestamp_gained: { type: Number, required: true },
     timestamp_revoked: { type: Number, required: false },
-});
+}, 
+{ _id: false }
+);
 
 /**
  * User role log schema through joi
@@ -59,7 +66,7 @@ const UserRoleLog = new mongoose.Schema<TUserRoleLog>({
 export const UserRoleLogSchema = Joi.object<TUserRoleLog>({
     role_uuid: Joi.string().required(),
     timestamp_gained: Joi.number().required(),
-    timestamp_revoked: Joi.number().optional()
+    timestamp_revoked: Joi.number().optional().allow(null)
 })
 
 /**
@@ -103,7 +110,7 @@ const UserAvailability = new mongoose.Schema<TUserAvailability>({
     days: { type: [UserAvailabilityDay], required: true },
     min_shift_count: { type: Number, required: false },
     max_shift_count: { type: Number, required: false },
-});
+}, { _id: false });
 
 /**
  * User Availability Day Schema through joi
@@ -184,4 +191,7 @@ export const UserSchema = Joi.object<TUser>({
     passkey: Joi.string().allow('').allow(null).optional()
 });
 
-// USE MIN TO DO PATCHES AND PUTS 
+export const UserSchemaOptional = UserSchema.fork(
+    Object.keys(UserSchema.describe().keys), 
+    (schema) => schema.optional()
+);

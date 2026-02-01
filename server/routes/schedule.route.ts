@@ -36,7 +36,7 @@ import {
 } from "common/verify";
 import { TAlert, TPublicScheduleData, TSchedule } from "common/schedule";
 import { TShift, TShiftEvent } from "common/shift";
-import { ScheduleSchema, ShiftSchema, AlertSchema } from "models/schedule.model";
+import { ScheduleSchema, ShiftSchema, AlertSchema, ShiftEventSchema, ScheduleSchemaOptional, ShiftSchemaOptional, AlertSchemaOptional } from "models/schedule.model";
 
 // --- Request and Response Types ---
 type ScheduleRequest = Request<{}, {}, { schedule_obj: TSchedule }>;
@@ -332,6 +332,7 @@ router.post(
  */
 router.put(
     "/:schedule_uuid/shifts/:shift_uuid",
+    verifySchema(ShiftSchema, "shift_obj"),
     async (req: ShiftUpdateRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
@@ -465,6 +466,7 @@ router.delete(
  */
 router.patch(
     "/:schedule_uuid/shifts/:shift_uuid/event",
+    verifySchema(ShiftEventSchema, "event_obj"),
     async (req: ShiftEventRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
@@ -633,6 +635,7 @@ router.post(
  */
 router.put(
     "/:schedule_uuid/alerts/:alert_uuid",
+    verifySchema(AlertSchema, "alert_obj"),
     async (req: AlertUpdateRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
@@ -1082,52 +1085,54 @@ router.post("/",
  * protected route, and a `requesting_uuid` header is required to call it.
  * The user must have the {@link API_SCOPE.UPDATE_SCHEDULE} scope.
  */
-router.put("/", async (req: ScheduleRequest, res: ScheduleResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = req.user?.uuid as string;
-    const schedule_obj = req.body.schedule_obj;
-    const schedule_uuid = schedule_obj.uuid;
+router.put("/", 
+    verifySchema(ScheduleSchema, "schedule_obj"),
+    async (req: ScheduleRequest, res: ScheduleResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = req.user?.uuid as string;
+        const schedule_obj = req.body.schedule_obj;
+        const schedule_uuid = schedule_obj.uuid;
 
-    // If no requesting user uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while updating a schedule",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-
-    req.log.debug({
-        msg: `Updating a schedule by uuid ${schedule_uuid}`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, update a schedule's information
-    if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_SCHEDULE)) {
-        const schedule = await updateSchedule(schedule_obj);
-        if (!schedule) {
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
             req.log.warn(
-                `Could not update schedule with uuid ${schedule_uuid} ` +
-                    `because it was not found.`,
+                "No requesting_uuid was provided while updating a schedule",
             );
-            res.status(StatusCodes.NOT_FOUND).json({
-                error:
-                    `Could not update schedule with uuid ` +
-                    `\`${schedule_uuid}\` because it was not found.`,
-            });
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
-        req.log.debug("Returned updated schedule.");
-        res.status(StatusCodes.OK).json(schedule);
-    } else {
-        req.log.warn({
-            msg: "Forbidden user attempted to update a schedule",
+
+        req.log.debug({
+            msg: `Updating a schedule by uuid ${schedule_uuid}`,
             requesting_uuid: requesting_uuid,
         });
-        // If the user is not authorized, provide a status error
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+
+        // If the user is authorized, update a schedule's information
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_SCHEDULE)) {
+            const schedule = await updateSchedule(schedule_obj);
+            if (!schedule) {
+                req.log.warn(
+                    `Could not update schedule with uuid ${schedule_uuid} ` +
+                        `because it was not found.`,
+                );
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error:
+                        `Could not update schedule with uuid ` +
+                        `\`${schedule_uuid}\` because it was not found.`,
+                });
+                return;
+            }
+            req.log.debug("Returned updated schedule.");
+            res.status(StatusCodes.OK).json(schedule);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to update a schedule",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 /**
  * Set the active schedule by uuid. Requires the {@link API_SCOPE.UPDATE_SCHEDULE} scope.
@@ -1237,6 +1242,7 @@ router.patch(
  */
 router.patch(
     "/:UUID",
+    verifySchema(ScheduleSchemaOptional, "partial_schedule_obj"),
     async (
         req: Request<
             { UUID: string },

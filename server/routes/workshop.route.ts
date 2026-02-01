@@ -23,7 +23,7 @@ import {
     SuccessfulResponse,
 } from "common/verify";
 import { TPublicWorkshopData, TWorkshop } from "common/workshop";
-import { WorkshopSchema } from "models/workshop.model";
+import { WorkshopSchema, WorkshopSchemaOptional } from "models/workshop.model";
 
 // --- Request and Response Types ---
 type WorkshopRequest = Request<{}, {}, { workshop_obj: TWorkshop }>;
@@ -236,47 +236,49 @@ router.post("/",
  * header is required to call it. The user must have the
  * {@link API_SCOPE.UPDATE_WORKSHOP} scope.
  */
-router.put("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = req.user?.uuid as string;
-    const workshop_obj = req.body.workshop_obj;
-    const workshop_uuid = workshop_obj.uuid;
+router.put("/", 
+    verifySchema(WorkshopSchema, "workshop_obj"),
+    async (req: WorkshopRequest, res: WorkshopResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = req.user?.uuid as string;
+        const workshop_obj = req.body.workshop_obj;
+        const workshop_uuid = workshop_obj.uuid;
 
-    // If no requesting user uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while updating a workshop",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-
-    req.log.debug({
-        msg: `Updating a workshop by uuid ${workshop_uuid}`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, update a workshop's information
-    if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_WORKSHOP)) {
-        const workshop = await updateWorkshop(workshop_obj);
-        if (!workshop) {
-            req.log.warn(`Workshop ${workshop_uuid} failed to update`);
-            res.status(StatusCodes.NOT_FOUND).json({
-                error: `Workshop \`${workshop_uuid}\` failed to update.`,
-            });
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while updating a workshop",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
-        req.log.debug("Returned updated workshop.");
-        res.status(StatusCodes.OK).json(workshop);
-    } else {
-        req.log.warn({
-            msg: "Forbidden user attempted to update a workshop",
+
+        req.log.debug({
+            msg: `Updating a workshop by uuid ${workshop_uuid}`,
             requesting_uuid: requesting_uuid,
         });
-        // If the user is not authorized, provide a status error
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+
+        // If the user is authorized, update a workshop's information
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_WORKSHOP)) {
+            const workshop = await updateWorkshop(workshop_obj);
+            if (!workshop) {
+                req.log.warn(`Workshop ${workshop_uuid} failed to update`);
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `Workshop \`${workshop_uuid}\` failed to update.`,
+                });
+                return;
+            }
+            req.log.debug("Returned updated workshop.");
+            res.status(StatusCodes.OK).json(workshop);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to update a workshop",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 /**
  * Deletes a workshop. This is a protected route, and a 'requesting_uuid'
@@ -495,6 +497,7 @@ router.patch(
  */
 router.patch(
     "/:UUID",
+    verifySchema(WorkshopSchemaOptional, "partial_workshop_obj"),
     async (
         req: Request<
             { UUID: string },
