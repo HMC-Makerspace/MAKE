@@ -6,6 +6,7 @@ import {
     Button,
     CardFooter,
     addToast,
+    useDisclosure,
 } from "@heroui/react";
 import clsx from "clsx";
 import { FILE_RESOURCE_TYPE } from "../../../../common/file";
@@ -15,12 +16,15 @@ import CertificationTag from "../../kiosks/admin/certifications/CertificationTag
 import { CalendarBoldIcon } from "@heroui/shared-icons";
 import { TUser } from "common/user";
 import axios, { AxiosError } from "axios";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { timestampToZonedDateTime } from "../../../utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { timestampToZonedDateTime, verifyScopes } from "../../../utils";
 import { TConfig } from "common/config";
 import { DateFormatter } from "@internationalized/date";
 import { TCertificate, TCertification } from "common/certification";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
+import { API_SCOPE } from "../../../../common/global";
+import WorkshopSigninModal from "./WorkshopSigninModal";
+import WorkshopSigninListModal from "./WorkshopSigninListModal";
 
 // cancel means cancel_rsvp
 async function rsvp({
@@ -101,6 +105,16 @@ export default function WorkshopCard({
         },
     });
 
+    const {
+        data: scopes,
+        isLoading: scopesLoading,
+        isError: scopesError,
+    } = useQuery<API_SCOPE[]>({
+        queryKey: ["user", "self", "scopes"],
+        refetchOnWindowFocus: false,
+        retry: false,
+    });
+
     const startZDT = timestampToZonedDateTime(
         workshop.timestamp_start,
         config?.schedule.timezone,
@@ -137,8 +151,37 @@ export default function WorkshopCard({
             hour: "numeric",
             minute: "2-digit",
         });
+    
+    const canRSVP =
+        scopes && verifyScopes(scopes, [API_SCOPE.RSVP_WORKSHOP]);
+    const canSignIn =
+        scopes && verifyScopes(scopes, [API_SCOPE.SIGN_IN_WORKSHOP]);
+    
+    const {
+        data: user_self,
+        isLoading: selfLoading,
+        isError: selfError,
+    } = useQuery<TUser>({
+        queryKey: ["user", "self"],
+        refetchOnWindowFocus: false,
+        retry: false,
+    });
+    const isWorkshopInstructor = user_self && (workshop.instructors.includes(user_self.uuid) || workshop.support_instructors?.includes(user_self.uuid));
+
+    const {
+        isOpen: signinIsOpen,
+        onOpen: signinOnOpen,
+        onOpenChange: signinOnOpenChange,
+    } = useDisclosure();
+
+    const {
+        isOpen: signinListOpen,
+        onOpen: signinListOnOpen,
+        onOpenChange: signinListOnOpenChange,
+    } = useDisclosure();
 
     return (
+        <>
         <Card id={workshop.title} key={workshop.title} className="h-[44dvh]">
             <CardHeader className="flex-col items-start">
                 <div
@@ -220,8 +263,9 @@ export default function WorkshopCard({
                             />
                         ))}
                 </div>
-                <div className="absolute w-full h-fit bottom-3 flex justify-center z-20">
-                    <Tooltip
+
+                <div className="absolute w-full h-fit bottom-3 flex justify-evenly z-20">
+                    {(canRSVP && !isWorkshopInstructor) && (<Tooltip
                         color="primary"
                         content={
                             workshop.timestamp_public &&
@@ -265,15 +309,77 @@ export default function WorkshopCard({
                             {rsvpIndex === -1 && overCapacity
                                 ? "Join Waitlist"
                                 : rsvpIndex === -1 && !overCapacity
-                                  ? "RSVP"
-                                  : !workshop.capacity ||
-                                      rsvpIndex < workshop.capacity
+                                ? "RSVP"
+                                : !workshop.capacity ||
+                                    rsvpIndex < workshop.capacity
                                     ? "Cancel RSVP"
                                     : "Leave Waitlist"}
                         </Button>
-                    </Tooltip>
+                    </Tooltip>)}
+                    
+                    {(canSignIn && !isWorkshopInstructor) && (<Tooltip
+                        color="primary"
+                        content={
+                            workshop.timestamp_start && config?.workshop.sign_in_enabled_within &&
+                            `Sign ins are closed until ${new Date((workshop.timestamp_start - config.workshop.sign_in_enabled_within) * 1000).toDateString()}`
+                        }
+                        isDisabled={
+                            workshop.timestamp_start && config?.workshop.sign_in_enabled_within
+                                ? workshop.timestamp_start - config.workshop.sign_in_enabled_within < Date.now() / 1000
+                                : true
+                        }
+                    >
+                        <Button
+                            className="text-small font-bold text-white bg-primary hover:bg-primary/50 hover:outline"
+                            color="default"
+                            radius="lg"
+                            size="sm"
+                            variant="flat"
+                            onPress={() => {
+                                // Only sign in if workshop is public
+                                if (
+                                    workshop.timestamp_start && config?.workshop.sign_in_enabled_within &&
+                                    workshop.timestamp_start - config.workshop.sign_in_enabled_within < Date.now() / 1000
+                                ) {
+                                    signinOnOpen();
+                                }
+                            }}
+                            isDisabled={
+                                !self ||
+                                workshop.timestamp_end < Date.now() / 1000
+                            }
+                        >
+                            Sign in
+                        </Button>
+                    </Tooltip>)}
+
+                    {isWorkshopInstructor && (<Button
+                        className="text-small font-bold text-white bg-primary hover:bg-primary/50 hover:outline"
+                        color="default"
+                        radius="lg"
+                        size="sm"
+                        variant="flat"
+                        onPress={signinListOnOpen}
+                    >
+                        View sign in list
+                    </Button>)}
                 </div>
             </CardBody>
         </Card>
+
+        {(canSignIn && !isWorkshopInstructor) && (<WorkshopSigninModal
+            key={`${workshop.uuid}-signin`}
+            workshop={workshop}
+            isOpen={signinIsOpen}
+            onOpenChange={signinOnOpenChange}
+        />)}
+
+        {isWorkshopInstructor && (<WorkshopSigninListModal
+            key={`${workshop.uuid}-signinlist`}
+            workshop={workshop}
+            isOpen={signinListOpen}
+            onOpenChange={signinListOnOpenChange}
+        />)}
+        </>
     );
 }

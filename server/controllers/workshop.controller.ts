@@ -310,19 +310,19 @@ export async function cancelRSVPToWorkshop(
  * Sign in a user to a given workshop
  * @param workshop_uuid The workshop's UUID
  * @param user_uuid The user's UUID to sign in
- * @returns Whether or not the sign in was successful
+ * @returns The updated workshop object (or "undefined" if the workshop doesn't exist, or "false" if the user is already signed in)
  */
 export async function signInToWorkshop(
     workshop_uuid: UUID,
     user_uuid: UserUUID,
-): Promise<boolean> {
+): Promise<TWorkshop | boolean | undefined> {
     const workshop = await getWorkshop(workshop_uuid);
     // If the workshop doesn't exist, the sign in fails
     if (!workshop) {
-        return false;
+        return undefined;
     }
     // If the user is already in the sign in list, the sign in fails
-    if (user_uuid in workshop.sign_in_list) {
+    if (workshop.sign_in_list.some(i => i.user_uuid == user_uuid)) {
         return false;
     }
     // Otherwise, add the user to the sign in list
@@ -331,8 +331,7 @@ export async function signInToWorkshop(
         timestamp: Date.now() / 1000,
     });
     // Update the workshop in the database
-    workshop.save();
-    return true;
+    return workshop.save();
 }
 
 export async function workshopReminderEmailCron(logger: Logger) {
@@ -378,7 +377,7 @@ export async function workshopReminderEmailCron(logger: Logger) {
                 new_sent_times.push(reminder);
             }
         }
-        
+
         if (new_sent_times.length != workshop.reminder_emails_sent.length) {
             await Workshops.updateOne(
                 {
