@@ -183,6 +183,21 @@ export async function updateMailingList(
     return request.save();
 }
 
+export async function removeUserFromMailingList(
+    request_uuid: string,
+    user_uuid: UserUUID,
+) {
+    // Find the request by UUID
+    const request = await getRestockRequest(request_uuid);
+    // If the request doesn't exist, return null
+    if (!request) {
+        return null;
+    }
+    // Remove the user from the mailing list by filtering them out
+    request.mailing_list = request.mailing_list.filter(uuid => uuid !== user_uuid);
+    return request.save();
+}
+
 export async function sendRestockUpdateEmail(
     restock: TRestockRequest,
     logger: Logger,

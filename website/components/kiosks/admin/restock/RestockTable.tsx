@@ -19,7 +19,8 @@ import {
     ChevronDownIcon,
     ArrowPathRoundedSquareIcon,
     PencilSquareIcon,
-    UserPlusIcon
+    UserPlusIcon,
+    XMarkIcon
 } from "@heroicons/react/24/outline";
 import {
     RESTOCK_REQUEST_STATUS,
@@ -32,6 +33,8 @@ import RestockUserList from "./RestockUserList";
 import RestockStatusLogs from "./RestockStatusLogs";
 import ItemInfo from "../inventory/ItemInfo";
 import React from "react";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { addToast } from "@heroui/react";
 import { UserChip } from "../../../user/UserChip";
 import { convertTimestampToDate } from "../../../../utils";
 import { TArea } from "common/area";
@@ -200,8 +203,6 @@ function RestockUserSelect({
     );
 }
 
-
-
 export default function RestockTable({
     restocks,
     inventory,
@@ -217,6 +218,44 @@ export default function RestockTable({
     certs: TCertification[];
     isLoading: boolean;
 }) {
+    const queryClient = useQueryClient();
+
+    const deleteUserMutation = useMutation({
+        mutationFn: async ({
+            restockUUID,
+            userUUID,
+        }: {
+            restockUUID: string;
+            userUUID: string;
+        }) => {
+            const response = await fetch(
+                `/api/v3/restock/${restockUUID}/user/${userUUID}`,
+                {
+                    method: "DELETE",
+                },
+            );
+            if (!response.ok) {
+                throw new Error("Failed to remove user from mailing list");
+            }
+            return response.json();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["restock"] });
+            addToast({
+                title: "Successfully removed from mailing list",
+                color: "success",
+                timeout: 3000,
+            });
+        },
+        onError: (error) => {
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+                timeout: 3000,
+            });
+        },
+    });
+
     const [selectedRestocks, setSelectedRestocks] = React.useState<Selection>(
         new Set(),
     );
@@ -288,6 +327,14 @@ export default function RestockTable({
         onOpen: restockUserOnOpen,
         onOpenChange: restockUserOnOpenChange,
     } = useDisclosure();
+
+    // runs when the X button next to the user is clicked
+    const handleRemoveUser = (restockUUID: string, userUUID: string) => {
+        deleteUserMutation.mutate({
+            restockUUID: restockUUID,
+            userUUID: userUUID,
+        });
+    };
 
     // table returned
     return (
@@ -419,12 +466,26 @@ export default function RestockTable({
                                 >
                                     {restock.mailing_list.map((uuid, index) => {
                                         return (
-                                            <div className="pb-1 w-[80%]">
+                                            <div className="pb-1 w-full flex flex-row items-center gap-2">
                                                 <UserChip
                                                     user_uuid={uuid}
                                                     popoverPlacement="bottom"
-                                                    className="justify-start w-full"
+                                                    className="justify-start flex-grow"
                                                 />
+                                                <Button
+                                                    isIconOnly
+                                                    size="sm"
+                                                    color="danger"
+                                                    variant="light"
+                                                    onPress={() =>
+                                                        handleRemoveUser(
+                                                            restock.uuid,
+                                                            uuid,
+                                                        )
+                                                    }
+                                                >
+                                                    <XMarkIcon className="size-4" />
+                                                </Button>
                                             </div>
                                         );
                                     })}
