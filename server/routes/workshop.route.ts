@@ -466,11 +466,11 @@ router.patch(
 
         // If the user is authorized, update a workshop's information
         if (await verifyRequest(requesting_uuid, API_SCOPE.SIGN_IN_WORKSHOP)) {
-            const rsvp_successful = await signInToWorkshop(
+            const rsvp_out = await signInToWorkshop(
                 workshop_uuid,
                 user_uuid,
             );
-            if (!rsvp_successful) {
+            if (rsvp_out === undefined) {
                 req.log.warn(
                     `Workshop with uuid ${workshop_uuid} not found, failed to sign in`,
                 );
@@ -478,9 +478,17 @@ router.patch(
                     error: `Workshop with uuid \`${workshop_uuid}\` not found.`,
                 });
                 return;
+            } else if (rsvp_out === false) {
+                req.log.warn(
+                    `User with uuid ${user_uuid} already signed in, failed to sign in`,
+                );
+                res.status(StatusCodes.IM_A_TEAPOT).json({ // hi person with better knowledge of http codes, please inform what code this would be (req failed because user already signed in)
+                    error: `User already signed in.`,
+                });
+                return;
             }
             req.log.debug("Signed in successfully!");
-            res.status(StatusCodes.OK);
+            res.status(StatusCodes.OK).json(rsvp_out);
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to sign into a workshop",

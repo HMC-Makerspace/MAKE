@@ -192,7 +192,7 @@ export function ColumnSelect({
         <Dropdown isDisabled={isLoading}>
             <DropdownTrigger className="hidden sm:flex">
                 <Button
-                    endContent={
+                    startContent={
                         <ChevronDownIcon className="size-6 text-small" />
                     }
                     variant="flat"

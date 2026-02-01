@@ -29,7 +29,7 @@ export default function WorkshopKiosk() {
     // Get all certification data
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
-            queryKey: ["certification"],
+            queryKey: ["certification", "public"],
             refetchOnWindowFocus: false,
         },
     );

@@ -69,7 +69,7 @@ export default function ItemEditor({
                     "absolute w-fit p-4 h-fit bg-primary-200/20 m-auto",
                     "top-0 bottom-0 left-0 right-0 rounded-xl flex gap-1",
                     "items-center justify-center font-semibold",
-                    "text-default-foreground",
+                    "text-default-foreground pointer-events-none",
                 )}
             >
                 Edit this item in its associated kiosk

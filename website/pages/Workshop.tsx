@@ -19,7 +19,7 @@ export default function WorkshopPage() {
         isLoading: workshopsLoading,
         isError: workshopsError,
     } = useQuery<TWorkshop[]>({
-        queryKey: ["workshop"],
+        queryKey: ["workshop", "public"],
         refetchOnWindowFocus: false,
         retry: false,
     });
@@ -37,7 +37,7 @@ export default function WorkshopPage() {
         isLoading: certsLoading,
         isError: certsError,
     } = useQuery<TCertification[]>({
-        queryKey: ["certification", "public"],
+        queryKey: ["certification"],
         refetchOnWindowFocus: false,
         retry: false,
     });

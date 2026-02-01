@@ -66,6 +66,7 @@ const ScheduleConfigSchema = Joi.object<TScheduleConfig>({
 const WorkshopConfig = new mongoose.Schema<TWorkshopConfig>(
     {
         reminder_times: { type: [Number], required: true },
+        sign_in_enabled_within: { type: Number, required: true },
     },
     { _id: false },
 );
