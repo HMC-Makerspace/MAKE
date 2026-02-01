@@ -1,8 +1,16 @@
-import { Input, Selection, Button, Spinner, Checkbox } from "@heroui/react";
+import {
+    Input,
+    Selection,
+    Button,
+    Spinner,
+    Checkbox,
+    useDisclosure,
+} from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
     PlusIcon,
     PencilSquareIcon,
+    ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
 import { TUser, TUserRole, UserUUID } from "common/user";
 import MAKETable, { ColumnSelect } from "../../../Table";
@@ -13,9 +21,10 @@ import clsx from "clsx";
 import CertificationTag from "../certifications/CertificationTag";
 import { TCertification } from "common/certification";
 import { useQuery } from "@tanstack/react-query";
+import UserExportModal from "./UserExportModal";
 
 const baseColumns = [
-    // { name: "UUID", id: "uuid" }, // No need to show
+    { name: "UUID", id: "uuid" }, // No need to show
     { name: "ID", id: "college_id" },
     { name: "Name", id: "name" },
     { name: "Email", id: "email" },
@@ -147,6 +156,12 @@ export default function UsersTable({
         [roles],
     );
 
+    const {
+        isOpen: exportMenu,
+        onOpen: openExportMenu,
+        onOpenChange: onChangeExportMenu,
+    } = useDisclosure();
+
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
             <div id="user-table-top-content" className="flex flex-col gap-4">
@@ -169,6 +184,15 @@ export default function UsersTable({
                     />
                     {fullHeader && (
                         <div className="flex gap-3">
+                            <Button
+                                color="default"
+                                variant="bordered"
+                                onPress={openExportMenu}
+                                className="px-2 xl:px-4 min-w-fit"
+                            >
+                                <ArrowTopRightOnSquareIcon className="size-5" />
+                                <div className="hidden xl:flex">Export</div>
+                            </Button>
                             <ColumnSelect
                                 columns={columns}
                                 visibleColumns={visibleColumns}
@@ -221,7 +245,8 @@ export default function UsersTable({
                     <span className="text-default-400 text-small">
                         {filteredUsers.length === numUsers
                             ? `Total ${numUsers} items`
-                            : `Showing ${filteredUsers.length} of ${numUsers} items`}                    </span>
+                            : `Showing ${filteredUsers.length} of ${numUsers} items`}{" "}
+                    </span>
                 </div>
             </div>
             <MAKETable
@@ -312,6 +337,14 @@ export default function UsersTable({
                     </span>
                 </div>
             )}
+            <UserExportModal
+                users={filteredUsers}
+                isOpen={exportMenu}
+                onOpenChange={onChangeExportMenu}
+                columns={columns}
+                visibleColumns={visibleColumns}
+                setVisibleColumns={setVisibleColumns}
+            />
         </div>
     );
 }
