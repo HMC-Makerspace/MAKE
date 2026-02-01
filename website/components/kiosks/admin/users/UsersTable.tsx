@@ -24,7 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import UserExportModal from "./UserExportModal";
 
 const baseColumns = [
-    // { name: "UUID", id: "uuid" }, // No need to show
+    { name: "UUID", id: "uuid" }, // No need to show
     { name: "ID", id: "college_id" },
     { name: "Name", id: "name" },
     { name: "Email", id: "email" },
@@ -188,9 +188,10 @@ export default function UsersTable({
                                 color="default"
                                 variant="bordered"
                                 onPress={openExportMenu}
+                                className="px-2 xl:px-4 min-w-fit"
                             >
                                 <ArrowTopRightOnSquareIcon className="size-5" />
-                                Export
+                                <div className="hidden xl:flex">Export</div>
                             </Button>
                             <ColumnSelect
                                 columns={columns}
@@ -340,6 +341,9 @@ export default function UsersTable({
                 users={filteredUsers}
                 isOpen={exportMenu}
                 onOpenChange={onChangeExportMenu}
+                columns={columns}
+                visibleColumns={visibleColumns}
+                setVisibleColumns={setVisibleColumns}
             />
         </div>
     );

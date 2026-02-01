@@ -4,68 +4,71 @@ import {
     ModalHeader,
     ModalBody,
     ModalFooter,
-    Form,
     Button,
-    Input,
-    Textarea,
-    NumberInput,
-    addToast,
-    Autocomplete,
-    AutocompleteItem,
+    Selection,
+    Select,
+    SelectItem,
 } from "@heroui/react";
-import {
-    TRestockRequest,
-    RESTOCK_REQUEST_STATUS,
-} from "../../../../../common/restock";
-import { TInventoryItem } from "common/inventory";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { TUser } from "common/user";
-import axios from "axios";
-import clsx from "clsx";
-import React from "react";
-
-const updateRestocks = async ({
-    restock,
-    isNew,
-}: {
-    restock: TRestockRequest;
-    isNew: boolean;
-}) => {
-    if (isNew) {
-        // Creating new restock request
-        return (
-            await axios.post<TRestockRequest>("/api/v3/restock/", {
-                request_obj: restock,
-            })
-        ).data;
-    } else {
-        // Add the user to the restock request's mailing list
-        return (
-            await axios.patch<TRestockRequest>(
-                `/api/v3/restock/mailing_list/${restock.uuid}`,
-                {
-                    person_obj: restock.mailing_list,
-                },
-            )
-        ).data;
-    }
-};
+import { ColumnSelect } from "../../../Table";
+import { useState } from "react";
 
 export default function UserExportModal({
     users,
+    columns,
+    visibleColumns,
+    setVisibleColumns,
     isOpen,
     onOpenChange,
 }: {
     users: TUser[];
+    columns: { name: string; id: string }[];
+    visibleColumns: Selection;
+    setVisibleColumns: (newColumns: Selection) => void;
     isOpen: boolean;
-    onOpenChange: () => void;
+    onOpenChange: (open: boolean) => void;
 }) {
-    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        // Prevent default browser page refresh.
-        e.preventDefault();
+    const [separator, setSeparator] = useState(",");
 
-        // Get form data as an object.
-        const data = new FormData(e.currentTarget);
+    const onPress = () => {
+        const keys = Array.from(visibleColumns);
+
+        // Header
+        let csvString = keys.join(",") + "\n";
+
+        // Add the rows
+        users.forEach((user) => {
+            // Map object values to the keys and join with commas
+            csvString +=
+                keys
+                    .map((key) => {
+                        // @ts-ignore All key items are valid user keys
+                        let value = String(user[key]);
+                        // Basic escaping for special characters (commas, quotes)
+                        if (
+                            typeof value === "string" &&
+                            (value.includes(",") || value.includes('"'))
+                        ) {
+                            value = `"${value.replace(/"/g, '""')}"`;
+                        }
+                        return value;
+                    })
+                    .join(",") + "\n";
+        });
+
+        const blob = new Blob([csvString]);
+
+        const a = document.createElement("a");
+        a.style.display = "none";
+        document.body.appendChild(a);
+
+        a.href = URL.createObjectURL(blob);
+        a.download = "users.csv";
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+
+        onOpenChange(false);
     };
 
     return (
@@ -86,60 +89,53 @@ export default function UserExportModal({
                             </div>
                         </ModalHeader>
                         <ModalBody>
-                            <Form onSubmit={onSubmit}>
-                                <div className="w-full flex flex-col gap-2">
-                                    <Autocomplete
-                                        label="Separator"
-                                        name="separator"
-                                        variant="faded"
-                                        color="primary"
-                                        size="md"
-                                        labelPlacement="outside-left"
-                                        classNames={{
-                                            base: "w-full justify-center",
-                                        }}
-                                        defaultInputValue="Comma"
-                                    >
-                                        <AutocompleteItem key=",">
-                                            Comma
-                                        </AutocompleteItem>
-                                        <AutocompleteItem key={`\t`}>
-                                            Tab
-                                        </AutocompleteItem>
-                                    </Autocomplete>
-                                    <Textarea
-                                        label="Reason for Restock"
-                                        name="reason_restock"
-                                        placeholder="Enter reason"
-                                        variant="faded"
-                                        color="primary"
-                                        classNames={{
-                                            input: clsx([
-                                                "placeholder:text-default-500",
-                                                "placeholder:italic",
-                                                "text-default-700",
-                                            ]),
-                                            base: "w-full",
-                                        }}
-                                    />
-                                </div>
-                                <ModalFooter className="w-full justify-between">
-                                    <Button
-                                        variant="flat"
-                                        color="danger"
-                                        onPress={onClose}
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        variant="shadow"
-                                        color="primary"
-                                        type="submit"
-                                    >
-                                        Export
-                                    </Button>
-                                </ModalFooter>
-                            </Form>
+                            <div className="w-full flex flex-row gap-2">
+                                <Select
+                                    label="Separator"
+                                    name="separator"
+                                    variant="faded"
+                                    color="primary"
+                                    size="md"
+                                    labelPlacement="outside-left"
+                                    classNames={{
+                                        base: "justify-center",
+                                    }}
+                                    selectedKeys={separator}
+                                    onSelectionChange={(key) =>
+                                        key.currentKey
+                                            ? setSeparator(key.currentKey)
+                                            : null
+                                    }
+                                    className="w-3/4"
+                                    isRequired
+                                >
+                                    <SelectItem key=",">Comma</SelectItem>
+                                    <SelectItem key={`\t`}>Tab</SelectItem>
+                                </Select>
+                                <ColumnSelect
+                                    columns={columns}
+                                    visibleColumns={visibleColumns}
+                                    setVisibleColumns={setVisibleColumns}
+                                    isLoading={false}
+                                />
+                            </div>
+                            <ModalFooter className="w-full justify-between">
+                                <Button
+                                    variant="flat"
+                                    color="danger"
+                                    onPress={onClose}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    variant="shadow"
+                                    color="primary"
+                                    type="submit"
+                                    onPress={onPress}
+                                >
+                                    Export
+                                </Button>
+                            </ModalFooter>
                         </ModalBody>
                     </>
                 )}
