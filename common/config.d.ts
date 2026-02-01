@@ -70,7 +70,15 @@ export type TScheduleConfig = {
 };
 
 export type TWorkshopConfig = {
+    /**
+     * List of times (in seconds) to send out workshop reminder emails
+     */
     reminder_times: number[];
+
+    /**
+     * Time (in seconds) before a workshop starts during which users can sign in
+     */
+    sign_in_enabled_within: number;
 }
 
 export type TGeneralConfig = {

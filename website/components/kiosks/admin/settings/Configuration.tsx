@@ -804,6 +804,22 @@ export default function Configuration({ config }: { config: TConfig }) {
                                     }}
                                 />
                             </ConfigItem>
+
+                            <ConfigItem
+                                name="Sign in Enabled Time"
+                                description="The time, in seconds before a workshop begins, that users will be able to sign into the workshop."
+                            >
+                                <Input
+                                    type="number"
+                                    defaultValue={config.workshop.sign_in_enabled_within?.toString()}
+                                    min={0}
+                                    name="workshop_sign_in_enabled_within"
+                                    color="primary"
+                                    variant="faded"
+                                    endContent="seconds"
+                                    isRequired
+                                />
+                            </ConfigItem>
                         </AccordionItem>
                         <AccordionItem key="faq" title="FAQ">
                             <ConfigItem
