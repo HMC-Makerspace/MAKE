@@ -811,12 +811,13 @@ export default function Configuration({ config }: { config: TConfig }) {
                             >
                                 <Input
                                     type="number"
-                                    defaultValue={config.workshop.sign_in_enabled_within.toString()}
+                                    defaultValue={config.workshop.sign_in_enabled_within?.toString()}
                                     min={0}
                                     name="workshop_sign_in_enabled_within"
                                     color="primary"
                                     variant="faded"
                                     endContent="seconds"
+                                    isRequired
                                 />
                             </ConfigItem>
                         </AccordionItem>
