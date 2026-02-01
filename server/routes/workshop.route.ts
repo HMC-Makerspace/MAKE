@@ -356,14 +356,9 @@ router.patch(
                 workshop_uuid,
                 requesting_uuid,
                 req.log,
+                res,
             );
             if (!updated_workshop) {
-                req.log.warn(
-                    `No public workshop found by uuid ${workshop_uuid}, failed to RSVP`,
-                );
-                res.status(StatusCodes.NOT_FOUND).json({
-                    error: `No public workshop found with uuid \`${workshop_uuid}\`, failed to RSVP.`,
-                });
                 return;
             }
             req.log.debug("RSVP'd successfully.");

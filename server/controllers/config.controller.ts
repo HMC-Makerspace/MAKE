@@ -23,3 +23,15 @@ export function setConfig(new_config: TConfig) {
         returnDocument: "after",
     });
 }
+
+/**
+ * Creates an initial config object. Throws an error if a config already exists.
+ */
+export async function createConfig(config: TConfig) {
+    const Configuration = mongoose.model("Config", Config);
+    if (await Configuration.exists({})) {
+        throw Error("Config already exists, cannot create default.")
+    } else {
+        return Configuration.create(config);
+    }
+}

@@ -686,8 +686,9 @@ export default function RolesTable({
                 </div>
                 <div className="flex justify-between items-center pb-2">
                     <span className="text-default-400 text-small">
-                        Total {numRoles} roles
-                    </span>
+                        {filteredRoles.length === numRoles
+                            ? `Total ${numRoles} items`
+                            : `Showing ${filteredRoles.length} of ${numRoles} items`}                    </span>
                     {canEdit && (
                         <span className="text-default-400 text-small">
                             Double click to edit role

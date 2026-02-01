@@ -134,60 +134,68 @@ export default function CheckoutsKiosk() {
 
     const [cart, setCart] = useState<TCheckoutItem[]>([]);
 
+    const [validation, setValidation] = useState<TCheckoutValidation>({
+        status: CHECKOUT_VALIDATION.VALID,
+    });
+
     const addItemToCart = React.useCallback(
         (item?: TInventoryItem) => {
-            if (!item) return;
-            const existing_item = cart.findIndex(
-                (c) => c.item_uuid === item.uuid,
-            );
-            if (existing_item !== -1) {
-                // Item already added to cart
-                // Increase quantity only if < item.quantity
-                // or item is relative quantity
-                if (
-                    cart[existing_item].quantity < item.quantity ||
-                    item.quantity < 0
-                ) {
-                    cart[existing_item].quantity++;
+            // This callback format fixes a dependency array bug
+            setCart((prevCart) => {
+                if (!item) return prevCart;
+                const newCart = [...prevCart];
+                const existing_item = newCart.findIndex(
+                    (c) => c.item_uuid === item.uuid,
+                );
+                if (existing_item !== -1) {
+                    // Item already added to cart
+                    // Increase quantity only if < item.quantity
+                    // or item is relative quantity
+                    if (
+                        newCart[existing_item].quantity < item.quantity ||
+                        item.quantity < 0
+                    ) {
+                        newCart[existing_item].quantity++;
+                    }
+                } else {
+                    // Item not yet in cart, add to quantity
+                    newCart.push({
+                        item_uuid: item.uuid,
+                        quantity: 1,
+                        role: item.role,
+                        linked_uuid: item.linked_uuid,
+                    });
                 }
-            } else {
-                // Item not yet in cart, add to quantity
-                cart.push({
-                    item_uuid: item.uuid,
-                    quantity: 1,
-                    role: item.role,
-                    linked_uuid: item.linked_uuid,
-                });
-            }
-            setCart([...cart]);
-            validationMutation.mutate({ cart: cart });
+                validationMutation.mutate({ cart: newCart });
+                return newCart;
+            });
         },
         [cart, setCart, validationMutation],
     );
 
     const removeItemFromCart = React.useCallback(
-        (item: TInventoryItem) => {
-            if (!item) return;
-            const existing_item = cart.findIndex(
-                (c) => c.item_uuid === item.uuid,
-            );
-            if (existing_item === -1) {
-                // Item not in cart, nothing to change
-            } else if (cart[existing_item].quantity === 1) {
-                // Remove item entirely
-                cart.splice(existing_item, 1);
-            } else {
-                cart[existing_item].quantity--;
-            }
-            setCart([...cart]);
-            validationMutation.mutate({ cart: cart });
+        (item_uuid: InventoryItemUUID, all?: boolean) => {
+            // This callback format fixes a dependency array bug
+            setCart((prevCart) => {
+                const newCart = [...prevCart];
+                if (!item_uuid) return prevCart;
+                const existing_item = newCart.findIndex(
+                    (c) => c.item_uuid === item_uuid,
+                );
+                if (existing_item === -1) {
+                    // Item not in cart, nothing to change
+                } else if (newCart[existing_item].quantity === 1 || all) {
+                    // Remove item entirely
+                    newCart.splice(existing_item, 1);
+                } else {
+                    newCart[existing_item].quantity--;
+                }
+                validationMutation.mutate({ cart: newCart });
+                return newCart;
+            });
         },
         [cart, setCart, validationMutation],
     );
-
-    const [validation, setValidation] = useState<TCheckoutValidation>({
-        status: CHECKOUT_VALIDATION.VALID,
-    });
 
     const [grantCert, setGrantCert] = useState<TCertification>();
     const [granting, setGranting] = useState<boolean>(true);
@@ -247,6 +255,7 @@ export default function CheckoutsKiosk() {
                         }
                         setUnavailability([]);
                     }}
+                    removeItemFromCart={removeItemFromCart}
                 />
                 <div className="flex flex-col h-full w-full p-3 bg-default-50 rounded-xl overflow-auto">
                     <Tabs
@@ -312,7 +321,7 @@ export default function CheckoutsKiosk() {
                                                     <MinusIcon className="size-5" />
                                                 }
                                                 onPress={() =>
-                                                    removeItemFromCart(i)
+                                                    removeItemFromCart(i.uuid)
                                                 }
                                             />
                                         </div>

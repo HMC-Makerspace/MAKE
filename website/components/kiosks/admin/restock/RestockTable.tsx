@@ -49,9 +49,7 @@ const columns = [
     { name: "Current Status", id: "current_status" },
     { name: "Updated Time", id: "time_updated" },
     { name: "Completion Note", id: "completion_note" },
-    { name: "Edit", id: "edit_button" },
     { name: "Logs", id: "log_button" },
-    // { name: "Status Logs", id: "status_logs" },
 ];
 
 const defaultColumns = [
@@ -63,7 +61,6 @@ const defaultColumns = [
     "current_status",
     "time_updated",
     "completion_note",
-    "edit_button",
     "log_button",
 ];
 
@@ -86,11 +83,11 @@ const statusOptions = [
 
 // modal for editor
 function ModifyRestockModal({
-    restockSelected,
+    restocksSelected,
     editIsOpen,
     editOnOpenChange,
 }: {
-    restockSelected: TRestockRequest | null;
+    restocksSelected: TRestockRequest[];
     editIsOpen: boolean;
     editOnOpenChange: () => void;
 }) {
@@ -103,10 +100,10 @@ function ModifyRestockModal({
         >
             <ModalContent className="flex flex-col justify-center">
                 {(onClose) =>
-                    restockSelected ? (
+                    restocksSelected ? (
                         <RestockEditor
                             onClose={onClose}
-                            restock={restockSelected}
+                            restocks={restocksSelected}
                         />
                     ) : null
                 }
@@ -217,11 +214,17 @@ export default function RestockTable({
     certs: TCertification[];
     isLoading: boolean;
 }) {
+    const [selectedRestocks, setSelectedRestocks] = React.useState<Selection>(
+        new Set(),
+    );
+
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
         new Set(defaultColumns),
     );
 
-    const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
+    const [statusFilter, setStatusFilter] = React.useState<Selection>(
+        new Set(),
+    );
 
     // The list of items after filtering and sorting
 
@@ -231,6 +234,7 @@ export default function RestockTable({
         // filtering by status
         if (
             statusFilter !== "all" &&
+            statusFilter.size !== 0 &&
             Array.from(statusFilter).length !== statusOptions.length
         ) {
             filteredRestocks = restocks.filter((restock) => {
@@ -293,7 +297,18 @@ export default function RestockTable({
                     View, approve, and deny restock requests.
                 </h3>
 
-                <div className="static mb-4 md:absolute md:right-10 md:top-20 ">
+                <div className="static mb-4 md:absolute md:right-10 md:top-20 flex gap-2">
+                    <Button
+                        color="warning"
+                        startContent={<PencilSquareIcon className="size-5" />}
+                        isDisabled={
+                            selectedRestocks !== "all" &&
+                            selectedRestocks.size === 0
+                        }
+                        onPress={editOnOpen}
+                    >
+                        Edit
+                    </Button>
                     <Dropdown>
                         <DropdownTrigger className="hidden sm:flex">
                             <Button
@@ -304,7 +319,8 @@ export default function RestockTable({
                             >
                                 Filter Status
                                 <div className="flex flex-row gap-1 m-2">
-                                    {statusFilter === "all"
+                                    {statusFilter === "all" ||
+                                    statusFilter.size === 0
                                         ? statusOptions.map((status) => (
                                               <RestockType
                                                   request_status={status.value}
@@ -324,7 +340,6 @@ export default function RestockTable({
                             </Button>
                         </DropdownTrigger>
                         <DropdownMenu
-                            disallowEmptySelection
                             aria-label="Table Columns"
                             closeOnSelect={false}
                             selectedKeys={statusFilter}
@@ -350,7 +365,9 @@ export default function RestockTable({
                 content={filteredRestocks}
                 columns={columns}
                 visibleColumns={visibleColumns}
-                multiSelect={false}
+                selectedKeys={selectedRestocks}
+                onSelectionChange={setSelectedRestocks}
+                multiSelect={true}
                 emptyContent={"No Restock Requests Found"}
                 customColumnComponents={{
                     reason: (restock) => (
@@ -447,19 +464,6 @@ export default function RestockTable({
                             />
                         </div>
                     ),
-                    edit_button: (restock) => (
-                        <Button
-                            color="primary"
-                            startContent={
-                                <PencilSquareIcon className="size-6" />
-                            }
-                            onPress={() => {
-                                setRestockSelected(restock);
-                                editOnOpen();
-                            }}
-                            isIconOnly
-                        ></Button>
-                    ),
                     log_button: (restock) => (
                         <Button
                             color="default"
@@ -483,7 +487,13 @@ export default function RestockTable({
             />
 
             <ModifyRestockModal
-                restockSelected={restockSelected}
+                restocksSelected={
+                    selectedRestocks === "all"
+                        ? filteredRestocks
+                        : filteredRestocks.filter((r) =>
+                              selectedRestocks.has(r.uuid),
+                          )
+                }
                 editIsOpen={editIsOpen}
                 editOnOpenChange={editOnOpenChange}
             />
