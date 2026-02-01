@@ -21,9 +21,10 @@ import { timestampToZonedDateTime, verifyScopes } from "../../../utils";
 import { TConfig } from "common/config";
 import { DateFormatter } from "@internationalized/date";
 import { TCertificate, TCertification } from "common/certification";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { API_SCOPE } from "../../../../common/global";
 import WorkshopSigninModal from "./WorkshopSigninModal";
+import WorkshopSigninListModal from "./WorkshopSigninListModal";
 
 // cancel means cancel_rsvp
 async function rsvp({
@@ -155,11 +156,28 @@ export default function WorkshopCard({
         scopes && verifyScopes(scopes, [API_SCOPE.RSVP_WORKSHOP]);
     const canSignIn =
         scopes && verifyScopes(scopes, [API_SCOPE.SIGN_IN_WORKSHOP]);
+    
+    const {
+        data: user_self,
+        isLoading: selfLoading,
+        isError: selfError,
+    } = useQuery<TUser>({
+        queryKey: ["user", "self"],
+        refetchOnWindowFocus: false,
+        retry: false,
+    });
+    const isWorkshopInstructor = user_self && (workshop.instructors.includes(user_self.uuid) || workshop.support_instructors?.includes(user_self.uuid));
 
     const {
         isOpen: signinIsOpen,
         onOpen: signinOnOpen,
         onOpenChange: signinOnOpenChange,
+    } = useDisclosure();
+
+    const {
+        isOpen: signinListOpen,
+        onOpen: signinListOnOpen,
+        onOpenChange: signinListOnOpenChange,
     } = useDisclosure();
 
     return (
@@ -247,7 +265,7 @@ export default function WorkshopCard({
                 </div>
 
                 <div className="absolute w-full h-fit bottom-3 flex justify-evenly z-20">
-                    {canRSVP && (<Tooltip
+                    {(canRSVP && !isWorkshopInstructor) && (<Tooltip
                         color="primary"
                         content={
                             workshop.timestamp_public &&
@@ -299,7 +317,7 @@ export default function WorkshopCard({
                         </Button>
                     </Tooltip>)}
                     
-                    {canSignIn && (<Tooltip
+                    {(canSignIn && !isWorkshopInstructor) && (<Tooltip
                         color="primary"
                         content={
                             workshop.timestamp_start && config?.workshop.sign_in_enabled_within &&
@@ -323,38 +341,45 @@ export default function WorkshopCard({
                                     workshop.timestamp_start && config?.workshop.sign_in_enabled_within &&
                                     workshop.timestamp_start - config.workshop.sign_in_enabled_within < Date.now() / 1000
                                 ) {
-                                    // rsvpMutation.mutate({
-                                    //     workshop_uuid: workshop.uuid,
-                                    //     cancel: workshop.rsvp_list.some(
-                                    //         (rsvp_record) =>
-                                    //             rsvp_record.user_uuid ===
-                                    //             self?.uuid,
-                                    //     ),
-                                    // });
-                                    console.log("signing in")
                                     signinOnOpen();
-                                    //.
                                 }
                             }}
                             isDisabled={
                                 !self ||
-                                //rsvpMutation.isPending ||
                                 workshop.timestamp_end < Date.now() / 1000
                             }
                         >
                             Sign in
                         </Button>
                     </Tooltip>)}
+
+                    {isWorkshopInstructor && (<Button
+                        className="text-small font-bold text-white bg-primary hover:bg-primary/50 hover:outline"
+                        color="default"
+                        radius="lg"
+                        size="sm"
+                        variant="flat"
+                        onPress={signinListOnOpen}
+                    >
+                        View sign in list
+                    </Button>)}
                 </div>
             </CardBody>
         </Card>
 
-        <WorkshopSigninModal
+        {(canSignIn && !isWorkshopInstructor) && (<WorkshopSigninModal
             key={`${workshop.uuid}-signin`}
             workshop={workshop}
             isOpen={signinIsOpen}
             onOpenChange={signinOnOpenChange}
-        />
+        />)}
+
+        {isWorkshopInstructor && (<WorkshopSigninListModal
+            key={`${workshop.uuid}-signinlist`}
+            workshop={workshop}
+            isOpen={signinListOpen}
+            onOpenChange={signinListOnOpenChange}
+        />)}
         </>
     );
 }
