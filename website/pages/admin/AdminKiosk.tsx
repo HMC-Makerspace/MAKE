@@ -128,8 +128,6 @@ export default function AdminKiosk() {
         enabled: !!user_uuid,
     });
 
-    console.log("staging", availabilitySchedule);
-
     const { data: config } = useQuery<TConfig>({
         queryKey: ["config"],
         refetchOnWindowFocus: false,
