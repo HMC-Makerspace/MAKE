@@ -45,7 +45,7 @@ type BatchRestockLogRequest = Request<
 type RestockMailingRequest = Request<
     { UUID: string },
     {},
-    { person_obj: [UserUUID] }
+    { mailing_list_obj: [UserUUID] }
 >;
 
 const router = Router();
@@ -440,7 +440,7 @@ router.post("/", async (req: RestockRequestRequest, res: RestockResponse) => {
 router.patch(
     "/mailing_list/:UUID",
     async (req: RestockMailingRequest, res: RestockResponse) => {
-        const person_obj = req.body.person_obj;
+        const person_obj = req.body.mailing_list_obj;
         if (!person_obj) {
             req.log.warn("No mailing list provided to update restock request");
             res.status(StatusCodes.BAD_REQUEST).json({
@@ -487,52 +487,6 @@ router.patch(
                 msg: "Forbidden user attempted to update restock request status",
                 requesting_uuid: requesting_uuid,
             });
-            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-        }
-    },
-);
-
-router.delete(
-    "/:UUID/user/:userUUID",
-    async (req: Request<{ UUID: string; userUUID: string }>, res: RestockResponse) => {
-        const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid = req.user?.uuid as string;
-        const restock_uuid = req.params.UUID;
-        const user_uuid = req.params.userUUID;
-        
-        // If no requesting user_uuid is provided, the call is not authorized
-        if (!requesting_uuid) {
-            req.log.warn(
-                "No requesting_uuid was provided while removing user from restock mailing list"
-            );
-            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-            return;
-        }
-        
-        req.log.debug({
-            msg: `Removing user ${user_uuid} from restock ${restock_uuid} mailing list`,
-            requesting_uuid: requesting_uuid,
-        });
-
-        // User must have CREATE_RESTOCK scope (same as adding users)
-        if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_RESTOCK)) {
-            const restock = await removeUserFromMailingList(restock_uuid, user_uuid);
-            if (!restock) {
-                req.log.warn(`No restock request found with uuid ${restock_uuid}`);
-                res.status(StatusCodes.NOT_FOUND).json({
-                    error: `No restock request found with uuid \`${restock_uuid}\`.`,
-                });
-                return;
-            }
-            req.log.debug(`Removed user ${user_uuid} from restock ${restock_uuid}`);
-            res.status(StatusCodes.OK).json(restock);
-
-        } else {
-            req.log.warn({
-                msg: "Forbidden user attempted to remove user from restock mailing list",
-                requesting_uuid: requesting_uuid,
-            });
-
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
     },

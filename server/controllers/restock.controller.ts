@@ -179,7 +179,6 @@ export async function updateMailingList(
     }
     // Update the request's mailing list
     request.mailing_list = new_list;
-    console.log(request);
     return request.save();
 }
 
