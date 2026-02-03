@@ -58,9 +58,7 @@ const columns = [
     { name: "Current Status", id: "current_status" },
     { name: "Updated Time", id: "time_updated" },
     { name: "Completion Note", id: "completion_note" },
-    { name: "Edit", id: "edit_button" },
     { name: "Logs", id: "log_button" },
-    // { name: "Status Logs", id: "status_logs" },
 ];
 
 const defaultColumns = [
@@ -72,7 +70,6 @@ const defaultColumns = [
     "current_status",
     "time_updated",
     "completion_note",
-    "edit_button",
     "log_button",
 ];
 
@@ -373,7 +370,7 @@ export default function RestockTable({
                         }
                         onPress={editOnOpen}
                     >
-                        Batch Edit
+                        Edit
                     </Button>
                     <Dropdown>
                         <DropdownTrigger className="hidden sm:flex">
@@ -548,19 +545,6 @@ export default function RestockTable({
                                 request_status={restock.current_status}
                             />
                         </div>
-                    ),
-                    edit_button: (restock) => (
-                        <Button
-                            color="primary"
-                            startContent={
-                                <PencilSquareIcon className="size-6" />
-                            }
-                            onPress={() => {
-                                setRestockSelected(restock);
-                                editOnOpen();
-                            }}
-                            isIconOnly
-                        ></Button>
                     ),
                     log_button: (restock) => (
                         <Button

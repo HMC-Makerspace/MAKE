@@ -137,7 +137,7 @@ export default function MAKETable<Type extends { uuid: string }>({
                     : null
             }
             selectionBehavior={multiSelect ? "toggle" : "replace"}
-            onRowAction={doubleClickAction}
+            onRowAction={multiSelect ? undefined : doubleClickAction}
             color={color}
             disabledKeys={disabledRows}
         >
@@ -192,7 +192,7 @@ export function ColumnSelect({
         <Dropdown isDisabled={isLoading}>
             <DropdownTrigger className="hidden sm:flex">
                 <Button
-                    endContent={
+                    startContent={
                         <ChevronDownIcon className="size-6 text-small" />
                     }
                     variant="flat"

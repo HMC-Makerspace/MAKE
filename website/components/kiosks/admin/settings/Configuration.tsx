@@ -170,7 +170,15 @@ export default function Configuration({ config }: { config: TConfig }) {
                 locale: config.schedule.locale,
             },
             faq: faq,
-            workshop: config.workshop,
+            workshop: {
+                reminder_times: config.workshop.reminder_times,
+                sign_in_enabled_within:
+                    parseInt(
+                        (formData.get(
+                            "workshop_sign_in_enabled_within",
+                        ) as string) || "0",
+                    ) || config.workshop.sign_in_enabled_within,
+            },
         };
 
         // Number values
@@ -796,12 +804,28 @@ export default function Configuration({ config }: { config: TConfig }) {
                                         input: "placeholder:text-default-400 text-default-700",
                                     }}
                                     validate={(value) => {
-                                        if (value.match(/^\d+(,\s*\d+)*$/)) {
+                                        if (value.match(/^\d*(,\s*\d+)*$/)) {
                                             return true;
                                         } else {
                                             return "Please enter integers separated by commas";
                                         }
                                     }}
+                                />
+                            </ConfigItem>
+
+                            <ConfigItem
+                                name="Sign in Enabled Time"
+                                description="The time, in seconds before a workshop begins, that users will be able to sign into the workshop."
+                            >
+                                <Input
+                                    type="number"
+                                    defaultValue={config.workshop.sign_in_enabled_within?.toString()}
+                                    min={0}
+                                    name="workshop_sign_in_enabled_within"
+                                    color="primary"
+                                    variant="faded"
+                                    endContent="seconds"
+                                    isRequired
                                 />
                             </ConfigItem>
                         </AccordionItem>
