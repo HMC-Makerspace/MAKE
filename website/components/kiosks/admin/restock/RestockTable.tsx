@@ -19,7 +19,8 @@ import {
     ChevronDownIcon,
     ArrowPathRoundedSquareIcon,
     PencilSquareIcon,
-    UserPlusIcon
+    UserPlusIcon,
+    XMarkIcon
 } from "@heroicons/react/24/outline";
 import {
     RESTOCK_REQUEST_STATUS,
@@ -32,12 +33,20 @@ import RestockUserList from "./RestockUserList";
 import RestockStatusLogs from "./RestockStatusLogs";
 import ItemInfo from "../inventory/ItemInfo";
 import React from "react";
+import {
+    useQueryClient,
+    useMutation,
+    UseMutationResult,
+} from "@tanstack/react-query";
+import { addToast } from "@heroui/react";
 import { UserChip } from "../../../user/UserChip";
 import { convertTimestampToDate } from "../../../../utils";
 import { TArea } from "common/area";
 import { TCertification } from "common/certification";
 import { TInventoryItem } from "common/inventory";
-import { TUser, TUserRole } from "common/user";
+import { TUser, UserUUID } from "common/user";
+import axios, { AxiosError } from "axios";
+import clsx from "clsx";
 
 const columns = [
     { name: "UUID", id: "uuid" },
@@ -80,6 +89,30 @@ const statusOptions = [
     { value: RESTOCK_REQUEST_STATUS.RESTOCKED, label: "Restocked" },
     { value: RESTOCK_REQUEST_STATUS.DENIED, label: "Denied" },
 ];
+
+const updateMailingList = async ({
+    restock,
+    user_uuid,
+    add,
+}: {
+    restock: TRestockRequest;
+    user_uuid: UserUUID;
+    add: boolean;
+}) => {
+    const mailing_list = add
+        ? restock.mailing_list.concat(user_uuid)
+        : restock.mailing_list.filter((uuid) => uuid !== user_uuid);
+    // Add the user to the restock request's mailing list
+    return (
+        await axios.patch<TRestockRequest>(
+            `/api/v3/restock/mailing_list/${restock.uuid}`,
+            {
+                mailing_list_obj: mailing_list,
+            },
+        )
+    ).data;
+};
+
 
 // modal for editor
 function ModifyRestockModal({
@@ -164,12 +197,22 @@ function RestockUserSelect({
     restockUserIsOpen,
     restockUserOnOpenChange,
     users,
+    mutation,
     isLoading,
 }: {
     restockSelected: TRestockRequest | null;
     restockUserIsOpen: boolean;
     restockUserOnOpenChange: () => void;
     users: TUser[];
+    mutation: UseMutationResult<
+        TRestockRequest,
+        AxiosError,
+        {
+            restock: TRestockRequest;
+            user_uuid: UserUUID;
+            add: boolean;
+        }
+    >;
     isLoading: boolean;
 }) {
     return (
@@ -187,7 +230,8 @@ function RestockUserSelect({
                         <RestockUserList
                             users={users}
                             onClose={onClose}
-                            prevRestock={restockSelected}
+                            restock={restockSelected}
+                            mutation={mutation}
                             isLoading={isLoading}
                         />
                     ) : null
@@ -196,8 +240,6 @@ function RestockUserSelect({
         </Modal>
     );
 }
-
-
 
 export default function RestockTable({
     restocks,
@@ -214,6 +256,27 @@ export default function RestockTable({
     certs: TCertification[];
     isLoading: boolean;
 }) {
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: updateMailingList,
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(["restock"], (old: TRestockRequest[]) =>
+                old.map((w) => (w.uuid === data.uuid ? data : w)),
+            );
+            addToast({
+                title: `Successfully ${variables.add ? "added to" : "removed from"} mailing list`,
+                color: "success",
+            });
+        },
+        onError: (error: AxiosError) => {
+            addToast({
+                title: `Error: ${error.message}`,
+                color: "danger",
+            });
+        },
+    });
+
     const [selectedRestocks, setSelectedRestocks] = React.useState<Selection>(
         new Set(),
     );
@@ -400,7 +463,11 @@ export default function RestockTable({
                                 className="py-0"
                                 itemClasses={{
                                     trigger: "py-0",
-                                    indicator: "size-6",
+                                    indicator: clsx(
+                                        "size-6",
+                                        restock.mailing_list?.length > 0 &&
+                                            "text-default-600",
+                                    ),
                                 }}
                             >
                                 <AccordionItem
@@ -414,14 +481,29 @@ export default function RestockTable({
                                     isCompact
                                     textValue="restock mailing list"
                                 >
-                                    {restock.mailing_list.map((uuid, index) => {
+                                    {restock.mailing_list.map((user_uuid) => {
                                         return (
-                                            <div className="pb-1 w-[80%]">
+                                            <div className="pb-1 w-full flex flex-row items-center gap-2">
                                                 <UserChip
-                                                    user_uuid={uuid}
+                                                    user_uuid={user_uuid}
                                                     popoverPlacement="bottom"
-                                                    className="justify-start w-full"
+                                                    className="justify-start flex-grow"
                                                 />
+                                                <Button
+                                                    isIconOnly
+                                                    size="sm"
+                                                    color="danger"
+                                                    variant="light"
+                                                    onPress={() =>
+                                                        mutation.mutate({
+                                                            user_uuid,
+                                                            restock,
+                                                            add: false,
+                                                        })
+                                                    }
+                                                >
+                                                    <XMarkIcon className="size-4" />
+                                                </Button>
                                             </div>
                                         );
                                     })}
@@ -507,6 +589,7 @@ export default function RestockTable({
                 restockUserIsOpen={restockUserIsOpen}
                 restockUserOnOpenChange={restockUserOnOpenChange}
                 users={users}
+                mutation={mutation}
                 isLoading={isLoading}
             />
         </div>

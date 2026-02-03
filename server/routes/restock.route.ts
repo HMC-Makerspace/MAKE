@@ -23,6 +23,7 @@ import {
     updateMailingList,
     validNewRestockRequest,
     updateRestockRequestStatuses,
+    removeUserFromMailingList,
 } from "controllers/restock.controller";
 
 // --- Request and Response Types ---
@@ -44,7 +45,7 @@ type BatchRestockLogRequest = Request<
 type RestockMailingRequest = Request<
     { UUID: string },
     {},
-    { person_obj: [UserUUID] }
+    { mailing_list_obj: [UserUUID] }
 >;
 
 const router = Router();
@@ -439,7 +440,7 @@ router.post("/", async (req: RestockRequestRequest, res: RestockResponse) => {
 router.patch(
     "/mailing_list/:UUID",
     async (req: RestockMailingRequest, res: RestockResponse) => {
-        const person_obj = req.body.person_obj;
+        const person_obj = req.body.mailing_list_obj;
         if (!person_obj) {
             req.log.warn("No mailing list provided to update restock request");
             res.status(StatusCodes.BAD_REQUEST).json({
