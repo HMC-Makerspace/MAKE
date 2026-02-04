@@ -10,8 +10,8 @@ import Joi from "joi";
 const InventoryItemLocation = new mongoose.Schema<TInventoryItemLocation>({
     area: { type: String, required: true },
     container: { type: String, required: false },
-    specific: { type: String, required: false },
-});
+    specific: { type: String, required: false }
+}, { _id: false });
 
 const InventoryItemLocationSchema = Joi.object<TInventoryItemLocation>({
     area: Joi.string().required(),
@@ -60,12 +60,17 @@ export const InventoryItemSchema = Joi.object<TInventoryItem>({
     reorder_url: Joi.string().optional().allow(""),
     serial_number: Joi.string().optional().allow(""),
     keywords: Joi.array().items(
-        Joi.string()
+        Joi.string().allow("")
     ).optional(),
     required_certifications: Joi.array().items(
         RequiredCertificateSchema
     ).optional(),
     authorized_roles: Joi.array().items(
         Joi.string()
-    ).optional()
+    ).optional().allow(null)
 });
+
+export const InventoryItemOptional = InventoryItemSchema.fork(
+    Object.keys(InventoryItemSchema.describe().keys), 
+    (schema) => schema.optional()
+);

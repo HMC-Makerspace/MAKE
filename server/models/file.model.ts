@@ -36,12 +36,13 @@ export const Document = new mongoose.Schema<TDocument>({
     name: { type: String, required: true },
     link: { type: String, required: true },
     authorized_roles: { type: [String], required: false },
-});
+}, { _id: false });
 
 export const DocumentSchema = Joi.object<TDocument>({
     name: Joi.string().required(),
     link: Joi.string().required(),
     authorized_roles: Joi.array().items(
         Joi.string()
-    ).optional()
+    ).optional().allow(null)
 });
+

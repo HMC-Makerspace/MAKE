@@ -10,7 +10,7 @@ export const RestockRequestLog = new mongoose.Schema<TRestockRequestLog>({
     timestamp: { type: Number, required: true },
     status: { type: Number, required: true },
     message: { type: String, required: false },
-});
+}, { _id: false });
 
 export const RestockRequestLogSchema = Joi.object<TRestockRequestLog>({
     timestamp: Joi.number().required(),

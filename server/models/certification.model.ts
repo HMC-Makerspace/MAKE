@@ -81,5 +81,10 @@ export const CertificationSchema = Joi.object<TCertification>({
     ).optional(),
     authorized_roles: Joi.array().items(
         Joi.string()
-    ).optional()
+    ).optional().allow(null)
 });
+
+export const CertificationSchemaOptional = CertificationSchema.fork(
+    Object.keys(CertificationSchema.describe().keys), 
+    (schema) => schema.optional()
+);

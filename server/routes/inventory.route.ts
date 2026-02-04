@@ -19,7 +19,7 @@ import {
     SuccessfulResponse,
 } from "common/verify";
 import { TInventoryItem } from "common/inventory";
-import { InventoryItemSchema } from "models/inventory.model";
+import { InventoryItemSchema, InventoryItemOptional } from "models/inventory.model";
 
 // --- Request and Response Types ---
 type ItemRequest = Request<{}, {}, { item_obj: TInventoryItem }>;
@@ -134,65 +134,68 @@ router.get("/", async (req: Request, res: InventoryResponse) => {
  * user is not authorized, a status error is returned. If the user is authorized,
  * the updated InventoryItem object is returned.
  */
-router.put("/", async (req: ItemRequest, res: ItemResponse) => {
+router.put("/", 
+    verifySchema(InventoryItemSchema, "item_obj"),
+    async (req: ItemRequest, res: ItemResponse) => {
 
-    console.log("Received:", req.body.item_obj);
+        console.log("Received:", req.body.item_obj);
 
 
-    // Get the item object from the request body
-    const item_obj = req.body.item_obj;
-    if (!item_obj) {
-        req.log.warn("No item object provided to update");
-        res.status(StatusCodes.BAD_REQUEST).json({
-            error: "No item object provided to update.",
-        });
-        return;
-    }
-
-    // Check for authorization
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = req.user?.uuid as string;
-    const uuid = item_obj.uuid;
-    // If no requesting user_uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while updating item by UUID",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-    req.log.debug({
-        msg: `Updating item with uuid ${uuid}`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // An update request is valid if the requesting user can update any user,
-    // or if the requesting user is allowed to update their own information.
-    if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_ITEM)) {
-        // If the user is authorized, perform the update.
-        const item = await updateInventoryItem(item_obj);
-        if (!item) {
-            req.log.warn(`Item not found to update with uuid ${uuid}`);
-            res.status(StatusCodes.NOT_FOUND).json({
-                error: `No item found to update with uuid \`${uuid}\`.`,
+        // Get the item object from the request body
+        const item_obj = req.body.item_obj;
+        if (!item_obj) {
+            req.log.warn("No item object provided to update");
+            res.status(StatusCodes.BAD_REQUEST).json({
+                error: "No item object provided to update.",
             });
             return;
         }
-        req.log.debug(`Updated item with uuid ${uuid}`);
-        // Return the updated item object
-        res.status(StatusCodes.OK).json(item);
-    } else {
-        // If the user is not authorized, provide a status error
-        req.log.warn({
-            msg: `Forbidden user attempted to update item with uuid ${uuid}`,
+
+        // Check for authorization
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = req.user?.uuid as string;
+        const uuid = item_obj.uuid;
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while updating item by UUID",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+        req.log.debug({
+            msg: `Updating item with uuid ${uuid}`,
             requesting_uuid: requesting_uuid,
         });
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+
+        // An update request is valid if the requesting user can update any user,
+        // or if the requesting user is allowed to update their own information.
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_ITEM)) {
+            // If the user is authorized, perform the update.
+            const item = await updateInventoryItem(item_obj);
+            if (!item) {
+                req.log.warn(`Item not found to update with uuid ${uuid}`);
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `No item found to update with uuid \`${uuid}\`.`,
+                });
+                return;
+            }
+            req.log.debug(`Updated item with uuid ${uuid}`);
+            // Return the updated item object
+            res.status(StatusCodes.OK).json(item);
+        } else {
+            // If the user is not authorized, provide a status error
+            req.log.warn({
+                msg: `Forbidden user attempted to update item with uuid ${uuid}`,
+                requesting_uuid: requesting_uuid,
+            });
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 router.patch(
     "/:UUID",
+    verifySchema(InventoryItemOptional, "partial_item_obj"),
     async (
         req: Request<
             { UUID: string },

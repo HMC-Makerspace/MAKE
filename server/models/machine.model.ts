@@ -18,7 +18,7 @@ const MachineInstance = new mongoose.Schema<TMachineInstance>({
     status: { type: Number, required: true },
     reserved: { type: Boolean, required: true },
     message: { type: String, required: false },
-});
+}, { _id: false });
 
 export const MachineInstanceSchema = Joi.object<TMachineInstance>({
     uuid: Joi.string().required(),
@@ -38,7 +38,9 @@ const MachineInstanceStatusLog = new mongoose.Schema<TMachineInstanceStatusLog>(
         instance_uuid: { type: String, required: false },
         status: { type: Number, required: true },
         message: { type: String, required: false },
-    },
+    }, {
+        _id: false
+    }
 );
 
 const MachineInstanceStatusLogSchema = Joi.object<TMachineInstanceStatusLog>({
@@ -94,7 +96,7 @@ export const MachineSchema = Joi.object<TMachine>({
     ).optional(),
     authorized_roles: Joi.array().items(
         Joi.string()
-    ).required(),
+    ).required().allow(null),
     reservable: Joi.boolean().optional(),
     reservation_type: Joi.number().optional()
 });

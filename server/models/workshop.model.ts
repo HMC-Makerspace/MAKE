@@ -14,7 +14,7 @@ const WorkshopUserRecord = new mongoose.Schema<TWorkshopUserRecord>({
 const WorkshopUserRecordSchema = Joi.object<TWorkshopUserRecord>({
     user_uuid: Joi.string().required(),
     timestamp: Joi.number().required()
-})
+});
 
 /**
  * See {@link TWorkshop} documentation for type information.
@@ -79,7 +79,7 @@ export const WorkshopSchema = Joi.object<TWorkshop>({
     ).optional(),
     authorized_roles: Joi.array().items(
         Joi.string()
-    ).optional()
+    ).optional().allow(null)
 });
 
 export const WorkshopSchemaOptional = WorkshopSchema.fork(

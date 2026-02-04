@@ -11,7 +11,7 @@ const CheckoutItem = new mongoose.Schema<TCheckoutItem>({
     quantity: { type: Number, required: true },
     role: { type: String, required: true },
     linked_uuid: { type: String, required: false },
-});
+}, { _id: false });
 
 const CheckoutItemSchema = Joi.object<TCheckoutItem>({
     item_uuid: Joi.string().required(),
@@ -47,3 +47,8 @@ export const CheckoutSchema = Joi.object<TCheckout>({
     timestamp_in: Joi.number().optional(),
     notifications_sent: Joi.number().optional()
 });
+
+export const CheckoutSchemaOptional = CheckoutSchema.fork(
+    Object.keys(CheckoutSchema.describe().keys), 
+    (schema) => schema.optional()
+);
