@@ -35,7 +35,7 @@ const Shift = new mongoose.Schema<TShift>({
     sec_end: { type: Number, required: true },
     assignee: { type: String, required: true },
     history: { type: [ShiftEvent], required: true },
-});
+}, { _id: false });
 
 export const ShiftSchema = Joi.object<TShift>({
     uuid: Joi.string().required(),
@@ -66,7 +66,7 @@ export const Alert = new mongoose.Schema<TAlert>({
     header: { type: String, required: true },
     content: { type: String, required: false },
     hyperlink: { type: Boolean, required: false },
-});
+}, { _id: false });
 
 export const AlertSchema = Joi.object<TAlert>({
     uuid: Joi.string().required(),

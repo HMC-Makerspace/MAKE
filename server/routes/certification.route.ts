@@ -19,7 +19,7 @@ import {
     SuccessfulResponse,
 } from "common/verify";
 import { TCertification } from "common/certification";
-import { CertificationSchema } from "models/certification.model";
+import { CertificationSchema, CertificationSchemaOptional } from "models/certification.model";
 
 // --- Request and Response Types ---
 type CertificationRequest = Request<
@@ -115,6 +115,7 @@ router.get(
 
 router.patch(
     "/:UUID",
+    verifySchema(CertificationSchemaOptional, "partial_cert_obj"),
     async (
         req: Request<
             { UUID: string },
@@ -237,6 +238,7 @@ router.post(
  */
 router.put(
     "/",
+    verifySchema(CertificationSchema, "certification_obj"),
     async (req: CertificationRequest, res: CertificationResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = req.user?.uuid as string;

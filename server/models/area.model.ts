@@ -41,10 +41,15 @@ export const AreaSchema = Joi.object<TArea>({
     ).optional(),
     authorized_roles: Joi.array().items(
         Joi.string()
-    ).optional(),
+    ).optional().allow(null),
     reservable: Joi.boolean().optional(),
     reserved: Joi.boolean().optional(),
     visible_to: Joi.array().items(
         Joi.string()
-    ).optional()
+    ).optional().allow(null)
 });
+
+export const AreaSchemaOptional = AreaSchema.fork(
+    Object.keys(AreaSchema.describe().keys), 
+    (schema) => schema.optional()
+);
