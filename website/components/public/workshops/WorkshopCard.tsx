@@ -115,6 +115,13 @@ export default function WorkshopCard({
         retry: false,
     });
 
+    const publicZDT = workshop.timestamp_public ? timestampToZonedDateTime(
+        workshop.timestamp_public,
+        config?.schedule.timezone,
+    ) : undefined;
+    const signinZDT = timestampToZonedDateTime(
+        workshop.timestamp_start - (config?.workshop.sign_in_enabled_within ?? 0)
+    )
     const startZDT = timestampToZonedDateTime(
         workshop.timestamp_start,
         config?.schedule.timezone,
@@ -268,8 +275,8 @@ export default function WorkshopCard({
                     {(canRSVP && !isWorkshopInstructor) && (<Tooltip
                         color="primary"
                         content={
-                            workshop.timestamp_public &&
-                            `RSVPs are closed until ${new Date(workshop.timestamp_public * 1000).toDateString()}`
+                            date_formatter && publicZDT &&
+                            `RSVPs are closed until ${date_formatter.format(publicZDT.toDate())}`
                         }
                         isDisabled={
                             workshop.timestamp_public
@@ -320,8 +327,8 @@ export default function WorkshopCard({
                     {(canSignIn && !isWorkshopInstructor) && (<Tooltip
                         color="primary"
                         content={
-                            workshop.timestamp_start && config?.workshop.sign_in_enabled_within &&
-                            `Sign ins are closed until ${new Date((workshop.timestamp_start - config.workshop.sign_in_enabled_within) * 1000).toDateString()}`
+                            date_formatter &&
+                            `Sign ins are closed until ${date_formatter.format(signinZDT.toDate())}`
                         }
                         isDisabled={
                             workshop.timestamp_start && config?.workshop.sign_in_enabled_within
