@@ -90,7 +90,14 @@ export default function WorkshopCard({
             queryClient.setQueryData(
                 ["workshop"],
                 (old_workshops: TWorkshop[]) =>
-                    old_workshops.map((old_workshop) =>
+                    (old_workshops ?? []).map((old_workshop) =>
+                        old_workshop.uuid === data.uuid ? data : old_workshop,
+                    ),
+            );
+            queryClient.setQueryData(
+                ["workshop", "public"],
+                (old_workshops: TWorkshop[]) =>
+                    (old_workshops ?? []).map((old_workshop) =>
                         old_workshop.uuid === data.uuid ? data : old_workshop,
                     ),
             );
