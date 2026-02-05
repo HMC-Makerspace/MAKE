@@ -53,3 +53,11 @@ export const AreaSchemaOptional = AreaSchema.fork(
     Object.keys(AreaSchema.describe().keys), 
     (schema) => schema.optional()
 );
+
+
+export const AreaArraySchema = Joi.array().items(
+    AreaSchema.append({
+        _id: Joi.string().allow("").optional(),
+        __v: Joi.number().optional()
+    })
+);

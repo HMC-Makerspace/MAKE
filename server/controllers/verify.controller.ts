@@ -57,7 +57,7 @@ export async function verifyCompoundRequest(
 }
 
 export function verifySchema<S, R extends Request>(
-    schema: Joi.ObjectSchema<S>,
+    schema: Joi.ObjectSchema<S> | Joi.ArraySchema<S> ,
     path_name: keyof R["body"],
 ): (req: Request, res: Response, next: NextFunction) => void {
     return async (

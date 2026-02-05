@@ -21,7 +21,7 @@ import {
 import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
-import { AreaSchema, AreaSchemaOptional } from "models/area.model";
+import { AreaSchema, AreaSchemaOptional, AreaArraySchema } from "models/area.model";
 
 // --- Request and Response Types ---
 type AreaRequest = Request<{}, {}, { area_obj: TArea }>;
@@ -219,44 +219,46 @@ router.post("/",
      * Update many areas. This will overwrite all existing areas. The
      * {@link API_SCOPE.UPDATE_ALL_AREAS scope is required.
      */
-    router.put("/all", async (req: AreasRequest, res: AreasResponse) => {
-        const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid: string = req.user?.uuid as string;
-        const area_objs = req.body.area_objs;
+    router.put("/all", 
+        verifySchema(AreaArraySchema, "area_objs"),
+        async (req: AreasRequest, res: AreasResponse) => {
+            const headers = req.headers as VerifyRequestHeader;
+            const requesting_uuid: string = req.user?.uuid as string;
+            const area_objs = req.body.area_objs;
 
-        // If no requesting user uuid is provided, the call is not authorized
-        if (!requesting_uuid) {
-            req.log.warn("No requesting_uuid was provided while setting all area");
-            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-            return;
-        }
-
-        req.log.debug({
-            msg: `Setting all areas`,
-            requesting_uuid: requesting_uuid,
-        });
-
-        // If the user is authorized, update a area's information
-        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_ALL_AREAS)) {
-            const areas = await setAllAreas(area_objs);
-            if (!areas) {
-                req.log.warn("Failed to update all areas");
-                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                    error: "Failed to update areas.",
-                });
+            // If no requesting user uuid is provided, the call is not authorized
+            if (!requesting_uuid) {
+                req.log.warn("No requesting_uuid was provided while setting all area");
+                res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
                 return;
             }
-            req.log.debug("Returned updated area.");
-            res.status(StatusCodes.OK).json(areas);
-        } else {
-            req.log.warn({
-                msg: "Forbidden user attempted to update a area",
+
+            req.log.debug({
+                msg: `Setting all areas`,
                 requesting_uuid: requesting_uuid,
             });
-            // If the user is not authorized, provide a status error
-            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-        }
-    });
+
+            // If the user is authorized, update a area's information
+            if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_ALL_AREAS)) {
+                const areas = await setAllAreas(area_objs);
+                if (!areas) {
+                    req.log.warn("Failed to update all areas");
+                    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                        error: "Failed to update areas.",
+                    });
+                    return;
+                }
+                req.log.debug("Returned updated area.");
+                res.status(StatusCodes.OK).json(areas);
+            } else {
+                req.log.warn({
+                    msg: "Forbidden user attempted to update a area",
+                    requesting_uuid: requesting_uuid,
+                });
+                // If the user is not authorized, provide a status error
+                res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+            }
+        });
 
 /**
  * Update a specific area. This route will not create a new area if the
