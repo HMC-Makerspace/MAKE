@@ -7,7 +7,8 @@ import {
     DropdownMenu,
     DropdownItem,
     Spinner,
-    addToast
+    addToast,
+    useDisclosure
 } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
@@ -15,6 +16,7 @@ import {
     PlusIcon,
     PencilSquareIcon,
     BookmarkIcon,
+    TrashIcon
 } from "@heroicons/react/24/outline";
 
 import React from "react";
@@ -27,6 +29,7 @@ import { CERTIFICATION_VISIBILITY } from "../../../../../common/certification";
 import CertificationTag from "./CertificationTag";
 import EditCertModal from "./EditCertModal";
 import EditDocsModal from "../../../EditDocsModal";
+import DeleteCertModal from "./DelCertModal";
 
 import UserRole from "../../../user/UserRole";
 import { TDocument } from "common/file";
@@ -45,6 +48,7 @@ const baseColumns = [
     { name: "Documents", id: "documents" },
     { name: "Prerequisites", id: "prerequisites" },
     { name: "Authorized Roles", id: "authorized_roles" },
+    { name: "Delete", id: "delete" }
 ];
 
 const updateCertDocs = async ({
@@ -82,6 +86,7 @@ export default function CertificationsTable({
         "visibility",
         "prerequisites",
         "authorized_roles",
+        "delete"
     ],
     extraColumns = [],
     customColumnComponents = {},
@@ -117,6 +122,13 @@ export default function CertificationsTable({
     const [certOpenDoc, setCertOpenDoc] = React.useState<TCertification>(); // the certification with edited docs
     const [docOpen, setDocOpen] = React.useState<boolean>(false); // whether doc edit modal is open
     const [prereqOpen, setPrereqOpen] = React.useState<boolean>(false); // whether prereq edit modal is open
+
+
+    const {
+        isOpen: isDeleting,
+        onOpen: onDelete,
+        onOpenChange: onDeleteChange,
+    } = useDisclosure();
 
     const queryClient = useQueryClient();
     const mutation = useMutation({
@@ -342,6 +354,19 @@ export default function CertificationsTable({
                             ))}
                         </div>
                     ),
+                    delete: (cert: TCertification) => (
+                        <Button
+                            variant="flat"
+                            color="danger"
+                            onPress={() => {
+                                setCertOpenDoc(cert);
+                                onDelete();
+                            }}
+                            isIconOnly
+                        >
+                            <TrashIcon className="size-6" />
+                        </Button>
+                    ),
                     ...customColumnComponents,
                 }}
                 isLoading={isLoading}
@@ -383,6 +408,15 @@ export default function CertificationsTable({
                     isOpen={prereqOpen}
                     onOpenChange={setPrereqOpen}
                     patchMutation={mutation}
+                />
+            )}
+
+            {certOpenDoc && (
+                <DeleteCertModal
+                    key={"del-" + certOpenDoc.uuid}
+                    cert={certOpenDoc}
+                    isOpen={isDeleting}
+                    onOpenChange={onDeleteChange}
                 />
             )}
         </div>
