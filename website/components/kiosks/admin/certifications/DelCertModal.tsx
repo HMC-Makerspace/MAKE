@@ -55,6 +55,8 @@ export default function DeleteCertModal({
 
             // Run the mutation
             mutation.mutate();
+            onOpenChange(false);
+
         },
         [mutation],
     );
