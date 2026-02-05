@@ -14,7 +14,7 @@ import { TUser } from "common/user";
 import { TCertification } from "../../common/certification";
 import DefaultLayout from "../layouts/Default";
 import CertificationTag from "../components/kiosks/admin/certifications/CertificationTag";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
     convertTimestampToDate,
     getForegroundColor,

@@ -38,7 +38,7 @@ import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
 import AuthorizedRolesModal from "../certifications/AuthorizedRolesModal";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import ItemQuantityIcon from "./ItemQuantityIcon";
 import ItemLocationModal from "./ItemLocationModal";
 import { TArea } from "common/area";

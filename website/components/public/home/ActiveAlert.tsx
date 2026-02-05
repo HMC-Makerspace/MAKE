@@ -16,7 +16,7 @@ export default function ActiveAlert() {
     return (
         <div
             className={clsx(
-                "absolute top-2 w-full min-h-16",
+                "w-full min-h-16",
                 "rounded-xl bg-secondary-400/50",
                 "border-secondary-400 border-2",
                 "transition-opacity content-center py-3",

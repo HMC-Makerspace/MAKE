@@ -20,7 +20,7 @@ import React, { useState } from "react";
 import clsx from "clsx";
 import { PlusIcon, AcademicCapIcon } from "@heroicons/react/24/solid";
 import EditableFAQItem from "./EditableFAQItem";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "motion/react";
 import StaticFAQItem from "./StaticFAQItem";
 
 function ConfigItem({
