@@ -31,7 +31,6 @@ import { CERTIFICATION_VISIBILITY } from "../../../../../common/certification";
 
 import CertificationTag from "./CertificationTag";
 import CVisibilityIcon from "./CVisibilityIcon";
-import DeleteCertModal from "./DelCertModal";
 
 import { UserRoleUUID } from "common/user";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
@@ -114,12 +113,6 @@ export default function EditCertModal({
             });
         },
     });
-
-    const {
-        isOpen: isDeleting,
-        onOpen: onDelete,
-        onOpenChange: onDeleteChange,
-    } = useDisclosure();
 
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
 
@@ -259,20 +252,6 @@ export default function EditCertModal({
                                         }}
                                     />
                                 </div>
-
-                                {
-                                    // Delete button
-                                    !isNew && (
-                                        <Button
-                                            variant="flat"
-                                            color="danger"
-                                            onPress={onDelete}
-                                            isIconOnly
-                                        >
-                                            <TrashIcon className="size-6" />
-                                        </Button>
-                                    )
-                                }
                             </div>
 
                             <div className="flex flex-row w-full gap-2 items-center">
@@ -453,13 +432,6 @@ export default function EditCertModal({
                                 </Button>
                             </div>
                         </Form>
-
-                        <DeleteCertModal
-                            key={"del-" + cert.uuid}
-                            cert={cert}
-                            isOpen={isDeleting}
-                            onOpenChange={onDeleteChange}
-                        />
                     </>
                 )}
             </ModalContent>

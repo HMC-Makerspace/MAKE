@@ -383,7 +383,8 @@ export default function WorkshopEditModal({
                                               workshop.timestamp_public,
                                               config.schedule.timezone,
                                           )
-                                        : undefined
+                                        : timestampToZonedDateTime(Date.now() / 1000)
+                                             
                                 }
                                 onChange={() => setHasEdits(true)}
                                 variant="faded"
