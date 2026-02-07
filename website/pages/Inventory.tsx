@@ -29,10 +29,13 @@ export default function InventoryPage() {
         refetchOnWindowFocus: false,
         refetchOnMount: false,
     });
-    const { data: restocks, isLoading: restocksLoading } = useQuery<TRestockRequest[]>({
+    const { data: restocks, isLoading: restocksLoading } = useQuery<
+        TRestockRequest[]
+    >({
         queryKey: ["restock"],
         refetchOnWindowFocus: false,
         refetchOnMount: false,
+        retry: false,
     });
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
@@ -74,7 +77,7 @@ export default function InventoryPage() {
 
     return (
         <DefaultLayout className="py-0 px-4 lg:px-8" pageHref="/inventory">
-            {inventory && requestingUser && scopes && roles && certs && areas && (
+            {inventory && roles && certs && areas && (
                 <InventoryTable
                     requestingUser={requestingUser}
                     scopes={scopes}

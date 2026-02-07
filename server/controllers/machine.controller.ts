@@ -66,30 +66,48 @@ export async function getMachinesVisibleToUser(
     const Machines = mongoose.model("Machine", Machine);
     // Find all machines that require no roles or which require roles that the
     // user has and ensures that the documents shown are ones the users have roles for
-
     return await Machines.aggregate([
-        {$match:
-            {$or: [
-            { authorized_roles: null },
-            { authorized_roles: { $in: role_uuids } }
-            ]}
-    
+        {
+            $match: {
+                $or: [
+                    { authorized_roles: null },
+                    { authorized_roles: { $in: role_uuids } },
+                ],
+            },
         },
-        {$addFields: {
-            "documents": {
-                $filter: {
-                    input: "$documents",
-                    as: "docs",
-                    cond: {
-    
-                            $gt: [ { $size: { $setIntersection: [ {$ifNull: ["$$docs.authorized_roles", role_uuids]}, role_uuids ] } }, 0 ] ,
-                        }
-                    }
-                }
-            }
-        }
-    ])
-
+        {
+            $set: {
+                documents: {
+                    $filter: {
+                        input: "$documents",
+                        as: "docs",
+                        cond: {
+                            $or: [
+                                {
+                                    $not: {
+                                        $isArray: "$$docs.authorized_roles",
+                                    },
+                                },
+                                {
+                                    $gt: [
+                                        {
+                                            $size: {
+                                                $setIntersection: [
+                                                    "$$docs.authorized_roles",
+                                                    role_uuids,
+                                                ],
+                                            },
+                                        },
+                                        0,
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                },
+            },
+        },
+    ]);
 }
 
 /**

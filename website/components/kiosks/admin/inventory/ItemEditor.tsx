@@ -9,7 +9,7 @@ import { TCertification } from "common/certification";
 import { TUserRole } from "common/user";
 import clsx from "clsx";
 import { TArea } from "common/area";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 export default function ItemEditor({
     item,

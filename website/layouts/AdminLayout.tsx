@@ -3,7 +3,7 @@ import AdminNavbar from "../components/kiosks/admin/dashboard/AdminNavbar";
 import { API_SCOPE } from "../../common/global";
 import { Spinner } from "@heroui/react";
 import clsx from "clsx";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 // import AdminSidebar from "../components/kiosks/admin/AdminSidebar";
 
 export type AdminPage = {

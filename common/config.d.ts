@@ -1,6 +1,16 @@
 import { UnixTimestamp, UUID } from "./global";
 import { UserRoleUUID } from "./user";
 
+export type TGeneralConfig = {
+    branding_url?: string;
+    tagline?: string;
+    discord_url?: string;
+    instagram_url?: string;
+    tiktok_url?: string;
+    extra_urls?: string[];
+    hide_home_embed?: boolean;
+};
+
 export type TCheckoutConfig = {
     /**
      * something to do with how often notifications are sent...
@@ -81,15 +91,6 @@ export type TWorkshopConfig = {
     sign_in_enabled_within: number;
 }
 
-export type TGeneralConfig = {
-    branding_url?: string;
-    tagline?: string;
-    discord_url?: string;
-    instagram_url?: string;
-    tiktok_url?: string;
-    extra_urls?: string[];
-};
-
 export type TFAQItem = {
     title: string;
     description?: string;
@@ -114,15 +115,3 @@ export type TConfig = {
     faq?: TFAQItem;
 };
 
-// const DefaultConfig: TConfig = {
-//     checkout: {},
-//     file: {
-//         max_upload_capacity: 2 * 1024 * 1024 * 1024, // 2 GB
-//         max_upload_count: 10,
-//     },
-//     schedule: {
-//         days_open: [0, 1, 2, 3, 4, 5, 6],
-//         first_display_day: 1,
-//         increment_sec: 60 * 60, // 1 hour
-//     },
-// };

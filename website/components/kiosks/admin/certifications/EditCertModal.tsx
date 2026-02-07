@@ -19,7 +19,7 @@ import React from "react";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { HexColorPicker } from "react-colorful";
 
 import {
