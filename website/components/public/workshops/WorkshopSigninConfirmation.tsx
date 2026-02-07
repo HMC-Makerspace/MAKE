@@ -8,13 +8,15 @@ import { TWorkshopUserRecord } from "common/workshop";
 export function WorkshopSigninConfirmation({
     email,
     rsvp_list,
-    onYes = () => {},
-    onNo = () => {},
+    capacity,
+    onSubmit = () => {},
+    onCancel = () => {},
 }: {
     email: string;
     rsvp_list: TWorkshopUserRecord[];
-    onYes?: (uuid?: string) => void;
-    onNo?: (uuid?: string) => void;
+    capacity?: number;
+    onSubmit?: (uuid?: string) => void;
+    onCancel?: (uuid?: string) => void;
 }) {
     const {
         data: user,
@@ -27,33 +29,85 @@ export function WorkshopSigninConfirmation({
         retry: false,
     });
 
-    let RSVPd = false;
-    for (let i = 0; i < rsvp_list.length; i++) {
-        if (rsvp_list[i].user_uuid == user?.uuid) {
-            RSVPd = true;
-            break;
-        }
+    const RSVP_index = rsvp_list.findIndex((r) => r.user_uuid === user?.uuid);
+    const RSVPd = RSVP_index !== -1;
+
+    let header = <></>;
+    let footer = (
+        <div className="flex flex-row w-full justify-between">
+            <Button
+                variant="shadow"
+                color="primary"
+                onPress={() => onSubmit(user?.uuid)}
+                className="w-fit min-w-24 mx-1"
+            >
+                Sign In
+            </Button>
+            <Button
+                variant="flat"
+                color="danger"
+                onPress={() => onCancel(user?.uuid)}
+                className="w-fit min-w-24 mx-1"
+            >
+                Cancel
+            </Button>
+        </div>
+    );
+
+    if (userIsLoading) {
+        header = <div className="w-fit m-auto text-center">Loading...</div>;
+        footer = <></>;
+    } else if (!user) {
+        header = (
+            <div className="w-fit m-auto text-center">
+                No user found by email
+                <br />
+                <span className="italic text-secondary-500 text-lg">
+                    {email}
+                </span>
+                <br />
+                Please login to create an account.
+            </div>
+        );
+        footer = <></>;
+    } else if (!RSVPd) {
+        header = (
+            <div className="w-fit m-auto text-center">
+                <div className="text-lg">
+                    <span className="font-bold text-secondary-500 text-lg">
+                        {user?.name}
+                    </span>{" "}
+                    <br />(
+                    <span className="italic text-secondary-500 text-lg">
+                        {user?.email}
+                    </span>
+                    )
+                </div>
+                is not on the RSVP list or waitlist for this workshop.
+                <br />
+                <div className="py-2 underline">
+                    Users on the RSVP and waitlist will be given priority.
+                </div>
+                <span>Would you still like to sign in?</span>
+            </div>
+        );
+    } else {
+        header = (
+            <div className="w-fit m-auto text-center">
+                <span className="font-bold text-primary-500">{user?.name}</span>
+                <br /> (
+                <span className="italic text-primary-500">{user?.email}</span>)
+                <br />
+                is on the{" "}
+                {!capacity || RSVP_index < capacity ? "RSVP list" : "wait list"}
+                .
+            </div>
+        );
     }
-
-    if (userIsLoading) return (<div className="w-fit m-auto text-center">Loading...</div>);
-
-    if (!RSVPd || !user) return (<div className="w-fit m-auto text-center">That user is not on the RSVP list or does not exist.</div>);
-
-    return (<div>
-        <div className="w-fit m-auto text-center">
-            Found the user {" "}
-                <span className="font-bold">{user?.name}</span> {" "}
-                (<span className="italic">{user?.email}</span>)
-            on the RSVP list. Is this you?
-        </div>
-
-        <div className="flex flex-row w-full justify-center">
-            <Button onPress={() => onYes(user?.uuid)} className="w-fit min-w-24 mx-1">
-                Yes
-            </Button>
-            <Button onPress={() => onNo(user?.uuid)} className="w-fit min-w-24 mx-1">
-                No
-            </Button>
-        </div>
-    </div>);
+    return (
+        <>
+            {header}
+            {footer}
+        </>
+    );
 }
