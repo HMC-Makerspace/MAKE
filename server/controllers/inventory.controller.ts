@@ -3,7 +3,7 @@ import { UserUUID } from "common/user";
 import { InventoryItem } from "models/inventory.model";
 import mongoose from "mongoose";
 import { getUser } from "./user.controller";
-import { getAreasVisibleToUser, getPrivateAreas } from "./area.controller";
+import { getAreasVisibleToUser, getPublicAreas } from "./area.controller";
 import { verifyRequest } from "./verify.controller";
 import { API_SCOPE, UUID } from "common/global";
 
@@ -108,23 +108,35 @@ export async function getInventoryVisibleToUser(
  */
 async function getPublicInventory(): Promise<TInventoryItem[]> {
     const Inventory = mongoose.model("InventoryItem", InventoryItem);
+
+    const visible_areas = (await getPublicAreas()).map((area) => area.uuid);
+
     // Find all items that need no roles or certifications
-    const items = await Inventory.find({
-        authorized_roles: null,
-        // Required certifications must either be empty or not exist
-        $or: [
-            { required_certifications: null },
-            { required_certifications: { $size: 0 } },
-        ],
-    });
-
-    const private_areas = (await getPrivateAreas()).map((area) => area.uuid);
-
-    // Filter out private locations
-    items.forEach((item) =>
-        item.locations.filter((loc) => !private_areas.includes(loc.area)),
-    );
-    return items;
+    return await Inventory.aggregate([
+        {
+            $match: {
+                authorized_roles: null,
+                // Required certifications must either be empty or not exist
+                $or: [
+                    { required_certifications: null },
+                    { required_certifications: { $size: 0 } },
+                ],
+            },
+        },
+        {
+            $set: {
+                locations: {
+                    $filter: {
+                        input: "$locations",
+                        as: "loc",
+                        cond: {
+                            $in: ["$$loc.area", visible_areas],
+                        },
+                    },
+                },
+            },
+        },
+    ]);
 }
 
 /**

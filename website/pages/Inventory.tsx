@@ -19,8 +19,6 @@ export default function InventoryPage() {
         refetchOnWindowFocus: false,
         refetchOnMount: false,
     });
-
-    console.log(inventory);
     const { data: requestingUser, isLoading: reqUserLoading } = useQuery<TUser>({
         queryKey: ["user", "self"],
         refetchOnWindowFocus: false,
@@ -79,7 +77,7 @@ export default function InventoryPage() {
 
     return (
         <DefaultLayout className="py-0 px-4 lg:px-8" pageHref="/inventory">
-            {inventory && requestingUser && scopes && roles && certs && areas && (
+            {inventory && roles && certs && areas && (
                 <InventoryTable
                     requestingUser={requestingUser}
                     scopes={scopes}
