@@ -158,13 +158,12 @@ export default function WorkshopCard({
             hour: "numeric",
             minute: "2-digit",
         });
-    
+
     const isAdmin = scopes && verifyScopes(scopes, [API_SCOPE.ADMIN]);
-    const canRSVP =
-        scopes && verifyScopes(scopes, [API_SCOPE.RSVP_WORKSHOP]);
+    const canRSVP = scopes && verifyScopes(scopes, [API_SCOPE.RSVP_WORKSHOP]);
     const canSignIn =
         scopes && verifyScopes(scopes, [API_SCOPE.SIGN_IN_WORKSHOP]);
-    
+
     const {
         data: user_self,
         isLoading: selfLoading,
@@ -287,7 +286,8 @@ export default function WorkshopCard({
                                 color="primary"
                                 content={
                                     workshop.timestamp_public &&
-                                    `RSVPs are closed until ${new Date(workshop.timestamp_public * 1000).toDateString()}`
+                                    date_formatter &&
+                                    `RSVPs are closed until ${date_formatter.format(new Date(workshop.timestamp_public * 1000))}`
                                 }
                                 isDisabled={
                                     workshop.timestamp_public
@@ -346,17 +346,31 @@ export default function WorkshopCard({
                                         workshop.timestamp_start &&
                                         config?.workshop
                                             .sign_in_enabled_within &&
-                                        `Sign ins are closed until ${new Date((workshop.timestamp_start - config.workshop.sign_in_enabled_within) * 1000).toDateString()}`
+                                        date_formatter &&
+                                        (workshop.timestamp_start -
+                                            config.workshop
+                                                .sign_in_enabled_within >
+                                        Date.now() / 1000
+                                            ? `Sign ins are closed until ${date_formatter.format(
+                                                  new Date(
+                                                      (workshop.timestamp_start -
+                                                          config.workshop
+                                                              .sign_in_enabled_within) *
+                                                          1000,
+                                                  ),
+                                              )}`
+                                            : "Sign in now!")
                                     }
-                                    isDisabled={
-                                        workshop.timestamp_start &&
-                                        config?.workshop.sign_in_enabled_within
-                                            ? workshop.timestamp_start -
-                                                  config.workshop
-                                                      .sign_in_enabled_within <
-                                              Date.now() / 1000
-                                            : true
-                                    }
+
+                                    // isDisabled={
+                                    //     workshop.timestamp_start &&
+                                    //     config?.workshop.sign_in_enabled_within
+                                    //         ? workshop.timestamp_start -
+                                    //               config.workshop
+                                    //                   .sign_in_enabled_within <
+                                    //           Date.now() / 1000
+                                    //         : true
+                                    // }
                                 >
                                     <Button
                                         className="text-small font-bold text-white bg-primary hover:bg-primary/50 hover:outline"
