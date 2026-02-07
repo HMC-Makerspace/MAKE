@@ -540,24 +540,30 @@ export default function Area({
                         )}
                     >
                         {area.equipment &&
-                            area.equipment.map((machine_uuid, i) => {
-                                const machine = machines.find(
-                                    (m) => m.uuid === machine_uuid,
-                                );
-                                if (machine) {
-                                    return (
-                                        <Machine
-                                            key={`area-${area.uuid}-machine-${i}-${machine_uuid}`}
-                                            machine={machine}
-                                            roles={roles}
-                                            certifications={certifications}
-                                            editable={editable}
-                                        />
+                            area.equipment
+                                .filter((machine_uuid) =>
+                                    machines.some(
+                                        (m) => m.uuid === machine_uuid,
+                                    ),
+                                )
+                                .map((machine_uuid, i) => {
+                                    const machine = machines.find(
+                                        (m) => m.uuid === machine_uuid,
                                     );
-                                } else {
-                                    return <div key={machine_uuid}></div>;
-                                }
-                            })}
+                                    if (machine) {
+                                        return (
+                                            <Machine
+                                                key={`area-${area.uuid}-machine-${i}-${machine_uuid}`}
+                                                machine={machine}
+                                                roles={roles}
+                                                certifications={certifications}
+                                                editable={editable}
+                                            />
+                                        );
+                                    } else {
+                                        return <></>;
+                                    }
+                                })}
                     </div>
                 )}
             </div>
