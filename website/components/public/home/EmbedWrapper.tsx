@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { TEmbed } from "common/embed";
 import { AnimatePresence, motion, usePresenceData, wrap } from "motion/react";
 import { ForwardedRef, forwardRef } from "react";
+import Embed from "./Embed";
 
 const EmbedWrapper = forwardRef(function EmbedWrapper(
     {
@@ -20,6 +21,7 @@ const EmbedWrapper = forwardRef(function EmbedWrapper(
     ref: ForwardedRef<HTMLDivElement>,
 ) {
     const direction: number = usePresenceData();
+
     return (
         <motion.div
             ref={ref}
@@ -43,7 +45,7 @@ const EmbedWrapper = forwardRef(function EmbedWrapper(
                 ease: "easeInOut",
             }}
         >
-            {embed.src}
+            {embed.is_element ? embed.src : <Embed embed={embed} />}
         </motion.div>
     );
 });
