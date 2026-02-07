@@ -1,11 +1,14 @@
 import { TDocument } from "./file";
-import { TUserRoleLog } from "./user";
+import { UUID } from "./global";
+import { UserRoleUUID } from "./user";
 
 export type TEmbed = {
+    uuid: UUID;
     title: string;
-    src: string | React.ReactElement;
-    authorized_roles?: TUserRoleLog[];
+    src: string;
+    visible_to?: UserRoleUUID[] | null;
     documents: TDocument[];
-    auto_dark?: boolean;
-    is_element?: boolean;
+    auto_invert?: boolean;
 };
+
+export type THomeEmbed = Omit<TEmbed, "src"> & { src: React.ReactNode };
