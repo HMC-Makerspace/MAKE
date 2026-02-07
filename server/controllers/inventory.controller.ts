@@ -3,7 +3,7 @@ import { UserUUID } from "common/user";
 import { InventoryItem } from "models/inventory.model";
 import mongoose from "mongoose";
 import { getUser } from "./user.controller";
-import { getPrivateAreas } from "./area.controller";
+import { getAreasVisibleToUser, getPrivateAreas } from "./area.controller";
 import { verifyRequest } from "./verify.controller";
 import { API_SCOPE, UUID } from "common/global";
 
@@ -61,34 +61,44 @@ export async function getInventoryVisibleToUser(
     const cert_uuids =
         user.active_certificates?.map((cert) => cert.certification_uuid) ?? [];
 
-    // Get all hidden areas
-    const private_areas = (await getPrivateAreas()).map((area) => area.uuid);
+    // Get all visible areas
+    const visible_areas = (await getAreasVisibleToUser(user_uuid)).map(
+        (area) => area.uuid,
+    );
 
     const Inventory = mongoose.model("InventoryItem", InventoryItem);
-    // Find all items that require no roles or which require roles that the
-    // user has at least one of
-    const items = await Inventory.find({
-        $or: [
-            { authorized_roles: null },
-            { authorized_roles: { $elemMatch: { $in: role_uuids } } },
-        ],
-    });
+    // Find all items that require no roles or which require roles that the user
+    // has at least one of, and remove locations the user does not have access to
+    return await Inventory.aggregate([
+        {
+            $match: {
+                $or: [
+                    { authorized_roles: null },
+                    { authorized_roles: { $in: role_uuids } },
+                ],
+            },
+        },
+        {
+            $set: {
+                locations: {
+                    $filter: {
+                        input: "$locations",
+                        as: "loc",
+                        cond: {
+                            $in: ["$$loc.area", visible_areas],
+                        },
+                    },
+                },
+            },
+        },
+    ]);
 
-    // Filter out private locations
-    items.forEach((item) =>
-        item.locations.filter((loc) => !private_areas.includes(loc.area)),
-    );
-
-    // Finally, filter out items that have no locations or require certifications
-    // that the user doesn't have
-    return items.filter(
-        (item) =>
-            (item.locations.length === 0 ||
-                item.required_certifications?.every((cert) =>
-                    cert_uuids.includes(cert.certification_uuid),
-                )) ??
-            true,
-    );
+    // Consider filter out items that require certifications the user doesn't have
+    /*.filter((item) =>
+        item.required_certifications?.every((cert) =>
+            cert_uuids.includes(cert.certification_uuid),
+        ),
+    );*/
 }
 
 /**

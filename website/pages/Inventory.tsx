@@ -19,6 +19,8 @@ export default function InventoryPage() {
         refetchOnWindowFocus: false,
         refetchOnMount: false,
     });
+
+    console.log(inventory);
     const { data: requestingUser, isLoading: reqUserLoading } = useQuery<TUser>({
         queryKey: ["user", "self"],
         refetchOnWindowFocus: false,
@@ -29,10 +31,13 @@ export default function InventoryPage() {
         refetchOnWindowFocus: false,
         refetchOnMount: false,
     });
-    const { data: restocks, isLoading: restocksLoading } = useQuery<TRestockRequest[]>({
+    const { data: restocks, isLoading: restocksLoading } = useQuery<
+        TRestockRequest[]
+    >({
         queryKey: ["restock"],
         refetchOnWindowFocus: false,
         refetchOnMount: false,
+        retry: false,
     });
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
