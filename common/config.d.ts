@@ -1,6 +1,16 @@
 import { UnixTimestamp, UUID } from "./global";
 import { UserRoleUUID } from "./user";
 
+export type TGeneralConfig = {
+    branding_url?: string;
+    tagline?: string;
+    discord_url?: string;
+    instagram_url?: string;
+    tiktok_url?: string;
+    extra_urls?: string[];
+    hide_home_embed?: boolean;
+};
+
 export type TCheckoutConfig = {
     /**
      * something to do with how often notifications are sent...
@@ -80,15 +90,6 @@ export type TWorkshopConfig = {
      */
     sign_in_enabled_within: number;
 }
-
-export type TGeneralConfig = {
-    branding_url?: string;
-    tagline?: string;
-    discord_url?: string;
-    instagram_url?: string;
-    tiktok_url?: string;
-    extra_urls?: string[];
-};
 
 export type TFAQItem = {
     title: string;

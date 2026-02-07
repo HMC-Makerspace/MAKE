@@ -46,23 +46,17 @@ export default function EditDocsModal<
         element.documents || [],
     );
 
-    const onSubmit = React.useCallback(
-        (e: React.FormEvent<HTMLFormElement>) => {
-            // Prevent default browser page refresh.
-            e.preventDefault();
+    const onSubmit = () => {
+        if (!hasEdits) return;
 
-            if (!hasEdits) return;
+        patchMutation.reset();
 
-            patchMutation.reset();
-
-            // Run the mutation
-            patchMutation.mutate({
-                uuid: element.uuid,
-                patch: { documents: docs },
-            });
-        },
-        [patchMutation, hasEdits, docs],
-    );
+        // Run the mutation
+        patchMutation.mutate({
+            uuid: element.uuid,
+            patch: { documents: docs },
+        });
+    };
 
     const wrapEdit = (i: number, prop: "name" | "link") => {
         return (val: any) => {
@@ -105,10 +99,7 @@ export default function EditDocsModal<
         >
             <ModalContent>
                 {(onClose) => (
-                    <Form
-                        onSubmit={onSubmit}
-                        className="flex flex-col gap-4 p-4"
-                    >
+                    <div className="flex flex-col gap-4 p-4">
                         <div className="text-lg font-semibold">
                             Edit Documents
                         </div>
@@ -136,9 +127,9 @@ export default function EditDocsModal<
                                             "text-default-700",
                                         ]),
                                     }}
-                                    className='w-full'
-                                />  
-                                    <Input
+                                    className="w-full"
+                                />
+                                <Input
                                     type="text"
                                     label="Link"
                                     name="link"
@@ -156,25 +147,28 @@ export default function EditDocsModal<
                                             "text-default-700",
                                         ]),
                                     }}
-                                    className='w-full'
+                                    className="w-full"
                                 />
-                                
-                                {roleOption &&
-                                    <div className='min-w-[15vw] max-w-full'>
+
+                                {roleOption && (
+                                    <div className="min-w-[15vw] max-w-full">
                                         <UserRoleSelect
-                                            selectedKeys={docs[i]["authorized_roles"] ?? undefined}
+                                            selectedKeys={
+                                                docs[i]["authorized_roles"] ??
+                                                undefined
+                                            }
                                             onSelectionChange={wrapRolesEdit(i)}
                                             placeholder="Select authorized roles"
                                             label="Authorized Roles"
                                             labelPlacement="inside"
                                             classNames={{
-                                                value: "text-default-500",                                                
+                                                value: "text-default-500",
                                             }}
                                             size="md"
                                             multiline={false}
                                         />
                                     </div>
-                                }
+                                )}
                                 <Button
                                     variant="flat"
                                     color="danger"
@@ -193,11 +187,11 @@ export default function EditDocsModal<
                         <div className="flex flex-row justify-between w-full gap-2">
                             <Button
                                 variant="shadow"
-                                type="submit"
                                 color="primary"
                                 className="w-full sm:w-auto"
                                 isDisabled={!isValid}
                                 isLoading={patchMutation.isPending}
+                                onPress={onSubmit}
                             >
                                 Submit
                             </Button>
@@ -221,7 +215,7 @@ export default function EditDocsModal<
                                 </Button>
                             </div>
                         </div>
-                    </Form>
+                    </div>
                 )}
             </ModalContent>
         </Modal>

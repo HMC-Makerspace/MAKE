@@ -335,7 +335,7 @@ export async function signInToWorkshop(
 }
 
 export async function workshopReminderEmailCron(logger: Logger) {
-    logger.info("Sending workshop reminder emails.");
+    logger.info("Cron: Sending workshop reminder emails.");
 
     const config = await getConfig();
     const timestamp = Math.round(Date.now() / 1000);
