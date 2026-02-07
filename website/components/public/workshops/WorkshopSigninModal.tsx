@@ -41,26 +41,38 @@ export default function WorkshopSigninModal({
     
     const signinMutation = useMutation({
         mutationFn: signinWorkshop,
-        onSuccess: (obj) => {
-            const updatedWorkshop = obj.data;
+        onSuccess: ({ data: updatedWorkshop }) => {
+            console.log("Success", updatedWorkshop);
 
-            queryClient.setQueryData(["workshop", updatedWorkshop.uuid], updatedWorkshop);
             queryClient.setQueryData(
-                ["workshop"],
+                ["workshop", updatedWorkshop.uuid],
+                updatedWorkshop,
+            );
+            queryClient.setQueryData(["workshop"], (old: TWorkshop[]) => {
+                return (old ?? []).map((oldWorkshop) =>
+                    oldWorkshop.uuid === updatedWorkshop.uuid
+                        ? updatedWorkshop
+                        : oldWorkshop,
+                );
+            });
+            queryClient.setQueryData(
+                ["workshop", "public"],
                 (old: TWorkshop[]) => {
-                    return old.map((oldWorkshop) =>
-                        oldWorkshop.uuid === updatedWorkshop.uuid ? updatedWorkshop : oldWorkshop,
+                    return (old ?? []).map((oldWorkshop) =>
+                        oldWorkshop.uuid === updatedWorkshop.uuid
+                            ? updatedWorkshop
+                            : oldWorkshop,
                     );
                 },
             );
-
             addToast({
                 title: `Successfully signed in to workshop`,
                 color: "success",
             });
             wrapOnOpenChange(false);
         },
-        onError: (e: AxiosError<{ error: string}>) => {
+        onError: (e: AxiosError<{ error: string }>) => {
+            console.log("Error", e);
             addToast({
                 title: `Error: ${e.response?.data?.error}`,
                 color: "danger",
@@ -115,43 +127,50 @@ export default function WorkshopSigninModal({
                                     "text-default-700",
                                 ]),
                             }}
+                            isRequired
                         />
-                        <div className="flex flex-row gap-2 justify-between w-full pt-4">
-                            <Button
-                                color="primary"
-                                isDisabled={!hasEdits}
-                                type="submit"
-                            >
-                                Submit
-                            </Button>
-                            <Button
-                                color="danger"
-                                onPress={() => {
-                                    wrapOnOpenChange(true);
-                                }}
-                            >
-                                Cancel
-                            </Button>
-                        </div>
+                        {email === "" && (
+                            <div className="flex flex-row gap-2 justify-between w-full pt-4">
+                                <Button
+                                    color="primary"
+                                    variant="bordered"
+                                    isDisabled={!hasEdits}
+                                    type="submit"
+                                >
+                                    Continue
+                                </Button>
+                                <Button
+                                    variant="flat"
+                                    color="danger"
+                                    onPress={() => {
+                                        wrapOnOpenChange(true);
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+                        )}
                     </Form>
 
-                    {email && (<WorkshopSigninConfirmation
-                        email={email}
-                        rsvp_list={workshop.rsvp_list}
-                        onYes={(uuid) => {
-                            if (!uuid) return;
-                            
-                            signinMutation.reset();
-                            signinMutation.mutate({
-                                workshop_uuid: workshop.uuid,
-                                user_uuid: uuid,
-                            });
-                        }}
-                        onNo={(uuid) => {
-                            setEmail("");
-                            // onopenchangemodified(false);
-                        }}
-                    ></WorkshopSigninConfirmation>)}
+                    {email && (
+                        <WorkshopSigninConfirmation
+                            email={email}
+                            rsvp_list={workshop.rsvp_list}
+                            capacity={workshop.capacity}
+                            onSubmit={(uuid) => {
+                                if (!uuid) return;
+                                signinMutation.reset();
+                                signinMutation.mutate({
+                                    workshop_uuid: workshop.uuid,
+                                    user_uuid: uuid,
+                                });
+                            }}
+                            onCancel={() => {
+                                setEmail("");
+                                onOpenChange(false);
+                            }}
+                        />
+                    )}
                 </ModalBody>
                 <ModalFooter className="flex flex-row justify-between items-center"></ModalFooter>
             </ModalContent>
