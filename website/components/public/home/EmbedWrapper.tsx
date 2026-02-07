@@ -1,7 +1,7 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { Button } from "@heroui/react";
 import clsx from "clsx";
-import { TEmbed } from "common/embed";
+import { TEmbed, THomeEmbed } from "common/embed";
 import { AnimatePresence, motion, usePresenceData, wrap } from "motion/react";
 import { ForwardedRef, forwardRef } from "react";
 import Embed from "./Embed";
@@ -13,7 +13,7 @@ const EmbedWrapper = forwardRef(function EmbedWrapper(
         duration = 0.5,
         delay = 0.05,
     }: {
-        embed: TEmbed;
+        embed: TEmbed | THomeEmbed;
         distance?: number;
         duration?: number;
         delay?: number;
@@ -45,7 +45,11 @@ const EmbedWrapper = forwardRef(function EmbedWrapper(
                 ease: "easeInOut",
             }}
         >
-            {embed.is_element ? embed.src : <Embed embed={embed} />}
+            {typeof embed.src !== "string" ? (
+                embed.src
+            ) : (
+                <Embed embed={embed} />
+            )}
         </motion.div>
     );
 });

@@ -8,7 +8,7 @@ import { AnimatePresence, motion, wrap } from "motion/react";
 import HomeLinks from "../components/public/home/HomeLinks";
 import { useState } from "react";
 import EmbedWrapper from "../components/public/home/EmbedWrapper";
-import { TEmbed } from "common/embed";
+import { THomeEmbed, TEmbed } from "common/embed";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 export default function HomePage() {
@@ -18,7 +18,14 @@ export default function HomePage() {
         refetchOnMount: false,
     });
 
-    const homeEmbed: TEmbed = {
+    const { data: embeds, isLoading: embedsLoading } = useQuery<TEmbed[]>({
+        queryKey: ["embed", "public"],
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+    });
+
+    const homeEmbed: THomeEmbed = {
+        uuid: "home",
         title: "Home",
         src: (
             <>
@@ -43,50 +50,14 @@ export default function HomePage() {
             </>
         ),
         documents: [],
-        is_element: true,
     };
 
     const [selectedItem, setSelectedItem] = useState<number>(0);
     const [direction, setDirection] = useState<1 | -1>(1);
 
-    const embeds = [
-        {
-            title: "Events",
-            src: "https://calendar.google.com/calendar/embed?src=c_8rrmu0a9da7jlegoen52aosglc%40group.calendar.google.com&ctz=America%2FLos_Angeles",
-            documents: [],
-            auto_dark: true,
-            is_element: false,
-        },
-        {
-            title: "Management",
-            // src: (
-            //     <div className="w-full h-full bg-content1 rounded-2xl p-6 flex justify-center flex-col items-center">
-            //         <div
-            //             className={clsx(
-            //                 "text-2xl font-bold",
-            //                 "text-foreground-400",
-            //             )}
-            //         >
-            //             Events page
-            //         </div>
-            //         <div
-            //             className={clsx(
-            //                 "text-4xl font-bold",
-            //                 "text-foreground-400 pb-5",
-            //             )}
-            //         >
-            //             Blergh
-            //         </div>
-            //     </div>
-            // ),
-            src: "https://calendar.google.com/calendar/embed?src=c_7f0eb8454a7ab406a29fbfb27accb936db3f9d86ab859cebc3bcc78572d94e88%40group.calendar.google.com&ctz=America%2FLos_Angeles",
-            documents: [],
-            auto_dark: true,
-            is_element: false,
-        },
-    ];
-
-    const allEmbeds = [homeEmbed, ...embeds];
+    const allEmbeds = (config?.general.hide_home_embed
+        ? embeds
+        : [homeEmbed, ...(embeds ?? [])]) ?? [homeEmbed, ...(embeds ?? [])];
     const count = allEmbeds.length;
 
     function setSlide(newDirection: 1 | -1) {
@@ -121,7 +92,8 @@ export default function HomePage() {
                                         "flex relative border-0 pr-1 pl-4 ",
                                         "rounded-xl items-center transition-colors-opacity",
                                         "gap-1 justify-end",
-                                        allEmbeds[selectedItem].is_element
+                                        typeof allEmbeds[selectedItem].src !==
+                                            "string"
                                             ? "self-end md:self-center"
                                             : "self-end",
                                     )}
@@ -187,7 +159,7 @@ export default function HomePage() {
                                         "flex relative border-0 pr-1 pl-4 ",
                                         "rounded-xl items-center transition-colors-opacity",
                                         "gap-1 justify-end",
-                                        currentEmbed.is_element
+                                        typeof currentEmbed.src !== "string"
                                             ? "self-end md:self-center"
                                             : "self-end",
                                     )}
