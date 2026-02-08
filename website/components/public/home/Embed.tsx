@@ -2,6 +2,7 @@ import { Button, Card, ScrollShadow } from "@heroui/react";
 import clsx from "clsx";
 import { TEmbed, THomeEmbed } from "common/embed";
 import { useTheme } from "next-themes";
+import { Link } from "react-router-dom";
 
 export default function Embed({ embed }: { embed: TEmbed | THomeEmbed }) {
     const { theme } = useTheme();
@@ -45,7 +46,8 @@ export default function Embed({ embed }: { embed: TEmbed | THomeEmbed }) {
                             <Button
                                 variant="solid"
                                 color="primary"
-                                href={doc.link}
+                                as={Link}
+                                to={doc.link}
                                 size="lg"
                                 className="rounded-full font-semibold px-12"
                             >

@@ -1,8 +1,5 @@
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import { Button } from "@heroui/react";
-import clsx from "clsx";
 import { TEmbed, THomeEmbed } from "common/embed";
-import { AnimatePresence, motion, usePresenceData, wrap } from "motion/react";
+import { motion, usePresenceData } from "motion/react";
 import { ForwardedRef, forwardRef } from "react";
 import Embed from "./Embed";
 

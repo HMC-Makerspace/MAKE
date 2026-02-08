@@ -4,7 +4,6 @@ import {
     CardBody,
     CardFooter,
     CardHeader,
-    Link,
     ScrollShadow,
     Tooltip,
 } from "@heroui/react";
@@ -22,6 +21,7 @@ import {
 } from "../utils";
 import { BookmarkIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import { Link } from "react-router-dom";
 
 export default function CertificationsPage() {
     // Get all data
@@ -405,10 +405,9 @@ export default function CertificationsPage() {
                                                 variant="shadow"
                                                 className="w-full font-medium"
                                                 size="lg"
-                                                href={docHref}
                                                 as={Link}
-                                                isExternal
                                                 isDisabled={!hasPrereqs}
+                                                to={docHref}
                                             >
                                                 {doc.name}
                                             </Button>

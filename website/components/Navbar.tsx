@@ -74,12 +74,7 @@ export default function CustomNavbar({
                             }
                         >
                             {page.icon && <page.icon className="size-5" />}
-                            {/* <Link
-                                href={page.href}
-                                className="text-lg text-inherit text-nowrap"
-                            > */}
                             {page.name}
-                            {/* </Link> */}
                         </motion.div>
                     ))}
                 </div>

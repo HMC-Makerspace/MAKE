@@ -5,7 +5,6 @@ import {
     Textarea,
     Select,
     SelectItem,
-    Link,
     useDisclosure,
     Tooltip,
     addToast,
@@ -30,6 +29,7 @@ import {
 import VisibilityModal from "./VisibilityModal";
 import ReservableAreaModal from "./ReservableAreaModal";
 import DeleteModal from "../../../DeleteModal";
+import { Link } from "react-router-dom";
 
 const patchArea = async ({
     uuid,
@@ -403,9 +403,8 @@ export default function Area({
                                     color="primary"
                                     variant="shadow"
                                     className=""
-                                    href={doc.link}
                                     as={Link}
-                                    isExternal
+                                    to={doc.link}
                                 >
                                     {doc.name}
                                 </Button>

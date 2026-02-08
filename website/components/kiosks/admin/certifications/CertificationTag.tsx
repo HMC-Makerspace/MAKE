@@ -1,4 +1,4 @@
-import { As, Card, Link } from "@heroui/react";
+import { Card } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
 
 import { TCertification } from "common/certification";
@@ -6,6 +6,7 @@ import CVisibilityIcon from "./CVisibilityIcon";
 import { BookmarkIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { getForegroundColor } from "../../../../utils";
+import { Link } from "react-router-dom";
 
 // A certification tag similar (but with less rounded edges) to user role tags (see UserRole)
 export default function CertificationTag({
@@ -62,9 +63,9 @@ export default function CertificationTag({
             isBlurred={!isLoading}
             onPress={onPress}
             isPressable={!!onPress || !!href}
-            as={href ? Link : undefined}
-            href={href}
             shadow="none"
+            as={href ? Link : undefined}
+            to={href}
         >
             {showVisibility ? (
                 <CVisibilityIcon

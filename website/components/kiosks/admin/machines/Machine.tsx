@@ -2,7 +2,6 @@ import {
     Button,
     Card,
     Input,
-    Link,
     Textarea,
     Tooltip,
     useDisclosure,
@@ -37,6 +36,7 @@ import ReservableConfirmationModal from "./ReservableConfirmationModal";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
 import AuthorizedRolesModal from "../certifications/AuthorizedRolesModal";
 import DeleteModal from "../../../DeleteModal";
+import { Link } from "react-router-dom";
 
 const patchMachine = async ({
     uuid,
@@ -427,8 +427,8 @@ export default function Machine({
                                     machine.documents.length == 0
                                     ? ""
                                     : "mt-2",
-                                machine.documents.length <= 2 
-                                    ? "w-4/5" 
+                                machine.documents.length <= 2
+                                    ? "w-4/5"
                                     : "w-full",
                             )}
                         >
@@ -438,45 +438,36 @@ export default function Machine({
                                         key={`machine-${machine.uuid}-doc-${i}`}
                                         color="primary"
                                         className="w-full"
-                                        href={doc.link}
                                         as={Link}
-                                        isExternal
+                                        to={doc.link}
                                     >
                                         {doc.name}
                                     </Button>
                                 ))
                             ) : (
-                                <div className='w-full'>
-                                    <Accordion
-                                        fullWidth
-                                        variant="splitted"
-                                    >                                    
-                                        <AccordionItem
-                                            title="View Documents"                                    
-                                        >
-                                            {
-                                                machine.documents.map((doc, i) => (
-                                                    <div className='py-1'>
-                                                        <Button
-                                                            key={`machine-${machine.uuid}-doc-${i}`}
-                                                            color="primary"
-                                                            className="w-full py-2"
-                                                            href={doc.link}
-                                                            as={Link}
-                                                            isExternal
-                                                        >
-                                                            {doc.name}
-                                                        </Button>
-                                                    </div>
-                                                    
-                                                ))
-                                            }
+                                <div className="w-full">
+                                    <Accordion fullWidth variant="splitted">
+                                        <AccordionItem title="View Documents">
+                                            {machine.documents.map((doc, i) => (
+                                                <div className="py-1">
+                                                    <Button
+                                                        key={`machine-${machine.uuid}-doc-${i}`}
+                                                        color="primary"
+                                                        className="w-full py-2"
+                                                        as={Link}
+                                                        to={doc.link}
+                                                    >
+                                                        {doc.name}
+                                                    </Button>
+                                                </div>
+                                            ))}
                                         </AccordionItem>
                                     </Accordion>
                                 </div>
                             )}
                         </div>
-                    ))}
+                    )
+                )}
             </div>
         </Card>
     );
