@@ -16,7 +16,7 @@ export enum ITEM_RELATIVE_QUANTITY {
 export type ItemQuantity = ITEM_RELATIVE_QUANTITY | number;
 
 /**
- * TLocation - Location of an inventory item
+ * TInventoryItemLocation - Location of an inventory item
  * @property room - The UUID of an area where the item is stored
  * @property quantity - of item stored in this location
  * @property container - (optional) subsection of room
@@ -98,7 +98,7 @@ export const ITEM_ACCESS_DESCRIPTORS: {
  * @property available - (optional) The current available quantity
  *      after accounting for checkouts/reservations (only applicable to items
  *      with a number quantity, not relative quantity)
- * @property locations - See {@link TLocation} documentation
+ * @property locations - See {@link TInventoryItemLocation} documentation
  * @property reorder_url - (optional) url for reordering item
  * @property serial_number - (optional) serial number of item
  * @property kit_contents - (optional) if kit, lists all item UUIDs in this kit
@@ -108,6 +108,8 @@ export const ITEM_ACCESS_DESCRIPTORS: {
  *      allowed to use this item. A user must have at least one of
  *      these roles to checkout the given item. If null, any user may
  *      checkout this item.
+ * @property kit_contents - The contents of the item, if it is a kit
+ * @property parent_kit - The UUID of the parent kit (if this item is in one)
  */
 export type TInventoryItem = {
     uuid: InventoryItemUUID;
@@ -124,4 +126,6 @@ export type TInventoryItem = {
     keywords?: string[];
     required_certifications?: TRequiredCertificate[];
     authorized_roles?: UserRoleUUID[] | null;
+    kit_contents?: InventoryItemUUID[];
+    parent_kit?: InventoryItemUUID;
 };
