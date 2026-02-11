@@ -33,8 +33,8 @@ export default function WorkshopSigninListModal({
         let place = getUserPlace(uuid);
 
         if (place < 0) return "";
-        else if (!workshop.capacity || place < workshop.capacity) return `RSVP #${1+place}`
-        else return `Waitlist #${1+place-workshop.capacity}`
+        else if (!workshop.capacity || place < workshop.capacity) return `RSVP #${1 + place}`;
+        else return `Waitlist #${1 + place - workshop.capacity}`;
     }
 
     return (
@@ -55,7 +55,7 @@ export default function WorkshopSigninListModal({
                             user_uuid={u.user_uuid}
                             className="flex-auto mx-1"
                         ></UserChip>
-                        <div className="px-5 mx-1 flex items-center justify-center">{getUserSpot(u.user_uuid)}</div>
+                        <div className="px-5 mx-1 w-32 flex items-center justify-center">{getUserSpot(u.user_uuid)}</div>
                     </div>))}
                 </ModalBody>
                 <ModalFooter className="flex flex-row justify-between items-center"></ModalFooter>
