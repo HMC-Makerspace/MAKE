@@ -71,7 +71,7 @@ export default function HomePage() {
     const nextEmbed = allEmbeds[wrap(0, count, selectedItem + 1)];
 
     return (
-        <DefaultLayout className="px-8" pageHref="/">
+        <DefaultLayout className="px-8 overscroll-y-none" pageHref="/">
             <div className="relative flex flex-col items-center justify-center h-full">
                 <ActiveAlert />
                 <div className="size-full flex flex-row items-center pt-4">
