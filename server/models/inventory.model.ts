@@ -34,6 +34,8 @@ export const InventoryItem = new mongoose.Schema<TInventoryItem>(
             required: false,
         },
         authorized_roles: { type: [String], required: false },
+        kit_contents: { type: [String], required: false },
+        parent_kit: { type: String, required: false },
     },
     { collection: "inventory" },
 );
