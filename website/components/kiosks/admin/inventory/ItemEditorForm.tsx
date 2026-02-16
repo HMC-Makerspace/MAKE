@@ -33,6 +33,7 @@ import {
     BookmarkIcon,
     UserIcon,
     GlobeAmericasIcon,
+    BriefcaseIcon,
 } from "@heroicons/react/24/solid";
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
@@ -42,6 +43,7 @@ import { motion } from "motion/react";
 import ItemQuantityIcon from "./ItemQuantityIcon";
 import ItemLocationModal from "./ItemLocationModal";
 import { TArea } from "common/area";
+import KitEditorModal from "./KitEditorModal";
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateItem = async ({
@@ -248,12 +250,14 @@ export default function ItemEditorForm({
     const [authrolesOpen, setAuthrolesOpen] = React.useState<boolean>(false); // whether authroles edit modal is open
     const [locationEditorOpen, setLocationEditorOpen] =
         React.useState<boolean>(false); // whether location editor modal is open
+    const [kitEditorOpen, setKitEditorOpen] = React.useState<boolean>(false); // whether kit content edit modal is open
 
     const reqcertsMutation = patchMutation(() => setReqcertsOpen(false));
     const authrolesMutation = patchMutation(() => setAuthrolesOpen(false));
     const locationEditorMutation = patchMutation(() =>
         setLocationEditorOpen(false),
     );
+    const kitEditorMutation = patchMutation(() => setKitEditorOpen(false));
 
     const [isNumericQuantity, setQtype] = React.useState<boolean>(
         item.quantity >= 0,
@@ -530,12 +534,7 @@ export default function ItemEditorForm({
                                     Area
                                 </span>
                             </SelectItem>
-                            <SelectItem
-                                key={ITEM_ROLE.KIT}
-                                textValue={"Kit"}
-                                isReadOnly
-                                className="text-default-400"
-                            >
+                            <SelectItem key={ITEM_ROLE.KIT} textValue={"Kit"}>
                                 <span className="flex gap-2 items-center">
                                     <ItemRoleIcon role={ITEM_ROLE.KIT} />
                                     Kit
@@ -689,6 +688,33 @@ export default function ItemEditorForm({
                                 {item.authorized_roles?.length ?? 0}
                             </Button>
                         </Tooltip>
+
+                        {item.role == ITEM_ROLE.KIT && (
+                            <Tooltip
+                                content={
+                                    isNew
+                                        ? "Create the item first, before editing kit contents."
+                                        : "Kit Contents"
+                                }
+                                className="w-fit p-2"
+                                delay={500}
+                                closeDelay={150}
+                                isDisabled={isDisabled}
+                            >
+                                <Button
+                                    // variant="flat"
+                                    color="primary"
+                                    onPress={() => !isNew && setKitEditorOpen(true)}
+                                    // isIconOnly
+                                    isDisabled={isDisabled}
+                                    className={isNew ? "opacity-disabled" : ""}
+                                    data-hover={!isNew && !isDisabled}
+                                >
+                                    <BriefcaseIcon className="size-7" />
+                                    {item.kit_contents?.length ?? 0}
+                                </Button>
+                            </Tooltip>
+                        )}
                         {/* </div> */}
                     </ButtonGroup>
                 </div>
@@ -747,6 +773,13 @@ export default function ItemEditorForm({
                 isOpen={locationEditorOpen}
                 onOpenChange={setLocationEditorOpen}
                 patchMutation={locationEditorMutation}
+            />
+            <KitEditorModal
+                key={"kitedit-" + item.uuid}
+                element={item}
+                isOpen={kitEditorOpen}
+                onOpenChange={setKitEditorOpen}
+                patchMutation={kitEditorMutation}
             />
         </>
     );
