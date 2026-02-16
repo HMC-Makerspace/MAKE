@@ -53,6 +53,7 @@ const baseColumns = [
     { name: "Locations", id: "locations" },
     { name: "Required Certs", id: "required_certifications" },
     { name: "Authorized Roles", id: "authorized_roles" },
+    { name: "Kit Contents", id: "kit_contents" },
     { name: "Keywords", id: "keywords" },
     { name: "Serial Number", id: "serial_number" },
     { name: "Reorder URL", id: "reorder_url" },
@@ -422,6 +423,13 @@ export default function InventoryTable({
                                     role_uuid={role}
                                     role={roles.find((r) => r.uuid === role)}
                                 />
+                            ))}
+                        </div>
+                    ),
+                    kit_contents: (i) => (
+                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
+                            {i.kit_contents?.map((content) => (
+                                <p>{content}</p>
                             ))}
                         </div>
                     ),
