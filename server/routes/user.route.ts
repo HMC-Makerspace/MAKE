@@ -616,7 +616,6 @@ router.post("/initialize_admin", async (req: Request, res: UserResponse) => {
  */
 router.get("/self", async (req: Request, res: UserResponse) => {
     const headers = req.headers as VerifyRequestHeader;
-    // @ts-ignore bleh
     const requesting_uuid = req.user?.uuid;
     // const requesting_uuid = req.user?.uuid as string;
     if (!requesting_uuid) {
