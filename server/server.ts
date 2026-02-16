@@ -13,6 +13,7 @@ import cookieParser from "cookie-parser";
 import passport from "passport";
 import { default as MongoDBStore } from "connect-mongodb-session";
 import { globalLimiter } from "rate-limiter";
+import { verifyUser } from "routes/verify.route";
 import Bun from 'bun'
 
 // await Bun.build({
@@ -110,7 +111,8 @@ app.use(
     }),
     // lusca.csrf(),
     passport.initialize(),
-    globalLimiter
+    globalLimiter,
+    verifyUser(),
 );
 
 passport.serializeUser((user, done) => {
