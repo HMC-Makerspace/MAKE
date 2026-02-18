@@ -326,7 +326,7 @@ export default function InventoryTable({
                 </div>
             </div>
             <MAKETable
-                content={filteredItems}
+                content={filteredItems.filter(item => !item.parent_kit)}
                 columns={columns}
                 visibleColumns={visibleColumns}
                 selectedKeys={selectedKeys}
