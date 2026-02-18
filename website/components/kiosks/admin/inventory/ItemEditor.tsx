@@ -16,6 +16,7 @@ export default function ItemEditor({
     certs,
     roles,
     areas,
+    items,
     isNew,
     isDisabled,
     onUpdate = () => {},
@@ -24,6 +25,7 @@ export default function ItemEditor({
     certs: TCertification[];
     roles: TUserRole[];
     areas: TArea[];
+    items: TInventoryItem[];
     isNew: boolean;
     isDisabled: boolean;
     onUpdate?: (isNew: boolean) => void;
@@ -45,6 +47,7 @@ export default function ItemEditor({
                 certs={certs}
                 roles={roles}
                 areas={areas}
+                items={items}
                 isMultiple={false}
                 isDisabled={isDisabled}
                 isNew={isNew}

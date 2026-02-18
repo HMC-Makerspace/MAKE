@@ -91,6 +91,7 @@ export default function ItemEditorForm({
     certs,
     roles,
     areas,
+    items,
     isMultiple,
     isDisabled,
     isNew,
@@ -100,6 +101,7 @@ export default function ItemEditorForm({
     certs: TCertification[];
     roles: TUserRole[];
     areas: TArea[];
+    items: TInventoryItem[];
     isMultiple: boolean;
     isDisabled: boolean;
     isNew: boolean;
@@ -777,9 +779,11 @@ export default function ItemEditorForm({
             <KitEditorModal
                 key={"kitedit-" + item.uuid}
                 element={item}
+                items={items}
                 isOpen={kitEditorOpen}
                 onOpenChange={setKitEditorOpen}
-                patchMutation={kitEditorMutation}
+                kitPatchMutation={kitEditorMutation}
+                contentPatchMutation={kitEditorMutation}
             />
         </>
     );

@@ -4,6 +4,8 @@ import {
     Form,
     ModalContent,
     Input,
+    Autocomplete,
+    AutocompleteItem,
 } from "@heroui/react";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
@@ -12,21 +14,24 @@ import { UseMutationResult } from "@tanstack/react-query";
 import clsx from "clsx";
 
 import { UUID } from "common/global";
-import { InventoryItemUUID } from "common/inventory";
+import { InventoryItemUUID, ITEM_ROLE, TInventoryItem } from "../../../../../common/inventory";
 
 export default function KitEditorModal<
     // Allow any type that has a uuid and optional required_certs list
     T extends { uuid: UUID; kit_contents?: InventoryItemUUID[] },
 >({
     element,
+    items,
     isOpen,
     onOpenChange,
-    patchMutation,
+    kitPatchMutation,
+    contentPatchMutation,
 }: {
     element: T;
+    items: TInventoryItem[];
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
-    patchMutation: UseMutationResult<
+    kitPatchMutation: UseMutationResult<
         T,
         Error,
         {
@@ -36,11 +41,28 @@ export default function KitEditorModal<
             };
         }
     >;
+    contentPatchMutation: UseMutationResult<
+        T,
+        Error,
+        {
+            uuid: UUID;
+            patch: {
+                parent_kit?: InventoryItemUUID;
+            };
+        }
+    >;
 }) {
+    items = items.filter(itm => 
+        itm.role == ITEM_ROLE.MATERIAL ||
+        itm.role == ITEM_ROLE.TOOL ||
+        itm.role == ITEM_ROLE.MACHINE
+    );
+
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
     const [currentContents, setCurrentContents] = React.useState<
         InventoryItemUUID[]
     >(element.kit_contents || []);
+    const [removedContents, setRemovedContents] = React.useState<InventoryItemUUID[]>([]);
 
     const onSubmit = React.useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
@@ -49,22 +71,43 @@ export default function KitEditorModal<
 
             if (!hasEdits) return;
 
-            patchMutation.reset();
+            // Update "parent_kit" attribute of each (added or removed) item
+
+            for (const content of currentContents) {
+                contentPatchMutation.reset();
+                contentPatchMutation.mutate({
+                    uuid: content,
+                    patch: { parent_kit: element.uuid },
+                });
+            }
+
+            for (const content of removedContents) {
+                contentPatchMutation.reset();
+                contentPatchMutation.mutate({
+                    uuid: content,
+                    patch: { parent_kit: "" },
+                });
+            }
+
+            kitPatchMutation.reset();
 
             // Run the mutation
-            patchMutation.mutate({
+            kitPatchMutation.mutate({
                 uuid: element.uuid,
                 patch: { kit_contents: currentContents },
             });
+
             onOpenChange(false);
             setHasEdits(false);
         },
-        [patchMutation, hasEdits, currentContents, element.uuid],
+        [kitPatchMutation, contentPatchMutation, hasEdits, currentContents, removedContents, element.uuid],
     );
 
     function wrapEdit( i: number ) {
-        return (val: InventoryItemUUID) => {
-            currentContents[i] = val;
+        return (val: any) => {
+            removedContents.push(currentContents[i]); // old item has been removed from the kit
+            currentContents[i] = val as InventoryItemUUID;
+            setRemovedContents(removedContents.filter(c => !currentContents.includes(c))); // if a prev removed item was added back, it shouldn't be marked removed
             setCurrentContents([...currentContents]); // update the instance list
             setHasEdits(true);
         };
@@ -104,29 +147,37 @@ export default function KitEditorModal<
                             >
 
                                 <div className="w-full h-full flex flex-row gap-2 items-center">
-                                    <Input
-                                        type="text"
-                                        label="UUID"
-                                        name="uuid"
-                                        placeholder="UUID"
-                                        defaultValue={content}
-                                        onValueChange={wrapEdit(i)}
+                                    <Autocomplete
+                                        label="Item"
+                                        name={`item-${i}`}
+                                        placeholder="Search for an item..."
+                                        defaultSelectedKey={content}
+                                        onSelectionChange={wrapEdit(i)}
+                                        disabledKeys={[...currentContents.filter((c, j) => j != i), ...(items.filter(itm => itm.parent_kit != "" && itm.parent_kit != element.uuid) as any[])]}
                                         variant="faded"
                                         color="primary"
                                         size="md"
-                                        classNames={{
-                                            input: clsx([
-                                                "placeholder:text-default-500",
-                                                "placeholder:italic",
-                                                "text-default-700",
-                                            ]),
-                                        }}
-                                    />
+                                        isRequired={true}
+                                        
+                                        // classNames={{
+                                        //     input: clsx([
+                                        //         "placeholder:text-default-500",
+                                        //         "placeholder:italic",
+                                        //         "text-default-700",
+                                        //     ]),
+                                        // }}
+                                    >
+                                        {items.map((itm) => (
+                                            <AutocompleteItem key={itm.uuid}>{itm.name}</AutocompleteItem>
+                                        ))}
+                                    </Autocomplete>
 
                                     <Button
                                         variant="flat"
                                         color="danger"
                                         onPress={() => {
+                                            removedContents.push(currentContents[i]);
+                                            setRemovedContents([...removedContents]);
                                             currentContents.splice(i, 1); // remove that cert
                                             setCurrentContents([...currentContents]);
                                             setHasEdits(true);
@@ -146,7 +197,7 @@ export default function KitEditorModal<
                                 color="primary"
                                 className="w-full sm:w-auto"
                                 isDisabled={!isValid}
-                                isLoading={patchMutation.isPending}
+                                isLoading={kitPatchMutation.isPending || contentPatchMutation.isPending}
                             >
                                 Submit
                             </Button>

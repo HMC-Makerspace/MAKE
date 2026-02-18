@@ -131,6 +131,7 @@ export default function InventoryKiosk() {
                     certs={certs}
                     roles={roles}
                     areas={areas}
+                    items={inventory}
                     isDisabled={
                         !isNewItem &&
                         (!item ||
