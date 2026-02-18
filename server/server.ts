@@ -85,13 +85,28 @@ const options: cors.CorsOptions = {
 };
 logger.debug("CORS setup");
 
+
+// const { doubleCsrfProtection } = doubleCsrf({
+//     getSecret: (req) => process.env.CSRF_SECRET,
+//     getSessionIdentifier: (req) => req.session.id
+// })
+ 
+// const myRoute = (req, res) => {
+//   const csrfToken = req.csrfToken(); 
+//   // You could also pass the token into the context of a HTML response.
+//   res.json({ csrfToken });
+// };
+// const myProtectedRoute = (req, res) =>
+//   res.json({ unpopularOpinion: "Game of Thrones was amazing" });
+
+
 // Middleware
 app.use(
     express.json(),
     compression(),
-    cookieParser(),
     loggerMiddleware({ logger: logger }),
     cors(options),
+    cookieParser(),
     session({
         secret: process.env.SESSION_SECRET,
         rolling: true,
@@ -121,6 +136,8 @@ app.use(
         replaceWith: "_",
     }),
 );
+// app.get("/csrf-token", myRoute);
+// app.use(doubleCsrfProtection)
 
 passport.serializeUser((user, done) => {
     process.nextTick(() => {
