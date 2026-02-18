@@ -14,7 +14,9 @@ import passport from "passport";
 import { default as MongoDBStore } from "connect-mongodb-session";
 import { globalLimiter } from "rate-limiter";
 import { verifyUser } from "routes/verify.route";
-import Bun from 'bun'
+import Bun from "bun";
+import mongoSanitize from "express-mongo-sanitize";
+// import { doubleCsrf } from "csrf-csrf";
 
 // await Bun.build({
 //     entrypoints: ["website/index.html"],
@@ -89,13 +91,28 @@ const options: cors.CorsOptions = {
 };
 logger.debug("CORS setup");
 
+
+// const { doubleCsrfProtection } = doubleCsrf({
+//     getSecret: (req) => process.env.CSRF_SECRET,
+//     getSessionIdentifier: (req) => req.session.id
+// })
+ 
+// const myRoute = (req, res) => {
+//   const csrfToken = req.csrfToken(); 
+//   // You could also pass the token into the context of a HTML response.
+//   res.json({ csrfToken });
+// };
+// const myProtectedRoute = (req, res) =>
+//   res.json({ unpopularOpinion: "Game of Thrones was amazing" });
+
+
 // Middleware
 app.use(
     express.json(),
     compression(),
-    cookieParser(),
     loggerMiddleware({ logger: logger }),
     cors(options),
+    cookieParser(),
     session({
         secret: process.env.SESSION_SECRET,
         rolling: true,
@@ -113,7 +130,22 @@ app.use(
     passport.initialize(),
     globalLimiter,
     verifyUser(),
+    // mongo sanitize has an issue with req.query; this function fixes issue
+    (req, _res, next) => {
+        Object.defineProperty(req, "query", {
+            ...Object.getOwnPropertyDescriptor(req, "query"),
+            value: req.query,
+            writable: true,
+        });
+        next();
+    },
+    mongoSanitize({
+        replaceWith: "_"
+    }),
+    
 );
+// app.get("/csrf-token", myRoute);
+// app.use(doubleCsrfProtection)
 
 passport.serializeUser((user, done) => {
     process.nextTick(() => {
