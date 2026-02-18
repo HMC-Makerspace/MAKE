@@ -7,6 +7,7 @@ declare module "bun" {
         SITE_URL: string;
 
         SESSION_SECRET: string;
+        CSRF_SECRET: string;
         IDP_ENTRY_POINT: string;
         IDP_CALLBACK: string;
         IDP_ISSUER: string;
