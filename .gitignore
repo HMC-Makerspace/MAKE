@@ -1,6 +1,5 @@
 .DS_Store
 .prettierignore
-.prettierrc
 .eslintignore
 .env
 website/build
