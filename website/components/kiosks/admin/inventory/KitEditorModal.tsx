@@ -105,10 +105,16 @@ export default function KitEditorModal<
 
     function wrapEdit( i: number ) {
         return (val: any) => {
-            removedContents.push(currentContents[i]); // old item has been removed from the kit
+            let oldContent = currentContents[i];
             currentContents[i] = val as InventoryItemUUID;
-            setRemovedContents(removedContents.filter(c => !currentContents.includes(c))); // if a prev removed item was added back, it shouldn't be marked removed
             setCurrentContents([...currentContents]); // update the instance list
+
+            // if not being set for the first time
+            if (oldContent != "") {
+                removedContents.push(oldContent); // old item has been removed from the kit
+                setRemovedContents(removedContents.filter(c => !currentContents.includes(c))); // if a prev removed item was added back, it shouldn't be marked removed
+            }
+
             setHasEdits(true);
         };
     }
