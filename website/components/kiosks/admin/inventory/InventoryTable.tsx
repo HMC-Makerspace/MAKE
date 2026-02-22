@@ -396,13 +396,31 @@ export default function InventoryTable({
                     },
                     locations: (i) => (
                         <div className="flex flex-col gap-2 min-w-max">
-                            {i.locations.map((location, index) => (
-                                <ItemLocationChip
-                                    key={`${location.area}-${index}`}
-                                    location={location}
-                                    areas={areas}
-                                />
-                            ))}
+                            {i.parent_kit ? (() => {
+                                let parent_kit = inventory.find(k => k.uuid == i.parent_kit);
+
+                                return (
+                                    parent_kit?.locations.map((location, index) => (
+                                        <ItemLocationChip
+                                            key={`${i.uuid}-location`}
+                                            location={{
+                                                area: location.area,
+                                                specific: `In ${parent_kit?.name}`,
+                                                container: ""
+                                            }}
+                                            areas={areas}
+                                        />
+                                    ))
+                                );
+                            })() : (
+                                i.locations.map((location, index) => (
+                                    <ItemLocationChip
+                                        key={`${location.area}-${index}`}
+                                        location={location}
+                                        areas={areas}
+                                    />
+                                ))
+                            )}
                         </div>
                     ),
                     required_certifications: (i) => (
