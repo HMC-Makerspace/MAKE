@@ -431,7 +431,9 @@ export default function InventoryTable({
                     kit_contents: (i) => (
                         <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
                             {i.kit_contents?.map((content) => (
-                                <p>{content}</p>
+                                <div key={i.uuid + "-item-" + content}>
+                                    {inventory.find(a => a.uuid == content)?.name}
+                                </div>
                             ))}
                         </div>
                     ),
