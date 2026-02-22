@@ -152,6 +152,7 @@ export default function InventoryKiosk() {
                     selectedKeys={selectedItems}
                     onSelectionChange={betterSelectionChange}
                     isLoading={inventoryLoading}
+                    showsKitContents={true}
                     editable
                     onCreate={setIsNewItem}
                 />

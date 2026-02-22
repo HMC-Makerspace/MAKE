@@ -83,6 +83,7 @@ export default function InventoryTable({
         "authorized_roles",
     ],
     customColumnComponents,
+    showsKitContents = false,
     editable = false,
     emptyContent,
     onCreate = undefined,
@@ -104,6 +105,7 @@ export default function InventoryTable({
     customColumnComponents?: {
         [column_id: string]: (item: TInventoryItem) => React.ReactNode;
     };
+    showsKitContents?: boolean;
     emptyContent?: string;
     editable?: React.ReactNode;
     onCreate?: (state: boolean) => void;
@@ -326,7 +328,7 @@ export default function InventoryTable({
                 </div>
             </div>
             <MAKETable
-                content={filteredItems.filter(item => !item.parent_kit)}
+                content={showsKitContents ? filteredItems : filteredItems.filter(item => !item.parent_kit)}
                 columns={columns}
                 visibleColumns={visibleColumns}
                 selectedKeys={selectedKeys}
