@@ -7,7 +7,7 @@ import {
     Autocomplete,
     AutocompleteItem,
 } from "@heroui/react";
-import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 import React from "react";
 import { UseMutationResult } from "@tanstack/react-query";
@@ -26,6 +26,7 @@ export default function KitEditorModal<
     onOpenChange,
     kitPatchMutation,
     contentPatchMutation,
+    setSelectedItem,
 }: {
     element: T;
     items: TInventoryItem[];
@@ -51,6 +52,7 @@ export default function KitEditorModal<
             };
         }
     >;
+    setSelectedItem: (s: Set<string>) => void;
 }) {
     items = items.filter(itm => 
         itm.role == ITEM_ROLE.MATERIAL ||
@@ -177,6 +179,18 @@ export default function KitEditorModal<
                                             <AutocompleteItem key={itm.uuid}>{itm.name}</AutocompleteItem>
                                         ))}
                                     </Autocomplete>
+
+                                    <Button
+                                        isIconOnly
+                                        color="primary"
+                                        variant="flat"
+                                        onPress={() => {
+                                            setSelectedItem(new Set([content ?? ""]));
+                                            onClose();
+                                        }}
+                                    >
+                                        <EyeIcon className="size-6" /> {/* haha eyecon */}
+                                    </Button>
 
                                     <Button
                                         variant="flat"

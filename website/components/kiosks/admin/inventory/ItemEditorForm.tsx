@@ -34,6 +34,7 @@ import {
     UserIcon,
     GlobeAmericasIcon,
     BriefcaseIcon,
+    EyeIcon,
 } from "@heroicons/react/24/solid";
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
@@ -96,6 +97,7 @@ export default function ItemEditorForm({
     isDisabled,
     isNew,
     onUpdate = () => {},
+    setSelectedItem,
 }: {
     item: TInventoryItem;
     certs: TCertification[];
@@ -106,6 +108,7 @@ export default function ItemEditorForm({
     isDisabled: boolean;
     isNew: boolean;
     onUpdate?: (isNew: boolean) => void; // Function to run when the item is updated
+    setSelectedItem: (s: Set<string>) => void;
 }) {
     const [UUID, setUUID] = React.useState<string>(
         isNew ? crypto.randomUUID() : item.uuid,
@@ -606,6 +609,49 @@ export default function ItemEditorForm({
                             ]),
                         }}
                     />
+
+                    <div className="flex flex-row items-center">
+                        <Textarea
+                            type="text"
+                            label="Parent Kit"
+                            name="parent_kit"
+                            placeholder={placeholder("No parent kit")}
+                            isDisabled={true}
+                            defaultValue={items.find(i => i.uuid == item.parent_kit)?.name}
+                            minRows={1}
+                            variant="faded"
+                            color="primary"
+                            size="md"
+                            classNames={{
+                                input: clsx([
+                                    "placeholder:text-default-500",
+                                    "placeholder:italic",
+                                    "text-default-700",
+                                ]),
+                            }}
+                        />
+
+                        <Tooltip
+                            content="View parent kit"
+                            className="w-fit p-2"
+                            delay={500}
+                            closeDelay={150}
+                            isDisabled={isDisabled}
+                        >
+                            <Button
+                                isIconOnly
+                                size="lg"
+                                color="primary"
+                                variant="flat"
+                                isDisabled={isDisabled || !item.parent_kit}
+                                onPress={() => setSelectedItem(new Set([item.parent_kit ?? ""]))}
+                                className="ml-2"
+                            >
+                                <EyeIcon className="size-5" /> {/* haha eyecon */}
+                            </Button>
+                        </Tooltip>
+                    </div>
+
                     <Divider className="hidden sm:block h-[1px] bg-default-400" />
                     <ButtonGroup
                         size="lg"
@@ -784,6 +830,7 @@ export default function ItemEditorForm({
                 onOpenChange={setKitEditorOpen}
                 kitPatchMutation={kitEditorMutation}
                 contentPatchMutation={kitEditorMutation}
+                setSelectedItem={setSelectedItem}
             />
         </>
     );

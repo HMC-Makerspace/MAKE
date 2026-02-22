@@ -140,6 +140,7 @@ export default function InventoryKiosk() {
                     }
                     isNew={isNewItem}
                     onUpdate={() => setIsNewItem(false)}
+                    setSelectedItem={onSelectionChange}
                 />
                 <InventoryTable
                     requestingUser={requestingUser}

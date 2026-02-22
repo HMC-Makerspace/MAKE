@@ -20,6 +20,7 @@ export default function ItemEditor({
     isNew,
     isDisabled,
     onUpdate = () => {},
+    setSelectedItem,
 }: {
     item: TInventoryItem;
     certs: TCertification[];
@@ -29,6 +30,7 @@ export default function ItemEditor({
     isNew: boolean;
     isDisabled: boolean;
     onUpdate?: (isNew: boolean) => void;
+    setSelectedItem: (s: Set<string>) => void;
 }) {
     const key = isNew ? "new" : item.uuid;
 
@@ -52,6 +54,7 @@ export default function ItemEditor({
                 isDisabled={isDisabled}
                 isNew={isNew}
                 onUpdate={onUpdate}
+                setSelectedItem={setSelectedItem}
             />
             <motion.div
                 initial={{
