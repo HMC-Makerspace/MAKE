@@ -1,6 +1,9 @@
 import { API_SCOPE } from "common/global";
 import { UserUUID } from "common/user";
 import { getUserScopes } from "./user.controller";
+import { Request, Response, NextFunction } from "express";
+import { StatusCodes } from "http-status-codes";
+import Joi from "joi";
 
 /**
  * Verify that a user is allowed to access an endpoint. A user must have at
@@ -51,4 +54,34 @@ export async function verifyCompoundRequest(
             group.every((scope) => scopes.includes(scope)),
         )
     );
+}
+
+export function verifySchema<S, R extends Request>(
+    schema: Joi.ObjectSchema<S> | Joi.ArraySchema<S> ,
+    path_name: keyof R["body"],
+): (req: Request, res: Response, next: NextFunction) => void {
+    return async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
+        const obj = req.body[path_name];
+        const { error, value } = schema.validate(obj);
+        req.log.info("verifying schema")
+
+        if (error) {
+            req.log.error({
+                msg:`An attempt was made to create a ` + 
+                `${String(path_name)}, but was passed in a faulty data.`,
+                err: error
+        });
+            res.status(StatusCodes.NOT_ACCEPTABLE).json({
+                error: `Failed to create ${String(path_name)} data. ${error}`,
+            });
+            next(error);
+        }
+        req.body[path_name] = value;
+
+        next();
+    }
 }

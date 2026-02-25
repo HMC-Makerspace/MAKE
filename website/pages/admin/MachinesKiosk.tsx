@@ -26,6 +26,7 @@ const createEmptyMachine = async () => {
                 count: 0,
                 instances: [],
                 status_logs: [],
+                authorized_roles: [],
             },
         })
     ).data;

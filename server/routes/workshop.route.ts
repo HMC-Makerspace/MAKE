@@ -12,7 +12,7 @@ import {
     getWorkshopsVisibleToUser,
     patchWorkshop,
 } from "controllers/workshop.controller";
-import { verifyRequest } from "controllers/verify.controller";
+import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -23,6 +23,7 @@ import {
     SuccessfulResponse,
 } from "common/verify";
 import { TPublicWorkshopData, TWorkshop } from "common/workshop";
+import { WorkshopSchema, WorkshopSchemaOptional } from "models/workshop.model";
 
 // --- Request and Response Types ---
 type WorkshopRequest = Request<{}, {}, { workshop_obj: TWorkshop }>;
@@ -181,48 +182,50 @@ router.get("/", async (req: WorkshopRequest, res: WorkshopsResponse) => {
  * header is required to call it. The user must have the
  * {@link API_SCOPE.CREATE_WORKSHOP} scope.
  */
-router.post("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = req.user?.uuid as string;
-    const workshop_obj = req.body.workshop_obj;
-    const workshop_uuid = workshop_obj.uuid;
+router.post("/", 
+    verifySchema(WorkshopSchema, "workshop_obj"),
+    async (req: WorkshopRequest, res: WorkshopResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = req.user?.uuid as string;
+        const workshop_obj = req.body.workshop_obj;
+        const workshop_uuid = workshop_obj.uuid;
 
-    // If no requesting user uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while creating a workshop",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-
-    req.log.debug({
-        msg: `Creating a workshop.`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, create a workshop
-    if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_WORKSHOP)) {
-        const workshop = await createWorkshop(workshop_obj);
-        if (!workshop) {
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
             req.log.warn(
-                `An attempt was made to create a workshop with uuid ` +
-                    `${workshop_uuid}, but a workshop with that uuid already exists`,
+                "No requesting_uuid was provided while creating a workshop",
             );
-            res.status(StatusCodes.CONFLICT).json({
-                error: `A workshop with uuid \`${workshop_uuid}\` already exists.`,
-            });
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
-        req.log.debug(`Created workshop with uuid ${workshop_uuid}`);
-        res.status(StatusCodes.CREATED).json(workshop);
-    } else {
-        req.log.warn({
-            msg: "Forbidden user attempted to create a workshop",
+
+        req.log.debug({
+            msg: `Creating a workshop.`,
             requesting_uuid: requesting_uuid,
         });
-        // If the user is not authorized, provide a status error
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+
+        // If the user is authorized, create a workshop
+        if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_WORKSHOP)) {
+                const workshop = await createWorkshop(workshop_obj);
+                if (!workshop) {
+                    req.log.warn(
+                        `An attempt was made to create a workshop with uuid ` +
+                            `${workshop_uuid}, but a workshop with that uuid already exists`,
+                    );
+                    res.status(StatusCodes.CONFLICT).json({
+                        error: `A workshop with uuid \`${workshop_uuid}\` already exists.`,
+                    });
+                    return;
+                }
+                req.log.debug(`Created workshop with uuid ${workshop_uuid}`);
+                res.status(StatusCodes.CREATED).json(workshop);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to create a workshop",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
     }
 });
 
@@ -233,47 +236,49 @@ router.post("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
  * header is required to call it. The user must have the
  * {@link API_SCOPE.UPDATE_WORKSHOP} scope.
  */
-router.put("/", async (req: WorkshopRequest, res: WorkshopResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = req.user?.uuid as string;
-    const workshop_obj = req.body.workshop_obj;
-    const workshop_uuid = workshop_obj.uuid;
+router.put("/", 
+    verifySchema(WorkshopSchema, "workshop_obj"),
+    async (req: WorkshopRequest, res: WorkshopResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = req.user?.uuid as string;
+        const workshop_obj = req.body.workshop_obj;
+        const workshop_uuid = workshop_obj.uuid;
 
-    // If no requesting user uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while updating a workshop",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-
-    req.log.debug({
-        msg: `Updating a workshop by uuid ${workshop_uuid}`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, update a workshop's information
-    if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_WORKSHOP)) {
-        const workshop = await updateWorkshop(workshop_obj);
-        if (!workshop) {
-            req.log.warn(`Workshop ${workshop_uuid} failed to update`);
-            res.status(StatusCodes.NOT_FOUND).json({
-                error: `Workshop \`${workshop_uuid}\` failed to update.`,
-            });
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while updating a workshop",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
-        req.log.debug("Returned updated workshop.");
-        res.status(StatusCodes.OK).json(workshop);
-    } else {
-        req.log.warn({
-            msg: "Forbidden user attempted to update a workshop",
+
+        req.log.debug({
+            msg: `Updating a workshop by uuid ${workshop_uuid}`,
             requesting_uuid: requesting_uuid,
         });
-        // If the user is not authorized, provide a status error
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+
+        // If the user is authorized, update a workshop's information
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_WORKSHOP)) {
+            const workshop = await updateWorkshop(workshop_obj);
+            if (!workshop) {
+                req.log.warn(`Workshop ${workshop_uuid} failed to update`);
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `Workshop \`${workshop_uuid}\` failed to update.`,
+                });
+                return;
+            }
+            req.log.debug("Returned updated workshop.");
+            res.status(StatusCodes.OK).json(workshop);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to update a workshop",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 /**
  * Deletes a workshop. This is a protected route, and a 'requesting_uuid'
@@ -500,6 +505,7 @@ router.patch(
  */
 router.patch(
     "/:UUID",
+    verifySchema(WorkshopSchemaOptional, "partial_workshop_obj"),
     async (
         req: Request<
             { UUID: string },

@@ -12,7 +12,7 @@ import {
     validateCheckout,
     undoCheckInCheckout,
 } from "controllers/checkout.controller";
-import { verifyRequest } from "controllers/verify.controller";
+import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -28,6 +28,7 @@ import {
     TCheckoutItemUnavailability,
     TCheckoutValidation,
 } from "common/checkout";
+import { CheckoutSchema } from "models/checkout.model";
 
 // --- Request and Response Types ---
 type CheckoutRequest = Request<{}, {}, { checkout_obj: TCheckout }>;
@@ -308,50 +309,52 @@ router.post(
  * header is required to call it. The user must have the
  * {@link API_SCOPE.CREATE_CHECKOUT} scope.
  */
-router.post("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = req.user?.uuid as string;
-    const checkout_obj = req.body.checkout_obj;
-    const checkout_uuid = checkout_obj.uuid;
+router.post("/", 
+    verifySchema(CheckoutSchema, "checkout_obj"),
+    async (req: CheckoutRequest, res: CheckoutResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = req.user?.uuid as string;
+        const checkout_obj = req.body.checkout_obj;
+        const checkout_uuid = checkout_obj.uuid;
 
-    // If no requesting user uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while creating a checkout",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-
-    req.log.debug({
-        msg: `Creating a checkout.`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, create a checkout
-    if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_CHECKOUT)) {
-        const checkout = await createCheckout(checkout_obj);
-        if (!checkout) {
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
             req.log.warn(
-                `An attempt was made to create a checkout with uuid ` +
-                    `${checkout_uuid}, but a checkout with that uuid already exists`,
+                "No requesting_uuid was provided while creating a checkout",
             );
-            res.status(StatusCodes.CONFLICT).json({
-                error: `A checkout with uuid \`${checkout_uuid}\` already exists.`,
-            });
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
-        req.log.debug(`Created checkout with uuid ${checkout_uuid}`);
-        res.status(StatusCodes.CREATED).json(checkout);
-    } else {
-        req.log.warn({
-            msg: "Forbidden user attempted to create a checkout",
+
+        req.log.debug({
+            msg: `Creating a checkout.`,
             requesting_uuid: requesting_uuid,
         });
-        // If the user is not authorized, provide a status error
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+
+        // If the user is authorized, create a checkout
+        if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_CHECKOUT)) {
+            const checkout = await createCheckout(checkout_obj);
+            if (!checkout) {
+                req.log.warn(
+                    `An attempt was made to create a checkout with uuid ` +
+                        `${checkout_uuid}, but a checkout with that uuid already exists`,
+                );
+                res.status(StatusCodes.CONFLICT).json({
+                    error: `A checkout with uuid \`${checkout_uuid}\` already exists.`,
+                });
+                return;
+            }
+            req.log.debug(`Created checkout with uuid ${checkout_uuid}`);
+            res.status(StatusCodes.CREATED).json(checkout);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to create a checkout",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 /**
  * Update a specific checkout. This route will not create a new checkout if the
@@ -359,52 +362,54 @@ router.post("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
  * protected route, and a `requesting_uuid` header is required to call it.
  * The user must have the {@link API_SCOPE.UPDATE_CHECKOUT} scope.
  */
-router.put("/", async (req: CheckoutRequest, res: CheckoutResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = req.user?.uuid as string;
-    const checkout_obj = req.body.checkout_obj;
-    const checkout_uuid = checkout_obj.uuid;
+router.put("/",
+    verifySchema(CheckoutSchema, "checkout_obj"),
+    async (req: CheckoutRequest, res: CheckoutResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = req.user?.uuid as string;
+        const checkout_obj = req.body.checkout_obj;
+        const checkout_uuid = checkout_obj.uuid;
 
-    // If no requesting user uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while updating a checkout",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-
-    req.log.debug({
-        msg: `Updating a checkout by uuid ${checkout_uuid}`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, update a checkout's information
-    if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_CHECKOUT)) {
-        const checkout = await updateCheckout(checkout_obj);
-        if (!checkout) {
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
             req.log.warn(
-                `Could not update checkout with uuid ${checkout_uuid} ` +
-                    `because it was not found.`,
+                "No requesting_uuid was provided while updating a checkout",
             );
-            res.status(StatusCodes.NOT_FOUND).json({
-                error:
-                    `Could not update checkout with uuid ` +
-                    `\`${checkout_uuid}\` because it was not found.`,
-            });
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
-        req.log.debug("Returned updated checkout.");
-        res.status(StatusCodes.OK).json(checkout);
-    } else {
-        req.log.warn({
-            msg: "Forbidden user attempted to update a checkout",
+
+        req.log.debug({
+            msg: `Updating a checkout by uuid ${checkout_uuid}`,
             requesting_uuid: requesting_uuid,
         });
-        // If the user is not authorized, provide a status error
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+
+        // If the user is authorized, update a checkout's information
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_CHECKOUT)) {
+            const checkout = await updateCheckout(checkout_obj);
+            if (!checkout) {
+                req.log.warn(
+                    `Could not update checkout with uuid ${checkout_uuid} ` +
+                        `because it was not found.`,
+                );
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error:
+                        `Could not update checkout with uuid ` +
+                        `\`${checkout_uuid}\` because it was not found.`,
+                });
+                return;
+            }
+            req.log.debug("Returned updated checkout.");
+            res.status(StatusCodes.OK).json(checkout);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to update a checkout",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 /**
  * Check in a specific checkout. This is a protected route, and a
@@ -552,6 +557,13 @@ router.patch(
         const requesting_uuid: string = req.user?.uuid as string;
         const checkout_uuid = req.params.UUID;
         const new_timestamp_due = req.body.new_timestamp_due;
+
+        if (typeof new_timestamp_due !== "number") {
+            req.log.warn(
+                "New timestamp not of type number"
+            );
+            return;
+        }
 
         // If no requesting user uuid is provided, the call is not authorized
         if (!requesting_uuid) {
