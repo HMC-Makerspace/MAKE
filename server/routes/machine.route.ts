@@ -20,8 +20,7 @@ import {
 import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
-import { MachineSchema, MachineSchemaOptional, MachineInstanceSchema } from "models/machine.model";
-import { machine } from "os";
+import { MachineSchema, MachineSchemaOptional } from "models/machine.model";
 
 // --- Request and Response Types ---
 type MachineRequest = Request<{}, {}, { machine_obj: TMachine }>;
