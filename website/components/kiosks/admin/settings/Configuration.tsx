@@ -3,6 +3,7 @@ import {
     AccordionItem,
     Button,
     Card,
+    Checkbox,
     Divider,
     Form,
     Input,
@@ -13,15 +14,31 @@ import {
 } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TConfig } from "common/config";
-import { SHIFT_DAY, SHIFT_DAYS } from "../../../../../common/shift";
+import { SHIFT_DAYS } from "../../../../../common/shift";
 import { UserRoleSelect } from "../../../../components/user/UserRoleSelect";
 import axios from "axios";
 import React, { useState } from "react";
 import clsx from "clsx";
 import { PlusIcon, AcademicCapIcon } from "@heroicons/react/24/solid";
 import EditableFAQItem from "./EditableFAQItem";
-import { AnimatePresence } from "framer-motion";
-import StaticFAQItem from "./StaticFAQItem";
+import { TEmbed } from "common/embed";
+import EditableEmbed from "./EditableEmbed";
+import { TUserRole } from "common/user";
+
+const createEmbed = async () => {
+    return (
+        await axios.post<TEmbed>("/api/v3/embed/", {
+            embed_obj: {
+                uuid: crypto.randomUUID(),
+                title: "New Embed",
+                src: window.location.origin,
+                documents: [],
+                auto_dark: false,
+                visible_to: [], // Start embeds as not visible
+            },
+        })
+    ).data;
+};
 
 function ConfigItem({
     name,
@@ -53,7 +70,15 @@ async function updateConfig({ config }: { config: TConfig }) {
     ).data;
 }
 
-export default function Configuration({ config }: { config: TConfig }) {
+export default function Configuration({
+    config,
+    embeds,
+    roles,
+}: {
+    config: TConfig;
+    embeds: TEmbed[];
+    roles: TUserRole[];
+}) {
     const queryClient = useQueryClient();
 
     const mutation = useMutation({
@@ -70,6 +95,22 @@ export default function Configuration({ config }: { config: TConfig }) {
                 title: `Error: ${error.message}`,
                 color: "danger",
             });
+        },
+    });
+
+    const createEmbedMutation = useMutation({
+        mutationFn: createEmbed,
+        onSuccess: (obj: TEmbed) => {
+            queryClient.setQueryData(["embed"], (old: TEmbed[]) => {
+                return [...old, obj];
+            });
+            addToast({
+                title: `Successfully created embed`,
+                color: "success",
+            });
+        },
+        onError: (error) => {
+            alert(`Error: ${error.message}`);
         },
     });
 
@@ -126,6 +167,10 @@ export default function Configuration({ config }: { config: TConfig }) {
         config.schedule.first_names_only ?? true,
     );
 
+    const [hideHomeEmbed, setHideHomeEmbed] = useState(
+        config.general.hide_home_embed ?? false,
+    );
+
     const [faq, setFaq] = useState(config.faq || { title: "" });
 
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -151,6 +196,7 @@ export default function Configuration({ config }: { config: TConfig }) {
                     (formData.get("tiktok_url") as string) ||
                     config.general.tiktok_url,
                 extra_urls: config.general.extra_urls,
+                hide_home_embed: hideHomeEmbed,
             },
             checkout: {
                 notification_interval_sec:
@@ -164,7 +210,7 @@ export default function Configuration({ config }: { config: TConfig }) {
                 days_open: config.schedule.days_open,
                 first_display_day: config.schedule.first_display_day,
                 worker_roles: config.schedule.worker_roles,
-                first_names_only: config.schedule.first_names_only,
+                first_names_only: firstNamesOnly,
                 increment_sec: config.schedule.increment_sec,
                 timezone: config.schedule.timezone,
                 locale: config.schedule.locale,
@@ -292,8 +338,6 @@ export default function Configuration({ config }: { config: TConfig }) {
         if (worker_roles.length > 0) {
             body.schedule.worker_roles = worker_roles;
         }
-
-        body.schedule.first_names_only = firstNamesOnly;
 
         const timezone = formData.get("timezone") as string;
         if (timezone) {
@@ -487,6 +531,45 @@ export default function Configuration({ config }: { config: TConfig }) {
                                         ]),
                                     }}
                                 />
+                            </ConfigItem>
+                            <ConfigItem
+                                name="Embeds"
+                                description="iframe items shown on the homepage, like calendars, documents, or forms."
+                                className="flex-col"
+                            >
+                                <div className="w-full flex flex-row items-center justify-end gap-3">
+                                    Hide home page (only show embeds):
+                                    <Checkbox
+                                        color="primary"
+                                        name="hide_home_page"
+                                        isSelected={hideHomeEmbed}
+                                        onValueChange={setHideHomeEmbed}
+                                    />
+                                </div>
+                                <div
+                                    className={clsx(
+                                        "grid h-full gap-4 p-4 sm:p-0 overflow-auto",
+                                        "grid-cols-1 sm:grid-cols-2",
+                                    )}
+                                >
+                                    {embeds.map((area) => (
+                                        <EditableEmbed
+                                            key={area.uuid}
+                                            embed={area}
+                                            roles={roles}
+                                        />
+                                    ))}
+                                    <Button
+                                        className="w-full min-h-fit p-2"
+                                        color="default"
+                                        variant="bordered"
+                                        onPress={() =>
+                                            createEmbedMutation.mutate()
+                                        }
+                                    >
+                                        <PlusIcon className="size-6" />
+                                    </Button>
+                                </div>
                             </ConfigItem>
                         </AccordionItem>
                         <AccordionItem key="checkout" title="Checkout Config">
@@ -762,6 +845,7 @@ export default function Configuration({ config }: { config: TConfig }) {
                                 className="flex-col"
                             >
                                 <UserRoleSelect
+                                    roles={roles}
                                     defaultSelectedKeys={
                                         config.schedule.worker_roles
                                     }

@@ -60,21 +60,12 @@ export async function getAreasVisibleToUser(user_uuid: UUID): Promise<TArea[]> {
  * @returns A promise to list of TPublicAreaData objects representing all
  *    public areas
  */
-async function getPublicAreas(): Promise<TArea[]> {
+export async function getPublicAreas(): Promise<TArea[]> {
     const Areas = mongoose.model("Area", Area, "areas");
     // Get all areas that are public
     return Areas.find({
         visible_to: null,
     });
-}
-
-/**
- * Get all private areas, which are only areas with the `hidden` flag
- * @returns A promise to list of TArea objects representing all private areas
- */
-export async function getPrivateAreas(): Promise<TArea[]> {
-    const Areas = mongoose.model("Area", Area);
-    return Areas.find({ reservable: true });
 }
 
 /**

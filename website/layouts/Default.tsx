@@ -17,7 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { API_SCOPE } from "../../common/global";
 import { verifyScopes } from "../utils";
 import { useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 
 const PAGES = [
     {

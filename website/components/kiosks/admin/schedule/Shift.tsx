@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { SHIFT_DAY, TShift } from "common/shift";
 import { TUser, TUserRole, UserUUID } from "common/user";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { API_SCOPE, UUID } from "../../../../../common/global";
 import axios from "axios";

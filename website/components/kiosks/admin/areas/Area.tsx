@@ -1,15 +1,13 @@
 import {
-    Spinner,
     Card,
     Button,
     Input,
     Textarea,
     Select,
     SelectItem,
-    Link,
     useDisclosure,
     Tooltip,
-    addToast
+    addToast,
 } from "@heroui/react";
 import { TUserRole } from "common/user";
 import Machine from "../../../../components/kiosks/admin/machines/Machine";
@@ -31,6 +29,7 @@ import {
 import VisibilityModal from "./VisibilityModal";
 import ReservableAreaModal from "./ReservableAreaModal";
 import DeleteModal from "../../../DeleteModal";
+import { Link } from "react-router-dom";
 
 const patchArea = async ({
     uuid,
@@ -89,7 +88,7 @@ export default function Area({
 
     const deleteMutation = useMutation({
         mutationFn: deleteArea,
-        onSuccess: (_, variables) => {       
+        onSuccess: (_, variables) => {
             // queryClient.removeQueries({
             //     queryKey: ["area", variables.uuid],
             // });
@@ -246,7 +245,8 @@ export default function Area({
                                         />
                                     </Tooltip>
                                     <VisibilityModal
-                                        area={area}
+                                        item={area}
+                                        itemType="area"
                                         roles={roles}
                                         isOpen={visibilityModal}
                                         onOpenChange={visibilityModalOpenChange}
@@ -403,9 +403,8 @@ export default function Area({
                                     color="primary"
                                     variant="shadow"
                                     className=""
-                                    href={doc.link}
                                     as={Link}
-                                    isExternal
+                                    to={doc.link}
                                 >
                                     {doc.name}
                                 </Button>
@@ -517,18 +516,7 @@ export default function Area({
                                 }}
                                 title={m.name}
                                 description={m.description}
-                            >
-                                {/* <div className="flex flex-col h-[45px] w-11/12 py-1">
-                                <div className="w-full flex flex-row gap-2 items-center">
-                                    <h1 className="text-md font-bold text-foreground-500">
-                                        {m.name}
-                                    </h1>
-                                </div>
-                                <p className="w-full text-sm text-foreground-300 text-ellipsis truncate">
-                                    {m.description}
-                                </p>
-                            </div> */}
-                            </SelectItem>
+                            />
                         ))}
                     </Select>
                 ) : (
@@ -540,24 +528,30 @@ export default function Area({
                         )}
                     >
                         {area.equipment &&
-                            area.equipment.map((machine_uuid, i) => {
-                                const machine = machines.find(
-                                    (m) => m.uuid === machine_uuid,
-                                );
-                                if (machine) {
-                                    return (
-                                        <Machine
-                                            key={`area-${area.uuid}-machine-${i}-${machine_uuid}`}
-                                            machine={machine}
-                                            roles={roles}
-                                            certifications={certifications}
-                                            editable={editable}
-                                        />
+                            area.equipment
+                                .filter((machine_uuid) =>
+                                    machines.some(
+                                        (m) => m.uuid === machine_uuid,
+                                    ),
+                                )
+                                .map((machine_uuid, i) => {
+                                    const machine = machines.find(
+                                        (m) => m.uuid === machine_uuid,
                                     );
-                                } else {
-                                    return <div key={machine_uuid}></div>;
-                                }
-                            })}
+                                    if (machine) {
+                                        return (
+                                            <Machine
+                                                key={`area-${area.uuid}-machine-${i}-${machine_uuid}`}
+                                                machine={machine}
+                                                roles={roles}
+                                                certifications={certifications}
+                                                editable={editable}
+                                            />
+                                        );
+                                    } else {
+                                        return <></>;
+                                    }
+                                })}
                     </div>
                 )}
             </div>

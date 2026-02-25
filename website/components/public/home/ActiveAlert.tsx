@@ -16,7 +16,7 @@ export default function ActiveAlert() {
     return (
         <div
             className={clsx(
-                "absolute top-2 w-full min-h-16",
+                "w-full min-h-fit",
                 "rounded-xl bg-secondary-400/50",
                 "border-secondary-400 border-2",
                 "transition-opacity content-center py-3",
@@ -28,10 +28,13 @@ export default function ActiveAlert() {
                     // isCompact
                     className="min-h-full"
                     selectedKeys={active_alert.hyperlink ? [] : undefined}
+                    isDisabled={
+                        !active_alert.content && !active_alert.hyperlink
+                    }
                 >
                     <AccordionItem
                         key="alert"
-                        className=""
+                        className="opacity-100"
                         title={active_alert.header}
                         classNames={{
                             content: "text-foreground px-2 whitespace-pre-line",

@@ -1,6 +1,6 @@
 import React from "react";
 import { Alert } from "@heroui/react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import clsx from "clsx";
 
 export default function PopupAlert({

@@ -13,7 +13,7 @@ import clsx from "clsx";
 import MAKE from "./public/home/MAKE";
 import Branding from "./public/home/Branding";
 import { ThemeSwitcher } from "./ThemeSwitcher";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useNavigate, Link as RouteLink } from "react-router-dom";
 import { UserLoginChip } from "./user/UserLoginChip";
 import PasskeyLoginModal from "./user/PasskeyLoginModal";
@@ -74,12 +74,7 @@ export default function CustomNavbar({
                             }
                         >
                             {page.icon && <page.icon className="size-5" />}
-                            {/* <Link
-                                href={page.href}
-                                className="text-lg text-inherit text-nowrap"
-                            > */}
                             {page.name}
-                            {/* </Link> */}
                         </motion.div>
                     ))}
                 </div>

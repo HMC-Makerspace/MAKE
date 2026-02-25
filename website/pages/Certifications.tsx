@@ -4,7 +4,6 @@ import {
     CardBody,
     CardFooter,
     CardHeader,
-    Link,
     ScrollShadow,
     Tooltip,
 } from "@heroui/react";
@@ -14,7 +13,7 @@ import { TUser } from "common/user";
 import { TCertification } from "../../common/certification";
 import DefaultLayout from "../layouts/Default";
 import CertificationTag from "../components/kiosks/admin/certifications/CertificationTag";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
     convertTimestampToDate,
     getForegroundColor,
@@ -22,6 +21,7 @@ import {
 } from "../utils";
 import { BookmarkIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import { Link } from "react-router-dom";
 
 export default function CertificationsPage() {
     // Get all data
@@ -405,10 +405,9 @@ export default function CertificationsPage() {
                                                 variant="shadow"
                                                 className="w-full font-medium"
                                                 size="lg"
-                                                href={docHref}
                                                 as={Link}
-                                                isExternal
                                                 isDisabled={!hasPrereqs}
+                                                to={docHref}
                                             >
                                                 {doc.name}
                                             </Button>

@@ -1,5 +1,6 @@
-import { Link } from "@heroui/react";
+import { Link as HeroLink } from "@heroui/react";
 import clsx from "clsx";
+import { Link } from "react-router-dom";
 
 export default function MAKE({
     href = "/",
@@ -11,7 +12,7 @@ export default function MAKE({
     hover?: boolean;
 }) {
     return (
-        <Link
+        <HeroLink
             className={clsx([
                 "font-title font-semibold text-5xl",
                 "tracking-title indent-[0.1em]",
@@ -20,9 +21,10 @@ export default function MAKE({
                 hover && "hover:tracking-wide hover:-indent-[0.075em]",
                 className,
             ])}
-            href={href ? href : undefined}
+            as={Link}
+            to={href ? href : undefined}
         >
             MAKE
-        </Link>
+        </HeroLink>
     );
 }

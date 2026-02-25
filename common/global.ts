@@ -27,6 +27,11 @@ export enum API_SCOPE {
     RESTOCK_KIOSK = "restock_kiosk",
     CERTIFICATION_KIOSK = "certification_kiosk",
     SETTINGS_KIOSK = "settings_kiosk",
+    // Embed scopes
+    GET_ALL_EMBEDS = "get_embeds",
+    CREATE_EMBED = "create_embed",
+    UPDATE_EMBED = "update_embed",
+    DELETE_EMBED = "delete_embed",
     // Area scopes
     GET_ALL_AREAS = "get_areas",
     GET_ONE_AREA = "get_area",
@@ -729,6 +734,31 @@ export const API_SCOPE_SECTIONS: {
                 scope: API_SCOPE.SIGN_IN_WORKSHOP,
                 label: "Sign In for Workshop",
                 description: "Able to sign in users to a workshop",
+            },
+        ],
+    },
+    {
+        title: "Embeds",
+        scopes: [
+            {
+                scope: API_SCOPE.GET_ALL_EMBEDS,
+                label: "Get all embeds",
+                description: "Able to get all home page embeds",
+            },
+            {
+                scope: API_SCOPE.CREATE_EMBED,
+                label: "Create embed",
+                description: "Able to create home page embed",
+            },
+            {
+                scope: API_SCOPE.UPDATE_EMBED,
+                label: "Update embed",
+                description: "Able to update existing embeds",
+            },
+            {
+                scope: API_SCOPE.DELETE_EMBED,
+                label: "Delete embed",
+                description: "Able to delete existing embeds",
             },
         ],
     },

@@ -5,7 +5,7 @@ import {
     PopoverTrigger,
     PopoverContent,
     Tooltip,
-    Link,
+    Link as HeroLink,
 } from "@heroui/react";
 import { TInventoryItem } from "../../../../../common/inventory";
 import ItemRoleIcon from "./ItemRoleIcon";
@@ -14,6 +14,7 @@ import { TArea } from "common/area";
 import CertificationTag from "../certifications/CertificationTag";
 import { TCertification } from "common/certification";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Link } from "react-router-dom";
 
 export default function ItemInfo({
     item_data,
@@ -117,14 +118,15 @@ export default function ItemInfo({
                                 className={`bg-primary p-2 h-fit w-full rounded-md text-center whitespace-nowrap, overflow-x-auto ${item_data ? "text-default-700" : "text-default-400"}`}
                             >
                                 {item_data.reorder_url ? (
-                                    <Link
+                                    <HeroLink
                                         isExternal
                                         showAnchorIcon
-                                        href={item_data.reorder_url}
+                                        as={Link}
+                                        to={item_data.reorder_url}
                                         className="text-primary-foreground text-sm"
                                     >
                                         Reorder Link
-                                    </Link>
+                                    </HeroLink>
                                 ) : (
                                     "No Reorder Link"
                                 )}

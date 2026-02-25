@@ -12,6 +12,8 @@ import lusca from "lusca";
 import cookieParser from "cookie-parser";
 import passport from "passport";
 import { default as MongoDBStore } from "connect-mongodb-session";
+import { globalLimiter } from "rate-limiter";
+import Bun from 'bun'
 
 // await Bun.build({
 //     entrypoints: ["website/index.html"],
@@ -25,6 +27,7 @@ import areaRoutes from "./routes/area.route";
 import certificationRoutes from "./routes/certification.route";
 import checkoutRoutes from "./routes/checkout.route";
 import configRoutes from "./routes/config.route";
+import embedRoutes from "./routes/embed.route";
 import fileRoutes from "./routes/file.route";
 // import indexRoutes from "./routes/index.route"; // TODO: Determine if still necessary
 import inventoryRoutes from "./routes/inventory.route";
@@ -107,6 +110,7 @@ app.use(
     }),
     // lusca.csrf(),
     passport.initialize(),
+    globalLimiter
 );
 
 passport.serializeUser((user, done) => {
@@ -131,6 +135,7 @@ app.use("/api/v3/area", areaRoutes);
 app.use("/api/v3/certification", certificationRoutes);
 app.use("/api/v3/checkout", checkoutRoutes);
 app.use("/api/v3/config", configRoutes);
+app.use("/api/v3/embed", embedRoutes);
 app.use("/api/v3/file", fileRoutes);
 // app.use("/api/v3", indexRoutes);
 app.use("/api/v3/inventory", inventoryRoutes);
