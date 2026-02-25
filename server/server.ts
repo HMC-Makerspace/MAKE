@@ -16,6 +16,12 @@ import { verifyUser } from "routes/verify.route";
 import mongoSanitize from "express-mongo-sanitize";
 import { csrfSync } from "csrf-sync";
 
+// await Bun.build({
+//     entrypoints: ["website/index.html"],
+//     outdir: "website/build",
+//     plugins: [html()],
+// });
+
 // Routes
 import loginRoutes from "./routes/login.route";
 import areaRoutes from "./routes/area.route";
@@ -85,21 +91,6 @@ const options: cors.CorsOptions = {
 };
 logger.debug("CORS setup");
 
-
-// const { doubleCsrfProtection } = doubleCsrf({
-//     getSecret: (req) => process.env.CSRF_SECRET,
-//     getSessionIdentifier: (req) => req.session.id
-// })
- 
-// const myRoute = (req, res) => {
-//   const csrfToken = req.csrfToken(); 
-//   // You could also pass the token into the context of a HTML response.
-//   res.json({ csrfToken });
-// };
-// const myProtectedRoute = (req, res) =>
-//   res.json({ unpopularOpinion: "Game of Thrones was amazing" });
-
-
 // Middleware
 app.use(
     express.json(),
@@ -136,8 +127,17 @@ app.use(
         replaceWith: "_",
     }),
 );
-// app.get("/csrf-token", myRoute);
-// app.use(doubleCsrfProtection)
+
+export const {
+  generateToken,
+  csrfSynchronisedProtection,
+} = csrfSync();
+
+app.get("/api/v3/csrf-token", (req, res) => {
+  res.json({ csrfToken: generateToken(req) });
+});
+
+app.use(csrfSynchronisedProtection);
 
 passport.serializeUser((user, done) => {
     process.nextTick(() => {
