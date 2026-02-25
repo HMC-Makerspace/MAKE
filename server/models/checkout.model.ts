@@ -17,7 +17,7 @@ const CheckoutItemSchema = Joi.object<TCheckoutItem>({
     item_uuid: Joi.string().required(),
     quantity: Joi.number().required(),
     role: Joi.string().required(),
-    linked_uuid: Joi.string().optional()
+    linked_uuid: Joi.string().optional().allow(null),
 });
 
 /**
