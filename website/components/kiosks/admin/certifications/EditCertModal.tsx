@@ -85,8 +85,6 @@ export default function EditCertModal({
     const mutation = useMutation({
         mutationFn: createUpdateCert,
         onSuccess: (result: TCertification) => {
-            console.log(result)
-
             queryClient.setQueryData(["certification", uuid], result);
             queryClient.setQueryData(
                 ["certification"],
