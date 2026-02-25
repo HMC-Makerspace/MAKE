@@ -1,4 +1,4 @@
-import express, { Application } from "express";
+import express, { Application, Request, Response } from "express";
 import fs from "fs";
 import ViteExpress from "vite-express";
 import compression from "compression";
@@ -16,7 +16,7 @@ import { globalLimiter } from "rate-limiter";
 import { verifyUser } from "routes/verify.route";
 import Bun from "bun";
 import mongoSanitize from "express-mongo-sanitize";
-// import { doubleCsrf } from "csrf-csrf";
+import { csrfSync } from "csrf-sync";
 
 // await Bun.build({
 //     entrypoints: ["website/index.html"],
@@ -88,23 +88,9 @@ const allowedOrigins = [
 ];
 const options: cors.CorsOptions = {
     origin: allowedOrigins,
+    credentials: true,
 };
 logger.debug("CORS setup");
-
-
-// const { doubleCsrfProtection } = doubleCsrf({
-//     getSecret: (req) => process.env.CSRF_SECRET,
-//     getSessionIdentifier: (req) => req.session.id
-// })
- 
-// const myRoute = (req, res) => {
-//   const csrfToken = req.csrfToken(); 
-//   // You could also pass the token into the context of a HTML response.
-//   res.json({ csrfToken });
-// };
-// const myProtectedRoute = (req, res) =>
-//   res.json({ unpopularOpinion: "Game of Thrones was amazing" });
-
 
 // Middleware
 app.use(
@@ -140,12 +126,20 @@ app.use(
         next();
     },
     mongoSanitize({
-        replaceWith: "_"
+        replaceWith: "_",
     }),
-    
 );
-// app.get("/csrf-token", myRoute);
-// app.use(doubleCsrfProtection)
+
+export const {
+  generateToken,
+  csrfSynchronisedProtection,
+} = csrfSync();
+
+app.get("/api/v3/csrf-token", (req, res) => {
+  res.json({ csrfToken: generateToken(req) });
+});
+
+app.use(csrfSynchronisedProtection);
 
 passport.serializeUser((user, done) => {
     process.nextTick(() => {
