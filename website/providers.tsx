@@ -20,6 +20,13 @@ declare module "@react-types/shared" {
     }
 }
 
+const { data: csrfData } = await axios.get("/api/v3/csrf-token", {
+  withCredentials: true,
+});
+
+axios.defaults.headers.common["x-csrf-token"] = csrfData.csrfToken
+axios.defaults.withCredentials = true;
+
 const defaultQueryFn = async ({ queryKey }: QueryFunctionContext) => {
     const { data } = await axios.get(`/api/v3/${queryKey.join("/")}`);
     return data;
