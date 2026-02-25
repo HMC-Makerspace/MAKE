@@ -9,12 +9,15 @@ import Joi from "joi"
  * See {@link TShiftEvent} documentation for type information.
  * Stored as children of {@link Shift}.
  */
-const ShiftEvent = new mongoose.Schema<TShiftEvent>({
-    timestamp: { type: Number, required: true },
-    shift_date: { type: Number, required: true },
-    type: { type: String, required: true },
-    initiator: { type: String, required: true },
-});
+const ShiftEvent = new mongoose.Schema<TShiftEvent>(
+    {
+        timestamp: { type: Number, required: true },
+        shift_date: { type: Number, required: true },
+        type: { type: String, required: true },
+        initiator: { type: String, required: true },
+    },
+    { _id: false },
+);
 
 export const ShiftEventSchema = Joi.object<TShiftEvent>({
     timestamp: Joi.number().required(),
