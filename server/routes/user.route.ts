@@ -279,7 +279,7 @@ router.delete(
 router.patch(
     "/by/email/:email/grant/certification/:cert_uuid/:level",
     async (
-        req: Request<{ email: string; cert_uuid: string; level: number }>,
+        req: Request<{ email: string; cert_uuid: string; level: string }>,
         res: UserResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -287,11 +287,12 @@ router.patch(
             (req.user?.uuid as string) ?? headers.requesting_uuid;
         const email = req.params.email;
         const cert_uuid = req.params.cert_uuid;
-        const level = req.params.level ?? 1;
-        if (typeof level !== "number") {
-            req.log.warn(
-                "Certification level not of type number"
-            );
+        const level = parseInt(req.params.level) ?? 1;
+        if (isNaN(level)) {
+            req.log.warn("Certification level not of type number");
+            res.status(StatusCodes.BAD_REQUEST).json({
+                error: "Certification level not of type number",
+            });
             return;
         }
         req.log.debug({
@@ -449,18 +450,19 @@ router.patch(
 router.patch(
     "/:user_uuid/grant/certification/:cert_uuid/:level",
     async (
-        req: Request<{ user_uuid: string; cert_uuid: string; level: number }>,
+        req: Request<{ user_uuid: string; cert_uuid: string; level: string }>,
         res: UserResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
         const user_uuid = req.params.user_uuid;
         const cert_uuid = req.params.cert_uuid;
-        const level = req.params.level ?? 1;
-        if (typeof level !== "number") {
-            req.log.warn(
-                "Certification level not of type number"
-            );
+        const level = parseInt(req.params.level) ?? 1;
+        if (isNaN(level)) {
+            req.log.warn("Certification level not of type number");
+            res.status(StatusCodes.BAD_REQUEST).json({
+                error: "Certification level not of type number",
+            });
             return;
         }
         req.log.debug({
