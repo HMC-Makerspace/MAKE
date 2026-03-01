@@ -1,0 +1,179 @@
+[33mcommit 91d671d526321b8c9287d40625dcdc6447da0eda[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mv3[m[33m)[m
+Author: Wil <wil@gmx.com>
+Date:   Sun Feb 8 10:54:14 2026 -0800
+
+    Update all external hrefs to use react-router-dom links
+
+ website/components/Navbar.tsx                      |  5 [31m--[m
+ website/components/kiosks/admin/areas/Area.tsx     |  5 [32m+[m[31m-[m
+ .../admin/certifications/CertificationTag.tsx      |  7 [32m+[m[31m--[m
+ .../components/kiosks/admin/inventory/ItemInfo.tsx | 10 [32m++[m[31m--[m
+ .../components/kiosks/admin/machines/Machine.tsx   | 53 [32m+++++++++[m[31m-------------[m
+ website/components/public/home/Embed.tsx           |  4 [32m+[m[31m-[m
+ website/components/public/home/EmbedWrapper.tsx    |  5 [32m+[m[31m-[m
+ website/components/public/home/MAKE.tsx            | 10 [32m++[m[31m--[m
+ website/pages/Certifications.tsx                   |  5 [32m+[m[31m-[m
+ 9 files changed, 46 insertions(+), 58 deletions(-)
+
+[33mcommit 1e453eb5cbc980ec58c786a7d86d4d4e994fb889[m
+Merge: 094d9f9 4224d7f
+Author: Wil Kirkland <wil@gmx.com>
+Date:   Sat Feb 7 09:34:42 2026 -0800
+
+    Merge pull request #140 from HMC-Makerspace/event-page
+    
+    Implement events page (embeds)
+
+[33mcommit 4224d7fc50b86fa0d6967335cd0edcb2e59df6e0[m
+Merge: 95d37cb 094d9f9
+Author: Wil Kirkland <wil@gmx.com>
+Date:   Sat Feb 7 09:34:31 2026 -0800
+
+    Merge branch 'v3' into event-page
+
+[33mcommit 094d9f9fe27f852a96eea0c4bcbe25f3e776244b[m
+Merge: e4e0646 9f0aa5d
+Author: Wil Kirkland <wil@gmx.com>
+Date:   Sat Feb 7 09:22:41 2026 -0800
+
+    Merge pull request #139 from HMC-Makerspace/workshop-sign-in-update
+    
+    Fix workshop sign in to allow for walk ins
+
+[33mcommit 95d37cb6e48d29509c97d25923420785e52abeb7[m
+Author: Wil <wil@gmx.com>
+Date:   Sat Feb 7 09:20:33 2026 -0800
+
+    Finalize embed visuals on home page and implement editor in the settings kiosk
+
+ .../kiosks/admin/settings/Configuration.tsx        |  98 [32m++++++[m[31m-[m
+ .../kiosks/admin/settings/EditableEmbed.tsx        | 302 [32m+++++++++++++++++++++[m
+ website/components/public/home/Embed.tsx           |  45 [32m++[m[31m-[m
+ website/components/public/home/EmbedWrapper.tsx    |  10 [32m+[m[31m-[m
+ website/pages/Home.tsx                             |  58 [32m+[m[31m---[m
+ website/pages/admin/SettingsKiosk.tsx              |  35 [32m++[m[31m-[m
+ 6 files changed, 485 insertions(+), 63 deletions(-)
+
+[33mcommit 90c8c8c5b3eeb20ad386cc1b33509d659ce2622f[m
+Author: Wil <wil@gmx.com>
+Date:   Sat Feb 7 09:19:56 2026 -0800
+
+    Implement embed model, controller, and routes
+
+ common/embed.d.ts                      |  13 [32m+[m[31m-[m
+ common/global.ts                       |  30 [32m++++[m
+ server/controllers/embed.controller.ts | 145 [32m++++++++++++++++++[m
+ server/models/embed.model.ts           |  17 [32m+++[m
+ server/routes/embed.route.ts           | 271 [32m+++++++++++++++++++++++++++++++++[m
+ server/server.ts                       |   2 [32m+[m
+ 6 files changed, 473 insertions(+), 5 deletions(-)
+
+[33mcommit 4e3e53d19652a3277bfe09f5ddb4132626694eaa[m
+Author: Wil <wil@gmx.com>
+Date:   Sat Feb 7 09:19:16 2026 -0800
+
+    Cleanup various files
+
+ common/config.d.ts                        | 19 [32m+++++[m[31m-----[m
+ server/controllers/area.controller.ts     | 11 [32m+[m[31m-----[m
+ server/controllers/workshop.controller.ts |  2 [32m+[m[31m-[m
+ server/routes/inventory.route.ts          |  4 [31m---[m
+ website/components/EditDocsModal.tsx      | 60 [32m++++++++++++++[m[31m-----------------[m
+ 5 files changed, 39 insertions(+), 57 deletions(-)
+
+[33mcommit f45ff287dd8a22055effb0832c870350d65b7b7d[m
+Author: Wil <wil@gmx.com>
+Date:   Fri Feb 6 22:29:10 2026 -0800
+
+    A similar inventory bug with visible/private areas
+
+ server/controllers/inventory.controller.ts | 44 [32m+++++++++++++++++++[m[31m-----------[m
+ website/pages/Inventory.tsx                |  4 [32m+[m[31m--[m
+ 2 files changed, 29 insertions(+), 19 deletions(-)
+
+[33mcommit 7f21f5cdec5b55de0032bd2ad0de43cc5db1b04f[m
+Author: Wil <wil@gmx.com>
+Date:   Fri Feb 6 22:13:03 2026 -0800
+
+    Rework area visibility modal to be generic for anything with a visible_to property
+
+ website/components/kiosks/admin/areas/Area.tsx     | 21 [32m++++[m[31m---------[m
+ .../kiosks/admin/areas/VisibilityModal.tsx         | 35 [32m++++++++++++[m[31m----------[m
+ 2 files changed, 24 insertions(+), 32 deletions(-)
+
+[33mcommit 9586688563206f3d2950062269d3a88f295c273a[m
+Author: Wil <wil@gmx.com>
+Date:   Fri Feb 6 22:12:30 2026 -0800
+
+    Fix a bug with inventory items showing more locations than expected
+
+ server/controllers/inventory.controller.ts | 64 [32m+++++++++++++++++[m[31m-------------[m
+ website/pages/Inventory.tsx                |  7 [32m+++[m[31m-[m
+ 2 files changed, 43 insertions(+), 28 deletions(-)
+
+[33mcommit 9f0aa5d0b9c7fe4ff739e28541ddf5a75442203f[m
+Author: Wil <wil@gmx.com>
+Date:   Fri Feb 6 17:44:51 2026 -0800
+
+    Fix workshop sign in to allow for walk ins
+
+ .../components/public/workshops/WorkshopCard.tsx   |  44 [32m+++++[m[31m---[m
+ .../workshops/WorkshopSigninConfirmation.tsx       | 112 [32m+++++++++++++++[m[31m------[m
+ .../public/workshops/WorkshopSigninListModal.tsx   |  52 [32m++++++++[m[31m--[m
+ .../public/workshops/WorkshopSigninModal.tsx       | 103 [32m+++++++++++[m[31m--------[m
+ 4 files changed, 216 insertions(+), 95 deletions(-)
+
+[33mcommit c103776ffac30727313962fd55b40f6a0f004b18[m
+Author: Wil <wil@gmx.com>
+Date:   Fri Feb 6 16:38:46 2026 -0800
+
+    Work on embed styling and draft new homepage layout
+
+ website/components/public/home/ActiveAlert.tsx  |   7 [32m+[m[31m-[m
+ website/components/public/home/Embed.tsx        |  32 [32m++[m[31m-[m
+ website/components/public/home/EmbedWrapper.tsx |   4 [32m+[m[31m-[m
+ website/pages/Home.tsx                          | 266 [32m+++++++++++++[m[31m-----------[m
+ 4 files changed, 187 insertions(+), 122 deletions(-)
+
+[33mcommit d390317d7b8f59e928292db3d9d596780d7ae869[m
+Author: Wil <wil@gmx.com>
+Date:   Fri Feb 6 16:38:30 2026 -0800
+
+    Fix machine documents showing up for more roles than expected
+
+ server/controllers/machine.controller.ts       | 62 [32m+++++++++++++++++[m[31m---------[m
+ website/components/kiosks/admin/areas/Area.tsx | 40 [32m++++++++++[m[31m-------[m
+ 2 files changed, 63 insertions(+), 39 deletions(-)
+
+[33mcommit 4767adc1227a27d0777a87032d60ba27aa35bc3f[m
+Author: Wil <wil@gmx.com>
+Date:   Wed Feb 4 23:46:04 2026 -0800
+
+    Scaffold home page embeds
+
+ common/config.d.ts                              |  12 [31m--[m
+ common/embed.d.ts                               |  11 [32m+[m
+ website/components/public/home/Embed.tsx        |   1 [32m+[m
+ website/components/public/home/EmbedWrapper.tsx |  51 [32m+++++[m
+ website/components/public/home/HomeLinks.tsx    | 102 [32m+++++++++[m
+ website/pages/Home.tsx                          | 270 [32m+++++++++++++++[m[31m---------[m
+ 6 files changed, 336 insertions(+), 111 deletions(-)
+
+[33mcommit 9606478f8e53205f9dad2223051ff87b472f0b25[m
+Author: Wil <wil@gmx.com>
+Date:   Wed Feb 4 23:45:35 2026 -0800
+
+    Update packages, and replace `framer-motion` with `motion/react` everywhere
+
+ package.json                                       | 60 [32m+++++++++++[m[31m-----------[m
+ website/components/Navbar.tsx                      |  2 [32m+[m[31m-[m
+ website/components/PopupAlert.tsx                  |  2 [32m+[m[31m-[m
+ .../kiosks/admin/certifications/EditCertModal.tsx  |  2 [32m+[m[31m-[m
+ .../kiosks/admin/inventory/ItemEditor.tsx          |  2 [32m+[m[31m-[m
+ .../kiosks/admin/inventory/ItemEditorForm.tsx      |  2 [32m+[m[31m-[m
+ .../components/kiosks/admin/roles/RolesTable.tsx   |  2 [32m+[m[31m-[m
+ website/components/kiosks/admin/schedule/Shift.tsx |  2 [32m+[m[31m-[m
+ .../kiosks/admin/settings/Configuration.tsx        |  2 [32m+[m[31m-[m
+ website/components/public/home/ActiveAlert.tsx     |  2 [32m+[m[31m-[m
+ website/layouts/AdminLayout.tsx                    |  2 [32m+[m[31m-[m
+ website/layouts/Default.tsx    
