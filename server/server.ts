@@ -1,4 +1,4 @@
-import express, { Application } from "express";
+import express, { Application, Request, Response } from "express";
 import fs from "fs";
 import ViteExpress from "vite-express";
 import compression from "compression";
@@ -13,7 +13,10 @@ import cookieParser from "cookie-parser";
 import passport from "passport";
 import { default as MongoDBStore } from "connect-mongodb-session";
 import { globalLimiter } from "rate-limiter";
-import Bun from 'bun'
+import { verifyUser } from "routes/verify.route";
+import Bun from "bun";
+import mongoSanitize from "express-mongo-sanitize";
+import { csrfSync } from "csrf-sync";
 
 // await Bun.build({
 //     entrypoints: ["website/index.html"],
@@ -85,6 +88,7 @@ const allowedOrigins = [
 ];
 const options: cors.CorsOptions = {
     origin: allowedOrigins,
+    credentials: true,
 };
 logger.debug("CORS setup");
 
@@ -110,8 +114,32 @@ app.use(
     }),
     // lusca.csrf(),
     passport.initialize(),
-    globalLimiter
+    globalLimiter,
+    verifyUser(),
+    // mongo sanitize has an issue with req.query; this function fixes issue
+    (req, _res, next) => {
+        Object.defineProperty(req, "query", {
+            ...Object.getOwnPropertyDescriptor(req, "query"),
+            value: req.query,
+            writable: true,
+        });
+        next();
+    },
+    mongoSanitize({
+        replaceWith: "_",
+    }),
 );
+
+export const {
+  generateToken,
+  csrfSynchronisedProtection,
+} = csrfSync();
+
+app.get("/api/v3/csrf-token", (req, res) => {
+  res.json({ csrfToken: generateToken(req) });
+});
+
+app.use(csrfSynchronisedProtection);
 
 passport.serializeUser((user, done) => {
     process.nextTick(() => {
