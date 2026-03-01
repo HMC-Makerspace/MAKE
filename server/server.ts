@@ -96,9 +96,9 @@ logger.debug("CORS setup");
 app.use(
     express.json(),
     compression(),
+    cookieParser(),
     loggerMiddleware({ logger: logger }),
     cors(options),
-    cookieParser(),
     session({
         secret: process.env.SESSION_SECRET,
         rolling: true,
