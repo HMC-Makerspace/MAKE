@@ -27,6 +27,7 @@ export enum API_SCOPE {
     RESTOCK_KIOSK = "restock_kiosk",
     CERTIFICATION_KIOSK = "certification_kiosk",
     SETTINGS_KIOSK = "settings_kiosk",
+    STATISTICS_KIOSK = 'statistic_kiosk',
     // Embed scopes
     GET_ALL_EMBEDS = "get_embeds",
     CREATE_EMBED = "create_embed",

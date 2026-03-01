@@ -4,7 +4,6 @@ import { API_SCOPE } from "../../common/global";
 import { Spinner } from "@heroui/react";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
-// import AdminSidebar from "../components/kiosks/admin/AdminSidebar";
 
 export type AdminPage = {
     name: string;
@@ -72,6 +71,11 @@ const ADMIN_PAGES: AdminPage[] = [
         name: "Settings",
         href: "/admin/settings",
         scope: API_SCOPE.SETTINGS_KIOSK,
+    },
+    {
+        name: "Statistics",
+        href: "/admin/statistics",
+        scope: API_SCOPE.STATISTICS_KIOSK,
     },
 ];
 
