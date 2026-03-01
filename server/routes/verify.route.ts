@@ -38,7 +38,6 @@ export function verifyUser(): (req: Request, res: Response, next: NextFunction) 
             req.log.warn({
                 msg: "No user session exists, and provided passkey authorization was invalid.",
                 requesting_uuid: requesting_uuid,
-                passkey: headers.passkey,
                 passkey_hash: passkey_hash,
                 user_hash: requesting_user?.passkey,
             });
