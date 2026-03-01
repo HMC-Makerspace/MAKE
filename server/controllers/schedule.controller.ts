@@ -607,16 +607,95 @@ export async function addShiftEventInSchedule(
     schedule_uuid: UUID,
     shift_uuid: UUID,
     event: TShiftEvent,
-): Promise<TSchedule | null> {
+) {
     const Schedules = mongoose.model("Schedule", Schedule);
 
-    // TODO: Consider deleting drop if assignee is the initiator of a pickup
-    return Schedules.findOneAndUpdate(
-        // Find the schedule by UUID
-        { uuid: schedule_uuid, "shifts.uuid": shift_uuid },
-        // Push the new event to the shift's history array
-        { $push: { "shifts.$.history": event } },
-        // Return the updated schedule
-        { returnDocument: "after" },
+    const schedule = await Schedules.findOne({ uuid: schedule_uuid });
+
+    if (!schedule) return null;
+
+    const shift = schedule.shifts.find((shift) => shift.uuid === shift_uuid);
+
+    if (!shift) return null;
+
+    // Find all events from this initiator on this date
+    const existing_events = shift.history.filter(
+        (e) =>
+            e.initiator === event.initiator &&
+            e.shift_date === event.shift_date,
     );
+
+    // If the given user has already picked up this shift,
+    if (existing_events.some((e) => e.type === SHIFT_EVENT_TYPE.PICKUP)) {
+        // And they are dropping it now,
+        if (event.type === SHIFT_EVENT_TYPE.DROP) {
+            // Remove the old pickup from the shift list
+            shift.history = shift.history.filter(
+                (e) =>
+                    !(
+                        e.initiator === event.initiator &&
+                        e.shift_date === event.shift_date &&
+                        (e.type === SHIFT_EVENT_TYPE.PICKUP ||
+                            e.type === SHIFT_EVENT_TYPE.DROP)
+                    ),
+            );
+            // If the user is trying to pickup this shift again, stop the request
+        } else if (event.type === SHIFT_EVENT_TYPE.PICKUP) {
+            return false;
+        }
+    } else if (
+        // Or if the user has previously dropped this shift,
+        existing_events.some((e) => e.type === SHIFT_EVENT_TYPE.DROP)
+    ) {
+        // And they are picking it now,
+        if (event.type === SHIFT_EVENT_TYPE.PICKUP) {
+            // Remove the old drop from the shift list
+            shift.history = shift.history.filter(
+                (e) =>
+                    !(
+                        e.initiator === event.initiator &&
+                        e.shift_date === event.shift_date &&
+                        (e.type === SHIFT_EVENT_TYPE.PICKUP ||
+                            e.type === SHIFT_EVENT_TYPE.DROP)
+                    ),
+            );
+            // If the user is trying to drop this shift again, stop the request
+        } else if (event.type === SHIFT_EVENT_TYPE.DROP) {
+            return false;
+        }
+    } else {
+        // Otherwise, the event request is valid, so add it to the shift history
+        shift.history.push(event);
+    }
+
+    // Update the schedule with the new shift history
+    schedule.shifts = schedule.shifts.map((sh) =>
+        sh.uuid === shift.uuid ? shift : sh,
+    );
+    return schedule.save();
+
+    //      {
+    //     // If the event types are the same, skip this one
+    //     if (existing_event.type === event.type) {
+    //         return false;
+    //         // If the event was a drop and is now being picked up or vice versa, remove the original
+    //     } else if (
+    //         (existing_event.type === SHIFT_EVENT_TYPE.PICKUP &&
+    //             event.type === SHIFT_EVENT_TYPE.DROP) ||
+    //         (existing_event.type === SHIFT_EVENT_TYPE.DROP &&
+    //             event.type === SHIFT_EVENT_TYPE.PICKUP)
+    //     ) {
+    //         shift.history = shift.history.filter(() => {});
+    //     } // Otherwise, continue
+    // }
+
+    // TODO: Consider deleting drop if assignee is the initiator of a pickup
+    // return Schedules.findOneAndUpdate(
+    //     // Find the schedule by UUID
+    //     { uuid: schedule_uuid, "shifts.uuid": shift_uuid },
+    //     // Push the new event to the shift's history array
+    //     { $push: { "shifts.$.history": event } },
+    //     // Return the updated schedule
+    //     { returnDocument: "after" },
+    // );
 }

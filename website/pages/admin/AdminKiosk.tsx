@@ -3,6 +3,7 @@ import Schedule from "../../components/kiosks/admin/schedule/Schedule";
 import AdminLayout from "../../layouts/AdminLayout";
 import { ScheduleUUID, TSchedule } from "common/schedule";
 import {
+    addToast,
     Button,
     DateInput,
     DatePicker,
@@ -43,7 +44,7 @@ import {
     today,
     ZonedDateTime,
 } from "@internationalized/date";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import ShiftHistoryModal from "../../components/kiosks/admin/dashboard/ShiftHistoryModal";
 
 async function createShiftEvent({
@@ -137,7 +138,7 @@ export default function AdminKiosk() {
 
     const shiftEventMutation = useMutation({
         mutationFn: createShiftEvent,
-        onSuccess: (new_schedule) => {
+        onSuccess: (new_schedule, variables) => {
             queryClient.refetchQueries({
                 queryKey: [
                     "schedule",
@@ -148,9 +149,23 @@ export default function AdminKiosk() {
                     user_uuid,
                 ],
             });
+            const type = variables.event.type;
+            const type_text =
+                type === SHIFT_EVENT_TYPE.DROP ? "dropped" : "picked up";
+            addToast({
+                title: `Shift successfully ${type_text}`,
+                color: "success",
+            });
             setPopupShifts([]);
         },
-        onError: (err) => alert(err),
+        onError: (error: AxiosError<{ error: string }>) => {
+            addToast({
+                title:
+                    error.response?.data.error ??
+                    `Unknown error: ${error.message}`,
+                color: "danger",
+            });
+        },
     });
 
     const shiftCountMutation = useMutation({
@@ -586,6 +601,9 @@ export default function AdminKiosk() {
                                             color="primary"
                                             variant="bordered"
                                             className="col-span-2"
+                                            isDisabled={
+                                                shiftEventMutation.isPending
+                                            }
                                         >
                                             Drop
                                         </Button>
@@ -707,7 +725,7 @@ export default function AdminKiosk() {
                                                                     },
                                                                 );
                                                             }}
-                                                            isLoading={
+                                                            isDisabled={
                                                                 shiftEventMutation.isPending
                                                             }
                                                         >
