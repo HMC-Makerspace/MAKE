@@ -42,6 +42,8 @@ export type TWorkshopUserRecord = {
  * @property visible_to - (optional) a list of UserRole UUIDs that are
  *      allowed to see this workshop. If null, any user may see this
  *      workshop
+ * @property rsvp_disclaimer - (optional) a disclaimer that will be shown before
+ *      a user can RSVP for a workshop
  */
 export type TWorkshop = {
     uuid: UUID;
@@ -60,6 +62,7 @@ export type TWorkshop = {
     images?: FileUUID[];
     available_to?: UserRoleUUID[] | null;
     visible_to?: UserRoleUUID[] | null;
+    rsvp_disclaimer?: string;
 };
 
 /**
