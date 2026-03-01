@@ -502,13 +502,22 @@ router.patch(
                 shift_uuid,
                 event_obj,
             );
-            if (!new_schedule) {
+            if (new_schedule === null) {
                 req.log.warn(
                     `An attempt was made to add an event to a shift in the schedule ` +
                         `with uuid ${schedule_uuid}, but that schedule or shift was not found`,
                 );
                 res.status(StatusCodes.NOT_FOUND).json({
                     error: `Schedule or shift not found.`,
+                });
+                return;
+            } else if (!new_schedule) {
+                req.log.warn(
+                    `An attempt was made to add an event to a shift in the schedule ` +
+                        `with uuid ${schedule_uuid} that has already been patched`,
+                );
+                res.status(StatusCodes.CONFLICT).json({
+                    error: `Request already submitted!`,
                 });
                 return;
             }
