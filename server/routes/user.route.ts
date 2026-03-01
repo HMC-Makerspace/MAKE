@@ -25,7 +25,7 @@ import {
     updateUserPublicInfo,
     updateUserRole,
 } from "controllers/user.controller";
-import { verifyRequest } from "controllers/verify.controller";
+import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -40,6 +40,7 @@ import { ScheduleUUID } from "common/schedule";
 import { getCertification } from "controllers/certification.controller";
 import { CERTIFICATION_VISIBILITY } from "common/certification";
 import { createHash } from "crypto";
+import { UserSchema, UserRoleSchema, UserSchemaOptional, UserRoleSchemaOptional } from "models/user.model";
 
 // --- Request and Response Types ---
 type UserRequest = Request<{}, {}, { user_obj: TUser }>;
@@ -127,46 +128,48 @@ router.get(
  * not authorized, a status error is returned. If the user is authorized, the
  * updated user role object is returned.
  */
-router.put("/role/", async (req: UserRoleRequest, res: UserRoleResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = req.user?.uuid as string;
-    const role_obj = req.body.role_obj;
-    const role_uuid = role_obj.uuid;
-    // If no requesting user_uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while updating user role " +
-                `with uuid ${role_uuid}.`,
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-    req.log.debug({
-        msg: `Updating user role by uuid ${role_uuid}`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, perform the update
-    if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_ROLE)) {
-        const user_role = await updateUserRole(role_obj);
-        if (!user_role) {
-            req.log.warn(`No user role found with uuid ${role_uuid}`);
-            res.status(StatusCodes.NOT_FOUND).json({
-                error: `No user role found with uuid \`${role_uuid}\`.`,
-            });
+router.put("/role/", 
+    verifySchema(UserRoleSchema, "role_obj"),
+    async (req: UserRoleRequest, res: UserRoleResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = req.user?.uuid as string;
+        const role_obj = req.body.role_obj;
+        const role_uuid = role_obj.uuid;
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while updating user role " +
+                    `with uuid ${role_uuid}.`,
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
-        req.log.debug(`Updated user role with uuid ${role_uuid}`);
-        res.status(StatusCodes.OK).json(user_role);
-    } else {
-        // If the user is not authorized, provide a status error
-        req.log.warn({
-            msg: "Forbidden user attempted to update user role",
+        req.log.debug({
+            msg: `Updating user role by uuid ${role_uuid}`,
             requesting_uuid: requesting_uuid,
         });
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+
+        // If the user is authorized, perform the update
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_ROLE)) {
+            const user_role = await updateUserRole(role_obj);
+            if (!user_role) {
+                req.log.warn(`No user role found with uuid ${role_uuid}`);
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `No user role found with uuid \`${role_uuid}\`.`,
+                });
+                return;
+            }
+            req.log.debug(`Updated user role with uuid ${role_uuid}`);
+            res.status(StatusCodes.OK).json(user_role);
+        } else {
+            // If the user is not authorized, provide a status error
+            req.log.warn({
+                msg: "Forbidden user attempted to update user role",
+                requesting_uuid: requesting_uuid,
+            });
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 /**
  * Create a user role. This is a protected route, and a
@@ -175,49 +178,53 @@ router.put("/role/", async (req: UserRoleRequest, res: UserRoleResponse) => {
  * status error is returned. If the user is authorized, the newly created
  * user role object is returned.
  */
-router.post("/role/", async (req: UserRoleRequest, res: UserRoleResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = req.user?.uuid as string;
-    const role_obj = req.body.role_obj;
-    const role_uuid = role_obj.uuid;
-    // If no requesting user_uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while creating user role " +
-                `with uuid ${role_uuid}.`,
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-    req.log.debug({
-        msg: `Creating new user role with uuid ${role_uuid}`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, create the role
-    if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_ROLE)) {
-        const user_role = await createUserRole(role_obj);
-        if (!user_role) {
+router.post("/role/", 
+    verifySchema(UserRoleSchema, "role_obj"),
+    async (req: UserRoleRequest, res: UserRoleResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = req.user?.uuid as string;
+        const role_obj = req.body.role_obj;
+        const role_uuid = role_obj.uuid;
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
             req.log.warn(
-                `An attempt was made to create a user role with uuid ` +
-                    `${role_uuid}, but a role with that uuid already exists`,
+                "No requesting_uuid was provided while creating user role " +
+                    `with uuid ${role_uuid}.`,
             );
-            res.status(StatusCodes.CONFLICT).json({
-                error: `A user role with uuid \`${role_uuid}\` already exists.`,
-            });
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
-        req.log.debug(`Created user role with uuid ${role_uuid}`);
-        res.status(StatusCodes.CREATED).json(user_role);
-    } else {
-        // If the user is not authorized, provide a status error
-        req.log.warn({
-            msg: "Forbidden user attempted to create user role",
+        req.log.debug({
+            msg: `Creating new user role with uuid ${role_uuid}`,
             requesting_uuid: requesting_uuid,
         });
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+
+        // If the user is authorized, create the role
+        if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_ROLE)) {
+
+            const user_role = await createUserRole(role_obj);
+            if (!user_role) {
+                req.log.warn(
+                    `An attempt was made to create a user role with uuid ` +
+                        `${role_uuid}, but a role with that uuid already exists`,
+                );
+                res.status(StatusCodes.CONFLICT).json({
+                    error: `A user role with uuid \`${role_uuid}\` already exists.`,
+                });
+                return;
+            }
+            req.log.debug(`Created user role with uuid ${role_uuid}`);
+            res.status(StatusCodes.CREATED).json(user_role);
+        
+        } else {
+            // If the user is not authorized, provide a status error
+            req.log.warn({
+                msg: "Forbidden user attempted to create user role",
+                requesting_uuid: requesting_uuid,
+            });
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 /**
  * Delete a single user role by UUID. This is a protected route, and a
@@ -272,7 +279,7 @@ router.delete(
 router.patch(
     "/by/email/:email/grant/certification/:cert_uuid/:level",
     async (
-        req: Request<{ email: string; cert_uuid: string; level: number }>,
+        req: Request<{ email: string; cert_uuid: string; level: string }>,
         res: UserResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -280,7 +287,14 @@ router.patch(
             (req.user?.uuid as string) ?? headers.requesting_uuid;
         const email = req.params.email;
         const cert_uuid = req.params.cert_uuid;
-        const level = req.params.level ?? 1;
+        const level = parseInt(req.params.level) ?? 1;
+        if (isNaN(level)) {
+            req.log.warn("Certification level not of type number");
+            res.status(StatusCodes.BAD_REQUEST).json({
+                error: "Certification level not of type number",
+            });
+            return;
+        }
         req.log.debug({
             msg: `Granting cert to user with id ${email} cert with uuid ${cert_uuid}`,
             requesting_uuid: requesting_uuid,
@@ -436,14 +450,21 @@ router.patch(
 router.patch(
     "/:user_uuid/grant/certification/:cert_uuid/:level",
     async (
-        req: Request<{ user_uuid: string; cert_uuid: string; level: number }>,
+        req: Request<{ user_uuid: string; cert_uuid: string; level: string }>,
         res: UserResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
         const user_uuid = req.params.user_uuid;
         const cert_uuid = req.params.cert_uuid;
-        const level = req.params.level ?? 1;
+        const level = parseInt(req.params.level) ?? 1;
+        if (isNaN(level)) {
+            req.log.warn("Certification level not of type number");
+            res.status(StatusCodes.BAD_REQUEST).json({
+                error: "Certification level not of type number",
+            });
+            return;
+        }
         req.log.debug({
             msg: `Granting user with uuid ${user_uuid} cert with uuid ${cert_uuid}`,
             requesting_uuid: requesting_uuid,
@@ -847,57 +868,60 @@ router.get("/", async (req: UsersRequest, res: UsersResponse) => {
  * the user is not authorized, a status error is returned. If the user is
  * authorized, the updated user object is returned.
  */
-router.put("/", async (req: UserRequest, res: UserResponse) => {
-    // Get the user object from the request body
-    const user_obj = req.body.user_obj;
-    if (!user_obj) {
-        req.log.warn("No user object provided to update");
-        res.status(StatusCodes.BAD_REQUEST).json({
-            error: "No user object provided to update.",
-        });
-        return;
-    }
-
-    // Check for authorization
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = req.user?.uuid as string;
-    const uuid = user_obj.uuid;
-    // If no requesting user_uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while updating user by UUID",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-    req.log.debug({
-        msg: `Updating user with uuid ${uuid}`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // Check if the request is valid
-    if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_USER)) {
-        // If the user is authorized, perform the update.
-        const user = await updateUser(user_obj);
-        if (!user) {
-            req.log.warn(`User not found to update with uuid ${uuid}`);
-            res.status(StatusCodes.NOT_FOUND).json({
-                error: `No user found to update with uuid \`${uuid}\`.`,
+router.put("/", 
+    verifySchema(UserSchema, "user_obj"),
+    async (req: UserRequest, res: UserResponse) => {
+        // Get the user object from the request body
+        const user_obj = req.body.user_obj;
+        req.log.info(user_obj)
+        if (!user_obj) {
+            req.log.warn("No user object provided to update");
+            res.status(StatusCodes.BAD_REQUEST).json({
+                error: "No user object provided to update.",
             });
             return;
         }
-        req.log.debug(`Updated user with uuid ${uuid}`);
-        // Return the updated user object
-        res.status(StatusCodes.OK).json(user);
-    } else {
-        // If the user is not authorized, provide a status error
-        req.log.warn({
-            msg: `Forbidden user attempted to update user with uuid ${uuid}`,
+
+        // Check for authorization
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = req.user?.uuid as string;
+        const uuid = user_obj.uuid;
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while updating user by UUID",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+        req.log.debug({
+            msg: `Updating user with uuid ${uuid}`,
             requesting_uuid: requesting_uuid,
         });
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+
+        // Check if the request is valid
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_USER)) {
+            // If the user is authorized, perform the update.
+            const user = await updateUser(user_obj);
+            if (!user) {
+                req.log.warn(`User not found to update with uuid ${uuid}`);
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error: `No user found to update with uuid \`${uuid}\`.`,
+                });
+                return;
+            }
+            req.log.debug(`Updated user with uuid ${uuid}`);
+            // Return the updated user object
+            res.status(StatusCodes.OK).json(user);
+        } else {
+            // If the user is not authorized, provide a status error
+            req.log.warn({
+                msg: `Forbidden user attempted to update user with uuid ${uuid}`,
+                requesting_uuid: requesting_uuid,
+            });
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 /**
  * Create a new user.
@@ -906,59 +930,63 @@ router.put("/", async (req: UserRequest, res: UserResponse) => {
  * user is not authorized, a status error is returned. If the user is
  * authorized, the new user object is returned.
  */
-router.post("/", async (req: UserRequest, res: UserResponse) => {
-    // Get the user object from the request body
-    const user_obj = req.body.user_obj;
-    if (!user_obj) {
-        req.log.warn("No user object provided to create new user.");
-        res.status(StatusCodes.BAD_REQUEST).json({
-            error: "No user object was provided.",
-        });
-        return;
-    }
-
-    // Check for authorization
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid = req.user?.uuid as string;
-    const new_user_uuid = user_obj.uuid;
-    // If no requesting user_uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while creating new user.",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-    req.log.debug({
-        msg: `Creating user with uuid ${new_user_uuid}`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, perform the creation
-    if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_USER)) {
-        const user = await createUser(user_obj);
-        if (!user) {
-            req.log.warn(
-                `An attempt was made to create a user with uuid ` +
-                    `${new_user_uuid}, but a user with that uuid already exists`,
-            );
-            res.status(StatusCodes.CONFLICT).json({
-                error: `A user with uuid \`${new_user_uuid}\` already exists.`,
+router.post("/", 
+    verifySchema(UserSchema, "user_obj"),
+    async (req: UserRequest, res: UserResponse) => {
+        // Get the user object from the request body
+        const user_obj = req.body.user_obj;
+        if (!user_obj) {
+            req.log.warn("No user object provided to create new user.");
+            res.status(StatusCodes.BAD_REQUEST).json({
+                error: "No user object was provided.",
             });
             return;
         }
-        req.log.debug(`Created user with uuid ${new_user_uuid}`);
-        // Return the new user object
-        res.status(StatusCodes.CREATED).json(user);
-    } else {
-        // If the user is not authorized, provide a status error
-        req.log.warn({
-            msg: `Forbidden user attempted to create user with uuid ${new_user_uuid}`,
+
+        // Check for authorization
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = req.user?.uuid as string;
+        const new_user_uuid = user_obj.uuid;
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while creating new user.",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+        req.log.debug({
+            msg: `Creating user with uuid ${new_user_uuid}`,
             requesting_uuid: requesting_uuid,
         });
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+
+        // If the user is authorized, perform the creation
+        if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_USER)) {
+
+            const user = await createUser(user_obj);
+            if (!user) {
+                req.log.warn(
+                    `An attempt was made to create a user with uuid ` +
+                        `${new_user_uuid}, but a user with that uuid already exists`,
+                );
+                res.status(StatusCodes.CONFLICT).json({
+                    error: `A user with uuid \`${new_user_uuid}\` already exists.`,
+                });
+                return;
+            }
+            req.log.debug(`Created user with uuid ${new_user_uuid}`);
+            // Return the new user object
+            res.status(StatusCodes.CREATED).json(user);
+
+        } else {
+            // If the user is not authorized, provide a status error
+            req.log.warn({
+                msg: `Forbidden user attempted to create user with uuid ${new_user_uuid}`,
+                requesting_uuid: requesting_uuid,
+            });
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 /**
  * Update a user's public information by UUID

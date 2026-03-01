@@ -24,7 +24,7 @@ import {
     getStagingSchedule,
     setStagingSchedule,
 } from "controllers/schedule.controller";
-import { verifyRequest } from "controllers/verify.controller";
+import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -36,6 +36,7 @@ import {
 } from "common/verify";
 import { TAlert, TPublicScheduleData, TSchedule } from "common/schedule";
 import { TShift, TShiftEvent } from "common/shift";
+import { ScheduleSchema, ShiftSchema, AlertSchema, ShiftEventSchema, ScheduleSchemaOptional, ShiftSchemaOptional, AlertSchemaOptional } from "models/schedule.model";
 
 // --- Request and Response Types ---
 type ScheduleRequest = Request<{}, {}, { schedule_obj: TSchedule }>;
@@ -259,6 +260,7 @@ router.get(
  */
 router.post(
     "/:schedule_uuid/shifts",
+    verifySchema(ShiftSchema, "shift_obj"),
     async (req: ShiftRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
@@ -288,22 +290,26 @@ router.post(
                 API_SCOPE.UPDATE_SCHEDULE,
             )
         ) {
-            const new_schedule = await createShiftInSchedule(
-                schedule_uuid,
-                shift_obj,
-            );
-            if (!new_schedule) {
-                req.log.warn(
-                    `An attempt was made to create a shift with uuid ` +
-                        `${shift_obj.uuid}, but a shift with that uuid already exists`,
+
+            if (shift_obj) {
+                const new_schedule = await createShiftInSchedule(
+                    schedule_uuid,
+                    shift_obj,
                 );
-                res.status(StatusCodes.CONFLICT).json({
-                    error: `A shift with uuid \`${shift_obj.uuid}\` already exists.`,
-                });
-                return;
+                if (!new_schedule) {
+                    req.log.warn(
+                        `An attempt was made to create a shift with uuid ` +
+                            `${shift_obj.uuid}, but a shift with that uuid already exists`,
+                    );
+                    res.status(StatusCodes.CONFLICT).json({
+                        error: `A shift with uuid \`${shift_obj.uuid}\` already exists.`,
+                    });
+                    return;
+                }
+                req.log.debug(`Created shift with uuid ${shift_obj.uuid}`);
+                res.status(StatusCodes.CREATED).json(new_schedule);
             }
-            req.log.debug(`Created shift with uuid ${shift_obj.uuid}`);
-            res.status(StatusCodes.CREATED).json(new_schedule);
+
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to create a shift",
@@ -326,6 +332,7 @@ router.post(
  */
 router.put(
     "/:schedule_uuid/shifts/:shift_uuid",
+    verifySchema(ShiftSchema, "shift_obj"),
     async (req: ShiftUpdateRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
@@ -459,6 +466,7 @@ router.delete(
  */
 router.patch(
     "/:schedule_uuid/shifts/:shift_uuid/event",
+    verifySchema(ShiftEventSchema, "event_obj"),
     async (req: ShiftEventRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
@@ -558,6 +566,7 @@ router.get("/active/alert", async (req: Request, res: ActiveAlertResponse) => {
  */
 router.post(
     "/:schedule_uuid/alerts",
+    verifySchema(AlertSchema, "alert_obj"),
     async (req: AlertRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
@@ -586,22 +595,25 @@ router.post(
                 API_SCOPE.CREATE_ALERT,
             )
         ) {
-            const new_schedule = await createAlertInSchedule(
-                schedule_uuid,
-                alert_obj,
-            );
-            if (!new_schedule) {
-                req.log.warn(
-                    `An attempt was made to create an alert in the schedule ` +
-                        `with uuid ${schedule_uuid}, but that schedule was not found`,
+
+            if (alert_obj) {
+                const new_schedule = await createAlertInSchedule(
+                    schedule_uuid,
+                    alert_obj,
                 );
-                res.status(StatusCodes.NOT_FOUND).json({
-                    error: `Schedule with uuid \`${schedule_uuid}\` not found.`,
-                });
-                return;
+                if (!new_schedule) {
+                    req.log.warn(
+                        `An attempt was made to create an alert in the schedule ` +
+                            `with uuid ${schedule_uuid}, but that schedule was not found`,
+                    );
+                    res.status(StatusCodes.NOT_FOUND).json({
+                        error: `Schedule with uuid \`${schedule_uuid}\` not found.`,
+                    });
+                    return;
+                }
+                req.log.debug(`Created alert in schedule ${schedule_uuid}`);
+                res.status(StatusCodes.CREATED).json(new_schedule);
             }
-            req.log.debug(`Created alert in schedule ${schedule_uuid}`);
-            res.status(StatusCodes.CREATED).json(new_schedule);
         } else {
             req.log.warn({
                 msg: `Forbidden user attempted to create an alert in schedule ${schedule_uuid}`,
@@ -623,6 +635,7 @@ router.post(
  */
 router.put(
     "/:schedule_uuid/alerts/:alert_uuid",
+    verifySchema(AlertSchema, "alert_obj"),
     async (req: AlertUpdateRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
@@ -1016,50 +1029,55 @@ router.get(
  * header is required to call it. The user must have the
  * {@link API_SCOPE.CREATE_SCHEDULE} scope.
  */
-router.post("/", async (req: ScheduleRequest, res: ScheduleResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = req.user?.uuid as string;
-    const schedule_obj = req.body.schedule_obj;
-    const schedule_uuid = schedule_obj.uuid;
+router.post("/",
+    verifySchema(ScheduleSchema, "schedule_obj"),
+    async (req: ScheduleRequest, res: ScheduleResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = req.user?.uuid as string;
+        const schedule_obj = req.body.schedule_obj;
+        const schedule_uuid = schedule_obj.uuid;
 
-    // If no requesting user uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while creating a schedule",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-
-    req.log.debug({
-        msg: `Creating a schedule.`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, create a schedule
-    if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_SCHEDULE)) {
-        const schedule = await createSchedule(schedule_obj);
-        if (!schedule) {
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
             req.log.warn(
-                `An attempt was made to create a schedule with uuid ` +
-                    `${schedule_uuid}, but a schedule with that uuid already exists`,
+                "No requesting_uuid was provided while creating a schedule",
             );
-            res.status(StatusCodes.CONFLICT).json({
-                error: `A schedule with uuid \`${schedule_uuid}\` already exists.`,
-            });
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
-        req.log.debug(`Created schedule with uuid ${schedule_uuid}`);
-        res.status(StatusCodes.CREATED).json(schedule);
-    } else {
-        req.log.warn({
-            msg: "Forbidden user attempted to create a schedule",
+
+        req.log.debug({
+            msg: `Creating a schedule.`,
             requesting_uuid: requesting_uuid,
         });
-        // If the user is not authorized, provide a status error
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+
+        // If the user is authorized, create a schedule
+        if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_SCHEDULE)) {
+            
+            if (schedule_obj) {
+                const schedule = await createSchedule(schedule_obj);
+                if (!schedule) {
+                    req.log.warn(
+                        `An attempt was made to create a schedule with uuid ` +
+                            `${schedule_uuid}, but a schedule with that uuid already exists`,
+                    );
+                    res.status(StatusCodes.CONFLICT).json({
+                        error: `A schedule with uuid \`${schedule_uuid}\` already exists.`,
+                    });
+                    return;
+                }
+                req.log.debug(`Created schedule with uuid ${schedule_uuid}`);
+                res.status(StatusCodes.CREATED).json(schedule);
+            }
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to create a schedule",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 /**
  * Update a specific schedule. This route will not create a new schedule if the
@@ -1067,52 +1085,54 @@ router.post("/", async (req: ScheduleRequest, res: ScheduleResponse) => {
  * protected route, and a `requesting_uuid` header is required to call it.
  * The user must have the {@link API_SCOPE.UPDATE_SCHEDULE} scope.
  */
-router.put("/", async (req: ScheduleRequest, res: ScheduleResponse) => {
-    const headers = req.headers as VerifyRequestHeader;
-    const requesting_uuid: string = req.user?.uuid as string;
-    const schedule_obj = req.body.schedule_obj;
-    const schedule_uuid = schedule_obj.uuid;
+router.put("/", 
+    verifySchema(ScheduleSchema, "schedule_obj"),
+    async (req: ScheduleRequest, res: ScheduleResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = req.user?.uuid as string;
+        const schedule_obj = req.body.schedule_obj;
+        const schedule_uuid = schedule_obj.uuid;
 
-    // If no requesting user uuid is provided, the call is not authorized
-    if (!requesting_uuid) {
-        req.log.warn(
-            "No requesting_uuid was provided while updating a schedule",
-        );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
-    }
-
-    req.log.debug({
-        msg: `Updating a schedule by uuid ${schedule_uuid}`,
-        requesting_uuid: requesting_uuid,
-    });
-
-    // If the user is authorized, update a schedule's information
-    if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_SCHEDULE)) {
-        const schedule = await updateSchedule(schedule_obj);
-        if (!schedule) {
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
             req.log.warn(
-                `Could not update schedule with uuid ${schedule_uuid} ` +
-                    `because it was not found.`,
+                "No requesting_uuid was provided while updating a schedule",
             );
-            res.status(StatusCodes.NOT_FOUND).json({
-                error:
-                    `Could not update schedule with uuid ` +
-                    `\`${schedule_uuid}\` because it was not found.`,
-            });
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
             return;
         }
-        req.log.debug("Returned updated schedule.");
-        res.status(StatusCodes.OK).json(schedule);
-    } else {
-        req.log.warn({
-            msg: "Forbidden user attempted to update a schedule",
+
+        req.log.debug({
+            msg: `Updating a schedule by uuid ${schedule_uuid}`,
             requesting_uuid: requesting_uuid,
         });
-        // If the user is not authorized, provide a status error
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+
+        // If the user is authorized, update a schedule's information
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_SCHEDULE)) {
+            const schedule = await updateSchedule(schedule_obj);
+            if (!schedule) {
+                req.log.warn(
+                    `Could not update schedule with uuid ${schedule_uuid} ` +
+                        `because it was not found.`,
+                );
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error:
+                        `Could not update schedule with uuid ` +
+                        `\`${schedule_uuid}\` because it was not found.`,
+                });
+                return;
+            }
+            req.log.debug("Returned updated schedule.");
+            res.status(StatusCodes.OK).json(schedule);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to update a schedule",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    });
 
 /**
  * Set the active schedule by uuid. Requires the {@link API_SCOPE.UPDATE_SCHEDULE} scope.
@@ -1222,6 +1242,7 @@ router.patch(
  */
 router.patch(
     "/:UUID",
+    verifySchema(ScheduleSchemaOptional, "partial_schedule_obj"),
     async (
         req: Request<
             { UUID: string },

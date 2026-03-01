@@ -434,7 +434,7 @@ export default function RestockTable({
                 emptyContent={"No Restock Requests Found"}
                 customColumnComponents={{
                     reason: (restock) => (
-                        <div className="max-w-[15vw] break-words overflow-auto">
+                        <div className="max-w-[15vw] break-words overflow-auto select-text">
                             {restock.reason}
                         </div>
                     ),
@@ -453,7 +453,12 @@ export default function RestockTable({
                         </span>
                     ),
                     completion_note: (restock) => (
-                        <span style={{ overflowWrap: "anywhere" }}>
+                        <span
+                            style={{
+                                overflowWrap: "anywhere",
+                                userSelect: "text",
+                            }}
+                        >
                             {restock.status_logs.at(-1)?.message}
                         </span>
                     ),
