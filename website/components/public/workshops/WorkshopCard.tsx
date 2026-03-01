@@ -25,6 +25,7 @@ import React, { useMemo } from "react";
 import { API_SCOPE } from "../../../../common/global";
 import WorkshopSigninModal from "./WorkshopSigninModal";
 import WorkshopSigninListModal from "./WorkshopSigninListModal";
+import WorkshopRSVPDisclaimerModal from "./WorkshopRSVPDisclaimer";
 
 // cancel means cancel_rsvp
 async function rsvp({
@@ -190,6 +191,12 @@ export default function WorkshopCard({
         onOpenChange: signinListOnOpenChange,
     } = useDisclosure();
 
+    const {
+        isOpen: rsvpDisclaimerOpen,
+        onOpen: rsvpDisclaimerOnOpen,
+        onOpenChange: rsvpDisclaimerOnOpenChange,
+    } = useDisclosure();
+
     const workshopEnded = workshop.timestamp_end < Date.now() / 1000;
 
     return (
@@ -309,14 +316,34 @@ export default function WorkshopCard({
                                             workshop.timestamp_public <
                                                 Date.now() / 1000
                                         ) {
-                                            rsvpMutation.mutate({
-                                                workshop_uuid: workshop.uuid,
-                                                cancel: workshop.rsvp_list.some(
-                                                    (rsvp_record) =>
-                                                        rsvp_record.user_uuid ===
-                                                        self?.uuid,
-                                                ),
-                                            });
+                                            if (
+                                                rsvpIndex === -1 &&
+                                                workshop.rsvp_disclaimer
+                                            ) {
+                                                rsvpDisclaimerOnOpen();
+                                            } else {
+                                                rsvpMutation.mutate({
+                                                    workshop_uuid:
+                                                        workshop.uuid,
+                                                    cancel: workshop.rsvp_list.some(
+                                                        (rsvp_record) =>
+                                                            rsvp_record.user_uuid ===
+                                                            self?.uuid,
+                                                    ),
+                                                });
+                                            }
+                                        } else {
+                                            // If workshop not public & RSVP button pressed, send alert
+                                            workshop.timestamp_public &&
+                                            date_formatter
+                                                ? addToast({
+                                                      title: `RSVPs are closed until ${date_formatter.format(new Date(workshop.timestamp_public * 1000))}`,
+                                                      color: "warning",
+                                                  })
+                                                : addToast({
+                                                      title: `RSVPs are currently closed`,
+                                                      color: "warning",
+                                                  });
                                         }
                                     }}
                                     isDisabled={
@@ -434,6 +461,17 @@ export default function WorkshopCard({
                     workshop={workshop}
                     isOpen={signinListOpen}
                     onOpenChange={signinListOnOpenChange}
+                />
+            )}
+
+            {canRSVP && !isWorkshopInstructor && (
+                <WorkshopRSVPDisclaimerModal
+                    key={`${workshop.uuid}-signin`}
+                    overCapacity={overCapacity}
+                    rsvpMutation={rsvpMutation}
+                    workshop={workshop}
+                    isOpen={rsvpDisclaimerOpen}
+                    onOpenChange={rsvpDisclaimerOnOpenChange}
                 />
             )}
         </>

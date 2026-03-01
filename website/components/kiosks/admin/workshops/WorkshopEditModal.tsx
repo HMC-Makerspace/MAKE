@@ -17,7 +17,7 @@ import {
     NumberInput,
     Autocomplete,
     AutocompleteItem,
-    addToast
+    addToast,
 } from "@heroui/react";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import { TWorkshop } from "../../../../../common/workshop";
@@ -91,7 +91,6 @@ export default function WorkshopEditModal({
                     title: `Successfully created workshop`,
                     color: "success",
                 });
-
             } else {
                 queryClient.setQueryData(["workshop"], (old: TWorkshop[]) =>
                     old.map((w) => (w.uuid === data.uuid ? data : w)),
@@ -137,8 +136,11 @@ export default function WorkshopEditModal({
                 uuid: workshop.uuid, // never changes
                 title: (formData.get("title") as string) || workshop.title,
                 description:
-                    (formData.get("description") as string) ||
+                    (formData.get("description") as string) ??
                     workshop.description,
+                rsvp_disclaimer:
+                    (formData.get("rsvp_disclaimer") as string) ??
+                    workshop.rsvp_disclaimer,
                 instructors:
                     (formData.getAll("instructors") as string[]) ||
                     workshop.instructors,
@@ -290,7 +292,23 @@ export default function WorkshopEditModal({
                                     ]),
                                 }}
                             />
-
+                            <Input
+                                type="text"
+                                label="RSVP Disclaimer"
+                                name="rsvp_disclaimer"
+                                placeholder="Enter RSVP disclaimer here"
+                                defaultValue={workshop.rsvp_disclaimer}
+                                onValueChange={wrapEdit("rsvp_disclaimer")}
+                                variant="faded"
+                                color="primary"
+                                classNames={{
+                                    input: clsx([
+                                        "placeholder:text-default-500",
+                                        "placeholder:italic",
+                                        "text-default-700",
+                                    ]),
+                                }}
+                            />
                             <div className="flex flex-col sm:flex-row gap-2">
                                 <Select
                                     label="Instructors"
@@ -383,8 +401,9 @@ export default function WorkshopEditModal({
                                               workshop.timestamp_public,
                                               config.schedule.timezone,
                                           )
-                                        : timestampToZonedDateTime(Date.now() / 1000)
-                                             
+                                        : timestampToZonedDateTime(
+                                              Date.now() / 1000,
+                                          )
                                 }
                                 onChange={() => setHasEdits(true)}
                                 variant="faded"
@@ -483,11 +502,11 @@ export default function WorkshopEditModal({
                                         ? {
                                               start: timestampToZonedDateTime(
                                                   workshop.timestamp_start,
-                                                  config.schedule.timezone
+                                                  config.schedule.timezone,
                                               ),
                                               end: timestampToZonedDateTime(
                                                   workshop.timestamp_end,
-                                                  config.schedule.timezone
+                                                  config.schedule.timezone,
                                               ),
                                           }
                                         : undefined

@@ -17,6 +17,7 @@ import {
     PlusIcon,
     TagIcon,
     DocumentDuplicateIcon,
+    InboxStackIcon
 } from "@heroicons/react/24/outline";
 import { TWorkshop } from "common/workshop";
 import { TCertification } from "common/certification";
@@ -237,32 +238,59 @@ export default function WorkshopTable({
                 <h3 className="text-l text-foreground-900 mb-4">
                     View, edit, and create workshops.
                 </h3>
-                <Button
-                    color="primary"
-                    isDisabled={isLoading}
-                    startContent={<PlusIcon className="size-6" />}
-                    onPress={() => {
-                        let t = zonedDateTimeToTimestamp(
-                            now(getLocalTimeZone()),
-                        );
-                        setIsNew(true);
-                        setSelectedWorkshop({
-                            uuid: crypto.randomUUID(),
-                            title: "",
-                            instructors: [],
-                            timestamp_public: t - (t % 60),
-                            timestamp_start: t - (t % 60),
-                            timestamp_end: t - (t % 60) + 60 * 60 * 24,
-                            rsvp_list: [],
-                            reminder_emails_sent: [],
-                            sign_in_list: [],
-                        });
-                        editOnOpen();
-                    }}
-                    className="relative lg:absolute top-0 right-0 mb-4"
-                >
-                    Create
-                </Button>
+                <div className="relative lg:absolute top-0 right-0 mb-4 flex gap-2">
+                    <Button
+                        color="primary"
+                        isDisabled={isLoading}
+                        startContent={<PlusIcon className="size-6" />}
+                        onPress={() => {
+                            let t = zonedDateTimeToTimestamp(
+                                now(getLocalTimeZone()),
+                            );
+                            setIsNew(true);
+                            setSelectedWorkshop({
+                                uuid: crypto.randomUUID(),
+                                title: "",
+                                instructors: [],
+                                timestamp_public: t - (t % 60),
+                                timestamp_start: t - (t % 60),
+                                timestamp_end: t - (t % 60) + 60 * 60 * 24,
+                                rsvp_list: [],
+                                reminder_emails_sent: [],
+                                sign_in_list: [],
+                            });
+                            editOnOpen();
+                        }}
+                    >
+                        Create
+                    </Button>
+
+                    <Button
+                        color="primary"
+                        isDisabled={isLoading}
+                        startContent={<InboxStackIcon className="size-6" />}
+                        onPress={() => {
+                            let t = zonedDateTimeToTimestamp(
+                                now(getLocalTimeZone()),
+                            );
+                            setIsNew(true);
+                            setSelectedWorkshop({
+                                uuid: crypto.randomUUID(),
+                                title: "",
+                                instructors: [],
+                                timestamp_public: t - (t % 60),
+                                timestamp_start: t - (t % 60),
+                                timestamp_end: t - (t % 60) + 60 * 60 * 24,
+                                rsvp_list: [],
+                                reminder_emails_sent: [],
+                                sign_in_list: [],
+                            });
+                            editOnOpen();
+                        }}
+                    >
+                        Batch Create
+                    </Button>
+                </div>
             </div>
             {workshops.length > 0 ? (
                 <MAKETable
