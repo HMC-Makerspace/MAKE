@@ -43,6 +43,7 @@ import { workshopReminderEmailCron } from "controllers/workshop.controller";
 import favicon from "common/favicon.ico";
 import { clearExpiredFilesCron } from "controllers/file.controller";
 import { revokeExpiredCertificatesCron } from "controllers/certification.controller";
+import { VerifyRequestHeader } from "common/verify";
 
 // Setup logging
 const logger = pino();
@@ -133,22 +134,32 @@ passport.deserializeUser((user: Express.User, done) => {
     });
 });
 
+// Passport defines its own CSRF state, so login routes do not need csrfSync
 app.use(loginRoutes);
+// Include user session authentication for all following routes
+app.use(passport.session());
 
-export const { generateToken, csrfSynchronisedProtection } = csrfSync();
+export const { generateToken, csrfSynchronisedProtection } = csrfSync({
+    skipCsrfProtection: (req) => {
+        const headers = req.headers as VerifyRequestHeader;
+        if (headers.requesting_uuid && headers.passkey && !req.user?.uuid) {
+            // calls with requesting_uuid and passkey get passed through to verify middleware instead
+            return true;
+        } else {
+            return false;
+        }
+    },
+});
 
 app.get("/api/v3/csrf-token", (req, res) => {
     res.json({ csrfToken: generateToken(req) });
 });
 
+app.use("/api/v3/certification", certificationRoutes);
 app.use(csrfSynchronisedProtection);
-
-// Include user session authentication for all following routes
-app.use(passport.session());
 
 // API Routes
 app.use("/api/v3/area", areaRoutes);
-app.use("/api/v3/certification", certificationRoutes);
 app.use("/api/v3/checkout", checkoutRoutes);
 app.use("/api/v3/config", configRoutes);
 app.use("/api/v3/embed", embedRoutes);
