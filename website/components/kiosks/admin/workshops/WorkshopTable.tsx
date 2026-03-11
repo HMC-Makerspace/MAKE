@@ -261,7 +261,7 @@ export default function WorkshopTable({
                         startContent={<PlusIcon className="size-6" />}
                         onPress={() => {
                             let t = zonedDateTimeToTimestamp(
-                                now(getLocalTimeZone()),
+                                now(config.schedule.timezone),
                             );
                             setIsNew(true);
                             setSelectedWorkshop({
@@ -288,7 +288,7 @@ export default function WorkshopTable({
                         startContent={<InboxStackIcon className="size-6" />}
                         onPress={() => {
                             let t = zonedDateTimeToTimestamp(
-                                now(getLocalTimeZone()),
+                                now(config.schedule.timezone),
                             );
                             setIsNew(true);
                             setSelectedWorkshop({
