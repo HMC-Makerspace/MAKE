@@ -68,6 +68,7 @@ export default function WorkshopEditModal({
     isNew,
     isOpen,
     onOpenChange,
+    batchEdit = false,
 }: {
     workshop: TWorkshop;
     users: TUser[];
@@ -76,6 +77,7 @@ export default function WorkshopEditModal({
     isNew: boolean;
     isOpen: boolean;
     onOpenChange: (open?: boolean) => void;
+    batchEdit: boolean;
 }) {
     const queryClient = useQueryClient();
     const updateCreateMutation = useMutation({
@@ -127,59 +129,111 @@ export default function WorkshopEditModal({
         };
     }
 
+    function shiftTime(
+        timestamp_start: Date,
+        repeat_interval: number,
+        repeats: number,
+        offset?: number,
+    ): number {
+        const days = Number(repeat_interval);
+        const date = new Date(timestamp_start.getTime());
+        if (offset) {
+            console.log(offset);
+            date.setDate(date.getDate() + days * repeats - offset);
+        } else {
+            date.setDate(date.getDate() + days * repeats);
+        }
+        return date.getTime() / 1000;
+    }
+
     const onSubmit = React.useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
             e.preventDefault();
             const formData = new FormData(e.currentTarget);
 
-            const new_workshop: TWorkshop = {
-                uuid: workshop.uuid, // never changes
-                title: (formData.get("title") as string) || workshop.title,
-                description:
-                    (formData.get("description") as string) ??
-                    workshop.description,
-                rsvp_disclaimer:
-                    (formData.get("rsvp_disclaimer") as string) ??
-                    workshop.rsvp_disclaimer,
-                instructors:
-                    (formData.getAll("instructors") as string[]) ||
-                    workshop.instructors,
-                support_instructors:
-                    (formData.getAll("support_instructors") as string[]) ||
-                    workshop.support_instructors,
-                capacity:
-                    parseInt(formData.get("capacity") as string) ||
-                    workshop.capacity,
-                timestamp_start:
-                    parseZonedDateTime(
-                        formData.get("timestamp_start") as string,
-                    )
-                        .toDate()
-                        .getTime() / 1000 || workshop.timestamp_start,
-                timestamp_end:
-                    parseZonedDateTime(formData.get("timestamp_end") as string)
-                        .toDate()
-                        .getTime() / 1000 || workshop.timestamp_end,
-                timestamp_public:
-                    parseZonedDateTime(
-                        formData.get("timestamp_public") as string,
-                    )
-                        .toDate()
-                        .getTime() / 1000 || workshop.timestamp_public,
-                required_certifications: workshop.required_certifications,
-                rsvp_list: workshop.rsvp_list,
-                reminder_emails_sent: workshop.reminder_emails_sent,
-                sign_in_list: workshop.sign_in_list,
-                images: workshop.images,
-                authorized_roles: workshop.authorized_roles,
-            };
+            const repeated_days: number = batchEdit
+                ? Number(formData.get("repeats"))
+                : 0;
 
-            updateCreateMutation.reset();
+            const repeat_interval: number = batchEdit
+                ? Number(formData.get("repeat_interval"))
+                : 0;
 
-            updateCreateMutation.mutate({
-                workshop: new_workshop,
-                isNew: isNew,
-            });
+            for (let i = 0; i <= repeated_days; i++) {
+
+                const new_workshop: TWorkshop = {
+                    uuid: batchEdit ? crypto.randomUUID() : workshop.uuid, // never changes
+                    title: (formData.get("title") as string) || workshop.title,
+                    description:
+                        (formData.get("description") as string) ??
+                        workshop.description,
+                    rsvp_disclaimer:
+                        (formData.get("rsvp_disclaimer") as string) ??
+                        workshop.rsvp_disclaimer,
+                    instructors:
+                        (formData.getAll("instructors") as string[]) ||
+                        workshop.instructors,
+                    support_instructors:
+                        (formData.getAll("support_instructors") as string[]) ||
+                        workshop.support_instructors,
+                    capacity:
+                        parseInt(formData.get("capacity") as string) ||
+                        workshop.capacity,
+                    timestamp_start: batchEdit
+                        ? shiftTime(
+                              parseZonedDateTime(
+                                  formData.get("timestamp_start") as string,
+                              ).toDate(),
+                              repeat_interval,
+                              i,
+                          )
+                        : parseZonedDateTime(
+                              formData.get("timestamp_start") as string,
+                          )
+                              .toDate()
+                              .getTime() / 1000 || workshop.timestamp_start,
+                    timestamp_end: batchEdit
+                        ? shiftTime(
+                              parseZonedDateTime(
+                                  formData.get("timestamp_end") as string,
+                              ).toDate(),
+                              repeat_interval,
+                              i,
+                          )
+                        : parseZonedDateTime(
+                              formData.get("timestamp_end") as string,
+                          )
+                              .toDate()
+                              .getTime() / 1000 || workshop.timestamp_end,
+                    timestamp_public: batchEdit
+                        ? shiftTime(
+                              parseZonedDateTime(
+                                  formData.get("timestamp_start") as string,
+                              ).toDate(),
+                              repeat_interval,
+                              i,
+                              Number(formData.get("timestamp_public")),
+                          )
+                        : parseZonedDateTime(
+                              formData.get("timestamp_public") as string,
+                          )
+                              .toDate()
+                              .getTime() / 1000 || workshop.timestamp_public,
+                    required_certifications: workshop.required_certifications,
+                    rsvp_list: workshop.rsvp_list,
+                    reminder_emails_sent: workshop.reminder_emails_sent,
+                    sign_in_list: workshop.sign_in_list,
+                    images: workshop.images,
+                    authorized_roles: workshop.authorized_roles,
+                };
+
+                updateCreateMutation.reset();
+
+                updateCreateMutation.mutate({
+                    workshop: new_workshop,
+                    isNew: isNew,
+                });
+            }
         },
         [isNew, workshop],
     );
@@ -194,48 +248,54 @@ export default function WorkshopEditModal({
         >
             <ModalContent>
                 <ModalHeader>
-                    <h1 className="text-2xl font-bold">Create/Edit Workshop</h1>
+                    <h1 className="text-2xl font-bold">
+                        {batchEdit
+                            ? "Batch Create Workshop"
+                            : "Create/Edit Workshop"}
+                    </h1>
                 </ModalHeader>
                 <ModalBody>
                     <Form onSubmit={onSubmit}>
                         <div className="flex flex-col w-full gap-2">
-                            <div className="flex flex-row gap-4 ">
-                                <Input
-                                    type="text"
-                                    label="UUID"
-                                    name="uuid"
-                                    placeholder={workshop.uuid}
-                                    // UUID is not editable
-                                    isDisabled
-                                    defaultValue={workshop.uuid}
-                                    variant="faded"
-                                    color="primary"
-                                    size="md"
-                                    classNames={{
-                                        input: clsx([
-                                            "placeholder:text-default-500",
-                                            "placeholder:italic",
-                                            "text-default-700",
-                                            "w-[50%]",
-                                        ]),
-                                    }}
-                                />
-                                <Button
-                                    // Create button to copy the UUID to the clipboard
-                                    size="md"
-                                    radius="lg"
-                                    className="my-auto"
-                                    isIconOnly
-                                    onPress={() => {
-                                        // Copy the UUID to the clipboard
-                                        navigator.clipboard.writeText(
-                                            workshop.uuid,
-                                        );
-                                    }}
-                                >
-                                    <ClipboardIcon className="size-6 text-primary-300" />
-                                </Button>
-                            </div>
+                            {batchEdit ? null : (
+                                <div className="flex flex-row gap-4 ">
+                                    <Input
+                                        type="text"
+                                        label="UUID"
+                                        name="uuid"
+                                        placeholder={workshop.uuid}
+                                        // UUID is not editable
+                                        isDisabled
+                                        defaultValue={workshop.uuid}
+                                        variant="faded"
+                                        color="primary"
+                                        size="md"
+                                        classNames={{
+                                            input: clsx([
+                                                "placeholder:text-default-500",
+                                                "placeholder:italic",
+                                                "text-default-700",
+                                                "w-[50%]",
+                                            ]),
+                                        }}
+                                    />
+                                    <Button
+                                        // Create button to copy the UUID to the clipboard
+                                        size="md"
+                                        radius="lg"
+                                        className="my-auto"
+                                        isIconOnly
+                                        onPress={() => {
+                                            // Copy the UUID to the clipboard
+                                            navigator.clipboard.writeText(
+                                                workshop.uuid,
+                                            );
+                                        }}
+                                    >
+                                        <ClipboardIcon className="size-6 text-primary-300" />
+                                    </Button>
+                                </div>
+                            )}
 
                             <div className="flex flex-row gap-2">
                                 <Input
@@ -389,37 +449,6 @@ export default function WorkshopEditModal({
                                 </Select>
                             </div>
 
-                            <DatePicker<ZonedDateTime>
-                                label="Public Announcement Date"
-                                name="timestamp_public"
-                                isRequired
-                                granularity="minute"
-                                hideTimeZone
-                                defaultValue={
-                                    workshop.timestamp_public
-                                        ? timestampToZonedDateTime(
-                                              workshop.timestamp_public,
-                                              config.schedule.timezone,
-                                          )
-                                        : timestampToZonedDateTime(
-                                              Date.now() / 1000,
-                                          )
-                                }
-                                onChange={() => setHasEdits(true)}
-                                variant="faded"
-                                color="primary"
-                                className="w-full"
-                                classNames={{
-                                    segment: clsx([
-                                        "text-default-700",
-                                        "data-[editable=true]:text-default-700 ",
-                                        "data-[editable=true]:data-[placeholder=true]:text-default-500",
-                                        "data-[editable=true]:data-[placeholder=true]:italic",
-                                        "focus:text-default-700",
-                                        "data-[editable=true]:focus:text-default-700",
-                                    ]),
-                                }}
-                            />
                             {/* <Select<TCertification>
                                     label="Required Certifications"
                                     labelPlacement="inside"
@@ -488,45 +517,183 @@ export default function WorkshopEditModal({
                                     ))}
                                 </Select> */}
 
-                            <DateRangePicker
-                                label="Workshop Date Range"
-                                aria-label="Workshop Time"
-                                startName="timestamp_start"
-                                endName="timestamp_end"
-                                isRequired
-                                granularity="minute"
-                                hideTimeZone
-                                defaultValue={
-                                    workshop.timestamp_start &&
-                                    workshop.timestamp_end
-                                        ? {
-                                              start: timestampToZonedDateTime(
-                                                  workshop.timestamp_start,
-                                                  config.schedule.timezone,
-                                              ),
-                                              end: timestampToZonedDateTime(
-                                                  workshop.timestamp_end,
-                                                  config.schedule.timezone,
-                                              ),
-                                          }
-                                        : undefined
-                                }
-                                onChange={() => setHasEdits(true)}
-                                variant="faded"
-                                color="primary"
-                                className="w-full"
-                                classNames={{
-                                    segment: clsx([
-                                        "text-xs sm:text-small",
-                                        "text-default-700",
-                                        "data-[editable=true]:text-default-700 ",
-                                        "data-[editable=true]:data-[placeholder=true]:text-default-500",
-                                        "data-[editable=true]:data-[placeholder=true]:italic",
-                                        "focus:text-default-700",
-                                        "data-[editable=true]:focus:text-default-700",
-                                    ]),
-                                }}
-                            />
+                            {batchEdit ? (
+                                <>
+                                    <DateRangePicker
+                                        label="Workshop Date Range"
+                                        aria-label="Workshop Time"
+                                        startName="timestamp_start"
+                                        endName="timestamp_end"
+                                        isRequired
+                                        granularity="minute"
+                                        hideTimeZone
+                                        defaultValue={
+                                            workshop.timestamp_start &&
+                                            workshop.timestamp_end
+                                                ? {
+                                                      start: timestampToZonedDateTime(
+                                                          workshop.timestamp_start,
+                                                          config.schedule
+                                                              .timezone,
+                                                      ),
+                                                      end: timestampToZonedDateTime(
+                                                          workshop.timestamp_end,
+                                                          config.schedule
+                                                              .timezone,
+                                                      ),
+                                                  }
+                                                : undefined
+                                        }
+                                        onChange={() => setHasEdits(true)}
+                                        variant="faded"
+                                        color="primary"
+                                        className="w-full"
+                                        classNames={{
+                                            segment: clsx([
+                                                "text-xs sm:text-small",
+                                                "text-default-700",
+                                                "data-[editable=true]:text-default-700 ",
+                                                "data-[editable=true]:data-[placeholder=true]:text-default-500",
+                                                "data-[editable=true]:data-[placeholder=true]:italic",
+                                                "focus:text-default-700",
+                                                "data-[editable=true]:focus:text-default-700",
+                                            ]),
+                                        }}
+                                    />
+                                    <div className="flex flex-row gap-2">
+                                        <NumberInput
+                                            label="Public Announcement Date"
+                                            name="timestamp_public"
+                                            isRequired
+                                            minValue={1}
+                                            maxValue={365}
+                                            placeholder="Days before workshop"
+                                            variant="faded"
+                                            color="primary"
+                                            classNames={{
+                                                input: clsx([
+                                                    "placeholder:text-default-500",
+                                                    "placeholder:italic",
+                                                    "text-default-700",
+                                                ]),
+                                                innerWrapper:
+                                                    "endcontent:text-default-500",
+                                            }}
+                                        />
+
+                                        <NumberInput
+                                            label="Repeated Interval"
+                                            name="repeat_interval"
+                                            placeholder="Repeat every x days"
+                                            isRequired
+                                            minValue={1}
+                                            maxValue={365}
+                                            variant="faded"
+                                            color="primary"
+                                            classNames={{
+                                                input: clsx([
+                                                    "placeholder:text-default-500",
+                                                    "placeholder:italic",
+                                                    "text-default-700",
+                                                ]),
+                                            }}
+                                        />
+                                        <NumberInput
+                                            className="w-3/4"
+                                            label="Repeats"
+                                            name="repeats"
+                                            placeholder="Repeat x times"
+                                            isRequired
+                                            minValue={1}
+                                            maxValue={365}
+                                            variant="faded"
+                                            color="primary"
+                                            classNames={{
+                                                input: clsx([
+                                                    "placeholder:text-default-500",
+                                                    "placeholder:italic",
+                                                    "text-default-700",
+                                                ]),
+                                            }}
+                                        />
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <DatePicker<ZonedDateTime>
+                                        label="Public Announcement Date"
+                                        name="timestamp_public"
+                                        isRequired
+                                        granularity="minute"
+                                        hideTimeZone
+                                        defaultValue={
+                                            workshop.timestamp_public
+                                                ? timestampToZonedDateTime(
+                                                      workshop.timestamp_public,
+                                                      config.schedule.timezone,
+                                                  )
+                                                : timestampToZonedDateTime(
+                                                      Date.now() / 1000,
+                                                  )
+                                        }
+                                        onChange={() => setHasEdits(true)}
+                                        variant="faded"
+                                        color="primary"
+                                        className="w-full"
+                                        classNames={{
+                                            segment: clsx([
+                                                "text-default-700",
+                                                "data-[editable=true]:text-default-700 ",
+                                                "data-[editable=true]:data-[placeholder=true]:text-default-500",
+                                                "data-[editable=true]:data-[placeholder=true]:italic",
+                                                "focus:text-default-700",
+                                                "data-[editable=true]:focus:text-default-700",
+                                            ]),
+                                        }}
+                                    />
+                                    <DateRangePicker
+                                        label="Workshop Date Range"
+                                        aria-label="Workshop Time"
+                                        startName="timestamp_start"
+                                        endName="timestamp_end"
+                                        isRequired
+                                        granularity="minute"
+                                        hideTimeZone
+                                        defaultValue={
+                                            workshop.timestamp_start &&
+                                            workshop.timestamp_end
+                                                ? {
+                                                      start: timestampToZonedDateTime(
+                                                          workshop.timestamp_start,
+                                                          config.schedule
+                                                              .timezone,
+                                                      ),
+                                                      end: timestampToZonedDateTime(
+                                                          workshop.timestamp_end,
+                                                          config.schedule
+                                                              .timezone,
+                                                      ),
+                                                  }
+                                                : undefined
+                                        }
+                                        onChange={() => setHasEdits(true)}
+                                        variant="faded"
+                                        color="primary"
+                                        className="w-full"
+                                        classNames={{
+                                            segment: clsx([
+                                                "text-xs sm:text-small",
+                                                "text-default-700",
+                                                "data-[editable=true]:text-default-700 ",
+                                                "data-[editable=true]:data-[placeholder=true]:text-default-500",
+                                                "data-[editable=true]:data-[placeholder=true]:italic",
+                                                "focus:text-default-700",
+                                                "data-[editable=true]:focus:text-default-700",
+                                            ]),
+                                        }}
+                                    />
+                                </>
+                            )}
                         </div>
                         <div className="flex flex-row gap-2 justify-between w-full pt-4">
                             <Button

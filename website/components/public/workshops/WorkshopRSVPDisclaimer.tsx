@@ -40,7 +40,7 @@ export default function WorkshopRSVPDisclaimerModal({
                 {(onClose) => (
                     <>
                         <ModalHeader>
-                            <h3 className="text-2xl font-bold">Disclaimer:</h3>
+                            <h3 className="text-2xl font-bold">Disclaimer</h3>
                         </ModalHeader>
                         <ModalBody className="overflow-auto h-full">
                             <div className="size-full flex flex-col gap-4 items-center overflow-auto">
