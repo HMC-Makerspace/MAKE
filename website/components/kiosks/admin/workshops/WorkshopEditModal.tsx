@@ -102,7 +102,9 @@ export default function WorkshopEditModal({
                     color: "success",
                 });
             }
-            onOpenChange(false);
+            if (!batchEdit) {
+                onOpenChange(false);
+            }
         },
         onError: (e) => {
             addToast({
@@ -234,8 +236,9 @@ export default function WorkshopEditModal({
                     isNew: isNew,
                 });
             }
+            if (batchEdit) onOpenChange(false);
         },
-        [isNew, workshop],
+        [isNew, workshop, batchEdit],
     );
 
     return (
