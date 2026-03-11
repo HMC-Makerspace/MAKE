@@ -405,6 +405,7 @@ export default function CertificationsTable({
                     key={"certdocprereq-" + certOpenDoc.uuid}
                     certifications={certs}
                     element={certOpenDoc}
+                    parentKitCerts={undefined}
                     isOpen={prereqOpen}
                     onOpenChange={setPrereqOpen}
                     patchMutation={mutation}

@@ -531,6 +531,7 @@ export default function WorkshopTable({
                     <RequiredCertsModal
                         key={selectedWorkshop.uuid}
                         element={selectedWorkshop}
+                        parentKitCerts={undefined}
                         certifications={certs}
                         isOpen={certsIsOpen}
                         onOpenChange={certsOnOpenChange}

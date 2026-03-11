@@ -534,6 +534,7 @@ export default function RestockTable({
                                 item_data={inventory.find(
                                     (item) => item.uuid === restock.item_uuid,
                                 )}
+                                inventory={inventory}
                                 areas={areas}
                                 certs={certs}
                             />

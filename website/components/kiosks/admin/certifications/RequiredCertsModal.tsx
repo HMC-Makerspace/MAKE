@@ -5,6 +5,7 @@ import {
     ModalContent,
     Input,
     NumberInput,
+    Divider,
 } from "@heroui/react";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
@@ -15,6 +16,7 @@ import clsx from "clsx";
 import { TRequiredCertificate, TCertification } from "common/certification";
 import { UUID } from "common/global";
 import { CertSelect } from "./CertSelect";
+import CertificationTag from "./CertificationTag";
 
 const emptyCert: TRequiredCertificate = {
     certification_uuid: "",
@@ -26,12 +28,14 @@ export default function RequiredCertsModal<
     T extends { uuid: UUID; required_certifications?: TRequiredCertificate[] },
 >({
     element,
+    parentKitCerts,
     certifications,
     isOpen,
     onOpenChange,
     patchMutation,
 }: {
     element: T;
+    parentKitCerts: TRequiredCertificate[] | undefined;
     certifications: TCertification[];
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
@@ -189,6 +193,26 @@ export default function RequiredCertsModal<
                                 </div>
                             </div>
                         ))}
+
+                        {parentKitCerts && (<>
+                            {currentCerts.length != 0 && (<Divider className="hidden sm:block h-[1px] bg-default-400" />)}
+                            <div className="w-full">
+                                <div className="text-lg font-semibold text-center">
+                                    Parent Kit Required Certifications
+                                </div>
+                                <div className="grid grid-cols-2 w-full gap-y-3 justify-evenly p-4">
+                                    {parentKitCerts?.map((cert, i) => (<div className={`flex content-center justify-center col-span-${i < parentKitCerts?.length - parentKitCerts?.length % 2 ? 1 : 2}`}>
+                                        <CertificationTag
+                                            cert_uuid={cert.certification_uuid}
+                                            certifications={certifications}
+                                            showVisibility={false}
+                                            level={cert.required_level}
+                                        >
+                                        </CertificationTag>
+                                    </div>))}
+                                </div>
+                            </div>
+                        </>)}
 
                         <div className="flex flex-row justify-between w-full gap-2">
                             <Button

@@ -284,6 +284,7 @@ export default function CheckoutsKiosk() {
                                 // }}
                                 multiSelect={true}
                                 isLoading={inventoryLoading}
+                                showsKitContents={true}
                                 extraColumns={[{ name: "Cart", id: "cart" }]}
                                 defaultColumns={[
                                     "role",

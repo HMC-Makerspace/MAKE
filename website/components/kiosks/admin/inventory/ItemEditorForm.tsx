@@ -45,6 +45,7 @@ import ItemQuantityIcon from "./ItemQuantityIcon";
 import ItemLocationModal from "./ItemLocationModal";
 import { TArea } from "common/area";
 import KitEditorModal from "./KitEditorModal";
+import { mergeRequiredCerts } from "../../../../utils";
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateItem = async ({
@@ -267,6 +268,8 @@ export default function ItemEditorForm({
     const [isNumericQuantity, setQtype] = React.useState<boolean>(
         item.quantity >= 0,
     ); // type of quantity (true: numerical, false: categorical)
+
+    const parent_kit = items.find(i => i.uuid == item.parent_kit);
 
     return (
         <>
@@ -708,7 +711,7 @@ export default function ItemEditorForm({
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <BookmarkIcon className="size-7" />
-                                {item.required_certifications?.length ?? 0}
+                                {mergeRequiredCerts(item.required_certifications || [], parent_kit?.required_certifications || []).length}
                             </Button>
                         </Tooltip>
 
@@ -802,6 +805,7 @@ export default function ItemEditorForm({
                 key={"certreq-" + item.uuid}
                 certifications={certs}
                 element={item}
+                parentKitCerts={parent_kit?.required_certifications}
                 isOpen={reqcertsOpen}
                 onOpenChange={setReqcertsOpen}
                 patchMutation={reqcertsMutation}

@@ -197,6 +197,7 @@ export default function Machine({
                                     </Button>
                                     <RequiredCertsModal
                                         element={machine}
+                                        parentKitCerts={undefined}
                                         certifications={certifications}
                                         isOpen={certModal}
                                         onOpenChange={certModalOpenChange}

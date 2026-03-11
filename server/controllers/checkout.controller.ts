@@ -35,6 +35,7 @@ import {
 } from "./machine.controller";
 import { clearAreaReservations, patchArea } from "./area.controller";
 import { getConfig } from "./config.controller";
+import { mergeRequiredCerts } from "../../website/utils";
 
 /**
  * Get all checkouts in the database
@@ -132,7 +133,14 @@ export async function validateCheckout(
                 };
             }
         }
-        for (const cert of item.required_certifications || []) {
+
+        const parent_kit = await Inventory.findOne({
+            uuid: item.parent_kit
+        });
+
+        const mergedCerts = mergeRequiredCerts(item.required_certifications || [], parent_kit?.required_certifications || []);
+
+        for (const cert of mergedCerts) {
             // User has no certs, so must not have the required certs.
             if (!user.active_certificates) {
                 return {

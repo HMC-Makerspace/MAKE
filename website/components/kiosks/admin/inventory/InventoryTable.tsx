@@ -28,10 +28,10 @@ import MAKETable from "../../../Table";
 import Fuse from "fuse.js";
 import React from "react";
 import { TUser, TUserRole } from "common/user";
-import { TCertification } from "common/certification";
+import { TCertification, TRequiredCertificate } from "common/certification";
 import { TRestockRequest } from "../../../../../common/restock";
 import { API_SCOPE } from "../../../../../common/global.ts";
-import { verifyScopes } from "../../../../utils.tsx";
+import { mergeRequiredCerts, verifyScopes } from "../../../../utils.tsx";
 import clsx from "clsx";
 import CertificationTag from "../certifications/CertificationTag";
 import UserRole from "../../../user/UserRole";
@@ -425,7 +425,9 @@ export default function InventoryTable({
                     ),
                     required_certifications: (i) => (
                         <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
-                            {i.required_certifications?.map((c) => (
+                            {mergeRequiredCerts(i.required_certifications,
+                                inventory.find(k => k.uuid == i.parent_kit)?.required_certifications
+                            )?.map((c) => (
                                 <CertificationTag
                                     key={c.certification_uuid}
                                     cert_uuid={c.certification_uuid}

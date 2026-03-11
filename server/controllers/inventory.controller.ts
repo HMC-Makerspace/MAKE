@@ -94,6 +94,7 @@ export async function getInventoryVisibleToUser(
     ]);
 
     // Consider filter out items that require certifications the user doesn't have
+    // Should potentially check parent kit's required certifications as well?
     /*.filter((item) =>
         item.required_certifications?.every((cert) =>
             cert_uuids.includes(cert.certification_uuid),

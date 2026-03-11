@@ -391,6 +391,7 @@ export default function CheckoutTable({
                                         item_data={inventory.find(
                                             (item) => item.uuid === i.item_uuid,
                                         )}
+                                        inventory={inventory}
                                         areas={areas}
                                         certs={certs}
                                         quantity={i.quantity}

@@ -15,14 +15,17 @@ import CertificationTag from "../certifications/CertificationTag";
 import { TCertification } from "common/certification";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
+import { mergeRequiredCerts } from "../../../../utils";
 
 export default function ItemInfo({
     item_data,
+    inventory,
     areas,
     certs,
     quantity,
 }: {
     item_data?: TInventoryItem;
+    inventory: TInventoryItem[];
     areas: TArea[];
     certs: TCertification[];
     quantity?: number;
@@ -99,7 +102,9 @@ export default function ItemInfo({
                                     <div>No Required Certifications</div>
                                 ) : (
                                     <div className="flex flex-row flex-wrap gap-1 overflow-auto max-w-1/2 items-center justify-center">
-                                        {item_data.required_certifications?.map(
+                                        {mergeRequiredCerts(item_data.required_certifications,
+                                            inventory.find(k => k.uuid == item_data.parent_kit)?.required_certifications
+                                        )?.map(
                                             (c) => (
                                                 <CertificationTag
                                                     key={c.certification_uuid}

@@ -10,6 +10,7 @@ import { API_SCOPE, UnixTimestamp } from "../common/global";
 import { TUser, TUserRole } from "common/user";
 import { TConfig } from "common/config";
 import { TShift, SHIFT_EVENT_TYPE, TShiftEvent } from "../common/shift";
+import { TRequiredCertificate } from "common/certification";
 
 /**
  * A file to contain useful utility functions for the website.
@@ -229,4 +230,28 @@ export function getForegroundColor(hex: string): string {
     } else {
         return "#000000";
     }
+}
+
+export function mergeRequiredCerts(a: TRequiredCertificate[] | undefined, b: TRequiredCertificate[] | undefined) {
+    // https://stackoverflow.com/questions/7486085/copy-array-by-value mfw
+    const res: TRequiredCertificate[] = JSON.parse(JSON.stringify(a ?? []));
+    const toMerge: TRequiredCertificate[] = JSON.parse(JSON.stringify(b ?? []));
+
+    for (let i = 0; i < res.length; i++) {
+        let uuid = res[i].certification_uuid;
+        let highestLevel = res[i].required_level;
+
+        for (let j = toMerge.length - 1; j >= 0; j--) {
+            if (toMerge[j].certification_uuid == uuid) {
+                if (toMerge[j].required_level > highestLevel) {
+                    highestLevel = toMerge[j].required_level;
+                }
+                toMerge.splice(j, 1);
+            }
+        }
+
+        res[i].required_level = highestLevel;
+    }
+
+    return [...res, ...toMerge];
 }
