@@ -1,4 +1,4 @@
-import express, { Application, Request, Response } from "express";
+import express from "express";
 import fs from "fs";
 import ViteExpress from "vite-express";
 import compression from "compression";
@@ -8,21 +8,13 @@ import loggerMiddleware from "pino-http";
 import cors from "cors";
 import cron from "node-cron";
 import session from "express-session";
-import lusca from "lusca";
 import cookieParser from "cookie-parser";
 import passport from "passport";
 import { default as MongoDBStore } from "connect-mongodb-session";
 import { globalLimiter } from "rate-limiter";
 import { verifyUser } from "routes/verify.route";
-import Bun from "bun";
 import mongoSanitize from "express-mongo-sanitize";
 import { csrfSync } from "csrf-sync";
-
-// await Bun.build({
-//     entrypoints: ["website/index.html"],
-//     outdir: "website/build",
-//     plugins: [html()],
-// });
 
 // Routes
 import loginRoutes from "./routes/login.route";
@@ -51,6 +43,7 @@ import { workshopReminderEmailCron } from "controllers/workshop.controller";
 import favicon from "common/favicon.ico";
 import { clearExpiredFilesCron } from "controllers/file.controller";
 import { revokeExpiredCertificatesCron } from "controllers/certification.controller";
+import { VerifyRequestHeader } from "common/verify";
 
 // Setup logging
 const logger = pino();
@@ -112,7 +105,6 @@ app.use(
         resave: false,
         saveUninitialized: false,
     }),
-    // lusca.csrf(),
     passport.initialize(),
     globalLimiter,
     verifyUser(),
@@ -130,17 +122,6 @@ app.use(
     }),
 );
 
-export const {
-  generateToken,
-  csrfSynchronisedProtection,
-} = csrfSync();
-
-app.get("/api/v3/csrf-token", (req, res) => {
-  res.json({ csrfToken: generateToken(req) });
-});
-
-app.use(csrfSynchronisedProtection);
-
 passport.serializeUser((user, done) => {
     process.nextTick(() => {
         return done(null, { uuid: user.uuid });
@@ -153,14 +134,32 @@ passport.deserializeUser((user: Express.User, done) => {
     });
 });
 
+// Passport defines its own CSRF state, so login routes do not need csrfSync
 app.use(loginRoutes);
-
 // Include user session authentication for all following routes
 app.use(passport.session());
 
+export const { generateToken, csrfSynchronisedProtection } = csrfSync({
+    skipCsrfProtection: (req) => {
+        const headers = req.headers as VerifyRequestHeader;
+        if (headers.requesting_uuid && headers.passkey) {
+            // calls with requesting_uuid and passkey get passed through to verify middleware instead
+            return true;
+        } else {
+            return false;
+        }
+    },
+});
+
+app.get("/api/v3/csrf-token", (req, res) => {
+    res.json({ csrfToken: generateToken(req) });
+});
+
+app.use("/api/v3/certification", certificationRoutes);
+app.use(csrfSynchronisedProtection);
+
 // API Routes
 app.use("/api/v3/area", areaRoutes);
-app.use("/api/v3/certification", certificationRoutes);
 app.use("/api/v3/checkout", checkoutRoutes);
 app.use("/api/v3/config", configRoutes);
 app.use("/api/v3/embed", embedRoutes);
