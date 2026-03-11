@@ -132,20 +132,14 @@ export default function WorkshopEditModal({
     }
 
     function shiftTime(
-        timestamp_start: Date,
+        timestamp_start: ZonedDateTime,
         repeat_interval: number,
         repeats: number,
-        offset?: number,
-    ): number {
-        const days = Number(repeat_interval);
-        const date = new Date(timestamp_start.getTime());
-        if (offset) {
-            console.log(offset);
-            date.setDate(date.getDate() + days * repeats - offset);
-        } else {
-            date.setDate(date.getDate() + days * repeats);
-        }
-        return date.getTime() / 1000;
+        offset = 0,
+    ): ZonedDateTime {
+            const shift = Number(repeat_interval) * repeats - offset;
+            const shifted_date = timestamp_start.add({days: shift})
+        return shifted_date
     }
 
     const onSubmit = React.useCallback(
@@ -185,10 +179,11 @@ export default function WorkshopEditModal({
                         ? shiftTime(
                               parseZonedDateTime(
                                   formData.get("timestamp_start") as string,
-                              ).toDate(),
+                              ),
                               repeat_interval,
                               i,
-                          )
+                          ).toDate()
+                            .getTime() / 1000
                         : parseZonedDateTime(
                               formData.get("timestamp_start") as string,
                           )
@@ -198,10 +193,11 @@ export default function WorkshopEditModal({
                         ? shiftTime(
                               parseZonedDateTime(
                                   formData.get("timestamp_end") as string,
-                              ).toDate(),
+                              ),
                               repeat_interval,
                               i,
-                          )
+                          ).toDate()
+                            .getTime() / 1000
                         : parseZonedDateTime(
                               formData.get("timestamp_end") as string,
                           )
@@ -211,11 +207,12 @@ export default function WorkshopEditModal({
                         ? shiftTime(
                               parseZonedDateTime(
                                   formData.get("timestamp_start") as string,
-                              ).toDate(),
+                              ),
                               repeat_interval,
                               i,
                               Number(formData.get("timestamp_public")),
-                          )
+                          ).toDate()
+                            .getTime() / 1000
                         : parseZonedDateTime(
                               formData.get("timestamp_public") as string,
                           )
