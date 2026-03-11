@@ -212,6 +212,7 @@ export default function WorkshopTable({
         TWorkshop | undefined
     >(undefined);
     const [isNew, setIsNew] = React.useState<boolean>(false);
+    const [isBatch, setIsBatch] = React.useState<boolean>(false);
 
     const {
         isOpen: peopleIsOpen,
@@ -274,6 +275,7 @@ export default function WorkshopTable({
                                 reminder_emails_sent: [],
                                 sign_in_list: [],
                             });
+                            setIsBatch(false);
                             editOnOpen();
                         }}
                     >
@@ -300,6 +302,7 @@ export default function WorkshopTable({
                                 reminder_emails_sent: [],
                                 sign_in_list: [],
                             });
+                            setIsBatch(true);
                             editOnOpen();
                         }}
                     >
@@ -512,6 +515,7 @@ export default function WorkshopTable({
                                         onPress={() => {
                                             setSelectedWorkshop(workshop);
                                             setIsNew(false);
+                                            setIsBatch(false);
                                             editOnOpen();
                                         }}
                                     ></Button>
@@ -582,6 +586,7 @@ export default function WorkshopTable({
                         isOpen={editIsOpen}
                         onOpenChange={editOnOpenChange}
                         config={config}
+                        batchEdit={isBatch}
                     />
                     <RequiredCertsModal
                         key={selectedWorkshop.uuid}
