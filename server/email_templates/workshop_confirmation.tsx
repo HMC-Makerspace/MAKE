@@ -28,6 +28,7 @@ const WorkshopConfirmationTemplate = (
         timeZoneName: "short",
         timeZone: config.schedule.timezone,
     });
+    const url = new URL("/workshops", process.env.SITE_URL);
     return (
         <>
             <h1>Workshop RSVP</h1>
@@ -53,7 +54,7 @@ const WorkshopConfirmationTemplate = (
                 <br />
                 <br />
                 If you are unable to attend, please cancel on{" "}
-                <a href="https://make.hmc.edu/workshops">make.hmc.edu</a>.
+                <a href={url.href}>{url.host}</a>.
             </p>
 
             <footer>

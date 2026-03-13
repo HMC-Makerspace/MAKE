@@ -22,6 +22,7 @@ const WorkshopWaitlistTemplate = (
         timeZoneName: "short",
         timeZone: config.schedule.timezone,
     });
+    const url = new URL("/workshops", process.env.SITE_URL);
     return (
         <>
             <h1>Workshop Waitlist Update</h1>
@@ -30,8 +31,8 @@ const WorkshopWaitlistTemplate = (
                 <br />
                 <br />
                 <b>
-                    You have been moved off the waitlist and onto the RSVP list for
-                    {workshop.title}.
+                    You have been moved off the waitlist and onto the RSVP list
+                    for {workshop.title}.
                 </b>
                 <br />
                 <br />
@@ -41,7 +42,7 @@ const WorkshopWaitlistTemplate = (
                 <br />
                 <br />
                 If you are unable to attend, please cancel on{" "}
-                <a href="https://make.hmc.edu/workshops">make.hmc.edu</a>.
+                <a href={url.href}>{url.host}</a>.
             </p>
 
             <footer>
