@@ -168,15 +168,15 @@ export default function ItemEditorForm({
                 access_type: parseInt(
                     data.get("access_type") as string,
                 ) as ITEM_ACCESS_TYPE,
-                locations: item.locations,
+                locations: item.locations || [],
                 reorder_url: data.get("reorder_url") as string,
                 serial_number: data.get("serial_number") as string,
                 keywords:
                     (data.get("keywords") as string)
                         ?.split(",")
                         .map((i) => i.trim()) ?? [],
-                required_certifications: item.required_certifications,
-                authorized_roles: item.authorized_roles,
+                required_certifications: item.required_certifications || [],
+                authorized_roles: item.authorized_roles || [],
                 quantity: quantity,
                 available: available,
             };
