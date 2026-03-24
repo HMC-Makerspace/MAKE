@@ -15,8 +15,8 @@ const InventoryItemLocation = new mongoose.Schema<TInventoryItemLocation>({
 
 const InventoryItemLocationSchema = Joi.object<TInventoryItemLocation>({
     area: Joi.string().required(),
-    container: Joi.string().optional().allow(""),
-    specific: Joi.string().optional().allow(""),
+    container: Joi.string().optional().allow("", null),
+    specific: Joi.string().optional().allow("", null),
 });
 
 /**
