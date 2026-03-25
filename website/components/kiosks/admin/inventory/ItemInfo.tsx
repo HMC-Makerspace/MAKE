@@ -30,6 +30,9 @@ export default function ItemInfo({
     certs: TCertification[];
     quantity?: number;
 }) {
+    const parent_kit = inventory.find(k => k.uuid == item_data?.parent_kit);
+    const mergedReqCerts = mergeRequiredCerts(item_data?.required_certifications, parent_kit?.required_certifications);
+
     return (
         <div>
             <Popover placement="bottom">
@@ -96,15 +99,12 @@ export default function ItemInfo({
                             <div
                                 className={`bg-default-200 p-2 h-fit w-full rounded-md flex justify-center whitespace-nowrap, overflow-x-auto ${item_data ? "text-default-700" : "text-default-400"}`}
                             >
-                                {item_data.required_certifications &&
-                                item_data.required_certifications.length ==
+                                {mergedReqCerts.length ==
                                     0 ? (
                                     <div>No Required Certifications</div>
                                 ) : (
                                     <div className="flex flex-row flex-wrap gap-1 overflow-auto max-w-1/2 items-center justify-center">
-                                        {mergeRequiredCerts(item_data.required_certifications,
-                                            inventory.find(k => k.uuid == item_data.parent_kit)?.required_certifications
-                                        )?.map(
+                                        {mergedReqCerts?.map(
                                             (c) => (
                                                 <CertificationTag
                                                     key={c.certification_uuid}

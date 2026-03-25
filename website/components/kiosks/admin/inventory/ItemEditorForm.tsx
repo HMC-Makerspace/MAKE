@@ -270,6 +270,7 @@ export default function ItemEditorForm({
     ); // type of quantity (true: numerical, false: categorical)
 
     const parent_kit = items.find(i => i.uuid == item.parent_kit);
+    const mergedReqCerts = mergeRequiredCerts(item.required_certifications || [], parent_kit?.required_certifications || []);
 
     return (
         <>
@@ -620,7 +621,7 @@ export default function ItemEditorForm({
                             name="parent_kit"
                             placeholder={placeholder("No parent kit")}
                             isDisabled={true}
-                            defaultValue={items.find(i => i.uuid == item.parent_kit)?.name}
+                            defaultValue={parent_kit?.name}
                             minRows={1}
                             variant="faded"
                             color="primary"
@@ -711,7 +712,7 @@ export default function ItemEditorForm({
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <BookmarkIcon className="size-7" />
-                                {mergeRequiredCerts(item.required_certifications || [], parent_kit?.required_certifications || []).length}
+                                {mergedReqCerts.length}
                             </Button>
                         </Tooltip>
 
