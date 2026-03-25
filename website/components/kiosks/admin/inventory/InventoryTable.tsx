@@ -402,7 +402,7 @@ export default function InventoryTable({
                                 return (
                                     parent_kit?.locations.map((location, index) => (
                                         <ItemLocationChip
-                                            key={`${i.uuid}-location`}
+                                            key={`${i.uuid}-location-${index}`}
                                             location={{
                                                 area: location.area,
                                                 specific: `In ${parent_kit?.name}`,

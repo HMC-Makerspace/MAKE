@@ -82,8 +82,22 @@ export default function ItemInfo({
                                 </Tooltip>
 
                                 <div className="flex-row gap-1 min-w-max flex-wrap">
-                                    {item_data.locations.map(
-                                        (location, index) => (
+                                    {parent_kit ? (
+                                        parent_kit.locations.map((location, index) => (
+                                            <div className="pb-1">
+                                                <ItemLocationChip
+                                                    key={`${item_data.uuid}-location-${index}`}
+                                                    location={{
+                                                        area: location.area,
+                                                        specific: `In ${parent_kit?.name}`,
+                                                        container: ""
+                                                    }}
+                                                    areas={areas}
+                                                />
+                                            </div>
+                                        ))
+                                    ) : (
+                                        item_data.locations.map((location, index) => (
                                             <div className="pb-1">
                                                 <ItemLocationChip
                                                     key={`${location.area}-${index}`}
@@ -91,7 +105,7 @@ export default function ItemInfo({
                                                     areas={areas}
                                                 />
                                             </div>
-                                        ),
+                                        ))
                                     )}
                                 </div>
                             </div>
