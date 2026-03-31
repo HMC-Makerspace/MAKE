@@ -12,7 +12,7 @@ import {
     ModalBody,
     useDisclosure,
     Image,
-    addToast
+    addToast,
 } from "@heroui/react";
 import {
     TrashIcon,
@@ -41,7 +41,7 @@ async function uploadImage({
     resource_type,
     file,
 }: {
-    resource_uuid: FileUUID;
+    resource_uuid: UUID;
     resource_type: FILE_RESOURCE_TYPE;
     file: File;
 }) {
@@ -218,7 +218,7 @@ function EditModal({
 
     const uploadMutation = useMutation({
         mutationFn: uploadImage,
-        onSuccess: (data: TFile[]) => {
+        onSuccess: (data: TFile) => {
             queryClient.setQueryData(
                 ["file", "by", resource_type, resource_uuid],
                 (old: TFile[]) => old.concat(data),
