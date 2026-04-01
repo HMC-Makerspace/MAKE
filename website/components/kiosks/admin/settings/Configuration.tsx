@@ -932,6 +932,7 @@ export default function Configuration({
                         variant="solid"
                         size="lg"
                         className="mt-auto flex-none mb-0"
+                        isDisabled={mutation.isPending}
                     >
                         Save Changes
                     </Button>
