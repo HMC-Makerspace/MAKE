@@ -121,7 +121,7 @@ FAQItemConfig.add({
 
 const FAQItemConfigSchema = Joi.object<TFAQItem>({
     title: Joi.string(),
-    description: Joi.string().optional(),
+    description: Joi.string().optional().allow(""),
     children_columns: Joi.number().optional(),
     default_open: Joi.boolean().optional(),
     always_open: Joi.boolean().optional(),
