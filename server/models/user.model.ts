@@ -143,6 +143,7 @@ export const User = new mongoose.Schema<TUser>(
         files: { type: [String], required: false },
         work_schedules: { type: [UserAvailability], required: false },
         passkey: { type: String, required: false },
+        last_login: { type: Number, required: true },
     },
     { collection: "users" },
 );
@@ -155,40 +156,17 @@ export const UserSchema = Joi.object<TUser>({
     name: Joi.string().required(),
     email: Joi.string().email().required(),
     college_id: Joi.string()
-    // maybe consider validating this, here is where ids could be validated!
-        .allow('')
+        // maybe consider validating this, here is where ids could be validated!
+        .allow("")
         .optional(),
-    active_roles: Joi.array()
-        .items(
-            UserRoleLogSchema
-        )
-        .required(),
-    past_roles: Joi.array()
-        .items(
-            UserRoleLogSchema
-        )
-        .required(),
-    active_certificates: Joi.array()
-        .items(
-            CertificateSchema
-        )
-        .optional(),
-    past_certificates: Joi.array()
-        .items(
-            CertificateSchema
-        )
-        .optional(),
-    files: Joi.array()
-        .items(
-            Joi.string()
-        )
-        .optional(),
-    work_schedules: Joi.array()
-        .items(
-            UserAvailabilitySchema
-        )
-        .optional(),
-    passkey: Joi.string().allow('').allow(null).optional()
+    active_roles: Joi.array().items(UserRoleLogSchema).required(),
+    past_roles: Joi.array().items(UserRoleLogSchema).required(),
+    active_certificates: Joi.array().items(CertificateSchema).optional(),
+    past_certificates: Joi.array().items(CertificateSchema).optional(),
+    files: Joi.array().items(Joi.string()).optional(),
+    work_schedules: Joi.array().items(UserAvailabilitySchema).optional(),
+    passkey: Joi.string().allow("").allow(null).optional(),
+    last_login: Joi.number().required(),
 });
 
 export const UserSchemaOptional = UserSchema.fork(
