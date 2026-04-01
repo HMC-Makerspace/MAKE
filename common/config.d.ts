@@ -1,3 +1,4 @@
+import { TDocument } from "./file";
 import { UnixTimestamp, UUID } from "./global";
 import { UserRoleUUID } from "./user";
 
@@ -89,7 +90,7 @@ export type TWorkshopConfig = {
      * Time (in seconds) before a workshop starts during which users can sign in
      */
     sign_in_enabled_within: number;
-}
+};
 
 export type TFAQItem = {
     title: string;
@@ -114,4 +115,3 @@ export type TConfig = {
     workshop: TWorkshopConfig;
     faq?: TFAQItem;
 };
-

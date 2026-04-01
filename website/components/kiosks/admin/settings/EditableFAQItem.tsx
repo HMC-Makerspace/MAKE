@@ -5,9 +5,6 @@ import {
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
 import {
     Button,
-    Card,
-    CardBody,
-    CardHeader,
     Dropdown,
     DropdownItem,
     DropdownMenu,
@@ -18,7 +15,7 @@ import {
 } from "@heroui/react";
 import clsx from "clsx";
 import { TFAQItem } from "common/config";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 
 export default function EditableFAQItem({
     faq_item,
@@ -58,9 +55,12 @@ export default function EditableFAQItem({
                 return; // no update
             }
             const new_self = { ...faq_item };
-            if (value !== undefined) {
+            if (value) {
                 // Update
                 new_self[prop] = value;
+                setItem(new_self, index);
+            } else {
+                delete new_self[prop];
                 setItem(new_self, index);
             }
         };
@@ -73,12 +73,12 @@ export default function EditableFAQItem({
                     <Input
                         type="text"
                         defaultValue={faq_item?.title}
-                        // name={`faq__i_${index}_title`}
                         onBlur={blurCallback("title")}
                         color="secondary"
                         variant="underlined"
                         placeholder="FAQ item title"
                         className="w-full"
+                        isRequired
                         classNames={{
                             input: clsx([
                                 "placeholder:text-default-500",
@@ -98,25 +98,23 @@ export default function EditableFAQItem({
                             const children = faq_item?.children ?? [];
                             const new_self: TFAQItem = {
                                 ...faq_item,
-                                children: [...children, { title: "" }],
+                                children: [...children, { title: "FAQ Item" }],
                             };
                             setItem(new_self, index);
                         }}
                     >
                         Add Child
                     </Button>
-                    {
-                        <Button
-                            color="danger"
-                            size="sm"
-                            variant="flat"
-                            isIconOnly
-                            startContent={<TrashIcon className="size-5" />}
-                            onPress={() => deleteItem && deleteItem(index)}
-                            isDisabled={!deleteItem}
-                        />
-                    }
-                    <Dropdown closeOnSelect={false}>
+                    <Button
+                        color="danger"
+                        size="sm"
+                        variant="flat"
+                        isIconOnly
+                        startContent={<TrashIcon className="size-5" />}
+                        onPress={() => deleteItem && deleteItem(index)}
+                        isDisabled={!deleteItem}
+                    />
+                    <Dropdown closeOnSelect={false} type="listbox">
                         <DropdownTrigger>
                             <Button
                                 size="sm"
@@ -148,28 +146,31 @@ export default function EditableFAQItem({
                                 key="columns"
                                 textValue={"Child Column Count"}
                             >
-                                <NumberInput
-                                    label={"Child Columns"}
-                                    labelPlacement="outside-left"
-                                    size="sm"
-                                    classNames={{
-                                        inputWrapper: "min-w-16",
-                                        mainWrapper: "w-min",
-                                        label: "text-md pl-0 text-default-600",
-                                    }}
-                                    color="secondary"
-                                    variant="bordered"
-                                    minValue={1}
-                                    defaultValue={
-                                        faq_item.children_columns ?? 1
-                                    }
-                                    onValueChange={(value) =>
-                                        blurCallback("children_columns")(
-                                            undefined,
-                                            value,
-                                        )
-                                    }
-                                />
+                                <div className="flex flex-row gap-2 items-center h-6">
+                                    <div className="text-sm whitespace-nowrap">
+                                        Child Columns
+                                    </div>
+                                    <NumberInput
+                                        size="sm"
+                                        classNames={{
+                                            inputWrapper: "min-w-16",
+                                            mainWrapper: "w-min",
+                                            label: "text-md pl-0 text-default-600",
+                                        }}
+                                        color="secondary"
+                                        variant="bordered"
+                                        minValue={1}
+                                        defaultValue={
+                                            faq_item.children_columns ?? 1
+                                        }
+                                        onValueChange={(value) =>
+                                            blurCallback("children_columns")(
+                                                undefined,
+                                                value,
+                                            )
+                                        }
+                                    />
+                                </div>
                             </DropdownItem>
                             <DropdownItem
                                 key="default_open"
@@ -241,6 +242,7 @@ export default function EditableFAQItem({
                 <Textarea
                     defaultValue={faq_item.description}
                     onBlur={blurCallback("description")}
+                    minRows={2}
                     color="secondary"
                     placeholder="Item content"
                     variant="faded"
