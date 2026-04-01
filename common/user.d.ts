@@ -102,6 +102,7 @@ export type TUserAvailability = {
  *      been a worker at the space, this property will not be present
  * @property passkey - (optional) An optional string passkey used as an
  *      alternate authorization method to SSO. Hashed using SHA256.
+ * @property last_login - (optional) The UNIX timestamp that this user last logged in.
  */
 export type TUser = {
     uuid: UserUUID;
@@ -115,6 +116,7 @@ export type TUser = {
     files?: FileUUID[];
     work_schedules?: TUserAvailability[];
     passkey?: string;
+    last_login?: UnixTimestamp;
 };
 
 /**

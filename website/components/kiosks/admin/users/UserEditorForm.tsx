@@ -206,6 +206,7 @@ export default function UserEditorForm({
                 files: user.files,
                 work_schedules: user.work_schedules,
                 passkey: data.get("passkey") as string,
+                last_login: user.last_login,
             };
 
             // Reset the mutation (clears any previous errors)

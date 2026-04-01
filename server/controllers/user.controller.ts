@@ -720,3 +720,16 @@ export async function initializeAdmin(
     });
     return newAdmin.save();
 }
+
+/**
+ * Update a user's last login time to the current time.
+ * @param user_uuid The user to update
+ * @returns The new user object
+ */
+export async function updateUserLoginTime(user_uuid: UserUUID) {
+    const Users = mongoose.model("User", User);
+    return Users.findOneAndUpdate(
+        { uuid: user_uuid },
+        { last_login: Date.now() / 1000 },
+    );
+}

@@ -22,6 +22,7 @@ import CertificationTag from "../certifications/CertificationTag";
 import { TCertification } from "common/certification";
 import { useQuery } from "@tanstack/react-query";
 import UserExportModal from "./UserExportModal";
+import { convertTimestampToDate } from "../../../../utils";
 
 const baseColumns = [
     { name: "UUID", id: "uuid" }, // No need to show
@@ -33,6 +34,7 @@ const baseColumns = [
     { name: "Certificates", id: "active_certificates" },
     { name: "Past Certificates", id: "past_certificates" },
     { name: "Has Passkey", id: "has_passkey" },
+    { name: "Last Login", id: "last_login" },
 ];
 
 const defaultUserColumns: string[] = [
@@ -316,6 +318,13 @@ export default function UsersTable({
                                 isDisabled
                                 className="opacity-100"
                             />
+                        </div>
+                    ),
+                    last_login: (user: TUser) => (
+                        <div className="flex justify-center">
+                            {user.last_login !== 0
+                                ? convertTimestampToDate(user.last_login)
+                                : "Never logged in"}
                         </div>
                     ),
                     ...customColumnComponents,
