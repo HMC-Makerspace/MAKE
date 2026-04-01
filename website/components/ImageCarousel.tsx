@@ -28,11 +28,14 @@ import clsx from "clsx";
 async function deleteImage({
     resource_type,
     file_uuid,
+    resource_uuid
 }: {
     resource_type: FILE_RESOURCE_TYPE;
     file_uuid: UUID;
+    resource_uuid: UUID;
 }) {
-    return (await axios.delete(`/api/v3/file/by/${resource_type}/${file_uuid}`))
+
+    return (await axios.delete(`/api/v3/file/by/${resource_type}/${file_uuid}/${resource_uuid}`))
         .data;
 }
 
@@ -261,6 +264,7 @@ function EditModal({
                                 <FileCard
                                     file={image}
                                     resource_type={resource_type}
+                                    resource_uuid={resource_uuid}
                                     deleteMutation={deleteMutation}
                                 />
                             );

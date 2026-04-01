@@ -15,23 +15,27 @@ import { Card, CardFooter, Button, Image, Tooltip } from "@heroui/react";
 import { UseMutationResult } from "@tanstack/react-query";
 import clsx from "clsx";
 import { FILE_RESOURCE_TYPE, FileUUID, TFile } from "../../../../common/file";
+import { UUID } from "../../../../common/global.ts";
 import { relativeTimestampToString } from "../../../utils";
 
 export default function FileCard({
     file,
     resource_type,
+    resource_uuid,
     deleteMutation,
     disableDeletion = false,
     showFooter = false,
 }: {
     file: TFile;
     resource_type: FILE_RESOURCE_TYPE;
+    resource_uuid: UUID;
     deleteMutation: UseMutationResult<
         {},
         Error,
         {
             file_uuid: FileUUID;
             resource_type: FILE_RESOURCE_TYPE;
+            resource_uuid: UUID;
         }
     >;
     disableDeletion?: boolean;
@@ -172,6 +176,7 @@ export default function FileCard({
                     deleteMutation.mutate({
                         file_uuid: file.uuid,
                         resource_type: resource_type,
+                        resource_uuid: resource_uuid
                     })
                 }
                 isDisabled={disableDeletion || deleteMutation.isPending}
