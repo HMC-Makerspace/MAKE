@@ -26,7 +26,7 @@ export type TFile = {
     timestamp_upload: UnixTimestamp;
     timestamp_expires?: UnixTimestamp;
     size: number;
-    resource_uuid: UUID;
+    resource_uuid: UUID[];
     resource_type: FILE_RESOURCE_TYPE;
 };
 

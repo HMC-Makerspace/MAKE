@@ -6,25 +6,27 @@ import Joi from "joi";
  * See {@link TFile} documentation for type information.
  */
 export const File = new mongoose.Schema<TFile>({
-  uuid: { type: String, required: true },
-  name: { type: String, required: true },
-  path: { type: String, required: true },
-  timestamp_upload: { type: Number, required: true },
-  timestamp_expires: { type: Number, required: false },
-  size: { type: Number, required: true },
-  resource_uuid: { type: String, required: true },
-  resource_type: { type: String, required: true },
+    uuid: { type: String, required: true },
+    name: { type: String, required: true },
+    path: { type: String, required: true },
+    timestamp_upload: { type: Number, required: true },
+    timestamp_expires: { type: Number, required: false },
+    size: { type: Number, required: true },
+    resource_uuid: { type: [String], required: true },
+    resource_type: { type: String, required: true },
 });
 
 export const FileSchema = Joi.object<TFile>({
-  uuid: Joi.string().required(),
-  name: Joi.string().required(),
-  path: Joi.string().required(),
-  timestamp_upload: Joi.number().required(),
-  timestamp_expires: Joi.number().optional(),
-  size: Joi.number().required(),
-  resource_uuid: Joi.string().required(),
-  resource_type: Joi.string().required(),
+    uuid: Joi.string().required(),
+    name: Joi.string().required(),
+    path: Joi.string().required(),
+    timestamp_upload: Joi.number().required(),
+    timestamp_expires: Joi.number().optional(),
+    size: Joi.number().required(),
+    resource_uuid: Joi.array().items(
+            Joi.string()
+        ).required(),
+    resource_type: Joi.string().required()
 });
 
 /**
