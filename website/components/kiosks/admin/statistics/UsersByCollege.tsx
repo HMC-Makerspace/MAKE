@@ -15,18 +15,42 @@ import {
 import { TUser } from "../../../../../common/user";
 
 //random colors that are assigned to each slice of the pie later on
-const DOMAIN_COLORS = [
-    "#4A7C59",
-    "#6B9D7A",
-    "#D97398",
-    "#F2A900",
-    "#4A90D9",
-    "#8B5CF6",
-    "#EC4899",
-    "#14B8A6",
-    "#F97316",
-    "#EAB308",
+const PIE_COLORS = [
+    "hsl(var(--heroui-primary))",
+    "hsl(var(--heroui-secondary))",
+    "hsl(var(--heroui-tertiary))",
 ];
+
+type ChartEntry = {
+    name: string;
+    value: number;
+    subDomains?: { name: string; value: number }[];
+};
+
+const CustomTooltip = ({ active, payload }: any) => {
+    if (!active || !payload?.length) return null;
+    const entry: ChartEntry = payload[0].payload;
+
+    return (
+        <div className="bg-white border border-default-200 rounded p-3 shadow text-sm max-w-xs">
+            <p className="font-bold mb-1">
+                {entry.name}: {entry.value} users
+            </p>
+            {entry.subDomains && (
+                <>
+                    <p className="text-default-500 mb-1">Includes:</p>
+                    <ul className="text-default-600 max-h-48 overflow-y-auto space-y-0.5">
+                        {entry.subDomains.map((d) => (
+                            <li key={d.name}>
+                                {d.name}: {d.value}
+                            </li>
+                        ))}
+                    </ul>
+                </>
+            )}
+        </div>
+    );
+};
 
 //defines the component and what properties (basically arguments) it accepts
 //{ users } pulls the users prop out of the props object
@@ -63,9 +87,27 @@ export default function UsersByCollege({ users }: { users: TUser[] }) {
         //.map reshapes each pair into { name: "xxx.edu", value: 42 }
         //which is the format Recharts needs to draw the chart
         //.sort orders by value descending so the biggest slice comes first
-        return Object.entries(domainCounts)
+        // AFTER
+        const total = users.length;
+
+        const entries = Object.entries(domainCounts)
             .map(([name, value]) => ({ name, value }))
             .sort((a, b) => b.value - a.value);
+
+        const significant: ChartEntry[] = entries.filter(
+            (e) => e.value / total >= 0.01,
+        );
+        const small = entries.filter((e) => e.value / total < 0.01);
+
+        if (small.length > 0) {
+            significant.push({
+                name: "Other",
+                value: small.reduce((sum, e) => sum + e.value, 0),
+                subDomains: small,
+            });
+        }
+
+        return significant;
     }, [users]);
 
     //now that we have our object that has our data sorted so we know what demain has how many users
@@ -95,16 +137,11 @@ export default function UsersByCollege({ users }: { users: TUser[] }) {
                         {data.map((entry, index) => (
                             <Cell
                                 key={`cell-${entry.name}`}
-                                fill={
-                                    DOMAIN_COLORS[index % DOMAIN_COLORS.length]
-                                }
+                                fill={PIE_COLORS[index % PIE_COLORS.length]}
                             />
                         ))}
                     </Pie>
-
-                    <Tooltip
-                        formatter={(value: any) => [`${value} users`, "Count"]}
-                    />
+                    <Tooltip content={<CustomTooltip />} />
                     <Legend />
                 </PieChart>
             </ResponsiveContainer>

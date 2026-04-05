@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { DateFormatter } from "@internationalized/date";
 import {
     LineChart,
     Line,
@@ -9,42 +10,51 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { TCheckout } from "common/checkout";
+import { TConfig } from "common/config";
+import { timestampToZonedDateTime } from "../../../../../website/utils";
 
 export default function CheckoutTrend({
     checkouts,
+    config,
 }: {
     checkouts: TCheckout[];
+    config?: TConfig;
 }) {
     const data = useMemo(() => {
-        //creates a dictionary dayCounts that takes the date and the number of checkouts
-        //that corresponds to that day
-        const dayCounts: { [key: string]: number } = {};
-        //does an array function "for loop" through each item in checkouts and gets the:
-        checkouts.forEach((checkout) => {
-            //date and date str in the corresponding forms
-            const date = new Date(checkout.timestamp_out * 1000);
-            const dateStr = date.toLocaleDateString("en-US", {
+        const dayCounts: Record<string, { date: string; count: number }> = {};
+
+        const dateFormatter =
+            config?.schedule.locale &&
+            new DateFormatter(config.schedule.locale, {
                 month: "short",
                 day: "numeric",
                 year: "numeric",
             });
-            //then we do the check we've been doing where if the
-            //dateStr is already in it, add 1, if not, start at 0 and add 1
-            dayCounts[dateStr] = (dayCounts[dateStr] || 0) + 1;
+
+        checkouts.forEach((checkout) => {
+            const zonedDate = timestampToZonedDateTime(
+                checkout.timestamp_out,
+                config?.schedule.timezone,
+            );
+
+            const dayKey = `${zonedDate.year}-${String(zonedDate.month).padStart(2, "0")}-${String(zonedDate.day).padStart(2, "0")}`;
+
+            if (!dayCounts[dayKey]) {
+                dayCounts[dayKey] = {
+                    date: dateFormatter
+                        ? dateFormatter.format(zonedDate.toDate())
+                        : `${zonedDate.month}/${zonedDate.day}/${zonedDate.year}`,
+                    count: 0,
+                };
+            }
+
+            dayCounts[dayKey].count += 1;
         });
 
-        //returns a sorted array out of daycount
-        return (
-            Object.entries(dayCounts)
-                //.map takes in the form [date, count] and turns it into the form {date, count}
-                .map(([date, count]) => ({ date, count }))
-                .sort(
-                    (a, b) =>
-                        new Date(a.date).getTime() - new Date(b.date).getTime(),
-                )
-        );
-        //we then sort it by going from earliest date to latest
-    }, [checkouts]);
+        return Object.entries(dayCounts)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([, value]) => value);
+    }, [checkouts, config?.schedule.locale, config?.schedule.timezone]);
 
     //just in case there is no data at all, display this
     if (data.length === 0) {
@@ -91,7 +101,7 @@ export default function CheckoutTrend({
                     <Line
                         type="monotone"
                         dataKey="count"
-                        stroke="#4A7C59"
+                        stroke="hsl(var(--heroui-primary))"
                         dot={false}
                         strokeWidth={2}
                     />
