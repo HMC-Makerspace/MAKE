@@ -1,6 +1,6 @@
 //again we useMemo so that component don't rerun all the time and only when its
 //dependencies have changed
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
     BarChart,
     Bar,
@@ -15,9 +15,6 @@ import {
 import { TInventoryItem } from "common/inventory";
 import { TCheckout } from "common/checkout";
 
-// defined outside the component so it never gets re-created on re-renders
-const BAR_COLOR = "#D97398";
-
 export default function TopCheckedOutItems({
     checkouts,
     inventory,
@@ -30,13 +27,15 @@ export default function TopCheckedOutItems({
     //A Map lets me instantly look up any item by its uuid like a dictionary.
     //the format is: Map { "uuid-abc" => { uuid, name, ... }, "uuid-xyz" => { ... } }
     //useMemo means this only rebuilds if the inventory depedency array changes.
+    const [topN, setTopN] = useState(10);
+
     const inventoryMap = useMemo(
         () => new Map(inventory.map((item) => [item.uuid, item])),
         [inventory],
     );
 
     //Count how many times each item was checked out
-    const data = useMemo(() => {
+    const sortedData = useMemo(() => {
         //itemCounts is a plain object used to keep track of item, and number of checkouts
         //format: { "uuid-abc": 5, "uuid-xyz": 12, ... }
         //the key is the item's uuid, the value is the total quantity checked out.
@@ -67,16 +66,15 @@ export default function TopCheckedOutItems({
                 }))
                 // sort highest count first
                 .sort((a, b) => b.count - a.count)
-                // only keep the top 10 results
-                .slice(0, 10)
         );
 
         //reruns this calculation only if checkouts or inventoryMap changes
         //this is the dependency argument of the useMemo
     }, [checkouts, inventoryMap]);
 
+    const data = sortedData.slice(0, topN);
     // if there's no data yet, show a message instead of an empty chart
-    if (data.length === 0) {
+    if (sortedData.length === 0) {
         return (
             <div className="bg-default-100 p-6 rounded-lg">
                 <h2 className="text-xl font-bold mb-4">
@@ -113,7 +111,7 @@ export default function TopCheckedOutItems({
                             "Count",
                         ]}
                     />
-                    <Bar dataKey="count" fill={BAR_COLOR} />
+                    <Bar dataKey="count" fill="hsl(var(--heroui-primary))" />
                 </BarChart>
             </ResponsiveContainer>
         </div>

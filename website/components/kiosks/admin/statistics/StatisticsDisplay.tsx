@@ -32,12 +32,9 @@ export default function StatisticsDisplay({
         <div className="flex flex-col max-h-full overflow-auto w-full">
             {/* this is just a display component that displays the title and subtitle */}
             <div className="flex flex-col content-center items-center">
-                <h1 className="text-xl font-bold text-foreground-900 mb-2">
+                <h1 className="text-3xl font-bold text-foreground-900 mb-2">
                     Statistics
                 </h1>
-                <h3 className="text-lg text-foreground-900 mb-4">
-                    View makerspace statistics.
-                </h3>
             </div>
 
             {/* this is the grid layout for displays
@@ -49,12 +46,7 @@ export default function StatisticsDisplay({
                 {/* how these work is that it passes data into the page and then displays it */}
                 <UsersByCollege users={users} />
 
-                {/* displays CheckoutsByRole */}
-                <CheckoutsByRole
-                    checkouts={checkouts}
-                    users={users}
-                    roles={roles}
-                />
+                {/* Removed: CheckoutsByRole */}
 
                 {/* displays TopCheckedOutItems */}
                 <TopCheckedOutItems
@@ -62,8 +54,7 @@ export default function StatisticsDisplay({
                     inventory={inventory}
                 />
 
-                {/* displays CheckoutHeatmap */}
-                <CheckoutHeatmap checkouts={checkouts} />
+
 
                 <CheckoutsByDay checkouts={checkouts} />
 
@@ -71,9 +62,12 @@ export default function StatisticsDisplay({
                     checkouts={checkouts}
                     inventory={inventory}
                 />
+                
+                <div className="col-span-1 lg:col-span-2">
+                {/* displays CheckoutHeatmap */}
+                <CheckoutHeatmap checkouts={checkouts} />
+                </div>
 
-                {/* col-span-1 lg:col-span-2 makes CheckoutTrend stretch across
-                    the full width of the grid on large screens */}
                 <div className="col-span-1 lg:col-span-2">
                     {/* Line chart — shows checkout volume over time */}
                     <CheckoutTrend checkouts={checkouts} />

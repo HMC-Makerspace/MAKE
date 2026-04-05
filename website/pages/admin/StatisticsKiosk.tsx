@@ -56,10 +56,6 @@ export default function StatisticsKiosk() {
             </div>
         );
     }
-    console.log("inventory", inventory);
-    console.log("users", users);
-    console.log("checkouts", checkouts);
-    console.log("roles", roles);
 
     //once all data has been quieried, render the page inside the admin nav wrapper
     //and passes all data down to StatisticsDisplay to be displayed

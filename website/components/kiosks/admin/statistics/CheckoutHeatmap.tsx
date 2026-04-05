@@ -10,9 +10,6 @@ import {
 } from "recharts";
 import { TCheckout } from "common/checkout";
 
-// defined outside the component so it doesn't keep getting recreated on each new redner
-const BAR_COLOR = "#6B9AC4";
-
 export default function CheckoutHeatmap({
     checkouts,
 }: {
@@ -65,7 +62,7 @@ export default function CheckoutHeatmap({
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                     <XAxis
                         dataKey="hour"
-                        angle={-30}
+                        angle={0}
                         textAnchor="end"
                         interval={0}
                         tick={{ fontSize: 11 }}
@@ -79,7 +76,7 @@ export default function CheckoutHeatmap({
                         ]}
                     />
                     {/* fill is set directly on Bar — no need for individual Cell components */}
-                    <Bar dataKey="count" fill={BAR_COLOR} />
+                    <Bar dataKey="count" fill="hsl(var(--heroui-primary))" />
                 </BarChart>
             </ResponsiveContainer>
         </div>
