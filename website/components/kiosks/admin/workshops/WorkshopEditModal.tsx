@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Button,
     Modal,
@@ -7,6 +7,7 @@ import {
     ModalContent,
     ModalFooter,
     Select,
+    useDisclosure,
     SelectItem,
     SelectedItems,
     Form,
@@ -23,7 +24,7 @@ import { ClipboardIcon } from "@heroicons/react/24/outline";
 import { TWorkshop } from "../../../../../common/workshop";
 import { UserRoleUUID, UserUUID } from "../../../../../common/user";
 import { CertificationUUID } from "../../../../../common/certification";
-import { UnixTimestamp } from "../../../../../common/global";
+import { UnixTimestamp, UUID } from "../../../../../common/global";
 import { FileUUID } from "../../../../../common/file";
 import { timestampToZonedDateTime } from "../../../../utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -31,6 +32,7 @@ import { TUser } from "../../../../../common/user";
 import { TCertification } from "../../../../../common/certification";
 import CertificationTag from "../certifications/CertificationTag";
 import { parseZonedDateTime, ZonedDateTime } from "@internationalized/date";
+import WorkshopImagesModal from "./WorkshopImagesModal.tsx";
 
 import clsx from "clsx";
 import { TConfig } from "common/config";
@@ -79,6 +81,9 @@ export default function WorkshopEditModal({
     onOpenChange: (open?: boolean) => void;
     batchEdit: boolean;
 }) {
+    // batch workshops storage
+    const [batchWorkshops, setBatchWorkshops] = useState<UUID[]>([])
+
     const queryClient = useQueryClient();
     const updateCreateMutation = useMutation({
         mutationFn: updateCreateWorkshop,
@@ -104,6 +109,8 @@ export default function WorkshopEditModal({
             }
             if (!batchEdit) {
                 onOpenChange(false);
+            } else {
+                setBatchWorkshops(prevArray => [...prevArray, data.uuid])
             }
         },
         onError: (e) => {
@@ -125,6 +132,12 @@ export default function WorkshopEditModal({
     //workshop properties
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
 
+    const {
+        isOpen: imagesIsOpen,
+        onOpen: imagesOnOpen,
+        onOpenChange: imagesOnOpenChange,
+    } = useDisclosure();
+
     function wrapEdit<P extends keyof TWorkshop>(prop: P) {
         return (val: TWorkshop[P]) => {
             setHasEdits(hasEdits || (val && val != workshop[prop]));
@@ -137,9 +150,9 @@ export default function WorkshopEditModal({
         repeats: number,
         offset = 0,
     ): ZonedDateTime {
-            const shift = Number(repeat_interval) * repeats - offset;
-            const shifted_date = timestamp_start.add({days: shift})
-        return shifted_date
+        const shift = Number(repeat_interval) * repeats - offset;
+        const shifted_date = timestamp_start.add({ days: shift });
+        return shifted_date;
     }
 
     const onSubmit = React.useCallback(
@@ -156,7 +169,6 @@ export default function WorkshopEditModal({
                 : 0;
 
             for (let i = 0; i <= repeated_days; i++) {
-
                 const new_workshop: TWorkshop = {
                     uuid: batchEdit ? crypto.randomUUID() : workshop.uuid, // never changes
                     title: (formData.get("title") as string) || workshop.title,
@@ -182,8 +194,9 @@ export default function WorkshopEditModal({
                               ),
                               repeat_interval,
                               i,
-                          ).toDate()
-                            .getTime() / 1000
+                          )
+                              .toDate()
+                              .getTime() / 1000
                         : parseZonedDateTime(
                               formData.get("timestamp_start") as string,
                           )
@@ -196,8 +209,9 @@ export default function WorkshopEditModal({
                               ),
                               repeat_interval,
                               i,
-                          ).toDate()
-                            .getTime() / 1000
+                          )
+                              .toDate()
+                              .getTime() / 1000
                         : parseZonedDateTime(
                               formData.get("timestamp_end") as string,
                           )
@@ -211,8 +225,9 @@ export default function WorkshopEditModal({
                               repeat_interval,
                               i,
                               Number(formData.get("timestamp_public")),
-                          ).toDate()
-                            .getTime() / 1000
+                          )
+                              .toDate()
+                              .getTime() / 1000
                         : parseZonedDateTime(
                               formData.get("timestamp_public") as string,
                           )
@@ -233,79 +248,136 @@ export default function WorkshopEditModal({
                     isNew: isNew,
                 });
             }
-            if (batchEdit) onOpenChange(false);
+            if (batchEdit) {
+                onOpenChange(false);
+                imagesOnOpen();
+            }
         },
         [isNew, workshop, batchEdit],
     );
 
     return (
-        <Modal
-            isOpen={isOpen}
-            placement="top-center"
-            onOpenChange={onOpenChange}
-            className="flex flex-col justify-center align-center"
-            size="2xl"
-        >
-            <ModalContent>
-                <ModalHeader>
-                    <h1 className="text-2xl font-bold">
-                        {batchEdit
-                            ? "Batch Create Workshop"
-                            : "Create/Edit Workshop"}
-                    </h1>
-                </ModalHeader>
-                <ModalBody>
-                    <Form onSubmit={onSubmit}>
-                        <div className="flex flex-col w-full gap-2">
-                            {batchEdit ? null : (
-                                <div className="flex flex-row gap-4 ">
+        <>
+            <Modal
+                isOpen={isOpen}
+                placement="top-center"
+                onOpenChange={onOpenChange}
+                className="flex flex-col justify-center align-center"
+                size="2xl"
+            >
+                <ModalContent>
+                    <ModalHeader>
+                        <h1 className="text-2xl font-bold">
+                            {batchEdit
+                                ? "Batch Create Workshop"
+                                : "Create/Edit Workshop"}
+                        </h1>
+                    </ModalHeader>
+                    <ModalBody>
+                        <Form onSubmit={onSubmit}>
+                            <div className="flex flex-col w-full gap-2">
+                                {batchEdit ? null : (
+                                    <div className="flex flex-row gap-4 ">
+                                        <Input
+                                            type="text"
+                                            label="UUID"
+                                            name="uuid"
+                                            placeholder={workshop.uuid}
+                                            // UUID is not editable
+                                            isDisabled
+                                            defaultValue={workshop.uuid}
+                                            variant="faded"
+                                            color="primary"
+                                            size="md"
+                                            classNames={{
+                                                input: clsx([
+                                                    "placeholder:text-default-500",
+                                                    "placeholder:italic",
+                                                    "text-default-700",
+                                                    "w-[50%]",
+                                                ]),
+                                            }}
+                                        />
+                                        <Button
+                                            // Create button to copy the UUID to the clipboard
+                                            size="md"
+                                            radius="lg"
+                                            className="my-auto"
+                                            isIconOnly
+                                            onPress={() => {
+                                                // Copy the UUID to the clipboard
+                                                navigator.clipboard.writeText(
+                                                    workshop.uuid,
+                                                );
+                                            }}
+                                        >
+                                            <ClipboardIcon className="size-6 text-primary-300" />
+                                        </Button>
+                                    </div>
+                                )}
+
+                                <div className="flex flex-row gap-2">
                                     <Input
                                         type="text"
-                                        label="UUID"
-                                        name="uuid"
-                                        placeholder={workshop.uuid}
-                                        // UUID is not editable
-                                        isDisabled
-                                        defaultValue={workshop.uuid}
+                                        label="Workshop Title"
+                                        name="title"
+                                        isRequired
+                                        placeholder="Enter workshop title"
+                                        defaultValue={workshop.title}
+                                        onValueChange={wrapEdit("title")}
                                         variant="faded"
                                         color="primary"
-                                        size="md"
                                         classNames={{
                                             input: clsx([
                                                 "placeholder:text-default-500",
                                                 "placeholder:italic",
                                                 "text-default-700",
-                                                "w-[50%]",
                                             ]),
                                         }}
                                     />
-                                    <Button
-                                        // Create button to copy the UUID to the clipboard
-                                        size="md"
-                                        radius="lg"
-                                        className="my-auto"
-                                        isIconOnly
-                                        onPress={() => {
-                                            // Copy the UUID to the clipboard
-                                            navigator.clipboard.writeText(
-                                                workshop.uuid,
-                                            );
+                                    <NumberInput
+                                        minValue={0}
+                                        label="Capacity"
+                                        name="capacity"
+                                        placeholder="0 for no limit"
+                                        defaultValue={workshop.capacity}
+                                        onValueChange={wrapEdit("capacity")}
+                                        variant="faded"
+                                        color="primary"
+                                        className="w-1/2"
+                                        classNames={{
+                                            input: clsx([
+                                                "placeholder:text-default-500",
+                                                "placeholder:italic",
+                                                "text-default-700",
+                                            ]),
                                         }}
-                                    >
-                                        <ClipboardIcon className="size-6 text-primary-300" />
-                                    </Button>
+                                    />
                                 </div>
-                            )}
 
-                            <div className="flex flex-row gap-2">
+                                <Textarea
+                                    label="Description"
+                                    name="description"
+                                    placeholder="Enter workshop description"
+                                    defaultValue={workshop.description}
+                                    onValueChange={wrapEdit("description")}
+                                    variant="faded"
+                                    color="primary"
+                                    classNames={{
+                                        input: clsx([
+                                            "placeholder:text-default-500",
+                                            "placeholder:italic",
+                                            "text-default-700",
+                                        ]),
+                                    }}
+                                />
                                 <Input
                                     type="text"
-                                    label="Workshop Title"
-                                    name="title"
-                                    isRequired
-                                    placeholder="Enter workshop title"
-                                    defaultValue={workshop.title}
-                                    onValueChange={wrapEdit("title")}
+                                    label="RSVP Disclaimer"
+                                    name="rsvp_disclaimer"
+                                    placeholder="Enter RSVP disclaimer here"
+                                    defaultValue={workshop.rsvp_disclaimer}
+                                    onValueChange={wrapEdit("rsvp_disclaimer")}
                                     variant="faded"
                                     color="primary"
                                     classNames={{
@@ -316,140 +388,93 @@ export default function WorkshopEditModal({
                                         ]),
                                     }}
                                 />
-                                <NumberInput
-                                    minValue={0}
-                                    label="Capacity"
-                                    name="capacity"
-                                    placeholder="0 for no limit"
-                                    defaultValue={workshop.capacity}
-                                    onValueChange={wrapEdit("capacity")}
-                                    variant="faded"
-                                    color="primary"
-                                    className="w-1/2"
-                                    classNames={{
-                                        input: clsx([
-                                            "placeholder:text-default-500",
-                                            "placeholder:italic",
-                                            "text-default-700",
-                                        ]),
-                                    }}
-                                />
-                            </div>
-
-                            <Textarea
-                                label="Description"
-                                name="description"
-                                placeholder="Enter workshop description"
-                                defaultValue={workshop.description}
-                                onValueChange={wrapEdit("description")}
-                                variant="faded"
-                                color="primary"
-                                classNames={{
-                                    input: clsx([
-                                        "placeholder:text-default-500",
-                                        "placeholder:italic",
-                                        "text-default-700",
-                                    ]),
-                                }}
-                            />
-                            <Input
-                                type="text"
-                                label="RSVP Disclaimer"
-                                name="rsvp_disclaimer"
-                                placeholder="Enter RSVP disclaimer here"
-                                defaultValue={workshop.rsvp_disclaimer}
-                                onValueChange={wrapEdit("rsvp_disclaimer")}
-                                variant="faded"
-                                color="primary"
-                                classNames={{
-                                    input: clsx([
-                                        "placeholder:text-default-500",
-                                        "placeholder:italic",
-                                        "text-default-700",
-                                    ]),
-                                }}
-                            />
-                            <div className="flex flex-col sm:flex-row gap-2">
-                                <Select
-                                    label="Instructors"
-                                    selectionMode="multiple"
-                                    name="instructors"
-                                    isRequired
-                                    placeholder="Enter workshop instructors"
-                                    defaultSelectedKeys={workshop.instructors}
-                                    onSelectionChange={(keys) => {
-                                        if (keys === "all") {
-                                            wrapEdit("instructors")(
-                                                sortedFilteredWorkers.map(
-                                                    (u) => u.uuid,
-                                                ),
-                                            );
-                                        } else {
-                                            wrapEdit("instructors")(
-                                                Array.from(keys) as string[],
-                                            );
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <Select
+                                        label="Instructors"
+                                        selectionMode="multiple"
+                                        name="instructors"
+                                        isRequired
+                                        placeholder="Enter workshop instructors"
+                                        defaultSelectedKeys={
+                                            workshop.instructors
                                         }
-                                    }}
-                                    variant="faded"
-                                    color="primary"
-                                    isMultiline
-                                    classNames={{
-                                        value: clsx([
-                                            "text-default-500",
-                                            "italic",
-                                            "group-data-[has-value=true]:text-default-700",
-                                            "group-data-[has-value=true]:not-italic	",
-                                        ]),
-                                    }}
-                                >
-                                    {sortedFilteredWorkers.map((u) => (
-                                        <SelectItem key={u.uuid}>
-                                            {u.name}
-                                        </SelectItem>
-                                    ))}
-                                </Select>
-                                <Select
-                                    label="Support Instructors"
-                                    name="support_instructors"
-                                    selectionMode="multiple"
-                                    placeholder="Enter workshop support instructors"
-                                    defaultSelectedKeys={
-                                        workshop.support_instructors
-                                    }
-                                    onSelectionChange={(keys) => {
-                                        if (keys === "all") {
-                                            wrapEdit("support_instructors")(
-                                                sortedFilteredWorkers.map(
-                                                    (u) => u.uuid,
-                                                ),
-                                            );
-                                        } else {
-                                            wrapEdit("support_instructors")(
-                                                Array.from(keys) as string[],
-                                            );
+                                        onSelectionChange={(keys) => {
+                                            if (keys === "all") {
+                                                wrapEdit("instructors")(
+                                                    sortedFilteredWorkers.map(
+                                                        (u) => u.uuid,
+                                                    ),
+                                                );
+                                            } else {
+                                                wrapEdit("instructors")(
+                                                    Array.from(
+                                                        keys,
+                                                    ) as string[],
+                                                );
+                                            }
+                                        }}
+                                        variant="faded"
+                                        color="primary"
+                                        isMultiline
+                                        classNames={{
+                                            value: clsx([
+                                                "text-default-500",
+                                                "italic",
+                                                "group-data-[has-value=true]:text-default-700",
+                                                "group-data-[has-value=true]:not-italic	",
+                                            ]),
+                                        }}
+                                    >
+                                        {sortedFilteredWorkers.map((u) => (
+                                            <SelectItem key={u.uuid}>
+                                                {u.name}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                    <Select
+                                        label="Support Instructors"
+                                        name="support_instructors"
+                                        selectionMode="multiple"
+                                        placeholder="Enter workshop support instructors"
+                                        defaultSelectedKeys={
+                                            workshop.support_instructors
                                         }
-                                    }}
-                                    variant="faded"
-                                    color="primary"
-                                    isMultiline
-                                    classNames={{
-                                        value: clsx([
-                                            "text-default-500",
-                                            "italic",
-                                            "group-data-[has-value=true]:text-default-700",
-                                            "group-data-[has-value=true]:not-italic	",
-                                        ]),
-                                    }}
-                                >
-                                    {sortedFilteredWorkers.map((u) => (
-                                        <SelectItem key={u.uuid}>
-                                            {u.name}
-                                        </SelectItem>
-                                    ))}
-                                </Select>
-                            </div>
+                                        onSelectionChange={(keys) => {
+                                            if (keys === "all") {
+                                                wrapEdit("support_instructors")(
+                                                    sortedFilteredWorkers.map(
+                                                        (u) => u.uuid,
+                                                    ),
+                                                );
+                                            } else {
+                                                wrapEdit("support_instructors")(
+                                                    Array.from(
+                                                        keys,
+                                                    ) as string[],
+                                                );
+                                            }
+                                        }}
+                                        variant="faded"
+                                        color="primary"
+                                        isMultiline
+                                        classNames={{
+                                            value: clsx([
+                                                "text-default-500",
+                                                "italic",
+                                                "group-data-[has-value=true]:text-default-700",
+                                                "group-data-[has-value=true]:not-italic	",
+                                            ]),
+                                        }}
+                                    >
+                                        {sortedFilteredWorkers.map((u) => (
+                                            <SelectItem key={u.uuid}>
+                                                {u.name}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                </div>
 
-                            {/* <Select<TCertification>
+                                {/* <Select<TCertification>
                                     label="Required Certifications"
                                     labelPlacement="inside"
                                     selectionMode="multiple"
@@ -517,205 +542,214 @@ export default function WorkshopEditModal({
                                     ))}
                                 </Select> */}
 
-                            {batchEdit ? (
-                                <>
-                                    <DateRangePicker
-                                        label="Workshop Date Range"
-                                        aria-label="Workshop Time"
-                                        startName="timestamp_start"
-                                        endName="timestamp_end"
-                                        isRequired
-                                        granularity="minute"
-                                        hideTimeZone
-                                        defaultValue={
-                                            workshop.timestamp_start &&
-                                            workshop.timestamp_end
-                                                ? {
-                                                      start: timestampToZonedDateTime(
-                                                          workshop.timestamp_start,
-                                                          config.schedule
-                                                              .timezone,
-                                                      ),
-                                                      end: timestampToZonedDateTime(
-                                                          workshop.timestamp_end,
-                                                          config.schedule
-                                                              .timezone,
-                                                      ),
-                                                  }
-                                                : undefined
-                                        }
-                                        onChange={() => setHasEdits(true)}
-                                        variant="faded"
-                                        color="primary"
-                                        className="w-full"
-                                        classNames={{
-                                            segment: clsx([
-                                                "text-xs sm:text-small",
-                                                "text-default-700",
-                                                "data-[editable=true]:text-default-700 ",
-                                                "data-[editable=true]:data-[placeholder=true]:text-default-500",
-                                                "data-[editable=true]:data-[placeholder=true]:italic",
-                                                "focus:text-default-700",
-                                                "data-[editable=true]:focus:text-default-700",
-                                            ]),
-                                        }}
-                                    />
-                                    <div className="flex flex-row gap-2">
-                                        <NumberInput
+                                {batchEdit ? (
+                                    <>
+                                        <DateRangePicker
+                                            label="Workshop Date Range"
+                                            aria-label="Workshop Time"
+                                            startName="timestamp_start"
+                                            endName="timestamp_end"
+                                            isRequired
+                                            granularity="minute"
+                                            hideTimeZone
+                                            defaultValue={
+                                                workshop.timestamp_start &&
+                                                workshop.timestamp_end
+                                                    ? {
+                                                          start: timestampToZonedDateTime(
+                                                              workshop.timestamp_start,
+                                                              config.schedule
+                                                                  .timezone,
+                                                          ),
+                                                          end: timestampToZonedDateTime(
+                                                              workshop.timestamp_end,
+                                                              config.schedule
+                                                                  .timezone,
+                                                          ),
+                                                      }
+                                                    : undefined
+                                            }
+                                            onChange={() => setHasEdits(true)}
+                                            variant="faded"
+                                            color="primary"
+                                            className="w-full"
+                                            classNames={{
+                                                segment: clsx([
+                                                    "text-xs sm:text-small",
+                                                    "text-default-700",
+                                                    "data-[editable=true]:text-default-700 ",
+                                                    "data-[editable=true]:data-[placeholder=true]:text-default-500",
+                                                    "data-[editable=true]:data-[placeholder=true]:italic",
+                                                    "focus:text-default-700",
+                                                    "data-[editable=true]:focus:text-default-700",
+                                                ]),
+                                            }}
+                                        />
+                                        <div className="flex flex-row gap-2">
+                                            <NumberInput
+                                                label="Public Announcement Date"
+                                                name="timestamp_public"
+                                                isRequired
+                                                minValue={1}
+                                                maxValue={365}
+                                                placeholder="Days before workshop"
+                                                variant="faded"
+                                                color="primary"
+                                                classNames={{
+                                                    input: clsx([
+                                                        "placeholder:text-default-500",
+                                                        "placeholder:italic",
+                                                        "text-default-700",
+                                                    ]),
+                                                    innerWrapper:
+                                                        "endcontent:text-default-500",
+                                                }}
+                                            />
+
+                                            <NumberInput
+                                                label="Repeated Interval"
+                                                name="repeat_interval"
+                                                placeholder="Repeat every x days"
+                                                isRequired
+                                                minValue={1}
+                                                maxValue={365}
+                                                variant="faded"
+                                                color="primary"
+                                                classNames={{
+                                                    input: clsx([
+                                                        "placeholder:text-default-500",
+                                                        "placeholder:italic",
+                                                        "text-default-700",
+                                                    ]),
+                                                }}
+                                            />
+                                            <NumberInput
+                                                className="w-3/4"
+                                                label="Repeats"
+                                                name="repeats"
+                                                placeholder="Repeat x times"
+                                                isRequired
+                                                minValue={1}
+                                                maxValue={365}
+                                                variant="faded"
+                                                color="primary"
+                                                classNames={{
+                                                    input: clsx([
+                                                        "placeholder:text-default-500",
+                                                        "placeholder:italic",
+                                                        "text-default-700",
+                                                    ]),
+                                                }}
+                                            />
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <DatePicker<ZonedDateTime>
                                             label="Public Announcement Date"
                                             name="timestamp_public"
                                             isRequired
-                                            minValue={1}
-                                            maxValue={365}
-                                            placeholder="Days before workshop"
-                                            variant="faded"
-                                            color="primary"
-                                            classNames={{
-                                                input: clsx([
-                                                    "placeholder:text-default-500",
-                                                    "placeholder:italic",
-                                                    "text-default-700",
-                                                ]),
-                                                innerWrapper:
-                                                    "endcontent:text-default-500",
-                                            }}
-                                        />
-
-                                        <NumberInput
-                                            label="Repeated Interval"
-                                            name="repeat_interval"
-                                            placeholder="Repeat every x days"
-                                            isRequired
-                                            minValue={1}
-                                            maxValue={365}
-                                            variant="faded"
-                                            color="primary"
-                                            classNames={{
-                                                input: clsx([
-                                                    "placeholder:text-default-500",
-                                                    "placeholder:italic",
-                                                    "text-default-700",
-                                                ]),
-                                            }}
-                                        />
-                                        <NumberInput
-                                            className="w-3/4"
-                                            label="Repeats"
-                                            name="repeats"
-                                            placeholder="Repeat x times"
-                                            isRequired
-                                            minValue={1}
-                                            maxValue={365}
-                                            variant="faded"
-                                            color="primary"
-                                            classNames={{
-                                                input: clsx([
-                                                    "placeholder:text-default-500",
-                                                    "placeholder:italic",
-                                                    "text-default-700",
-                                                ]),
-                                            }}
-                                        />
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    <DatePicker<ZonedDateTime>
-                                        label="Public Announcement Date"
-                                        name="timestamp_public"
-                                        isRequired
-                                        granularity="minute"
-                                        hideTimeZone
-                                        defaultValue={
-                                            workshop.timestamp_public
-                                                ? timestampToZonedDateTime(
-                                                      workshop.timestamp_public,
-                                                      config.schedule.timezone,
-                                                  )
-                                                : timestampToZonedDateTime(
-                                                      Date.now() / 1000,
-                                                  )
-                                        }
-                                        onChange={() => setHasEdits(true)}
-                                        variant="faded"
-                                        color="primary"
-                                        className="w-full"
-                                        classNames={{
-                                            segment: clsx([
-                                                "text-default-700",
-                                                "data-[editable=true]:text-default-700 ",
-                                                "data-[editable=true]:data-[placeholder=true]:text-default-500",
-                                                "data-[editable=true]:data-[placeholder=true]:italic",
-                                                "focus:text-default-700",
-                                                "data-[editable=true]:focus:text-default-700",
-                                            ]),
-                                        }}
-                                    />
-                                    <DateRangePicker
-                                        label="Workshop Date Range"
-                                        aria-label="Workshop Time"
-                                        startName="timestamp_start"
-                                        endName="timestamp_end"
-                                        isRequired
-                                        granularity="minute"
-                                        hideTimeZone
-                                        defaultValue={
-                                            workshop.timestamp_start &&
-                                            workshop.timestamp_end
-                                                ? {
-                                                      start: timestampToZonedDateTime(
-                                                          workshop.timestamp_start,
+                                            granularity="minute"
+                                            hideTimeZone
+                                            defaultValue={
+                                                workshop.timestamp_public
+                                                    ? timestampToZonedDateTime(
+                                                          workshop.timestamp_public,
                                                           config.schedule
                                                               .timezone,
-                                                      ),
-                                                      end: timestampToZonedDateTime(
-                                                          workshop.timestamp_end,
-                                                          config.schedule
-                                                              .timezone,
-                                                      ),
-                                                  }
-                                                : undefined
-                                        }
-                                        onChange={() => setHasEdits(true)}
-                                        variant="faded"
-                                        color="primary"
-                                        className="w-full"
-                                        classNames={{
-                                            segment: clsx([
-                                                "text-xs sm:text-small",
-                                                "text-default-700",
-                                                "data-[editable=true]:text-default-700 ",
-                                                "data-[editable=true]:data-[placeholder=true]:text-default-500",
-                                                "data-[editable=true]:data-[placeholder=true]:italic",
-                                                "focus:text-default-700",
-                                                "data-[editable=true]:focus:text-default-700",
-                                            ]),
-                                        }}
-                                    />
-                                </>
-                            )}
-                        </div>
-                        <div className="flex flex-row gap-2 justify-between w-full pt-4">
-                            <Button
-                                color="primary"
-                                isDisabled={!hasEdits}
-                                type="submit"
-                            >
-                                Submit
-                            </Button>
-                            <Button
-                                color="danger"
-                                onPress={() => {
-                                    onOpenChange(true);
-                                }}
-                            >
-                                Cancel
-                            </Button>
-                        </div>
-                    </Form>
-                </ModalBody>
-                <ModalFooter className="flex flex-row justify-between items-center"></ModalFooter>
-            </ModalContent>
-        </Modal>
+                                                      )
+                                                    : timestampToZonedDateTime(
+                                                          Date.now() / 1000,
+                                                      )
+                                            }
+                                            onChange={() => setHasEdits(true)}
+                                            variant="faded"
+                                            color="primary"
+                                            className="w-full"
+                                            classNames={{
+                                                segment: clsx([
+                                                    "text-default-700",
+                                                    "data-[editable=true]:text-default-700 ",
+                                                    "data-[editable=true]:data-[placeholder=true]:text-default-500",
+                                                    "data-[editable=true]:data-[placeholder=true]:italic",
+                                                    "focus:text-default-700",
+                                                    "data-[editable=true]:focus:text-default-700",
+                                                ]),
+                                            }}
+                                        />
+                                        <DateRangePicker
+                                            label="Workshop Date Range"
+                                            aria-label="Workshop Time"
+                                            startName="timestamp_start"
+                                            endName="timestamp_end"
+                                            isRequired
+                                            granularity="minute"
+                                            hideTimeZone
+                                            defaultValue={
+                                                workshop.timestamp_start &&
+                                                workshop.timestamp_end
+                                                    ? {
+                                                          start: timestampToZonedDateTime(
+                                                              workshop.timestamp_start,
+                                                              config.schedule
+                                                                  .timezone,
+                                                          ),
+                                                          end: timestampToZonedDateTime(
+                                                              workshop.timestamp_end,
+                                                              config.schedule
+                                                                  .timezone,
+                                                          ),
+                                                      }
+                                                    : undefined
+                                            }
+                                            onChange={() => setHasEdits(true)}
+                                            variant="faded"
+                                            color="primary"
+                                            className="w-full"
+                                            classNames={{
+                                                segment: clsx([
+                                                    "text-xs sm:text-small",
+                                                    "text-default-700",
+                                                    "data-[editable=true]:text-default-700 ",
+                                                    "data-[editable=true]:data-[placeholder=true]:text-default-500",
+                                                    "data-[editable=true]:data-[placeholder=true]:italic",
+                                                    "focus:text-default-700",
+                                                    "data-[editable=true]:focus:text-default-700",
+                                                ]),
+                                            }}
+                                        />
+                                    </>
+                                )}
+                            </div>
+                            <div className="flex flex-row gap-2 justify-between w-full pt-4">
+                                <Button
+                                    color="primary"
+                                    isDisabled={!hasEdits}
+                                    type="submit"
+                                >
+                                    Submit
+                                </Button>
+                                <Button
+                                    color="danger"
+                                    onPress={() => {
+                                        onOpenChange(true);
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+                        </Form>
+                    </ModalBody>
+                    <ModalFooter className="flex flex-row justify-between items-center"></ModalFooter>
+                </ModalContent>
+            </Modal>
+            <WorkshopImagesModal
+                key={`${workshop.uuid}-images`}
+                workshop={batchWorkshops}
+                isOpen={imagesIsOpen}
+                onOpenChange={imagesOnOpenChange}
+                firstTime={true}
+            />
+        </>
     );
 }
