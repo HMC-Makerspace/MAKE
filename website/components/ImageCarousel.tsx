@@ -28,15 +28,17 @@ import clsx from "clsx";
 async function deleteImage({
     resource_type,
     file_uuid,
-    resource_uuid
+    resource_uuid,
 }: {
     resource_type: FILE_RESOURCE_TYPE;
     file_uuid: UUID;
-    resource_uuid: UUID;
+    resource_uuid: UUID | UUID[];
 }) {
-
-    return (await axios.delete(`/api/v3/file/by/${resource_type}/${file_uuid}/${resource_uuid}`))
-        .data;
+    return (
+        await axios.delete(
+            `/api/v3/file/by/${resource_type}/${file_uuid}/${resource_uuid}`,
+        )
+    ).data;
 }
 
 async function uploadImage({
@@ -44,7 +46,7 @@ async function uploadImage({
     resource_type,
     file,
 }: {
-    resource_uuid: UUID;
+    resource_uuid: UUID | UUID[];
     resource_type: FILE_RESOURCE_TYPE;
     file: File;
 }) {
@@ -68,11 +70,13 @@ export default function ImageCarousel({
     resource_type,
     editable = false,
     className = "",
+    firstTime = false,
 }: {
-    resource_uuid: UUID;
+    resource_uuid: UUID | UUID[];
     resource_type: FILE_RESOURCE_TYPE;
     editable?: boolean;
     className?: string;
+    firstTime?: boolean;
 }) {
     const {
         data: images,
@@ -146,18 +150,32 @@ export default function ImageCarousel({
                     isBlurred
                 />
             ) : (
-                <p className="text-center text-l text-bold">No Images Found</p>
+                !firstTime && (
+                    <p className="text-center text-l text-bold">
+                        No Images Found
+                    </p>
+                )
             )}
 
-            {editable && (
-                <Button
-                    isIconOnly
-                    className="absolute bottom-2 right-2"
-                    onPress={editOnOpenChange}
-                >
-                    <ArrowUpOnSquareIcon className="size-7" />
-                </Button>
-            )}
+            {editable &&
+                (firstTime && images.length === 0 ? (
+                    <Button
+                        isIconOnly
+                        className="min-w-full"
+                        onPress={editOnOpenChange}
+                    >
+                        Add Images
+                        <ArrowUpOnSquareIcon className="size-7" />
+                    </Button>
+                ) : (
+                    <Button
+                        isIconOnly
+                        className="absolute bottom-2 right-2"
+                        onPress={editOnOpenChange}
+                    >
+                        <ArrowUpOnSquareIcon className="size-7" />
+                    </Button>
+                ))}
             {images.length > 1 && (
                 <Button
                     className="absolute right-1 top-0 bottom-0 my-auto z-20"
@@ -202,7 +220,7 @@ function EditModal({
     editOnOpenChange: () => void;
     images: TFile[];
     resource_type: FILE_RESOURCE_TYPE;
-    resource_uuid: UUID;
+    resource_uuid: UUID | UUID[];
 }) {
     const queryClient = useQueryClient();
 
@@ -230,7 +248,6 @@ function EditModal({
                 title: `Successfully uploaded image`,
                 color: "success",
             });
-
         },
     });
 

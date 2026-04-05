@@ -28,14 +28,14 @@ export default function FileCard({
 }: {
     file: TFile;
     resource_type: FILE_RESOURCE_TYPE;
-    resource_uuid: UUID;
+    resource_uuid: UUID | UUID[];
     deleteMutation: UseMutationResult<
         {},
         Error,
         {
             file_uuid: FileUUID;
             resource_type: FILE_RESOURCE_TYPE;
-            resource_uuid: UUID;
+            resource_uuid: UUID | UUID[];
         }
     >;
     disableDeletion?: boolean;

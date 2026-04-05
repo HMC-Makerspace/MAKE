@@ -727,8 +727,8 @@ router.post(
                 // in the db
                 .then(() => {
                     // Create a new file object
-                    const resource_uuid_list = Array.isArray(resource_uuid)
-                        ? resource_uuid
+                    const resource_uuid_list = resource_uuid.includes(",")
+                        ? resource_uuid.split(",")
                         : [resource_uuid];
 
                     const file_obj: TFile = {
@@ -874,7 +874,8 @@ router.delete(
                                                 error: `File with uuid \`${file_uuid}\` not found.`,
                                             });
                                         } else if (
-                                            error_message === "Successfully deleted file"
+                                            error_message ===
+                                            "Successfully deleted file"
                                         ) {
                                             req.log.debug(
                                                 "Deleted file successfully.",
@@ -915,7 +916,6 @@ router.delete(
                         error: err.message,
                     });
                 });
-
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to delete a file",
@@ -978,8 +978,8 @@ router.delete(
             )
         ) {
             // Convert the resource_uuid into an array or keep it as an array
-            const resource_uuid_list = Array.isArray(resource_uuid)
-                ? resource_uuid
+            const resource_uuid_list = resource_uuid.includes(",")
+                ? resource_uuid.split(",")
                 : [resource_uuid];
 
             removeResourceFromFile(file_uuid, resource_uuid_list)
