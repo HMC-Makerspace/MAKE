@@ -43,3 +43,50 @@ export const FORBIDDEN_ERROR: ErrorResponse = {
 };
 
 export type SuccessfulResponse = Response<null | ErrorResponse | {}>;
+
+/**
+ * Custom logic for validating college ID numbers.
+ * Modify this function to suit your needs. If the return value is a string,
+ * the result should be the corrected, valid version of the given input, which
+ * may be the original value or a modified version (e.g. trimmed whitespace).
+ * If the return value is null, the ID is invalid and will be ignored.
+ * @param college_id The provided user's college ID
+ * @returns The corrected ID, or null if the id is invalid
+ */
+export function validateCollegeIDStrict(college_id: string): string | null {
+    // Remove whitespace
+    college_id = college_id.trim();
+    // Remove underscores, (semi)colons, spaces, and question marks
+    college_id = college_id.replace(/[\_\;\: \?]/, "");
+    if (college_id.length >= 9) {
+        if (college_id.match(/^[12]/) && college_id.length === 9) {
+            return college_id; // Valid ID
+        } else if (college_id.startsWith("0")) {
+            // Attempt to revalidate ID by dropping leading 0
+            return validateCollegeID(college_id.slice(1));
+        } else {
+            // Attempt to revalidate ID by dropping trailing number
+            return validateCollegeID(
+                college_id.slice(0, college_id.length - 1),
+            );
+        }
+    } else if (college_id.length === 8) {
+        if (college_id.match(/^[1-5]/)) {
+            return college_id; // Valid ID
+        } else {
+            return null;
+        }
+    } else {
+        return null;
+    }
+}
+
+/**
+ * Validate a user's college ID, but default to accepting the original value if invalid.
+ * @param college_id The provided user's college ID
+ * @returns The corrected ID, or the input value if invalid.
+ */
+export function validateCollegeID(college_id: string): string {
+    const new_id = validateCollegeIDStrict(college_id);
+    return new_id === null ? college_id : new_id;
+}
