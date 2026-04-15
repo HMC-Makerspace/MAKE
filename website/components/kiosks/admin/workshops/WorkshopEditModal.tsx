@@ -63,6 +63,20 @@ const updateCreateWorkshop = async ({
     }
 };
 
+const updateBatchCreateWorkshop = async ({
+    workshops,
+}: {
+    workshops: TWorkshop[];
+}) => {
+    console.log("Creating", workshops);
+
+    return await Promise.all(
+        workshops.map((workshop) => {
+            return updateCreateWorkshop({workshop: workshop, isNew: true})
+        })   
+    )
+};
+
 export default function WorkshopEditModal({
     workshop,
     users,
@@ -83,7 +97,8 @@ export default function WorkshopEditModal({
     batchEdit: boolean;
 }) {
     // batch workshops storage
-    const [batchWorkshops, setBatchWorkshops] = useState<UUID[]>([]);
+    const [batchWorkshopsUUIDS, setBatchWorkshopsUUIDS] = useState<UUID[]>([])
+    const workshops: TWorkshop[] = [];
 
     const queryClient = useQueryClient();
     const updateCreateMutation = useMutation({
@@ -108,11 +123,35 @@ export default function WorkshopEditModal({
                     color: "success",
                 });
             }
-            if (!batchEdit) {
-                onOpenChange(false);
-            } else {
-                setBatchWorkshops((prevArray) => [...prevArray, data.uuid]);
-            }
+            onOpenChange(false);
+        },
+        onError: (e) => {
+            addToast({
+                title: `Error: ${e.message}`,
+                color: "danger",
+            });
+        },
+    });
+
+    const updateBatchCreateMutation = useMutation({
+        mutationFn: updateBatchCreateWorkshop,
+        onSuccess: (data, variables) => {
+            data.forEach((workshop) => {
+                queryClient.setQueryData(["workshop", workshop.uuid], workshop);
+            })
+            setBatchWorkshopsUUIDS(data.map((w) => w.uuid));
+
+            // queryClient.setQueryData(["workshop", data.uuid], data);
+            queryClient.setQueryData(["workshop"], (old: TWorkshop[]) => [
+                ...data,
+                ...old,
+            ]);
+            addToast({
+                title: `Successfully created workshop`,
+                color: "success",
+            });
+            onOpenChange(false);
+            imagesOnOpen();
         },
         onError: (e) => {
             addToast({
@@ -243,16 +282,24 @@ export default function WorkshopEditModal({
                     available_to: workshop.available_to,
                 };
 
-                updateCreateMutation.reset();
+                workshops.push(new_workshop)
 
-                updateCreateMutation.mutate({
-                    workshop: new_workshop,
-                    isNew: isNew,
-                });
+                if (!batchEdit) {
+                    updateCreateMutation.reset();
+
+                    updateCreateMutation.mutate({
+                        workshop: new_workshop,
+                        isNew: isNew,
+                    });
+                }
             }
+
             if (batchEdit) {
-                onOpenChange(false);
-                imagesOnOpen();
+                updateBatchCreateMutation.reset();
+
+                updateBatchCreateMutation.mutate({
+                    workshops: workshops,
+                });
             }
         },
         [isNew, workshop, batchEdit],
@@ -679,7 +726,7 @@ export default function WorkshopEditModal({
             </Modal>
             <WorkshopImagesModal
                 key={`${workshop.uuid}-images`}
-                workshop={batchWorkshops}
+                workshop={batchWorkshopsUUIDS}
                 isOpen={imagesIsOpen}
                 onOpenChange={imagesOnOpenChange}
                 firstTime={true}

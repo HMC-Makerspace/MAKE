@@ -78,12 +78,16 @@ export default function ImageCarousel({
     className?: string;
     firstTime?: boolean;
 }) {
+    const normalizedUUID = Array.isArray(resource_uuid)
+        ? resource_uuid[0]
+        : resource_uuid;
+
     const {
         data: images,
         isLoading,
         isFetching,
     } = useQuery<TFile[]>({
-        queryKey: ["file", "by", resource_type, resource_uuid],
+        queryKey: ["file", "by", resource_type, normalizedUUID],
         refetchOnWindowFocus: false,
         placeholderData: [],
     });
@@ -170,7 +174,7 @@ export default function ImageCarousel({
                 ) : (
                     <Button
                         isIconOnly
-                        className="absolute bottom-2 right-2"
+                        className="absolute bottom-2 right-2 z-30"
                         onPress={editOnOpenChange}
                     >
                         <ArrowUpOnSquareIcon className="size-7" />
@@ -223,12 +227,15 @@ function EditModal({
     resource_uuid: UUID | UUID[];
 }) {
     const queryClient = useQueryClient();
+    const normalizedUUID = Array.isArray(resource_uuid)
+        ? resource_uuid[0]
+        : resource_uuid;
 
     const deleteMutation = useMutation({
         mutationFn: deleteImage,
         onSuccess: (data: TFile[]) => {
             queryClient.invalidateQueries({
-                queryKey: ["file", "by", resource_type, resource_uuid],
+                queryKey: ["file", "by", resource_type, normalizedUUID],
             });
             addToast({
                 title: `Successfully deleted image`,
@@ -241,7 +248,7 @@ function EditModal({
         mutationFn: uploadImage,
         onSuccess: (data: TFile) => {
             queryClient.setQueryData(
-                ["file", "by", resource_type, resource_uuid],
+                ["file", "by", resource_type, normalizedUUID],
                 (old: TFile[]) => old.concat(data),
             );
             addToast({
