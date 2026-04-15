@@ -190,9 +190,10 @@ export async function moveTempFileOnServer(
  * @param file_uuid the specific file's unique id
  * @returns The deleted file object, or null if the file doesn't exist
  */
-export async function removeResourceFromFile(
+export async function removeResourcesFromFile(
     file_uuid: UUID,
     resource_uuids: UUID[],
+    delete_from_resource: boolean = true,
 ): Promise<TFile | null> {
     // find file by uuid
     const requested_file = await getFile(file_uuid);
@@ -201,79 +202,83 @@ export async function removeResourceFromFile(
         return null;
     }
 
-
     // Remove the user from the resource_uuid list by filtering them out
     requested_file.resource_uuid = requested_file.resource_uuid.filter(
         (uuid) => !resource_uuids.includes(uuid),
     );
 
-    for (const resource_uuid of resource_uuids) {
-
-        // If the file exists, remove the file's UUID from the resource's list
-        if (requested_file.resource_type === FILE_RESOURCE_TYPE.USER) {
-            // If the file is a user file, remove the file's UUID from the user's file list
-            const Users = mongoose.model("User", User);
-            const user = await Users.findOne({ uuid: resource_uuid });
-            // If the user doesn't exist, throw an error
-            if (!user) {
-                throw new Error("User not found");
+    if (!delete_from_resource) {
+        return requested_file.save();
+    } else {
+        for (const resource_uuid of resource_uuids) {
+            // If the file exists, remove the file's UUID from the resource's list
+            if (requested_file.resource_type === FILE_RESOURCE_TYPE.USER) {
+                // If the file is a user file, remove the file's UUID from the user's file list
+                const Users = mongoose.model("User", User);
+                const user = await Users.findOne({ uuid: resource_uuid });
+                // If the user doesn't exist, throw an error
+                if (!user) {
+                    throw new Error("User not found");
+                }
+                // Remove the file's UUID from the user's file list and save the user
+                user.files = (user.files ?? []).filter(
+                    (file_uuid) => file_uuid !== requested_file.uuid,
+                );
+                await user.save();
+            } else if (
+                requested_file.resource_type === FILE_RESOURCE_TYPE.AREA
+            ) {
+                // If the file is an area image, remove the file's UUID from the area's image list
+                const Areas = mongoose.model("Area", Area);
+                const area = await Areas.findOne({ uuid: resource_uuid });
+                // If the area doesn't exist, throw an error
+                if (!area) {
+                    throw new Error("Area not found");
+                }
+                // Remove the file's UUID from the area's image list and save the area
+                area.images = (area.images ?? []).filter(
+                    (file_uuid) => file_uuid !== requested_file.uuid,
+                );
+                await area.save();
+            } else if (
+                requested_file.resource_type === FILE_RESOURCE_TYPE.MACHINE
+            ) {
+                // If the file is a machine image, remove the file's UUID from the machine's image list
+                const Machines = mongoose.model("Machine", Machine);
+                const machine = await Machines.findOne({
+                    uuid: resource_uuid,
+                });
+                // If the machine doesn't exist, throw an error
+                if (!machine) {
+                    throw new Error("Machine not found");
+                }
+                // Remove the file's UUID from the machine's image list and save the machine
+                machine.images = (machine.images ?? []).filter(
+                    (file_uuid) => file_uuid !== requested_file.uuid,
+                );
+                await machine.save();
+            } else if (
+                requested_file.resource_type === FILE_RESOURCE_TYPE.WORKSHOP
+            ) {
+                // If the file is a workshop image, remove the file's UUID from the workshop's image list
+                const Workshops = mongoose.model("Workshop", Workshop);
+                const workshop = await Workshops.findOne({
+                    uuid: resource_uuid,
+                });
+                // If the workshop doesn't exist, throw an error
+                if (!workshop) {
+                    throw new Error("Workshop not found");
+                }
+                // Remove the file's UUID from the workshop's image list and save the workshop
+                workshop.images = (workshop.images ?? []).filter(
+                    (file_uuid) => file_uuid !== requested_file.uuid,
+                );
+                await workshop.save();
             }
-            // Remove the file's UUID from the user's file list and save the user
-            user.files = (user.files ?? []).filter(
-                (file_uuid) => file_uuid !== requested_file.uuid,
-            );
-            await user.save();
-        } else if (requested_file.resource_type === FILE_RESOURCE_TYPE.AREA) {
-            // If the file is an area image, remove the file's UUID from the area's image list
-            const Areas = mongoose.model("Area", Area);
-            const area = await Areas.findOne({ uuid: resource_uuid });
-            // If the area doesn't exist, throw an error
-            if (!area) {
-                throw new Error("Area not found");
-            }
-            // Remove the file's UUID from the area's image list and save the area
-            area.images = (area.images ?? []).filter(
-                (file_uuid) => file_uuid !== requested_file.uuid,
-            );
-            await area.save();
-        } else if (
-            requested_file.resource_type === FILE_RESOURCE_TYPE.MACHINE
-        ) {
-            // If the file is a machine image, remove the file's UUID from the machine's image list
-            const Machines = mongoose.model("Machine", Machine);
-            const machine = await Machines.findOne({
-                uuid: resource_uuid,
-            });
-            // If the machine doesn't exist, throw an error
-            if (!machine) {
-                throw new Error("Machine not found");
-            }
-            // Remove the file's UUID from the machine's image list and save the machine
-            machine.images = (machine.images ?? []).filter(
-                (file_uuid) => file_uuid !== requested_file.uuid,
-            );
-            await machine.save();
-        } else if (
-            requested_file.resource_type === FILE_RESOURCE_TYPE.WORKSHOP
-        ) {
-            // If the file is a workshop image, remove the file's UUID from the workshop's image list
-            const Workshops = mongoose.model("Workshop", Workshop);
-            const workshop = await Workshops.findOne({
-                uuid: resource_uuid,
-            });
-            // If the workshop doesn't exist, throw an error
-            if (!workshop) {
-                throw new Error("Workshop not found");
-            }
-            // Remove the file's UUID from the workshop's image list and save the workshop
-            workshop.images = (workshop.images ?? []).filter(
-                (file_uuid) => file_uuid !== requested_file.uuid,
-            );
-            await workshop.save();
         }
-    }
 
-    return requested_file.save();
+        return requested_file.save();
+    }
 }
 
 /**

@@ -16,7 +16,7 @@ import {
     deleteFileOnServer,
     moveTempFileOnServer,
     deleteFilesOnServer,
-    removeResourceFromFile,
+    removeResourcesFromFile,
 } from "controllers/file.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { NextFunction, Request, Response, Router } from "express";
@@ -847,7 +847,7 @@ router.delete(
                     API_SCOPE.DELETE_OWN_FILE,
             )
         ) {
-            removeResourceFromFile(file_uuid, file.resource_uuid)
+            removeResourcesFromFile(file_uuid, file.resource_uuid)
                 // Once the resource has been removed from file
                 .then((updated_file) => {
                     // If updated file is null, it couldn't be found
@@ -982,7 +982,7 @@ router.delete(
                 ? resource_uuid.split(",")
                 : [resource_uuid];
 
-            removeResourceFromFile(file_uuid, resource_uuid_list)
+            removeResourcesFromFile(file_uuid, resource_uuid_list)
                 // Once the resource has been removed from file
                 .then((updated_file) => {
                     // If updated file is null, it couldn't be found
