@@ -475,7 +475,17 @@ export default function UserEditorForm({
                             const passkey = data.get("passkey") as string;
 
                             const new_user: TUser = {
-                                ...user,
+                                uuid: user.uuid,
+                                name: user.name,
+                                email: user.email,
+                                college_id: user.college_id,
+                                active_roles: user.active_roles,
+                                past_roles: user.past_roles,
+                                active_certificates: user.active_certificates,
+                                past_certificates: user.past_certificates,
+                                files: user.files,
+                                work_schedules: user.work_schedules,
+                                last_login: user.last_login,
                                 passkey: passkey,
                             };
 

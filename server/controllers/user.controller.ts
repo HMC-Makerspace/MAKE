@@ -16,6 +16,7 @@ import { SHIFT_DAY } from "common/shift";
 import { ScheduleUUID } from "common/schedule";
 import { getCertification } from "./certification.controller";
 import { createHash } from "crypto";
+import { validateEmail } from "common/verify";
 
 /**
  * Get all users in the database
@@ -72,8 +73,12 @@ export async function getUserByCollegeID(id: string): Promise<TUser | null> {
  */
 export async function getUserByEmail(email: string): Promise<TUser | null> {
     const Users = mongoose.model("User", User);
+    // Validate user email
+    const valid_email = validateEmail(email);
     // Get user by email with case insensitive search.
-    return Users.findOne({ email: { $regex: new RegExp(`^${email}$`, "i") } });
+    return Users.findOne({
+        email: { $regex: new RegExp(`^${valid_email}$`, "i") },
+    });
 }
 
 /**

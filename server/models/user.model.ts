@@ -73,19 +73,25 @@ export const UserRoleLogSchema = Joi.object<TUserRoleLog>({
  * See {@link TUserAvailabilityTime} documentation for type information.
  * Stored as children of {@link UserAvailability}.
  */
-const UserAvailabilityTime = new mongoose.Schema<TUserAvailabilityTime>({
-    sec_start: { type: Number, required: true },
-    sec_end: { type: Number, required: true },
-});
+const UserAvailabilityTime = new mongoose.Schema<TUserAvailabilityTime>(
+    {
+        sec_start: { type: Number, required: true },
+        sec_end: { type: Number, required: true },
+    },
+    { _id: false },
+);
 
 /**
  * See {@link TUserAvailabilityDay} documentation for type information.
  * Stored as children of {@link User}.
  */
-const UserAvailabilityDay = new mongoose.Schema<TUserAvailabilityDay>({
-    day: { type: Number, required: true },
-    availability: { type: [UserAvailabilityTime], required: true },
-});
+const UserAvailabilityDay = new mongoose.Schema<TUserAvailabilityDay>(
+    {
+        day: { type: Number, required: true },
+        availability: { type: [UserAvailabilityTime], required: true },
+    },
+    { _id: false },
+);
 
 /**
  * User Availability Day Schema through joi

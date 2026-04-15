@@ -234,10 +234,9 @@ export default function CheckoutSidebar({
                     onSubmit={(e) => {
                         e.preventDefault();
                         const data = new FormData(e.currentTarget);
-                        const id = data.get("college_id") as string;
+                        const id = (data.get("college_id") as string) || "";
                         const validatedID = validateCollegeID(id);
-                        console.log("Valid?", validatedID);
-                        setCollegeID(validatedID || id || "");
+                        setCollegeID(validatedID);
                         if (validatedID) {
                             const endTime = timestampToTime(
                                 activeSchedule.daily_close_time,
