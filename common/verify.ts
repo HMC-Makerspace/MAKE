@@ -46,10 +46,11 @@ export type SuccessfulResponse = Response<null | ErrorResponse | {}>;
 
 /**
  * Custom logic for validating college ID numbers.
- * Modify this function to suit your needs. If the return value is a string,
- * the result should be the corrected, valid version of the given input, which
- * may be the original value or a modified version (e.g. trimmed whitespace).
- * If the return value is null, the ID is invalid and will be ignored.
+ * TODO: Modify this function to suit your needs.
+ * If the return value is a string, the result is the corrected, valid version
+ * of the given input ID, which may be the original value or a modified version
+ * (e.g. trimmed whitespace). If the return value is null, the ID is invalid
+ * and will be ignored.
  * @param college_id The provided user's college ID
  * @returns The corrected ID, or null if the id is invalid
  */
@@ -59,7 +60,7 @@ export function validateCollegeIDStrict(college_id: string): string | null {
     // Remove underscores, (semi)colons, spaces, and question marks
     college_id = college_id.replace(/[\_\;\: \?]/, "");
     if (college_id.length >= 9) {
-        if (college_id.match(/^[12]/) && college_id.length === 9) {
+        if (college_id.match(/^(25|9)/) && college_id.length === 9) {
             return college_id; // Valid ID
         } else if (college_id.startsWith("0")) {
             // Attempt to revalidate ID by dropping leading 0
@@ -81,6 +82,33 @@ export function validateCollegeIDStrict(college_id: string): string | null {
     }
 }
 
+
+/**
+ * Validate a user's email
+ * TODO: Modify this function to suit your needs.
+ * If the return value is a string, the result is the corrected, valid
+ * version of the given input email, which may be the original value or
+ * a modified version (e.g. lowercase). If the return value is null,
+ * the email format is invalid and will be ignored.
+ * @param college_id The provided user's email
+ * @returns The corrected email, or null if the email is invalid
+ */
+export function validateEmailStrict(email: string): string | null {
+    // Remove whitespace and make case insensitive
+    email = email.trim().toLowerCase();
+    // Basic email format check
+    if (!email.match(/^.+@.+$/)) {
+        return null;
+    }
+    // Convert g.hmc.edu to hmc.edu
+    if (email.endsWith("g.hmc.edu")) {
+        return validateEmailStrict(
+            email.substring(0, email.indexOf("g.hmc.edu")) + "hmc.edu",
+        );
+    }
+    return email;
+}
+
 /**
  * Validate a user's college ID, but default to accepting the original value if invalid.
  * @param college_id The provided user's college ID
@@ -88,5 +116,16 @@ export function validateCollegeIDStrict(college_id: string): string | null {
  */
 export function validateCollegeID(college_id: string): string {
     const new_id = validateCollegeIDStrict(college_id);
+    return new_id === null ? college_id : new_id;
+}
+
+
+/**
+ * Validate a user's email, but default to accepting the original value if invalid.
+ * @param college_id The provided user's email
+ * @returns The corrected email, or the input value if invalid.
+ */
+export function validateEmail(college_id: string): string {
+    const new_id = validateEmailStrict(college_id);
     return new_id === null ? college_id : new_id;
 }
