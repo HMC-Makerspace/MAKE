@@ -39,7 +39,7 @@ import {
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
-import AuthorizedRolesModal from "../certifications/AuthorizedRolesModal";
+import { AvailableToRolesModal, VisibleToRolesModal } from "../certifications/AuthorizedRolesModal";
 import { motion } from "motion/react";
 import ItemQuantityIcon from "./ItemQuantityIcon";
 import ItemLocationModal from "./ItemLocationModal";
@@ -184,7 +184,8 @@ export default function ItemEditorForm({
                         ?.split(",")
                         .map((i) => i.trim()) ?? [],
                 required_certifications: item.required_certifications,
-                authorized_roles: item.authorized_roles,
+                available_to: item.available_to,
+                visible_to: item.visible_to,
                 quantity: quantity,
                 available: available,
             };
@@ -253,13 +254,15 @@ export default function ItemEditorForm({
     });
 
     const [reqcertsOpen, setReqcertsOpen] = React.useState<boolean>(false); // whether reqcerts edit modal is open
-    const [authrolesOpen, setAuthrolesOpen] = React.useState<boolean>(false); // whether authroles edit modal is open
+    const [acrolesOpen, setAcrolesOpen] = React.useState<boolean>(false); // whether accessor roles edit modal is open
+    const [vwrolesOpen, setVwrolesOpen] = React.useState<boolean>(false); // whether viewer roles edit modal is open
     const [locationEditorOpen, setLocationEditorOpen] =
         React.useState<boolean>(false); // whether location editor modal is open
     const [kitEditorOpen, setKitEditorOpen] = React.useState<boolean>(false); // whether kit content edit modal is open
 
     const reqcertsMutation = patchMutation(() => setReqcertsOpen(false));
-    const authrolesMutation = patchMutation(() => setAuthrolesOpen(false));
+    const acrolesMutation = patchMutation(() => setAcrolesOpen(false));
+    const vwrolesMutation = patchMutation(() => setVwrolesOpen(false));
     const locationEditorMutation = patchMutation(() =>
         setLocationEditorOpen(false),
     );
@@ -719,8 +722,8 @@ export default function ItemEditorForm({
                         <Tooltip
                             content={
                                 isNew
-                                    ? "Create the item first, before editing authorized roles."
-                                    : "Authorized Roles"
+                                    ? "Create the item first, before editing accessor roles."
+                                    : "Accessor Roles"
                             }
                             className="w-fit p-2"
                             delay={500}
@@ -730,14 +733,39 @@ export default function ItemEditorForm({
                             <Button
                                 // variant="flat"
                                 color="primary"
-                                onPress={() => !isNew && setAuthrolesOpen(true)}
+                                onPress={() => !isNew && setAcrolesOpen(true)}
                                 // isIconOnly
                                 isDisabled={isDisabled}
                                 className={isNew ? "opacity-disabled" : ""}
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <UserIcon className="size-7" />
-                                {item.authorized_roles?.length ?? 0}
+                                {item.available_to?.length ?? 0}
+                            </Button>
+                        </Tooltip>
+
+                        <Tooltip
+                            content={
+                                isNew
+                                    ? "Create the item first, before editing viewer roles."
+                                    : "Viewer Roles"
+                            }
+                            className="w-fit p-2"
+                            delay={500}
+                            closeDelay={150}
+                            isDisabled={isDisabled}
+                        >
+                            <Button
+                                // variant="flat"
+                                color="primary"
+                                onPress={() => !isNew && setVwrolesOpen(true)}
+                                // isIconOnly
+                                isDisabled={isDisabled}
+                                className={isNew ? "opacity-disabled" : ""}
+                                data-hover={!isNew && !isDisabled}
+                            >
+                                <UserIcon className="size-7" />
+                                {item.visible_to?.length ?? 0}
                             </Button>
                         </Tooltip>
 
@@ -811,13 +839,21 @@ export default function ItemEditorForm({
                 onOpenChange={setReqcertsOpen}
                 patchMutation={reqcertsMutation}
             />
-            <AuthorizedRolesModal
-                key={"roleauth-" + item.uuid}
+            <AvailableToRolesModal
+                key={"acroleauth-" + item.uuid}
                 element={item}
                 roles={roles}
-                isOpen={authrolesOpen}
-                onOpenChange={setAuthrolesOpen}
-                patchMutation={authrolesMutation}
+                isOpen={acrolesOpen}
+                onOpenChange={setAcrolesOpen}
+                patchMutation={acrolesMutation}
+            />
+            <VisibleToRolesModal
+                key={"vwroleauth-" + item.uuid}
+                element={item}
+                roles={roles}
+                isOpen={vwrolesOpen}
+                onOpenChange={setVwrolesOpen}
+                patchMutation={vwrolesMutation}
             />
             <ItemLocationModal
                 key={"locedit-" + item.uuid}

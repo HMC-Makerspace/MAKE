@@ -110,10 +110,10 @@ export async function validateCheckout(
         // For each item being checked out, verify that the user
         // has authorized roles and required certs as needed
         if (
-            item.authorized_roles !== null &&
-            item.authorized_roles !== undefined
+            item.available_to !== null &&
+            item.available_to !== undefined
         ) {
-            if (item.authorized_roles.length === 0) {
+            if (item.available_to.length === 0) {
                 // No user roles are authorized
                 return {
                     status: CHECKOUT_VALIDATION.MISSING_ROLE,
@@ -121,7 +121,7 @@ export async function validateCheckout(
                 };
             }
             if (
-                !item.authorized_roles.some((r) =>
+                !item.available_to.some((r) =>
                     user.active_roles.some((log) => log.role_uuid === r),
                 )
             ) {

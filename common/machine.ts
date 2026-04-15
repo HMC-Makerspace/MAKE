@@ -101,11 +101,14 @@ export type TMachineInstanceStatusLog = {
  * @property documents - (optional) A list of {@link TDocument | Document} objects
  *      about this machine (manuals, data sheets, how-to videos, etc.)
  * @property required_certs - UUIDs of certs required to use/reserve the machine
- * @property authorized_roles - (optional) A list of UserRole UUIDs that are
+ * @property available_to - (optional) A list of UserRole UUIDs that are
  *      allowed to use this machine. A user must have at least one of these
- *      roles to see the given machine in the area tab and reserve the machine.
- *      If null, this machine is public and reservable by anyone.
- *      If set as an empty list, only admins are able to see or reserve the machine.
+ *      roles to reserve the machine. If null, this machine is reservable by anyone;
+ *      if an empty list, only admins are able to reserve the machine.
+ * @property visible_to - (optional) A list of UserRole UUIDs that are allowed to
+ *      see this machine. A user must have at least one of these roles to see the
+ *      given machine in the area tab. If null, this machine is public; if an empty
+ *      list, this machine is only visible to admins.
  * @property reservable - (optional) Whether this machine is allowed to be
  *      reserved. Only users with the required certifications and at least one
  *      authorized role can reserve this machine.
@@ -123,7 +126,8 @@ export type TMachine = {
     status_logs: TMachineInstanceStatusLog[];
     documents?: TDocument[];
     required_certifications?: TRequiredCertificate[];
-    authorized_roles?: UserRoleUUID[] | null;
+    available_to?: UserRoleUUID[] | null;
+    visible_to?: UserRoleUUID[] | null;
     reservable?: boolean;
     reservation_type?:
         | ITEM_ACCESS_TYPE.CHECKOUT_IN_SPACE

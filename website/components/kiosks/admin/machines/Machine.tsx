@@ -34,9 +34,9 @@ import {
 import CertificationTag from "../certifications/CertificationTag";
 import ReservableConfirmationModal from "./ReservableConfirmationModal";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
-import AuthorizedRolesModal from "../certifications/AuthorizedRolesModal";
 import DeleteModal from "../../../DeleteModal";
 import { Link } from "react-router-dom";
+import { AvailableToRolesModal, VisibleToRolesModal } from "../certifications/AuthorizedRolesModal";
 
 const patchMachine = async ({
     uuid,
@@ -88,9 +88,15 @@ export default function Machine({
     } = useDisclosure();
 
     const {
-        isOpen: roleModal,
-        onOpenChange: roleModalOpenChange,
-        onOpen: roleModalOpen,
+        isOpen: acroleModal,
+        onOpenChange: acroleModalOpenChange,
+        onOpen: acroleModalOpen,
+    } = useDisclosure();
+
+    const {
+        isOpen: vwroleModal,
+        onOpenChange: vwroleModalOpenChange,
+        onOpen: vwroleModalOpen,
     } = useDisclosure();
 
     const {
@@ -396,11 +402,22 @@ export default function Machine({
                             color="warning"
                             className="w-full px-2"
                             startContent={<UserCircleIcon className="size-7" />}
-                            onPress={roleModalOpen}
+                            onPress={acroleModalOpen}
                         >
-                            Authorized Roles
-                            {machine.authorized_roles
-                                ? ` (${machine.authorized_roles.length})`
+                            Accessor Roles
+                            {machine.available_to
+                                ? ` (${machine.available_to.length})`
+                                : ""}
+                        </Button>
+                        <Button
+                            color="warning"
+                            className="w-full px-2"
+                            startContent={<UserCircleIcon className="size-7" />}
+                            onPress={vwroleModalOpen}
+                        >
+                            Viewer Roles
+                            {machine.visible_to
+                                ? ` (${machine.visible_to.length})`
                                 : ""}
                         </Button>
                         <EditDocsModal
@@ -409,13 +426,19 @@ export default function Machine({
                             isOpen={editDocs}
                             onOpenChange={editDocsModalOpenChange}
                             patchMutation={patchMutation}
-                            roleOption={true}
                         />
-                        <AuthorizedRolesModal
+                        <AvailableToRolesModal
                             element={machine}
                             roles={roles}
-                            isOpen={roleModal}
-                            onOpenChange={roleModalOpenChange}
+                            isOpen={acroleModal}
+                            onOpenChange={acroleModalOpenChange}
+                            patchMutation={patchMutation}
+                        />
+                        <VisibleToRolesModal
+                            element={machine}
+                            roles={roles}
+                            isOpen={vwroleModal}
+                            onOpenChange={vwroleModalOpenChange}
                             patchMutation={patchMutation}
                         />
                     </div>

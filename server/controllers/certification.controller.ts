@@ -79,8 +79,8 @@ export async function getCertificationsVisibleToUser(
             { visibility: CERTIFICATION_VISIBILITY.PUBLIC },
             {
                 $or: [
-                    { authorized_roles: null },
-                    { authorized_roles: { $elemMatch: { $in: role_uuids } } },
+                    { visible_to: null },
+                    { visible_to: { $elemMatch: { $in: role_uuids } } },
                 ],
             },
         ],
@@ -97,7 +97,7 @@ async function getPublicCertifications(): Promise<TCertification[]> {
     // Only return certifications that have require no roles
     return Certifications.find({
         visibility: { $ne: CERTIFICATION_VISIBILITY.SCHEDULE },
-        authorized_roles: null,
+        visible_to: null,
     });
 }
 

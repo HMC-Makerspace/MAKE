@@ -35,6 +35,7 @@ import { parseZonedDateTime, ZonedDateTime } from "@internationalized/date";
 import clsx from "clsx";
 import { TConfig } from "common/config";
 import axios from "axios";
+import RequiredCertsModal from "../certifications/RequiredCertsModal";
 
 const updateCreateWorkshop = async ({
     workshop,
@@ -169,7 +170,8 @@ export default function WorkshopEditModal({
                 reminder_emails_sent: workshop.reminder_emails_sent,
                 sign_in_list: workshop.sign_in_list,
                 images: workshop.images,
-                authorized_roles: workshop.authorized_roles,
+                available_to: workshop.available_to,
+                visible_to: workshop.visible_to,
             };
 
             console.log("here");
@@ -403,73 +405,6 @@ export default function WorkshopEditModal({
                                     ]),
                                 }}
                             />
-                            {/* <Select<TCertification>
-                                    label="Required Certifications"
-                                    labelPlacement="inside"
-                                    selectionMode="multiple"
-                                    placeholder="Enter required certifications"
-                                    defaultSelectedKeys={
-                                        workshop.required_certifications
-                                    }
-                                    onSelectionChange={(keys) => {
-                                        if (keys === "all") {
-                                            wrapEdit("required_certifications")(
-                                                sortedFilteredWorkers.map(
-                                                    (u) => u.uuid,
-                                                ),
-                                            );
-                                        } else {
-                                            wrapEdit("required_certifications")(
-                                                Array.from(keys) as string[],
-                                            );
-                                        }
-                                    }}
-                                    // selectedKeys={requiredCertifications}
-                                    // onSelectionChange={wrapSetEdit(
-                                    //     setRequiredCertifications,
-                                    // )}
-                                    isMultiline
-                                    variant="faded"
-                                    color="primary"
-                                    classNames={{
-                                        value: clsx([
-                                            "text-default-500",
-                                            "italic",
-                                            "group-data-[has-value=true]:text-default-700",
-                                            "group-data-[has-value=true]:not-italic	",
-                                        ]),
-                                    }}
-                                    renderValue={(selectedKeys) => {
-                                        if (selectedKeys.length === 0) {
-                                            // If no prereqs are selected, show the placeholder
-                                            return "";
-                                        } else {
-                                            return (
-                                                // Otherwise, show the selected prereqs in a flexbox
-                                                <div className="flex flex-wrap gap-1 p-2">
-                                                    {selectedKeys.map((c) => {
-                                                        return c.key ? (
-                                                            <CertificationTag
-                                                                cert_uuid={
-                                                                    c.key as string
-                                                                }
-                                                                key={c.key}
-                                                            />
-                                                        ) : null;
-                                                    })}
-                                                </div>
-                                            );
-                                        }
-                                    }}
-                                >
-                                    {certs.map((cert) => (
-                                        <SelectItem key={cert.uuid}>
-                                            <CertificationTag
-                                                cert_uuid={cert.uuid}
-                                            />
-                                        </SelectItem>
-                                    ))}
-                                </Select> */}
 
                             <DateRangePicker
                                 label="Workshop Date Range"

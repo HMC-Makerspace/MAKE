@@ -73,8 +73,8 @@ export async function getInventoryVisibleToUser(
         {
             $match: {
                 $or: [
-                    { authorized_roles: null },
-                    { authorized_roles: { $in: role_uuids } },
+                    { visible_to: null },
+                    { visible_to: { $in: role_uuids } },
                 ],
             },
         },
@@ -116,7 +116,7 @@ async function getPublicInventory(): Promise<TInventoryItem[]> {
     return await Inventory.aggregate([
         {
             $match: {
-                authorized_roles: null,
+                visible_to: null,
                 // Required certifications must either be empty or not exist
                 $or: [
                     { required_certifications: null },

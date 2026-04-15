@@ -104,10 +104,12 @@ export const ITEM_ACCESS_DESCRIPTORS: {
  * @property kit_contents - (optional) if kit, lists all item UUIDs in this kit
  * @property keywords - (optional) keywords associated with item
  * @property required_certs - UUIDs of certs required to use item
- * @property authorized_roles - (optional) A list of UserRole UUIDs that are
+ * @property available_to - (optional) A list of UserRole UUIDs that are
  *      allowed to use this item. A user must have at least one of
  *      these roles to checkout the given item. If null, any user may
  *      checkout this item.
+ * @property visible_to - (optional) A list of UserRole UUIDs that are allowed
+ *      to see this item. If null, the item is publicly visible.
  * @property kit_contents - The contents of the item, if it is a kit
  * @property parent_kit - The UUID of the parent kit (if this item is in one)
  */
@@ -125,7 +127,8 @@ export type TInventoryItem = {
     serial_number?: string;
     keywords?: string[];
     required_certifications?: TRequiredCertificate[];
-    authorized_roles?: UserRoleUUID[] | null;
+    available_to?: UserRoleUUID[] | null;
+    visible_to?: UserRoleUUID[] | null;
     kit_contents?: InventoryItemUUID[];
     parent_kit?: InventoryItemUUID;
 };

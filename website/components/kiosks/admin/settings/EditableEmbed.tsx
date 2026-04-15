@@ -151,7 +151,7 @@ export default function EditableEmbed({
                         <div className="flex gap-2 sm:gap-3">
                             <Tooltip
                                 color={
-                                    embed.visible_to === null
+                                    embed.visible_to == null
                                         ? "success"
                                         : embed.visible_to &&
                                             embed.visible_to.length === 0
@@ -159,7 +159,7 @@ export default function EditableEmbed({
                                           : "primary"
                                 }
                                 content={
-                                    embed.visible_to === null
+                                    embed.visible_to == null
                                         ? "Visible"
                                         : embed.visible_to &&
                                             embed.visible_to.length === 0
@@ -185,7 +185,7 @@ export default function EditableEmbed({
                                         )
                                     }
                                     color={
-                                        embed.visible_to === null
+                                        embed.visible_to == null
                                             ? "success"
                                             : embed.visible_to &&
                                                 embed.visible_to.length === 0

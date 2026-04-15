@@ -13,7 +13,7 @@ import { UserRoleUUID } from "common/user";
 const emptyDoc: TDocument = {
     name: "",
     link: "",
-    authorized_roles: null,
+    visible_to: null,
 };
 
 export default function EditDocsModal<
@@ -24,7 +24,7 @@ export default function EditDocsModal<
     isOpen,
     onOpenChange,
     patchMutation,
-    roleOption = false,
+    roleOption = true,
 }: {
     element: T;
     isOpen: boolean;
@@ -72,8 +72,8 @@ export default function EditDocsModal<
     const wrapRolesEdit = (i: number) => {
         return (val: any) => {
             if (!docs[i]) docs[i] = { ...emptyDoc }; // copy the emptyDoc template if necessary
-            docs[i]["authorized_roles"] = Array.from(val) as UserRoleUUID[]; // update the value
-            if (docs[i]["authorized_roles"].length == 0) {docs[i]["authorized_roles"] = null}; // makes sure empty lists not allowed
+            docs[i]["visible_to"] = Array.from(val) as UserRoleUUID[]; // update the value
+            if (docs[i]["visible_to"].length == 0) {docs[i]["visible_to"] = null}; // makes sure empty lists not allowed
             setDocs([...docs]); // update the docs list
 
             setHasEdits(true);
@@ -150,16 +150,16 @@ export default function EditDocsModal<
                                     className="w-full"
                                 />
 
-                                {roleOption && (
+                                {roleOption && ( // TODO: doesn't currently allow the distinction between [] (only visible to admins) and null (public)
                                     <div className="min-w-[15vw] max-w-full">
                                         <UserRoleSelect
                                             selectedKeys={
-                                                docs[i]["authorized_roles"] ??
+                                                docs[i]["visible_to"] ??
                                                 undefined
                                             }
                                             onSelectionChange={wrapRolesEdit(i)}
-                                            placeholder="Select authorized roles"
-                                            label="Authorized Roles"
+                                            placeholder="Select viewer roles"
+                                            label="Viewer Roles"
                                             labelPlacement="inside"
                                             classNames={{
                                                 value: "text-default-500",

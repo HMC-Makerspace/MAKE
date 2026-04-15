@@ -52,7 +52,8 @@ const baseColumns = [
     { name: "Quantity", id: "quantity_ratio" },
     { name: "Locations", id: "locations" },
     { name: "Required Certs", id: "required_certifications" },
-    { name: "Authorized Roles", id: "authorized_roles" },
+    { name: "Accessor Roles", id: "available_to" },
+    { name: "Viewer Roles", id: "visible_to" },
     { name: "Kit Contents", id: "kit_contents" },
     { name: "Keywords", id: "keywords" },
     { name: "Serial Number", id: "serial_number" },
@@ -80,7 +81,8 @@ export default function InventoryTable({
         "quantity_ratio",
         "locations",
         "required_certifications",
-        "authorized_roles",
+        "available_to",
+        "visible_to",
     ],
     customColumnComponents,
     showsKitContents = false,
@@ -437,9 +439,20 @@ export default function InventoryTable({
                             ))}
                         </div>
                     ),
-                    authorized_roles: (i) => (
+                    available_to: (i) => (
                         <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
-                            {i.authorized_roles?.map((role) => (
+                            {i.available_to?.map((role) => (
+                                <UserRole
+                                    key={role}
+                                    role_uuid={role}
+                                    role={roles.find((r) => r.uuid === role)}
+                                />
+                            ))}
+                        </div>
+                    ),
+                    visible_to: (i) => (
+                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
+                            {i.visible_to?.map((role) => (
                                 <UserRole
                                     key={role}
                                     role_uuid={role}

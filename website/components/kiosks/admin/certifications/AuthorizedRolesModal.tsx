@@ -7,39 +7,46 @@ import { UserRoleUUID, TUserRole } from "common/user";
 import { UUID } from "common/global";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
 
-export default function RequiredRolesModal<
-    // Allow any type that has a uuid and optional required_roles list
-    T extends { uuid: UUID; authorized_roles?: UserRoleUUID[] | null },
->({
+type Available = {
+    uuid: UUID,
+    available_to?: UserRoleUUID[] | null,
+}
+
+type Visible = {
+    uuid: UUID,
+    visible_to?: UserRoleUUID[] | null,
+}
+
+function RequiredRolesModal({
+    type,
     element,
     roles,
     isOpen,
     onOpenChange,
     patchMutation,
 }: {
-    element: T;
+    type: "available_to" | "visible_to";
+    element: any;
     roles: TUserRole[];
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
     patchMutation: UseMutationResult<
-        T,
+        typeof element,
         Error,
         {
             uuid: UUID;
-            patch: {
-                authorized_roles?: UserRoleUUID[] | null;
-            };
+            patch: any;
         }
     >;
 }) {
     const [hasEdits, setHasEdits] = React.useState(false);
     const [currentRoles, setCurrentRoles] = React.useState<UserRoleUUID[]>(
-        element.authorized_roles || [],
+        element[type] || [],
     );
     // An open authorized object always has an empty role list and is available to anyone,
     // whereas an closed authorized object with an empty role list is available to no one.
     const [openAuthorized, setOpenAuthorized] = React.useState(
-        element.authorized_roles === null,
+        element[type] == null,
     );
 
     const onSubmit = React.useCallback(
@@ -51,15 +58,19 @@ export default function RequiredRolesModal<
 
             patchMutation.reset();
 
+            let patch: any = {};
+
             if (openAuthorized) {
+                patch[type] = null;
                 patchMutation.mutate({
                     uuid: element.uuid,
-                    patch: { authorized_roles: null },
+                    patch,
                 });
             } else {
+                patch[type] = currentRoles;
                 patchMutation.mutate({
                     uuid: element.uuid,
-                    patch: { authorized_roles: currentRoles },
+                    patch,
                 });
             }
             onOpenChange(false);
@@ -89,11 +100,11 @@ export default function RequiredRolesModal<
                         className="flex flex-col gap-4 p-4"
                     >
                         <div className="text-lg font-semibold">
-                            Edit Authorized Roles
+                            Edit {type == "available_to" ? "Accessor Roles" : "Viewer Roles"}
                         </div>
                         <div>
                             Users with at least one of the selected roles will
-                            be able to reserve this machine.
+                            have {type == "available_to" ? "use" : "view"} permissions.
                         </div>
 
                         <div
@@ -106,7 +117,7 @@ export default function RequiredRolesModal<
                                 label=""
                                 placeholder={
                                     openAuthorized
-                                        ? "Reservable by all roles"
+                                        ? `${type == "available_to" ? "Usable" : "Viewable"} by all roles`
                                         : "Select roles to authorize"
                                 }
                                 isDisabled={openAuthorized}
@@ -169,4 +180,71 @@ export default function RequiredRolesModal<
             </ModalContent>
         </Modal>
     );
+}
+
+// Wrappers for the above component to account for both types of authorized roles
+// trying to figure out typescript things for this, so may not work lol
+
+export function AvailableToRolesModal<T extends Available>({
+    element,
+    roles,
+    isOpen,
+    onOpenChange,
+    patchMutation,
+}: {
+    element: T;
+    roles: TUserRole[];
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    patchMutation: UseMutationResult<
+        T,
+        Error,
+        {
+            uuid: UUID;
+            patch: {
+                available_to?: UserRoleUUID[] | null;
+            };
+        }
+    >;
+}) {
+    return (<RequiredRolesModal
+        type="available_to"
+        element={element}
+        roles={roles}
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        patchMutation={patchMutation}
+    ></RequiredRolesModal>);
+}
+
+export function VisibleToRolesModal<T extends Visible>({
+    element,
+    roles,
+    isOpen,
+    onOpenChange,
+    patchMutation,
+}: {
+    element: T;
+    roles: TUserRole[];
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    patchMutation: UseMutationResult<
+        T,
+        Error,
+        {
+            uuid: UUID;
+            patch: {
+                visible_to?: UserRoleUUID[] | null;
+            };
+        }
+    >;
+}) {
+    return (<RequiredRolesModal
+        type="visible_to"
+        element={element}
+        roles={roles}
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        patchMutation={patchMutation}
+    ></RequiredRolesModal>);
 }

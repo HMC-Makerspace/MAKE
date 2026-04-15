@@ -17,6 +17,7 @@ import {
     PlusIcon,
     TagIcon,
     DocumentDuplicateIcon,
+    RocketLaunchIcon,
 } from "@heroicons/react/24/outline";
 import { TWorkshop } from "common/workshop";
 import { TCertification } from "common/certification";
@@ -39,6 +40,7 @@ import { UUID } from "common/global.ts";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getLocalTimeZone, now } from "@internationalized/date";
+import { AvailableToRolesModal, VisibleToRolesModal } from "../certifications/AuthorizedRolesModal.tsx";
 
 // TODO-
 // [] FIX TIME
@@ -56,7 +58,8 @@ const columns = [
     // {name: 'Sign-In List', id:'sign_in_list'},
     { name: "People", id: "signups" },
     { name: "Photos", id: "photos" },
-    // { name: "Authorized Roles", id: "authorized_roles" },
+    { name: "Accessor Roles", id: "available_to" },
+    { name: "Viewer Roles", id: "visible_to" },
     { name: "Edit", id: "edit" },
     { name: "Duplicate", id: "duplicate" },
     { name: "Delete", id: "delete" },
@@ -73,7 +76,8 @@ const defaultColumns = [
     // 'rsvp_list',
     // 'sign_in_list',
     "photos",
-    // "authorized_roles",
+    "available_to",
+    "visible_to",
     "edit",
     "duplicate",
     "delete",
@@ -113,7 +117,8 @@ const duplicateWorkshop = async ({ workshop }: { workshop: TWorkshop }) => {
         reminder_emails_sent: [],
         sign_in_list: [],
         images: [], // Exclude images in duplication
-        authorized_roles: workshop.authorized_roles,
+        available_to: workshop.available_to,
+        visible_to: workshop.visible_to,
     };
 
     return (
@@ -227,6 +232,16 @@ export default function WorkshopTable({
         onOpen: certsOnOpen,
         onOpenChange: certsOnOpenChange,
     } = useDisclosure();
+    const {
+        isOpen: acrolesIsOpen,
+        onOpen: acrolesOnOpen,
+        onOpenChange: acrolesOnOpenChange,
+    } = useDisclosure();
+    const {
+        isOpen: vwrolesIsOpen,
+        onOpen: vwrolesOnOpen,
+        onOpenChange: vwrolesOnOpenChange,
+    } = useDisclosure();
 
     return (
         <div className="flex flex-col max-h-full overflow-auto">
@@ -256,6 +271,8 @@ export default function WorkshopTable({
                             rsvp_list: [],
                             reminder_emails_sent: [],
                             sign_in_list: [],
+                            available_to: [],
+                            visible_to: [],
                         });
                         editOnOpen();
                     }}
@@ -427,24 +444,36 @@ export default function WorkshopTable({
                                 }}
                             />
                         ),
-                        // TODO: Add roles
-                        // "authorized_roles": (workshop) => {
-                        //     return (
-                        //         <div>
-                        //             {
-                        //                 workshop.authorized_roles ?
-
-                        //                 workshop.authorized_roles.map((roleUUID) => {
-                        //                     return <UserRole
-                        //                     role_uuid={workshop.authorized_roles}
-                        //                   />
-                        //                 })
-
-                        //             }
-
-                        //         </div>
-                        //     )
-                        // },
+                        "available_to": (workshop) => (
+                            <div className="flex w-full justify-center">
+                                <Button
+                                    isIconOnly
+                                    className="bg-default-300 mx-auto"
+                                    startContent={
+                                        <RocketLaunchIcon className="size-6" />
+                                    }
+                                    onPress={() => {
+                                        setSelectedWorkshop(workshop);
+                                        acrolesOnOpen();
+                                    }}
+                                />
+                            </div>
+                        ),
+                        "visible_to": (workshop) => (
+                            <div className="flex w-full justify-center">
+                                <Button
+                                    isIconOnly
+                                    className="bg-default-300 mx-auto"
+                                    startContent={
+                                        <RocketLaunchIcon className="size-6" />
+                                    }
+                                    onPress={() => {
+                                        setSelectedWorkshop(workshop);
+                                        vwrolesOnOpen();
+                                    }}
+                                />
+                            </div>
+                        ),
                         edit: (workshop) => {
                             return (
                                 <>
@@ -535,6 +564,22 @@ export default function WorkshopTable({
                         certifications={certs}
                         isOpen={certsIsOpen}
                         onOpenChange={certsOnOpenChange}
+                        patchMutation={patchMutation}
+                    />
+                    <AvailableToRolesModal
+                        key={`${selectedWorkshop.uuid}-acroles`}
+                        element={selectedWorkshop}
+                        roles={roles}
+                        isOpen={acrolesIsOpen}
+                        onOpenChange={acrolesOnOpenChange}
+                        patchMutation={patchMutation}
+                    />
+                    <VisibleToRolesModal
+                        key={`${selectedWorkshop.uuid}-vwroles`}
+                        element={selectedWorkshop}
+                        roles={roles}
+                        isOpen={vwrolesIsOpen}
+                        onOpenChange={vwrolesOnOpenChange}
                         patchMutation={patchMutation}
                     />
                 </>

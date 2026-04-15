@@ -60,7 +60,7 @@ export async function getEmbedsVisibleToUser(
                             $or: [
                                 {
                                     $not: {
-                                        $isArray: "$$docs.authorized_roles",
+                                        $isArray: "$$docs.visible_to",
                                     },
                                 },
                                 {
@@ -68,7 +68,7 @@ export async function getEmbedsVisibleToUser(
                                         {
                                             $size: {
                                                 $setIntersection: [
-                                                    "$$docs.authorized_roles",
+                                                    "$$docs.visible_to",
                                                     role_uuids,
                                                 ],
                                             },

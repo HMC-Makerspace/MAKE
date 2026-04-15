@@ -29,7 +29,8 @@ export const Workshop = new mongoose.Schema<TWorkshop>(
         reminder_emails_sent: { type: [Number], required: true },
         sign_in_list: { type: [WorkshopUserRecord], required: true },
         images: { type: [String], required: false },
-        authorized_roles: { type: [String], required: false },
+        available_to: { type: [String], required: false },
+        visible_to: { type: [String], required: false },
     },
     { collection: "workshops" }, // Collection name
 );

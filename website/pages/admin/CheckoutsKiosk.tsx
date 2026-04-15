@@ -292,7 +292,8 @@ export default function CheckoutsKiosk() {
                                     "quantity_ratio",
                                     "locations",
                                     "required_certifications",
-                                    "authorized_roles",
+                                    "available_to",
+                                    "visible_to",
                                     "cart",
                                 ]}
                                 customColumnComponents={{
@@ -400,7 +401,7 @@ export default function CheckoutsKiosk() {
                                     "max_level",
                                     "seconds_valid_for",
                                     "prerequisites",
-                                    "authorized_roles",
+                                    "visible_to",
                                     "grant_revoke",
                                 ]}
                                 extraColumns={[

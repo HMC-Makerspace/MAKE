@@ -35,9 +35,8 @@ export type TAreaStatus = {
  * @property status_logs - A list of past statuses
  * @property required_certifications - (optional) UUIDs of certs required to
  *      use/reserve the area
- * @property authorized_roles - (optional) A list of UserRole UUIDs that are
- *      allowed to see this area. A user must have at least one of these
- *      to reserve the area. If null, area needs to rolls to be reserved.
+ * @property available_to - (optional) A list of UserRole UUIDs that are
+ *      allowed to reserve this area. If null, area needs no roles to be reserved.
  *      If set as the empty list, only admin users will be able to reserve this area.
  * @property reservable - (optional) Whether this area is allowed to be reserved.
  *      Only users with the required certifications and authorized roles can
@@ -57,7 +56,7 @@ export type TArea = {
     equipment?: MachineUUID[];
     images?: FileUUID[];
     required_certifications?: TRequiredCertificate[];
-    authorized_roles?: UserRoleUUID[] | null;
+    available_to?: UserRoleUUID[] | null;
     reservable?: boolean;
     reserved?: boolean;
     visible_to?: UserRoleUUID[] | null;

@@ -40,7 +40,7 @@ export const Certification = new mongoose.Schema<TCertification>(
         seconds_valid_for: { type: Number, required: false },
         documents: { type: [Document], required: false },
         required_certifications: { type: [RequiredCertificate], required: false },
-        authorized_roles: { type: [String], required: false },
+        visible_to: { type: [String], required: false },
     },
     { collection: "certifications" },
 );

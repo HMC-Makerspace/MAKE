@@ -156,7 +156,7 @@ export async function setAllAreas(area_objs: TArea[]): Promise<TArea[] | null> {
             equipment: area_obj.equipment,
             images: area_obj.images,
             required_certifications: area_obj.required_certifications,
-            authorized_roles: area_obj.authorized_roles,
+            available_to: area_obj.available_to,
             reservable: area_obj.reservable,
             reserved: area_obj.reserved,
             visible_to: area_obj.visible_to,
@@ -193,7 +193,8 @@ export async function patchArea(
         // refresh instance items
         (partial_area.reservable !== undefined ||
             partial_area.name ||
-            partial_area.authorized_roles ||
+            partial_area.available_to ||
+            partial_area.visible_to ||
             partial_area.required_certifications)
     ) {
         refreshAreaItem(updated_area);
@@ -278,7 +279,8 @@ export async function refreshAreaItem(area: TArea) {
                 },
             ],
             required_certifications: area.required_certifications,
-            authorized_roles: area.authorized_roles,
+            available_to: area.available_to,
+            visible_to: area.visible_to,
         };
         new Inventory(instance_item_data).save();
     } else if (area.reservable === false) {
