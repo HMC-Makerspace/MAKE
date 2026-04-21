@@ -341,50 +341,52 @@ router.delete(
                             } else if (
                                 updated_file.resource_uuid.length === 0
                             ) {
-                                deleteFileOnServer(updated_file.path, req, res).then(
-                                    (error_message) => {
-                                        deleteFile(image)
-                                            .then((deleted_file) => {
-                                                if (!deleted_file) {
-                                                    req.log.warn(
-                                                        `File with uuid ${image} not found, failed to delete`,
-                                                    );
-                                                    res.status(
-                                                        StatusCodes.NOT_FOUND,
-                                                    ).json({
-                                                        error: `File with uuid \`${image}\` not found.`,
-                                                    });
-                                                } else if (
-                                                    error_message ===
-                                                    "Successfully deleted file"
-                                                ) {
-                                                    req.log.debug(
-                                                        "Deleted file successfully.",
-                                                    );
-                                                    res.status(
-                                                        StatusCodes.OK,
-                                                    ).json({});
-                                                } else {
-                                                    res.status(
-                                                        StatusCodes.INTERNAL_SERVER_ERROR,
-                                                    ).json({
-                                                        error: error_message,
-                                                    });
-                                                }
-                                            })
-                                            .catch((err: Error) => {
-                                                req.log.error({
-                                                    msg: `Error deleting file with uuid ${image}`,
-                                                    err: err,
+                                deleteFileOnServer(
+                                    updated_file.path,
+                                    req,
+                                    res,
+                                ).then((error_message) => {
+                                    deleteFile(image)
+                                        .then((deleted_file) => {
+                                            if (!deleted_file) {
+                                                req.log.warn(
+                                                    `File with uuid ${image} not found, failed to delete`,
+                                                );
+                                                res.status(
+                                                    StatusCodes.NOT_FOUND,
+                                                ).json({
+                                                    error: `File with uuid \`${image}\` not found.`,
                                                 });
+                                            } else if (
+                                                error_message ===
+                                                "Successfully deleted file"
+                                            ) {
+                                                req.log.debug(
+                                                    "Deleted file successfully.",
+                                                );
+                                                res.status(StatusCodes.OK).json(
+                                                    {},
+                                                );
+                                            } else {
                                                 res.status(
                                                     StatusCodes.INTERNAL_SERVER_ERROR,
                                                 ).json({
-                                                    error: err.message,
+                                                    error: error_message,
                                                 });
+                                            }
+                                        })
+                                        .catch((err: Error) => {
+                                            req.log.error({
+                                                msg: `Error deleting file with uuid ${image}`,
+                                                err: err,
                                             });
-                                    },
-                                );
+                                            res.status(
+                                                StatusCodes.INTERNAL_SERVER_ERROR,
+                                            ).json({
+                                                error: err.message,
+                                            });
+                                        });
+                                });
                             } else {
                                 req.log.debug(
                                     "Removed user from file successfully.",
