@@ -82,6 +82,19 @@ export async function getUserByEmail(email: string): Promise<TUser | null> {
 }
 
 /**
+ * Find all emails for a list of users, by uuid.
+ * @param user_uuids The list of user uuids to search
+ * @returns The list of emails for the given users
+ */
+export async function getUserEmails(user_uuids: string[]) {
+    const Users = mongoose.model("User", User);
+    // For all users with uuids in the given list, select and return only their email
+    return (
+        await Users.find({ uuid: { $in: user_uuids } }, { email: 1, _id: 0 })
+    ).map((u) => u.email);
+}
+
+/**
  * Update a user's information given an entire TUser object. The user is found
  * by UUID.
  * @param user_obj The user's complete and updated information
