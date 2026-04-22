@@ -57,7 +57,7 @@ export default function CheckoutHeatmap({
             <ResponsiveContainer width="100%" height={350}>
                 <BarChart
                     data={data}
-                    margin={{ top: 10, right: 20, left: 20, bottom: 20 }}
+                    margin={{ top: 20, right: 30, left: 5, bottom: 5 }}
                 >
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                     <XAxis
