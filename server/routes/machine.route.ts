@@ -17,10 +17,19 @@ import {
     setMachineInstances,
     patchMachine,
 } from "controllers/machine.controller";
-import { verifyRequest, verifySchema } from "controllers/verify.controller";
+import {
+    verifyRequest,
+    verifyCompoundRequest,
+    verifySchema,
+} from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import { MachineSchema, MachineSchemaOptional } from "models/machine.model";
+import {
+    removeResourcesFromFile,
+    deleteFileOnServer,
+    deleteFile,
+} from "../controllers/file.controller";
 
 // --- Request and Response Types ---
 type MachineRequest = Request<{}, {}, { machine_obj: TMachine }>;
@@ -175,7 +184,8 @@ router.get("/", async (req: MachineRequest, res: MachinesResponse) => {
  * header is required to call it. The user must have the
  * {@link API_SCOPE.CREATE_MACHINE} scope.
  */
-router.post("/", 
+router.post(
+    "/",
     verifySchema(MachineSchema, "machine_obj"),
     async (req: MachineRequest, res: MachineResponse) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -212,8 +222,7 @@ router.post("/",
             }
             req.log.debug(`Created machine with uuid ${machine_uuid}`);
             res.status(StatusCodes.CREATED).json(machine);
-
-    } else {
+        } else {
             req.log.warn({
                 msg: "Forbidden user attempted to create a machine",
                 requesting_uuid: requesting_uuid,
@@ -221,7 +230,8 @@ router.post("/",
             // If the user is not authorized, provide a status error
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
-    });
+    },
+);
 
 /**
  * Update a specific machine. This route will not create a new machine if the
@@ -230,7 +240,8 @@ router.post("/",
  * header is required to call it. The user must have the
  * {@link API_SCOPE.UPDATE_MACHINE} scope.
  */
-router.put("/", 
+router.put(
+    "/",
     verifySchema(MachineSchema, "machine_obj"),
     async (req: MachineRequest, res: MachineResponse) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -272,7 +283,8 @@ router.put("/",
             // If the user is not authorized, provide a status error
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
-    });
+    },
+);
 
 /**
  * Updates the machine with partial machine
@@ -362,7 +374,12 @@ router.delete(
         });
 
         // If the user is authorized, delete a machine object
-        if (await verifyRequest(requesting_uuid, API_SCOPE.DELETE_MACHINE)) {
+        if (
+            await verifyCompoundRequest(requesting_uuid, [
+                API_SCOPE.DELETE_MACHINE,
+                API_SCOPE.DELETE_FILE,
+            ])
+        ) {
             const machine = await deleteMachine(machine_uuid);
             if (!machine) {
                 req.log.warn(`Failed to delete machine ${machine_uuid}`);
@@ -370,6 +387,87 @@ router.delete(
                     error: `Failed to delete machine \`${machine_uuid}\`.`,
                 });
                 return;
+            }
+
+            // Delete all associated files
+            if (machine.images?.length) {
+                for (const image of machine.images) {
+                    await removeResourcesFromFile(image, [machine.uuid], false)
+                        .then((updated_file) => {
+                            // If updated file is null, it couldn't be found
+                            if (!updated_file) {
+                                req.log.warn(
+                                    `File with uuid ${image} not found, failed to delete`,
+                                );
+                                res.status(StatusCodes.NOT_FOUND).json({
+                                    error: `File with uuid \`${image}\` not found.`,
+                                });
+                            } else if (
+                                updated_file.resource_uuid.length === 0
+                            ) {
+                                deleteFileOnServer(
+                                    updated_file.path,
+                                    req,
+                                    res,
+                                ).then((error_message) => {
+                                    deleteFile(image)
+                                        .then((deleted_file) => {
+                                            if (!deleted_file) {
+                                                req.log.warn(
+                                                    `File with uuid ${image} not found, failed to delete`,
+                                                );
+                                                res.status(
+                                                    StatusCodes.NOT_FOUND,
+                                                ).json({
+                                                    error: `File with uuid \`${image}\` not found.`,
+                                                });
+                                            } else if (
+                                                error_message ===
+                                                "Successfully deleted file"
+                                            ) {
+                                                req.log.debug(
+                                                    "Deleted file successfully.",
+                                                );
+                                                res.status(StatusCodes.OK).json(
+                                                    {},
+                                                );
+                                            } else {
+                                                res.status(
+                                                    StatusCodes.INTERNAL_SERVER_ERROR,
+                                                ).json({
+                                                    error: error_message,
+                                                });
+                                            }
+                                        })
+                                        .catch((err: Error) => {
+                                            req.log.error({
+                                                msg: `Error deleting file with uuid ${image}`,
+                                                err: err,
+                                            });
+                                            res.status(
+                                                StatusCodes.INTERNAL_SERVER_ERROR,
+                                            ).json({
+                                                error: err.message,
+                                            });
+                                        });
+                                });
+                            } else {
+                                req.log.debug(
+                                    "Removed user from file successfully.",
+                                );
+                                res.status(StatusCodes.OK).json({});
+                            }
+                        })
+                        .catch((err: Error) => {
+                            req.log.error({
+                                msg: `Error removing workshop with ${machine.uuid} from file with uuid ${image}`,
+                                err: err,
+                            });
+                            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                                error: err.message,
+                            });
+                        });
+                }
             }
             req.log.debug(`Deleted machine ${machine_uuid}`);
             res.status(StatusCodes.NO_CONTENT).json({});

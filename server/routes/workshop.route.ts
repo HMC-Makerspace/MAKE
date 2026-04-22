@@ -12,7 +12,11 @@ import {
     getWorkshopsVisibleToUser,
     patchWorkshop,
 } from "controllers/workshop.controller";
-import { verifyRequest, verifySchema } from "controllers/verify.controller";
+import {
+    verifyRequest,
+    verifyCompoundRequest,
+    verifySchema,
+} from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -24,6 +28,11 @@ import {
 } from "common/verify";
 import { TPublicWorkshopData, TWorkshop } from "common/workshop";
 import { WorkshopSchema, WorkshopSchemaOptional } from "models/workshop.model";
+import {
+    removeResourcesFromFile,
+    deleteFileOnServer,
+    deleteFile,
+} from "../controllers/file.controller";
 
 // --- Request and Response Types ---
 type WorkshopRequest = Request<{}, {}, { workshop_obj: TWorkshop }>;
@@ -182,7 +191,8 @@ router.get("/", async (req: WorkshopRequest, res: WorkshopsResponse) => {
  * header is required to call it. The user must have the
  * {@link API_SCOPE.CREATE_WORKSHOP} scope.
  */
-router.post("/", 
+router.post(
+    "/",
     verifySchema(WorkshopSchema, "workshop_obj"),
     async (req: WorkshopRequest, res: WorkshopResponse) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -206,19 +216,19 @@ router.post("/",
 
         // If the user is authorized, create a workshop
         if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_WORKSHOP)) {
-                const workshop = await createWorkshop(workshop_obj);
-                if (!workshop) {
-                    req.log.warn(
-                        `An attempt was made to create a workshop with uuid ` +
-                            `${workshop_uuid}, but a workshop with that uuid already exists`,
-                    );
-                    res.status(StatusCodes.CONFLICT).json({
-                        error: `A workshop with uuid \`${workshop_uuid}\` already exists.`,
-                    });
-                    return;
-                }
-                req.log.debug(`Created workshop with uuid ${workshop_uuid}`);
-                res.status(StatusCodes.CREATED).json(workshop);
+            const workshop = await createWorkshop(workshop_obj);
+            if (!workshop) {
+                req.log.warn(
+                    `An attempt was made to create a workshop with uuid ` +
+                        `${workshop_uuid}, but a workshop with that uuid already exists`,
+                );
+                res.status(StatusCodes.CONFLICT).json({
+                    error: `A workshop with uuid \`${workshop_uuid}\` already exists.`,
+                });
+                return;
+            }
+            req.log.debug(`Created workshop with uuid ${workshop_uuid}`);
+            res.status(StatusCodes.CREATED).json(workshop);
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to create a workshop",
@@ -226,8 +236,9 @@ router.post("/",
             });
             // If the user is not authorized, provide a status error
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
-    }
-});
+        }
+    },
+);
 
 /**
  * Update a specific workshop. This route will not create a new workshop if the
@@ -236,7 +247,8 @@ router.post("/",
  * header is required to call it. The user must have the
  * {@link API_SCOPE.UPDATE_WORKSHOP} scope.
  */
-router.put("/", 
+router.put(
+    "/",
     verifySchema(WorkshopSchema, "workshop_obj"),
     async (req: WorkshopRequest, res: WorkshopResponse) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -278,7 +290,8 @@ router.put("/",
             // If the user is not authorized, provide a status error
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
-    });
+    },
+);
 
 /**
  * Deletes a workshop. This is a protected route, and a 'requesting_uuid'
@@ -307,7 +320,12 @@ router.delete(
         });
 
         // If the user is authorized, delete a workshop object
-        if (await verifyRequest(requesting_uuid, API_SCOPE.DELETE_WORKSHOP)) {
+        if (
+            await verifyCompoundRequest(requesting_uuid, [
+                API_SCOPE.DELETE_WORKSHOP,
+                API_SCOPE.DELETE_FILE,
+            ])
+        ) {
             const workshop = await deleteWorkshop(workshop_uuid);
             if (!workshop) {
                 req.log.warn(`Failed to delete workshop ${workshop_uuid}`);
@@ -315,6 +333,86 @@ router.delete(
                     error: `Failed to delete workshop \`${workshop_uuid}\`.`,
                 });
                 return;
+            }
+            // Delete all associated files
+            if (workshop.images?.length) {
+                for (const image of workshop.images) {
+                    await removeResourcesFromFile(image, [workshop.uuid], false)
+                        .then((updated_file) => {
+                            // If updated file is null, it couldn't be found
+                            if (!updated_file) {
+                                req.log.warn(
+                                    `File with uuid ${image} not found, failed to delete`,
+                                );
+                                res.status(StatusCodes.NOT_FOUND).json({
+                                    error: `File with uuid \`${image}\` not found.`,
+                                });
+                            } else if (
+                                updated_file.resource_uuid.length === 0
+                            ) {
+                                deleteFileOnServer(
+                                    updated_file.path,
+                                    req,
+                                    res,
+                                ).then((error_message) => {
+                                    deleteFile(image)
+                                        .then((deleted_file) => {
+                                            if (!deleted_file) {
+                                                req.log.warn(
+                                                    `File with uuid ${image} not found, failed to delete`,
+                                                );
+                                                res.status(
+                                                    StatusCodes.NOT_FOUND,
+                                                ).json({
+                                                    error: `File with uuid \`${image}\` not found.`,
+                                                });
+                                            } else if (
+                                                error_message ===
+                                                "Successfully deleted file"
+                                            ) {
+                                                req.log.debug(
+                                                    "Deleted file successfully.",
+                                                );
+                                                res.status(StatusCodes.OK).json(
+                                                    {},
+                                                );
+                                            } else {
+                                                res.status(
+                                                    StatusCodes.INTERNAL_SERVER_ERROR,
+                                                ).json({
+                                                    error: error_message,
+                                                });
+                                            }
+                                        })
+                                        .catch((err: Error) => {
+                                            req.log.error({
+                                                msg: `Error deleting file with uuid ${image}`,
+                                                err: err,
+                                            });
+                                            res.status(
+                                                StatusCodes.INTERNAL_SERVER_ERROR,
+                                            ).json({
+                                                error: err.message,
+                                            });
+                                        });
+                                });
+                            } else {
+                                req.log.debug(
+                                    "Removed user from file successfully.",
+                                );
+                                res.status(StatusCodes.OK).json({});
+                            }
+                        })
+                        .catch((err: Error) => {
+                            req.log.error({
+                                msg: `Error removing workshop with ${workshop.uuid} from file with uuid ${image}`,
+                                err: err,
+                            });
+                            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                                error: err.message,
+                            });
+                        });
+                }
             }
             req.log.debug(`Deleted workshop ${workshop_uuid}`);
             res.status(StatusCodes.NO_CONTENT).json({});
@@ -466,10 +564,7 @@ router.patch(
 
         // If the user is authorized, update a workshop's information
         if (await verifyRequest(requesting_uuid, API_SCOPE.SIGN_IN_WORKSHOP)) {
-            const rsvp_out = await signInToWorkshop(
-                workshop_uuid,
-                user_uuid,
-            );
+            const rsvp_out = await signInToWorkshop(workshop_uuid, user_uuid);
             if (rsvp_out === undefined) {
                 req.log.warn(
                     `Workshop with uuid ${workshop_uuid} not found, failed to sign in`,
@@ -482,7 +577,8 @@ router.patch(
                 req.log.warn(
                     `User with uuid ${user_uuid} already signed in, failed to sign in`,
                 );
-                res.status(StatusCodes.IM_A_TEAPOT).json({ // hi person with better knowledge of http codes, please inform what code this would be (req failed because user already signed in)
+                res.status(StatusCodes.IM_A_TEAPOT).json({
+                    // hi person with better knowledge of http codes, please inform what code this would be (req failed because user already signed in)
                     error: `User already signed in.`,
                 });
                 return;
