@@ -14,6 +14,7 @@ import {
 //i want to receive for its respective categories
 import { TInventoryItem } from "common/inventory";
 import { TCheckout } from "common/checkout";
+import { Input } from "@heroui/react";
 
 export default function TopCheckedOutItems({
     checkouts,
@@ -90,11 +91,22 @@ export default function TopCheckedOutItems({
     //the display component of the graph itself
     return (
         <div className="bg-default-100 p-6 rounded-lg">
-            <h2 className="text-xl font-bold mb-4">Top Checked Out Items</h2>
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold mb-4">Top Checked Out Items</h2>
+                <Input
+                    type="number"
+                    value={String(topN)}
+                    onChange={(e) => setTopN(Number(e.target.value))}
+                    className="w-20 bg-default-200 px-3 py-1 rounded-md text-sm"
+                />
+            </div>
+            <p className="text-sm text-default-500 mb-3">
+                Top {topN} most checked out items.
+            </p>
             <ResponsiveContainer width="100%" height={450}>
                 <BarChart
                     data={data}
-                    margin={{ top: 10, right: 20, left: 20, bottom: 120 }}
+                    margin={{ top: 20, right: 30, left: 5, bottom: 20 }}
                 >
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                     <XAxis

@@ -7,7 +7,8 @@ import TopCheckedOutItems from "./TopCheckedOutItems";
 import CheckoutTrend from "./CheckoutTrend";
 import CheckoutHeatmap from "./CheckoutHeatmap";
 import CheckoutsByDay from "./CheckoutsByDay";
-import RarelyCheckedOutItems from "./RarelyCheckedOutItems";
+import RarelyCheckedOutItems from "./RarelyCheckedOutItems"
+
 
 //this page receives all the data from StatisticsKiosk as props
 //and its job is to lay out all the chart components on the page.

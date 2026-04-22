@@ -10,26 +10,52 @@ import {
 } from "recharts";
 import { TCheckout } from "common/checkout";
 
-// maps .getDay() index (0–6) to a readable name
-// .getDay() returns 0 for Sunday, 1 for Monday, etc.
-enum Day {
-    Sun = 0,
-    Mon = 1,
-    Tue = 2,
-    Wed = 3,
-    Thu = 4,
-    Fri = 5,
-    Sat = 6,
+export enum SHIFT_DAY {
+    SUNDAY = 0,
+    MONDAY,
+    TUESDAY,
+    WEDNESDAY,
+    THURSDAY,
+    FRIDAY,
+    SATURDAY,
 }
 
-const ORDERED_DAYS = [
-    Day.Sun,
-    Day.Mon,
-    Day.Tue,
-    Day.Wed,
-    Day.Thu,
-    Day.Fri,
-    Day.Sat,
+export const SHIFT_DAYS = [
+    {
+        day: SHIFT_DAY.SUNDAY,
+        name: "Sun",
+        key: `day${SHIFT_DAY.SUNDAY}`,
+    },
+    {
+        day: SHIFT_DAY.MONDAY,
+        name: "Mon",
+        key: `day${SHIFT_DAY.MONDAY}`,
+    },
+    {
+        day: SHIFT_DAY.TUESDAY,
+        name: "Tue",
+        key: `day${SHIFT_DAY.TUESDAY}`,
+    },
+    {
+        day: SHIFT_DAY.WEDNESDAY,
+        name: "Wed",
+        key: `day${SHIFT_DAY.WEDNESDAY}`,
+    },
+    {
+        day: SHIFT_DAY.THURSDAY,
+        name: "Thu",
+        key: `day${SHIFT_DAY.THURSDAY}`,
+    },
+    {
+        day: SHIFT_DAY.FRIDAY,
+        name: "Fri",
+        key: `day${SHIFT_DAY.FRIDAY}`,
+    },
+    {
+        day: SHIFT_DAY.SATURDAY,
+        name: "Sat",
+        key: `day${SHIFT_DAY.SATURDAY}`,
+    },
 ];
 
 export default function CheckoutsByDay({
@@ -38,24 +64,26 @@ export default function CheckoutsByDay({
     checkouts: TCheckout[];
 }) {
     const data = useMemo(() => {
-        const dayCounts: { [key in Day]: number } = {
-            [Day.Sun]: 0,
-            [Day.Mon]: 0,
-            [Day.Tue]: 0,
-            [Day.Wed]: 0,
-            [Day.Thu]: 0,
-            [Day.Fri]: 0,
-            [Day.Sat]: 0,
+        const dayCounts: { [key in SHIFT_DAY]: number } = {
+            [SHIFT_DAY.SUNDAY]: 0,
+            [SHIFT_DAY.MONDAY]: 0,
+            [SHIFT_DAY.TUESDAY]: 0,
+            [SHIFT_DAY.WEDNESDAY]: 0,
+            [SHIFT_DAY.THURSDAY]: 0,
+            [SHIFT_DAY.FRIDAY]: 0,
+            [SHIFT_DAY.SATURDAY]: 0,
         };
 
         checkouts.forEach((checkout) => {
-            const day: Day = new Date(checkout.timestamp_out * 1000).getDay();
+            const day: SHIFT_DAY = new Date(
+                checkout.timestamp_out * 1000,
+            ).getDay();
             dayCounts[day] += 1;
         });
 
-        return ORDERED_DAYS.map((dayEnum) => ({
-            day: Day[dayEnum], 
-            count: dayCounts[dayEnum],
+        return SHIFT_DAYS.map((entry) => ({
+            day: entry.name,
+            count: dayCounts[entry.day],
         }));
     }, [checkouts]);
 
@@ -79,7 +107,7 @@ export default function CheckoutsByDay({
             <ResponsiveContainer width="100%" height={350}>
                 <BarChart
                     data={data}
-                    margin={{ top: 10, right: 20, left: 20, bottom: 20 }}
+                    margin={{ top: 20, right: 30, left: 5, bottom: 20 }}
                 >
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                     <XAxis dataKey="day" />
