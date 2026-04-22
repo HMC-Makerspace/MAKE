@@ -12,7 +12,11 @@ import {
     getWorkshopsVisibleToUser,
     patchWorkshop,
 } from "controllers/workshop.controller";
-import { verifyRequest, verifySchema } from "controllers/verify.controller";
+import {
+    verifyRequest,
+    verifyCompoundRequest,
+    verifySchema,
+} from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -316,7 +320,12 @@ router.delete(
         });
 
         // If the user is authorized, delete a workshop object
-        if (await verifyRequest(requesting_uuid, API_SCOPE.DELETE_WORKSHOP)) {
+        if (
+            await verifyCompoundRequest(requesting_uuid, [
+                API_SCOPE.DELETE_WORKSHOP,
+                API_SCOPE.DELETE_FILE,
+            ])
+        ) {
             const workshop = await deleteWorkshop(workshop_uuid);
             if (!workshop) {
                 req.log.warn(`Failed to delete workshop ${workshop_uuid}`);
