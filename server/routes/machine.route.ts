@@ -17,7 +17,11 @@ import {
     setMachineInstances,
     patchMachine,
 } from "controllers/machine.controller";
-import { verifyRequest, verifySchema } from "controllers/verify.controller";
+import {
+    verifyRequest,
+    verifyCompoundRequest,
+    verifySchema,
+} from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import { MachineSchema, MachineSchemaOptional } from "models/machine.model";
@@ -180,7 +184,8 @@ router.get("/", async (req: MachineRequest, res: MachinesResponse) => {
  * header is required to call it. The user must have the
  * {@link API_SCOPE.CREATE_MACHINE} scope.
  */
-router.post("/", 
+router.post(
+    "/",
     verifySchema(MachineSchema, "machine_obj"),
     async (req: MachineRequest, res: MachineResponse) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -217,8 +222,7 @@ router.post("/",
             }
             req.log.debug(`Created machine with uuid ${machine_uuid}`);
             res.status(StatusCodes.CREATED).json(machine);
-
-    } else {
+        } else {
             req.log.warn({
                 msg: "Forbidden user attempted to create a machine",
                 requesting_uuid: requesting_uuid,
@@ -226,7 +230,8 @@ router.post("/",
             // If the user is not authorized, provide a status error
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
-    });
+    },
+);
 
 /**
  * Update a specific machine. This route will not create a new machine if the
@@ -235,7 +240,8 @@ router.post("/",
  * header is required to call it. The user must have the
  * {@link API_SCOPE.UPDATE_MACHINE} scope.
  */
-router.put("/", 
+router.put(
+    "/",
     verifySchema(MachineSchema, "machine_obj"),
     async (req: MachineRequest, res: MachineResponse) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -277,7 +283,8 @@ router.put("/",
             // If the user is not authorized, provide a status error
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
-    });
+    },
+);
 
 /**
  * Updates the machine with partial machine
@@ -367,7 +374,12 @@ router.delete(
         });
 
         // If the user is authorized, delete a machine object
-        if (await verifyRequest(requesting_uuid, API_SCOPE.DELETE_MACHINE)) {
+        if (
+            await verifyCompoundRequest(requesting_uuid, [
+                API_SCOPE.DELETE_MACHINE,
+                API_SCOPE.DELETE_FILE,
+            ])
+        ) {
             const machine = await deleteMachine(machine_uuid);
             if (!machine) {
                 req.log.warn(`Failed to delete machine ${machine_uuid}`);

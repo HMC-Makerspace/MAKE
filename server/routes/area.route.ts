@@ -18,7 +18,11 @@ import {
     updateArea,
     updateAreaStatus,
 } from "controllers/area.controller";
-import { verifyRequest, verifySchema } from "controllers/verify.controller";
+import {
+    verifyRequest,
+    verifyCompoundRequest,
+    verifySchema,
+} from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import {
@@ -357,7 +361,12 @@ router.delete(
         });
 
         // If the user is authorized, delete a area object
-        if (await verifyRequest(requesting_uuid, API_SCOPE.DELETE_AREA)) {
+        if (
+            await verifyCompoundRequest(requesting_uuid, [
+                API_SCOPE.DELETE_AREA,
+                API_SCOPE.DELETE_FILE,
+            ])
+        ) {
             const area = await deleteArea(area_uuid);
             if (!area) {
                 req.log.warn(`Failed to delete area ${area_uuid}`);
