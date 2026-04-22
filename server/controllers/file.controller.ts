@@ -10,6 +10,7 @@ import { Area } from "models/area.model";
 import { Workshop } from "models/workshop.model";
 import { Machine } from "models/machine.model";
 import { Logger } from "pino";
+import path from "path";
 
 /**
  * Get all files in the database
@@ -296,23 +297,41 @@ export async function deleteFileOnServer(
     res: Response,
     error_message: string = "authorized",
 ) {
+    const normalizedPath = path.resolve(file_path);
+    const safeRoots = [path.resolve(process.cwd(), "uploads"), path.resolve(process.cwd(), "tmp")];
+    const isWithinSafeRoot = safeRoots.some(
+        (root) => normalizedPath === root || normalizedPath.startsWith(root + path.sep),
+    );
+
+    if (!isWithinSafeRoot) {
+        req.log.warn({
+            msg: "Blocked file deletion outside allowed upload directories",
+            file_path: file_path,
+            normalized_path: normalizedPath,
+        });
+        res.status(StatusCodes.FORBIDDEN).json({
+            error: "Invalid file path",
+        });
+        return Promise.reject(new Error("Invalid file path"));
+    }
+
     return fs
-        .exists(file_path) // Check that the file exists first
+        .exists(normalizedPath) // Check that the file exists first
         .then(() =>
             fs
-                .unlink(file_path) // Attempt to delete the file
+                .unlink(normalizedPath) // Attempt to delete the file
                 .then(() => {
                     // If the file was successfully deleted, log accordingly
                     if (error_message === "authorized") {
                         req.log.info({
                             msg: `Successfully deleted file`,
-                            file_path: file_path,
+                            file_path: normalizedPath,
                         });
                         return "Successfully deleted file";
                     } else {
                         req.log.info({
                             msg: `File successfully deleted: ${error_message}`,
-                            file_path: file_path,
+                            file_path: normalizedPath,
                         });
                         return error_message;
                     }
