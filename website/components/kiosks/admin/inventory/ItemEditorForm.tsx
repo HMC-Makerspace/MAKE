@@ -39,7 +39,7 @@ import {
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
-import { AvailableToRolesModal, VisibleToRolesModal } from "../certifications/AuthorizedRolesModal";
+import { AvailableToRolesModal, EditAuthrolesModal, VisibleToRolesModal } from "../certifications/AuthorizedRolesModal";
 import { motion } from "motion/react";
 import ItemQuantityIcon from "./ItemQuantityIcon";
 import ItemLocationModal from "./ItemLocationModal";
@@ -259,6 +259,7 @@ export default function ItemEditorForm({
     const [locationEditorOpen, setLocationEditorOpen] =
         React.useState<boolean>(false); // whether location editor modal is open
     const [kitEditorOpen, setKitEditorOpen] = React.useState<boolean>(false); // whether kit content edit modal is open
+    const [rolesOpen, setRolesOpen] = React.useState<boolean>(false); // whether gen auth role edit modal is open
 
     const reqcertsMutation = patchMutation(() => setReqcertsOpen(false));
     const acrolesMutation = patchMutation(() => setAcrolesOpen(false));
@@ -722,8 +723,8 @@ export default function ItemEditorForm({
                         <Tooltip
                             content={
                                 isNew
-                                    ? "Create the item first, before editing accessor roles."
-                                    : "Accessor Roles"
+                                    ? "Create the item first, before editing authorized roles."
+                                    : "Authorized Roles"
                             }
                             className="w-fit p-2"
                             delay={500}
@@ -733,39 +734,14 @@ export default function ItemEditorForm({
                             <Button
                                 // variant="flat"
                                 color="primary"
-                                onPress={() => !isNew && setAcrolesOpen(true)}
+                                onPress={() => !isNew && setRolesOpen(true)}
                                 // isIconOnly
                                 isDisabled={isDisabled}
                                 className={isNew ? "opacity-disabled" : ""}
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <UserIcon className="size-7" />
-                                {item.available_to?.length ?? 0}
-                            </Button>
-                        </Tooltip>
-
-                        <Tooltip
-                            content={
-                                isNew
-                                    ? "Create the item first, before editing viewer roles."
-                                    : "Viewer Roles"
-                            }
-                            className="w-fit p-2"
-                            delay={500}
-                            closeDelay={150}
-                            isDisabled={isDisabled}
-                        >
-                            <Button
-                                // variant="flat"
-                                color="primary"
-                                onPress={() => !isNew && setVwrolesOpen(true)}
-                                // isIconOnly
-                                isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled" : ""}
-                                data-hover={!isNew && !isDisabled}
-                            >
-                                <UserIcon className="size-7" />
-                                {item.visible_to?.length ?? 0}
+                                {(item.available_to?.length ?? 0) + (item.visible_to?.length ?? 0)}
                             </Button>
                         </Tooltip>
 
@@ -872,6 +848,15 @@ export default function ItemEditorForm({
                 kitPatchMutation={kitEditorMutation}
                 contentPatchMutation={kitEditorMutation}
                 setSelectedItem={setSelectedItem}
+            />
+            <EditAuthrolesModal
+                key={"kitefdssffdsdit-" + item.uuid}
+                isOpen={rolesOpen}
+                onOpenChange={setRolesOpen}
+                setVwrolesOpen={setVwrolesOpen}
+                setAcrolesOpen={setAcrolesOpen}
+                numVwroles={item.visible_to?.length ?? 0}
+                numAcroles={item.available_to?.length ?? 0}
             />
         </>
     );

@@ -1,4 +1,4 @@
-import { Button, Modal, Form, ModalContent, Checkbox } from "@heroui/react";
+import { Button, Modal, Form, ModalContent, Checkbox, Tooltip } from "@heroui/react";
 
 import React from "react";
 import { UseMutationResult } from "@tanstack/react-query";
@@ -6,6 +6,7 @@ import { UseMutationResult } from "@tanstack/react-query";
 import { UserRoleUUID, TUserRole } from "common/user";
 import { UUID } from "common/global";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
+import { EyeIcon, KeyIcon } from "@heroicons/react/24/outline";
 
 type Available = {
     uuid: UUID,
@@ -247,4 +248,71 @@ export function VisibleToRolesModal<T extends Visible>({
         onOpenChange={onOpenChange}
         patchMutation={patchMutation}
     ></RequiredRolesModal>);
+}
+
+export function EditAuthrolesModal({
+    isOpen,
+    onOpenChange,
+    setVwrolesOpen,
+    setAcrolesOpen,
+    numVwroles,
+    numAcroles,
+}: {
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    setVwrolesOpen: (value: React.SetStateAction<boolean>) => void;
+    setAcrolesOpen: (value: React.SetStateAction<boolean>) => void;
+    numVwroles: number;
+    numAcroles: number;
+}) {
+    return (
+        <Modal
+            isOpen={isOpen}
+            onOpenChange={onOpenChange}
+            backdrop="blur"
+            size="lg"
+        >
+            <ModalContent>
+                {(onClose) => (
+                    <Form className="flex flex-col gap-4 p-4">
+                        <div className="text-lg font-semibold m-auto">
+                            Edit Authorized Roles
+                        </div>
+
+                        <div className="w-full flex flex-row justify-evenly">
+                            <Tooltip
+                                content="Accessor Roles"
+                                className="w-fit p-2"
+                                delay={500}
+                                closeDelay={150}
+                            >
+                                <Button
+                                    color="primary"
+                                    onPress={() => {onClose(); setAcrolesOpen(true);}}
+                                >
+                                    <KeyIcon className="size-5" />
+                                    {numAcroles}
+                                </Button>
+                            </Tooltip>
+
+                            <Tooltip
+                                content="Viewer Roles"
+                                className="w-fit p-2"
+                                delay={500}
+                                closeDelay={150}
+                            >
+                                <Button
+                                    color="primary"
+                                    onPress={() => {onClose(); setVwrolesOpen(true);}}
+                                >
+                                    <EyeIcon className="size-5" />
+                                    {numVwroles}
+                                </Button>
+                            </Tooltip>
+                        </div>
+                    </Form>
+                )}
+            </ModalContent>
+        </Modal>
+    );
 }
