@@ -278,15 +278,21 @@ export async function cancelRSVPToWorkshop(
     ) {
         return null;
     }
+    // Find the user's index in the rsvp list
+    const position = workshop.rsvp_list.findIndex(
+        (rsvp) => rsvp.user_uuid === user_uuid,
+    );
     // Remove the user from the rsvp list
     workshop.rsvp_list = workshop.rsvp_list.filter(
         (rsvp) => rsvp.user_uuid != user_uuid,
     );
 
-    // Send email to user moved off the waitlist
+    // If the current user was in the first slots of the RSVP list,
+    // send an email to the user moved off the waitlist
     const firstUserOnWaitlist =
         workshop.capacity &&
         workshop.capacity > 0 &&
+        position < workshop.capacity &&
         workshop.rsvp_list.length >= workshop.capacity
             ? workshop.rsvp_list[workshop.capacity - 1].user_uuid
             : null;

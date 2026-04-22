@@ -72,7 +72,8 @@ const WorkshopConfig = new mongoose.Schema<TWorkshopConfig>(
 );
 
 const WorkshopConfigSchema = Joi.object<TWorkshopConfig>({
-    reminder_times: Joi.number().required()
+    reminder_times: Joi.array().items(Joi.number()).required(),
+    sign_in_enabled_within: Joi.number().required(),
 });
 
 const GeneralConfig = new mongoose.Schema<TGeneralConfig>(
@@ -83,6 +84,7 @@ const GeneralConfig = new mongoose.Schema<TGeneralConfig>(
         instagram_url: { type: String, required: false },
         tiktok_url: { type: String, required: false },
         extra_urls: { type: [String], required: false },
+        hide_home_embed: { type: Boolean, required: false },
     },
     {
         _id: false,
@@ -91,13 +93,12 @@ const GeneralConfig = new mongoose.Schema<TGeneralConfig>(
 
 const GeneralConfigSchema = Joi.object<TGeneralConfig>({
     branding_url: Joi.string().optional(),
-    tagline: Joi.string().optional(), 
+    tagline: Joi.string().optional(),
     discord_url: Joi.string().optional(),
     instagram_url: Joi.string().optional(),
     tiktok_url: Joi.string().optional(),
-    extra_urls: Joi.array().items(
-        Joi.string()
-    ).optional()
+    extra_urls: Joi.array().items(Joi.string()).optional(),
+    hide_home_embed: Joi.boolean().optional(),
 });
 
 const FAQItemConfig = new mongoose.Schema<TFAQItem>(
@@ -120,16 +121,14 @@ FAQItemConfig.add({
 
 const FAQItemConfigSchema = Joi.object<TFAQItem>({
     title: Joi.string(),
-    description: Joi.string().optional(),
+    description: Joi.string().optional().allow(""),
     children_columns: Joi.number().optional(),
     default_open: Joi.boolean().optional(),
     always_open: Joi.boolean().optional(),
     bordered: Joi.boolean().optional(),
     title_centered: Joi.boolean().optional(),
-    children: Joi.array().items(
-        Joi.link('#FAQItemConfigSchema')
-    ).optional()
-});
+    children: Joi.array().items(Joi.link("#FAQItemConfigSchema")).optional(),
+}).id("FAQItemConfigSchema");
 
 /**
  * See {@link TConfig} documentation for type information.

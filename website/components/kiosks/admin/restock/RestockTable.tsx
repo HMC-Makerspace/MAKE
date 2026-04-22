@@ -119,10 +119,12 @@ function ModifyRestockModal({
     restocksSelected,
     editIsOpen,
     editOnOpenChange,
+    setSelectedRestocks,
 }: {
     restocksSelected: TRestockRequest[];
     editIsOpen: boolean;
     editOnOpenChange: () => void;
+    setSelectedRestocks: (restocks: Selection) => void;
 }) {
     return (
         <Modal
@@ -135,7 +137,11 @@ function ModifyRestockModal({
                 {(onClose) =>
                     restocksSelected ? (
                         <RestockEditor
-                            onClose={onClose}
+                            onClose={() => {
+                                // Clear selected restocks
+                                setSelectedRestocks(new Set());
+                                onClose();
+                            }}
                             restocks={restocksSelected}
                         />
                     ) : null
@@ -583,6 +589,7 @@ export default function RestockTable({
                 }
                 editIsOpen={editIsOpen}
                 editOnOpenChange={editOnOpenChange}
+                setSelectedRestocks={setSelectedRestocks}
             />
             <PastStatusLogs
                 restockSelected={restockSelected}

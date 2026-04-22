@@ -38,6 +38,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { UnixTimestamp } from "common/global";
 import { ShoppingCartIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { validateCollegeID } from "../../../../../common/verify";
 
 async function createCheckout({
     user_uuid,
@@ -233,9 +234,10 @@ export default function CheckoutSidebar({
                     onSubmit={(e) => {
                         e.preventDefault();
                         const data = new FormData(e.currentTarget);
-                        const newID = data.get("college_id") as string;
-                        setCollegeID(newID || "");
-                        if (newID) {
+                        const id = (data.get("college_id") as string) || "";
+                        const validatedID = validateCollegeID(id);
+                        setCollegeID(validatedID);
+                        if (validatedID) {
                             const endTime = timestampToTime(
                                 activeSchedule.daily_close_time,
                             );
