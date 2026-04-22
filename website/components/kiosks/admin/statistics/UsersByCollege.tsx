@@ -16,9 +16,18 @@ import { TUser } from "../../../../../common/user";
 
 //random colors that are assigned to each slice of the pie later on
 const PIE_COLORS = [
-    "hsl(var(--heroui-primary))",
-    "hsl(var(--heroui-secondary))",
-    "hsl(var(--heroui-tertiary))",
+    "hsl(var(--heroui-primary-300))",
+    "hsl(var(--heroui-secondary-300))",
+    "hsl(var(--heroui-warning-300))",
+    "hsl(var(--heroui-success-300))",
+    "hsl(var(--heroui-primary-500))",
+    "hsl(var(--heroui-secondary-500))",
+    "hsl(var(--heroui-warning-500))",
+    "hsl(var(--heroui-success-500))",
+    "hsl(var(--heroui-primary-200))",
+    "hsl(var(--heroui-secondary-200))",
+    "hsl(var(--heroui-warning-200))",
+    "hsl(var(--heroui-success-200))",
 ];
 
 type ChartEntry = {

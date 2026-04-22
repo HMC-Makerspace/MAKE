@@ -23,12 +23,14 @@ export default function ItemInfo({
     areas,
     certs,
     quantity,
+    className = "",
 }: {
     item_data?: TInventoryItem;
     inventory: TInventoryItem[];
     areas: TArea[];
     certs: TCertification[];
     quantity?: number;
+    className?: string;
 }) {
     const parent_kit = inventory.find(k => k.uuid == item_data?.parent_kit);
     const mergedReqCerts = mergeRequiredCerts(item_data?.required_certifications, parent_kit?.required_certifications);
@@ -37,7 +39,7 @@ export default function ItemInfo({
         <div>
             <Popover placement="bottom">
                 <PopoverTrigger>
-                    <Button>
+                    <Button className={className}>
                         {quantity && quantity > 1 ? (
                             <>
                                 {quantity}
