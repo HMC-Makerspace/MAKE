@@ -196,6 +196,7 @@ export default function Machine({
                                             : ""}
                                     </Button>
                                     <RequiredCertsModal
+                                        mode="single"
                                         element={machine}
                                         certifications={certifications}
                                         isOpen={certModal}
