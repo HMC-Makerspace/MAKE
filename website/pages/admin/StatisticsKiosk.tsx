@@ -5,6 +5,8 @@ import { TInventoryItem } from "../../../common/inventory";
 import { TUser, TUserRole } from "../../../common/user";
 import { TCheckout } from "../../../common/checkout";
 import { Spinner } from "@heroui/react";
+import { TArea } from "common/area";
+import { TCertification } from "common/certification";
 
 //the kiosk's job is just to fetch the data needed from the server using useQuery
 //and display a loading circle when any of the data needed isn't ready
@@ -42,13 +44,29 @@ export default function StatisticsKiosk() {
         refetchOnWindowFocus: false,
     });
 
+    //fetches area data
+    const { data: areas, isLoading: areasLoading } = useQuery<TArea[]>({
+        queryKey: ["area"],
+        refetchOnWindowFocus: false,
+    });
+
+    //fetches certification data
+    const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
+        {
+            queryKey: ["certification"],
+            refetchOnWindowFocus: false,
+        },
+    );
+
     //displays a centered spinner if any of the four queries are still loading.
     //also checks if any of the data is undefined
     if (
         inventory === undefined ||
         users === undefined ||
         checkouts === undefined ||
-        roles === undefined
+        roles === undefined ||
+        areas === undefined ||
+        certs === undefined
     ) {
         return (
             <div className="w-full h-screen flex justify-center py-auto">
@@ -66,6 +84,8 @@ export default function StatisticsKiosk() {
                 users={users}
                 checkouts={checkouts}
                 roles={roles}
+                areas={areas}
+                certs={certs}
             />
         </AdminLayout>
     );

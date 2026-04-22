@@ -1,14 +1,21 @@
 import { useMemo, useState } from "react";
 import { TCheckout } from "common/checkout";
 import { TInventoryItem } from "common/inventory";
-import { Input } from "@heroui/react";
+import { NumberInput } from "@heroui/react";
+import ItemInfo from "../inventory/ItemInfo";
+import { TCertification } from "common/certification";
+import { TArea } from "common/area";
 
 export default function RarelyCheckedOutItems({
     checkouts,
     inventory,
+    areas,
+    certs,
 }: {
     checkouts: TCheckout[];
     inventory: TInventoryItem[];
+    areas: TArea[];
+    certs: TCertification[];
 }) {
     const [threshold, setThreshold] = useState(3);
 
@@ -33,28 +40,33 @@ export default function RarelyCheckedOutItems({
 
     return (
         <div className="bg-default-100 p-6 rounded-lg">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold mb-4">Rarely Checked Out</h2>
-                <Input
-                    type="number"
-                    value={String(threshold)}
-                    onChange={(e) => setThreshold(Number(e.target.value))}
-                    className="w-20 bg-default-200 px-3 py-1 rounded-md text-sm"
+                <NumberInput
+                    label={"# Times:"}
+                    labelPlacement="outside-left"
+                    value={threshold}
+                    onValueChange={setThreshold}
+                    variant="bordered"
+                    className="w-fit px-3 py-1 rounded-md text-sm"
                 />
             </div>
 
             <p className="text-sm text-default-500 mb-3">
-                {rarelyCheckedOut.length} item
-                {rarelyCheckedOut.length !== 1 ? "s" : ""} checked out fewer
-                than {threshold} times.
+                There are {rarelyCheckedOut.length} item
+                {rarelyCheckedOut.length !== 1 ? "s" : ""} that have been
+                checked out fewer than {threshold} time
+                {threshold !== 1 ? "s" : ""}.
             </p>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 max-h-80 overflow-auto">
                 {rarelyCheckedOut.map((item) => (
-                    <div
-                        key={item.uuid}
-                        className="bg-default-200 px-4 py-2 rounded-md text-sm"
-                    >
-                        {item.name}
+                    <div key={item.uuid} className="px-4 rounded-md text-sm">
+                        <ItemInfo
+                            item_data={item}
+                            areas={areas}
+                            certs={certs}
+                            className="w-full justify-start"
+                        />
                     </div>
                 ))}
             </div>
