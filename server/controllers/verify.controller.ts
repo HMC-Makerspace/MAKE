@@ -58,10 +58,20 @@ export function verifySchema<S, R extends Request>(
     schema: Joi.ObjectSchema<S> | Joi.ArraySchema<S> ,
     path_name: keyof R["body"],
 ): (req: Request, res: Response, next: NextFunction) => void {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    const obj = req.body[path_name];
-    const { error, value } = schema.validate(obj);
-    req.log.info("verifying schema");
+    return async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
+        const obj = req.body[path_name];
+        if (obj._id) {
+            delete obj._id;
+        }
+        if (obj.__v !== undefined) {
+            delete obj.__v;
+        }
+        const { error, value } = schema.validate(obj);
+        req.log.info("verifying schema")
 
     if (error) {
       req.log.error({
