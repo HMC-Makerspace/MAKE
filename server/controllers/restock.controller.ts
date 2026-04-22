@@ -3,7 +3,7 @@ import { TUser, UserUUID } from "common/user";
 import { RestockRequest } from "models/restock.model";
 import mongoose from "mongoose";
 import { Logger } from "pino";
-import { getUser } from "./user.controller";
+import { getUser, getUserEmails } from "./user.controller";
 import { sendTemplatedEmail } from "./email.controller";
 import RestockRequestTemplate from "email_templates/restock_completion";
 import { getInventoryItem } from "./inventory.controller";
@@ -135,6 +135,15 @@ export async function updateRestockRequestStatus(
             await item.save();
         }
     }
+    // If the item is pending, update its quantity
+    if (new_status.status === RESTOCK_REQUEST_STATUS.PENDING_APPROVAL) {
+        // Update the item's quantity from high to low, as necessary
+        const item = await getInventoryItem(request.item_uuid);
+        if (item?.quantity === ITEM_RELATIVE_QUANTITY.HIGH) {
+            item.quantity = ITEM_RELATIVE_QUANTITY.LOW;
+            await item.save();
+        }
+    }
     sendRestockUpdateEmail(request, logger);
     // Update the request's current status and status logs
     request.current_status = new_status.status;
@@ -217,6 +226,7 @@ export async function sendRestockUpdateEmail(
         });
         return;
     }
+    const emails = await getUserEmails(restock.mailing_list);
 
     const date = new Date(Date.now());
     // Send automated email to requesting user to indicate that the status has changed
@@ -225,6 +235,7 @@ export async function sendRestockUpdateEmail(
         `Updated Restock Request (${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()})`,
         RestockRequestTemplate(restock, user, item),
         logger,
-        restock.mailing_list
+        [],
+        emails,
     );
 }
