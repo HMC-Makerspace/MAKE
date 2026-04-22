@@ -202,6 +202,7 @@ export default function Machine({
                                             : ""}
                                     </Button>
                                     <RequiredCertsModal
+                                        mode="single"
                                         element={machine}
                                         parentKitCerts={undefined}
                                         certifications={certifications}

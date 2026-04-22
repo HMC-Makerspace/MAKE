@@ -589,6 +589,7 @@ export default function WorkshopTable({
                         batchEdit={isBatch}
                     />
                     <RequiredCertsModal
+                        mode="single"
                         key={selectedWorkshop.uuid}
                         element={selectedWorkshop}
                         parentKitCerts={undefined}

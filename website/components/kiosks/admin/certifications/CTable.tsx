@@ -401,6 +401,7 @@ export default function CertificationsTable({
 
             {certOpenDoc && (
                 <RequiredCertsModal
+                    mode="single"
                     key={"certdocprereq-" + certOpenDoc.uuid}
                     certifications={certs}
                     element={certOpenDoc}

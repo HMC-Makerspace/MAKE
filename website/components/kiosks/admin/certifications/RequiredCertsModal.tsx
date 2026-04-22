@@ -23,22 +23,9 @@ const emptyCert: TRequiredCertificate = {
     required_level: 0,
 };
 
-export default function RequiredCertsModal<
-    // Allow any type that has a uuid and optional required_certs list
-    T extends { uuid: UUID; required_certifications?: TRequiredCertificate[] },
->({
-    element,
-    parentKitCerts,
-    certifications,
-    isOpen,
-    onOpenChange,
-    patchMutation,
-}: {
+type SinglePatch<T> = {
+    mode: "single";
     element: T;
-    parentKitCerts: TRequiredCertificate[] | undefined;
-    certifications: TCertification[];
-    isOpen: boolean;
-    onOpenChange: (isOpen: boolean) => void;
     patchMutation: UseMutationResult<
         T,
         Error,
@@ -49,11 +36,46 @@ export default function RequiredCertsModal<
             };
         }
     >;
-}) {
+};
+
+type BatchPatch<T> = {
+    mode: "batch";
+    element: UUID[];
+    patchMutation: UseMutationResult<
+        T[],
+        Error,
+        {
+            uuids: UUID[];
+            patch: {
+                required_certifications?: TRequiredCertificate[];
+            };
+        }
+    >;
+};
+
+export default function RequiredCertsModal<
+    // Allow any type that has a uuid and optional required_certs list
+    T extends { uuid: UUID; required_certifications?: TRequiredCertificate[] },
+>({
+    certifications,
+    parentKitCerts,
+    isOpen,
+    onOpenChange,
+    ...mutationProps
+}: {
+    certifications: TCertification[];
+    parentKitCerts: TRequiredCertificate[] | undefined;
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+} & (SinglePatch<T> | BatchPatch<T>)) {
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
     const [currentCerts, setCurrentCerts] = React.useState<
         TRequiredCertificate[]
-    >(element.required_certifications || []);
+    >(
+        mutationProps.mode === "single"
+            ? (mutationProps.element.required_certifications ?? [])
+            : [],
+    );
 
     const onSubmit = React.useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
@@ -62,17 +84,30 @@ export default function RequiredCertsModal<
 
             if (!hasEdits) return;
 
-            patchMutation.reset();
+            mutationProps.patchMutation.reset();
 
-            // Run the mutation
-            patchMutation.mutate({
-                uuid: element.uuid,
-                patch: { required_certifications: currentCerts },
-            });
+            // Run the mutations
+            if (mutationProps.mode === "single") {
+                mutationProps.patchMutation.mutate({
+                    uuid: mutationProps.element.uuid,
+                    patch: { required_certifications: currentCerts },
+                });
+            } else {
+                mutationProps.patchMutation.mutate({
+                    uuids: mutationProps.element,
+                    patch: { required_certifications: currentCerts },
+                });
+            }
+
             onOpenChange(false);
             setHasEdits(false);
         },
-        [patchMutation, hasEdits, currentCerts, element.uuid],
+        [
+            mutationProps.patchMutation,
+            hasEdits,
+            currentCerts,
+            mutationProps.element,
+        ],
     );
 
     function wrapEdit<P extends keyof TRequiredCertificate>(
@@ -84,7 +119,7 @@ export default function RequiredCertsModal<
                 currentCerts[i] = emptyCert;
             }
 
-            const cert = {...currentCerts[i]};
+            const cert = { ...currentCerts[i] };
             cert[prop] = val;
             const certs = [...currentCerts];
             certs[i] = cert;
@@ -117,13 +152,19 @@ export default function RequiredCertsModal<
                         className="flex flex-col gap-4 p-4"
                     >
                         <div className="text-lg font-semibold">
-                            Edit Required Certifications
+                            {mutationProps.mode === "single"
+                                ? "Edit Required Certifications"
+                                : "Batch Edit Required Certifications"}
                         </div>
 
                         {currentCerts.map((cert, i) => (
                             <div
                                 className="flex flex-col sm:flex-row w-full gap-2 items-top"
-                                key={element.uuid + "-cert-" + cert.certification_uuid}
+                                key={
+                                    mutationProps.element +
+                                    "-cert-" +
+                                    cert.certification_uuid
+                                }
                             >
                                 <CertSelect
                                     certifications={certifications}
@@ -194,25 +235,36 @@ export default function RequiredCertsModal<
                             </div>
                         ))}
 
-                        {parentKitCerts && (<>
-                            {currentCerts.length != 0 && (<Divider className="hidden sm:block h-[1px] bg-default-400" />)}
-                            <div className="w-full">
-                                <div className="text-lg font-semibold text-center">
-                                    Parent Kit Required Certifications
+                        {parentKitCerts && (
+                            <>
+                                {currentCerts.length != 0 && (
+                                    <Divider className="hidden sm:block h-[1px] bg-default-400" />
+                                )}
+                                <div className="w-full">
+                                    <div className="text-lg font-semibold text-center">
+                                        Parent Kit Required Certifications
+                                    </div>
+                                    <div className="grid grid-cols-2 w-full gap-y-3 justify-evenly p-4">
+                                        {parentKitCerts?.map((cert, i) => (
+                                            <div
+                                                className={`flex content-center justify-center col-span-${i < parentKitCerts?.length - (parentKitCerts?.length % 2) ? 1 : 2}`}
+                                            >
+                                                <CertificationTag
+                                                    cert_uuid={
+                                                        cert.certification_uuid
+                                                    }
+                                                    certifications={
+                                                        certifications
+                                                    }
+                                                    showVisibility={false}
+                                                    level={cert.required_level}
+                                                ></CertificationTag>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                                <div className="grid grid-cols-2 w-full gap-y-3 justify-evenly p-4">
-                                    {parentKitCerts?.map((cert, i) => (<div className={`flex content-center justify-center col-span-${i < parentKitCerts?.length - parentKitCerts?.length % 2 ? 1 : 2}`}>
-                                        <CertificationTag
-                                            cert_uuid={cert.certification_uuid}
-                                            certifications={certifications}
-                                            showVisibility={false}
-                                            level={cert.required_level}
-                                        >
-                                        </CertificationTag>
-                                    </div>))}
-                                </div>
-                            </div>
-                        </>)}
+                            </>
+                        )}
 
                         <div className="flex flex-row justify-between w-full gap-2">
                             <Button
@@ -221,7 +273,9 @@ export default function RequiredCertsModal<
                                 color="primary"
                                 className="w-full sm:w-auto"
                                 isDisabled={!isValid}
-                                isLoading={patchMutation.isPending}
+                                isLoading={
+                                    mutationProps.patchMutation.isPending
+                                }
                             >
                                 Submit
                             </Button>
