@@ -16,7 +16,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TConfig } from "common/config";
 import { SHIFT_DAYS } from "../../../../../common/shift";
 import { UserRoleSelect } from "../../../../components/user/UserRoleSelect";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import React, { useState } from "react";
 import clsx from "clsx";
 import { PlusIcon, AcademicCapIcon } from "@heroicons/react/24/solid";
@@ -90,9 +90,9 @@ export default function Configuration({
                 color: "success",
             });
         },
-        onError: (error) => {
+        onError: (error: AxiosError<{ error: string }>) => {
             addToast({
-                title: `Error: ${error.message}`,
+                title: error.response?.data?.error ?? `Error: ${error.message}`,
                 color: "danger",
             });
         },
@@ -310,7 +310,8 @@ export default function Configuration({
 
         const extra_urls = ((formData.get("extra_urls") as string) ?? "")
             .replace(" ", "")
-            .split(",");
+            .split(",")
+            .filter((s) => s);
         if (extra_urls.length > 0) {
             body.general.extra_urls = extra_urls;
         }
@@ -931,6 +932,7 @@ export default function Configuration({
                         variant="solid"
                         size="lg"
                         className="mt-auto flex-none mb-0"
+                        isDisabled={mutation.isPending}
                     >
                         Save Changes
                     </Button>

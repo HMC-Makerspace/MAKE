@@ -16,6 +16,7 @@ import { SHIFT_DAY } from "common/shift";
 import { ScheduleUUID } from "common/schedule";
 import { getCertification } from "./certification.controller";
 import { createHash } from "crypto";
+import { validateEmail } from "common/verify";
 
 /**
  * Get all users in the database
@@ -72,8 +73,25 @@ export async function getUserByCollegeID(id: string): Promise<TUser | null> {
  */
 export async function getUserByEmail(email: string): Promise<TUser | null> {
     const Users = mongoose.model("User", User);
+    // Validate user email
+    const valid_email = validateEmail(email);
     // Get user by email with case insensitive search.
-    return Users.findOne({ email: { $regex: new RegExp(`^${email}$`, "i") } });
+    return Users.findOne({
+        email: { $regex: new RegExp(`^${valid_email}$`, "i") },
+    });
+}
+
+/**
+ * Find all emails for a list of users, by uuid.
+ * @param user_uuids The list of user uuids to search
+ * @returns The list of emails for the given users
+ */
+export async function getUserEmails(user_uuids: string[]) {
+    const Users = mongoose.model("User", User);
+    // For all users with uuids in the given list, select and return only their email
+    return (
+        await Users.find({ uuid: { $in: user_uuids } }, { email: 1, _id: 0 })
+    ).map((u) => u.email);
 }
 
 /**
@@ -719,4 +737,17 @@ export async function initializeAdmin(
         past_roles: [],
     });
     return newAdmin.save();
+}
+
+/**
+ * Update a user's last login time to the current time.
+ * @param user_uuid The user to update
+ * @returns The new user object
+ */
+export async function updateUserLoginTime(user_uuid: UserUUID) {
+    const Users = mongoose.model("User", User);
+    return Users.findOneAndUpdate(
+        { uuid: user_uuid },
+        { last_login: Date.now() / 1000 },
+    );
 }
