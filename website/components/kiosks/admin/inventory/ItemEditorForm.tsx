@@ -725,6 +725,7 @@ export default function ItemEditorForm({
             </Form>
 
             <RequiredCertsModal
+                mode="single"
                 key={"certreq-" + item.uuid}
                 certifications={certs}
                 element={item}

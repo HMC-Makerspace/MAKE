@@ -33,6 +33,8 @@ import { TCertification } from "../../../../../common/certification";
 import CertificationTag from "../certifications/CertificationTag";
 import { parseZonedDateTime, ZonedDateTime } from "@internationalized/date";
 import WorkshopImagesModal from "./WorkshopImagesModal.tsx";
+import RequiredCertsModal from "../certifications/RequiredCertsModal.tsx";
+
 
 import clsx from "clsx";
 import { TConfig } from "common/config";
@@ -71,9 +73,39 @@ const updateBatchCreateWorkshop = async ({
 
     return await Promise.all(
         workshops.map((workshop) => {
-            return updateCreateWorkshop({workshop: workshop, isNew: true})
-        })   
-    )
+            return updateCreateWorkshop({ workshop: workshop, isNew: true });
+        }),
+    );
+};
+
+async function patchWorkshop({
+    uuid,
+    patch,
+}: {
+    uuid: UUID;
+    patch: Partial<TWorkshop>;
+}) {
+    return (
+        await axios.patch<TWorkshop>(`/api/v3/workshop/${uuid}`, {
+            partial_workshop_obj: patch,
+        })
+    ).data;
+}
+
+const patchBatchWorkshop = async ({
+    uuids,
+    patch
+}: {
+    uuids: UUID[];
+    patch: Partial<TWorkshop>;
+}) => {
+    console.log("Updating", uuids);
+
+    return await Promise.all(
+        uuids.map((uuid) => {
+            return patchWorkshop({ uuid: uuid, patch });
+        }),
+    );
 };
 
 export default function WorkshopEditModal({
@@ -96,7 +128,7 @@ export default function WorkshopEditModal({
     batchEdit: boolean;
 }) {
     // batch workshops storage
-    const [batchWorkshopsUUIDS, setBatchWorkshopsUUIDS] = useState<UUID[]>([])
+    const [batchWorkshopsUUIDS, setBatchWorkshopsUUIDS] = useState<UUID[]>([]);
     const workshops: TWorkshop[] = [];
 
     const queryClient = useQueryClient();
@@ -137,20 +169,21 @@ export default function WorkshopEditModal({
         onSuccess: (data, variables) => {
             data.forEach((workshop) => {
                 queryClient.setQueryData(["workshop", workshop.uuid], workshop);
-            })
+            });
             setBatchWorkshopsUUIDS(data.map((w) => w.uuid));
 
-            // queryClient.setQueryData(["workshop", data.uuid], data);
             queryClient.setQueryData(["workshop"], (old: TWorkshop[]) => [
                 ...data,
                 ...old,
             ]);
+
             addToast({
-                title: `Successfully created workshop`,
+                title: `Successfully created workshops`,
                 color: "success",
             });
             onOpenChange(false);
             imagesOnOpen();
+            
         },
         onError: (e) => {
             addToast({
@@ -159,6 +192,28 @@ export default function WorkshopEditModal({
             });
         },
     });
+
+    const patchBatchMutation = useMutation({
+            mutationFn: patchBatchWorkshop,
+            onSuccess: (data) => {
+                data.forEach((workshop) => {
+                    queryClient.setQueryData(["workshop", workshop.uuid], workshop);
+                });
+                queryClient.setQueryData(["workshop"], (old: TWorkshop[]) =>
+                    old.map((w) => data.find((d) => d.uuid === w.uuid) ?? w )
+                );
+                addToast({
+                    title: `Successfully updated workshops`,
+                    color: "success",
+                });
+            },
+            onError: (e) => {
+                addToast({
+                    title: `Error: ${e.message}`,
+                    color: "danger",
+                });
+            },
+        });
 
     const sortedFilteredWorkers = users
         .filter((user) =>
@@ -176,6 +231,13 @@ export default function WorkshopEditModal({
         onOpen: imagesOnOpen,
         onOpenChange: imagesOnOpenChange,
     } = useDisclosure();
+
+    const {
+        isOpen: certsIsOpen,
+        onOpen: certsOnOpen,
+        onOpenChange: certsOnOpenChange,
+    } = useDisclosure();
+    
 
     function wrapEdit<P extends keyof TWorkshop>(prop: P) {
         return (val: TWorkshop[P]) => {
@@ -207,7 +269,7 @@ export default function WorkshopEditModal({
                 ? Number(formData.get("repeat_interval"))
                 : 0;
 
-            for (let i = 0; i <= repeated_days; i++) {
+            for (let i = 0; i < repeated_days; i++) {
                 const new_workshop: TWorkshop = {
                     uuid: batchEdit ? crypto.randomUUID() : workshop.uuid, // never changes
                     title: (formData.get("title") as string) || workshop.title,
@@ -280,7 +342,7 @@ export default function WorkshopEditModal({
                     authorized_roles: workshop.authorized_roles,
                 };
 
-                workshops.push(new_workshop)
+                workshops.push(new_workshop);
 
                 if (!batchEdit) {
                     updateCreateMutation.reset();
@@ -592,7 +654,7 @@ export default function WorkshopEditModal({
                                 {batchEdit ? (
                                     <>
                                         <DateRangePicker
-                                            label="Workshop Date Range"
+                                            label="First Workshop Time"
                                             aria-label="Workshop Time"
                                             startName="timestamp_start"
                                             endName="timestamp_end"
@@ -631,7 +693,7 @@ export default function WorkshopEditModal({
                                                     "data-[editable=true]:focus:text-default-700",
                                                 ]),
                                             }}
-                                        />
+                                        />                                       
                                         <div className="flex flex-row gap-2">
                                             <NumberInput
                                                 label="Public Announcement Date"
@@ -672,7 +734,7 @@ export default function WorkshopEditModal({
                                             />
                                             <NumberInput
                                                 className="w-3/4"
-                                                label="Repeats"
+                                                label="Total Repeats"
                                                 name="repeats"
                                                 placeholder="Repeat x times"
                                                 isRequired
@@ -795,7 +857,17 @@ export default function WorkshopEditModal({
                 workshop={batchWorkshopsUUIDS}
                 isOpen={imagesIsOpen}
                 onOpenChange={imagesOnOpenChange}
+                certsOnOpen={certsOnOpen}
                 firstTime={true}
+            />
+            <RequiredCertsModal
+                key={workshop.uuid}
+                mode="batch"
+                element={batchWorkshopsUUIDS}
+                certifications={certs}
+                isOpen={certsIsOpen}
+                onOpenChange={certsOnOpenChange}
+                patchMutation={patchBatchMutation}
             />
         </>
     );
