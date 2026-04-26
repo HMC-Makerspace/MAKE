@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { TInventoryItem } from "../../../common/inventory";
 import { TUser, TUserRole } from "../../../common/user";
 import { TCheckout } from "../../../common/checkout";
+import { TRestockRequest } from "../../../common/restock";
 import { Spinner } from "@heroui/react";
 
 //the kiosk's job is just to fetch the data needed from the server using useQuery
@@ -42,13 +43,19 @@ export default function StatisticsKiosk() {
         refetchOnWindowFocus: false,
     });
 
+    const { data: restocks, isLoading: restocksLoading } = useQuery<TRestockRequest[]>({
+    queryKey: ["restock"],
+    refetchOnWindowFocus: false,
+});
+
     //displays a centered spinner if any of the four queries are still loading.
     //also checks if any of the data is undefined
     if (
         inventory === undefined ||
         users === undefined ||
         checkouts === undefined ||
-        roles === undefined
+        roles === undefined ||
+        restocks == undefined
     ) {
         return (
             <div className="w-full h-screen flex justify-center py-auto">
@@ -66,6 +73,7 @@ export default function StatisticsKiosk() {
                 users={users}
                 checkouts={checkouts}
                 roles={roles}
+                restocks = {restocks}
             />
         </AdminLayout>
     );
