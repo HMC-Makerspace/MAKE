@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { TCheckout } from "common/checkout";
 import { TInventoryItem } from "common/inventory";
-import { NumberInput } from "@heroui/react";
+import { NumberInput, Spinner } from "@heroui/react";
 import ItemInfo from "../inventory/ItemInfo";
 import { TCertification } from "common/certification";
 import { TArea } from "common/area";
+import { useScroll } from "../../../UseScroll";
 
 export default function RarelyCheckedOutItems({
     checkouts,
@@ -38,8 +39,11 @@ export default function RarelyCheckedOutItems({
         });
     }, [checkouts, inventory, threshold]);
 
+    const { visibleContent, hasMoreContent, loaderRef, scrollerRef } =
+        useScroll(rarelyCheckedOut ?? [], 20, 20);
+
     return (
-        <div className="bg-default-100 p-6 rounded-lg">
+        <main className="bg-default-100 p-6 rounded-lg" ref={scrollerRef}>
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold mb-4">Rarely Checked Out</h2>
                 <NumberInput
@@ -59,7 +63,7 @@ export default function RarelyCheckedOutItems({
                 {threshold !== 1 ? "s" : ""}.
             </p>
             <div className="flex flex-col gap-2 max-h-80 overflow-auto">
-                {rarelyCheckedOut.map((item) => (
+                {visibleContent.map((item) => (
                     <div key={item.uuid} className="px-4 rounded-md text-sm">
                         <ItemInfo
                             item_data={item}
@@ -69,7 +73,8 @@ export default function RarelyCheckedOutItems({
                         />
                     </div>
                 ))}
+                {hasMoreContent && <Spinner ref={loaderRef} color="primary" />}
             </div>
-        </div>
+        </main>
     );
 }

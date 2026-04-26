@@ -224,6 +224,7 @@ export default function Machine({
                                                             ? cert.required_level
                                                             : undefined
                                                     }
+                                                    anchor
                                                 />
                                             ),
                                         )}

@@ -39,6 +39,9 @@ const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
             queryFn: defaultQueryFn,
+            gcTime: 1000 * 60 * 60, // 1 hour
+            refetchOnWindowFocus: false,
+            refetchOnMount: false,
         },
     },
 });
