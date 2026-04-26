@@ -16,21 +16,16 @@ export default function CheckoutHeatmap({
     checkouts: TCheckout[];
 }) {
     const data = useMemo(() => {
-        // initialize all 24 hours to 0 so every hour always appears on the chart
         const hourCounts: { [key: number]: number } = {};
         for (let i = 0; i < 24; i++) {
             hourCounts[i] = 0;
         }
 
-        // for each checkout, extract the hour from the unix timestamp and tally it
-        // timestamp_out is in seconds, so multiply by 1000 to get milliseconds for JS Date
         checkouts.forEach((checkout) => {
             const hour = new Date(checkout.timestamp_out * 1000).getHours();
             hourCounts[hour] = (hourCounts[hour] || 0) + 1;
         });
 
-        // convert the tally object into an array recharts can use
-        // padStart(2, "0") formats hours like "09:00" instead of "9:00"
         return Object.entries(hourCounts)
             .map(([hour, count]) => ({
                 hour: `${hour.toString().padStart(2, "0")}:00`,
@@ -39,7 +34,6 @@ export default function CheckoutHeatmap({
             .sort((a, b) => parseInt(a.hour) - parseInt(b.hour));
     }, [checkouts]);
 
-    // if there's no data yet, show a message instead of an empty chart
     if (data.length === 0) {
         return (
             <div className="bg-default-100 p-6 rounded-lg">

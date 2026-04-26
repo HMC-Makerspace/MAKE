@@ -34,12 +34,18 @@ export default function RarelyCheckedOutItems({
     return (
         <div className="bg-default-100 p-6 rounded-lg">
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold mb-4">Rarely Checked Out</h2>
+                <h2 className="text-xl font-bold">Rarely Checked Out</h2>
                 <Input
                     type="number"
+                    min={1}
                     value={String(threshold)}
-                    onChange={(e) => setThreshold(Number(e.target.value))}
-                    className="w-20 bg-default-200 px-3 py-1 rounded-md text-sm"
+                    onValueChange={(val) => setThreshold(Number(val))}
+                    size="sm"
+                    className="w-20"
+                    classNames={{
+                        inputWrapper: "bg-default-200 h-8 min-h-0",
+                        input: "text-sm",
+                    }}
                 />
             </div>
 
