@@ -8,7 +8,7 @@ import {
     Tooltip,
 } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TUser } from "common/user";
 import { TCertification } from "../../common/certification";
 import DefaultLayout from "../layouts/Default";
@@ -21,7 +21,7 @@ import {
 } from "../utils";
 import { BookmarkIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 export default function CertificationsPage() {
     // Get all data
@@ -41,6 +41,20 @@ export default function CertificationsPage() {
     });
 
     const [index, setIndex] = useState(0);
+
+    const params = useParams();
+
+    // Select a specific cert by index if it is in the route parameters
+    useEffect(() => {
+        if (params.cert_uuid) {
+            const param_cert = certs?.findIndex(
+                (c) => c.uuid === params.cert_uuid,
+            );
+            if (param_cert && param_cert >= 0) {
+                setIndex(param_cert);
+            }
+        }
+    }, [params.cert_uuid, setIndex, certs]);
 
     const cert = certs ? certs[index] : undefined;
 
@@ -328,6 +342,15 @@ export default function CertificationsPage() {
                                                         req_cert.required_level
                                                     }
                                                     certifications={certs}
+                                                    onPress={() =>
+                                                        setIndex(
+                                                            certs?.findIndex(
+                                                                (c) =>
+                                                                    c.uuid ===
+                                                                    req_cert.certification_uuid,
+                                                            ) || -1,
+                                                        )
+                                                    }
                                                 />
                                             ),
                                         )}
@@ -419,91 +442,6 @@ export default function CertificationsPage() {
                     </CardFooter>
                 </Card>
             </div>
-
-            {/* <div className="size-full flex flex-row overflow-auto">
-                <div className="w-full h-full fixed ">
-                    {publicCerts.map((cert, i) => {
-                        const index = scrollIndex;
-                        const pos = i - index;
-                        const isSelected = i === index;
-                        const sign = i > index ? 1 : -1;
-                        const distance =
-                            pos * 3 + (isSelected ? 0 : sign * 0.8);
-                        return (
-                            <motion.div
-                                key={`${cert.uuid}-box-lg`}
-                                className="hidden sm:block"
-                                style={{
-                                    position: "absolute",
-                                    top: 0,
-                                    left: 0,
-                                    // offsetPath: 'path("M 100 0 A 100 300 0 0 1 100 300")',
-                                    offsetPath: "circle(20% at -200px 50%)",
-                                    rotate: "-90deg",
-                                    width: "fit-content",
-                                    height: "fit-content",
-                                }}
-                                transition={{
-                                    duration: 0.2,
-                                    ease: "easeOut",
-                                }}
-                                initial={{
-                                    offsetDistance: `${distance}%`,
-                                    // borderWidth: isSelected ? 10 : 0,
-                                }}
-                                animate={{
-                                    offsetDistance: `${distance}%`,
-                                    opacity:
-                                        index > i + 1 || index < i - 1
-                                            ? 0.6
-                                            : 1,
-                                    // marginLeft: isSelected ? 40 : 0,
-                                    scale: isSelected ? 1.3 : 1,
-                                }}
-                                // animate={{
-                                //     offsetDistance: `${(i + index * 1.2 - 100}%`,
-                                //     borderWidth: i === index ? 2 : 0,
-                                // }}
-                            >
-                                <div className="w-0 h-fit">
-                                    <CertificationTag
-                                        cert_uuid={cert.uuid}
-                                        certifications={publicCerts}
-                                        highlight={i === index}
-                                    />
-                                </div>
-                            </motion.div>
-                        );
-                    })}
-                </div>
-                <div
-                    className="w-full h-full overflow-scroll z-10"
-                    style={{ direction: "rtl" }}
-                    ref={carouselRef}
-                >
-                    <div className="h-[143vh] "></div>
-                </div>
-            </div> */}
-            {/* <h1 className="text-3xl font-bold pb-4">Held Certifications</h1>
-                <div className="grid grid-cols-3 gap-4 overflow-auto">
-                    {heldCerts.map((cert) => (
-                        <CertificationCard cert={cert} />
-                    ))}
-                </div>
-                <h1 className="text-3xl font-bold pb-4">
-                    Available Certifications
-                </h1>
-                <div className="grid grid-cols-3 gap-4 overflow-auto">
-                    {unHeldCerts.slice(1, 2).map((cert) => (
-                        <CertificationCard cert={cert} />
-                    ))}
-                </div>
-                <h1 className="text-3xl font-bold py-4">Missing Prereq</h1>
-                <div className="grid grid-cols-3 gap-4 overflow-auto opacity-50">
-                    {unHeldCerts.toSpliced(1, 1).map((cert) => (
-                        <CertificationCard cert={cert} />
-                    ))}
-                </div> */}
         </DefaultLayout>
     );
 }

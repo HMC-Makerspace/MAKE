@@ -7,6 +7,8 @@ import { MACHINE_EDIT_LEVEL, TMachine } from "../../common/machine";
 import { TArea } from "common/area";
 import { API_SCOPE } from "../../common/global";
 import { verifyScopes } from "../utils";
+import { useScroll } from "../components/UseScroll";
+import { Spinner } from "@heroui/react";
 
 export default function AreasPage() {
     const {
@@ -48,12 +50,18 @@ export default function AreasPage() {
     const canEditMachines =
         scopes && verifyScopes(scopes, [API_SCOPE.UPDATE_MACHINE_INSTANCES]);
 
+    const { visibleContent, hasMoreContent, loaderRef, scrollerRef } =
+        useScroll(areas ?? [], 2, 2);
+
     return (
         <DefaultLayout className="p-4 lg:p-8" pageHref="/areas">
             {areas && machines && roles && certs && (
-                <div className="h-full overflow-auto rounded-xl">
+                <main
+                    className="h-full overflow-auto rounded-xl"
+                    ref={scrollerRef}
+                >
                     <div className="h-fit flex flex-col gap-8 rounded-xl">
-                        {areas.map((area) => (
+                        {visibleContent.map((area) => (
                             <Area
                                 key={area.uuid}
                                 area={area}
@@ -67,8 +75,11 @@ export default function AreasPage() {
                                 }
                             />
                         ))}
+                        {hasMoreContent && (
+                            <Spinner ref={loaderRef} color="primary" />
+                        )}
                     </div>
-                </div>
+                </main>
             )}
         </DefaultLayout>
     );

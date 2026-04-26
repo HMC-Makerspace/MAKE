@@ -435,6 +435,7 @@ export default function InventoryTable({
                                     cert_uuid={c.certification_uuid}
                                     certifications={certifications}
                                     level={c.required_level}
+                                    anchor
                                 />
                             ))}
                         </div>

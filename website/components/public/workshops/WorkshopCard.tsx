@@ -283,6 +283,7 @@ export default function WorkshopCard({
                                             ? cert.required_level
                                             : undefined
                                     }
+                                    anchor
                                 />
                             ))}
                     </div>
@@ -466,7 +467,7 @@ export default function WorkshopCard({
 
             {canRSVP && !isWorkshopInstructor && (
                 <WorkshopRSVPDisclaimerModal
-                    key={`${workshop.uuid}-signin`}
+                    key={`${workshop.uuid}-signin-instr`}
                     overCapacity={overCapacity}
                     rsvpMutation={rsvpMutation}
                     workshop={workshop}

@@ -95,6 +95,7 @@ export default function MAKETable<Type extends { uuid: string }>({
     const [loaderRef, scrollerRef] = useInfiniteScroll({
         hasMore: hasMoreContent,
         onLoadMore: loadMoreContent,
+        shouldUseLoader: true,
     });
 
     // The actual column header objects, filtered based on the visible columns
