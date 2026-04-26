@@ -1,50 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FILE_RESOURCE_TYPE, FileUUID, TFile } from "../../common/file.ts";
+import { FILE_RESOURCE_TYPE, TFile } from "../../common/file.ts";
 import DefaultLayout from "../layouts/Default";
-import {
-    Card,
-    CardFooter,
-    Image,
-    Button,
-    Spinner,
-    Input,
-    Form,
-    closeToast,
-    addToast,
-} from "@heroui/react";
-import {
-    AcademicCapIcon,
-    ArrowUpTrayIcon,
-    PlusIcon,
-    TrashIcon,
-} from "@heroicons/react/24/solid";
+import { Button, Spinner, Input, Form, addToast } from "@heroui/react";
+import { AcademicCapIcon, ArrowUpTrayIcon } from "@heroicons/react/24/solid";
 import axios, { AxiosError } from "axios";
-import React from "react";
-import { TUser, UserUUID } from "../../common/user.js";
+import React, { useEffect } from "react";
+import { TUser } from "../../common/user.js";
 import clsx from "clsx";
-import {
-    ArchiveBoxIcon,
-    CubeTransparentIcon,
-    DocumentChartBarIcon,
-    DocumentIcon,
-    DocumentTextIcon,
-    FilmIcon,
-    IdentificationIcon,
-    MusicalNoteIcon,
-    PhotoIcon,
-} from "@heroicons/react/24/outline";
 import { API_SCOPE } from "../../common/global.ts";
 import { verifyScopes } from "../utils.tsx";
 import FileCard from "../components/public/file/FileCard.tsx";
+import { validateCollegeID } from "../../common/verify.ts";
 
 async function uploadFiles({
     college_id,
     files,
-    toast_key,
 }: {
     college_id: string;
     files: File[];
-    toast_key: string;
 }) {
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
@@ -79,19 +52,18 @@ async function getFiles({ college_id }: { college_id: string }) {
 
 async function deleteFile({
     file_uuid,
+    resource_uuid,
     resource_type,
 }: {
     file_uuid: string;
+    resource_uuid: string | string[];
     resource_type: FILE_RESOURCE_TYPE;
 }) {
-    const response = await axios.delete(
-        `/api/v3/file/by/${resource_type}/${file_uuid}`,
-        {
-            headers: {
-                "Content-Type": "multipart/form-data",
-            },
+    const response = await axios.delete(`/api/v3/file/by/user/${file_uuid}`, {
+        headers: {
+            "Content-Type": "multipart/form-data",
         },
-    );
+    });
     return response.data;
 }
 
@@ -110,6 +82,7 @@ export default function QuickTransferPage() {
         data: user,
         isLoading: userLoading,
         isError: userError,
+        refetch,
     } = useQuery<TUser>({
         queryKey: ["user", "by", "id", collegeID],
         refetchOnWindowFocus: false,
@@ -145,6 +118,13 @@ export default function QuickTransferPage() {
         refetchOnWindowFocus: false,
         retry: false,
     });
+
+    // Update College ID when current user loads
+    useEffect(() => {
+        if (self?.college_id) {
+            setCollegeID(self.college_id);
+        }
+    }, [self?.college_id]);
 
     const uploadMutation = useMutation({
         mutationFn: uploadFiles,
@@ -223,7 +203,6 @@ export default function QuickTransferPage() {
         const promise = uploadMutation.mutateAsync({
             college_id: collegeID,
             files: files,
-            toast_key: "",
         });
         const toast = addToast({
             title: "Uploading ...",
@@ -262,6 +241,14 @@ export default function QuickTransferPage() {
         }
     };
 
+    const updateID = async (new_id: string | undefined) => {
+        const validatedID = validateCollegeID(new_id || "");
+        setCollegeID(validatedID);
+        if (collegeID === validatedID) {
+            await refetch();
+        }
+    };
+
     return (
         <DefaultLayout className="p-4 lg:p-8" pageHref="/transfer">
             <div
@@ -277,11 +264,11 @@ export default function QuickTransferPage() {
                 >
                     <Form
                         id="id-input"
-                        onSubmit={(e) => {
+                        onSubmit={async (e) => {
                             e.preventDefault();
                             const data = new FormData(e.currentTarget);
                             const newID = data.get("college_id") as string;
-                            setCollegeID(newID || "");
+                            await updateID(newID);
                         }}
                         className="mr-auto flex-1"
                     >
@@ -308,10 +295,14 @@ export default function QuickTransferPage() {
                                 input: "text-large sm:text-base",
                                 label: "pb-1.5 sm:pb-0.5",
                             }}
-                            onBlur={(blurEvent) => {
+                            onBlur={async (blurEvent) => {
                                 // Get input value
-                                const value = blurEvent.target.value;
-                                setCollegeID(value || "");
+                                const value =
+                                    blurEvent.target.value ||
+                                    (self?.college_id !== undefined
+                                        ? self?.college_id
+                                        : undefined);
+                                await updateID(value);
                             }}
                         />
                     </Form>
@@ -375,6 +366,7 @@ export default function QuickTransferPage() {
                                     key={file.uuid}
                                     file={file}
                                     resource_type={FILE_RESOURCE_TYPE.USER}
+                                    resource_uuid={file.resource_uuid}
                                     deleteMutation={deleteMutation}
                                     disableDeletion={!deleteAccess}
                                     showFooter

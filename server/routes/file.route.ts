@@ -427,6 +427,11 @@ router.post(
             FILE_RESOURCE_TYPE.USER,
         );
 
+        const IS_ADMIN_REQUEST = await verifyRequest(
+            requesting_uuid,
+            API_SCOPE.ADMIN,
+        );
+
         let file_size_sum = 0;
         await Promise.allSettled(
             files.map(async (file, i) => {
@@ -468,12 +473,12 @@ router.post(
                     moveTempFileOnServer(temp_path, target_path, req)
                         // If the file was successfully saved, create a new File object
                         // in the db
-                        .then(() => {
+                        .then(async () => {
                             // Create a new file object
                             const upload_time = Date.now() / 1000;
+                            // Override expiration time if the request is from an admin
                             const expiration_time =
-                                config.file.upload_duration &&
-                                !verifyRequest(user.uuid, API_SCOPE.ADMIN)
+                                config.file.upload_duration && !IS_ADMIN_REQUEST
                                     ? upload_time + config.file.upload_duration
                                     : undefined;
                             const file_obj: TFile = {
