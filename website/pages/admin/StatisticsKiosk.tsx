@@ -83,7 +83,7 @@ export default function StatisticsKiosk() {
         );
     }
 
-    //once all data has been quieried, render the page inside the admin nav wrapper
+    //once all data has been queried, render the page inside the admin nav wrapper
     //and passes all data down to StatisticsDisplay to be displayed
     return (
         <AdminLayout pageHref="/admin/statistics">
