@@ -12,7 +12,7 @@ import {
     ModalBody,
     useDisclosure,
     Image,
-    addToast
+    addToast,
 } from "@heroui/react";
 import {
     TrashIcon,
@@ -28,12 +28,17 @@ import clsx from "clsx";
 async function deleteImage({
     resource_type,
     file_uuid,
+    resource_uuid,
 }: {
     resource_type: FILE_RESOURCE_TYPE;
     file_uuid: UUID;
+    resource_uuid: UUID | UUID[];
 }) {
-    return (await axios.delete(`/api/v3/file/by/${resource_type}/${file_uuid}`))
-        .data;
+    return (
+        await axios.delete(
+            `/api/v3/file/by/${resource_type}/${file_uuid}/${resource_uuid}`,
+        )
+    ).data;
 }
 
 async function uploadImage({
@@ -41,7 +46,7 @@ async function uploadImage({
     resource_type,
     file,
 }: {
-    resource_uuid: FileUUID;
+    resource_uuid: UUID | UUID[];
     resource_type: FILE_RESOURCE_TYPE;
     file: File;
 }) {
@@ -65,18 +70,24 @@ export default function ImageCarousel({
     resource_type,
     editable = false,
     className = "",
+    firstTime = false,
 }: {
-    resource_uuid: UUID;
+    resource_uuid: UUID | UUID[];
     resource_type: FILE_RESOURCE_TYPE;
     editable?: boolean;
     className?: string;
+    firstTime?: boolean;
 }) {
+    const normalizedUUID = Array.isArray(resource_uuid)
+        ? resource_uuid[0]
+        : resource_uuid;
+
     const {
         data: images,
         isLoading,
         isFetching,
     } = useQuery<TFile[]>({
-        queryKey: ["file", "by", resource_type, resource_uuid],
+        queryKey: ["file", "by", resource_type, normalizedUUID],
         refetchOnWindowFocus: false,
         placeholderData: [],
     });
@@ -143,18 +154,32 @@ export default function ImageCarousel({
                     isBlurred
                 />
             ) : (
-                <p className="text-center text-l text-bold">No Images Found</p>
+                !firstTime && (
+                    <p className="text-center text-l text-bold">
+                        No Images Found
+                    </p>
+                )
             )}
 
-            {editable && (
-                <Button
-                    isIconOnly
-                    className="absolute bottom-2 right-2"
-                    onPress={editOnOpenChange}
-                >
-                    <ArrowUpOnSquareIcon className="size-7" />
-                </Button>
-            )}
+            {editable &&
+                (firstTime && images.length === 0 ? (
+                    <Button
+                        isIconOnly
+                        className="min-w-full"
+                        onPress={editOnOpenChange}
+                    >
+                        Add Images
+                        <ArrowUpOnSquareIcon className="size-7" />
+                    </Button>
+                ) : (
+                    <Button
+                        isIconOnly
+                        className="absolute bottom-2 right-2 z-30"
+                        onPress={editOnOpenChange}
+                    >
+                        <ArrowUpOnSquareIcon className="size-7" />
+                    </Button>
+                ))}
             {images.length > 1 && (
                 <Button
                     className="absolute right-1 top-0 bottom-0 my-auto z-20"
@@ -199,15 +224,18 @@ function EditModal({
     editOnOpenChange: () => void;
     images: TFile[];
     resource_type: FILE_RESOURCE_TYPE;
-    resource_uuid: UUID;
+    resource_uuid: UUID | UUID[];
 }) {
     const queryClient = useQueryClient();
+    const normalizedUUID = Array.isArray(resource_uuid)
+        ? resource_uuid[0]
+        : resource_uuid;
 
     const deleteMutation = useMutation({
         mutationFn: deleteImage,
         onSuccess: (data: TFile[]) => {
             queryClient.invalidateQueries({
-                queryKey: ["file", "by", resource_type, resource_uuid],
+                queryKey: ["file", "by", resource_type, normalizedUUID],
             });
             addToast({
                 title: `Successfully deleted image`,
@@ -218,16 +246,15 @@ function EditModal({
 
     const uploadMutation = useMutation({
         mutationFn: uploadImage,
-        onSuccess: (data: TFile[]) => {
+        onSuccess: (data: TFile) => {
             queryClient.setQueryData(
-                ["file", "by", resource_type, resource_uuid],
+                ["file", "by", resource_type, normalizedUUID],
                 (old: TFile[]) => old.concat(data),
             );
             addToast({
                 title: `Successfully uploaded image`,
                 color: "success",
             });
-
         },
     });
 
@@ -261,6 +288,7 @@ function EditModal({
                                 <FileCard
                                     file={image}
                                     resource_type={resource_type}
+                                    resource_uuid={resource_uuid}
                                     deleteMutation={deleteMutation}
                                 />
                             );

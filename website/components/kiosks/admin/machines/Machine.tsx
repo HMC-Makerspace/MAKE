@@ -196,6 +196,7 @@ export default function Machine({
                                             : ""}
                                     </Button>
                                     <RequiredCertsModal
+                                        mode="single"
                                         element={machine}
                                         certifications={certifications}
                                         isOpen={certModal}
@@ -223,6 +224,7 @@ export default function Machine({
                                                             ? cert.required_level
                                                             : undefined
                                                     }
+                                                    anchor
                                                 />
                                             ),
                                         )}

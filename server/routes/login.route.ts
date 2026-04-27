@@ -2,8 +2,8 @@ import { API_SCOPE } from "common/global";
 import { UNAUTHORIZED_ERROR, VerifyRequestHeader } from "common/verify";
 import {
     createUser,
-    getUser,
     getUserByEmail,
+    updateUserLoginTime,
 } from "controllers/user.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { createHash } from "crypto";
@@ -36,6 +36,7 @@ if (process.env.NODE_ENV === "development") {
                     next(err);
                 } else {
                     // If successfully logged in, redirect to the main page
+                    updateUserLoginTime(user.uuid);
                     res.redirect("/");
                 }
             });
@@ -99,10 +100,13 @@ if (process.env.NODE_ENV === "production") {
                         past_roles: [],
                         active_certificates: [],
                         past_certificates: [],
+                        last_login: Date.now() / 1000,
                     };
                     await createUser(new_user_obj);
                     done(null, { uuid: new_user_obj.uuid });
                 } else {
+                    // Successful login
+                    updateUserLoginTime(user_obj.uuid);
                     done(null, { uuid: user_obj.uuid });
                 }
             },
@@ -150,6 +154,7 @@ router.get("/login/:user_uuid", passport.session(), async (req, res, next) => {
                     next(err);
                 } else {
                     // If successfully logged in, redirect to the main page
+                    updateUserLoginTime(user_uuid);
                     res.redirect("/");
                 }
             });
@@ -205,7 +210,8 @@ router.post("/login/email/", async (req: EmailLoginRequest, res, next) => {
             // Pass error to Express
             next(err);
         } else {
-            // If successfully logged in, redirect to the main page
+            // If successfully logged in, update user's last login time and redirect to the main page
+            updateUserLoginTime(user.uuid);
             res.redirect("/");
         }
     });

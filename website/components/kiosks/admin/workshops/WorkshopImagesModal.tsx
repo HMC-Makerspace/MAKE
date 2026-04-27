@@ -15,15 +15,20 @@ import {
 import { TWorkshop } from "../../../../../common/workshop";
 import ImageCarousel from "../../../ImageCarousel";
 import { FILE_RESOURCE_TYPE } from "../../../../../common/file";
+import { UUID } from "common/global";
 
 export default function WorkshopImagesModal({
     workshop,
     isOpen,
     onOpenChange,
+    certsOnOpen,
+    firstTime = false,
 }: {
-    workshop?: TWorkshop;
+    workshop?: TWorkshop | UUID[];
     isOpen: boolean;
     onOpenChange: () => void;
+    certsOnOpen: () => void;
+    firstTime?: boolean;
 }) {
     return (
         <Modal
@@ -34,15 +39,18 @@ export default function WorkshopImagesModal({
             className="flex flex-col justify-center"
         >
             <ModalContent>
-                <ModalHeader>Workshop Images</ModalHeader>
+                <ModalHeader>
+                    {firstTime ? "Add Batch Image" : "Workshop Images"}
+                </ModalHeader>
 
                 <ModalBody className="flex flex-col items-center px-6 justify-center">
                     <div className="w-[90%] h-[40vh]">
                         {workshop ? (
                             <ImageCarousel
-                                resource_uuid={workshop.uuid}
+                                resource_uuid={Array.isArray(workshop) ? workshop : workshop.uuid}
                                 resource_type={FILE_RESOURCE_TYPE.WORKSHOP}
                                 editable={true}
+                                firstTime={firstTime}
                             />
                         ) : (
                             <div>No workshop selected.</div>
@@ -53,6 +61,9 @@ export default function WorkshopImagesModal({
                     <Button
                         color="primary"
                         onPress={() => {
+                            if (Array.isArray(workshop)) {
+                                certsOnOpen();
+                            }
                             onOpenChange();
                         }}
                     >

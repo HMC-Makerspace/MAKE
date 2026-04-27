@@ -10,6 +10,8 @@ import CheckoutHeatmap from "./CheckoutHeatmap";
 import CheckoutsByDay from "./CheckoutsByDay";
 import RarelyCheckedOutItems from "./RarelyCheckedOutItems";
 import TopRestockedItems from "./TopRestockedItems";
+import { TCertification } from "common/certification";
+import { TArea } from "common/area";
 
 //this page receives all the data from StatisticsKiosk as props
 //and its job is to lay out all the chart components on the page.
@@ -21,6 +23,8 @@ export default function StatisticsDisplay({
     checkouts,
     roles,
     restocks,
+    areas,
+    certs,
 }: {
     //these are the prop types which tells TypeScript exactly what
     //type of data this component expects to receive
@@ -29,6 +33,8 @@ export default function StatisticsDisplay({
     checkouts: TCheckout[];
     roles: TUserRole[];
     restocks: TRestockRequest[];
+    areas: TArea[];
+    certs: TCertification[];
 }) {
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -49,9 +55,14 @@ export default function StatisticsDisplay({
                     checkouts={checkouts}
                     inventory={inventory}
                 />
+
+                <CheckoutsByDay checkouts={checkouts} />
+
                 <RarelyCheckedOutItems
                     checkouts={checkouts}
                     inventory={inventory}
+                    areas={areas}
+                    certs={certs}
                 />
                 <div className="col-span-1 lg:col-span-2">
                     <CheckoutHeatmap 

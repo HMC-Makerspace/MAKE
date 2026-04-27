@@ -21,17 +21,19 @@ export default function ItemInfo({
     areas,
     certs,
     quantity,
+    className = "",
 }: {
     item_data?: TInventoryItem;
     areas: TArea[];
     certs: TCertification[];
     quantity?: number;
+    className?: string;
 }) {
     return (
         <div>
             <Popover placement="bottom">
                 <PopoverTrigger>
-                    <Button>
+                    <Button className={className}>
                         {quantity && quantity > 1 ? (
                             <>
                                 {quantity}

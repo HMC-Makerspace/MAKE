@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import { TInventoryItem } from "common/inventory";
 import { TCheckout } from "common/checkout";
-import { Input } from "@heroui/react";
+import { NumberInput } from "@heroui/react";
 
 export default function TopCheckedOutItems({
     checkouts,
@@ -62,19 +62,17 @@ export default function TopCheckedOutItems({
 
     return (
         <div className="bg-default-100 p-6 rounded-lg">
-            <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">Top Checked Out Items</h2>
-                <Input
-                    type="number"
-                    min={1}
-                    value={String(topN)}
-                    onValueChange={(val) => setTopN(Number(val))}
-                    size="sm"
-                    className="w-20"
-                    classNames={{
-                        inputWrapper: "bg-default-200 h-8 min-h-0",
-                        input: "text-sm",
-                    }}
+            <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold mb-2">
+                    Top Checked Out Items
+                </h2>
+                <NumberInput
+                    label="Count:"
+                    labelPlacement="outside-left"
+                    value={topN}
+                    onValueChange={setTopN}
+                    variant="bordered"
+                    className="w-fit px-3 py-1 rounded-md text-sm"
                 />
             </div>
             <p className="text-sm text-default-500 mb-3">
@@ -100,7 +98,10 @@ export default function TopCheckedOutItems({
                             "Count",
                         ]}
                     />
-                    <Bar dataKey="count" fill="hsl(var(--heroui-primary))" />
+                    <Bar
+                        dataKey="count"
+                        fill="hsl(var(--heroui-success-200))"
+                    />
                 </BarChart>
             </ResponsiveContainer>
         </div>
