@@ -45,7 +45,9 @@ export default function StatisticsKiosk() {
         refetchOnWindowFocus: false,
     });
 
-    const { data: restocks, isLoading: restocksLoading } = useQuery<TRestockRequest[]>({
+    const { data: restocks, isLoading: restocksLoading } = useQuery<
+        TRestockRequest[]
+    >({
         queryKey: ["restock"],
         refetchOnWindowFocus: false,
     });
@@ -56,10 +58,12 @@ export default function StatisticsKiosk() {
     });
 
     //fetches certification data
-    const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>({
-        queryKey: ["certification"],
-        refetchOnWindowFocus: false,
-    });
+    const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
+        {
+            queryKey: ["certification"],
+            refetchOnWindowFocus: false,
+        },
+    );
 
     //displays a centered spinner if any of the four queries are still loading.
     //also checks if any of the data is undefined
@@ -68,7 +72,7 @@ export default function StatisticsKiosk() {
         users === undefined ||
         checkouts === undefined ||
         roles === undefined ||
-        restocks == undefined
+        restocks == undefined ||
         areas === undefined ||
         certs === undefined
     ) {
@@ -79,7 +83,7 @@ export default function StatisticsKiosk() {
         );
     }
 
-    //once all data has been quieried, render the page inside the admin nav wrapper
+    //once all data has been queried, render the page inside the admin nav wrapper
     //and passes all data down to StatisticsDisplay to be displayed
     return (
         <AdminLayout pageHref="/admin/statistics">

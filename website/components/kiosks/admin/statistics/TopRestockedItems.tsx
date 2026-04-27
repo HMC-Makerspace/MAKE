@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { TInventoryItem } from "common/inventory";
-import { Input } from "@heroui/react";
+import { Input, NumberInput } from "@heroui/react";
 import { TRestockRequest, RESTOCK_REQUEST_STATUS } from "../../../../../common/restock";
 
 export default function TopRestockedItems({
@@ -41,11 +41,10 @@ export default function TopRestockedItems({
         <div className="bg-default-100 p-6 rounded-lg">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold">Top Restocked Items</h2>
-                <Input
-                    type="number"
+                <NumberInput
                     min={1}
-                    value={String(topN)}
-                    onValueChange={(val) => setTopN(Number(val))}
+                    value={topN}
+                    onValueChange={setTopN}
                     size="sm"
                     className="w-20"
                     classNames={{
@@ -73,7 +72,8 @@ export default function TopRestockedItems({
                             >
                                 <span>{item.name}</span>
                                 <span className="text-default-500">
-                                    {item.count} restock{item.count !== 1 ? "s" : ""}
+                                    {item.count} restock
+                                    {item.count !== 1 ? "s" : ""}
                                 </span>
                             </div>
                         ))}

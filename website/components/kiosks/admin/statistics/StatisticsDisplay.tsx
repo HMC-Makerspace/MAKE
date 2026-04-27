@@ -2,7 +2,7 @@ import { TInventoryItem } from "common/inventory";
 import { TUser, TUserRole } from "common/user";
 import { TCheckout } from "common/checkout";
 import { TRestockRequest } from "common/restock";
-import UsersByCollege from "./UsersByCollege";
+import UsersByDomain from "./UsersByDomain";
 import CheckoutsByRole from "./CheckoutsByRole";
 import TopCheckedOutItems from "./TopCheckedOutItems";
 import CheckoutTrend from "./CheckoutTrend";
@@ -44,18 +44,19 @@ export default function StatisticsDisplay({
                 </h1>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
-                <UsersByCollege 
-                    users={users} 
-                />
-                <TopRestockedItems 
-                    restocks={restocks} 
-                    inventory={inventory} 
-                />
+                <div className="col-span-1 lg:col-span-2">
+                    <UsersByDomain users={users} />
+                    {/* <CheckoutsByRole
+                        users={users}
+                        roles={roles}
+                        checkouts={checkouts}
+                    /> */}
+                </div>
+
                 <TopCheckedOutItems
                     checkouts={checkouts}
                     inventory={inventory}
                 />
-
                 <CheckoutsByDay checkouts={checkouts} />
 
                 <RarelyCheckedOutItems
@@ -64,20 +65,15 @@ export default function StatisticsDisplay({
                     areas={areas}
                     certs={certs}
                 />
+                <TopRestockedItems restocks={restocks} inventory={inventory} />
                 <div className="col-span-1 lg:col-span-2">
-                    <CheckoutHeatmap 
-                        checkouts={checkouts} 
-                />
+                    <CheckoutHeatmap checkouts={checkouts} />
                 </div>
                 <div className="col-span-1 lg:col-span-2">
-                    <CheckoutsByDay 
-                        checkouts={checkouts} 
-                />
+                    <CheckoutsByDay checkouts={checkouts} />
                 </div>
                 <div className="col-span-1 lg:col-span-2">
-                    <CheckoutTrend 
-                        checkouts={checkouts} 
-                />
+                    <CheckoutTrend checkouts={checkouts} />
                 </div>
             </div>
         </div>

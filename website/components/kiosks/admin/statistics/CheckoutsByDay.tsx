@@ -55,9 +55,9 @@ export default function CheckoutsByDay({
     }
 
     return (
-        <div className="bg-default-100 p-6 rounded-lg">
+        <div className="flex flex-col bg-default-100 p-6 rounded-lg justify-between">
             <h2 className="text-xl font-bold mb-4">Checkouts by Day of Week</h2>
-            <ResponsiveContainer width="100%" height={350}>
+            <ResponsiveContainer width="100%" height={450}>
                 <BarChart
                     data={data}
                     margin={{ top: 20, right: 30, left: 5, bottom: 20 }}
