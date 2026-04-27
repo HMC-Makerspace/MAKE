@@ -70,9 +70,6 @@ export default function StatisticsDisplay({
                     <CheckoutHeatmap checkouts={checkouts} />
                 </div>
                 <div className="col-span-1 lg:col-span-2">
-                    <CheckoutsByDay checkouts={checkouts} />
-                </div>
-                <div className="col-span-1 lg:col-span-2">
                     <CheckoutTrend checkouts={checkouts} />
                 </div>
             </div>
