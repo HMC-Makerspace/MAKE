@@ -8,15 +8,20 @@ import {
 import { TWorkshop } from "../../../../common/workshop";
 import { UserChip } from "../../user/UserChip";
 
-export default function WorkshopSigninListModal({
+export default function WorkshopUserListModal({
     workshop,
+    type,
     isOpen,
     onOpenChange,
 }: {
     workshop: TWorkshop;
+    type: "rsvp" | "sign-in";
     isOpen: boolean;
     onOpenChange: (open?: boolean) => void;
 }) {
+    const typeName = type === "rsvp" ? "RSVP" : "Sign in";
+    const userList =
+        type === "rsvp" ? workshop.rsvp_list : workshop.sign_in_list;
     return (
         <Modal
             isOpen={isOpen}
@@ -28,12 +33,12 @@ export default function WorkshopSigninListModal({
             <ModalContent className="overflow-auto max-h-[66%]">
                 <ModalHeader>
                     <h1 className="text-2xl font-bold">
-                        Sign in list for workshop "{workshop.title}"
+                        {typeName} list for workshop "{workshop.title}"
                     </h1>
                 </ModalHeader>
                 <ModalBody className="overflow-auto h-full">
                     <div className="size-full flex flex-col gap-4 items-center overflow-auto">
-                        {workshop.sign_in_list.map((u, i) => {
+                        {userList.map((u, i) => {
                             const RSVP_index = workshop.rsvp_list.findIndex(
                                 (r) => r.user_uuid === u.user_uuid,
                             );
@@ -44,7 +49,7 @@ export default function WorkshopSigninListModal({
                                 RSVP_index >= workshop.capacity;
 
                             return (
-                                <div className="w-full flex gap-2 p-2 bg-default-200 rounded-2xl ">
+                                <div className="w-full flex gap-2 p-2 bg-default-200 rounded-2xl">
                                     <div className="font-bold text-default-700 p-2 content-center">
                                         {i + 1}.
                                     </div>
@@ -58,13 +63,15 @@ export default function WorkshopSigninListModal({
                                                 "text-ellipsis overflow-hidden",
                                         }}
                                     />
-                                    <div className="font-bold text-default-700 p-2 content-center ml-auto">
-                                        {onWaitlist
-                                            ? `Waitlist #${RSVP_index + 1}`
-                                            : RSVPd
-                                              ? `RSVP #${RSVP_index + 1}`
-                                              : "Walk-In"}
-                                    </div>
+                                    {type === "sign-in" && (
+                                        <div className="font-bold text-default-700 p-2 content-center ml-auto">
+                                            {onWaitlist
+                                                ? `Waitlist #${RSVP_index + 1}`
+                                                : RSVPd
+                                                  ? `RSVP #${RSVP_index + 1}`
+                                                  : "Walk-In"}
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })}
