@@ -1,4 +1,4 @@
-import { Button, Modal, Form, ModalContent, Checkbox, Tooltip } from "@heroui/react";
+import { Button, Modal, Form, ModalContent, Checkbox, Tooltip, Divider } from "@heroui/react";
 
 import React from "react";
 import { UseMutationResult } from "@tanstack/react-query";
@@ -7,6 +7,7 @@ import { UserRoleUUID, TUserRole } from "common/user";
 import { UUID } from "common/global";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
 import { EyeIcon, KeyIcon } from "@heroicons/react/24/outline";
+import UserRole from "../../../user/UserRole";
 
 type Available = {
     uuid: UUID,
@@ -25,6 +26,7 @@ function RequiredRolesModal({
     isOpen,
     onOpenChange,
     patchMutation,
+    parentKitRoles,
 }: {
     type: "available_to" | "visible_to";
     element: any;
@@ -39,6 +41,7 @@ function RequiredRolesModal({
             patch: any;
         }
     >;
+    parentKitRoles?: UserRoleUUID[] | null;
 }) {
     const [hasEdits, setHasEdits] = React.useState(false);
     const [currentRoles, setCurrentRoles] = React.useState<UserRoleUUID[]>(
@@ -101,7 +104,7 @@ function RequiredRolesModal({
                         className="flex flex-col gap-4 p-4"
                     >
                         <div className="text-lg font-semibold">
-                            Edit {type == "available_to" ? "Accessor Roles" : "Viewer Roles"}
+                            Edit {type == "available_to" ? "Accessor" : "Viewer"} Roles
                         </div>
                         <div>
                             Users with at least one of the selected roles will
@@ -156,6 +159,26 @@ function RequiredRolesModal({
                             </div>
                         </div>
 
+                        {parentKitRoles && (<>
+                            {currentRoles.length != 0 && (<Divider className="hidden sm:block h-[1px] bg-default-400" />)}
+                            <div className="w-full">
+                                <div className="text-lg font-semibold text-center">
+                                    Parent Kit {type == "available_to" ? "Accessor" : "Viewer"} Roles
+                                </div>
+                                <div className="grid grid-cols-2 w-full gap-y-3 justify-evenly p-4">
+                                    {parentKitRoles?.map((role, i) => (
+                                        <div className={`flex content-center justify-center col-span-${i < parentKitRoles?.length - parentKitRoles?.length % 2 ? 1 : 2}`}>
+                                            <UserRole
+                                                key={role}
+                                                role_uuid={role}
+                                                role={roles.find((r) => r.uuid === role)}
+                                            ></UserRole>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </>)}
+
                         <div className="flex flex-row justify-between w-full gap-2">
                             <Button
                                 variant="shadow"
@@ -192,6 +215,7 @@ export function AvailableToRolesModal<T extends Available>({
     isOpen,
     onOpenChange,
     patchMutation,
+    parentKitAcroles,
 }: {
     element: T;
     roles: TUserRole[];
@@ -207,6 +231,7 @@ export function AvailableToRolesModal<T extends Available>({
             };
         }
     >;
+    parentKitAcroles?: UserRoleUUID[] | null;
 }) {
     return (<RequiredRolesModal
         type="available_to"
@@ -215,6 +240,7 @@ export function AvailableToRolesModal<T extends Available>({
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         patchMutation={patchMutation}
+        parentKitRoles={parentKitAcroles}
     ></RequiredRolesModal>);
 }
 
@@ -224,6 +250,7 @@ export function VisibleToRolesModal<T extends Visible>({
     isOpen,
     onOpenChange,
     patchMutation,
+    parentKitVwroles,
 }: {
     element: T;
     roles: TUserRole[];
@@ -239,6 +266,7 @@ export function VisibleToRolesModal<T extends Visible>({
             };
         }
     >;
+    parentKitVwroles?: UserRoleUUID[] | null;
 }) {
     return (<RequiredRolesModal
         type="visible_to"
@@ -247,6 +275,7 @@ export function VisibleToRolesModal<T extends Visible>({
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         patchMutation={patchMutation}
+        parentKitRoles={parentKitVwroles}
     ></RequiredRolesModal>);
 }
 

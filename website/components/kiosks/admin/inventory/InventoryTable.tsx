@@ -31,7 +31,7 @@ import { TUser, TUserRole } from "common/user";
 import { TCertification, TRequiredCertificate } from "common/certification";
 import { TRestockRequest } from "../../../../../common/restock";
 import { API_SCOPE } from "../../../../../common/global.ts";
-import { mergeRequiredCerts, verifyScopes } from "../../../../utils.tsx";
+import { mergeAuthRoles, mergeRequiredCerts, verifyScopes } from "../../../../utils.tsx";
 import clsx from "clsx";
 import CertificationTag from "../certifications/CertificationTag";
 import UserRole from "../../../user/UserRole";
@@ -441,7 +441,9 @@ export default function InventoryTable({
                     ),
                     available_to: (i) => (
                         <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
-                            {i.available_to?.map((role) => (
+                            {mergeAuthRoles(i.available_to,
+                                inventory.find(k => k.uuid == i.parent_kit)?.available_to
+                            )?.map((role) => (
                                 <UserRole
                                     key={role}
                                     role_uuid={role}
@@ -452,7 +454,9 @@ export default function InventoryTable({
                     ),
                     visible_to: (i) => (
                         <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
-                            {i.visible_to?.map((role) => (
+                            {mergeAuthRoles(i.visible_to,
+                                inventory.find(k => k.uuid == i.parent_kit)?.visible_to
+                            )?.map((role) => (
                                 <UserRole
                                     key={role}
                                     role_uuid={role}

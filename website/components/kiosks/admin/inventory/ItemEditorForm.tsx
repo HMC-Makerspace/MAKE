@@ -45,7 +45,7 @@ import ItemQuantityIcon from "./ItemQuantityIcon";
 import ItemLocationModal from "./ItemLocationModal";
 import { TArea } from "common/area";
 import KitEditorModal from "./KitEditorModal";
-import { mergeRequiredCerts } from "../../../../utils";
+import { mergeAuthRoles, mergeRequiredCerts } from "../../../../utils";
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateItem = async ({
@@ -275,6 +275,8 @@ export default function ItemEditorForm({
 
     const parent_kit = items.find(i => i.uuid == item.parent_kit);
     const mergedReqCerts = mergeRequiredCerts(item.required_certifications || [], parent_kit?.required_certifications || []);
+    const mergedAcroles = mergeAuthRoles(item.available_to, parent_kit?.available_to);
+    const mergedVwroles = mergeAuthRoles(item.visible_to, parent_kit?.visible_to);
 
     return (
         <>
@@ -741,7 +743,7 @@ export default function ItemEditorForm({
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <UserIcon className="size-7" />
-                                {(item.available_to?.length ?? 0) + (item.visible_to?.length ?? 0)}
+                                {mergedAcroles.length + mergedVwroles.length}
                             </Button>
                         </Tooltip>
 
@@ -822,6 +824,7 @@ export default function ItemEditorForm({
                 isOpen={acrolesOpen}
                 onOpenChange={setAcrolesOpen}
                 patchMutation={acrolesMutation}
+                parentKitAcroles={parent_kit?.available_to}
             />
             <VisibleToRolesModal
                 key={"vwroleauth-" + item.uuid}
@@ -830,6 +833,7 @@ export default function ItemEditorForm({
                 isOpen={vwrolesOpen}
                 onOpenChange={setVwrolesOpen}
                 patchMutation={vwrolesMutation}
+                parentKitVwroles={parent_kit?.visible_to}
             />
             <ItemLocationModal
                 key={"locedit-" + item.uuid}
@@ -855,8 +859,8 @@ export default function ItemEditorForm({
                 onOpenChange={setRolesOpen}
                 setVwrolesOpen={setVwrolesOpen}
                 setAcrolesOpen={setAcrolesOpen}
-                numVwroles={item.visible_to?.length ?? 0}
-                numAcroles={item.available_to?.length ?? 0}
+                numVwroles={mergedVwroles.length}
+                numAcroles={mergedAcroles.length}
             />
         </>
     );

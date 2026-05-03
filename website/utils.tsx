@@ -7,7 +7,7 @@ import {
     parseZonedDateTime,
 } from "@internationalized/date";
 import { API_SCOPE, UnixTimestamp } from "../common/global";
-import { TUser, TUserRole } from "common/user";
+import { TUser, TUserRole, UserRoleUUID } from "common/user";
 import { TConfig } from "common/config";
 import { TShift, SHIFT_EVENT_TYPE, TShiftEvent } from "../common/shift";
 import { TRequiredCertificate } from "common/certification";
@@ -254,4 +254,9 @@ export function mergeRequiredCerts(a: TRequiredCertificate[] | undefined, b: TRe
     }
 
     return [...res, ...toMerge];
+}
+
+export function mergeAuthRoles(a: UserRoleUUID[] | null | undefined, b: UserRoleUUID[] | null | undefined) {
+    // merges & removes duplicates
+    return Array.from(new Set([...(a || []), ...(b || [])]));
 }
