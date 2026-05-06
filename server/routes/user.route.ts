@@ -1161,7 +1161,7 @@ router.patch(
  * is returned.
  */
 router.patch(
-    "/:UUID/availability/addBatch",
+    "/:UUID/availability/add/batch",
     async (req: UserAvailabilityRequestBatch, res: UserResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
@@ -1307,7 +1307,7 @@ router.patch(
  * is returned.
  */
 router.patch(
-    "/:UUID/availability/removeBatch",
+    "/:UUID/availability/remove/batch",
     async (req: UserAvailabilityRequestBatch, res: UserResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid = req.user?.uuid as string;
