@@ -40,6 +40,7 @@ import ItemLocationChip from "./ItemLocationChip";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RestockRequestModal from "../restock/RestockRequestModal";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import ItemInfo from "./ItemInfo.tsx";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" },
@@ -469,7 +470,12 @@ export default function InventoryTable({
                         <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
                             {i.kit_contents?.map((content) => (
                                 <div key={i.uuid + "-item-" + content}>
-                                    {inventory.find(a => a.uuid == content)?.name}
+                                    <ItemInfo
+                                        item_data={inventory.find(a => a.uuid == content)}
+                                        inventory={inventory}
+                                        areas={areas}
+                                        certs={certifications}
+                                    />
                                 </div>
                             ))}
                         </div>
