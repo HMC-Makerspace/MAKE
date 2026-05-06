@@ -67,6 +67,7 @@ const WorkshopConfig = new mongoose.Schema<TWorkshopConfig>(
     {
         reminder_times: { type: [Number], required: true },
         sign_in_enabled_within: { type: Number, required: true },
+        instructor_roles: { type: [String], required: true },
     },
     { _id: false },
 );
@@ -74,6 +75,9 @@ const WorkshopConfig = new mongoose.Schema<TWorkshopConfig>(
 const WorkshopConfigSchema = Joi.object<TWorkshopConfig>({
     reminder_times: Joi.array().items(Joi.number()).required(),
     sign_in_enabled_within: Joi.number().required(),
+    instructor_roles: Joi.array().items(
+        Joi.string()
+    ).required(),
 });
 
 const GeneralConfig = new mongoose.Schema<TGeneralConfig>(

@@ -90,6 +90,12 @@ export type TWorkshopConfig = {
      * Time (in seconds) before a workshop starts during which users can sign in
      */
     sign_in_enabled_within: number;
+
+    /**
+     * The list of user role UUIDs that can be instructors for workshops,
+     * which will show up in in the workshop editor.
+     */
+    instructor_roles: UserRoleUUID[];
 };
 
 export type TFAQItem = {

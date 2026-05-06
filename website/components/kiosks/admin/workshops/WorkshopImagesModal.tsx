@@ -27,7 +27,7 @@ export default function WorkshopImagesModal({
     workshop?: TWorkshop | UUID[];
     isOpen: boolean;
     onOpenChange: () => void;
-    certsOnOpen: () => void;
+    certsOnOpen?: () => void;
     firstTime?: boolean;
 }) {
     return (
@@ -62,7 +62,7 @@ export default function WorkshopImagesModal({
                         color="primary"
                         onPress={() => {
                             if (Array.isArray(workshop)) {
-                                certsOnOpen();
+                                if (certsOnOpen) certsOnOpen();
                             }
                             onOpenChange();
                         }}
