@@ -272,35 +272,53 @@ export default function Schedule({
                                     days.map((day) => (
                                         <td key={`shift-${day}-${i}`}>
                                             <motion.div
+                                                className="size-full"
                                                 onTapStart={() => {
                                                     if (
                                                         type ===
                                                         "worker_availability"
                                                     ) {
                                                         setDragging(true);
-                                                            const available = selectedUser
+                                                        const available =
+                                                            selectedUser
                                                                 ? selectedUser.work_schedules
-                                                                    ?.find((a) => a.schedule == schedule.uuid)
-                                                                    ?.days.some(
-                                                                        (record) =>
-                                                                            record.day === day &&
-                                                                            record.availability.some(
-                                                                                (time) =>
-                                                                                    time.sec_start <= row_start_sec &&
-                                                                                    time.sec_end >= row_end_sec,
-                                                                            ),
-                                                                    )
+                                                                      ?.find(
+                                                                          (a) =>
+                                                                              a.schedule ==
+                                                                              schedule.uuid,
+                                                                      )
+                                                                      ?.days.some(
+                                                                          (
+                                                                              record,
+                                                                          ) =>
+                                                                              record.day ===
+                                                                                  day &&
+                                                                              record.availability.some(
+                                                                                  (
+                                                                                      time,
+                                                                                  ) =>
+                                                                                      time.sec_start <=
+                                                                                          row_start_sec &&
+                                                                                      time.sec_end >=
+                                                                                          row_end_sec,
+                                                                              ),
+                                                                      )
                                                                 : false;
                                                         setAvailabilityChange(
                                                             !available,
                                                         );
                                                         if (selectedUser) {
-                                                            setAvailableShifts((prev) => [
-                                                                    ...prev, {
+                                                            setAvailableShifts(
+                                                                (prev) => [
+                                                                    ...prev,
+                                                                    {
                                                                         day: day,
-                                                                        sec_start: row_start_sec,
-                                                                        sec_end: row_end_sec,
-                                                                    }],
+                                                                        sec_start:
+                                                                            row_start_sec,
+                                                                        sec_end:
+                                                                            row_end_sec,
+                                                                    },
+                                                                ],
                                                             );
                                                         }
                                                     }
@@ -321,32 +339,51 @@ export default function Schedule({
                                                     ) {
                                                         setDragging(false);
                                                         if (selectedUser) {
-                                                            const available = selectedUser
-                                                                ? selectedUser.work_schedules
-                                                                    ?.find((a) => a.schedule == schedule.uuid)
-                                                                    ?.days.some(
-                                                                        (record) =>
-                                                                            record.day === day &&
-                                                                            record.availability.some(
-                                                                                (time) =>
-                                                                                    time.sec_start <= row_start_sec &&
-                                                                                    time.sec_end >= row_end_sec,
-                                                                            ),
-                                                                    )
-                                                                : false;
+                                                            const available =
+                                                                selectedUser
+                                                                    ? selectedUser.work_schedules
+                                                                          ?.find(
+                                                                              (
+                                                                                  a,
+                                                                              ) =>
+                                                                                  a.schedule ==
+                                                                                  schedule.uuid,
+                                                                          )
+                                                                          ?.days.some(
+                                                                              (
+                                                                                  record,
+                                                                              ) =>
+                                                                                  record.day ===
+                                                                                      day &&
+                                                                                  record.availability.some(
+                                                                                      (
+                                                                                          time,
+                                                                                      ) =>
+                                                                                          time.sec_start <=
+                                                                                              row_start_sec &&
+                                                                                          time.sec_end >=
+                                                                                              row_end_sec,
+                                                                                  ),
+                                                                          )
+                                                                    : false;
                                                             setAvailabilityChange(
-                                                            !available,
-                                                        );
-                                                        if (selectedUser) {
-                                                            setAvailableShifts((prev) => [
-                                                                    ...prev, {
-                                                                        day: day,
-                                                                        sec_start: row_start_sec,
-                                                                        sec_end: row_end_sec,
-                                                                    }],
+                                                                !available,
+                                                            );
+                                                            if (selectedUser) {
+                                                                setAvailableShifts(
+                                                                    (prev) => [
+                                                                        ...prev,
+                                                                        {
+                                                                            day: day,
+                                                                            sec_start:
+                                                                                row_start_sec,
+                                                                            sec_end:
+                                                                                row_end_sec,
+                                                                        },
+                                                                    ],
                                                                 );
-                                                        }
-                                                        handleDragEnd();
+                                                            }
+                                                            handleDragEnd();
                                                         }
                                                     }
                                                 }}
@@ -402,7 +439,9 @@ export default function Schedule({
                                                         config.schedule
                                                             .first_names_only
                                                     }
-                                                    availabilityChange={availabilityChange}
+                                                    availabilityChange={
+                                                        availabilityChange
+                                                    }
                                                 />
                                             </motion.div>
                                         </td>
