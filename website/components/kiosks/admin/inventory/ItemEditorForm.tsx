@@ -141,8 +141,6 @@ export default function ItemEditorForm({
             // Prevent default browser page refresh.
             e.preventDefault();
 
-            console.log("submitting form");
-
             // If something is wrong, don't submit.
             if (isDisabled) return;
 
@@ -175,6 +173,10 @@ export default function ItemEditorForm({
                     (data.get("keywords") as string)
                         ?.split(",")
                         .map((i) => i.trim()) ?? [],
+                checkout_disclaimer:
+                    (data.get("checkout_disclaimer") as string) || undefined,
+                return_disclaimer:
+                    (data.get("return_disclaimer") as string) || undefined,
                 required_certifications: item.required_certifications || [],
                 authorized_roles: item.authorized_roles || [],
                 quantity: quantity,
@@ -263,25 +265,33 @@ export default function ItemEditorForm({
         <>
             <Form
                 onSubmit={onSubmit}
-                className="overflow-auto h-full justify-between gap-4 relative"
+                className="overflow-auto h-full gap-0 relative items-center"
             >
-                <Snippet
-                    // Allow user uuid to be copied
-                    variant="bordered"
-                    color="default"
-                    symbol={""}
-                    size="md"
-                    className="w-full text-default-500 relative h-14"
-                    timeout={1000}
-                    classNames={{
-                        copyButton:
-                            "absolute right-2 bg-default-200 hover:!bg-default-300",
-                    }}
-                >
-                    {UUID}
-                </Snippet>
+                <div className="px-4 w-full pb-4 rounded-b-lg bg-default-50">
+                    <Snippet
+                        // Allow item uuid to be copied
+                        variant="bordered"
+                        color="default"
+                        symbol={""}
+                        size="md"
+                        className="w-full text-default-500 relative h-14"
+                        timeout={1000}
+                        classNames={{
+                            copyButton:
+                                "absolute right-2 bg-default-200 hover:!bg-default-300",
+                        }}
+                    >
+                        {UUID}
+                    </Snippet>
+                </div>
 
-                <div className="w-full grid grid-cols-2 gap-4 lg:grid-cols-1 overflow-auto">
+                <div
+                    className={clsx(
+                        "w-full grid grid-cols-2 gap-2",
+                        " lg:grid-cols-1 overflow-auto",
+                        "bg-content1 p-2 flex-1",
+                    )}
+                >
                     <Input // Name
                         type="text"
                         label="Item Name"
@@ -605,7 +615,51 @@ export default function ItemEditorForm({
                             ]),
                         }}
                     />
-                    <Divider className="hidden sm:block h-[1px] bg-default-400" />
+                    <Textarea
+                        label="Checkout Disclaimer"
+                        name="checkout_disclaimer"
+                        placeholder={placeholder(
+                            "A notice to display when this item is checked out",
+                        )}
+                        isDisabled={isDisabled}
+                        defaultValue={item.checkout_disclaimer}
+                        onValueChange={defaultEdit}
+                        minRows={2}
+                        variant="faded"
+                        color="primary"
+                        size="md"
+                        classNames={{
+                            input: clsx([
+                                "placeholder:text-default-500",
+                                "placeholder:italic",
+                                "text-default-700",
+                            ]),
+                        }}
+                    />
+                    <Textarea
+                        label="Return Disclaimer"
+                        name="return_disclaimer"
+                        placeholder={placeholder(
+                            "A notice to display when this item is returned",
+                        )}
+                        isDisabled={isDisabled}
+                        defaultValue={item.return_disclaimer}
+                        onValueChange={defaultEdit}
+                        minRows={2}
+                        variant="faded"
+                        color="primary"
+                        size="md"
+                        classNames={{
+                            input: clsx([
+                                "placeholder:text-default-500",
+                                "placeholder:italic",
+                                "text-default-700",
+                            ]),
+                        }}
+                    />
+                </div>
+                {/* <Divider className="hidden sm:block h-[1px] bg-default-400" /> */}
+                <div className="px-4 w-full pt-4 pb-2 rounded-t-lg bg-default-50">
                     <ButtonGroup
                         size="lg"
                         fullWidth
@@ -692,35 +746,37 @@ export default function ItemEditorForm({
                         {/* </div> */}
                     </ButtonGroup>
                 </div>
-                <div className="w-full mt-auto col-span-2 flex flex-row gap-2">
-                    <Button
-                        size="lg"
-                        className="w-full"
-                        isDisabled={!hasEdits}
-                        isLoading={mutation.isPending}
-                        color={"primary"}
-                        variant="shadow"
-                        type="submit"
-                    >
-                        {isNew
-                            ? "Create Item"
-                            : isMultiple
-                              ? "Apply Batch Edit"
-                              : "Update Item"}
-                    </Button>
-                    <Button
-                        isIconOnly
-                        size="lg"
-                        color="danger"
-                        variant="flat"
-                        isDisabled={isDisabled || isNew}
-                        isLoading={deleteMutation.isPending}
-                        onPress={() =>
-                            deleteMutation.mutate({ item_uuid: UUID })
-                        }
-                    >
-                        <TrashIcon className="size-5" />
-                    </Button>
+                <div className="px-4 w-full bg-default-50 rounded-b-lg pb-4">
+                    <div className="w-full mt-auto col-span-2 flex flex-row gap-2">
+                        <Button
+                            size="lg"
+                            className="w-full"
+                            isDisabled={!hasEdits}
+                            isLoading={mutation.isPending}
+                            color={"primary"}
+                            variant="shadow"
+                            type="submit"
+                        >
+                            {isNew
+                                ? "Create Item"
+                                : isMultiple
+                                  ? "Apply Batch Edit"
+                                  : "Update Item"}
+                        </Button>
+                        <Button
+                            isIconOnly
+                            size="lg"
+                            color="danger"
+                            variant="flat"
+                            isDisabled={isDisabled || isNew}
+                            isLoading={deleteMutation.isPending}
+                            onPress={() =>
+                                deleteMutation.mutate({ item_uuid: UUID })
+                            }
+                        >
+                            <TrashIcon className="size-5" />
+                        </Button>
+                    </div>
                 </div>
             </Form>
 
