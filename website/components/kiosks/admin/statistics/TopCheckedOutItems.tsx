@@ -31,17 +31,14 @@ export default function TopCheckedOutItems({
 
         checkouts.forEach((checkout) => {
             checkout.items.forEach((checkoutItem) => {
-                itemCounts[checkoutItem.item_uuid] =
-                    (itemCounts[checkoutItem.item_uuid] || 0) +
-                    checkoutItem.quantity;
+                const name =
+                    inventoryMap.get(checkoutItem.item_uuid)?.name || "Unknown Item";
+                itemCounts[name] = (itemCounts[name] || 0) + checkoutItem.quantity;
             });
         });
 
         return Object.entries(itemCounts)
-            .map(([uuid, count]) => ({
-                name: inventoryMap.get(uuid)?.name || "Unknown Item",
-                count,
-            }))
+            .map(([name, count]) => ({name, count}))
             .sort((a, b) => b.count - a.count);
     }, [checkouts, inventoryMap]);
 
