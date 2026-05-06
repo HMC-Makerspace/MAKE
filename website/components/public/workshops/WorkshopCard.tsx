@@ -4,9 +4,9 @@ import {
     CardBody,
     Tooltip,
     Button,
-    CardFooter,
     addToast,
     useDisclosure,
+    ButtonGroup,
 } from "@heroui/react";
 import clsx from "clsx";
 import { FILE_RESOURCE_TYPE } from "../../../../common/file";
@@ -20,11 +20,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { timestampToZonedDateTime, verifyScopes } from "../../../utils";
 import { TConfig } from "common/config";
 import { DateFormatter } from "@internationalized/date";
-import { TCertificate, TCertification } from "common/certification";
-import React, { useMemo } from "react";
+import { TCertification } from "common/certification";
 import { API_SCOPE } from "../../../../common/global";
 import WorkshopSigninModal from "./WorkshopSigninModal";
-import WorkshopSigninListModal from "./WorkshopSigninListModal";
+import WorkshopUserListModal from "./WorkshopUserListModal";
+import WorkshopRSVPDisclaimerModal from "./WorkshopRSVPDisclaimer";
 
 // cancel means cancel_rsvp
 async function rsvp({
@@ -185,12 +185,30 @@ export default function WorkshopCard({
     } = useDisclosure();
 
     const {
+        isOpen: rsvpListOpen,
+        onOpen: rsvpListOnOpen,
+        onOpenChange: rsvpListOnOpenChange,
+    } = useDisclosure();
+
+    const {
         isOpen: signinListOpen,
         onOpen: signinListOnOpen,
         onOpenChange: signinListOnOpenChange,
     } = useDisclosure();
 
+    const {
+        isOpen: rsvpDisclaimerOpen,
+        onOpen: rsvpDisclaimerOnOpen,
+        onOpenChange: rsvpDisclaimerOnOpenChange,
+    } = useDisclosure();
+
     const workshopEnded = workshop.timestamp_end < Date.now() / 1000;
+
+    const buttonStyle = clsx(
+        "text-small font-bold text-white",
+        "bg-primary border-2 border-primary-400",
+        "hover:bg-primary-200",
+    );
 
     return (
         <>
@@ -276,145 +294,171 @@ export default function WorkshopCard({
                                             ? cert.required_level
                                             : undefined
                                     }
+                                    anchor
                                 />
                             ))}
                     </div>
 
                     <div className="absolute w-full h-fit bottom-3 flex justify-evenly z-20">
-                        {canRSVP && !isWorkshopInstructor && !workshopEnded && (
-                            <Tooltip
-                                color="primary"
-                                content={
-                                    workshop.timestamp_public &&
-                                    date_formatter &&
-                                    `RSVPs are closed until ${date_formatter.format(new Date(workshop.timestamp_public * 1000))}`
-                                }
-                                isDisabled={
-                                    workshop.timestamp_public
-                                        ? workshop.timestamp_public <
-                                          Date.now() / 1000
-                                        : true
-                                }
-                            >
-                                <Button
-                                    className="text-small font-bold text-white bg-primary hover:bg-primary/50 hover:outline"
-                                    color="default"
-                                    radius="lg"
-                                    size="sm"
-                                    variant="flat"
-                                    onPress={() => {
-                                        // Only RSVP if workshop is public
-                                        if (
+                        <ButtonGroup
+                            color="primary"
+                            radius="lg"
+                            size="sm"
+                            variant="flat"
+                        >
+                            {canRSVP &&
+                                !isWorkshopInstructor &&
+                                !workshopEnded && (
+                                    <Tooltip
+                                        color="primary"
+                                        content={
                                             workshop.timestamp_public &&
-                                            workshop.timestamp_public <
-                                                Date.now() / 1000
-                                        ) {
-                                            rsvpMutation.mutate({
-                                                workshop_uuid: workshop.uuid,
-                                                cancel: workshop.rsvp_list.some(
-                                                    (rsvp_record) =>
-                                                        rsvp_record.user_uuid ===
-                                                        self?.uuid,
-                                                ),
-                                            });
+                                            date_formatter &&
+                                            `RSVPs are closed until ${date_formatter.format(new Date(workshop.timestamp_public * 1000))}`
                                         }
-                                    }}
-                                    isDisabled={
-                                        !self ||
-                                        rsvpMutation.isPending ||
-                                        workshopEnded
-                                    }
-                                >
-                                    {rsvpIndex === -1 && overCapacity
-                                        ? "Join Waitlist"
-                                        : rsvpIndex === -1 && !overCapacity
-                                          ? "RSVP"
-                                          : !workshop.capacity ||
-                                              rsvpIndex < workshop.capacity
-                                            ? "Cancel RSVP"
-                                            : "Leave Waitlist"}
-                                </Button>
-                            </Tooltip>
-                        )}
-
-                        {canSignIn &&
-                            !isWorkshopInstructor &&
-                            !workshopEnded && (
-                                <Tooltip
-                                    color="primary"
-                                    content={
-                                        workshop.timestamp_start &&
-                                        config?.workshop
-                                            .sign_in_enabled_within &&
-                                        date_formatter &&
-                                        (workshop.timestamp_start -
-                                            config.workshop
-                                                .sign_in_enabled_within >
-                                        Date.now() / 1000
-                                            ? `Sign ins are closed until ${date_formatter.format(
-                                                  new Date(
-                                                      (workshop.timestamp_start -
-                                                          config.workshop
-                                                              .sign_in_enabled_within) *
-                                                          1000,
-                                                  ),
-                                              )}`
-                                            : "Sign in now!")
-                                    }
-
-                                    // isDisabled={
-                                    //     workshop.timestamp_start &&
-                                    //     config?.workshop.sign_in_enabled_within
-                                    //         ? workshop.timestamp_start -
-                                    //               config.workshop
-                                    //                   .sign_in_enabled_within <
-                                    //           Date.now() / 1000
-                                    //         : true
-                                    // }
-                                >
-                                    <Button
-                                        className="text-small font-bold text-white bg-primary hover:bg-primary/50 hover:outline"
-                                        color="default"
-                                        radius="lg"
-                                        size="sm"
-                                        variant="flat"
-                                        onPress={() => {
-                                            // Only sign in if workshop is public
-                                            if (
-                                                workshop.timestamp_start &&
-                                                config?.workshop
-                                                    .sign_in_enabled_within &&
-                                                workshop.timestamp_start -
-                                                    config.workshop
-                                                        .sign_in_enabled_within <
-                                                    Date.now() / 1000
-                                            ) {
-                                                signinOnOpen();
-                                            }
-                                        }}
                                         isDisabled={
-                                            !self ||
-                                            workshop.timestamp_end <
-                                                Date.now() / 1000
+                                            workshop.timestamp_public
+                                                ? workshop.timestamp_public <
+                                                  Date.now() / 1000
+                                                : true
                                         }
                                     >
-                                        Sign in
-                                    </Button>
-                                </Tooltip>
-                            )}
+                                        <Button
+                                            className={buttonStyle}
+                                            onPress={() => {
+                                                // Only RSVP if workshop is public
+                                                if (
+                                                    workshop.timestamp_public &&
+                                                    workshop.timestamp_public <
+                                                        Date.now() / 1000
+                                                ) {
+                                                    if (
+                                                        rsvpIndex === -1 &&
+                                                        workshop.rsvp_disclaimer
+                                                    ) {
+                                                        rsvpDisclaimerOnOpen();
+                                                    } else {
+                                                        rsvpMutation.mutate({
+                                                            workshop_uuid:
+                                                                workshop.uuid,
+                                                            cancel: workshop.rsvp_list.some(
+                                                                (rsvp_record) =>
+                                                                    rsvp_record.user_uuid ===
+                                                                    self?.uuid,
+                                                            ),
+                                                        });
+                                                    }
+                                                } else {
+                                                    // If workshop not public & RSVP button pressed, send alert
+                                                    workshop.timestamp_public &&
+                                                    date_formatter
+                                                        ? addToast({
+                                                              title: `RSVPs are closed until ${date_formatter.format(new Date(workshop.timestamp_public * 1000))}`,
+                                                              color: "warning",
+                                                          })
+                                                        : addToast({
+                                                              title: `RSVPs are currently closed`,
+                                                              color: "warning",
+                                                          });
+                                                }
+                                            }}
+                                            isDisabled={
+                                                !self ||
+                                                rsvpMutation.isPending ||
+                                                workshopEnded
+                                            }
+                                        >
+                                            {rsvpIndex === -1 && overCapacity
+                                                ? "Join Waitlist"
+                                                : rsvpIndex === -1 &&
+                                                    !overCapacity
+                                                  ? "RSVP"
+                                                  : !workshop.capacity ||
+                                                      rsvpIndex <
+                                                          workshop.capacity
+                                                    ? "Cancel RSVP"
+                                                    : "Leave Waitlist"}
+                                        </Button>
+                                    </Tooltip>
+                                )}
 
-                        {(isWorkshopInstructor || isAdmin) && (
-                            <Button
-                                className="text-small font-bold text-white bg-primary hover:bg-primary/50 hover:outline"
-                                color="default"
-                                radius="lg"
-                                size="sm"
-                                variant="flat"
-                                onPress={signinListOnOpen}
-                            >
-                                View sign in list
-                            </Button>
-                        )}
+                            {(isWorkshopInstructor || isAdmin) && (
+                                <Button
+                                    className={buttonStyle}
+                                    onPress={rsvpListOnOpen}
+                                >
+                                    View RSVP list
+                                </Button>
+                            )}
+                        </ButtonGroup>
+
+                        <ButtonGroup
+                            variant="flat"
+                            radius="lg"
+                            size="sm"
+                            color="primary"
+                        >
+                            {canSignIn &&
+                                !isWorkshopInstructor &&
+                                !workshopEnded && (
+                                    <Tooltip
+                                        color="primary"
+                                        content={
+                                            workshop.timestamp_start &&
+                                            config?.workshop
+                                                .sign_in_enabled_within &&
+                                            date_formatter &&
+                                            (workshop.timestamp_start -
+                                                config.workshop
+                                                    .sign_in_enabled_within >
+                                            Date.now() / 1000
+                                                ? `Sign ins are closed until ${date_formatter.format(
+                                                      new Date(
+                                                          (workshop.timestamp_start -
+                                                              config.workshop
+                                                                  .sign_in_enabled_within) *
+                                                              1000,
+                                                      ),
+                                                  )}`
+                                                : "Sign in now!")
+                                        }
+                                    >
+                                        <Button
+                                            className={buttonStyle}
+                                            onPress={() => {
+                                                // Only sign in if workshop is public
+                                                if (
+                                                    workshop.timestamp_start &&
+                                                    config?.workshop
+                                                        .sign_in_enabled_within &&
+                                                    workshop.timestamp_start -
+                                                        config.workshop
+                                                            .sign_in_enabled_within <
+                                                        Date.now() / 1000
+                                                ) {
+                                                    signinOnOpen();
+                                                }
+                                            }}
+                                            isDisabled={
+                                                !self ||
+                                                workshop.timestamp_end <
+                                                    Date.now() / 1000
+                                            }
+                                        >
+                                            Sign in
+                                        </Button>
+                                    </Tooltip>
+                                )}
+
+                            {(isWorkshopInstructor || isAdmin) && (
+                                <Button
+                                    className={buttonStyle}
+                                    onPress={signinListOnOpen}
+                                >
+                                    View sign in list
+                                </Button>
+                            )}
+                        </ButtonGroup>
                     </div>
                 </CardBody>
             </Card>
@@ -429,11 +473,33 @@ export default function WorkshopCard({
             )}
 
             {(isWorkshopInstructor || isAdmin) && (
-                <WorkshopSigninListModal
+                <WorkshopUserListModal
+                    key={`${workshop.uuid}-rsvplist`}
+                    workshop={workshop}
+                    type="rsvp"
+                    isOpen={rsvpListOpen}
+                    onOpenChange={rsvpListOnOpenChange}
+                />
+            )}
+
+            {(isWorkshopInstructor || isAdmin) && (
+                <WorkshopUserListModal
                     key={`${workshop.uuid}-signinlist`}
                     workshop={workshop}
+                    type="sign-in"
                     isOpen={signinListOpen}
                     onOpenChange={signinListOnOpenChange}
+                />
+            )}
+
+            {canRSVP && !isWorkshopInstructor && (
+                <WorkshopRSVPDisclaimerModal
+                    key={`${workshop.uuid}-signin-instr`}
+                    overCapacity={overCapacity}
+                    rsvpMutation={rsvpMutation}
+                    workshop={workshop}
+                    isOpen={rsvpDisclaimerOpen}
+                    onOpenChange={rsvpDisclaimerOnOpenChange}
                 />
             )}
         </>

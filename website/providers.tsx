@@ -39,6 +39,9 @@ const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
             queryFn: defaultQueryFn,
+            gcTime: 1000 * 60 * 60, // 1 hour
+            refetchOnWindowFocus: false,
+            refetchOnMount: false,
         },
     },
 });
@@ -48,7 +51,14 @@ export function Provider({ children }: { children: React.ReactNode }) {
 
     return (
         <HeroUIProvider navigate={navigate} useHref={useHref}>
-            <ToastProvider toastProps={{ timeout: 3000 }} />
+            <ToastProvider
+                toastProps={{
+                    timeout: 3000,
+                    classNames: {
+                        title: "overflow-auto text-wrap whitespace-normal",
+                    },
+                }}
+            />
             <ThemeProvider
                 attribute="class"
                 defaultTheme="dark"

@@ -10,6 +10,7 @@ import { Area } from "models/area.model";
 import { Workshop } from "models/workshop.model";
 import { Machine } from "models/machine.model";
 import { Logger } from "pino";
+import path from "path";
 
 /**
  * Get all files in the database
@@ -75,63 +76,75 @@ export async function createFile(file_obj: TFile): Promise<TFile | null> {
     if (file_obj.resource_type === FILE_RESOURCE_TYPE.USER) {
         // If the file is a user file, add the file's UUID to the user's file list
         const Users = mongoose.model("User", User);
-        const user = await Users.findOne({ uuid: file_obj.resource_uuid });
-        // If the user doesn't exist, throw an error
-        if (!user) {
-            throw new Error("User not found");
+
+        for (const user_resource_uuid of file_obj.resource_uuid) {
+            const user = await Users.findOne({ uuid: user_resource_uuid });
+            // If the user doesn't exist, throw an error
+            if (!user) {
+                throw new Error("User not found");
+            }
+            // Add the file's UUID to the user's file list and save the user
+            if (!user.files) {
+                user.files = [];
+            }
+            user.files.push(file_obj.uuid);
+            await user.save();
         }
-        // Add the file's UUID to the user's file list and save the user
-        if (!user.files) {
-            user.files = [];
-        }
-        user.files.push(file_obj.uuid);
-        await user.save();
     } else if (file_obj.resource_type === FILE_RESOURCE_TYPE.AREA) {
         // If the file is an area image, add the file's UUID to the area's image list
         const Areas = mongoose.model("Area", Area);
-        const area = await Areas.findOne({ uuid: file_obj.resource_uuid });
-        // If the area doesn't exist, throw an error
-        if (!area) {
-            throw new Error("Area not found");
+
+        for (const file_resource_uuid of file_obj.resource_uuid) {
+            const area = await Areas.findOne({ uuid: file_resource_uuid });
+            // If the area doesn't exist, throw an error
+            if (!area) {
+                throw new Error("Area not found");
+            }
+            // Add the file's UUID to the area's image list and save the area
+            if (!area.images) {
+                area.images = [];
+            }
+            area.images.push(file_obj.uuid);
+            await area.save();
         }
-        // Add the file's UUID to the area's image list and save the area
-        if (!area.images) {
-            area.images = [];
-        }
-        area.images.push(file_obj.uuid);
-        await area.save();
     } else if (file_obj.resource_type === FILE_RESOURCE_TYPE.MACHINE) {
         // If the file is a machine image, add the file's UUID to the machine's image list
         const Machines = mongoose.model("Machine", Machine);
-        const machine = await Machines.findOne({
-            uuid: file_obj.resource_uuid,
-        });
-        // If the machine doesn't exist, throw an error
-        if (!machine) {
-            throw new Error("Machine not found");
+
+        for (const file_resource_uuid of file_obj.resource_uuid) {
+            const machine = await Machines.findOne({
+                uuid: file_resource_uuid,
+            });
+            // If the machine doesn't exist, throw an error
+            if (!machine) {
+                throw new Error("Machine not found");
+            }
+            // Add the file's UUID to the machine's image list and save the machine
+            if (!machine.images) {
+                machine.images = [];
+            }
+            machine.images.push(file_obj.uuid);
+            await machine.save();
         }
-        // Add the file's UUID to the machine's image list and save the machine
-        if (!machine.images) {
-            machine.images = [];
-        }
-        machine.images.push(file_obj.uuid);
-        await machine.save();
     } else if (file_obj.resource_type === FILE_RESOURCE_TYPE.WORKSHOP) {
         // If the file is a workshop image, add the file's UUID to the workshop's image list
         const Workshops = mongoose.model("Workshop", Workshop);
-        const workshop = await Workshops.findOne({
-            uuid: file_obj.resource_uuid,
-        });
-        // If the workshop doesn't exist, throw an error
-        if (!workshop) {
-            throw new Error("Workshop not found");
+
+        for (const file_resource_uuid of file_obj.resource_uuid) {
+            const workshop = await Workshops.findOne({
+                uuid: file_resource_uuid,
+            });
+            // If the workshop doesn't exist, throw an error
+            if (!workshop) {
+                throw new Error("Workshop not found");
+            }
+            // Add the file's UUID to the workshop's image list and save the workshop
+            if (!workshop.images) {
+                workshop.images = [];
+            }
+            workshop.images.push(file_obj.uuid);
+            await workshop.save();
         }
-        // Add the file's UUID to the workshop's image list and save the workshop
-        if (!workshop.images) {
-            workshop.images = [];
-        }
-        workshop.images.push(file_obj.uuid);
-        await workshop.save();
     } else {
         // If the resource type is invalid, throw an error
         throw new Error("Invalid resource type");
@@ -174,6 +187,102 @@ export async function moveTempFileOnServer(
 }
 
 /**
+ * Remove a resource from an associated file in the database by UUID
+ * @param file_uuid the specific file's unique id
+ * @returns The deleted file object, or null if the file doesn't exist
+ */
+export async function removeResourcesFromFile(
+    file_uuid: UUID,
+    resource_uuids: UUID[],
+    delete_from_resource: boolean = true,
+): Promise<TFile | null> {
+    // find file by uuid
+    const requested_file = await getFile(file_uuid);
+    // if file doesn't exist, return null
+    if (!requested_file) {
+        return null;
+    }
+
+    // Remove the user from the resource_uuid list by filtering them out
+    requested_file.resource_uuid = requested_file.resource_uuid.filter(
+        (uuid) => !resource_uuids.includes(uuid),
+    );
+
+    if (!delete_from_resource) {
+        return requested_file.save();
+    } else {
+        for (const resource_uuid of resource_uuids) {
+            // If the file exists, remove the file's UUID from the resource's list
+            if (requested_file.resource_type === FILE_RESOURCE_TYPE.USER) {
+                // If the file is a user file, remove the file's UUID from the user's file list
+                const Users = mongoose.model("User", User);
+                const user = await Users.findOne({ uuid: resource_uuid });
+                // If the user doesn't exist, throw an error
+                if (!user) {
+                    throw new Error("User not found");
+                }
+                // Remove the file's UUID from the user's file list and save the user
+                user.files = (user.files ?? []).filter(
+                    (file_uuid) => file_uuid !== requested_file.uuid,
+                );
+                await user.save();
+            } else if (
+                requested_file.resource_type === FILE_RESOURCE_TYPE.AREA
+            ) {
+                // If the file is an area image, remove the file's UUID from the area's image list
+                const Areas = mongoose.model("Area", Area);
+                const area = await Areas.findOne({ uuid: resource_uuid });
+                // If the area doesn't exist, throw an error
+                if (!area) {
+                    throw new Error("Area not found");
+                }
+                // Remove the file's UUID from the area's image list and save the area
+                area.images = (area.images ?? []).filter(
+                    (file_uuid) => file_uuid !== requested_file.uuid,
+                );
+                await area.save();
+            } else if (
+                requested_file.resource_type === FILE_RESOURCE_TYPE.MACHINE
+            ) {
+                // If the file is a machine image, remove the file's UUID from the machine's image list
+                const Machines = mongoose.model("Machine", Machine);
+                const machine = await Machines.findOne({
+                    uuid: resource_uuid,
+                });
+                // If the machine doesn't exist, throw an error
+                if (!machine) {
+                    throw new Error("Machine not found");
+                }
+                // Remove the file's UUID from the machine's image list and save the machine
+                machine.images = (machine.images ?? []).filter(
+                    (file_uuid) => file_uuid !== requested_file.uuid,
+                );
+                await machine.save();
+            } else if (
+                requested_file.resource_type === FILE_RESOURCE_TYPE.WORKSHOP
+            ) {
+                // If the file is a workshop image, remove the file's UUID from the workshop's image list
+                const Workshops = mongoose.model("Workshop", Workshop);
+                const workshop = await Workshops.findOne({
+                    uuid: resource_uuid,
+                });
+                // If the workshop doesn't exist, throw an error
+                if (!workshop) {
+                    throw new Error("Workshop not found");
+                }
+                // Remove the file's UUID from the workshop's image list and save the workshop
+                workshop.images = (workshop.images ?? []).filter(
+                    (file_uuid) => file_uuid !== requested_file.uuid,
+                );
+                await workshop.save();
+            }
+        }
+
+        return requested_file.save();
+    }
+}
+
+/**
  * A helper function to delete/unlink a file from the server
  * @param file_path The path to the file to delete
  * @param req The request object to log errors and info
@@ -188,64 +297,85 @@ export async function deleteFileOnServer(
     res: Response,
     error_message: string = "authorized",
 ) {
+    const normalizedPath = path.resolve(file_path);
+    const safeRoots = [path.resolve(process.cwd(), "uploads"), path.resolve(process.cwd(), "tmp")];
+    const isWithinSafeRoot = safeRoots.some(
+        (root) => normalizedPath === root || normalizedPath.startsWith(root + path.sep),
+    );
+
+    if (!isWithinSafeRoot) {
+        req.log.warn({
+            msg: "Blocked file deletion outside allowed upload directories",
+            file_path: file_path,
+            normalized_path: normalizedPath,
+        });
+        res.status(StatusCodes.FORBIDDEN).json({
+            error: "Invalid file path",
+        });
+        return Promise.reject(new Error("Invalid file path"));
+    }
+
     return fs
-        .exists(file_path) // Check that the file exists first
-        .then(() => fs.unlink(file_path) // Attempt to delete the file
-            .then(() => {
-                // If the file was successfully deleted, log accordingly
-                if (error_message === "authorized") {
-                    req.log.info({
-                        msg: `Successfully deleted file`,
-                        file_path: file_path,
-                    });
-                    return "Successfully deleted file";
-                } else {
-                    req.log.info({
-                        msg: `File successfully deleted: ${error_message}`,
-                        file_path: file_path,
-                    });
-                    return error_message;
-                }
-            })
-            .catch((err) => {
-                // If there was an error unlinking the file, and the user was not
-                // authorized to create the file, return a distinct error
-                if (error_message === "authorized") {
-                    // Otherwise, if the user was authorized to delete the file, log
-                    // the error and return a generic error message
-                    req.log.error({
-                        msg: `Error deleting file at ${file_path}`,
-                        error: err,
-                    });
-                    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                        error: "Error deleting file",
-                    });
-                } else {
-                    //
-                    req.log.fatal({
-                        msg:
-                            "Requesting user was not authorized to create a file, " +
-                            "and there was an error unlinking the provided file",
-                        error_message: error_message,
-                        file_path: file_path,
-                        error: err,
-                    });
-                    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                        error:
-                            "The requesting user is not authorized to create a " +
-                            "file, and there was an error unlinking the " +
-                            "provided file. If you are seeing this error, " +
-                            "please contact a site administrator.",
-                    });
-                }
-                return Promise.reject(err); // Return a rejected promise to stop the chain
-            })
-        ).catch((err) => {
+        .exists(normalizedPath) // Check that the file exists first
+        .then(() =>
+            fs
+                .unlink(normalizedPath) // Attempt to delete the file
+                .then(() => {
+                    // If the file was successfully deleted, log accordingly
+                    if (error_message === "authorized") {
+                        req.log.info({
+                            msg: `Successfully deleted file`,
+                            file_path: normalizedPath,
+                        });
+                        return "Successfully deleted file";
+                    } else {
+                        req.log.info({
+                            msg: `File successfully deleted: ${error_message}`,
+                            file_path: normalizedPath,
+                        });
+                        return error_message;
+                    }
+                })
+                .catch((err) => {
+                    // If there was an error unlinking the file, and the user was not
+                    // authorized to create the file, return a distinct error
+                    if (error_message === "authorized") {
+                        // Otherwise, if the user was authorized to delete the file, log
+                        // the error and return a generic error message
+                        req.log.error({
+                            msg: `Error deleting file at ${file_path}`,
+                            error: err,
+                        });
+                        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                            error: "Error deleting file",
+                        });
+                    } else {
+                        //
+                        req.log.fatal({
+                            msg:
+                                "Requesting user was not authorized to create a file, " +
+                                "and there was an error unlinking the provided file",
+                            error_message: error_message,
+                            file_path: file_path,
+                            error: err,
+                        });
+                        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                            error:
+                                "The requesting user is not authorized to create a " +
+                                "file, and there was an error unlinking the " +
+                                "provided file. If you are seeing this error, " +
+                                "please contact a site administrator.",
+                        });
+                    }
+                    return Promise.reject(err); // Return a rejected promise to stop the chain
+                }),
+        )
+        .catch((err) => {
             // If the file does not exist, log an error.
             req.log.error({
                 msg: `File not found: ${file_path}`,
                 error: err,
-            })
+            });
             res.status(StatusCodes.NOT_FOUND).json({
                 error: "File not found",
             });
@@ -339,64 +469,7 @@ export async function deleteFile(file_uuid: UUID): Promise<TFile | null> {
     if (!file) {
         return null;
     }
-    // If the file exists, remove the file's UUID from the resource's list
-    if (file.resource_type === FILE_RESOURCE_TYPE.USER) {
-        // If the file is a user file, remove the file's UUID from the user's file list
-        const Users = mongoose.model("User", User);
-        const user = await Users.findOne({ uuid: file.resource_uuid });
-        // If the user doesn't exist, throw an error
-        if (!user) {
-            throw new Error("User not found");
-        }
-        // Remove the file's UUID from the user's file list and save the user
-        user.files = (user.files ?? []).filter(
-            (file_uuid) => file_uuid !== file.uuid,
-        );
-        await user.save();
-    } else if (file.resource_type === FILE_RESOURCE_TYPE.AREA) {
-        // If the file is an area image, remove the file's UUID from the area's image list
-        const Areas = mongoose.model("Area", Area);
-        const area = await Areas.findOne({ uuid: file.resource_uuid });
-        // If the area doesn't exist, throw an error
-        if (!area) {
-            throw new Error("Area not found");
-        }
-        // Remove the file's UUID from the area's image list and save the area
-        area.images = (area.images ?? []).filter(
-            (file_uuid) => file_uuid !== file.uuid,
-        );
-        await area.save();
-    } else if (file.resource_type === FILE_RESOURCE_TYPE.MACHINE) {
-        // If the file is a machine image, remove the file's UUID from the machine's image list
-        const Machines = mongoose.model("Machine", Machine);
-        const machine = await Machines.findOne({
-            uuid: file.resource_uuid,
-        });
-        // If the machine doesn't exist, throw an error
-        if (!machine) {
-            throw new Error("Machine not found");
-        }
-        // Remove the file's UUID from the machine's image list and save the machine
-        machine.images = (machine.images ?? []).filter(
-            (file_uuid) => file_uuid !== file.uuid,
-        );
-        await machine.save();
-    } else if (file.resource_type === FILE_RESOURCE_TYPE.WORKSHOP) {
-        // If the file is a workshop image, remove the file's UUID from the workshop's image list
-        const Workshops = mongoose.model("Workshop", Workshop);
-        const workshop = await Workshops.findOne({
-            uuid: file.resource_uuid,
-        });
-        // If the workshop doesn't exist, throw an error
-        if (!workshop) {
-            throw new Error("Workshop not found");
-        }
-        // Remove the file's UUID from the workshop's image list and save the workshop
-        workshop.images = (workshop.images ?? []).filter(
-            (file_uuid) => file_uuid !== file.uuid,
-        );
-        await workshop.save();
-    }
+
     return file;
 }
 

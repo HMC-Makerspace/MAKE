@@ -9,54 +9,7 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { TCheckout } from "common/checkout";
-
-export enum SHIFT_DAY {
-    SUNDAY = 0,
-    MONDAY,
-    TUESDAY,
-    WEDNESDAY,
-    THURSDAY,
-    FRIDAY,
-    SATURDAY,
-}
-
-export const SHIFT_DAYS = [
-    {
-        day: SHIFT_DAY.SUNDAY,
-        name: "Sun",
-        key: `day${SHIFT_DAY.SUNDAY}`,
-    },
-    {
-        day: SHIFT_DAY.MONDAY,
-        name: "Mon",
-        key: `day${SHIFT_DAY.MONDAY}`,
-    },
-    {
-        day: SHIFT_DAY.TUESDAY,
-        name: "Tue",
-        key: `day${SHIFT_DAY.TUESDAY}`,
-    },
-    {
-        day: SHIFT_DAY.WEDNESDAY,
-        name: "Wed",
-        key: `day${SHIFT_DAY.WEDNESDAY}`,
-    },
-    {
-        day: SHIFT_DAY.THURSDAY,
-        name: "Thu",
-        key: `day${SHIFT_DAY.THURSDAY}`,
-    },
-    {
-        day: SHIFT_DAY.FRIDAY,
-        name: "Fri",
-        key: `day${SHIFT_DAY.FRIDAY}`,
-    },
-    {
-        day: SHIFT_DAY.SATURDAY,
-        name: "Sat",
-        key: `day${SHIFT_DAY.SATURDAY}`,
-    },
-];
+import { SHIFT_DAY, SHIFT_DAYS } from "../../../../../common/shift";
 
 export default function CheckoutsByDay({
     checkouts,
@@ -102,9 +55,9 @@ export default function CheckoutsByDay({
     }
 
     return (
-        <div className="bg-default-100 p-6 rounded-lg">
+        <div className="flex flex-col bg-default-100 p-6 rounded-lg justify-between">
             <h2 className="text-xl font-bold mb-4">Checkouts by Day of Week</h2>
-            <ResponsiveContainer width="100%" height={350}>
+            <ResponsiveContainer width="100%" height={450}>
                 <BarChart
                     data={data}
                     margin={{ top: 20, right: 30, left: 5, bottom: 20 }}
@@ -118,7 +71,10 @@ export default function CheckoutsByDay({
                             "Count",
                         ]}
                     />
-                    <Bar dataKey="count" fill="hsl(var(--heroui-primary))" />
+                    <Bar
+                        dataKey="count"
+                        fill="hsl(var(--heroui-secondary-400))"
+                    />
                 </BarChart>
             </ResponsiveContainer>
         </div>

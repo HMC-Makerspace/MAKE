@@ -16,9 +16,18 @@ import { TUser } from "../../../../../common/user";
 
 //random colors that are assigned to each slice of the pie later on
 const PIE_COLORS = [
-    "hsl(var(--heroui-primary))",
-    "hsl(var(--heroui-secondary))",
-    "hsl(var(--heroui-tertiary))",
+    "hsl(var(--heroui-primary-300))",
+    "hsl(var(--heroui-secondary-300))",
+    "hsl(var(--heroui-warning-300))",
+    "hsl(var(--heroui-success-300))",
+    "hsl(var(--heroui-primary-500))",
+    "hsl(var(--heroui-secondary-500))",
+    "hsl(var(--heroui-warning-500))",
+    "hsl(var(--heroui-success-500))",
+    "hsl(var(--heroui-primary-200))",
+    "hsl(var(--heroui-secondary-200))",
+    "hsl(var(--heroui-warning-200))",
+    "hsl(var(--heroui-success-200))",
 ];
 
 type ChartEntry = {
@@ -55,7 +64,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 //defines the component and what properties (basically arguments) it accepts
 //{ users } pulls the users prop out of the props object
 // : { users: TUser[] } tells TypeScript users must be an array of TUser objects
-export default function UsersByCollege({ users }: { users: TUser[] }) {
+export default function UsersByDomain({ users }: { users: TUser[] }) {
     //THE FORM OF USERMEMO: tells it to cache this calculation so it only reruns when users changes
     //without it, all this processing will rerun on every render
     //"[users]" at the end is the dependency, only recompute if users changes
@@ -116,11 +125,11 @@ export default function UsersByCollege({ users }: { users: TUser[] }) {
         <div className="bg-default-100 p-6 rounded-lg">
             <h2 className="text-xl font-bold mb-2">Users by Domain</h2>
 
-            <p className="text-sm text-default-600 mb-4">
+            <p className="text-sm text-default-600 -mb-10">
                 Total Users: {users.length}
             </p>
 
-            <ResponsiveContainer width="100%" height={350}>
+            <ResponsiveContainer width="100%" height={500}>
                 <PieChart>
                     <Pie
                         data={data}
@@ -130,7 +139,7 @@ export default function UsersByCollege({ users }: { users: TUser[] }) {
                         label={(entry: any) =>
                             `${entry.name}: ${(entry.percent * 100).toFixed(1)}%`
                         }
-                        outerRadius={120}
+                        outerRadius={200}
                         fill="#8884d8"
                         dataKey="value"
                     >

@@ -6,6 +6,8 @@ import { TUser, TUserRole } from "../../../common/user";
 import { TCheckout } from "../../../common/checkout";
 import { TRestockRequest } from "../../../common/restock";
 import { Spinner } from "@heroui/react";
+import { TArea } from "common/area";
+import { TCertification } from "common/certification";
 
 //the kiosk's job is just to fetch the data needed from the server using useQuery
 //and display a loading circle when any of the data needed isn't ready
@@ -43,10 +45,25 @@ export default function StatisticsKiosk() {
         refetchOnWindowFocus: false,
     });
 
-    const { data: restocks, isLoading: restocksLoading } = useQuery<TRestockRequest[]>({
-    queryKey: ["restock"],
-    refetchOnWindowFocus: false,
-});
+    const { data: restocks, isLoading: restocksLoading } = useQuery<
+        TRestockRequest[]
+    >({
+        queryKey: ["restock"],
+        refetchOnWindowFocus: false,
+    });
+    //fetches area data
+    const { data: areas, isLoading: areasLoading } = useQuery<TArea[]>({
+        queryKey: ["area"],
+        refetchOnWindowFocus: false,
+    });
+
+    //fetches certification data
+    const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
+        {
+            queryKey: ["certification"],
+            refetchOnWindowFocus: false,
+        },
+    );
 
     //displays a centered spinner if any of the four queries are still loading.
     //also checks if any of the data is undefined
@@ -55,7 +72,9 @@ export default function StatisticsKiosk() {
         users === undefined ||
         checkouts === undefined ||
         roles === undefined ||
-        restocks == undefined
+        restocks == undefined ||
+        areas === undefined ||
+        certs === undefined
     ) {
         return (
             <div className="w-full h-screen flex justify-center py-auto">
@@ -64,7 +83,7 @@ export default function StatisticsKiosk() {
         );
     }
 
-    //once all data has been quieried, render the page inside the admin nav wrapper
+    //once all data has been queried, render the page inside the admin nav wrapper
     //and passes all data down to StatisticsDisplay to be displayed
     return (
         <AdminLayout pageHref="/admin/statistics">
@@ -73,7 +92,9 @@ export default function StatisticsKiosk() {
                 users={users}
                 checkouts={checkouts}
                 roles={roles}
-                restocks = {restocks}
+                restocks={restocks}
+                areas={areas}
+                certs={certs}
             />
         </AdminLayout>
     );

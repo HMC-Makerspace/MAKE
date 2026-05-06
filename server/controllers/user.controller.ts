@@ -16,6 +16,7 @@ import { SHIFT_DAY } from "common/shift";
 import { ScheduleUUID } from "common/schedule";
 import { getCertification } from "./certification.controller";
 import { createHash } from "crypto";
+import { validateEmail } from "common/verify";
 
 /**
  * Get all users in the database
@@ -72,8 +73,25 @@ export async function getUserByCollegeID(id: string): Promise<TUser | null> {
  */
 export async function getUserByEmail(email: string): Promise<TUser | null> {
     const Users = mongoose.model("User", User);
+    // Validate user email
+    const valid_email = validateEmail(email);
     // Get user by email with case insensitive search.
-    return Users.findOne({ email: { $regex: new RegExp(`^${email}$`, "i") } });
+    return Users.findOne({
+        email: { $regex: new RegExp(`^${valid_email}$`, "i") },
+    });
+}
+
+/**
+ * Find all emails for a list of users, by uuid.
+ * @param user_uuids The list of user uuids to search
+ * @returns The list of emails for the given users
+ */
+export async function getUserEmails(user_uuids: string[]) {
+    const Users = mongoose.model("User", User);
+    // For all users with uuids in the given list, select and return only their email
+    return (
+        await Users.find({ uuid: { $in: user_uuids } }, { email: 1, _id: 0 })
+    ).map((u) => u.email);
 }
 
 /**
@@ -601,6 +619,65 @@ export async function addUserAvailability(
 }
 
 /**
+ * Add a block of availability for a user in the current active schedule.
+ * @param user_uuid The uuid of the user to update
+ * @param selectedShifts A set of shifts the user is available. Each shift in
+ *      the form of "day,sec_start,sec_end"
+ * @returns The updated user object, or null if the user or active schedule does
+ *      not exist.
+ */
+export async function addBatchUserAvailability(
+    user_uuid: UserUUID,
+    selectedShifts: {
+        day: SHIFT_DAY;
+        sec_start: number;
+        sec_end: number;
+    }[],
+) {
+    const user = await getUser(user_uuid);
+
+    const stagingSchedule = await getStagingSchedule();
+
+    // If the user or schedule doesn't exist, we cannot update availability
+    if (!user || !stagingSchedule) {
+        return null;
+    }
+
+    if (!user.work_schedules) {
+        user.work_schedules = [];
+    }
+
+    const work = user.work_schedules.find(
+        (s) => s.schedule === stagingSchedule.uuid,
+    ) ?? {
+        days: [],
+        schedule: stagingSchedule.uuid,
+    };
+
+    selectedShifts.forEach((shift) => {
+        const work_day = work.days.find((d) => d.day === shift.day) ?? {
+            day: shift.day,
+            availability: [],
+        };
+
+        work_day.availability.push({
+            sec_start: shift.sec_start,
+            sec_end: shift.sec_end,
+        });
+
+        work.days = work.days
+            .filter((d) => d.day !== shift.day)
+            .concat(work_day);
+    });
+
+    user.work_schedules = user.work_schedules
+        .filter((w) => w.schedule !== stagingSchedule.uuid)
+        .concat(work);
+
+    return user.save();
+}
+
+/**
  * Remove a block of availability from a user in the current active schedule.
  * @param user_uuid The uuid of the user to update
  * @param day The day of the week, defined by {@link SHIFT_DAY}
@@ -651,6 +728,68 @@ export async function removeUserAvailability(
     user.work_schedules = user.work_schedules
         .filter((w) => w.schedule !== stagingSchedule.uuid)
         .concat(work);
+
+    return user.save();
+}
+
+/**
+ * Remove a block of availability from a user in the current active schedule.
+ * @param user_uuid The uuid of the user to update
+ * @param selectedShifts A set of shifts the user is available. Each shift in
+ *      the form of "day,sec_start,sec_end"
+ * @returns The updated user object, or null if the user or active schedule does
+ *      not exist, or false if the user has no availability at the given time.
+ */
+export async function removeBatchUserAvailability(
+    user_uuid: UserUUID,
+    selectedShifts: {
+        day: SHIFT_DAY;
+        sec_start: number;
+        sec_end: number;
+    }[],
+) {
+    const user = await getUser(user_uuid);
+
+    const stagingSchedule = await getStagingSchedule();
+
+    // If the user or schedule doesn't exist, we cannot update availability
+    if (!user || !stagingSchedule) {
+        return null;
+    }
+
+    const workSchedules = user.work_schedules
+
+    if (!workSchedules) {
+        return false;
+    }
+
+    const work = workSchedules.find(
+        (s) => s.schedule === stagingSchedule.uuid,
+    );
+
+    if (!work) {
+        return false;
+    }
+
+    selectedShifts.forEach((shift) => {
+        const work_day = work.days.find((d) => d.day === shift.day);
+
+        if (!work_day) {
+            return false;
+        }
+
+        work_day.availability = work_day.availability.filter(
+            (a) => shift.sec_start > a.sec_start || a.sec_end > shift.sec_end,
+        );
+
+        work.days = work.days
+            .filter((d) => d.day !== shift.day)
+            .concat(work_day);
+
+        user.work_schedules = workSchedules
+            .filter((w) => w.schedule !== stagingSchedule.uuid)
+            .concat(work);
+    });
 
     return user.save();
 }
@@ -719,4 +858,17 @@ export async function initializeAdmin(
         past_roles: [],
     });
     return newAdmin.save();
+}
+
+/**
+ * Update a user's last login time to the current time.
+ * @param user_uuid The user to update
+ * @returns The new user object
+ */
+export async function updateUserLoginTime(user_uuid: UserUUID) {
+    const Users = mongoose.model("User", User);
+    return Users.findOneAndUpdate(
+        { uuid: user_uuid },
+        { last_login: Date.now() / 1000 },
+    );
 }

@@ -33,12 +33,14 @@ export default function ItemEditor({
     return (
         <div
             className={clsx(
-                "flex flex-col rounded-xl bg-content1 p-4",
+                "flex flex-col rounded-xl bg-content1",
                 "h-1/3 lg:h-full relative",
-                "w-full lg:w-2/3 xl:w-1/2 2xl:w-1/3",
+                "w-full lg:w-2/3 xl:w-1/2 2xl:w-1/3 p-1.5",
             )}
         >
-            <h1 className="3xl font-bold text-center pb-2">Item Editor</h1>
+            <h1 className="3xl font-bold text-center p-3 bg-default-50 rounded-t-lg">
+                Item Editor
+            </h1>
             <ItemEditorForm
                 key={key}
                 item={item}
@@ -66,7 +68,7 @@ export default function ItemEditor({
                             : 0,
                 }}
                 className={clsx(
-                    "absolute w-fit p-4 h-fit bg-primary-200/20 m-auto",
+                    "absolute w-fit p-8 h-fit bg-primary-200/20 m-auto",
                     "top-0 bottom-0 left-0 right-0 rounded-xl flex gap-1",
                     "items-center justify-center font-semibold",
                     "text-default-foreground pointer-events-none",

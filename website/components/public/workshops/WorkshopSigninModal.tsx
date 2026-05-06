@@ -17,6 +17,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { WorkshopSigninConfirmation } from "./WorkshopSigninConfirmation";
 import clsx from "clsx";
 import axios, { AxiosError } from "axios";
+import { validateEmail } from "../../../../common/verify";
 
 const signinWorkshop = async ({
     workshop_uuid,
@@ -87,7 +88,8 @@ export default function WorkshopSigninModal({
         (e: React.FormEvent<HTMLFormElement>) => {
             e.preventDefault();
             const formData = new FormData(e.currentTarget);
-            setEmail(formData.get("email") as string);
+            const valid_email = validateEmail(formData.get("email") as string);
+            setEmail(valid_email);
         },
         [],
     );

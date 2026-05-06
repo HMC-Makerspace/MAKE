@@ -13,6 +13,7 @@ import { getConfig } from "./config.controller";
 import WorkshopWaitlistTemplate from "email_templates/workshop_waitlist_move";
 import { Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import { removeResourcesFromFile, deleteFileOnServer, deleteFile } from "./file.controller";
 
 /**
  * Get all workshops in the database
@@ -120,9 +121,11 @@ export async function createWorkshop(
 export async function deleteWorkshop(
     workshop_uuid: UUID,
 ): Promise<TWorkshop | null> {
-    const Workshops = mongoose.model("Workshop", Workshop);
-    // If the workshop exists, return it and delete it
-    return Workshops.findOneAndDelete({ uuid: workshop_uuid });
+    const Workshops = mongoose.model<TWorkshop>("Workshop", Workshop);
+
+    // Delete the workshop and get the document in one call
+    return await Workshops.findOneAndDelete({ uuid: workshop_uuid });
+
 }
 
 /**
@@ -275,15 +278,21 @@ export async function cancelRSVPToWorkshop(
     ) {
         return null;
     }
+    // Find the user's index in the rsvp list
+    const position = workshop.rsvp_list.findIndex(
+        (rsvp) => rsvp.user_uuid === user_uuid,
+    );
     // Remove the user from the rsvp list
     workshop.rsvp_list = workshop.rsvp_list.filter(
         (rsvp) => rsvp.user_uuid != user_uuid,
     );
 
-    // Send email to user moved off the waitlist
+    // If the current user was in the first slots of the RSVP list,
+    // send an email to the user moved off the waitlist
     const firstUserOnWaitlist =
         workshop.capacity &&
         workshop.capacity > 0 &&
+        position < workshop.capacity &&
         workshop.rsvp_list.length >= workshop.capacity
             ? workshop.rsvp_list[workshop.capacity - 1].user_uuid
             : null;
@@ -322,7 +331,7 @@ export async function signInToWorkshop(
         return undefined;
     }
     // If the user is already in the sign in list, the sign in fails
-    if (workshop.sign_in_list.some(i => i.user_uuid == user_uuid)) {
+    if (workshop.sign_in_list.some((i) => i.user_uuid == user_uuid)) {
         return false;
     }
     // Otherwise, add the user to the sign in list
@@ -352,9 +361,12 @@ export async function workshopReminderEmailCron(logger: Logger) {
         let sent = false;
         const new_sent_times = [...workshop.reminder_emails_sent];
 
-        for (const reminder of config.workshop.reminder_times.filter(r => !new_sent_times?.includes(r))) {
+        for (const reminder of config.workshop.reminder_times.filter(
+            (r) => !new_sent_times?.includes(r),
+        )) {
             if (workshop.timestamp_start <= timestamp + reminder) {
-                if (!sent) { // only send one email per cycle so we're not making up 3000 emails at once if they haven't sent for some reason
+                if (!sent) {
+                    // only send one email per cycle so we're not making up 3000 emails at once if they haven't sent for some reason
 
                     // get users on the RSVP list
                     for (let u of workshop.rsvp_list) {
@@ -365,7 +377,12 @@ export async function workshopReminderEmailCron(logger: Logger) {
                             await sendTemplatedEmail(
                                 user.email,
                                 "Reminder: " + workshop.title,
-                                WorkshopReminderTemplate(workshop.title, Math.round(workshop.timestamp_start - timestamp)),
+                                WorkshopReminderTemplate(
+                                    workshop.title,
+                                    Math.round(
+                                        workshop.timestamp_start - timestamp,
+                                    ),
+                                ),
                                 logger,
                             );
                         }
@@ -384,7 +401,7 @@ export async function workshopReminderEmailCron(logger: Logger) {
                     uuid: workshop.uuid,
                 },
                 {
-                    reminder_emails_sent: new_sent_times
+                    reminder_emails_sent: new_sent_times,
                 },
             );
         }

@@ -39,6 +39,7 @@ export const Workshop = new mongoose.Schema<TWorkshop>(
         sign_in_list: { type: [WorkshopUserRecord], required: true },
         images: { type: [String], required: false },
         authorized_roles: { type: [String], required: false },
+        rsvp_disclaimer: { type: String, required: false },
     },
     { collection: "workshops" }, // Collection name
 );
@@ -49,7 +50,7 @@ export const Workshop = new mongoose.Schema<TWorkshop>(
 export const WorkshopSchema = Joi.object<TWorkshop>({
     uuid: Joi.string().required(),
     title: Joi.string().required(),
-    description: Joi.string().required(),
+    description: Joi.string().optional().allow(null, ''),
     instructors: Joi.array()
         .items(
             Joi.string()
@@ -79,7 +80,8 @@ export const WorkshopSchema = Joi.object<TWorkshop>({
     ).optional(),
     authorized_roles: Joi.array().items(
         Joi.string()
-    ).optional().allow(null)
+    ).optional().allow(null),
+    rsvp_disclaimer: Joi.string().allow(null, '')
 });
 
 export const WorkshopSchemaOptional = WorkshopSchema.fork(

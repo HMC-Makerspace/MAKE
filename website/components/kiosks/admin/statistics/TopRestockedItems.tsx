@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { TInventoryItem } from "common/inventory";
-import { Input } from "@heroui/react";
+import { Input, NumberInput, Spinner } from "@heroui/react";
 import { TRestockRequest, RESTOCK_REQUEST_STATUS } from "../../../../../common/restock";
+import { useScroll } from "../../../UseScroll";
 
 export default function TopRestockedItems({
     restocks,
@@ -37,15 +38,17 @@ export default function TopRestockedItems({
 
     const data = sortedData.slice(0, topN);
 
+    const { visibleContent, hasMoreContent, loaderRef, scrollerRef } =
+        useScroll(data ?? [], 20, 20);
+
     return (
-        <div className="bg-default-100 p-6 rounded-lg">
+        <main className="bg-default-100 p-6 rounded-lg" ref={scrollerRef}>
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold">Top Restocked Items</h2>
-                <Input
-                    type="number"
+                <NumberInput
                     min={1}
-                    value={String(topN)}
-                    onValueChange={(val) => setTopN(Number(val))}
+                    value={topN}
+                    onValueChange={setTopN}
                     size="sm"
                     className="w-20"
                     classNames={{
@@ -65,21 +68,25 @@ export default function TopRestockedItems({
                         Showing top {data.length} most restocked item
                         {data.length !== 1 ? "s" : ""}
                     </p>
-                    <div className="flex flex-col gap-2">
-                        {data.map((item, index) => (
+                    <div className="flex flex-col gap-2 max-h-80 overflow-auto">
+                        {visibleContent.map((item, index) => (
                             <div
                                 key={index}
                                 className="bg-default-200 px-4 py-2 rounded-md text-sm flex justify-between items-center"
                             >
                                 <span>{item.name}</span>
                                 <span className="text-default-500">
-                                    {item.count} restock{item.count !== 1 ? "s" : ""}
+                                    {item.count} restock
+                                    {item.count !== 1 ? "s" : ""}
                                 </span>
                             </div>
                         ))}
+                        {hasMoreContent && (
+                            <Spinner ref={loaderRef} color="primary" />
+                        )}
                     </div>
                 </>
             )}
-        </div>
+        </main>
     );
 }

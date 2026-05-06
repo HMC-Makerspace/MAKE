@@ -12,7 +12,7 @@ import {
     PopoverContent,
     PopoverTrigger,
     Selection,
-    addToast
+    addToast,
 } from "@heroui/react";
 import React from "react";
 import UserRole from "../../../user/UserRole";
@@ -74,46 +74,6 @@ const toggleUserShift = async ({
     }
 };
 
-const toggleWorkerAvailability = async ({
-    user_uuid,
-    isAvailable,
-    day,
-    sec_start,
-    sec_end,
-}: {
-    user_uuid: string;
-    isAvailable: boolean;
-    day: SHIFT_DAY;
-    sec_start: number;
-    sec_end: number;
-}) => {
-    if (!isAvailable) {
-        // Add the user's availability
-        return (
-            await axios.patch<TUser>(
-                `/api/v3/user/${user_uuid}/availability/add`,
-                {
-                    day: day,
-                    sec_start: sec_start,
-                    sec_end: sec_end,
-                },
-            )
-        ).data;
-    } else {
-        // Remove the user's availability
-        return (
-            await axios.patch<TUser>(
-                `/api/v3/user/${user_uuid}/availability/remove`,
-                {
-                    day: day,
-                    sec_start: sec_start,
-                    sec_end: sec_end,
-                },
-            )
-        ).data;
-    }
-};
-
 function getAvailableUsers(
     schedule_uuid: UUID,
     users: TUser[],
@@ -152,6 +112,7 @@ export default function Shift({
     dragging = false,
     setDragging = () => {},
     firstNamesOnly = true,
+    availabilityChange = false
 }: {
     schedule_uuid: UUID;
     shifts: TShift[];
@@ -173,6 +134,7 @@ export default function Shift({
     dragging: boolean;
     setDragging: (dragging: boolean) => void;
     firstNamesOnly?: boolean;
+    availabilityChange?: boolean;
 }) {
     const queryClient = useQueryClient();
 
@@ -189,20 +151,6 @@ export default function Shift({
                 title: `Error: ${error.message}`,
                 color: "danger",
             });
-        },
-    });
-
-    const availabilityMutation = useMutation({
-        mutationFn: toggleWorkerAvailability,
-        onSuccess: (result: TUser) => {
-            queryClient.setQueryData(["user", result.uuid], result);
-            queryClient.setQueryData(["user"], (old?: TUser[]) =>
-                (old ?? []).map((u) => (u.uuid === result.uuid ? result : u)),
-            );
-            // Naively assume worker availability is updating self, since that
-            // is the only current use of the availability modal.
-            // TODO: Update later to add a isSelf parameter?
-            queryClient.setQueryData(["user", "self"], result);
         },
     });
 
@@ -253,19 +201,6 @@ export default function Shift({
         (availableUsers.length / users.length) * availabilityColors.length,
     );
 
-    const dragFn =
-        type === "worker_availability" && !!selected_user && dragging
-            ? () => {
-                  availabilityMutation.mutate({
-                      user_uuid: selected_user.uuid,
-                      isAvailable: !!available,
-                      day: day,
-                      sec_start: sec_start,
-                      sec_end: sec_end,
-                  });
-              }
-            : undefined;
-
     const edit_classes = [
         // If in edit mode and the user is scheduled, show a + cursor,
         // otherwise a no-edit cursor
@@ -296,7 +231,9 @@ export default function Shift({
 
     const worker_availability_classes = [
         !available && "bg-default-300",
+        dragging && availabilityChange && isShiftSelected && "bg-success-600",
         available && "bg-success-400",
+        dragging && !availabilityChange && isShiftSelected && "bg-danger-500",
     ];
 
     const worker_view_classes = [
@@ -338,22 +275,6 @@ export default function Shift({
                         ...(type === "worker_view" ? worker_view_classes : []),
                     )}
                     animate
-                    onMouseOver={dragFn}
-                    onTapStart={() => {
-                        if (type === "worker_availability") {
-                            setDragging(true);
-                            if (selected_user) {
-                                availabilityMutation.mutate({
-                                    user_uuid: selected_user.uuid,
-                                    isAvailable: !!available,
-                                    day: day,
-                                    sec_start: sec_start,
-                                    sec_end: sec_end,
-                                });
-                            }
-                        }
-                    }}
-                    onTapCancel={() => setDragging(false)}
                     onTap={() => {
                         if (type === "edit") {
                             if (selected_user) {
@@ -409,8 +330,6 @@ export default function Shift({
                                     new Set([`${day},${sec_start},${sec_end}`]),
                                 );
                             }
-                        } else if (type === "worker_availability") {
-                            setDragging(false);
                         }
                     }}
                     whileTap={{
