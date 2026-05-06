@@ -36,6 +36,8 @@ export const InventoryItem = new mongoose.Schema<TInventoryItem>(
         reorder_url: { type: String, required: false },
         serial_number: { type: String, required: false },
         keywords: { type: [String], required: false },
+        checkout_disclaimer: { type: String, required: false },
+        return_disclaimer: { type: String, required: false },
         required_certifications: {
             type: [RequiredCertificate],
             required: false,
@@ -54,20 +56,16 @@ export const InventoryItemSchema = Joi.object<TInventoryItem>({
     quantity: Joi.number().required(),
     available: Joi.number().required(),
     access_type: Joi.number().required(),
-    locations: Joi.array().items(
-        InventoryItemLocationSchema
-    ).required(),
+    locations: Joi.array().items(InventoryItemLocationSchema).required(),
     reorder_url: Joi.string().optional().allow(""),
     serial_number: Joi.string().optional().allow(""),
-    keywords: Joi.array().items(
-        Joi.string().allow("")
-    ).optional(),
-    required_certifications: Joi.array().items(
-        RequiredCertificateSchema
-    ).optional(),
-    authorized_roles: Joi.array().items(
-        Joi.string()
-    ).optional().allow(null)
+    keywords: Joi.array().items(Joi.string().allow("")).optional(),
+    checkout_disclaimer: Joi.string().optional().allow(""),
+    return_disclaimer: Joi.string().optional().allow(""),
+    required_certifications: Joi.array()
+        .items(RequiredCertificateSchema)
+        .optional(),
+    authorized_roles: Joi.array().items(Joi.string()).optional().allow(null),
 });
 
 export const InventoryItemOptional = InventoryItemSchema.fork(

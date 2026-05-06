@@ -13,7 +13,7 @@ import {
     Selection,
     useDisclosure,
 } from "@heroui/react";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { TCertification } from "common/certification";
 import { TUser, TUserRole, UserUUID } from "common/user";
 import clsx from "clsx";
@@ -39,6 +39,7 @@ import axios from "axios";
 import { UnixTimestamp } from "common/global";
 import { ShoppingCartIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { validateCollegeID } from "../../../../../common/verify";
+import CheckoutDisclaimerModal from "./CheckoutDisclaimerModal";
 
 async function createCheckout({
     user_uuid,
@@ -113,11 +114,7 @@ export default function CheckoutSidebar({
     setValidation: (v: TCheckoutValidation) => void;
     removeItemFromCart: (item_uuid: InventoryItemUUID, all?: boolean) => void;
 }) {
-    const {
-        data: user,
-        isLoading,
-        isError,
-    } = useQuery<TUser>({
+    const { data: user, refetch: refetchUser } = useQuery<TUser>({
         queryKey: ["user", "by", "id", collegeID],
         refetchOnWindowFocus: false,
         enabled: !!collegeID,
@@ -215,6 +212,31 @@ export default function CheckoutSidebar({
 
     const [mobileCart, setMobileCart] = useState(false);
 
+    const submitCheckout = useCallback(() => {
+        if (!user?.uuid || !range) {
+            return;
+        } else {
+            createMutation.mutate({
+                user_uuid: user.uuid,
+                cart: cart,
+                timestamp_out: zonedDateTimeToTimestamp(range.start),
+                timestamp_due: zonedDateTimeToTimestamp(range.end),
+            });
+        }
+    }, [user, range, createMutation]);
+
+    const cart_uuids = cart.map((i) => i.item_uuid);
+    // Find all items with checkout disclaimers in the cart
+    const itemsWithDisclaimers = inventory
+        .filter((i) => cart_uuids.includes(i.uuid))
+        .filter((i) => i.checkout_disclaimer);
+
+    const {
+        isOpen: checkoutDisclaimerOpen,
+        onOpen: checkoutDisclaimerOnOpen,
+        onOpenChange: checkoutDisclaimerOpenChange,
+    } = useDisclosure();
+
     return (
         <div
             className={clsx(
@@ -257,6 +279,7 @@ export default function CheckoutSidebar({
                                         : endDate,
                             };
                             setRange(defaultRange);
+                            refetchUser();
                         }
                     }}
                     className="flex flex-row gap-2 h-fit box-border items-center"
@@ -388,23 +411,20 @@ export default function CheckoutSidebar({
                     cart={cart}
                     config={config}
                     inventory={inventory}
+                    // If any items have a disclaimer, open the disclaimer popup before checkout
                     onPress={() => {
-                        if (!user?.uuid || !range) {
-                            return;
-                        } else {
-                            createMutation.mutate({
-                                user_uuid: user.uuid,
-                                cart: cart,
-                                timestamp_out: zonedDateTimeToTimestamp(
-                                    range.start,
-                                ),
-                                timestamp_due: zonedDateTimeToTimestamp(
-                                    range.end,
-                                ),
-                            });
-                        }
+                        itemsWithDisclaimers.length > 0
+                            ? checkoutDisclaimerOnOpen()
+                            : submitCheckout();
                     }}
                     isLoading={createMutation.isPending}
+                />
+                <CheckoutDisclaimerModal
+                    type="checkout"
+                    items={itemsWithDisclaimers}
+                    onSubmit={submitCheckout}
+                    isOpen={checkoutDisclaimerOpen}
+                    onOpenChange={checkoutDisclaimerOpenChange}
                 />
             </div>
         </div>
