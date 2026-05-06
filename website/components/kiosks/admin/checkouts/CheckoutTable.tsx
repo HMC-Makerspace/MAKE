@@ -9,6 +9,7 @@ import {
     Spinner,
     Tooltip,
     addToast,
+    useDisclosure,
 } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
@@ -19,20 +20,13 @@ import {
     ClockIcon,
     PlusIcon,
 } from "@heroicons/react/24/outline";
-import {
-    ITEM_ACCESS_DESCRIPTORS,
-    ITEM_RELATIVE_QUANTITY,
-    ITEM_ROLE,
-    TInventoryItem,
-} from "../../../../../common/inventory";
+import { TInventoryItem } from "../../../../../common/inventory";
 import MAKETable from "../../../Table";
-import Fuse, { FuseGetFunction } from "fuse.js";
-import React from "react";
-import { TUser, TUserRole } from "common/user";
-import { TCertificate, TCertification } from "common/certification";
+import Fuse from "fuse.js";
+import React, { useCallback, useState } from "react";
+import { TUser } from "common/user";
+import { TCertification } from "common/certification";
 import clsx from "clsx";
-import CertificationTag from "../certifications/CertificationTag";
-import UserRole from "../../../user/UserRole";
 import { TArea } from "common/area";
 import { TCheckout } from "common/checkout";
 import { TConfig } from "common/config";
@@ -47,8 +41,8 @@ import {
     zonedDateTimeToTimestamp,
 } from "../../../../utils";
 import { now, ZonedDateTime } from "@internationalized/date";
-import UserInfo from "../users/UserInfo";
 import { UserChip } from "../../../user/UserChip";
+import CheckoutDisclaimerModal from "./CheckoutDisclaimerModal";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" },
@@ -204,7 +198,6 @@ export default function CheckoutTable({
                 if (isLoading) {
                     return obj.uuid;
                 }
-                console.log(path);
                 if (path.includes("checked_out_by")) {
                     // Get user name
                     return (
@@ -271,6 +264,12 @@ export default function CheckoutTable({
         setSearch(value);
     }, []);
 
+    const [itemsWithDisclaimers, setItemsWithDisclaimers] = useState<
+        TInventoryItem[]
+    >([]);
+
+    const [selectedCheckout, setSelectedCheckout] = useState<UUID>();
+
     const renderTimestamp = (
         timestamp: "timestamp_out" | "timestamp_due" | "timestamp_in",
     ) => {
@@ -290,6 +289,33 @@ export default function CheckoutTable({
             </h2>
         );
     };
+
+    // Callback to return a checkout by uuid, but popup disclaimers as necessary
+    const attemptReturnCheckout = useCallback(
+        (checkout: TCheckout) => {
+            const item_uuids = checkout.items.map((i) => i.item_uuid);
+            const potentialDisclaimers = inventory
+                .filter((i) => item_uuids.includes(i.uuid))
+                .filter((i) => i.checkout_disclaimer);
+            // If no disclaimers present, return immediately
+            if (potentialDisclaimers.length === 0) {
+                returnMutation.mutate({
+                    checkout_uuid: checkout.uuid,
+                });
+            } else {
+                setItemsWithDisclaimers(potentialDisclaimers);
+                setSelectedCheckout(checkout.uuid);
+                checkoutDisclaimerOnOpen();
+            }
+        },
+        [returnMutation],
+    );
+
+    const {
+        isOpen: checkoutDisclaimerOpen,
+        onOpen: checkoutDisclaimerOnOpen,
+        onOpenChange: checkoutDisclaimerOpenChange,
+    } = useDisclosure();
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -365,12 +391,10 @@ export default function CheckoutTable({
                     timestamp_out: renderTimestamp("timestamp_out"),
                     timestamp_due: renderTimestamp("timestamp_due"),
                     timestamp_in: renderTimestamp("timestamp_in"),
-                    // put stuff here
                     checked_out_by: (c) => {
                         const user = users?.find(
                             (u) => u.uuid === c.checked_out_by,
                         );
-                        console.log(c.checked_out_by, user);
                         return (
                             <UserChip
                                 key={user?.uuid}
@@ -540,11 +564,7 @@ export default function CheckoutTable({
                                                 selectedUser.uuid !==
                                                     c.checked_out_by)*/ false
                                     }
-                                    onPress={() =>
-                                        returnMutation.mutate({
-                                            checkout_uuid: c.uuid,
-                                        })
-                                    }
+                                    onPress={() => attemptReturnCheckout(c)}
                                 />
                             );
                         }
@@ -557,6 +577,18 @@ export default function CheckoutTable({
                         <Spinner color="white" ref={ref} />
                     </div>
                 )}
+            />
+            <CheckoutDisclaimerModal
+                type="return"
+                items={itemsWithDisclaimers}
+                onSubmit={() =>
+                    selectedCheckout &&
+                    returnMutation.mutate({
+                        checkout_uuid: selectedCheckout,
+                    })
+                }
+                isOpen={checkoutDisclaimerOpen}
+                onOpenChange={checkoutDisclaimerOpenChange}
             />
         </div>
     );
