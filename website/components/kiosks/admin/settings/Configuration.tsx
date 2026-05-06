@@ -224,6 +224,7 @@ export default function Configuration({
                             "workshop_sign_in_enabled_within",
                         ) as string) || "0",
                     ) || config.workshop.sign_in_enabled_within,
+            instructor_roles: config.workshop.instructor_roles,
             },
         };
 
@@ -335,9 +336,14 @@ export default function Configuration({
             }
         }
 
-        const worker_roles = formData.getAll("roles") as string[];
+        const worker_roles = formData.getAll("worker_roles") as string[];
         if (worker_roles.length > 0) {
             body.schedule.worker_roles = worker_roles;
+        }
+
+        const instructor_roles = formData.getAll("instructor_roles") as string[];
+        if (instructor_roles.length > 0) {
+            body.workshop.instructor_roles = instructor_roles;
         }
 
         const timezone = formData.get("timezone") as string;
@@ -840,12 +846,31 @@ export default function Configuration({
                                     )}
                                 </Select>
                             </ConfigItem>
+                            <ConfigItem name="Locale" description="">
+                                <Select
+                                    name="locale"
+                                    selectionMode="single"
+                                    placeholder="Select locale"
+                                    variant="faded"
+                                    color="primary"
+                                    aria-label="Select locale"
+                                    classNames={{ value: "capitalize" }}
+                                >
+                                    <SelectItem
+                                        textValue={config.schedule.locale}
+                                        classNames={{ title: "capitalize" }}
+                                    >
+                                        {config.schedule.locale}
+                                    </SelectItem>
+                                </Select>
+                            </ConfigItem>
                             <ConfigItem
                                 name="Workers"
                                 description="Roles visible in the schedule editor"
                                 className="flex-col"
                             >
                                 <UserRoleSelect
+                                    name={"worker_roles"}
                                     roles={roles}
                                     defaultSelectedKeys={
                                         config.schedule.worker_roles
@@ -911,6 +936,21 @@ export default function Configuration({
                                     variant="faded"
                                     endContent="seconds"
                                     isRequired
+                                />
+                            </ConfigItem>
+
+                            <ConfigItem
+                                name="Instructors"
+                                description="Instructors visible in the workshop editor"
+                                className="flex-col"
+                            >
+                                <UserRoleSelect
+                                    name={"instructor_roles"}
+                                    roles={roles}
+                                    defaultSelectedKeys={
+                                        config.workshop.instructor_roles
+                                    }
+                                    label=""
                                 />
                             </ConfigItem>
                         </AccordionItem>
