@@ -103,6 +103,10 @@ export const ITEM_ACCESS_DESCRIPTORS: {
  * @property serial_number - (optional) serial number of item
  * @property kit_contents - (optional) if kit, lists all item UUIDs in this kit
  * @property keywords - (optional) keywords associated with item
+ * @property checkout_disclaimer - (optional) A notice to indicate to the user
+ *      when checking out this item.
+ * @property return_disclaimer - (optional) A notice to indicate to the user
+ *      when checking in this item.
  * @property required_certs - UUIDs of certs required to use item
  * @property authorized_roles - (optional) A list of UserRole UUIDs that are
  *      allowed to use this item. A user must have at least one of
@@ -122,6 +126,8 @@ export type TInventoryItem = {
     reorder_url?: string;
     serial_number?: string;
     keywords?: string[];
+    checkout_disclaimer?: string;
+    return_disclaimer?: string;
     required_certifications?: TRequiredCertificate[];
     authorized_roles?: UserRoleUUID[] | null;
 };
