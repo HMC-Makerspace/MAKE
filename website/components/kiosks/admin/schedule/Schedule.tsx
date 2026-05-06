@@ -28,7 +28,7 @@ const toggleWorkerAvailability = async ({
         // Add the user's availability
         return (
             await axios.patch<TUser>(
-                `/api/v3/user/${user_uuid}/availability/addBatch`,
+                `/api/v3/user/${user_uuid}/availability/add/batch`,
                 {
                     selectedShifts: selectedShifts,
                 },
@@ -38,7 +38,7 @@ const toggleWorkerAvailability = async ({
         // Remove the user's availability
         return (
             await axios.patch<TUser>(
-                `/api/v3/user/${user_uuid}/availability/removeBatch`,
+                `/api/v3/user/${user_uuid}/availability/remove/batch`,
                 {
                     selectedShifts: selectedShifts,
                 },
