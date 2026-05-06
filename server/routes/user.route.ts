@@ -20,6 +20,8 @@ import {
     initializeAdminRole,
     patchUserAvailability,
     removeUserAvailability,
+    addBatchUserAvailability,
+    removeBatchUserAvailability,
     revokeCertificateFromUser,
     updateUser,
     updateUserPublicInfo,
@@ -40,7 +42,13 @@ import { ScheduleUUID } from "common/schedule";
 import { getCertification } from "controllers/certification.controller";
 import { CERTIFICATION_VISIBILITY } from "common/certification";
 import { createHash } from "crypto";
-import { UserSchema, UserRoleSchema, UserSchemaOptional, UserRoleSchemaOptional } from "models/user.model";
+import {
+    UserSchema,
+    UserRoleSchema,
+    UserSchemaOptional,
+    UserRoleSchemaOptional,
+} from "models/user.model";
+import { SHIFT_DAY } from "common/shift";
 
 // --- Request and Response Types ---
 type UserRequest = Request<{}, {}, { user_obj: TUser }>;
@@ -65,6 +73,18 @@ type UserAvailabilityRequest = Request<
     { UUID: string },
     {},
     { day: number; sec_start: number; sec_end: number }
+>;
+
+type UserAvailabilityRequestBatch = Request<
+    { UUID: string },
+    {},
+    {
+        selectedShifts: {
+            day: SHIFT_DAY;
+            sec_start: number;
+            sec_end: number;
+        }[];
+    }
 >;
 
 const router = Router();
@@ -962,7 +982,6 @@ router.post("/",
 
         // If the user is authorized, perform the creation
         if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_USER)) {
-
             const user = await createUser(user_obj);
             if (!user) {
                 req.log.warn(
@@ -977,7 +996,7 @@ router.post("/",
             req.log.debug(`Created user with uuid ${new_user_uuid}`);
             // Return the new user object
             res.status(StatusCodes.CREATED).json(user);
-
+        
         } else {
             // If the user is not authorized, provide a status error
             req.log.warn({
@@ -1133,6 +1152,77 @@ router.patch(
 );
 
 /**
+ * Add batch availability for a given user in the current active schedule.
+ * This is a protected route, and a `requesting_uuid` header is required to
+ * call it. The user must have the {@link API_SCOPE.UPDATE_USER} scope. If the
+ * user is requesting to update their own availability, they must have the
+ * {@link API_SCOPE.UPDATE_AVAILABILITY} scope. If the user is not authorized, a
+ * status error is returned. If the user is authorized, the updated user object
+ * is returned.
+ */
+router.patch(
+    "/:UUID/availability/add/batch",
+    async (req: UserAvailabilityRequestBatch, res: UserResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = req.user?.uuid as string;
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while adding user availability",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+
+        const user_uuid = req.params.UUID;
+        const selectedShifts = req.body.selectedShifts;
+
+        req.log.debug({
+            msg: `Adding to a user's availability with uuid ${user_uuid}`,
+            requesting_uuid: user_uuid,
+        });
+
+        // A patch request is valid if the requesting user can update any user,
+        // or if the requesting user is allowed to update their own availability
+        if (
+            await verifyRequest(
+                requesting_uuid,
+                API_SCOPE.UPDATE_USER,
+                requesting_uuid === user_uuid && API_SCOPE.UPDATE_AVAILABILITY,
+            )
+        ) {
+            // If the user is authorized, perform the update
+            const updated_user = await addBatchUserAvailability(
+                user_uuid,
+                selectedShifts,
+            );
+            if (!updated_user) {
+                req.log.warn(
+                    `No user found to update availability with uuid ${user_uuid}` +
+                        "or no active schedule",
+                );
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error:
+                        `No user found to update availability with uuid ${user_uuid}` +
+                        "or no active schedule",
+                });
+                return;
+            }
+            req.log.debug(`Updated user availability with uuid ${user_uuid}`);
+            // Return the updated user object
+            res.status(StatusCodes.OK).json(updated_user);
+        } else {
+            // If the user is not authorized, provide a status error
+            req.log.warn({
+                msg: `Forbidden user attempted to update user availability with uuid ${user_uuid}`,
+                requesting_uuid: requesting_uuid,
+            });
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
+
+/**
  * Remove availability for a given user in the current active schedule.
  * This is a protected route, and a `requesting_uuid` header is required to
  * call it. The user must have the {@link API_SCOPE.UPDATE_USER} scope. If the
@@ -1180,6 +1270,77 @@ router.patch(
                 day,
                 sec_start,
                 sec_end,
+            );
+            if (!updated_user) {
+                req.log.warn(
+                    `No user found to update availability with uuid ${user_uuid}` +
+                        "or no active schedule",
+                );
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error:
+                        `No user found to update availability with uuid ${user_uuid}` +
+                        "or no active schedule",
+                });
+                return;
+            }
+            req.log.debug(`Updated user availability with uuid ${user_uuid}`);
+            // Return the updated user object)
+            res.status(StatusCodes.OK).json(updated_user);
+        } else {
+            // If the user is not authorized, provide a status error
+            req.log.warn({
+                msg: `Forbidden user attempted to update user availability with uuid ${user_uuid}`,
+                requesting_uuid: requesting_uuid,
+            });
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
+
+/**
+ * Remove batch availability for a given user in the current active schedule.
+ * This is a protected route, and a `requesting_uuid` header is required to
+ * call it. The user must have the {@link API_SCOPE.UPDATE_USER} scope. If the
+ * user is requesting to update their own availability, they must have the
+ * {@link API_SCOPE.UPDATE_AVAILABILITY} scope. If the user is not authorized, a
+ * status error is returned. If the user is authorized, the updated user object
+ * is returned.
+ */
+router.patch(
+    "/:UUID/availability/remove/batch",
+    async (req: UserAvailabilityRequestBatch, res: UserResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid = req.user?.uuid as string;
+        // If no requesting user_uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while removing user availability",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+
+        const user_uuid = req.params.UUID;
+        const selectedShifts = req.body.selectedShifts;
+
+        req.log.debug({
+            msg: `Removing from a user's availability with uuid ${user_uuid}`,
+            requesting_uuid: user_uuid,
+        });
+
+        // A patch request is valid if the requesting user can update any user,
+        // or if the requesting user is allowed to update their own availability
+        if (
+            await verifyRequest(
+                requesting_uuid,
+                API_SCOPE.UPDATE_USER,
+                requesting_uuid === user_uuid && API_SCOPE.UPDATE_AVAILABILITY,
+            )
+        ) {
+            // If the user is authorized, perform the update
+            const updated_user = await removeBatchUserAvailability(
+                user_uuid,
+                selectedShifts
             );
             if (!updated_user) {
                 req.log.warn(
