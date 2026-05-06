@@ -4,8 +4,48 @@ import { TSchedule } from "common/schedule";
 import Shift from "./Shift";
 import { SHIFT_DAY } from "../../../../../common/shift";
 import { TUser, TUserRole, UserUUID } from "common/user";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
+import { motion } from "motion/react";
+import axios from "axios";
+
+const toggleWorkerAvailability = async ({
+    user_uuid,
+    availabilityChange,
+    selectedShifts,
+}: {
+    user_uuid: string;
+    isSelf?: boolean;
+    availabilityChange: boolean;
+    selectedShifts: {
+        day: SHIFT_DAY;
+        sec_start: number;
+        sec_end: number;
+    }[];
+}) => {
+    if (availabilityChange) {
+        // Add the user's availability
+        return (
+            await axios.patch<TUser>(
+                `/api/v3/user/${user_uuid}/availability/addBatch`,
+                {
+                    selectedShifts: selectedShifts,
+                },
+            )
+        ).data;
+    } else {
+        // Remove the user's availability
+        return (
+            await axios.patch<TUser>(
+                `/api/v3/user/${user_uuid}/availability/removeBatch`,
+                {
+                    selectedShifts: selectedShifts,
+                },
+            )
+        ).data;
+    }
+};
 
 export default function Schedule({
     schedule,
@@ -47,6 +87,22 @@ export default function Schedule({
             </Card>
         );
     }
+    const queryClient = useQueryClient();
+
+    const availabilityMutation = useMutation({
+        mutationFn: toggleWorkerAvailability,
+        onSuccess: (result: TUser) => {
+            queryClient.setQueryData(["user", result.uuid], result);
+            queryClient.setQueryData(["user"], (old?: TUser[]) =>
+                (old ?? []).map((u) => (u.uuid === result.uuid ? result : u)),
+            );
+
+            // Naively assume worker availability is updating self, since that
+            // is the only current use of the availability modal.
+            // TODO: Update later to add a isSelf parameter?
+            queryClient.setQueryData(["user", "self"], result);
+        },
+    });
 
     const numIntervals = Math.floor(
         (schedule.daily_close_time - schedule.daily_open_time) /
@@ -56,6 +112,36 @@ export default function Schedule({
     const days = config.schedule.days_open ?? [0, 1, 2, 3, 4, 5, 6];
 
     const [dragging, setDragging] = useState(false);
+    const [availableShifts, setAvailableShifts] = useState<
+        {
+            day: SHIFT_DAY;
+            sec_start: number;
+            sec_end: number;
+        }[]
+    >([]);
+
+    const availableShiftsSet = useMemo<Set<string>>(() => {
+        return new Set(
+            availableShifts.map(
+                ({ day, sec_start, sec_end }) =>
+                    `${day},${sec_start},${sec_end}`,
+            ),
+        );
+    }, [availableShifts]);
+
+    const [availabilityChange, setAvailabilityChange] =
+        useState<boolean>(false);
+
+    const handleDragEnd = () => {
+        if (selectedUser) {
+            availabilityMutation.mutate({
+                user_uuid: selectedUser.uuid,
+                availabilityChange: availabilityChange,
+                selectedShifts: availableShifts,
+            });
+        }
+        setAvailableShifts([]);
+    };
 
     const handleKeyPress = useCallback((event: KeyboardEvent) => {
         if (event.key === "Escape") {
@@ -185,30 +271,140 @@ export default function Schedule({
                                     // Column
                                     days.map((day) => (
                                         <td key={`shift-${day}-${i}`}>
-                                            <Shift
-                                                schedule_uuid={schedule.uuid}
-                                                shifts={schedule.shifts}
-                                                users={users}
-                                                roles={roles}
-                                                day={day}
-                                                sec_start={row_start_sec}
-                                                sec_end={row_end_sec}
-                                                selected_user={selectedUser}
-                                                setSelectedUsers={
-                                                    setSelectedUsers
+                                            <motion.div
+                                                onTapStart={() => {
+                                                    if (
+                                                        type ===
+                                                        "worker_availability"
+                                                    ) {
+                                                        setDragging(true);
+                                                            const available = selectedUser
+                                                                ? selectedUser.work_schedules
+                                                                    ?.find((a) => a.schedule == schedule.uuid)
+                                                                    ?.days.some(
+                                                                        (record) =>
+                                                                            record.day === day &&
+                                                                            record.availability.some(
+                                                                                (time) =>
+                                                                                    time.sec_start <= row_start_sec &&
+                                                                                    time.sec_end >= row_end_sec,
+                                                                            ),
+                                                                    )
+                                                                : false;
+                                                        setAvailabilityChange(
+                                                            !available,
+                                                        );
+                                                        if (selectedUser) {
+                                                            setAvailableShifts((prev) => [
+                                                                    ...prev, {
+                                                                        day: day,
+                                                                        sec_start: row_start_sec,
+                                                                        sec_end: row_end_sec,
+                                                                    }],
+                                                            );
+                                                        }
+                                                    }
+                                                }}
+                                                onTapCancel={() => {
+                                                    if (
+                                                        type ===
+                                                        "worker_availability"
+                                                    ) {
+                                                        setDragging(false);
+                                                        handleDragEnd();
+                                                    }
+                                                }}
+                                                onTap={() => {
+                                                    if (
+                                                        type ===
+                                                        "worker_availability"
+                                                    ) {
+                                                        setDragging(false);
+                                                        if (selectedUser) {
+                                                            const available = selectedUser
+                                                                ? selectedUser.work_schedules
+                                                                    ?.find((a) => a.schedule == schedule.uuid)
+                                                                    ?.days.some(
+                                                                        (record) =>
+                                                                            record.day === day &&
+                                                                            record.availability.some(
+                                                                                (time) =>
+                                                                                    time.sec_start <= row_start_sec &&
+                                                                                    time.sec_end >= row_end_sec,
+                                                                            ),
+                                                                    )
+                                                                : false;
+                                                            setAvailabilityChange(
+                                                            !available,
+                                                        );
+                                                        if (selectedUser) {
+                                                            setAvailableShifts((prev) => [
+                                                                    ...prev, {
+                                                                        day: day,
+                                                                        sec_start: row_start_sec,
+                                                                        sec_end: row_end_sec,
+                                                                    }],
+                                                                );
+                                                        }
+                                                        handleDragEnd();
+                                                        }
+                                                    }
+                                                }}
+                                                onMouseOver={
+                                                    type ===
+                                                        "worker_availability" &&
+                                                    !!selectedUser &&
+                                                    dragging
+                                                        ? () => {
+                                                              setAvailableShifts(
+                                                                  (prev) => [
+                                                                      ...prev,
+                                                                      {
+                                                                          day: day,
+                                                                          sec_start:
+                                                                              row_start_sec,
+                                                                          sec_end:
+                                                                              row_end_sec,
+                                                                      },
+                                                                  ],
+                                                              );
+                                                          }
+                                                        : undefined
                                                 }
-                                                type={type}
-                                                selectedShifts={selectedShifts}
-                                                setSelectedShifts={
-                                                    setSelectedShifts
-                                                }
-                                                dragging={dragging}
-                                                setDragging={setDragging}
-                                                firstNamesOnly={
-                                                    config.schedule
-                                                        .first_names_only
-                                                }
-                                            />
+                                            >
+                                                <Shift
+                                                    schedule_uuid={
+                                                        schedule.uuid
+                                                    }
+                                                    shifts={schedule.shifts}
+                                                    users={users}
+                                                    roles={roles}
+                                                    day={day}
+                                                    sec_start={row_start_sec}
+                                                    sec_end={row_end_sec}
+                                                    selected_user={selectedUser}
+                                                    setSelectedUsers={
+                                                        setSelectedUsers
+                                                    }
+                                                    type={type}
+                                                    selectedShifts={
+                                                        type ===
+                                                        "worker_availability"
+                                                            ? availableShiftsSet
+                                                            : selectedShifts
+                                                    }
+                                                    setSelectedShifts={
+                                                        setSelectedShifts
+                                                    }
+                                                    dragging={dragging}
+                                                    setDragging={setDragging}
+                                                    firstNamesOnly={
+                                                        config.schedule
+                                                            .first_names_only
+                                                    }
+                                                    availabilityChange={availabilityChange}
+                                                />
+                                            </motion.div>
                                         </td>
                                     ))
                                 }
