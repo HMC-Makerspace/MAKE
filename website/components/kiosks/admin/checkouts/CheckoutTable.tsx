@@ -294,16 +294,16 @@ export default function CheckoutTable({
     const attemptReturnCheckout = useCallback(
         (checkout: TCheckout) => {
             const item_uuids = checkout.items.map((i) => i.item_uuid);
-            const potentialDisclaimers = inventory
+            const returnDisclaimers = inventory
                 .filter((i) => item_uuids.includes(i.uuid))
-                .filter((i) => i.checkout_disclaimer);
+                .filter((i) => i.return_disclaimer);
             // If no disclaimers present, return immediately
-            if (potentialDisclaimers.length === 0) {
+            if (returnDisclaimers.length === 0) {
                 returnMutation.mutate({
                     checkout_uuid: checkout.uuid,
                 });
             } else {
-                setItemsWithDisclaimers(potentialDisclaimers);
+                setItemsWithDisclaimers(returnDisclaimers);
                 setSelectedCheckout(checkout.uuid);
                 checkoutDisclaimerOnOpen();
             }
