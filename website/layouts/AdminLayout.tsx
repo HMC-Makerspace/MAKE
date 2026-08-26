@@ -68,14 +68,14 @@ const ADMIN_PAGES: AdminPage[] = [
         scope: API_SCOPE.MACHINE_KIOSK,
     },
     {
-        name: "Settings",
-        href: "/admin/settings",
-        scope: API_SCOPE.SETTINGS_KIOSK,
-    },
-    {
         name: "Statistics",
         href: "/admin/statistics",
         scope: API_SCOPE.STATISTICS_KIOSK,
+    },
+    {
+        name: "Settings",
+        href: "/admin/settings",
+        scope: API_SCOPE.SETTINGS_KIOSK,
     },
 ];
 
