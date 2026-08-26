@@ -354,6 +354,7 @@ export default function Shift({
                                                 "text-danger-800",
                                                 "text-sm",
                                             )}
+                                            title={assignee}
                                         >
                                             Unknown User
                                         </div>
@@ -388,6 +389,7 @@ export default function Shift({
                                             }
                                         }}
                                         size="sm"
+                                        title={assignee}
                                     >
                                         <div
                                             className={clsx(
