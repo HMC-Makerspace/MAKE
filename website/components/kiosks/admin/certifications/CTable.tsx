@@ -31,13 +31,13 @@ import EditCertModal from "./EditCertModal";
 import EditDocsModal from "../../../EditDocsModal";
 import DeleteCertModal from "./DelCertModal";
 
-import UserRole from "../../../user/UserRole";
-import { TDocument } from "common/file";
+import { UserRoleChip } from "../../../user/UserRoleChip";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import RequiredCertsModal from "./RequiredCertsModal";
 import { relativeTimestampToString } from "../../../../utils";
 import { TUserRole } from "common/user";
+import { UserRoleList } from "../../../user/UserRoleList";
 
 const baseColumns = [
     { name: "UUID", id: "uuid" },
@@ -344,15 +344,11 @@ export default function CertificationsTable({
                         }
                     },
                     authorized_roles: (cert: TCertification) => (
-                        <div>
-                            {cert.authorized_roles?.map((role) => (
-                                <UserRole
-                                    role_uuid={role}
-                                    key={role}
-                                    role={roles?.find((r) => r.uuid === role)}
-                                />
-                            ))}
-                        </div>
+                        <UserRoleList
+                            list={cert.authorized_roles}
+                            roles={roles || []}
+                            size="lg"
+                        />
                     ),
                     delete: (cert: TCertification) => (
                         <Button

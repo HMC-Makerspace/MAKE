@@ -1,11 +1,8 @@
-import { Spinner } from "@heroui/react";
-import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { TCertification } from "common/certification";
 import { TUser, TUserRole, UserUUID } from "common/user";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
-import { CertSelect } from "../certifications/CertSelect";
-import CertificationTag from "../certifications/CertificationTag";
+import { CertificationList } from "../certifications/CertificationList";
 
 export default function UserInfo({
     user,
@@ -96,7 +93,7 @@ export default function UserInfo({
                         !user.active_roles ||
                         user.active_roles.length === 0
                             ? "px-0"
-                            : "pl-2 pr-0",
+                            : "pl-2 pr-0 py-2",
                     value: clsx(
                         "text-default-400",
                         (!user ||
@@ -109,30 +106,16 @@ export default function UserInfo({
                 placeholder={user ? "No active roles" : "Roles"}
                 viewOnly
             />
-            <div
-                className={clsx(
-                    "rounded-lg bg-default-100 border-2 border-default-200 p-2",
-                    "col-span-3 flex flex-wrap gap-2 overflow-auto max-h-[30vh]",
-                )}
-            >
-                {user?.active_certificates &&
-                user.active_certificates.length > 0 ? (
-                    user.active_certificates.map((c) => (
-                        <CertificationTag
-                            key={c.certification_uuid}
-                            cert_uuid={c.certification_uuid}
-                            certifications={certs}
-                            level={c.level}
-                        />
-                    ))
-                ) : (
-                    <div className="text-default-400 text-center w-full">
-                        {unknownPlaceholders
-                            ? "No active certifications"
-                            : "Certifications"}
-                    </div>
-                )}
-            </div>
+            <CertificationList
+                certifications={certs || []}
+                list={user?.active_certificates}
+                size="xl"
+                placeholder={
+                    unknownPlaceholders
+                        ? "No active certifications"
+                        : "Certifications"
+                }
+            />
             {endContent}
         </div>
     );

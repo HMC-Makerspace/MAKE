@@ -6,6 +6,7 @@ import ScheduleBuffer from "../../components/kiosks/admin/schedule/SchedulesBuff
 import { Spinner, Selection, user } from "@heroui/react";
 import { TUser, TUserRole, UserUUID } from "common/user";
 import React, { useEffect } from "react";
+import { useRoles } from "../../queries/useRoles";
 
 export default function ScheduleKiosk() {
     const {
@@ -28,10 +29,7 @@ export default function ScheduleKiosk() {
         refetchOnWindowFocus: false,
     });
 
-    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
-    });
+    const { data: roles, isLoading: rolesLoading } = useRoles();
 
     const [selectedUsers, setSelectedUsers] = React.useState<Selection>(
         new Set(),

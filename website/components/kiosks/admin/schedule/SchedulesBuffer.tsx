@@ -153,6 +153,7 @@ export default function ScheduleBuffer({
                         schedule={schedule}
                         config={config}
                         users={users}
+                        workers={filteredUsers}
                         roles={roles}
                         isLoading={false}
                         selectedUser={selectedUser}

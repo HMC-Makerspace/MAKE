@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import WorkshopTable from "../../components/kiosks/admin/workshops/WorkshopTable";
 import React from "react";
 import { TConfig } from "common/config";
+import { useRoles } from "../../queries/useRoles";
 
 export default function WorkshopKiosk() {
     // getting workshop data
@@ -34,10 +35,7 @@ export default function WorkshopKiosk() {
         },
     );
 
-    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
-    });
+    const { data: roles, isLoading: rolesLoading } = useRoles();
 
     const { data: config, isLoading: configLoading } = useQuery<TConfig>({
         queryKey: ["config"],
