@@ -34,12 +34,14 @@ import { API_SCOPE } from "../../../../../common/global.ts";
 import { mergeRequiredCerts, verifyScopes } from "../../../../utils.tsx";
 import clsx from "clsx";
 import CertificationTag from "../certifications/CertificationTag";
-import UserRole from "../../../user/UserRole";
+import { UserRoleChip } from "../../../user/UserRoleChip.tsx";
 import { TArea } from "common/area";
 import ItemLocationChip from "./ItemLocationChip";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RestockRequestModal from "../restock/RestockRequestModal";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import { UserRoleList } from "../../../user/UserRoleList.tsx";
+import { CertificationList } from "../certifications/CertificationList.tsx";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" },
@@ -109,7 +111,7 @@ export default function InventoryTable({
     };
     showsKitContents?: boolean;
     emptyContent?: string;
-    editable?: React.ReactNode;
+    editable?: boolean;
     onCreate?: (state: boolean) => void;
 }) {
     // The set of columns that are visible
@@ -330,7 +332,11 @@ export default function InventoryTable({
                 </div>
             </div>
             <MAKETable
-                content={showsKitContents ? filteredItems : filteredItems.filter(item => !item.parent_kit)}
+                content={
+                    showsKitContents
+                        ? filteredItems
+                        : filteredItems.filter((item) => !item.parent_kit)
+                }
                 columns={columns}
                 visibleColumns={visibleColumns}
                 selectedKeys={selectedKeys}
@@ -398,75 +404,70 @@ export default function InventoryTable({
                     },
                     locations: (i) => (
                         <div className="flex flex-col gap-2 min-w-max">
-                            {i.parent_kit ? (() => {
-                                let parent_kit = inventory.find(k => k.uuid == i.parent_kit);
+                            {i.parent_kit
+                                ? (() => {
+                                      let parent_kit = inventory.find(
+                                          (k) => k.uuid == i.parent_kit,
+                                      );
 
-                                return (
-                                    parent_kit?.locations.map((location, index) => (
-                                        <ItemLocationChip
-                                            key={`${i.uuid}-location-${index}`}
-                                            location={{
-                                                area: location.area,
-                                                specific: `In ${parent_kit?.name}`,
-                                                container: ""
-                                            }}
-                                            areas={areas}
-                                        />
-                                    ))
-                                );
-                            })() : (
-                                i.locations.map((location, index) => (
-                                    <ItemLocationChip
-                                        key={`${location.area}-${index}`}
-                                        location={location}
-                                        areas={areas}
-                                    />
-                                ))
-                            )}
+                                      return parent_kit?.locations.map(
+                                          (location, index) => (
+                                              <ItemLocationChip
+                                                  key={`${i.uuid}-location-${index}`}
+                                                  location={{
+                                                      area: location.area,
+                                                      specific: `In ${parent_kit?.name}`,
+                                                      container: "",
+                                                  }}
+                                                  areas={areas}
+                                              />
+                                          ),
+                                      );
+                                  })()
+                                : i.locations.map((location, index) => (
+                                      <ItemLocationChip
+                                          key={`${location.area}-${index}`}
+                                          location={location}
+                                          areas={areas}
+                                      />
+                                  ))}
                         </div>
                     ),
                     required_certifications: (i) => (
-                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
-                            {mergeRequiredCerts(i.required_certifications,
-                                inventory.find(k => k.uuid == i.parent_kit)?.required_certifications
-                            )?.map((c) => (
-                                <CertificationTag
-                                    key={c.certification_uuid}
-                                    cert_uuid={c.certification_uuid}
-                                    certifications={certifications}
-                                    level={c.required_level}
-                                    anchor
-                                />
-                            ))}
-                        </div>
+                        <CertificationList
+                            certifications={certifications}
+                            list={mergeRequiredCerts(
+                                i.required_certifications,
+                                inventory.find((k) => k.uuid == i.parent_kit)
+                                    ?.required_certifications,
+                            )}
+                            size="sm"
+                            // Only anchor if the table is on the home page
+                            anchor={!editable && !multiSelect}
+                        />
                     ),
                     available_to: (i) => (
-                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
-                            {i.available_to?.map((role) => (
-                                <UserRole
-                                    key={role}
-                                    role_uuid={role}
-                                    role={roles.find((r) => r.uuid === role)}
-                                />
-                            ))}
-                        </div>
+                        <UserRoleList
+                            list={i.available_to}
+                            roles={roles}
+                            size="lg"
+                        />
                     ),
                     visible_to: (i) => (
-                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
-                            {i.visible_to?.map((role) => (
-                                <UserRole
-                                    key={role}
-                                    role_uuid={role}
-                                    role={roles.find((r) => r.uuid === role)}
-                                />
-                            ))}
-                        </div>
+                        <UserRoleList
+                            list={i.visible_to}
+                            roles={roles}
+                            size="lg"
+                        />
                     ),
                     kit_contents: (i) => (
                         <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
                             {i.kit_contents?.map((content) => (
                                 <div key={i.uuid + "-item-" + content}>
-                                    {inventory.find(a => a.uuid == content)?.name}
+                                    {
+                                        inventory.find((a) => a.uuid == content)
+                                            ?.name
+                                    }
                                 </div>
                             ))}
                         </div>

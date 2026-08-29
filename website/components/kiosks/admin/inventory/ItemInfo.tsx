@@ -16,6 +16,7 @@ import { TCertification } from "common/certification";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { mergeRequiredCerts } from "../../../../utils";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/solid";
 
 export default function ItemInfo({
     item_data,
@@ -63,25 +64,18 @@ export default function ItemInfo({
                             </div>
 
                             <div className="flex flex-row gap-2 justify-evenly items-center">
-                                <Tooltip
-                                    content={item_data.role || "Unknown Role"}
-                                    placement="bottom"
-                                    color="primary"
-                                    classNames={{
-                                        content: "capitalize",
-                                    }}
+                                <div
+                                    className={clsx(
+                                        "bg-default-200 p-2 h-fit w-full",
+                                        "rounded-md flex justify-center",
+                                        "whitespace-nowrap overflow-x-auto",
+                                        "text-default-700 capitalize gap-2",
+                                        "items-center"
+                                    )}
                                 >
-                                    <div
-                                        className={clsx(
-                                            "bg-default-200 p-2 h-fit w-full",
-                                            "rounded-md flex justify-center",
-                                            "whitespace-nowrap overflow-x-auto",
-                                            "text-default-700",
-                                        )}
-                                    >
-                                        <ItemRoleIcon role={item_data.role} />
-                                    </div>
-                                </Tooltip>
+                                    {item_data.role || "Unknown Role"}
+                                    <ItemRoleIcon role={item_data.role} />
+                                </div>
 
                                 <div className="flex-row gap-1 min-w-max flex-wrap">
                                     {parent_kit ? (
@@ -135,23 +129,25 @@ export default function ItemInfo({
                                     </div>
                                 )}
                             </div>
-                            <div
-                                className={`bg-primary p-2 h-fit w-full rounded-md text-center whitespace-nowrap, overflow-x-auto ${item_data ? "text-default-700" : "text-default-400"}`}
+                            <Button
+                                variant="solid"
+                                color="primary"
+                                as={Link}
+                                isDisabled={!item_data.reorder_url}
+                                // radius="none"
+                                to={item_data.reorder_url || ""}
+                                target="_blank"
+                                className="rounded-md"
                             >
                                 {item_data.reorder_url ? (
-                                    <HeroLink
-                                        isExternal
-                                        showAnchorIcon
-                                        as={Link}
-                                        to={item_data.reorder_url}
-                                        className="text-primary-foreground text-sm"
-                                    >
+                                    <>
                                         Reorder Link
-                                    </HeroLink>
+                                        <ArrowTopRightOnSquareIcon className="size-5" />
+                                    </>
                                 ) : (
                                     "No Reorder Link"
                                 )}
-                            </div>
+                            </Button>
                         </div>
                     </PopoverContent>
                 )}

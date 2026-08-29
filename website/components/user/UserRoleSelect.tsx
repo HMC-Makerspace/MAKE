@@ -5,9 +5,12 @@ import {
     SelectItem,
 } from "@heroui/react";
 import { TUserRole, UserRoleUUID } from "common/user";
-import UserRole from "./UserRole";
+import { UserRoleChip } from "./UserRoleChip";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
+import { useRoles } from "../../queries/useRoles";
+import { useMemo } from "react";
+import { compareUserRoles, getUserRoleHierarchy } from "../../utils";
 
 export function UserRoleSelect({
     roles,
@@ -24,6 +27,7 @@ export function UserRoleSelect({
     classNames = {
         label: "pl-2",
         value: "text-default-500 min-h-[48px] content-center",
+        trigger: "py-2",
     },
     placeholder = "Select roles",
     label = "Roles",
@@ -63,14 +67,22 @@ export function UserRoleSelect({
     multiline?: boolean; // if the select allows for multiline
     name?: string;
 }) {
-    const { data: queryRoles, isLoading: queryLoading } = useQuery<TUserRole[]>(
-        {
-            queryKey: ["user", "role"],
-            refetchOnWindowFocus: false,
-            enabled: !roles && !isLoading,
-        },
-    );
+    const { data: queryRoles, isLoading: queryLoading } = useRoles({
+        disabled: !!roles || isLoading,
+    });
     const allRoles = roles || queryRoles || [];
+
+    const sortedDefaults = useMemo(
+        () =>
+            defaultSelectedKeys
+                ? allRoles
+                      .filter((role) => defaultSelectedKeys.includes(role.uuid))
+                      .toSorted(compareUserRoles)
+                      .map((r) => r.uuid)
+                : [],
+        [allRoles, defaultSelectedKeys],
+    );
+
     return (
         <Select
             items={allRoles ?? []}
@@ -78,7 +90,7 @@ export function UserRoleSelect({
             aria-label={label || "Roles"}
             selectedKeys={selectedKeys}
             onSelectionChange={onSelectionChange}
-            defaultSelectedKeys={defaultSelectedKeys}
+            defaultSelectedKeys={sortedDefaults}
             isLoading={isLoading || queryLoading}
             isDisabled={isDisabled || viewOnly}
             isRequired={isRequired}
@@ -92,9 +104,7 @@ export function UserRoleSelect({
             labelPlacement={labelPlacement}
             classNames={classNames}
             // Base classes
-            className={clsx(
-                viewOnly ? "opacity-100" : "", 
-                className)}
+            className={clsx(viewOnly ? "opacity-100" : "", className)}
             selectorIcon={viewOnly ? <span /> : undefined}
             tabIndex={viewOnly ? -1 : undefined}
             renderValue={(selectedKeys) => {
@@ -107,7 +117,7 @@ export function UserRoleSelect({
                                 (
                                     selected_role: SelectedItemProps<TUserRole>,
                                 ) => (
-                                    <UserRole
+                                    <UserRoleChip
                                         key={selected_role.data?.uuid}
                                         role_uuid={
                                             selected_role.data?.uuid || ""
@@ -128,7 +138,7 @@ export function UserRoleSelect({
         >
             {(role) => (
                 <SelectItem key={role.uuid} textValue={role.title}>
-                    <UserRole role_uuid={role.uuid} size="md" />
+                    <UserRoleChip role_uuid={role.uuid} size="md" />
                 </SelectItem>
             )}
         </Select>

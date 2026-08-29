@@ -9,6 +9,7 @@ import { API_SCOPE } from "../../common/global.ts";
 import { verifyScopes } from "../utils.tsx";
 import { Skeleton, Selection } from "@heroui/react";
 import React from 'react';
+import { useRoles } from "../queries/useRoles.tsx";
  
 
 export default function InventoryPage() {
@@ -24,9 +25,7 @@ export default function InventoryPage() {
         refetchOnWindowFocus: false,
         refetchOnMount: false,
     });
-    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
+    const { data: roles, isLoading: rolesLoading } = useRoles({
         refetchOnMount: false,
     });
     const { data: restocks, isLoading: restocksLoading } = useQuery<
@@ -94,6 +93,7 @@ export default function InventoryPage() {
                             ? "Please login to view all inventory items"
                             : undefined
                     }
+                    multiSelect={false}
                 />
             )}
         </DefaultLayout>

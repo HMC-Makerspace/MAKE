@@ -2,7 +2,7 @@ import { ScheduleUUID } from "common/schedule";
 import { TShift } from "common/shift";
 import { TUser, TUserRole } from "common/user";
 import { getUserRoleHierarchy } from "../../../../utils";
-import UserRole from "../../../user/UserRole";
+import { UserRoleChip } from "../../../user/UserRoleChip";
 import clsx from "clsx";
 
 export default function WorkerInfo({
@@ -17,7 +17,7 @@ export default function WorkerInfo({
     schedule_uuid: ScheduleUUID;
 }) {
     const statHierarchicalRoles = worker
-        ? getUserRoleHierarchy(worker, roles)
+        ? getUserRoleHierarchy(worker.active_roles, roles)
         : [];
 
     const statUserScheduledShifts = shifts.filter(
@@ -70,7 +70,7 @@ export default function WorkerInfo({
                 <span key="name" className="font-bold text-medium">
                     {worker.name}
                 </span>
-                <UserRole role_uuid={statHierarchicalRoles[0].uuid} />
+                <UserRoleChip role_uuid={statHierarchicalRoles[0].uuid} />
             </div>
             <div
                 className={clsx(

@@ -3,15 +3,20 @@ import { useQuery } from "@tanstack/react-query";
 import { TUserRole } from "common/user";
 import { StarIcon } from "@heroicons/react/24/outline";
 import { getForegroundColor } from "../../utils";
+import clsx from "clsx";
 
-export default function UserRole({
+export function UserRoleChip({
     role_uuid,
     role,
     size = "md",
+    className,
+    zIndex,
 }: {
     role_uuid: string;
     role?: TUserRole;
     size?: "sm" | "md";
+    className?: string;
+    zIndex?: number;
 }) {
     const { data, isSuccess, isError } = useQuery<TUserRole>({
         queryKey: ["user", "role", role_uuid],
@@ -29,22 +34,36 @@ export default function UserRole({
     if (size == "sm") {
         return (
             <div
-                className={`w-5 h-5 rounded-full`}
-                style={{backgroundColor: color}}
-            ></div>
+                className={clsx(
+                    "size-6 rounded-full flex justify-center items-center",
+                    className,
+                )}
+                style={{ backgroundColor: color, zIndex: zIndex }}
+            >
+                {isDefault && (
+                    <StarIcon
+                        className="size-4"
+                        strokeWidth={2.5}
+                        color={foregroundColor}
+                        fill={foregroundColor}
+                    />
+                )}
+            </div>
         );
     } else {
         return (
-            
             <Card
-                className="p-1.5 flex flex-row gap-1 w-fit px-2.5"
-                style={{ backgroundColor: color }}
+                className={clsx(
+                    "p-1.5 flex flex-row gap-1 w-fit px-2.5",
+                    className,
+                )}
+                style={{ backgroundColor: color, zIndex: zIndex }}
                 isBlurred={!isSuccess}
                 shadow="none"
             >
                 {isDefault ? (
                     <StarIcon
-                        className={`size-4 mt-[1.5px] -ml-0.5`}
+                        className="size-4 mt-[1.5px] -ml-0.5"
                         strokeWidth={2.5}
                         color={foregroundColor}
                     />

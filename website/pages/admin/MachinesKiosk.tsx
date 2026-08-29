@@ -16,6 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import axios from "axios";
+import { useRoles } from "../../queries/useRoles";
 
 const createEmptyMachine = async () => {
     return (
@@ -45,10 +46,7 @@ export default function MachinesKiosk() {
         },
     );
 
-    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
-    });
+    const { data: roles, isLoading: rolesLoading } = useRoles();
 
     const { data: certifications, isLoading: certificationsLoading } = useQuery<
         TCertification[]

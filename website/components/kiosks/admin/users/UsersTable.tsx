@@ -14,7 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { TUser, TUserRole, UserUUID } from "common/user";
 import MAKETable, { ColumnSelect } from "../../../Table";
-import UserChipRole from "../../../user/UserRole";
+import { UserRoleChip } from "../../../user/UserRoleChip";
 import Fuse from "fuse.js";
 import React, { useEffect, useRef } from "react";
 import clsx from "clsx";
@@ -23,6 +23,8 @@ import { TCertification } from "common/certification";
 import { useQuery } from "@tanstack/react-query";
 import UserExportModal from "./UserExportModal";
 import { convertTimestampToDate } from "../../../../utils";
+import { UserRoleList } from "../../../user/UserRoleList";
+import { CertificationList } from "../certifications/CertificationList";
 
 const baseColumns = [
     { name: "UUID", id: "uuid" }, // No need to show
@@ -153,11 +155,6 @@ export default function UsersTable({
         if (onCreate) onCreate(true);
     };
 
-    const findRole = React.useCallback(
-        (role_uuid: string) => roles.find((role) => role.uuid === role_uuid),
-        [roles],
-    );
-
     const {
         isOpen: exportMenu,
         onOpen: openExportMenu,
@@ -264,40 +261,25 @@ export default function UsersTable({
                 disabledRows={unselectableUsers}
                 customColumnComponents={{
                     active_roles: (user: TUser) => (
-                        <div className="flex flex-row flex-wrap gap-2">
-                            {user.active_roles.map((log) => (
-                                <UserChipRole
-                                    role_uuid={log.role_uuid}
-                                    role={findRole(log.role_uuid)}
-                                    key={log.role_uuid}
-                                    size="md"
-                                />
-                            ))}
-                        </div>
+                        <UserRoleList
+                            list={user.active_roles}
+                            roles={roles}
+                            size="md"
+                        />
                     ),
                     past_roles: (user: TUser) => (
-                        <div className="flex flex-row flex-wrap gap-2">
-                            {user.past_roles.map((log) => (
-                                <UserChipRole
-                                    role_uuid={log.role_uuid}
-                                    role={findRole(log.role_uuid)}
-                                    key={log.role_uuid}
-                                    size="md"
-                                />
-                            ))}
-                        </div>
+                        <UserRoleList
+                            list={user.past_roles}
+                            roles={roles}
+                            size="md"
+                        />
                     ),
                     active_certificates: (user: TUser) => (
-                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
-                            {user.active_certificates?.map((c) => (
-                                <CertificationTag
-                                    key={c.certification_uuid}
-                                    cert_uuid={c.certification_uuid}
-                                    certifications={certs}
-                                    level={c.level}
-                                />
-                            ))}
-                        </div>
+                        <CertificationList
+                            certifications={certs}
+                            list={user.active_certificates}
+                            size="md"
+                        />
                     ),
                     past_certificates: (user: TUser) => (
                         <div className="flex flex-col gap-1 overflow-auto max-w-1/2">

@@ -50,6 +50,7 @@ const toggleWorkerAvailability = async ({
 export default function Schedule({
     schedule,
     users,
+    workers,
     roles,
     config,
     isLoading,
@@ -62,6 +63,7 @@ export default function Schedule({
 }: {
     schedule: TSchedule | undefined;
     users: TUser[];
+    workers?: TUser[]; // users with a worker role
     roles: TUserRole[];
     config: TConfig;
     isLoading: boolean;
@@ -415,6 +417,7 @@ export default function Schedule({
                                                     }
                                                     shifts={schedule.shifts}
                                                     users={users}
+                                                    workers={workers}
                                                     roles={roles}
                                                     day={day}
                                                     sec_start={row_start_sec}

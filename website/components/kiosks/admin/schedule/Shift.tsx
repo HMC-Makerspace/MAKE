@@ -1,9 +1,9 @@
 import clsx from "clsx";
-import { SHIFT_DAY, TShift } from "common/shift";
-import { TUser, TUserRole, UserUUID } from "common/user";
+import { TShift } from "common/shift";
+import { TUser, TUserRole } from "common/user";
 import { motion } from "motion/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { API_SCOPE, UUID } from "../../../../../common/global";
+import { UUID } from "../../../../../common/global";
 import axios from "axios";
 import { TSchedule } from "common/schedule";
 import {
@@ -15,7 +15,6 @@ import {
     addToast,
 } from "@heroui/react";
 import React from "react";
-import UserRole from "../../../user/UserRole";
 import { getUserRoleHierarchy } from "../../../../utils";
 import WorkerInfo from "./WorkerInfo";
 
@@ -99,6 +98,7 @@ function getAvailableUsers(
 export default function Shift({
     schedule_uuid,
     shifts,
+    workers,
     users,
     roles,
     day,
@@ -112,11 +112,12 @@ export default function Shift({
     dragging = false,
     setDragging = () => {},
     firstNamesOnly = true,
-    availabilityChange = false
+    availabilityChange = false,
 }: {
     schedule_uuid: UUID;
     shifts: TShift[];
     users: TUser[];
+    workers?: TUser[];
     roles: TUserRole[];
     day: number;
     sec_start: number;
@@ -198,7 +199,8 @@ export default function Shift({
             : [];
 
     const availabilityColorIndex = Math.floor(
-        (availableUsers.length / users.length) * availabilityColors.length,
+        (availableUsers.length / (workers ? workers.length : users.length)) *
+            availabilityColors.length,
     );
 
     const edit_classes = [
@@ -363,7 +365,7 @@ export default function Shift({
                             }
                             if (type === "edit") {
                                 const hierarchical_roles = getUserRoleHierarchy(
-                                    u,
+                                    u.active_roles,
                                     roles,
                                 );
                                 const hierarchical_color =
@@ -462,7 +464,7 @@ export default function Shift({
                                     4 * (assignees.length - 1),
                             }}
                         >
-                            {`${availableUsers.length}/${users.length}`}
+                            {`${availableUsers.length}/${workers ? workers.length : users.length}`}
                         </div>
                     )}
                     {type === "worker_availability" && (

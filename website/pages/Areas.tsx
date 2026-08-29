@@ -9,6 +9,7 @@ import { API_SCOPE } from "../../common/global";
 import { verifyScopes } from "../utils";
 import { useScroll } from "../components/UseScroll";
 import { Spinner } from "@heroui/react";
+import { useRoles } from "../queries/useRoles";
 
 export default function AreasPage() {
     const {
@@ -32,9 +33,7 @@ export default function AreasPage() {
             refetchOnMount: false,
         },
     );
-    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
+    const { data: roles, isLoading: rolesLoading } = useRoles({
         refetchOnMount: false,
     });
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(

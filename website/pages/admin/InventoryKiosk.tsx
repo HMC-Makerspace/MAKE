@@ -20,6 +20,7 @@ import { TCertification } from "common/certification";
 import { TArea } from "common/area";
 import { TRestockRequest } from "../../../common/restock";
 import { API_SCOPE } from "common/global";
+import { useRoles } from "../../queries/useRoles";
 
 const DEFAULT_ITEM: TInventoryItem = {
     uuid: "",
@@ -40,10 +41,7 @@ export default function InventoryKiosk() {
         refetchOnWindowFocus: false,
     });
 
-    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
-    });
+    const { data: roles, isLoading: rolesLoading } = useRoles();
     const { data: requestingUser, isLoading: reqUserLoading } = useQuery<TUser>(
         {
             queryKey: ["user", "self"],

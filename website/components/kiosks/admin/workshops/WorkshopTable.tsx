@@ -1,9 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
     Selection,
     Button,
-    Modal,
-    ModalHeader,
     useDisclosure,
     addToast,
     Spinner,
@@ -25,7 +23,7 @@ import { TCertification } from "common/certification";
 import { TUser, TUserRole } from "common/user";
 import MAKETable from "../../../Table.tsx";
 import { UserChip } from "../../../user/UserChip.tsx";
-import UserRole from "../../../user/UserRole.tsx";
+
 import {
     convertTimestampToDate,
     zonedDateTimeToTimestamp,
@@ -33,8 +31,6 @@ import {
 import WorkshopPeopleModal from "./WorkshopPeopleModal.tsx";
 import WorkshopImagesModal from "./WorkshopImagesModal.tsx";
 import WorkshopEditModal from "./WorkshopEditModal.tsx";
-import DeleteModal from "../../../DeleteModal";
-import { set } from "mongoose";
 import { TConfig } from "common/config.js";
 import RequiredCertsModal from "../certifications/RequiredCertsModal.tsx";
 import { UUID } from "common/global.ts";

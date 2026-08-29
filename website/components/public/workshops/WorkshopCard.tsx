@@ -294,6 +294,7 @@ export default function WorkshopCard({
                                             ? cert.required_level
                                             : undefined
                                     }
+                                    size="sm"
                                     anchor
                                 />
                             ))}

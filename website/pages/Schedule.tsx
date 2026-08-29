@@ -13,6 +13,7 @@ import Schedule from "../components/kiosks/admin/schedule/Schedule";
 import ScheduleCertSelector from "../components/public/schedule/ScheduleCertSelector";
 import clsx from "clsx";
 import { StatusCodes } from "http-status-codes";
+import { useRoles } from "../queries/useRoles";
 
 export default function SchedulePage() {
     const {
@@ -33,9 +34,7 @@ export default function SchedulePage() {
         refetchOnWindowFocus: false,
         refetchOnMount: false,
     });
-    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
+    const { data: roles, isLoading: rolesLoading } = useRoles({
         refetchOnMount: false,
     });
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(

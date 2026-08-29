@@ -3,13 +3,11 @@ import RolesTable from "../../components/kiosks/admin/roles/RolesTable";
 import { useQuery } from "@tanstack/react-query";
 import { TUserRole } from "common/user";
 import { API_SCOPE } from "../../../common/global";
+import { useRoles } from "../../queries/useRoles";
 
 export default function RolesKiosk() {
     // Get all user data
-    const { data, isLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
-    });
+    const { data, isLoading } = useRoles();
     const scopesQuery = useQuery<API_SCOPE[]>({
         queryKey: ["user", "self", "scopes"],
         refetchOnWindowFocus: false,
