@@ -4,12 +4,13 @@ import type { Response } from "express";
 
 /**
  * VerifyRequestHeader - A standard interface for verifying requests
- * @property requesting_uuid - The UUID of the user making this request. The
+ * @property requester - The UUID of the user making this request. The
  *      user's roles will be queried to determine if they have the proper API
  *      scopes to make the given request.
+ * @property passkey - The users passkey
  */
 export type VerifyRequestHeader = IncomingHttpHeaders & {
-    requesting_uuid: UserUUID;
+    requester: UserUUID;
     passkey: string;
 };
 

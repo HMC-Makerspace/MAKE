@@ -17,7 +17,7 @@ export function verifyUser(): (req: Request, res: Response, next: NextFunction) 
         };
         
         // if there is no requesting uuid the next route will handle it
-        const requesting_uuid = headers.requesting_uuid;
+        const requesting_uuid = headers.requester;
         if (!requesting_uuid) {
             next();
             return;

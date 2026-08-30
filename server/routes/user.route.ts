@@ -303,8 +303,7 @@ router.patch(
         res: UserResponse,
     ) => {
         const headers = req.headers as VerifyRequestHeader;
-        const requesting_uuid =
-            (req.user?.uuid as string) ?? headers.requesting_uuid;
+        const requesting_uuid = (req.user?.uuid as string) ?? headers.requester;
         const email = req.params.email;
         const cert_uuid = req.params.cert_uuid;
         const level = parseInt(req.params.level) ?? 1;
