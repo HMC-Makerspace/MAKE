@@ -61,7 +61,7 @@ export function validateCollegeIDStrict(college_id: string): string | null {
     // Remove underscores, (semi)colons, spaces, and question marks
     college_id = college_id.replace(/[\_\;\: \?]/, "");
     if (college_id.length >= 9) {
-        if (college_id.match(/^(25|9)/) && college_id.length === 9) {
+        if (college_id.length === 9 && college_id.match(/^(2[1-9]|9)/)) {
             return college_id; // Valid ID
         } else if (college_id.startsWith("0")) {
             // Attempt to revalidate ID by dropping leading 0
