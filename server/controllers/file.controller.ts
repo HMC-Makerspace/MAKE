@@ -312,7 +312,7 @@ export async function deleteFileOnServer(
         res.status(StatusCodes.FORBIDDEN).json({
             error: "Invalid file path",
         });
-        return Promise.reject(new Error("Invalid file path"));
+        return Promise.reject("Invalid file path");
     }
 
     return fs
