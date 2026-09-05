@@ -7,7 +7,7 @@ import {
     parseZonedDateTime,
 } from "@internationalized/date";
 import { API_SCOPE, UnixTimestamp } from "../common/global";
-import { TUser, TUserRole } from "common/user";
+import { TUser, TUserRole, TUserRoleLog, UserRoleUUID } from "common/user";
 import { TConfig } from "common/config";
 import { TShift, SHIFT_EVENT_TYPE, TShiftEvent } from "../common/shift";
 
@@ -103,32 +103,59 @@ export function relativeTimestampToString(timestamp: number): string {
     return res.filter(Boolean).join(", ") || "0 seconds";
 }
 
-
-export function getUserRoleHierarchy(user: TUser, roles: TUserRole[]) {
+// Compare and filter roles based on a given list. If logs are provided, timestamps
+// are used as a backup.
+export function getUserRoleHierarchy(
+    logs: (TUserRoleLog | UserRoleUUID)[] | null | undefined,
+    roles: TUserRole[],
+): TUserRole[] {
+    if (!logs) {
+        return [];
+    }
     return (
-        user.active_roles
-            .map((role_log) => {
-                return {
-                    role: roles.find((r) => r.uuid === role_log.role_uuid),
-                    timestamp: role_log.timestamp_gained,
-                };
-            })
-            .filter((tr) => !!tr.role)
-            // Sort by role hierarchy (if available) or otherwise timestamp in increasing order (oldest first)
-            .sort((a, b) => {
-                const a_level = a.role?.display_hierarchy;
-                const b_level = b.role?.display_hierarchy;
-                if (a_level === undefined) {
-                    return 1; // show b first, since a has no hierarchy level
-                } else if (b_level === undefined) {
-                    return -1; // show a first, since b has no hierarchy level
+        logs
+            .map((item) => {
+                if (typeof item === "string") {
+                    return {
+                        role: roles.find((r) => r.uuid === item),
+                    };
+                } else {
+                    return {
+                        role: roles.find((r) => r.uuid === item.role_uuid),
+                        timestamp: item.timestamp_gained,
+                    };
                 }
-                // Smaller hierarchical levels and smaller (older) timestamps, appear first
-                return a_level - b_level || a.timestamp - b.timestamp;
             })
+            .filter(
+                (tr): tr is { role: TUserRole; timestamp: number } => !!tr.role,
+            )
+            // Sort by role hierarchy (if available) or otherwise timestamp in increasing order (oldest first)
+            .sort(
+                (a, b) =>
+                    compareUserRoles(a.role, b.role) ||
+                    a.timestamp - b.timestamp,
+            )
             .map((tr) => tr.role)
             .filter((r) => !!r)
     );
+}
+
+export function compareUserRoles(a: TUserRole, b: TUserRole) {
+    const a_level = a.display_hierarchy;
+    const b_level = b.display_hierarchy;
+    if (a_level === undefined && b_level === undefined) {
+        if (a.default || b.default) {
+            return b.default ? -1 : 1;
+        } else {
+            return a.title.localeCompare(b.title);
+        }
+    }
+    if (a_level === undefined) {
+        return 1; // show b first, since a has no hierarchy level
+    } else if (b_level === undefined) {
+        return -1; // show a first, since b has no hierarchy level
+    }
+    return a_level - b_level;
 }
 
 /**

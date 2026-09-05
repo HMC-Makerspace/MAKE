@@ -37,6 +37,7 @@ import RequiredCertsModal from "../certifications/RequiredCertsModal";
 import AuthorizedRolesModal from "../certifications/AuthorizedRolesModal";
 import DeleteModal from "../../../DeleteModal";
 import { Link } from "react-router-dom";
+import { CertificationList } from "../certifications/CertificationList";
 
 const patchMachine = async ({
     uuid,
@@ -205,30 +206,12 @@ export default function Machine({
                                     />
                                 </>
                             ) : (
-                                <div className="min-w-max flex flex-row gap-2">
-                                    {machine.required_certifications &&
-                                        machine.required_certifications.map(
-                                            (cert) => (
-                                                <CertificationTag
-                                                    key={
-                                                        cert.certification_uuid
-                                                    }
-                                                    cert_uuid={
-                                                        cert.certification_uuid
-                                                    }
-                                                    certifications={
-                                                        certifications
-                                                    }
-                                                    level={
-                                                        cert.required_level > 0
-                                                            ? cert.required_level
-                                                            : undefined
-                                                    }
-                                                    anchor
-                                                />
-                                            ),
-                                        )}
-                                </div>
+                                <CertificationList
+                                    certifications={certifications}
+                                    list={machine.required_certifications}
+                                    size="md"
+                                    anchor
+                                />
                             )}
                         </div>
                     </div>

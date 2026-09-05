@@ -38,6 +38,7 @@ import UsersTable from "../../components/kiosks/admin/users/UsersTable";
 import GrantCertPopup from "../../components/kiosks/admin/checkouts/GrantCertPopup";
 import AssignIDPopup from "../../components/kiosks/admin/checkouts/AssignIDPopup";
 import CertificationTag from "../../components/kiosks/admin/certifications/CertificationTag";
+import { useRoles } from "../../queries/useRoles";
 
 async function getCartUnavailability({ cart }: { cart: TCheckoutItem[] }) {
     return (
@@ -68,10 +69,7 @@ export default function CheckoutsKiosk() {
         queryKey: ["user"],
         refetchOnWindowFocus: false,
     });
-    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
-    });
+    const { data: roles, isLoading: rolesLoading } = useRoles();
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
             queryKey: ["certification"],
@@ -310,24 +308,6 @@ export default function CheckoutsKiosk() {
                                                     removeItemFromCart(i.uuid)
                                                 }
                                             />
-                                        </div>
-                                    ),
-                                    required_certifications: (i) => (
-                                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
-                                            {i.required_certifications?.map(
-                                                (c) => (
-                                                    <CertificationTag
-                                                        key={
-                                                            c.certification_uuid
-                                                        }
-                                                        cert_uuid={
-                                                            c.certification_uuid
-                                                        }
-                                                        certifications={certs}
-                                                        level={c.required_level}
-                                                    />
-                                                ),
-                                            )}
                                         </div>
                                     ),
                                 }}

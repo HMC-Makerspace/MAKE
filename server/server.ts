@@ -142,7 +142,7 @@ app.use(passport.session());
 export const { generateToken, csrfSynchronisedProtection } = csrfSync({
     skipCsrfProtection: (req) => {
         const headers = req.headers as VerifyRequestHeader;
-        if (headers.requesting_uuid && headers.passkey) {
+        if (headers.requester && headers.passkey) {
             // calls with requesting_uuid and passkey get passed through to verify middleware instead
             return true;
         } else {

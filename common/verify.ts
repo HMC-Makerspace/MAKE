@@ -4,12 +4,13 @@ import type { Response } from "express";
 
 /**
  * VerifyRequestHeader - A standard interface for verifying requests
- * @property requesting_uuid - The UUID of the user making this request. The
+ * @property requester - The UUID of the user making this request. The
  *      user's roles will be queried to determine if they have the proper API
  *      scopes to make the given request.
+ * @property passkey - The users passkey
  */
 export type VerifyRequestHeader = IncomingHttpHeaders & {
-    requesting_uuid: UserUUID;
+    requester: UserUUID;
     passkey: string;
 };
 
@@ -60,7 +61,7 @@ export function validateCollegeIDStrict(college_id: string): string | null {
     // Remove underscores, (semi)colons, spaces, and question marks
     college_id = college_id.replace(/[\_\;\: \?]/, "");
     if (college_id.length >= 9) {
-        if (college_id.match(/^(25|9)/) && college_id.length === 9) {
+        if (college_id.length === 9 && college_id.match(/^(2[1-9]|9)/)) {
             return college_id; // Valid ID
         } else if (college_id.startsWith("0")) {
             // Attempt to revalidate ID by dropping leading 0

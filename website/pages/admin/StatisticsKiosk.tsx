@@ -8,6 +8,7 @@ import { TRestockRequest } from "../../../common/restock";
 import { Spinner } from "@heroui/react";
 import { TArea } from "common/area";
 import { TCertification } from "common/certification";
+import { useRoles } from "../../queries/useRoles";
 
 //the kiosk's job is just to fetch the data needed from the server using useQuery
 //and display a loading circle when any of the data needed isn't ready
@@ -38,12 +39,7 @@ export default function StatisticsKiosk() {
         refetchOnWindowFocus: false,
     });
 
-    //fetches the user role data which is used to display role names
-    //in CheckoutsByRole instead of their raw UUIDs
-    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
-    });
+    const { data: roles, isLoading: rolesLoading } = useRoles();
 
     const { data: restocks, isLoading: restocksLoading } = useQuery<
         TRestockRequest[]

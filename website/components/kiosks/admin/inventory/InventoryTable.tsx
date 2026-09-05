@@ -34,12 +34,14 @@ import { API_SCOPE } from "../../../../../common/global.ts";
 import { verifyScopes } from "../../../../utils.tsx";
 import clsx from "clsx";
 import CertificationTag from "../certifications/CertificationTag";
-import UserRole from "../../../user/UserRole";
+import { UserRoleChip } from "../../../user/UserRoleChip.tsx";
 import { TArea } from "common/area";
 import ItemLocationChip from "./ItemLocationChip";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RestockRequestModal from "../restock/RestockRequestModal";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import { UserRoleList } from "../../../user/UserRoleList.tsx";
+import { CertificationList } from "../certifications/CertificationList.tsx";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" },
@@ -104,7 +106,7 @@ export default function InventoryTable({
         [column_id: string]: (item: TInventoryItem) => React.ReactNode;
     };
     emptyContent?: string;
-    editable?: React.ReactNode;
+    editable?: boolean;
     onCreate?: (state: boolean) => void;
 }) {
     // The set of columns that are visible
@@ -403,28 +405,20 @@ export default function InventoryTable({
                         </div>
                     ),
                     required_certifications: (i) => (
-                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
-                            {i.required_certifications?.map((c) => (
-                                <CertificationTag
-                                    key={c.certification_uuid}
-                                    cert_uuid={c.certification_uuid}
-                                    certifications={certifications}
-                                    level={c.required_level}
-                                    anchor
-                                />
-                            ))}
-                        </div>
+                        <CertificationList
+                            certifications={certifications}
+                            list={i.required_certifications}
+                            size="sm"
+                            // Only anchor if the table is on the home page
+                            anchor={!editable && !multiSelect}
+                        />
                     ),
                     authorized_roles: (i) => (
-                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
-                            {i.authorized_roles?.map((role) => (
-                                <UserRole
-                                    key={role}
-                                    role_uuid={role}
-                                    role={roles.find((r) => r.uuid === role)}
-                                />
-                            ))}
-                        </div>
+                        <UserRoleList
+                            list={i.authorized_roles}
+                            roles={roles}
+                            size="lg"
+                        />
                     ),
                     access_type: (i) => (
                         <div className="text-default-700 bg-default-200 p-2 rounded-md">

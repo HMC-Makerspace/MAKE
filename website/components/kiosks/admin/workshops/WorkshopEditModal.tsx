@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     Button,
     Modal,
@@ -9,28 +9,21 @@ import {
     Select,
     useDisclosure,
     SelectItem,
-    SelectedItems,
     Form,
     Textarea,
     Input,
     DatePicker,
     DateRangePicker,
     NumberInput,
-    Autocomplete,
-    AutocompleteItem,
     addToast,
 } from "@heroui/react";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import { TWorkshop } from "../../../../../common/workshop";
-import { UserRoleUUID, UserUUID } from "../../../../../common/user";
-import { CertificationUUID } from "../../../../../common/certification";
-import { UnixTimestamp, UUID } from "../../../../../common/global";
-import { FileUUID } from "../../../../../common/file";
+import { UUID } from "../../../../../common/global";
 import { timestampToZonedDateTime } from "../../../../utils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TUser } from "../../../../../common/user";
 import { TCertification } from "../../../../../common/certification";
-import CertificationTag from "../certifications/CertificationTag";
 import { parseZonedDateTime, ZonedDateTime } from "@internationalized/date";
 import WorkshopImagesModal from "./WorkshopImagesModal.tsx";
 import RequiredCertsModal from "../certifications/RequiredCertsModal.tsx";
@@ -257,13 +250,13 @@ export default function WorkshopEditModal({
     }
 
     const onSubmit = React.useCallback(
-        (e: React.FormEvent<HTMLFormElement>) => {
+        (e: React.SyntheticEvent<HTMLFormElement>) => {
             e.preventDefault();
             const formData = new FormData(e.currentTarget);
 
             const repeated_days: number = batchEdit
                 ? Number(formData.get("repeats"))
-                : 0;
+                : 1;
 
             const repeat_interval: number = batchEdit
                 ? Number(formData.get("repeat_interval"))

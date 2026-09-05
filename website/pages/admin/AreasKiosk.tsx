@@ -19,6 +19,7 @@ import {
 } from "@heroicons/react/24/outline";
 import axios from "axios";
 import RearrangeAreasModal from "../../components/kiosks/admin/areas/RearrangeAreasModal";
+import { useRoles } from "../../queries/useRoles";
 
 const createEmptyArea = async () => {
     return (
@@ -45,10 +46,7 @@ export default function AreasKiosk() {
         },
     );
 
-    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
-    });
+    const { data: roles, isLoading: rolesLoading } = useRoles();
 
     const { data: certifications, isLoading: certificationsLoading } = useQuery<
         TCertification[]
