@@ -34,9 +34,9 @@
   "dependencies": {
     "@colors/colors": "^1.6.0",
     "@heroicons/react": "^2.2.0",
-    "@heroui/react": "^2.8.8",
+    "@heroui/react": "^2.8.10",
     "@heroui/use-infinite-scroll": "^2.2.12",
-    "@internationalized/date": "^3.11.0",
+    "@internationalized/date": "^3.12.4",
     "@iroomit/rate-limit-mongodb": "^1.0.1",
     "@tanstack/react-query": "^5.90.20",
     "autoprefixer": "^10.4.24",
