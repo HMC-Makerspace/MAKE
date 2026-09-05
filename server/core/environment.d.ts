@@ -1,28 +1,30 @@
-declare module "bun" {
-    interface Env {
-        NODE_ENV: "development" | "production";
-        MONGO_URI: string;
-        VITE_SERVER_PORT?: number;
-        VITE_PORT?: number;
-        SITE_URL: string;
+declare global {
+    namespace NodeJS {
+        interface ProcessEnv {
+            NODE_ENV: "development" | "production";
+            MONGO_URI: string;
+            VITE_SERVER_PORT?: number;
+            VITE_PORT?: number;
+            SITE_URL: string;
 
-        SESSION_SECRET: string;
-        IDP_ENTRY_POINT: string;
-        IDP_CALLBACK: string;
-        IDP_ISSUER: string;
-        IDP_ID_FORMAT: string;
+            SESSION_SECRET: string;
+            IDP_ENTRY_POINT: string;
+            IDP_CALLBACK: string;
+            IDP_ISSUER: string;
+            IDP_ID_FORMAT: string;
 
-        EMAIL_BOT_HOST: string;
-        EMAIL_BOT_PORT: number;
-        EMAIL_BOT_OAUTH_ADDRESS: string;
-        EMAIL_BOT_DISPLAY_ADDRESS: string;
-        EMAIL_BOT_NAME: string;
-        EMAIL_BOT_CLIENT_ID: string;
-        EMAIL_BOT_CLIENT_SECRET: string;
+            EMAIL_BOT_HOST: string;
+            EMAIL_BOT_PORT: number;
+            EMAIL_BOT_OAUTH_ADDRESS: string;
+            EMAIL_BOT_DISPLAY_ADDRESS: string;
+            EMAIL_BOT_NAME: string;
+            EMAIL_BOT_CLIENT_ID: string;
+            EMAIL_BOT_CLIENT_SECRET: string;
 
-        FILE_UPLOAD_PATH: string;
-        FILE_TEMP_PATH: string;
-        FILE_MAX_SIZE: number;
+            FILE_UPLOAD_PATH: string;
+            FILE_TEMP_PATH: string;
+            FILE_MAX_SIZE: number;
+        }
     }
 }
 

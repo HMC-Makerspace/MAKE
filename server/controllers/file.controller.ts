@@ -316,7 +316,7 @@ export async function deleteFileOnServer(
     }
 
     return fs
-        .exists(normalizedPath) // Check that the file exists first
+        .access(normalizedPath) // Check that the file exists first
         .then(() =>
             fs
                 .unlink(normalizedPath) // Attempt to delete the file
