@@ -9,6 +9,7 @@ import { Spinner } from "@heroui/react";
 import { TArea } from "common/area";
 import { TCertification } from "common/certification";
 import { useRoles } from "../../queries/useRoles";
+import { TMachine } from "common/machine";
 
 //the kiosk's job is just to fetch the data needed from the server using useQuery
 //and display a loading circle when any of the data needed isn't ready
@@ -18,48 +19,45 @@ export default function StatisticsKiosk() {
     //fetches the inventory data from the server
     //react automatically manages this data.
     //we use const here to declare a variable that can't be reassigned
-    const { data: inventory, isLoading: inventoryLoading } = useQuery<
-        TInventoryItem[]
-    >({
+    const { data: inventory } = useQuery<TInventoryItem[]>({
         queryKey: ["inventory"],
         refetchOnWindowFocus: false, //don't fetch again just because user switched tabs
     });
 
     //fetches the user data from the server
-    const { data: users, isLoading: usersLoading } = useQuery<TUser[]>({
+    const { data: users } = useQuery<TUser[]>({
         queryKey: ["user"],
         refetchOnWindowFocus: false,
     });
 
     //fetches checkout data from the server
-    const { data: checkouts, isLoading: checkoutsLoading } = useQuery<
-        TCheckout[]
-    >({
+    const { data: checkouts } = useQuery<TCheckout[]>({
         queryKey: ["checkout"],
         refetchOnWindowFocus: false,
     });
 
-    const { data: roles, isLoading: rolesLoading } = useRoles();
+    const { data: roles } = useRoles();
 
-    const { data: restocks, isLoading: restocksLoading } = useQuery<
-        TRestockRequest[]
-    >({
+    const { data: restocks } = useQuery<TRestockRequest[]>({
         queryKey: ["restock"],
         refetchOnWindowFocus: false,
     });
     //fetches area data
-    const { data: areas, isLoading: areasLoading } = useQuery<TArea[]>({
+    const { data: areas } = useQuery<TArea[]>({
         queryKey: ["area"],
         refetchOnWindowFocus: false,
     });
 
     //fetches certification data
-    const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
-        {
-            queryKey: ["certification"],
-            refetchOnWindowFocus: false,
-        },
-    );
+    const { data: certs } = useQuery<TCertification[]>({
+        queryKey: ["certification"],
+        refetchOnWindowFocus: false,
+    });
+
+    const { data: machines } = useQuery<TMachine[]>({
+        queryKey: ["machine"],
+        refetchOnWindowFocus: false,
+    });
 
     //displays a centered spinner if any of the four queries are still loading.
     //also checks if any of the data is undefined
@@ -70,7 +68,8 @@ export default function StatisticsKiosk() {
         roles === undefined ||
         restocks == undefined ||
         areas === undefined ||
-        certs === undefined
+        certs === undefined ||
+        machines === undefined
     ) {
         return (
             <div className="w-full h-screen flex justify-center py-auto">
@@ -91,6 +90,7 @@ export default function StatisticsKiosk() {
                 restocks={restocks}
                 areas={areas}
                 certs={certs}
+                machines={machines}
             />
         </AdminLayout>
     );

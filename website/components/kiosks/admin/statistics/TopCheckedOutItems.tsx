@@ -11,13 +11,19 @@ import {
 import { TInventoryItem } from "common/inventory";
 import { TCheckout } from "common/checkout";
 import { NumberInput } from "@heroui/react";
+import { TMachine } from "common/machine";
+import { TArea } from "common/area";
 
 export default function TopCheckedOutItems({
     checkouts,
     inventory,
+    machines,
+    areas,
 }: {
     checkouts: TCheckout[];
     inventory: TInventoryItem[];
+    machines: TMachine[];
+    areas: TArea[];
 }) {
     const [topN, setTopN] = useState(10);
 
@@ -25,20 +31,37 @@ export default function TopCheckedOutItems({
         () => new Map(inventory.map((item) => [item.uuid, item])),
         [inventory],
     );
+    const machineMap = useMemo(
+        () => new Map(machines.map((machine) => [machine.uuid, machine])),
+        [machines],
+    );
+    const areaMap = useMemo(
+        () => new Map(areas.map((area) => [area.uuid, area])),
+        [areas],
+    );
 
     const sortedData = useMemo(() => {
         const itemCounts: { [key: string]: number } = {};
 
         checkouts.forEach((checkout) => {
             checkout.items.forEach((checkoutItem) => {
-                const name =
-                    inventoryMap.get(checkoutItem.item_uuid)?.name || "Unknown Item";
-                itemCounts[name] = (itemCounts[name] || 0) + checkoutItem.quantity;
+                const uuid =
+                    inventoryMap.get(checkoutItem.item_uuid)?.linked_uuid ||
+                    checkoutItem.item_uuid;
+                itemCounts[uuid] =
+                    (itemCounts[uuid] || 0) + checkoutItem.quantity;
             });
         });
 
         return Object.entries(itemCounts)
-            .map(([name, count]) => ({name, count}))
+            .map(([uuid, count]) => ({
+                name:
+                    inventoryMap.get(uuid)?.name ||
+                    machineMap.get(uuid)?.name ||
+                    areaMap.get(uuid)?.name ||
+                    "Unknown Item",
+                count,
+            }))
             .sort((a, b) => b.count - a.count);
     }, [checkouts, inventoryMap]);
 
