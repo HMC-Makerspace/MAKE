@@ -80,7 +80,9 @@ export default function CheckoutTrend({
     if (data.length === 0) {
         return (
             <div className="bg-default-100 p-6 rounded-lg col-span-1">
-                <h2 className="text-xl font-bold mb-4">Checkout Trend</h2>
+                <h2 className="text-xl font-bold text-foreground-900 mb-4">
+                    Checkout Trend
+                </h2>
                 <p className="text-sm text-default-500">
                     No checkout data available.
                 </p>
@@ -91,11 +93,16 @@ export default function CheckoutTrend({
     //all this stuff is display stuff
     return (
         <div className="bg-default-100 p-6 rounded-lg col-span-1">
-            <h2 className="text-xl font-bold mb-4">Checkout Trend</h2>
+            <h2 className="text-xl font-bold text-foreground-900 mb-4">
+                Checkout Trend
+            </h2>
+            <p className="text-sm text-default-500 mb-3">
+                Daily checkout activity over the selected date range.
+            </p>
             <ResponsiveContainer width="100%" height={300}>
                 <LineChart
                     data={data}
-                    margin={{ top: 10, right: 20, left: 20, bottom: 10 }}
+                    margin={{ top: 20, right: 30, left: -10, bottom: 10 }}
                 >
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                     <XAxis
@@ -104,7 +111,7 @@ export default function CheckoutTrend({
                         textAnchor="end"
                         interval="preserveStartEnd"
                         tick={{ fontSize: 11 }}
-                        height={60}
+                        height={45}
                     />
                     <YAxis
                         allowDecimals={false}

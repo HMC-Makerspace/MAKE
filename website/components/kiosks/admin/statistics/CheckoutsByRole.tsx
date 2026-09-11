@@ -50,7 +50,9 @@ export default function CheckoutsByRole({
     //display stuff yay!
     return (
         <div className="bg-default-100 p-6 rounded-lg">
-            <h2 className="text-xl font-bold mb-2">Checkouts by User Role</h2>
+            <h2 className="text-xl font-bold text-foreground-900 mb-2">
+                Checkouts by User Role
+            </h2>
             <p className="text-sm text-default-600 mb-4">
                 Total Checkouts: {checkouts.length}
             </p>
