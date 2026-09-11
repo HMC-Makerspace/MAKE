@@ -8,6 +8,7 @@ import { TRestockRequest } from "../../../common/restock";
 import { Spinner } from "@heroui/react";
 import { TArea } from "common/area";
 import { TCertification } from "common/certification";
+import { TMachine } from "common/machine";
 import { useRoles } from "../../queries/useRoles";
 
 //the kiosk's job is just to fetch the data needed from the server using useQuery
@@ -61,6 +62,13 @@ export default function StatisticsKiosk() {
         },
     );
 
+    const { data: machines, isLoading: machinesLoading } = useQuery<TMachine[]>(
+        {
+            queryKey: ["machine"],
+            refetchOnWindowFocus: false,
+        },
+    );
+
     //displays a centered spinner if any of the four queries are still loading.
     //also checks if any of the data is undefined
     if (
@@ -70,7 +78,8 @@ export default function StatisticsKiosk() {
         roles === undefined ||
         restocks == undefined ||
         areas === undefined ||
-        certs === undefined
+        certs === undefined ||
+        machines === undefined
     ) {
         return (
             <div className="w-full h-screen flex justify-center py-auto">
@@ -91,6 +100,7 @@ export default function StatisticsKiosk() {
                 restocks={restocks}
                 areas={areas}
                 certs={certs}
+                machines={machines}
             />
         </AdminLayout>
     );

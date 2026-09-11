@@ -44,32 +44,42 @@ export default function RarelyCheckedOutItems({
 
     return (
         <main className="bg-default-100 p-6 rounded-lg" ref={scrollerRef}>
-            <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold mb-4">Rarely Checked Out</h2>
-                <NumberInput
-                    label={"# Times:"}
-                    labelPlacement="outside-left"
-                    value={threshold}
-                    onValueChange={setThreshold}
-                    variant="bordered"
-                    className="w-fit px-3 py-1 rounded-md text-sm"
-                />
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-foreground-900">
+                    Rarely Checked Out
+                </h2>
+                <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-sm text-default-700">Under</span>
+                    <NumberInput
+                        aria-label="Rarely checked out threshold"
+                        min={1}
+                        value={threshold}
+                        onValueChange={setThreshold}
+                        variant="bordered"
+                        size="sm"
+                        className="w-24"
+                        classNames={{
+                            inputWrapper: "h-8 min-h-0",
+                            input: "text-sm",
+                        }}
+                    />
+                </div>
             </div>
 
             <p className="text-sm text-default-500 mb-3">
-                There are {rarelyCheckedOut.length} item
+                Showing {rarelyCheckedOut.length} item
                 {rarelyCheckedOut.length !== 1 ? "s" : ""} that have been
                 checked out fewer than {threshold} time
                 {threshold !== 1 ? "s" : ""}.
             </p>
             <div className="flex flex-col gap-2 max-h-80 overflow-auto">
                 {visibleContent.map((item) => (
-                    <div key={item.uuid} className="px-4 rounded-md text-sm">
+                    <div key={item.uuid} className="h-10 min-h-10">
                         <ItemInfo
                             item_data={item}
                             areas={areas}
                             certs={certs}
-                            className="w-full justify-start"
+                            className="h-10 min-h-10 w-full justify-start rounded-md bg-default-200 px-4 py-2 text-left text-sm font-normal"
                         />
                     </div>
                 ))}

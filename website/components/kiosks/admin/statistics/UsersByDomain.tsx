@@ -123,10 +123,13 @@ export default function UsersByDomain({ users }: { users: TUser[] }) {
     //we can start to display the pie chart
     return (
         <div className="bg-default-100 p-6 rounded-lg">
-            <h2 className="text-xl font-bold mb-2">Users by Domain</h2>
+            <h2 className="text-xl font-bold text-foreground-900 mb-2">
+                Users by Domain
+            </h2>
 
-            <p className="text-sm text-default-600 -mb-10">
-                Total Users: {users.length}
+            <p className="text-sm text-default-500 -mb-10">
+                Users grouped by email domain based on last login. Total users:{" "}
+                {users.length}
             </p>
 
             <ResponsiveContainer width="100%" height={500}>
