@@ -496,13 +496,14 @@ export default function InventoryTable({
                 )}
             />
 
-            {restocks && (
+            {restocks && restockIsOpen && (
                 <RestockRequestModal
                     requestingUser={requestingUser}
                     restocks={restocks}
                     restockSelected={selectedItem}
                     editIsOpen={restockIsOpen}
                     editOnOpenChange={restockOnOpenChange}
+                    inventory={inventory}
                 />
             )}
         </div>
