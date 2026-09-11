@@ -421,8 +421,10 @@ export default function InventoryTable({
                         />
                     ),
                     access_type: (i) => (
-                        <div className="text-default-700 bg-default-200 p-2 rounded-md">
-                            {ITEM_ACCESS_DESCRIPTORS[i.access_type].label}
+                        <div className="text-default-700 bg-default-200 p-2 rounded-md flex justify-center align-center">
+                            {ITEM_ACCESS_DESCRIPTORS.find(
+                                (descriptor) => descriptor.type === i.access_type
+                            )?.label}
                         </div>
                     ),
                     keywords: (i) => i.keywords?.join(", "),
