@@ -160,7 +160,7 @@ export default function RestockRequestModal({
             // Reason can be added any time
             const reason = data.get("reason_restock") as string;
 
-            if (reason) {
+            if (reason || isNew) {
                 restock.status_logs.push({
                     timestamp: Date.now() / 1000,
                     status: restock.current_status,
