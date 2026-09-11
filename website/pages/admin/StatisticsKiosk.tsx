@@ -8,6 +8,7 @@ import { TRestockRequest } from "../../../common/restock";
 import { Spinner } from "@heroui/react";
 import { TArea } from "common/area";
 import { TCertification } from "common/certification";
+import { TMachine } from "common/machine";
 import { useRoles } from "../../queries/useRoles";
 import { TMachine } from "common/machine";
 
@@ -58,6 +59,13 @@ export default function StatisticsKiosk() {
         queryKey: ["machine"],
         refetchOnWindowFocus: false,
     });
+
+    const { data: machines, isLoading: machinesLoading } = useQuery<TMachine[]>(
+        {
+            queryKey: ["machine"],
+            refetchOnWindowFocus: false,
+        },
+    );
 
     //displays a centered spinner if any of the four queries are still loading.
     //also checks if any of the data is undefined
