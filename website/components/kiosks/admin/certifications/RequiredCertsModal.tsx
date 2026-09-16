@@ -64,7 +64,7 @@ export default function RequiredCertsModal<
     ...mutationProps
 }: {
     certifications: TCertification[];
-    parentKitCerts: TRequiredCertificate[] | undefined;
+    parentKitCerts?: TRequiredCertificate[];
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
 } & (SinglePatch<T> | BatchPatch<T>)) {
