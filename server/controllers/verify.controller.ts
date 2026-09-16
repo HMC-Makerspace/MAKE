@@ -42,7 +42,7 @@ export async function verifyRequest(
  */
 export async function verifyCompoundRequest(
     user_uuid: UserUUID,
-    ...scope_groups: API_SCOPE[][]
+    ...scope_groups: (API_SCOPE | false)[][]
 ): Promise<boolean> {
     // Get a list of the user's scopes
     const scopes = await getUserScopes(user_uuid);
@@ -51,7 +51,9 @@ export async function verifyCompoundRequest(
     return (
         scopes.includes(API_SCOPE.ADMIN) ||
         scope_groups.some((group) =>
-            group.every((scope) => scopes.includes(scope)),
+            group
+                .filter((scope) => scope !== false)
+                .every((scope) => scopes.includes(scope)),
         )
     );
 }

@@ -203,13 +203,15 @@ export default function InventoryTable({
         onOpenChange: restockOnOpenChange,
     } = useDisclosure();
 
-    const restockButtonAccess =
+    const restockSelfAccess =
         scopes &&
         scopes.length !== 0 &&
-        verifyScopes(scopes, [
-            API_SCOPE.GET_ALL_RESTOCKS,
-            API_SCOPE.CREATE_RESTOCK,
-        ]);
+        verifyScopes(scopes, [API_SCOPE.CREATE_RESTOCK_BY_SELF]);
+    const restockOtherAccess =
+        scopes &&
+        scopes.length !== 0 &&
+        verifyScopes(scopes, [API_SCOPE.CREATE_RESTOCK_FOR_USER]);
+    const restockButtonAccess = restockSelfAccess || restockOtherAccess;
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -220,7 +222,7 @@ export default function InventoryTable({
                 <div className="flex justify-between gap-3 items-end">
                     <Input
                         isClearable
-                        className="w-full sm:max-w-[44%] text-for"
+                        className="w-full sm:max-w-[44%]"
                         placeholder="Search..."
                         startContent={<SearchIcon className="size-6" />}
                         value={search}
@@ -228,7 +230,7 @@ export default function InventoryTable({
                         onValueChange={onInputChange}
                         isDisabled={isLoading}
                         classNames={{
-                            input: "placeholder:text-foreground-200",
+                            input: "placeholder:text-foreground-200 text-medium",
                         }}
                     />
                     <div className="gap-3 flex">
@@ -295,15 +297,31 @@ export default function InventoryTable({
                         </div>
 
                         {restockButtonAccess && (
-                            <Button
-                                startContent={<PlusIcon className="size-6" />}
-                                isDisabled={selectedItem.name === ""}
-                                onPress={() => {
-                                    restockOnOpen();
-                                }}
+                            <Tooltip
+                                content="Select an item to restock"
+                                color="warning"
+                                delay={300}
+                                isDisabled={selectedItem.name !== ""}
                             >
-                                Restock
-                            </Button>
+                                <Button
+                                    startContent={
+                                        <PlusIcon className="size-6" />
+                                    }
+                                    disableAnimation={selectedItem.name === ""}
+                                    onPress={() =>
+                                        selectedItem.name === ""
+                                            ? undefined
+                                            : restockOnOpen()
+                                    }
+                                    className={
+                                        selectedItem.name === ""
+                                            ? "!opacity-disabled !cursor-default"
+                                            : ""
+                                    }
+                                >
+                                    Restock
+                                </Button>
+                            </Tooltip>
                         )}
 
                         {editable && (
@@ -445,6 +463,13 @@ export default function InventoryTable({
                     restockSelected={selectedItem}
                     editIsOpen={restockIsOpen}
                     editOnOpenChange={restockOnOpenChange}
+                    type={
+                        restockSelfAccess && restockOtherAccess
+                            ? "both"
+                            : restockSelfAccess
+                              ? "create_self"
+                              : "create_other"
+                    }
                 />
             )}
         </div>
