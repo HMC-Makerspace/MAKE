@@ -27,7 +27,7 @@ export enum API_SCOPE {
     RESTOCK_KIOSK = "restock_kiosk",
     CERTIFICATION_KIOSK = "certification_kiosk",
     SETTINGS_KIOSK = "settings_kiosk",
-    STATISTICS_KIOSK = 'statistic_kiosk',
+    STATISTICS_KIOSK = "statistic_kiosk",
     // Embed scopes
     GET_ALL_EMBEDS = "get_embeds",
     CREATE_EMBED = "create_embed",
@@ -87,7 +87,8 @@ export enum API_SCOPE {
     GET_ALL_RESTOCKS = "get_restock_requests",
     GET_RESTOCKS_BY_USER = "get_user_restock_requests",
     GET_RESTOCKS_BY_SELF = "get_own_restock_requests",
-    CREATE_RESTOCK = "create_restock_request",
+    CREATE_RESTOCK_BY_SELF = "create_restock_request",
+    CREATE_RESTOCK_FOR_USER = "create_restock_request_user",
     UPDATE_RESTOCK = "update_restock_request",
     UPDATE_RESTOCK_STATUS = "update_restock_status",
     DELETE_RESTOCK = "delete_restock_request",
@@ -485,9 +486,14 @@ export const API_SCOPE_SECTIONS: {
                     "Able to view all restock requests made by oneself",
             },
             {
-                scope: API_SCOPE.CREATE_RESTOCK,
+                scope: API_SCOPE.CREATE_RESTOCK_BY_SELF,
                 label: "Create Restock",
                 description: "Able to create new restock requests",
+            },
+            {
+                scope: API_SCOPE.CREATE_RESTOCK_FOR_USER,
+                label: "Create Restock For User",
+                description: "Able to create new restock requests for others",
             },
             {
                 scope: API_SCOPE.UPDATE_RESTOCK,
