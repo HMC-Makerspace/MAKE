@@ -2,6 +2,7 @@ import { AreaUUID } from "./area";
 import type { CertificationUUID, TRequiredCertificate } from "./certification";
 import type { UUID } from "./global";
 import type { UserRoleUUID } from "./user";
+import { UnixTimestamp } from "./global";
 
 export type InventoryItemUUID = UUID;
 
@@ -88,6 +89,16 @@ export const ITEM_ACCESS_DESCRIPTORS: {
 ];
 
 /**
+ * TInventoryAudit - Audit on an inventory audit
+ * @property timestamp - The timestamp this audit occured
+ * @property description - (optional) A description of the audit 
+ */
+export type TInventoryAudit = {
+    timestamp: UnixTimestamp;
+    description?: string;
+}
+
+/**
  * TInventoryItem - Unique object for item
  * @property uuid - unique id
  * @property name - short name of the item
@@ -130,4 +141,5 @@ export type TInventoryItem = {
     return_disclaimer?: string;
     required_certifications?: TRequiredCertificate[];
     authorized_roles?: UserRoleUUID[] | null;
+    audit_logs?: TInventoryAudit[] | null
 };

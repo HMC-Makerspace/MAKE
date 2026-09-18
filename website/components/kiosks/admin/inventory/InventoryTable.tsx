@@ -31,7 +31,7 @@ import { TUser, TUserRole } from "common/user";
 import { TCertification } from "common/certification";
 import { TRestockRequest } from "../../../../../common/restock";
 import { API_SCOPE } from "../../../../../common/global.ts";
-import { verifyScopes } from "../../../../utils.tsx";
+import { verifyScopes, convertTimestampToDate } from "../../../../utils.tsx";
 import clsx from "clsx";
 import CertificationTag from "../certifications/CertificationTag";
 import { UserRoleChip } from "../../../user/UserRoleChip.tsx";
@@ -58,6 +58,13 @@ const baseColumns = [
     { name: "Keywords", id: "keywords" },
     { name: "Serial Number", id: "serial_number" },
     { name: "Reorder URL", id: "reorder_url" },
+    {
+        name: "Last Audit Date",
+        id: "last_audit_date",
+        sortable: true,
+        sortValue: (item: TInventoryItem) =>
+            item.audit_logs?.[0]?.timestamp ?? null,
+    },
 ];
 
 export default function InventoryTable({
@@ -426,6 +433,13 @@ export default function InventoryTable({
                         </div>
                     ),
                     keywords: (i) => i.keywords?.join(", "),
+                    last_audit_date: (i) => (
+                        <div>
+                            {convertTimestampToDate(
+                                i.audit_logs?.[0]?.timestamp,
+                            )}
+                        </div>
+                    ),
                     ...customColumnComponents,
                 }}
                 isLoading={isLoading}
