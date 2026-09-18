@@ -48,3 +48,4 @@ export const DocumentSchema = Joi.object<TDocument>({
   link: Joi.string().required(),
   visible_to: Joi.array().items(Joi.string()).optional().allow(null),
 });
+
