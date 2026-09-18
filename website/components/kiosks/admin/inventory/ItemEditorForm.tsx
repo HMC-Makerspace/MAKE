@@ -33,6 +33,8 @@ import {
     BookmarkIcon,
     UserIcon,
     GlobeAmericasIcon,
+    ArrowPathRoundedSquareIcon,
+    PlusIcon,
 } from "@heroicons/react/24/solid";
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
@@ -42,6 +44,8 @@ import { motion } from "motion/react";
 import ItemQuantityIcon from "./ItemQuantityIcon";
 import ItemLocationModal from "./ItemLocationModal";
 import { TArea } from "common/area";
+import InventoryAuditModal from "./InventoryAuditModal";
+import InventoryAuditLogsModal from "./InventoryAuditLogsModal";
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateItem = async ({
@@ -181,6 +185,9 @@ export default function ItemEditorForm({
                 authorized_roles: item.authorized_roles || [],
                 quantity: quantity,
                 available: available,
+                audit_logs: [{
+                    timestamp: Date.now() / 1000
+                }, ...item.audit_logs ?? []]
             };
 
             // Reset the mutation (clears any previous errors)
@@ -250,12 +257,21 @@ export default function ItemEditorForm({
     const [authrolesOpen, setAuthrolesOpen] = React.useState<boolean>(false); // whether authroles edit modal is open
     const [locationEditorOpen, setLocationEditorOpen] =
         React.useState<boolean>(false); // whether location editor modal is open
+    const [invAuditOpen, setInvAuditOpen] = React.useState<boolean>(false); // whether new inventory audit modal is open
+    const [invAuditLogsOpen, setInvAuditLogsOpen] = React.useState<boolean>(false); // whether inventory audit logs modal is open
 
     const reqcertsMutation = patchMutation(() => setReqcertsOpen(false));
     const authrolesMutation = patchMutation(() => setAuthrolesOpen(false));
     const locationEditorMutation = patchMutation(() =>
         setLocationEditorOpen(false),
     );
+    const inventoryAuditMutation = patchMutation(() => {
+        setInvAuditOpen(false)
+        addToast({
+            title: "Successfully audited item",
+            color: "success",
+        });
+    });
 
     const [isNumericQuantity, setQtype] = React.useState<boolean>(
         item.quantity >= 0,
@@ -657,6 +673,27 @@ export default function ItemEditorForm({
                             ]),
                         }}
                     />
+                    <div className="w-full pb-2 rounded-t-lg flex flex-row gap-2">
+                        <Button
+                            size="md"
+                            startContent={<PlusIcon className="size-5" />}
+                            color="success"
+                            isDisabled={isDisabled || isNew}
+                            className='flex-1'
+                            onPress={() => !isNew && setInvAuditOpen(true)}
+
+                        >
+                            New Audit
+                        </Button>
+                        <Button
+                            size="md"
+                            isDisabled={isDisabled || isNew}
+                            isIconOnly
+                            onPress={() => !isNew && setInvAuditLogsOpen(true)}
+                        >
+                            <ArrowPathRoundedSquareIcon className="size-5" />
+                        </Button>
+                </div>
                 </div>
                 {/* <Divider className="hidden sm:block h-[1px] bg-default-400" /> */}
                 <div className="px-4 w-full pt-4 pb-2 rounded-t-lg bg-default-50">
@@ -804,6 +841,19 @@ export default function ItemEditorForm({
                 isOpen={locationEditorOpen}
                 onOpenChange={setLocationEditorOpen}
                 patchMutation={locationEditorMutation}
+            />
+            <InventoryAuditModal 
+                key={"invaudit-" + item.uuid}
+                item={item}
+                isOpen={invAuditOpen}
+                onOpenChange={setInvAuditOpen}
+                patchMutation={inventoryAuditMutation}
+            />
+            <InventoryAuditLogsModal 
+                key={"invauditlogs-" + item.uuid}
+                item={item}
+                isOpen={invAuditLogsOpen}
+                onOpenChange={setInvAuditLogsOpen}
             />
         </>
     );
