@@ -136,8 +136,22 @@ export default function InventoryTable({
                 "role",
                 "locations.container",
                 "locations.specific",
+                "kit_contents"
             ],
+            getFn: (obj, key) => {
+                if (key == "kit_contents") {
+                    let fullKitContents = [];
+                    for (let contentUUID of obj.kit_contents ?? []) {
+                        let item = inventory.find(k => k.uuid == contentUUID);
+                        fullKitContents.push(`${item?.name} ${item?.long_name ?? ""} ${item?.keywords ?? ""}`)
+                    }
+                    return fullKitContents;
+                }
+
+                return obj[key as keyof TInventoryItem] as string;
+            },
             threshold: 0.3,
+            distance: 50000
         });
     }, [inventory]);
 
