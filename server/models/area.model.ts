@@ -39,7 +39,7 @@ export const AreaSchema = Joi.object<TArea>({
     required_certifications: Joi.array().items(
         RequiredCertificateSchema
     ).optional(),
-    authorized_roles: Joi.array().items(
+    available_to: Joi.array().items(
         Joi.string()
     ).optional().allow(null),
     reservable: Joi.boolean().optional(),

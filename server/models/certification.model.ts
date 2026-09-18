@@ -79,7 +79,7 @@ export const CertificationSchema = Joi.object<TCertification>({
     required_certifications: Joi.array().items(
         RequiredCertificateSchema
     ).optional(),
-    authorized_roles: Joi.array().items(
+    visible_to: Joi.array().items(
         Joi.string()
     ).optional().allow(null)
 });
