@@ -128,16 +128,9 @@ app.use(
     }),
 );
 
-export const {
-  generateToken,
-  csrfSynchronisedProtection,
-} = csrfSync();
-
 app.get("/api/v3/csrf-token", (req, res) => {
   res.json({ csrfToken: generateToken(req) });
 });
-
-app.use(csrfSynchronisedProtection);
 
 passport.serializeUser((user, done) => {
     process.nextTick(() => {

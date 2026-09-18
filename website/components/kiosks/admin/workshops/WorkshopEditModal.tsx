@@ -26,9 +26,6 @@ import { TUser } from "../../../../../common/user";
 import { TCertification } from "../../../../../common/certification";
 import { parseZonedDateTime, ZonedDateTime } from "@internationalized/date";
 import WorkshopImagesModal from "./WorkshopImagesModal.tsx";
-import RequiredCertsModal from "../certifications/RequiredCertsModal.tsx";
-
-
 import clsx from "clsx";
 import { TConfig } from "common/config";
 import axios from "axios";

@@ -104,7 +104,7 @@ function RequiredRolesModal({
                         </div>
                         <div>
                             Users with at least one of the selected roles will
-                            have {type == "available_to" ? "use" : "view"} permissions.
+                            have permission to {type == "available_to" ? "use/checkout." : "view."}
                         </div>
 
                         <div

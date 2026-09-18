@@ -68,7 +68,8 @@ export const InventoryItemSchema = Joi.object<TInventoryItem>({
     required_certifications: Joi.array()
         .items(RequiredCertificateSchema)
         .optional(),
-    authorized_roles: Joi.array().items(Joi.string()).optional().allow(null),
+    available_to: Joi.array().items(Joi.string()).optional().allow(null),
+    visible_to: Joi.array().items(Joi.string()).optional().allow(null),
 });
 
 export const InventoryItemOptional = InventoryItemSchema.fork(

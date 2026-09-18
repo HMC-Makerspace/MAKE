@@ -35,6 +35,7 @@ import {
     GlobeAmericasIcon,
     BriefcaseIcon,
     EyeIcon,
+    MagnifyingGlassIcon,
 } from "@heroicons/react/24/solid";
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
@@ -664,7 +665,7 @@ export default function ItemEditorForm({
                                 onPress={() => setSelectedItem(new Set([item.parent_kit ?? ""]))}
                                 className="ml-2"
                             >
-                                <EyeIcon className="size-5" /> {/* haha eyecon */}
+                                <MagnifyingGlassIcon className="size-6" /> {/* haha eyecon */}
                             </Button>
                         </Tooltip>
                     </div>
@@ -741,7 +742,7 @@ export default function ItemEditorForm({
                                 }
                                 // isIconOnly
                                 isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled" : ""}
+                                className={isNew ? "opacity-disabled px-2" : "px-2"}
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <GlobeAmericasIcon className="size-7" />
@@ -766,7 +767,7 @@ export default function ItemEditorForm({
                                 onPress={() => !isNew && setReqcertsOpen(true)}
                                 // isIconOnly
                                 isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled" : ""}
+                                className={isNew ? "opacity-disabled px-2" : "px-2"}
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <BookmarkIcon className="size-7" />
@@ -791,7 +792,7 @@ export default function ItemEditorForm({
                                 onPress={() => !isNew && setAcrolesOpen(true)}
                                 // isIconOnly
                                 isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled" : ""}
+                                className={isNew ? "opacity-disabled px-2" : "px-2"}
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <UserIcon className="size-7" />
@@ -816,10 +817,10 @@ export default function ItemEditorForm({
                                 onPress={() => !isNew && setVwrolesOpen(true)}
                                 // isIconOnly
                                 isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled" : ""}
+                                className={isNew ? "opacity-disabled px-2" : "px-2"}
                                 data-hover={!isNew && !isDisabled}
                             >
-                                <UserIcon className="size-7" />
+                                <EyeIcon className="size-7" />
                                 {item.visible_to?.length ?? 0}
                             </Button>
                         </Tooltip>
@@ -842,7 +843,7 @@ export default function ItemEditorForm({
                                     onPress={() => !isNew && setKitEditorOpen(true)}
                                     // isIconOnly
                                     isDisabled={isDisabled}
-                                    className={isNew ? "opacity-disabled" : ""}
+                                    className={isNew ? "opacity-disabled px-2" : "px-2"}
                                     data-hover={!isNew && !isDisabled}
                                 >
                                     <BriefcaseIcon className="size-7" />
