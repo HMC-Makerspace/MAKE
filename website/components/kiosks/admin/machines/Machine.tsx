@@ -25,6 +25,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import {
     DocumentIcon,
+    EyeIcon,
     LinkSlashIcon,
     PencilSquareIcon,
     ShoppingCartIcon,
@@ -397,7 +398,7 @@ export default function Machine({
                         <Button
                             color="warning"
                             className="w-full px-2"
-                            startContent={<UserCircleIcon className="size-7" />}
+                            startContent={<EyeIcon className="size-7" />}
                             onPress={vwroleModalOpen}
                         >
                             Viewer Roles
