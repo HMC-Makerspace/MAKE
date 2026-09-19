@@ -37,10 +37,12 @@ export type TWorkshopUserRecord = {
  *     signed in to the workshop
  * @property images - (optional) a list UUIDs of {@link TFile | image Files} to
  *      display for this workshop
- * @property authorized_roles - (optional) a list of UserRole UUIDs that are
+ * @property available_to - (optional) a list of UserRole UUIDs that are allowed
+ *      to RSVP to this workshop. If null, any user may RSVP.
+ * @property visible_to - (optional) a list of UserRole UUIDs that are
  *      allowed to see this workshop. If null, any user may see this
  *      workshop
- * @property rsvp_disclaimer - (optional) a disclaimer that will be shown before 
+ * @property rsvp_disclaimer - (optional) a disclaimer that will be shown before
  *      a user can RSVP for a workshop
  */
 export type TWorkshop = {
@@ -58,7 +60,8 @@ export type TWorkshop = {
     reminder_emails_sent: number[];
     sign_in_list: TWorkshopUserRecord[];
     images?: FileUUID[];
-    authorized_roles?: UserRoleUUID[] | null;
+    available_to?: UserRoleUUID[] | null;
+    visible_to?: UserRoleUUID[] | null;
     rsvp_disclaimer?: string;
 };
 

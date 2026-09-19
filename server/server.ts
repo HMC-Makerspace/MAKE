@@ -16,6 +16,12 @@ import { verifyUser } from "routes/verify.route";
 import mongoSanitize from "express-mongo-sanitize";
 import { csrfSync } from "csrf-sync";
 
+// await Bun.build({
+//     entrypoints: ["website/index.html"],
+//     outdir: "website/build",
+//     plugins: [html()],
+// });
+
 // Routes
 import loginRoutes from "./routes/login.route";
 import areaRoutes from "./routes/area.route";
@@ -121,6 +127,10 @@ app.use(
         replaceWith: "_",
     }),
 );
+
+app.get("/api/v3/csrf-token", (req, res) => {
+  res.json({ csrfToken: generateToken(req) });
+});
 
 passport.serializeUser((user, done) => {
     process.nextTick(() => {

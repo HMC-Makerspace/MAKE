@@ -19,16 +19,18 @@ import axios from "axios";
 import { useRoles } from "../../queries/useRoles";
 
 const createEmptyMachine = async () => {
+    const machine_obj: TMachine = {
+        uuid: crypto.randomUUID(),
+        name: "New Machine",
+        count: 0,
+        instances: [],
+        status_logs: [],
+        available_to: [],
+        visible_to: [],
+    };
     return (
         await axios.post<TMachine>("/api/v3/machine/", {
-            machine_obj: {
-                uuid: crypto.randomUUID(),
-                name: "New Machine",
-                count: 0,
-                instances: [],
-                status_logs: [],
-                authorized_roles: [],
-            },
+            machine_obj,
         })
     ).data;
 };

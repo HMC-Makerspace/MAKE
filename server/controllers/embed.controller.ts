@@ -60,7 +60,7 @@ export async function getEmbedsVisibleToUser(
                             $or: [
                                 {
                                     $not: {
-                                        $isArray: "$$docs.authorized_roles",
+                                        $isArray: "$$docs.visible_to",
                                     },
                                 },
                                 {
@@ -68,7 +68,7 @@ export async function getEmbedsVisibleToUser(
                                         {
                                             $size: {
                                                 $setIntersection: [
-                                                    "$$docs.authorized_roles",
+                                                    "$$docs.visible_to",
                                                     role_uuids,
                                                 ],
                                             },
@@ -85,6 +85,7 @@ export async function getEmbedsVisibleToUser(
     ]);
 
     // Consider filter out items that require certifications the user doesn't have
+    // Should potentially check parent kit's required certifications as well?
     /*.filter((item) =>
         item.required_certifications?.every((cert) =>
             cert_uuids.includes(cert.certification_uuid),

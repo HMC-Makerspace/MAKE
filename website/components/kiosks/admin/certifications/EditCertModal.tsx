@@ -129,8 +129,8 @@ export default function EditCertModal({
     const [prereqs, setPrereqs] = React.useState<TRequiredCertificate[]>(
         cert.required_certifications ?? [],
     );
-    const [authRoles, setAuthRoles] = React.useState<UserRoleUUID[]>(
-        cert.authorized_roles ?? [],
+    const [visibleToRoles, setVisibleToRoles] = React.useState<UserRoleUUID[] | undefined>(
+        cert.visible_to,
     );
     const [color, setColor] = React.useState<string>(cert.color);
 
@@ -154,7 +154,7 @@ export default function EditCertModal({
                 max_level: maxLevel,
                 seconds_valid_for: secondsValidFor,
                 documents: cert?.documents, // edit documents in separate modal
-                authorized_roles: authRoles,
+                visible_to: visibleToRoles,
                 required_certifications: prereqs,
             };
 
@@ -171,7 +171,7 @@ export default function EditCertModal({
             color,
             maxLevel,
             secondsValidFor,
-            authRoles,
+            visibleToRoles,
             prereqs,
             hasEdits,
         ],
@@ -356,10 +356,10 @@ export default function EditCertModal({
                             </div>
 
                             <UserRoleSelect
-                                selectedKeys={authRoles}
-                                onSelectionChange={wrapSetEdit(setAuthRoles)}
-                                placeholder="Select authorized roles"
-                                label="Authorized Roles"
+                                selectedKeys={visibleToRoles}
+                                onSelectionChange={wrapSetEdit(setVisibleToRoles)}
+                                placeholder="Select viewer roles"
+                                label="Viewer Roles"
                                 labelPlacement="inside"
                                 classNames={{
                                     value: "text-default-500",

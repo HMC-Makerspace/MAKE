@@ -70,8 +70,8 @@ export async function getMachinesVisibleToUser(
         {
             $match: {
                 $or: [
-                    { authorized_roles: null },
-                    { authorized_roles: { $in: role_uuids } },
+                    { visible_to: null },
+                    { visible_to: { $in: role_uuids } },
                 ],
             },
         },
@@ -85,7 +85,7 @@ export async function getMachinesVisibleToUser(
                             $or: [
                                 {
                                     $not: {
-                                        $isArray: "$$docs.authorized_roles",
+                                        $isArray: "$$docs.visible_to",
                                     },
                                 },
                                 {
@@ -93,7 +93,7 @@ export async function getMachinesVisibleToUser(
                                         {
                                             $size: {
                                                 $setIntersection: [
-                                                    "$$docs.authorized_roles",
+                                                    "$$docs.visible_to",
                                                     role_uuids,
                                                 ],
                                             },
@@ -119,7 +119,7 @@ async function getPublicMachines(): Promise<TPublicMachineData[]> {
     const Machines = mongoose.model("Machine", Machine, "machines");
     // Get all machines that are public
     return Machines.find({
-        authorized_roles: null,
+        visible_to: null,
     }).select([
         // Remove private information from the machine
         "-status_logs",
@@ -220,7 +220,8 @@ export async function patchMachine(
         // refresh instance items
         (partial_machine.reservable !== undefined ||
             partial_machine.name ||
-            partial_machine.authorized_roles ||
+            partial_machine.available_to ||
+            partial_machine.visible_to ||
             partial_machine.reservation_type ||
             partial_machine.required_certifications)
     ) {
@@ -312,7 +313,8 @@ export async function refreshMachineItems(
                 access_type: machine.reservation_type,
                 locations: locations,
                 required_certifications: machine.required_certifications,
-                authorized_roles: machine.authorized_roles,
+                available_to: machine.available_to,
+                visible_to: machine.visible_to,
             };
             new Inventory(instance_item_data).save();
         });

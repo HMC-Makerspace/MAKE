@@ -67,7 +67,8 @@ export const Machine = new mongoose.Schema<TMachine>(
             type: [RequiredCertificate],
             required: false,
         },
-        authorized_roles: { type: [String], required: true },
+        available_to: { type: [String], required: false },
+        visible_to: { type: [String], required: false },
         reservable: { type: Boolean, required: false },
         reservation_type: { type: Number, required: false },
     },
@@ -78,27 +79,18 @@ export const MachineSchema = Joi.object<TMachine>({
     uuid: Joi.string().required(),
     name: Joi.string().required(),
     description: Joi.string().optional().allow(""),
-    images: Joi.array().items(
-        Joi.string
-    ).optional(),
+    images: Joi.array().items(Joi.string).optional(),
     count: Joi.number().required(),
-    instances: Joi.array().items(
-        MachineInstanceSchema
-    ).required(),
-    status_logs: Joi.array().items(
-        MachineInstanceStatusLogSchema
-    ).required(),
-    documents: Joi.array().items(
-        DocumentSchema
-    ).optional(),
-    required_certifications: Joi.array().items(
-        RequiredCertificateSchema
-    ).optional(),
-    authorized_roles: Joi.array().items(
-        Joi.string()
-    ).required().allow(null),
+    instances: Joi.array().items(MachineInstanceSchema).required(),
+    status_logs: Joi.array().items(MachineInstanceStatusLogSchema).required(),
+    documents: Joi.array().items(DocumentSchema).optional(),
+    required_certifications: Joi.array()
+        .items(RequiredCertificateSchema)
+        .optional(),
+    available_to: Joi.array().items(Joi.string()).required().allow(null),
+    visible_to: Joi.array().items(Joi.string()).required().allow(null),
     reservable: Joi.boolean().optional(),
-    reservation_type: Joi.number().optional()
+    reservation_type: Joi.number().optional(),
 });
 
 export const MachineSchemaOptional = MachineSchema.fork(

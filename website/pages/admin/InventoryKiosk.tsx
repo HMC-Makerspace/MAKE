@@ -129,6 +129,7 @@ export default function InventoryKiosk() {
                     certs={certs}
                     roles={roles}
                     areas={areas}
+                    items={inventory}
                     isDisabled={
                         !isNewItem &&
                         (!item ||
@@ -137,6 +138,7 @@ export default function InventoryKiosk() {
                     }
                     isNew={isNewItem}
                     onUpdate={() => setIsNewItem(false)}
+                    setSelectedItem={onSelectionChange}
                 />
                 <InventoryTable
                     requestingUser={requestingUser}
@@ -149,6 +151,7 @@ export default function InventoryKiosk() {
                     selectedKeys={selectedItems}
                     onSelectionChange={betterSelectionChange}
                     isLoading={inventoryLoading}
+                    showsKitContents={true}
                     editable
                     onCreate={setIsNewItem}
                 />

@@ -35,6 +35,7 @@ import {
 } from "./machine.controller";
 import { clearAreaReservations, patchArea } from "./area.controller";
 import { getConfig } from "./config.controller";
+import { mergeRequiredCerts } from "../../website/utils";
 
 /**
  * Get all checkouts in the database
@@ -109,10 +110,10 @@ export async function validateCheckout(
         // For each item being checked out, verify that the user
         // has authorized roles and required certs as needed
         if (
-            item.authorized_roles !== null &&
-            item.authorized_roles !== undefined
+            item.available_to !== null &&
+            item.available_to !== undefined
         ) {
-            if (item.authorized_roles.length === 0) {
+            if (item.available_to.length === 0) {
                 // No user roles are authorized
                 return {
                     status: CHECKOUT_VALIDATION.MISSING_ROLE,
@@ -120,7 +121,7 @@ export async function validateCheckout(
                 };
             }
             if (
-                !item.authorized_roles.some((r) =>
+                !item.available_to.some((r) =>
                     user.active_roles.some((log) => log.role_uuid === r),
                 )
             ) {
@@ -132,7 +133,14 @@ export async function validateCheckout(
                 };
             }
         }
-        for (const cert of item.required_certifications || []) {
+
+        const parent_kit = await Inventory.findOne({
+            uuid: item.parent_kit
+        });
+
+        const mergedCerts = mergeRequiredCerts(item.required_certifications || [], parent_kit?.required_certifications || []);
+
+        for (const cert of mergedCerts) {
             // User has no certs, so must not have the required certs.
             if (!user.active_certificates) {
                 return {

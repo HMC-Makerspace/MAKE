@@ -42,7 +42,10 @@ export const InventoryItem = new mongoose.Schema<TInventoryItem>(
             type: [RequiredCertificate],
             required: false,
         },
-        authorized_roles: { type: [String], required: false },
+        available_to: { type: [String], required: false },
+        visible_to: { type: [String], required: false },
+        kit_contents: { type: [String], required: false },
+        parent_kit: { type: String, required: false },
     },
     { collection: "inventory" },
 );
@@ -65,7 +68,8 @@ export const InventoryItemSchema = Joi.object<TInventoryItem>({
     required_certifications: Joi.array()
         .items(RequiredCertificateSchema)
         .optional(),
-    authorized_roles: Joi.array().items(Joi.string()).optional().allow(null),
+    available_to: Joi.array().items(Joi.string()).optional().allow(null),
+    visible_to: Joi.array().items(Joi.string()).optional().allow(null),
 });
 
 export const InventoryItemOptional = InventoryItemSchema.fork(

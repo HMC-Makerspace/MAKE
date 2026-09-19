@@ -34,7 +34,7 @@ export type TFile = {
  * TAreaDocument - A document link for users to access
  * @property name - The name of the document
  * @property link - The link to the document
- * @property authorized_roles - (optional) A list of UserRole UUIDs that are
+ * @property visible_to - (optional) A list of UserRole UUIDs that are
  *      allowed to see this file. A user must have at least one of these
  *      roles to see the given file.
  *      If null, this file is public.
@@ -43,5 +43,5 @@ export type TFile = {
 export type TDocument = {
     name: string;
     link: string;
-    authorized_roles?: UserRoleUUID[] | null;
+    visible_to?: UserRoleUUID[] | null;
 };
