@@ -28,7 +28,7 @@ export enum CERTIFICATION_VISIBILITY {
  *     certification, such as a training manual or a Google form link.
  * @property required_certifications - (optional) a list of required certificates
  *      that are prerequisites to getting this cert
- * @property authorized_roles - (optional) a list of UserRole UUIDs that are
+ * @property visible_to - (optional) a list of UserRole UUIDs that are
  *      allowed to see this certification. If not present, any user may see this
  *      certification
  */
@@ -42,7 +42,8 @@ export type TCertification = {
     seconds_valid_for?: number;
     documents?: TDocument[];
     required_certifications?: TRequiredCertificate[];
-    authorized_roles?: UserRoleUUID[];
+    visible_to?: UserRoleUUID[];
+    // TODO? available_to
 };
 
 /**

@@ -66,6 +66,7 @@ export default function RarelyCheckedOutItems({
                 {visibleContent.map((item) => (
                     <div key={item.uuid} className="px-4 rounded-md text-sm">
                         <ItemInfo
+                            inventory={inventory}
                             item_data={item}
                             areas={areas}
                             certs={certs}

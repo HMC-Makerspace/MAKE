@@ -9,9 +9,9 @@ import CheckoutTrend from "./CheckoutTrend";
 import CheckoutHeatmap from "./CheckoutHeatmap";
 import CheckoutsByDay from "./CheckoutsByDay";
 import RarelyCheckedOutItems from "./RarelyCheckedOutItems";
-import TopRestockedItems from "./TopRestockedItems";
 import { TCertification } from "common/certification";
 import { TArea } from "common/area";
+import TopRestockedItems from "./TopRestockedItems";
 import { TMachine } from "common/machine";
 
 //this page receives all the data from StatisticsKiosk as props
@@ -23,8 +23,8 @@ export default function StatisticsDisplay({
     users,
     checkouts,
     roles,
-    restocks,
     areas,
+    restocks,
     certs,
     machines,
 }: {
@@ -34,8 +34,8 @@ export default function StatisticsDisplay({
     users: TUser[];
     checkouts: TCheckout[];
     roles: TUserRole[];
-    restocks: TRestockRequest[];
     areas: TArea[];
+    restocks: TRestockRequest[];
     certs: TCertification[];
     machines: TMachine[];
 }) {

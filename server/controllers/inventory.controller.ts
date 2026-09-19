@@ -73,8 +73,8 @@ export async function getInventoryVisibleToUser(
         {
             $match: {
                 $or: [
-                    { authorized_roles: null },
-                    { authorized_roles: { $in: role_uuids } },
+                    { visible_to: null },
+                    { visible_to: { $in: role_uuids } },
                 ],
             },
         },
@@ -94,6 +94,7 @@ export async function getInventoryVisibleToUser(
     ]);
 
     // Consider filter out items that require certifications the user doesn't have
+    // Should potentially check parent kit's required certifications as well?
     /*.filter((item) =>
         item.required_certifications?.every((cert) =>
             cert_uuids.includes(cert.certification_uuid),
@@ -112,10 +113,10 @@ async function getPublicInventory(): Promise<TInventoryItem[]> {
     const visible_areas = (await getPublicAreas()).map((area) => area.uuid);
 
     // Find all items that need no roles or certifications
-    return await Inventory.aggregate([
+    let filteredInv = await Inventory.aggregate([
         {
             $match: {
-                authorized_roles: null,
+                visible_to: null,
                 // Required certifications must either be empty or not exist
                 $or: [
                     { required_certifications: null },
@@ -137,6 +138,17 @@ async function getPublicInventory(): Promise<TInventoryItem[]> {
             },
         },
     ]);
+
+    // if an item is in the filtered list but its parent kit isn't, it shouldn't be
+    // visible (parent kit isn't publicly visible. ...or DNE ig)
+    for (let i = filteredInv.length - 1; i >= 0; i--) {
+        let item = filteredInv[i];
+        if (item.parent_kit && !filteredInv.some(itm => itm.uuid == item.parent_kit)) {
+            filteredInv.splice(i, 1);
+        }
+    }
+
+    return filteredInv;
 }
 
 /**

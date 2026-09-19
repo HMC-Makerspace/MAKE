@@ -348,7 +348,7 @@ export default function CertificationsPage() {
                                                                 (c) =>
                                                                     c.uuid ===
                                                                     req_cert.certification_uuid,
-                                                            ) || -1,
+                                                            ) ?? -1,
                                                         )
                                                     }
                                                 />

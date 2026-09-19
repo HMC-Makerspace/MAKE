@@ -28,10 +28,10 @@ import MAKETable from "../../../Table";
 import Fuse from "fuse.js";
 import React from "react";
 import { TUser, TUserRole } from "common/user";
-import { TCertification } from "common/certification";
+import { TCertification, TRequiredCertificate } from "common/certification";
 import { TRestockRequest } from "../../../../../common/restock";
 import { API_SCOPE } from "../../../../../common/global.ts";
-import { verifyScopes } from "../../../../utils.tsx";
+import { mergeRequiredCerts, verifyScopes } from "../../../../utils.tsx";
 import clsx from "clsx";
 import CertificationTag from "../certifications/CertificationTag";
 import { UserRoleChip } from "../../../user/UserRoleChip.tsx";
@@ -54,7 +54,9 @@ const baseColumns = [
     { name: "Quantity", id: "quantity_ratio" },
     { name: "Locations", id: "locations" },
     { name: "Required Certs", id: "required_certifications" },
-    { name: "Authorized Roles", id: "authorized_roles" },
+    { name: "Required Roles", id: "available_to" },
+    { name: "Visibility", id: "visible_to" },
+    { name: "Kit Contents", id: "kit_contents" },
     { name: "Keywords", id: "keywords" },
     { name: "Serial Number", id: "serial_number" },
     { name: "Reorder URL", id: "reorder_url" },
@@ -81,9 +83,10 @@ export default function InventoryTable({
         "quantity_ratio",
         "locations",
         "required_certifications",
-        "authorized_roles",
+        "available_to",
     ],
     customColumnComponents,
+    showsKitContents = false,
     editable = false,
     emptyContent,
     onCreate = undefined,
@@ -105,6 +108,7 @@ export default function InventoryTable({
     customColumnComponents?: {
         [column_id: string]: (item: TInventoryItem) => React.ReactNode;
     };
+    showsKitContents?: boolean;
     emptyContent?: string;
     editable?: boolean;
     onCreate?: (state: boolean) => void;
@@ -327,7 +331,11 @@ export default function InventoryTable({
                 </div>
             </div>
             <MAKETable
-                content={filteredItems}
+                content={
+                    showsKitContents
+                        ? filteredItems
+                        : filteredItems.filter((item) => !item.parent_kit)
+                }
                 columns={columns}
                 visibleColumns={visibleColumns}
                 selectedKeys={selectedKeys}
@@ -395,30 +403,73 @@ export default function InventoryTable({
                     },
                     locations: (i) => (
                         <div className="flex flex-col gap-2 min-w-max">
-                            {i.locations.map((location, index) => (
-                                <ItemLocationChip
-                                    key={`${location.area}-${index}`}
-                                    location={location}
-                                    areas={areas}
-                                />
-                            ))}
+                            {i.parent_kit
+                                ? (() => {
+                                      let parent_kit = inventory.find(
+                                          (k) => k.uuid == i.parent_kit,
+                                      );
+
+                                      return parent_kit?.locations.map(
+                                          (location, index) => (
+                                              <ItemLocationChip
+                                                  key={`${i.uuid}-location-${index}`}
+                                                  location={{
+                                                      area: location.area,
+                                                      specific: `In ${parent_kit?.name}`,
+                                                      container: "",
+                                                  }}
+                                                  areas={areas}
+                                              />
+                                          ),
+                                      );
+                                  })()
+                                : i.locations.map((location, index) => (
+                                      <ItemLocationChip
+                                          key={`${location.area}-${index}`}
+                                          location={location}
+                                          areas={areas}
+                                      />
+                                  ))}
                         </div>
                     ),
                     required_certifications: (i) => (
                         <CertificationList
                             certifications={certifications}
-                            list={i.required_certifications}
+                            list={mergeRequiredCerts(
+                                i.required_certifications,
+                                inventory.find((k) => k.uuid == i.parent_kit)
+                                    ?.required_certifications,
+                            )}
                             size="sm"
                             // Only anchor if the table is on the home page
                             anchor={!editable && !multiSelect}
                         />
                     ),
-                    authorized_roles: (i) => (
+                    available_to: (i) => (
                         <UserRoleList
-                            list={i.authorized_roles}
+                            list={i.available_to}
                             roles={roles}
                             size="lg"
                         />
+                    ),
+                    visible_to: (i) => (
+                        <UserRoleList
+                            list={i.visible_to}
+                            roles={roles}
+                            size="lg"
+                        />
+                    ),
+                    kit_contents: (i) => (
+                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
+                            {i.kit_contents?.map((content) => (
+                                <div key={i.uuid + "-item-" + content}>
+                                    {
+                                        inventory.find((a) => a.uuid == content)
+                                            ?.name
+                                    }
+                                </div>
+                            ))}
+                        </div>
                     ),
                     access_type: (i) => (
                         <div className="text-default-700 bg-default-200 p-2 rounded-md flex justify-center align-center">

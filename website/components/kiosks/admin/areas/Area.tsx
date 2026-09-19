@@ -198,7 +198,7 @@ export default function Area({
                                 <div className="flex gap-2 sm:gap-3">
                                     <Tooltip
                                         color={
-                                            area.visible_to === null
+                                            area.visible_to == null
                                                 ? "success"
                                                 : area.visible_to &&
                                                     area.visible_to.length === 0
@@ -206,7 +206,7 @@ export default function Area({
                                                   : "primary"
                                         }
                                         content={
-                                            area.visible_to === null
+                                            area.visible_to == null
                                                 ? "Visible"
                                                 : area.visible_to &&
                                                     area.visible_to.length === 0
@@ -232,7 +232,7 @@ export default function Area({
                                                 )
                                             }
                                             color={
-                                                area.visible_to === null
+                                                area.visible_to == null
                                                     ? "success"
                                                     : area.visible_to &&
                                                         area.visible_to

@@ -47,7 +47,7 @@ const baseColumns = [
     { name: "Expires After", id: "seconds_valid_for" },
     { name: "Documents", id: "documents" },
     { name: "Prerequisites", id: "prerequisites" },
-    { name: "Authorized Roles", id: "authorized_roles" },
+    { name: "Viewer Roles", id: "visible_to" },
     { name: "Delete", id: "delete" }
 ];
 
@@ -85,7 +85,7 @@ export default function CertificationsTable({
         "documents",
         "visibility",
         "prerequisites",
-        "authorized_roles",
+        "visible_to",
         "delete"
     ],
     extraColumns = [],
@@ -237,7 +237,6 @@ export default function CertificationsTable({
                                         max_level: 0,
                                         seconds_valid_for: 0,
                                         documents: [],
-                                        authorized_roles: [],
                                         required_certifications: [],
                                     });
                                     setIsNew(true);
@@ -343,9 +342,9 @@ export default function CertificationsTable({
                             );
                         }
                     },
-                    authorized_roles: (cert: TCertification) => (
+                    visible_to: (cert: TCertification) => (
                         <UserRoleList
-                            list={cert.authorized_roles}
+                            list={cert.visible_to}
                             roles={roles || []}
                             size="lg"
                         />
@@ -402,6 +401,7 @@ export default function CertificationsTable({
                     key={"certdocprereq-" + certOpenDoc.uuid}
                     certifications={certs}
                     element={certOpenDoc}
+                    parentKitCerts={undefined}
                     isOpen={prereqOpen}
                     onOpenChange={setPrereqOpen}
                     patchMutation={mutation}

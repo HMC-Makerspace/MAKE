@@ -34,17 +34,18 @@ export const FileSchema = Joi.object<TFile>({
  * Stored as children of {@link Area} and {@link Machine},
  * and {@link Certification} objects.
  */
-export const Document = new mongoose.Schema<TDocument>({
+export const Document = new mongoose.Schema<TDocument>(
+  {
     name: { type: String, required: true },
     link: { type: String, required: true },
-    authorized_roles: { type: [String], required: false },
-}, { _id: false });
+    visible_to: { type: [String], required: false },
+  },
+  { _id: false },
+);
 
 export const DocumentSchema = Joi.object<TDocument>({
-    name: Joi.string().required(),
-    link: Joi.string().required(),
-    authorized_roles: Joi.array().items(
-        Joi.string()
-    ).optional().allow(null)
+  name: Joi.string().required(),
+  link: Joi.string().required(),
+  visible_to: Joi.array().items(Joi.string()).optional().allow(null),
 });
 
