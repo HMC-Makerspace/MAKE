@@ -1,7 +1,10 @@
 import { useMemo, useState } from "react";
 import { TInventoryItem } from "common/inventory";
-import { Input, NumberInput, Spinner } from "@heroui/react";
-import { TRestockRequest, RESTOCK_REQUEST_STATUS } from "../../../../../common/restock";
+import { NumberInput, Spinner } from "@heroui/react";
+import {
+    TRestockRequest,
+    RESTOCK_REQUEST_STATUS,
+} from "../../../../../common/restock";
 import { useScroll } from "../../../UseScroll";
 
 export default function TopRestockedItems({
@@ -15,14 +18,16 @@ export default function TopRestockedItems({
 
     const inventoryMap = useMemo(
         () => new Map(inventory.map((item) => [item.uuid, item])),
-        [inventory]
+        [inventory],
     );
 
     const sortedData = useMemo(() => {
         const restockCounts: Record<string, number> = {};
 
         restocks
-            .filter((r) => r.current_status === RESTOCK_REQUEST_STATUS.RESTOCKED)
+            .filter(
+                (r) => r.current_status === RESTOCK_REQUEST_STATUS.RESTOCKED,
+            )
             .forEach((r) => {
                 restockCounts[r.item_uuid] =
                     (restockCounts[r.item_uuid] || 0) + 1;
@@ -44,18 +49,25 @@ export default function TopRestockedItems({
     return (
         <main className="bg-default-100 p-6 rounded-lg" ref={scrollerRef}>
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">Top Restocked Items</h2>
-                <NumberInput
-                    min={1}
-                    value={topN}
-                    onValueChange={setTopN}
-                    size="sm"
-                    className="w-20"
-                    classNames={{
-                        inputWrapper: "bg-default-200 h-8 min-h-0",
-                        input: "text-sm",
-                    }}
-                />
+                <h2 className="text-xl font-bold text-foreground-900">
+                    Top Restocked Items
+                </h2>
+                <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-sm text-default-700">Top</span>
+                    <NumberInput
+                        aria-label="Number of top restocked items"
+                        min={1}
+                        value={topN}
+                        onValueChange={setTopN}
+                        variant="bordered"
+                        size="sm"
+                        className="w-20"
+                        classNames={{
+                            inputWrapper: "h-8 min-h-0",
+                            input: "text-sm",
+                        }}
+                    />
+                </div>
             </div>
 
             {data.length === 0 ? (
@@ -65,17 +77,17 @@ export default function TopRestockedItems({
             ) : (
                 <>
                     <p className="text-sm text-default-500 mb-3">
-                        Showing top {data.length} most restocked item
+                        Showing the top {data.length} restocked item
                         {data.length !== 1 ? "s" : ""}
                     </p>
                     <div className="flex flex-col gap-2 max-h-80 overflow-auto">
                         {visibleContent.map((item, index) => (
                             <div
                                 key={index}
-                                className="bg-default-200 px-4 py-2 rounded-md text-sm flex justify-between items-center"
+                                className="h-10 min-h-10 rounded-md bg-default-200 px-4 py-2 text-sm text-default-700 flex items-center justify-between"
                             >
                                 <span>{item.name}</span>
-                                <span className="text-default-500">
+                                <span className="text-default-700">
                                     {item.count} restock
                                     {item.count !== 1 ? "s" : ""}
                                 </span>
