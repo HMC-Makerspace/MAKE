@@ -10,7 +10,6 @@ import { TArea } from "common/area";
 import { TCertification } from "common/certification";
 import { TMachine } from "common/machine";
 import { useRoles } from "../../queries/useRoles";
-import { TMachine } from "common/machine";
 
 //the kiosk's job is just to fetch the data needed from the server using useQuery
 //and display a loading circle when any of the data needed isn't ready
@@ -59,13 +58,6 @@ export default function StatisticsKiosk() {
         queryKey: ["machine"],
         refetchOnWindowFocus: false,
     });
-
-    const { data: machines, isLoading: machinesLoading } = useQuery<TMachine[]>(
-        {
-            queryKey: ["machine"],
-            refetchOnWindowFocus: false,
-        },
-    );
 
     //displays a centered spinner if any of the four queries are still loading.
     //also checks if any of the data is undefined

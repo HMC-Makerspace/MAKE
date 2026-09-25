@@ -135,8 +135,6 @@ export default function StatisticsDisplay({
                 <LeastCheckedOutItems
                     checkouts={filteredCheckouts}
                     inventory={inventory}
-                    machines={machines}
-                    areas={areas}
                 />
                 <CheckoutsByDay checkouts={filteredCheckouts} />
 
