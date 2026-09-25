@@ -10,7 +10,7 @@ import {
 } from "@heroui/react";
 import clsx from "clsx";
 import { FILE_RESOURCE_TYPE } from "../../../../common/file";
-import { TWorkshop } from "common/workshop";
+import { TPublicWorkshopData, TWorkshop } from "common/workshop";
 import ImageCarousel from "../../ImageCarousel";
 import CertificationTag from "../../kiosks/admin/certifications/CertificationTag";
 import { CalendarBoldIcon } from "@heroui/shared-icons";
@@ -72,7 +72,7 @@ export default function WorkshopCard({
             const onWaitList =
                 data.capacity &&
                 data.capacity > 0 &&
-                data.rsvp_list.findIndex((rs) => rs.user_uuid === self?.uuid) >=
+                data.rsvp_list?.findIndex((rs) => rs.user_uuid === self?.uuid) >=
                     data.capacity;
             addToast({
                 title: hasCancelled

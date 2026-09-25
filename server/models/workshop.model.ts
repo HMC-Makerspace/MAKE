@@ -68,8 +68,8 @@ export const WorkshopSchema = Joi.object<TWorkshop>({
     reminder_emails_sent: Joi.array().items(Joi.number()).required(),
     sign_in_list: Joi.array().items(WorkshopUserRecordSchema).required(),
     images: Joi.array().items(Joi.string()).optional(),
-    available_to: Joi.array().items(Joi.string()).optional(),
-    visible_to: Joi.array().items(Joi.string()).optional(),
+    available_to: Joi.array().items(Joi.string()).optional().allow(null),
+    visible_to: Joi.array().items(Joi.string()).optional().allow(null),
     rsvp_disclaimer: Joi.string().allow(null, ""),
 });
 
