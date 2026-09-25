@@ -34,13 +34,15 @@ import { API_SCOPE } from "../../../../../common/global.ts";
 import { mergeAuthRoles, mergeRequiredCerts, verifyScopes } from "../../../../utils.tsx";
 import clsx from "clsx";
 import CertificationTag from "../certifications/CertificationTag";
-import UserRole from "../../../user/UserRole";
+import { UserRoleChip } from "../../../user/UserRoleChip.tsx";
 import { TArea } from "common/area";
 import ItemLocationChip from "./ItemLocationChip";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RestockRequestModal from "../restock/RestockRequestModal";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ItemInfo from "./ItemInfo.tsx";
+import { UserRoleList } from "../../../user/UserRoleList.tsx";
+import { CertificationList } from "../certifications/CertificationList.tsx";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" },
@@ -53,8 +55,8 @@ const baseColumns = [
     { name: "Quantity", id: "quantity_ratio" },
     { name: "Locations", id: "locations" },
     { name: "Required Certs", id: "required_certifications" },
-    { name: "Accessor Roles", id: "available_to" },
-    { name: "Viewer Roles", id: "visible_to" },
+    { name: "Required Roles", id: "available_to" },
+    { name: "Visibility", id: "visible_to" },
     { name: "Kit Contents", id: "kit_contents" },
     { name: "Keywords", id: "keywords" },
     { name: "Serial Number", id: "serial_number" },
@@ -83,7 +85,6 @@ export default function InventoryTable({
         "locations",
         "required_certifications",
         "available_to",
-        "visible_to",
     ],
     customColumnComponents,
     showsKitContents = false,
@@ -110,7 +111,7 @@ export default function InventoryTable({
     };
     showsKitContents?: boolean;
     emptyContent?: string;
-    editable?: React.ReactNode;
+    editable?: boolean;
     onCreate?: (state: boolean) => void;
 }) {
     // The set of columns that are visible
@@ -345,7 +346,11 @@ export default function InventoryTable({
                 </div>
             </div>
             <MAKETable
-                content={showsKitContents ? filteredItems : filteredItems.filter(item => !item.parent_kit)}
+                content={
+                    showsKitContents
+                        ? filteredItems
+                        : filteredItems.filter((item) => !item.parent_kit)
+                }
                 columns={columns}
                 visibleColumns={visibleColumns}
                 selectedKeys={selectedKeys}
@@ -413,72 +418,65 @@ export default function InventoryTable({
                     },
                     locations: (i) => (
                         <div className="flex flex-col gap-2 min-w-max">
-                            {i.parent_kit ? (() => {
-                                let parent_kit = inventory.find(k => k.uuid == i.parent_kit);
+                            {i.parent_kit
+                                ? (() => {
+                                      let parent_kit = inventory.find(
+                                          (k) => k.uuid == i.parent_kit,
+                                      );
 
-                                return (
-                                    parent_kit?.locations.map((location, index) => (
-                                        <ItemLocationChip
-                                            key={`${i.uuid}-location-${index}`}
-                                            location={{
-                                                area: location.area,
-                                                specific: `In ${parent_kit?.name}`,
-                                                container: ""
-                                            }}
-                                            areas={areas}
-                                        />
-                                    ))
-                                );
-                            })() : (
-                                i.locations.map((location, index) => (
-                                    <ItemLocationChip
-                                        key={`${location.area}-${index}`}
-                                        location={location}
-                                        areas={areas}
-                                    />
-                                ))
-                            )}
+                                      return parent_kit?.locations.map(
+                                          (location, index) => (
+                                              <ItemLocationChip
+                                                  key={`${i.uuid}-location-${index}`}
+                                                  location={{
+                                                      area: location.area,
+                                                      specific: `In ${parent_kit?.name}`,
+                                                      container: "",
+                                                  }}
+                                                  areas={areas}
+                                              />
+                                          ),
+                                      );
+                                  })()
+                                : i.locations.map((location, index) => (
+                                      <ItemLocationChip
+                                          key={`${location.area}-${index}`}
+                                          location={location}
+                                          areas={areas}
+                                      />
+                                  ))}
                         </div>
                     ),
                     required_certifications: (i) => (
-                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
-                            {mergeRequiredCerts(i.required_certifications,
-                                inventory.find(k => k.uuid == i.parent_kit)?.required_certifications
-                            )?.map((c) => (
-                                <CertificationTag
-                                    key={c.certification_uuid}
-                                    cert_uuid={c.certification_uuid}
-                                    certifications={certifications}
-                                    level={c.required_level}
-                                />
-                            ))}
-                        </div>
+                        <CertificationList
+                            certifications={certifications}
+                            list={mergeRequiredCerts(
+                                i.required_certifications,
+                                inventory.find((k) => k.uuid == i.parent_kit)
+                                    ?.required_certifications,
+                            )}
+                            size="sm"
+                            // Only anchor if the table is on the home page
+                            anchor={!editable && !multiSelect}
+                        />
                     ),
                     available_to: (i) => (
-                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
-                            {mergeAuthRoles(i.available_to,
+                        <UserRoleList
+                            list={mergeAuthRoles(i.available_to,
                                 inventory.find(k => k.uuid == i.parent_kit)?.available_to
-                            )?.map((role) => (
-                                <UserRole
-                                    key={role}
-                                    role_uuid={role}
-                                    role={roles.find((r) => r.uuid === role)}
-                                />
-                            ))}
-                        </div>
+                            )}
+                            roles={roles}
+                            size="lg"
+                        />
                     ),
                     visible_to: (i) => (
-                        <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
-                            {mergeAuthRoles(i.visible_to,
+                        <UserRoleList
+                            list={mergeAuthRoles(i.visible_to,
                                 inventory.find(k => k.uuid == i.parent_kit)?.visible_to
-                            )?.map((role) => (
-                                <UserRole
-                                    key={role}
-                                    role_uuid={role}
-                                    role={roles.find((r) => r.uuid === role)}
-                                />
-                            ))}
-                        </div>
+                            )}
+                            roles={roles}
+                            size="lg"
+                        />
                     ),
                     kit_contents: (i) => (
                         <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
@@ -495,8 +493,10 @@ export default function InventoryTable({
                         </div>
                     ),
                     access_type: (i) => (
-                        <div className="text-default-700 bg-default-200 p-2 rounded-md">
-                            {ITEM_ACCESS_DESCRIPTORS[i.access_type].label}
+                        <div className="text-default-700 bg-default-200 p-2 rounded-md flex justify-center align-center">
+                            {ITEM_ACCESS_DESCRIPTORS.find(
+                                (descriptor) => descriptor.type === i.access_type
+                            )?.label}
                         </div>
                     ),
                     keywords: (i) => i.keywords?.join(", "),

@@ -42,12 +42,9 @@ const updateRestocks = async ({
     } else {
         // Add the user to the restock request's mailing list
         return (
-            await axios.patch<TRestockRequest>(
-                `/api/v3/restock/mailing_list/${restock.uuid}`,
-                {
-                    person_obj: restock.mailing_list,
-                },
-            )
+            await axios.put<TRestockRequest>(`/api/v3/restock/`, {
+                request_obj: restock,
+            })
         ).data;
     }
 };
@@ -124,8 +121,19 @@ export default function RestockRequestModal({
                         old.map((w) => (w.uuid === data.uuid ? data : w)),
                 );
             }
+            const title = isNew
+                ? "Successfully created restock"
+                : requestingUser?.uuid &&
+                    !(
+                        prevRestock.mailing_list.includes(
+                            requestingUser.uuid,
+                        ) || prevRestock.requesting_user === requestingUser.uuid
+                    ) &&
+                    data.mailing_list.includes(requestingUser.uuid)
+                  ? "Successfully joined mailing list"
+                  : "Successfully updated restock";
             addToast({
-                title: `${isNew ? "Successfully created restock" : "Successfully added to mailing list"}`,
+                title,
                 color: "success",
             });
             editOnOpenChange();
@@ -159,27 +167,35 @@ export default function RestockRequestModal({
                       reason: data.get("reason_restock") as string,
                       mailing_list: [],
                       requesting_user: requestingUser.uuid,
-                      status_logs: [
-                          {
-                              timestamp: Date.now() / 1000,
-                              status: RESTOCK_REQUEST_STATUS.PENDING_APPROVAL,
-                              message: data.get("reason_restock") as string,
-                          },
-                      ],
+                      status_logs: [],
                   }
-                : {
-                      ...prevRestock,
-                      mailing_list: [
-                          ...prevRestock.mailing_list,
-                          requestingUser.uuid,
-                      ],
-                  };
+                : // User can be added to mailing list only if they are not already on it
+                  !prevRestock.mailing_list.includes(requestingUser.uuid) &&
+                    prevRestock.requesting_user !== requestingUser.uuid
+                  ? {
+                        ...prevRestock,
+                        mailing_list: [
+                            ...prevRestock.mailing_list,
+                            requestingUser.uuid,
+                        ],
+                    }
+                  : prevRestock;
+            // Reason can be added any time
+            const reason = data.get("reason_restock") as string;
+
+            if (reason || isNew) {
+                restock.status_logs.push({
+                    timestamp: Date.now() / 1000,
+                    status: restock.current_status,
+                    message: reason,
+                });
+            }
             // Reset the mutation (clears any previous errors)
             mutation.reset();
             // Run the mutation
             mutation.mutate({ restock: restock, isNew: isNew ?? true });
         },
-        [restockSelected.uuid, requestingUser?.uuid],
+        [isNew, prevRestock, restockSelected.uuid, requestingUser?.uuid],
     );
 
     return (
@@ -192,7 +208,7 @@ export default function RestockRequestModal({
             <ModalContent className="flex flex-col justify-center">
                 {(onClose) =>
                     restockSelected ? (
-                        <div className="w-full">
+                        <div className="w-full overflow-auto">
                             <ModalHeader>Restock Request Form</ModalHeader>
                             <ModalBody>
                                 <Form onSubmit={onSubmit}>
@@ -264,9 +280,10 @@ export default function RestockRequestModal({
                                         <div>
                                             <p className="pb-2">
                                                 There is already a restock
-                                                request for this item. If you
-                                                would like to be notified when
-                                                it is restocked, please select
+                                                request for this item. If
+                                                you would like to be
+                                                notified when it is
+                                                restocked, please select
                                                 "Join Mailing List" below.
                                             </p>
 
@@ -282,11 +299,11 @@ export default function RestockRequestModal({
                                                         size="md"
                                                     />
                                                 </div>
-                                                <div className="flex flex-row gap-2 items-center ">
+                                                <div className="w-full overflow-auto flex flex-col gap-2 items-left ">
                                                     <h3 className="font-bold">
                                                         Last Message:
                                                     </h3>
-                                                    <p>
+                                                    <p className="overflow-auto pl-4">
                                                         {prevRestock.status_logs.at(
                                                             -1,
                                                         )
@@ -296,16 +313,29 @@ export default function RestockRequestModal({
                                                             : ""}
                                                     </p>
                                                 </div>
-
-                                                {userCanRequest ? null : (
-                                                    <div className="flex justify-center">
-                                                        <p className="font-bold">
-                                                            You are already on
-                                                            the mailing list.
-                                                        </p>
-                                                    </div>
-                                                )}
                                             </div>
+                                            <p className="pt-4 pb-2">
+                                                If you would like to add an
+                                                additional comment, please enter
+                                                it in the textbox below.
+                                            </p>
+                                            <Textarea
+                                                label="Updated Reason"
+                                                name="reason_restock"
+                                                placeholder="Enter reason"
+                                                variant="faded"
+                                                color="primary"
+                                                required={!userCanRequest}
+                                                isRequired={!userCanRequest}
+                                                classNames={{
+                                                    input: clsx([
+                                                        "placeholder:text-default-500",
+                                                        "placeholder:italic",
+                                                        "text-default-700",
+                                                    ]),
+                                                    base: "w-full",
+                                                }}
+                                            />
                                         </div>
                                     )}
                                     
@@ -314,15 +344,14 @@ export default function RestockRequestModal({
                                             variant="shadow"
                                             color="primary"
                                             type="submit"
-                                            isDisabled={
-                                                !userCanRequest ||
-                                                mutation.isPending
-                                            }
+                                            // isDisabled={!userCanRequest && }
                                             isLoading={mutation.isPending}
                                         >
-                                            {isNew || !prevRestock
-                                                ? "Submit"
-                                                : "Join Mailing List"}
+                                            {isNew
+                                                ? "Submit Request"
+                                                : userCanRequest
+                                                  ? "Join Mailing List"
+                                                  : "Update Request"}
                                         </Button>
                                         <Button
                                             variant="flat"

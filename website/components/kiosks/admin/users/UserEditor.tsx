@@ -50,6 +50,7 @@ export default function UserEditor({
                                   college_id: "",
                                   active_roles: [],
                                   past_roles: [],
+                                  last_login: 0,
                               }
                     }
                     roles={roles}

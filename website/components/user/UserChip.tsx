@@ -146,6 +146,7 @@ export function UserChip({
                         user={user_data}
                         roles={roles}
                         isLoading={rolesLoading}
+                        unknownPlaceholders
                     />
                 )}
             </PopoverContent>

@@ -5,7 +5,7 @@ import ScheduleUserPicker from "./ScheduleUserPicker";
 import ScheduleSelector from "./ScheduleSelector";
 import { Selection, useDisclosure } from "@heroui/react";
 import { TUser, TUserRole, UserUUID } from "common/user";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 function getUserTotalAvailableTime(user: TUser, schedule?: TSchedule) {
     if (!schedule) {
@@ -48,7 +48,6 @@ export default function ScheduleBuffer({
     selectedUsers: Selection;
     setSelectedUsers: (users: Selection) => void;
 }) {
-
     // Opposite of schedule mode is availability mode
     const [scheduleMode, setScheduleMode] = React.useState<
         "schedule" | "availability"
@@ -56,10 +55,9 @@ export default function ScheduleBuffer({
 
     const [availableUsers, setAvailableUsers] = useState<Selection>(new Set());
 
-    // When in schedule mode, only one user can be selected at a time, so
-    // we can just use the first. When in availability mode, selected users are available
+    // Use the first selected user, since multiselect is disabled.
     const selectedUserUUID =
-        selectedUsers === "all" || scheduleMode === "availability"
+        selectedUsers === "all"
             ? null
             : (Array.from(selectedUsers)[0] as UserUUID);
 
@@ -102,6 +100,40 @@ export default function ScheduleBuffer({
         ? users.find((u) => u.uuid === selectedUserUUID)
         : undefined;
 
+    const switchScheduleMode = (mode: "schedule" | "availability") => {
+        setScheduleMode(mode);
+        if (
+            availableUsers !== "all" &&
+            selectedUserUUID &&
+            !availableUsers.has(selectedUserUUID)
+        ) {
+
+            setAvailableUsers(new Set());
+        }
+    };
+
+    const handleKeyPress = useCallback(
+        (event: KeyboardEvent) => {
+            if (event.key === "`") {
+                // Switch modes
+                setScheduleMode((mode) =>
+                    mode === "schedule" ? "availability" : "schedule",
+                );
+            }
+        },
+        [setScheduleMode],
+    );
+
+    useEffect(() => {
+        // attach the event listener
+        document.addEventListener("keydown", handleKeyPress);
+
+        // remove the event listener
+        return () => {
+            document.removeEventListener("keydown", handleKeyPress);
+        };
+    }, [handleKeyPress]);
+
     return (
         <div className="w-full h-full">
             <div className="w-full h-full flex flex-col lg:flex-row gap-4 overflow-auto">
@@ -113,14 +145,15 @@ export default function ScheduleBuffer({
                         setSelectedSchedules={setSelectedSchedules}
                         config={config}
                         scheduleMode={scheduleMode}
-                        setScheduleMode={setScheduleMode}
+                        setScheduleMode={switchScheduleMode}
                         setSelectedUsers={setSelectedUsers}
                         key={schedule?.uuid}
                     />
                     <Schedule
                         schedule={schedule}
                         config={config}
-                        users={filteredUsers}
+                        users={users}
+                        workers={filteredUsers}
                         roles={roles}
                         isLoading={false}
                         selectedUser={selectedUser}
@@ -136,24 +169,32 @@ export default function ScheduleBuffer({
                         }
                     />
                 </div>
-                <ScheduleUserPicker
-                    schedule_uuid={schedule?.uuid}
-                    config={config}
-                    users={
-                        scheduleMode === "schedule"
-                            ? sortedUsers
-                            : sortedAvailableUsers
-                    }
-                    roles={roles}
-                    isLoading={false}
-                    selectedUsers={selectedUsers}
-                    setSelectedUsers={
-                        scheduleMode === "schedule"
-                            ? setSelectedUsers
-                            : setAvailableUsers
-                    }
-                    type={scheduleMode === "schedule" ? "edit" : "availability"}
-                />
+                <>
+                    <ScheduleUserPicker
+                        schedule_uuid={schedule?.uuid}
+                        config={config}
+                        users={sortedUsers}
+                        roles={roles}
+                        isLoading={false}
+                        selectedUsers={selectedUsers}
+                        setSelectedUsers={setSelectedUsers}
+                        type={"edit"}
+                        className={
+                            scheduleMode === "availability" ? "hidden" : ""
+                        }
+                    />
+                    <ScheduleUserPicker
+                        schedule_uuid={schedule?.uuid}
+                        config={config}
+                        users={sortedAvailableUsers}
+                        roles={roles}
+                        isLoading={false}
+                        selectedUsers={selectedUsers}
+                        setSelectedUsers={setSelectedUsers}
+                        type="availability"
+                        className={scheduleMode === "schedule" ? "hidden" : ""}
+                    />
+                </>
             </div>
         </div>
     );

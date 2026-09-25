@@ -1,9 +1,9 @@
-import { Card, Table, TableRow, Selection } from "@heroui/react";
+import { Card, Selection } from "@heroui/react";
 import { TConfig } from "common/config";
 import { TUser, TUserRole } from "common/user";
 import UsersTable from "../users/UsersTable";
 import { ScheduleUUID } from "common/schedule";
-import { TCertification } from "common/certification";
+import clsx from "clsx";
 
 export default function ScheduleUserPicker({
     schedule_uuid,
@@ -14,6 +14,7 @@ export default function ScheduleUserPicker({
     selectedUsers,
     setSelectedUsers,
     type,
+    className,
 }: {
     schedule_uuid?: ScheduleUUID;
     users: TUser[];
@@ -23,10 +24,14 @@ export default function ScheduleUserPicker({
     selectedUsers: Selection;
     setSelectedUsers: (selectedUsers: Selection) => void;
     type: "edit" | "availability";
+    className: string;
 }) {
     return (
         <Card
-            className="w-full lg:w-1/3 p-5 overflow-auto h-2/3 lg:h-full"
+            className={clsx(
+                "w-full lg:w-1/3 p-5 overflow-auto h-2/3 lg:h-full",
+                className,
+            )}
             shadow="sm"
         >
             <UsersTable

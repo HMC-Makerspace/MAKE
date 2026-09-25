@@ -33,7 +33,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { TUserRole, UserRoleUUID } from "common/user";
 import MAKETable, { ColumnSelect } from "../../../Table";
-import UserChipRole from "../../../user/UserRole";
+import {UserRoleChip} from "../../../user/UserRoleChip";
 import Fuse from "fuse.js";
 import React from "react";
 import {
@@ -705,7 +705,7 @@ export default function RolesTable({
                 multiSelect={false}
                 customColumnComponents={{
                     title: (role: TUserRole) => (
-                        <UserChipRole role_uuid={role.uuid} role={role} />
+                        <UserRoleChip role_uuid={role.uuid} role={role} />
                     ),
                     default: (role: TUserRole) =>
                         role.default ? (

@@ -1,6 +1,7 @@
 import { Accordion, AccordionItem, Spacer } from "@heroui/react";
 import clsx from "clsx";
 import { TFAQItem } from "common/config";
+import { Link } from "react-router-dom";
 
 const DEPTH_TITLE_SIZES = [
     "text-5xl",
@@ -27,6 +28,12 @@ export default function StaticFAQItem({
     index?: number;
     depth?: number;
 }) {
+    // Interpret Markdown-style links
+    const sep_regex = new RegExp(/\[[^\]]*\]\([^\)]*\)/g);
+    const link_regex = new RegExp(/\[([^\]]*)\]\(([^\)]*)\)/g);
+    const separated_text = faq_item.description?.split(sep_regex);
+    const links = faq_item.description?.matchAll(link_regex).toArray();
+
     return (
         <Accordion
             variant={faq_item.bordered ? "bordered" : "light"}
@@ -64,7 +71,21 @@ export default function StaticFAQItem({
                             : DEPTH_BODY_SIZES[-1],
                     )}
                 >
-                    {faq_item.description}
+                    {separated_text?.map((text, i) => (
+                        <span key={`faq-i${index}-d${depth + 1}-text${i}`}>
+                            <span>{text}</span>
+                            {links && i < links.length ? (
+                                <Link
+                                    to={links[i][2]}
+                                    className="underline text-primary-300"
+                                >
+                                    {links[i][1]}
+                                </Link>
+                            ) : (
+                                <></>
+                            )}
+                        </span>
+                    ))}
                 </div>
                 <Spacer y={2} />
                 {faq_item.children && faq_item.children.length > 0 && (

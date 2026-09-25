@@ -19,6 +19,7 @@ import RestockKiosk from "./pages/admin/RestockKiosk";
 import RolesKiosk from "./pages/admin/RolesKiosk";
 import ScheduleKiosk from "./pages/admin/SchedulesKiosk";
 import SettingsKiosk from "./pages/admin/SettingsKiosk";
+import StatisticsKiosk from "./pages/admin/StatisticsKiosk";
 import AreasKiosk from "./pages/admin/AreasKiosk";
 import MachinesKiosk from "./pages/admin/MachinesKiosk";
 import InventoryKiosk from "./pages/admin/InventoryKiosk";
@@ -29,7 +30,10 @@ const App: React.FC = () => {
     return (
         <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/certifications" element={<CertificationsPage />} />
+            <Route path="/certifications">
+                <Route index element={<CertificationsPage />} />
+                <Route path=":cert_uuid" element={<CertificationsPage />} />
+            </Route>
             <Route path="/areas" element={<AreasPage />} />
             <Route path="/schedule" element={<SchedulePage />} />
             <Route path="/inventory" element={<InventoryPage />} />
@@ -53,6 +57,7 @@ const App: React.FC = () => {
             <Route path="/admin/restocks" element={<RestockKiosk />} />
             <Route path="/admin/inventory" element={<InventoryKiosk />} />
             <Route path="/admin/workshops" element={<WorkshopKiosk />} />
+            <Route path="/admin/statistics" element={<StatisticsKiosk />} />
         </Routes>
     );
 };

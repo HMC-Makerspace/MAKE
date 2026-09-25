@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import DefaultLayout from "../layouts/Default";
-import { Tabs, Tab } from "@heroui/react";
+import { Tabs, Tab, Card, Spinner } from "@heroui/react";
 import { TWorkshop } from "../../common/workshop.ts";
 import { TUser } from "common/user.js";
 import { Key, useState } from "react";
@@ -11,6 +11,7 @@ import {
 import { TCertification } from "common/certification.ts";
 import { TConfig } from "common/config.js";
 import WorkshopCard from "../components/public/workshops/WorkshopCard.tsx";
+import { useScroll } from "../components/UseScroll.tsx";
 
 export default function WorkshopPage() {
     const [selected, setSelected] = useState<Key>("current-workshops");
@@ -65,6 +66,9 @@ export default function WorkshopPage() {
         filteredWorkshops = filteredWorkshops?.reverse();
     }
 
+    const { visibleContent, hasMoreContent, loaderRef, scrollerRef } =
+        useScroll(filteredWorkshops ?? [], 6, 4);
+
     return (
         <DefaultLayout className="p-8" pageHref="/workshops">
             <div
@@ -98,28 +102,42 @@ export default function WorkshopPage() {
                         }
                     />
                 </Tabs>
-                {filteredWorkshops &&
-                    (filteredWorkshops.length > 0 ? (
-                        <div
-                            id="card-container"
-                            className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full w-full"
-                        >
-                            {filteredWorkshops.map((workshop) => (
-                                <WorkshopCard
-                                    workshop={workshop}
-                                    self={self}
-                                    users={users}
-                                    certifications={certifications}
-                                    config={config}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="size-full flex items-center justify-center">
-                            No workshops are currently available. Please check
-                            back later!
-                        </div>
-                    ))}
+                <main
+                    ref={scrollerRef}
+                    className="w-full h-full flex flex-col overflow-auto"
+                >
+                    {visibleContent &&
+                        (visibleContent.length > 0 ? (
+                            <>
+                                <div
+                                    id="card-container"
+                                    className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full w-full"
+                                >
+                                    {visibleContent.map((workshop) => (
+                                        <WorkshopCard
+                                            workshop={workshop}
+                                            self={self}
+                                            users={users}
+                                            certifications={certifications}
+                                            config={config}
+                                            key={workshop.uuid}
+                                        />
+                                    ))}
+                                    {hasMoreContent && (
+                                        <Spinner
+                                            ref={loaderRef}
+                                            color="primary"
+                                        />
+                                    )}
+                                </div>
+                            </>
+                        ) : (
+                            <div className="size-full flex items-center justify-center">
+                                No workshops are currently available. Please
+                                check back later!
+                            </div>
+                        ))}
+                </main>
             </div>
         </DefaultLayout>
     );

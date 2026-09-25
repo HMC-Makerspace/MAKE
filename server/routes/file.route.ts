@@ -16,6 +16,7 @@ import {
     deleteFileOnServer,
     moveTempFileOnServer,
     deleteFilesOnServer,
+    removeResourcesFromFile,
 } from "controllers/file.controller";
 import { verifyRequest } from "controllers/verify.controller";
 import { NextFunction, Request, Response, Router } from "express";
@@ -426,6 +427,11 @@ router.post(
             FILE_RESOURCE_TYPE.USER,
         );
 
+        const IS_ADMIN_REQUEST = await verifyRequest(
+            requesting_uuid,
+            API_SCOPE.ADMIN,
+        );
+
         let file_size_sum = 0;
         await Promise.allSettled(
             files.map(async (file, i) => {
@@ -467,12 +473,12 @@ router.post(
                     moveTempFileOnServer(temp_path, target_path, req)
                         // If the file was successfully saved, create a new File object
                         // in the db
-                        .then(() => {
+                        .then(async () => {
                             // Create a new file object
                             const upload_time = Date.now() / 1000;
+                            // Override expiration time if the request is from an admin
                             const expiration_time =
-                                config.file.upload_duration &&
-                                !verifyRequest(user.uuid, API_SCOPE.ADMIN)
+                                config.file.upload_duration && !IS_ADMIN_REQUEST
                                     ? upload_time + config.file.upload_duration
                                     : undefined;
                             const file_obj: TFile = {
@@ -482,7 +488,7 @@ router.post(
                                 timestamp_upload: upload_time,
                                 timestamp_expires: expiration_time,
                                 size: file.size,
-                                resource_uuid: user.uuid,
+                                resource_uuid: [user.uuid],
                                 resource_type: FILE_RESOURCE_TYPE.USER,
                             };
                             return (
@@ -609,7 +615,7 @@ router.post(
                             path: target_path,
                             timestamp_upload: Date.now() / 1000,
                             size: file.size,
-                            resource_uuid: user_uuid,
+                            resource_uuid: [user_uuid],
                             resource_type: FILE_RESOURCE_TYPE.USER,
                         };
                         createFile(file_obj)
@@ -726,13 +732,17 @@ router.post(
                 // in the db
                 .then(() => {
                     // Create a new file object
+                    const resource_uuid_list = resource_uuid.includes(",")
+                        ? resource_uuid.split(",")
+                        : [resource_uuid];
+
                     const file_obj: TFile = {
                         uuid: crypto.randomUUID(),
                         name: file.originalname,
                         path: target_path,
                         timestamp_upload: Date.now(),
                         size: file.size,
-                        resource_uuid: resource_uuid,
+                        resource_uuid: resource_uuid_list,
                         resource_type: resource_type,
                     };
                     createFile(file_obj)
@@ -838,41 +848,79 @@ router.delete(
             await verifyRequest(
                 requesting_uuid,
                 API_SCOPE.DELETE_FILE,
-                requesting_uuid == file.resource_uuid &&
+                requesting_uuid == file.resource_uuid[0] &&
                     API_SCOPE.DELETE_OWN_FILE,
             )
         ) {
-            deleteFileOnServer(file.path, req, res).then((error_message) => {
-                deleteFile(file_uuid)
-                    .then((deleted_file) => {
-                        if (!deleted_file) {
-                            req.log.warn(
-                                `File with uuid ${file_uuid} not found, failed to delete`,
-                            );
-                            res.status(StatusCodes.NOT_FOUND).json({
-                                error: `File with uuid \`${file_uuid}\` not found.`,
-                            });
-                        } else if (
-                            error_message === "Successfully deleted file"
-                        ) {
-                            req.log.debug("Deleted file object successfully.");
-                            res.status(StatusCodes.NO_CONTENT).json({});
-                        } else {
-                            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                                error: error_message,
-                            });
-                        }
-                    })
-                    .catch((err: Error) => {
-                        req.log.error({
-                            msg: `Error deleting file with uuid ${file_uuid}`,
-                            err: err,
+            removeResourcesFromFile(file_uuid, file.resource_uuid)
+                // Once the resource has been removed from file
+                .then((updated_file) => {
+                    // If updated file is null, it couldn't be found
+                    if (!updated_file) {
+                        req.log.warn(
+                            `File with uuid ${file_uuid} not found, failed to delete`,
+                        );
+                        res.status(StatusCodes.NOT_FOUND).json({
+                            error: `File with uuid \`${file_uuid}\` not found.`,
                         });
-                        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                            error: err.message,
-                        });
+                    } else if (updated_file.resource_uuid.length === 0) {
+                        // If resource is deleted and file is not associated with any more resources, delete the file
+                        deleteFileOnServer(file.path, req, res).then(
+                            (error_message) => {
+                                deleteFile(file_uuid)
+                                    .then((deleted_file) => {
+                                        if (!deleted_file) {
+                                            req.log.warn(
+                                                `File with uuid ${file_uuid} not found, failed to delete`,
+                                            );
+                                            res.status(
+                                                StatusCodes.NOT_FOUND,
+                                            ).json({
+                                                error: `File with uuid \`${file_uuid}\` not found.`,
+                                            });
+                                        } else if (
+                                            error_message ===
+                                            "Successfully deleted file"
+                                        ) {
+                                            req.log.debug(
+                                                "Deleted file successfully.",
+                                            );
+                                            res.status(StatusCodes.OK).json({});
+                                        } else {
+                                            res.status(
+                                                StatusCodes.INTERNAL_SERVER_ERROR,
+                                            ).json({
+                                                error: error_message,
+                                            });
+                                        }
+                                    })
+                                    .catch((err: Error) => {
+                                        req.log.error({
+                                            msg: `Error deleting file with uuid ${file_uuid}`,
+                                            err: err,
+                                        });
+                                        res.status(
+                                            StatusCodes.INTERNAL_SERVER_ERROR,
+                                        ).json({
+                                            error: err.message,
+                                        });
+                                    });
+                            },
+                        );
+                    } else {
+                        req.log.debug("Removed user from file successfully.");
+                        res.status(StatusCodes.OK).json({});
+                    }
+                })
+                .catch((err: Error) => {
+                    req.log.error({
+                        msg: `Error removing user with ${requesting_uuid} from file with uuid ${file_uuid}`,
+                        err: err,
                     });
-            });
+                    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                        error: err.message,
+                    });
+                });
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to delete a file",
@@ -891,31 +939,33 @@ router.delete(
  * resource the file is related to.
  */
 router.delete(
-    /\/by\/(workshop|area|machine)\/(.+)/,
+    /\/by\/(workshop|area|machine)\/([^/]+)\/([^/]+)/,
     async (req: Request, res: SuccessfulResponse) => {
         const headers = req.headers as VerifyRequestHeader;
         const requesting_uuid: string = req.user?.uuid as string;
         // Get the resource type and UUID from the URL
         const resource_type = req.params[0] as FILE_RESOURCE_TYPE;
-        const resource_uuid = req.params[1];
+        const resource_uuid = req.params[2];
+
+        const file_uuid = req.params[1];
 
         // Get the file to verify the request
-        const file = await getFile(resource_uuid);
+        const file = await getFile(file_uuid);
 
         if (!file) {
-            req.log.warn(`File not found by uuid ${resource_uuid}`);
+            req.log.warn(`File not found by uuid ${file_uuid}`);
             res.status(StatusCodes.NOT_FOUND).json({
-                error: `No file found with uuid \`${resource_uuid}\`.`,
+                error: `No file found with uuid \`${file_uuid}\`.`,
             });
             return;
         }
 
         if (file.resource_type !== resource_type) {
             req.log.warn({
-                msg: `File with uuid ${resource_uuid} is not a ${resource_type} file.`,
+                msg: `File with uuid ${file_uuid} is not a ${resource_type} file.`,
             });
             res.status(StatusCodes.FORBIDDEN).json({
-                error: `File with uuid \`${resource_uuid}\` is not a ${resource_type} file.`,
+                error: `File with uuid \`${file_uuid}\` is not a ${resource_type} file.`,
             });
         }
 
@@ -932,37 +982,82 @@ router.delete(
                     API_SCOPE.UPDATE_MACHINE,
             )
         ) {
-            deleteFileOnServer(file.path, req, res).then((error_message) => {
-                deleteFile(resource_uuid)
-                    .then((deleted_file) => {
-                        if (!deleted_file) {
-                            req.log.warn(
-                                `File with uuid ${resource_uuid} not found, failed to delete`,
-                            );
-                            res.status(StatusCodes.NOT_FOUND).json({
-                                error: `File with uuid \`${resource_uuid}\` not found.`,
-                            });
-                        } else if (
-                            error_message === "Successfully deleted file"
-                        ) {
-                            req.log.debug("Deleted file successfully.");
-                            res.status(StatusCodes.OK).json({});
-                        } else {
-                            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                                error: error_message,
-                            });
-                        }
-                    })
-                    .catch((err: Error) => {
-                        req.log.error({
-                            msg: `Error deleting file with uuid ${resource_uuid}`,
-                            err: err,
+            // Convert the resource_uuid into an array or keep it as an array
+            const resource_uuid_list = resource_uuid.includes(",")
+                ? resource_uuid.split(",")
+                : [resource_uuid];
+
+            removeResourcesFromFile(file_uuid, resource_uuid_list)
+                // Once the resource has been removed from file
+                .then((updated_file) => {
+                    // If updated file is null, it couldn't be found
+                    if (!updated_file) {
+                        req.log.warn(
+                            `File with uuid ${file_uuid} not found, failed to delete`,
+                        );
+                        res.status(StatusCodes.NOT_FOUND).json({
+                            error: `File with uuid \`${file_uuid}\` not found.`,
                         });
-                        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                            error: err.message,
-                        });
+                    } else if (updated_file.resource_uuid.length === 0) {
+                        // If resource is deleted and file is not associated with any more resources, delete the file
+                        deleteFileOnServer(file.path, req, res).then(
+                            (error_message) => {
+                                deleteFile(file_uuid)
+                                    .then((deleted_file) => {
+                                        if (!deleted_file) {
+                                            req.log.warn(
+                                                `File with uuid ${file_uuid} not found, failed to delete`,
+                                            );
+                                            res.status(
+                                                StatusCodes.NOT_FOUND,
+                                            ).json({
+                                                error: `File with uuid \`${file_uuid}\` not found.`,
+                                            });
+                                        } else if (
+                                            error_message ===
+                                            "Successfully deleted file"
+                                        ) {
+                                            req.log.debug(
+                                                "Deleted file successfully.",
+                                            );
+                                            res.status(StatusCodes.OK).json({});
+                                        } else {
+                                            res.status(
+                                                StatusCodes.INTERNAL_SERVER_ERROR,
+                                            ).json({
+                                                error: error_message,
+                                            });
+                                        }
+                                    })
+                                    .catch((err: Error) => {
+                                        req.log.error({
+                                            msg: `Error deleting file with uuid ${file_uuid}`,
+                                            err: err,
+                                        });
+                                        res.status(
+                                            StatusCodes.INTERNAL_SERVER_ERROR,
+                                        ).json({
+                                            error: err.message,
+                                        });
+                                    });
+                            },
+                        );
+                    } else {
+                        req.log.debug(
+                            "Removed resource from file successfully.",
+                        );
+                        res.status(StatusCodes.OK).json({});
+                    }
+                })
+                .catch((err: Error) => {
+                    req.log.error({
+                        msg: `Error removing resource with ${resource_uuid} from file with uuid ${file_uuid}`,
+                        err: err,
                     });
-            });
+                    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                        error: err.message,
+                    });
+                });
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to delete a file for a resource",

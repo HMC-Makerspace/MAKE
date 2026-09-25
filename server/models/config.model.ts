@@ -8,6 +8,7 @@ import type {
     TScheduleConfig,
     TWorkshopConfig,
 } from "common/config";
+import Joi from 'joi';
 
 const CheckoutConfig = new mongoose.Schema<TCheckoutConfig>(
     {
@@ -15,6 +16,10 @@ const CheckoutConfig = new mongoose.Schema<TCheckoutConfig>(
     },
     { _id: false },
 );
+
+const CheckoutConfigSchema = Joi.object<TCheckoutConfig>({
+    notification_interval_sec: Joi.number().optional()
+});
 
 const FileConfig = new mongoose.Schema<TFileConfig>(
     {
@@ -24,6 +29,12 @@ const FileConfig = new mongoose.Schema<TFileConfig>(
     },
     { _id: false },
 );
+
+const FileConfigSchema = Joi.object<TFileConfig>({
+    max_upload_capacity: Joi.number().optional(),
+    max_upload_count: Joi.number().optional(),
+    upload_duration: Joi.number().optional()
+});
 
 const ScheduleConfig = new mongoose.Schema<TScheduleConfig>(
     {
@@ -38,13 +49,36 @@ const ScheduleConfig = new mongoose.Schema<TScheduleConfig>(
     { _id: false },
 );
 
+const ScheduleConfigSchema = Joi.object<TScheduleConfig>({
+    days_open: Joi.array().items(
+        Joi.number()
+    ).optional(),
+    first_display_day: Joi.number().optional(),
+    worker_roles: Joi.array().items(
+        Joi.string()
+    ).required(),
+    increment_sec: Joi.number().required(),
+    first_names_only: Joi.boolean().optional(),
+    timezone: Joi.string().required(),
+    locale: Joi.string().required()
+});
+
 const WorkshopConfig = new mongoose.Schema<TWorkshopConfig>(
     {
         reminder_times: { type: [Number], required: true },
         sign_in_enabled_within: { type: Number, required: true },
+        instructor_roles: { type: [String], required: true },
     },
     { _id: false },
 );
+
+const WorkshopConfigSchema = Joi.object<TWorkshopConfig>({
+    reminder_times: Joi.array().items(Joi.number()).required(),
+    sign_in_enabled_within: Joi.number().required(),
+    instructor_roles: Joi.array().items(
+        Joi.string()
+    ).required(),
+});
 
 const GeneralConfig = new mongoose.Schema<TGeneralConfig>(
     {
@@ -54,11 +88,22 @@ const GeneralConfig = new mongoose.Schema<TGeneralConfig>(
         instagram_url: { type: String, required: false },
         tiktok_url: { type: String, required: false },
         extra_urls: { type: [String], required: false },
+        hide_home_embed: { type: Boolean, required: false },
     },
     {
         _id: false,
     },
 );
+
+const GeneralConfigSchema = Joi.object<TGeneralConfig>({
+    branding_url: Joi.string().optional(),
+    tagline: Joi.string().optional(),
+    discord_url: Joi.string().optional(),
+    instagram_url: Joi.string().optional(),
+    tiktok_url: Joi.string().optional(),
+    extra_urls: Joi.array().items(Joi.string()).optional(),
+    hide_home_embed: Joi.boolean().optional(),
+});
 
 const FAQItemConfig = new mongoose.Schema<TFAQItem>(
     {
@@ -78,6 +123,17 @@ FAQItemConfig.add({
     children: { type: [FAQItemConfig], required: false },
 });
 
+const FAQItemConfigSchema = Joi.object<TFAQItem>({
+    title: Joi.string(),
+    description: Joi.string().optional().allow(""),
+    children_columns: Joi.number().optional(),
+    default_open: Joi.boolean().optional(),
+    always_open: Joi.boolean().optional(),
+    bordered: Joi.boolean().optional(),
+    title_centered: Joi.boolean().optional(),
+    children: Joi.array().items(Joi.link("#FAQItemConfigSchema")).optional(),
+}).id("FAQItemConfigSchema");
+
 /**
  * See {@link TConfig} documentation for type information.
  * TODO: Finish setting up config db typing
@@ -94,3 +150,13 @@ export const Config = new mongoose.Schema<TConfig>(
     },
     { collection: "config" },
 );
+
+export const ConfigSchema = Joi.object<TConfig>({
+    timestamp: Joi.number().required(),
+    general: GeneralConfigSchema.required(),
+    checkout: CheckoutConfigSchema.required(),
+    file: FileConfigSchema.required(),
+    schedule: ScheduleConfigSchema.required(),
+    workshop: WorkshopConfigSchema.required(),
+    faq: FAQItemConfigSchema.optional(),
+});

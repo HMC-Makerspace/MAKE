@@ -16,17 +16,21 @@ import {
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import axios from "axios";
+import { useRoles } from "../../queries/useRoles";
 
 const createEmptyMachine = async () => {
+    const machine_obj: TMachine = {
+        uuid: crypto.randomUUID(),
+        name: "New Machine",
+        count: 0,
+        instances: [],
+        status_logs: [],
+        available_to: [],
+        visible_to: [],
+    };
     return (
         await axios.post<TMachine>("/api/v3/machine/", {
-            machine_obj: {
-                uuid: crypto.randomUUID(),
-                name: "New Machine",
-                count: 0,
-                instances: [],
-                status_logs: [],
-            },
+            machine_obj,
         })
     ).data;
 };
@@ -44,10 +48,7 @@ export default function MachinesKiosk() {
         },
     );
 
-    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
-    });
+    const { data: roles, isLoading: rolesLoading } = useRoles();
 
     const { data: certifications, isLoading: certificationsLoading } = useQuery<
         TCertification[]

@@ -1,9 +1,4 @@
-import {
-    InventoryItemUUID,
-    ITEM_ACCESS_TYPE,
-    ITEM_ROLE,
-    TInventoryItem,
-} from "../../../common/inventory";
+import { InventoryItemUUID, TInventoryItem } from "../../../common/inventory";
 import {
     Button,
     Selection,
@@ -13,12 +8,11 @@ import {
     Tooltip,
     useDisclosure,
 } from "@heroui/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { TUser, TUserRole, UserUUID } from "common/user";
+import { TUser, TUserRole } from "common/user";
 import {
     CERTIFICATION_VISIBILITY,
-    CertificationUUID,
     TCertification,
 } from "../../../common/certification";
 import { TArea } from "common/area";
@@ -29,12 +23,7 @@ import {
     TCheckoutItemUnavailability,
     TCheckoutValidation,
 } from "../../../common/checkout";
-import {
-    InformationCircleIcon,
-    MinusIcon,
-    PlusIcon,
-    TrashIcon,
-} from "@heroicons/react/24/outline";
+import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import AdminLayout from "../../layouts/AdminLayout";
 import InventoryTable from "../../components/kiosks/admin/inventory/InventoryTable";
 import CheckoutTable from "../../components/kiosks/admin/checkouts/CheckoutTable";
@@ -48,7 +37,8 @@ import { CheckBadgeIcon, PercentBadgeIcon } from "@heroicons/react/24/solid";
 import UsersTable from "../../components/kiosks/admin/users/UsersTable";
 import GrantCertPopup from "../../components/kiosks/admin/checkouts/GrantCertPopup";
 import AssignIDPopup from "../../components/kiosks/admin/checkouts/AssignIDPopup";
-import { TPublicScheduleData } from "common/schedule";
+import CertificationTag from "../../components/kiosks/admin/certifications/CertificationTag";
+import { useRoles } from "../../queries/useRoles";
 
 async function getCartUnavailability({ cart }: { cart: TCheckoutItem[] }) {
     return (
@@ -79,10 +69,7 @@ export default function CheckoutsKiosk() {
         queryKey: ["user"],
         refetchOnWindowFocus: false,
     });
-    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
-    });
+    const { data: roles, isLoading: rolesLoading } = useRoles();
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
             queryKey: ["certification"],
@@ -104,18 +91,12 @@ export default function CheckoutsKiosk() {
             refetchOnWindowFocus: false,
         });
 
-    const [selectedItems, setSelectedItems] = useState<Selection>(new Set());
-
     const [unavailability, setUnavailability] = useState<
         TCheckoutItemUnavailability[]
     >([]);
 
     const [collegeID, setCollegeID] = useState("");
-    const {
-        data: user,
-        isLoading,
-        isError,
-    } = useQuery<TUser>({
+    const { data: user } = useQuery<TUser>({
         queryKey: ["user", "by", "id", collegeID],
         refetchOnWindowFocus: false,
         enabled: !!collegeID,
@@ -142,6 +123,7 @@ export default function CheckoutsKiosk() {
         (item?: TInventoryItem) => {
             let validAdd = false;
 
+            console.log("Setting cart outside");
             // This callback format fixes a dependency array bug
             setCart((prevCart) => {
                 if (!item) return prevCart;
@@ -157,8 +139,11 @@ export default function CheckoutsKiosk() {
                         newCart[existing_item].quantity < item.quantity ||
                         item.quantity < 0
                     ) {
-                        newCart[existing_item].quantity++;
                         validAdd = true;
+                        newCart[existing_item] = {
+                            ...newCart[existing_item],
+                            quantity: newCart[existing_item].quantity + 1,
+                        };
                     }
                 } else {
                     // Item not yet in cart, add to quantity
@@ -227,7 +212,6 @@ export default function CheckoutsKiosk() {
         isOpen: grantPopup,
         onOpenChange: changeGrantPopup,
         onOpen: openGrantPopup,
-        onClose: closeGrantPopup,
     } = useDisclosure();
 
     const [missingIDUser, setMissingIDUser] = useState<TUser>();

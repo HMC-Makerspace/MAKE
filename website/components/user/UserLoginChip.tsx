@@ -220,6 +220,7 @@ export function UserLoginChip({
                             user={user}
                             roles={roles}
                             isLoading={rolesLoading}
+                            unknownPlaceholders
                         />
                     )}
                     <div className="w-full flex flex-row gap-4 justify-center p-2">

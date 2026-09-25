@@ -34,7 +34,7 @@ export default function CheckoutUser({
             size="md"
             className="h-full overflow-auto relative min-w-0"
             endContent={
-                isError ? (
+                isError && college_id ? (
                     <div
                         className={clsx(
                             "absolute h-[50%] primary shadow-md bg-primary-100/50 flex",

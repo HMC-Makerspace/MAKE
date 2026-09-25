@@ -95,6 +95,7 @@ export default function MAKETable<Type extends { uuid: string }>({
     const [loaderRef, scrollerRef] = useInfiniteScroll({
         hasMore: hasMoreContent,
         onLoadMore: loadMoreContent,
+        shouldUseLoader: true,
     });
 
     // The actual column header objects, filtered based on the visible columns
@@ -116,7 +117,7 @@ export default function MAKETable<Type extends { uuid: string }>({
             // Otherwise, just return the cell value as a string
             return item[columnKey as keyof Type] as string;
         }
-    }, []);
+    }, [customColumnComponents]);
 
     return (
         <Table

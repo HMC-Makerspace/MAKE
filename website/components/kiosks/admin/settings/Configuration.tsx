@@ -16,7 +16,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TConfig } from "common/config";
 import { SHIFT_DAYS } from "../../../../../common/shift";
 import { UserRoleSelect } from "../../../../components/user/UserRoleSelect";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import React, { useState } from "react";
 import clsx from "clsx";
 import { PlusIcon, AcademicCapIcon } from "@heroicons/react/24/solid";
@@ -90,9 +90,9 @@ export default function Configuration({
                 color: "success",
             });
         },
-        onError: (error) => {
+        onError: (error: AxiosError<{ error: string }>) => {
             addToast({
-                title: `Error: ${error.message}`,
+                title: error.response?.data?.error ?? `Error: ${error.message}`,
                 color: "danger",
             });
         },
@@ -224,6 +224,7 @@ export default function Configuration({
                             "workshop_sign_in_enabled_within",
                         ) as string) || "0",
                     ) || config.workshop.sign_in_enabled_within,
+            instructor_roles: config.workshop.instructor_roles,
             },
         };
 
@@ -310,7 +311,8 @@ export default function Configuration({
 
         const extra_urls = ((formData.get("extra_urls") as string) ?? "")
             .replace(" ", "")
-            .split(",");
+            .split(",")
+            .filter((s) => s);
         if (extra_urls.length > 0) {
             body.general.extra_urls = extra_urls;
         }
@@ -334,9 +336,14 @@ export default function Configuration({
             }
         }
 
-        const worker_roles = formData.getAll("roles") as string[];
+        const worker_roles = formData.getAll("worker_roles") as string[];
         if (worker_roles.length > 0) {
             body.schedule.worker_roles = worker_roles;
+        }
+
+        const instructor_roles = formData.getAll("instructor_roles") as string[];
+        if (instructor_roles.length > 0) {
+            body.workshop.instructor_roles = instructor_roles;
         }
 
         const timezone = formData.get("timezone") as string;
@@ -839,12 +846,31 @@ export default function Configuration({
                                     )}
                                 </Select>
                             </ConfigItem>
+                            <ConfigItem name="Locale" description="">
+                                <Select
+                                    name="locale"
+                                    selectionMode="single"
+                                    placeholder="Select locale"
+                                    variant="faded"
+                                    color="primary"
+                                    aria-label="Select locale"
+                                    classNames={{ value: "capitalize" }}
+                                >
+                                    <SelectItem
+                                        textValue={config.schedule.locale}
+                                        classNames={{ title: "capitalize" }}
+                                    >
+                                        {config.schedule.locale}
+                                    </SelectItem>
+                                </Select>
+                            </ConfigItem>
                             <ConfigItem
                                 name="Workers"
                                 description="Roles visible in the schedule editor"
                                 className="flex-col"
                             >
                                 <UserRoleSelect
+                                    name={"worker_roles"}
                                     roles={roles}
                                     defaultSelectedKeys={
                                         config.schedule.worker_roles
@@ -912,6 +938,21 @@ export default function Configuration({
                                     isRequired
                                 />
                             </ConfigItem>
+
+                            <ConfigItem
+                                name="Instructors"
+                                description="Instructors visible in the workshop editor"
+                                className="flex-col"
+                            >
+                                <UserRoleSelect
+                                    name={"instructor_roles"}
+                                    roles={roles}
+                                    defaultSelectedKeys={
+                                        config.workshop.instructor_roles
+                                    }
+                                    label=""
+                                />
+                            </ConfigItem>
                         </AccordionItem>
                         <AccordionItem key="faq" title="FAQ">
                             <ConfigItem
@@ -931,6 +972,7 @@ export default function Configuration({
                         variant="solid"
                         size="lg"
                         className="mt-auto flex-none mb-0"
+                        isDisabled={mutation.isPending}
                     >
                         Save Changes
                     </Button>

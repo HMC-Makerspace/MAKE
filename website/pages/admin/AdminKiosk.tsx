@@ -3,6 +3,7 @@ import Schedule from "../../components/kiosks/admin/schedule/Schedule";
 import AdminLayout from "../../layouts/AdminLayout";
 import { ScheduleUUID, TSchedule } from "common/schedule";
 import {
+    addToast,
     Button,
     DateInput,
     DatePicker,
@@ -43,7 +44,7 @@ import {
     today,
     ZonedDateTime,
 } from "@internationalized/date";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import ShiftHistoryModal from "../../components/kiosks/admin/dashboard/ShiftHistoryModal";
 
 async function createShiftEvent({
@@ -137,7 +138,7 @@ export default function AdminKiosk() {
 
     const shiftEventMutation = useMutation({
         mutationFn: createShiftEvent,
-        onSuccess: (new_schedule) => {
+        onSuccess: (new_schedule, variables) => {
             queryClient.refetchQueries({
                 queryKey: [
                     "schedule",
@@ -148,9 +149,23 @@ export default function AdminKiosk() {
                     user_uuid,
                 ],
             });
+            const type = variables.event.type;
+            const type_text =
+                type === SHIFT_EVENT_TYPE.DROP ? "dropped" : "picked up";
+            addToast({
+                title: `Shift successfully ${type_text}`,
+                color: "success",
+            });
             setPopupShifts([]);
         },
-        onError: (err) => alert(err),
+        onError: (error: AxiosError<{ error: string }>) => {
+            addToast({
+                title:
+                    error.response?.data.error ??
+                    `Unknown error: ${error.message}`,
+                color: "danger",
+            });
+        },
     });
 
     const shiftCountMutation = useMutation({
@@ -248,17 +263,13 @@ export default function AdminKiosk() {
                                         const minShifts =
                                             // @ts-ignore This property does exist...
                                             blurEvent.target.value;
-                                        if (
-                                            !schedule ||
-                                            !user_uuid ||
-                                            minShifts === undefined
-                                        ) {
+                                        if (!schedule || !user_uuid) {
                                             return;
                                         }
                                         shiftCountMutation.mutate({
                                             user_uuid: user_uuid,
                                             schedule_uuid: schedule.uuid,
-                                            min_shift_count: minShifts,
+                                            min_shift_count: minShifts || 0,
                                         });
                                     }}
                                 />
@@ -284,17 +295,13 @@ export default function AdminKiosk() {
                                         const maxShifts =
                                             // @ts-ignore This property does exist...
                                             blurEvent.target.value;
-                                        if (
-                                            !schedule ||
-                                            !user_uuid ||
-                                            maxShifts === undefined
-                                        ) {
+                                        if (!schedule || !user_uuid) {
                                             return;
                                         }
                                         shiftCountMutation.mutate({
                                             user_uuid: user_uuid,
                                             schedule_uuid: schedule.uuid,
-                                            max_shift_count: maxShifts,
+                                            max_shift_count: maxShifts || 0,
                                         });
                                     }}
                                 />
@@ -407,8 +414,7 @@ export default function AdminKiosk() {
                                     if (
                                         !availabilitySchedule ||
                                         !schedule ||
-                                        !user_uuid ||
-                                        minShifts === undefined
+                                        !user_uuid
                                     ) {
                                         return;
                                     }
@@ -416,7 +422,7 @@ export default function AdminKiosk() {
                                         user_uuid: user_uuid,
                                         schedule_uuid:
                                             availabilitySchedule.uuid,
-                                        min_shift_count: minShifts,
+                                        min_shift_count: minShifts || 0,
                                     });
                                 }}
                             />
@@ -442,18 +448,14 @@ export default function AdminKiosk() {
                                 onBlur={(blurEvent) => {
                                     // @ts-ignore This property does exist...
                                     const maxShifts = blurEvent.target.value;
-                                    if (
-                                        !availabilitySchedule ||
-                                        !user_uuid ||
-                                        maxShifts === undefined
-                                    ) {
+                                    if (!availabilitySchedule || !user_uuid) {
                                         return;
                                     }
                                     shiftCountMutation.mutate({
                                         user_uuid: user_uuid,
                                         schedule_uuid:
                                             availabilitySchedule.uuid,
-                                        max_shift_count: maxShifts,
+                                        max_shift_count: maxShifts || 0,
                                     });
                                 }}
                             />
@@ -586,6 +588,9 @@ export default function AdminKiosk() {
                                             color="primary"
                                             variant="bordered"
                                             className="col-span-2"
+                                            isDisabled={
+                                                shiftEventMutation.isPending
+                                            }
                                         >
                                             Drop
                                         </Button>
@@ -707,7 +712,7 @@ export default function AdminKiosk() {
                                                                     },
                                                                 );
                                                             }}
-                                                            isLoading={
+                                                            isDisabled={
                                                                 shiftEventMutation.isPending
                                                             }
                                                         >

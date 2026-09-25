@@ -16,6 +16,7 @@ import { TCertification } from "common/certification";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { mergeRequiredCerts } from "../../../../utils";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/solid";
 
 export default function ItemInfo({
     item_data,
@@ -23,12 +24,14 @@ export default function ItemInfo({
     areas,
     certs,
     quantity,
+    className = "",
 }: {
     item_data?: TInventoryItem;
     inventory: TInventoryItem[];
     areas: TArea[];
     certs: TCertification[];
     quantity?: number;
+    className?: string;
 }) {
     const parent_kit = inventory.find(k => k.uuid == item_data?.parent_kit);
     const mergedReqCerts = mergeRequiredCerts(item_data?.required_certifications, parent_kit?.required_certifications);
@@ -37,7 +40,7 @@ export default function ItemInfo({
         <div>
             <Popover placement="bottom">
                 <PopoverTrigger>
-                    <Button>
+                    <Button className={className}>
                         {quantity && quantity > 1 ? (
                             <>
                                 {quantity}
@@ -61,25 +64,18 @@ export default function ItemInfo({
                             </div>
 
                             <div className="flex flex-row gap-2 justify-evenly items-center">
-                                <Tooltip
-                                    content={item_data.role || "Unknown Role"}
-                                    placement="bottom"
-                                    color="primary"
-                                    classNames={{
-                                        content: "capitalize",
-                                    }}
+                                <div
+                                    className={clsx(
+                                        "bg-default-200 p-2 h-fit w-full",
+                                        "rounded-md flex justify-center",
+                                        "whitespace-nowrap overflow-x-auto",
+                                        "text-default-700 capitalize gap-2",
+                                        "items-center"
+                                    )}
                                 >
-                                    <div
-                                        className={clsx(
-                                            "bg-default-200 p-2 h-fit w-full",
-                                            "rounded-md flex justify-center",
-                                            "whitespace-nowrap overflow-x-auto",
-                                            "text-default-700",
-                                        )}
-                                    >
-                                        <ItemRoleIcon role={item_data.role} />
-                                    </div>
-                                </Tooltip>
+                                    {item_data.role || "Unknown Role"}
+                                    <ItemRoleIcon role={item_data.role} />
+                                </div>
 
                                 <div className="flex-row gap-1 min-w-max flex-wrap">
                                     {parent_kit ? (
@@ -142,36 +138,50 @@ export default function ItemInfo({
                                                 {itm?.name}
                                             </div>
                                             <div className={`bg-primary p-2 ml-2 h-fit w-full rounded-md text-center whitespace-nowrap overflow-x-auto ${item_data ? "text-default-700" : "text-default-400"}`}>
-                                                {itm?.reorder_url ? (
-                                                    <HeroLink
-                                                        isExternal
-                                                        showAnchorIcon
-                                                        as={Link}
-                                                        to={itm.reorder_url}
-                                                        className="text-primary-foreground text-sm"
-                                                    >
-                                                        Reorder Link
-                                                    </HeroLink>
-                                                ) : (
-                                                    "No Reorder Link"
-                                                )}
+                                                
+                                                <Button
+                                                    variant="solid"
+                                                    color="primary"
+                                                    as={Link}
+                                                    isDisabled={!itm?.reorder_url}
+                                                    // radius="none"
+                                                    to={itm?.reorder_url || ""}
+                                                    target="_blank"
+                                                    className="rounded-md"
+                                                >
+                                                    {itm?.reorder_url ? (
+                                                        <>
+                                                            Reorder Link
+                                                            <ArrowTopRightOnSquareIcon className="size-5" />
+                                                        </>
+                                                    ) : (
+                                                        "No Reorder Link"
+                                                    )}
+                                                </Button>
                                             </div>
                                         </div>)
                                     })}
                                 </> : <div className={`bg-primary p-2 h-fit w-full rounded-md text-center whitespace-nowrap overflow-x-auto ${item_data ? "text-default-700" : "text-default-400"}`}>
-                                    {item_data.reorder_url ? (
-                                        <HeroLink
-                                            isExternal
-                                            showAnchorIcon
-                                            as={Link}
-                                            to={item_data.reorder_url}
-                                            className="text-primary-foreground text-sm"
-                                        >
-                                            Reorder Link
-                                        </HeroLink>
-                                    ) : (
-                                        "No Reorder Link"
-                                    )}
+                                    
+                                    <Button
+                                        variant="solid"
+                                        color="primary"
+                                        as={Link}
+                                        isDisabled={!item_data?.reorder_url}
+                                        // radius="none"
+                                        to={item_data?.reorder_url || ""}
+                                        target="_blank"
+                                        className="rounded-md"
+                                    >
+                                        {item_data?.reorder_url ? (
+                                            <>
+                                                Reorder Link
+                                                <ArrowTopRightOnSquareIcon className="size-5" />
+                                            </>
+                                        ) : (
+                                            "No Reorder Link"
+                                        )}
+                                    </Button>
                                 </div>}
                             </>
                         </div>

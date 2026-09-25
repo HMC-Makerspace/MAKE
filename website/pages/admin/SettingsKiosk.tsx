@@ -4,6 +4,7 @@ import { TConfig } from "common/config";
 import Configuration from "../../components/kiosks/admin/settings/Configuration";
 import { TEmbed } from "common/embed";
 import { TUserRole } from "common/user";
+import { useRoles } from "../../queries/useRoles";
 
 export default function SettingsKiosk() {
     const { data: config, isLoading: configLoading } = useQuery<TConfig>({
@@ -35,10 +36,7 @@ export default function SettingsKiosk() {
     //     },
     // ];
 
-    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
-        queryKey: ["user", "role"],
-        refetchOnWindowFocus: false,
-    });
+    const { data: roles, isLoading: rolesLoading } = useRoles();
 
     if (configLoading || rolesLoading || embedsLoading || !roles || !embeds)
         return (
