@@ -55,7 +55,7 @@ export const InventoryItem = new mongoose.Schema<TInventoryItem>(
         audit_logs: {
             type: [InventoryAudit],
             required: false,
-        }
+        },
         available_to: { type: [String], required: false },
         visible_to: { type: [String], required: false },
         kit_contents: { type: [String], required: false },

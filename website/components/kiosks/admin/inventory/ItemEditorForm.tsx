@@ -678,10 +678,15 @@ export default function ItemEditorForm({
                                 color="primary"
                                 variant="flat"
                                 isDisabled={isDisabled || !item.parent_kit}
-                                onPress={() => setSelectedItem(new Set([item.parent_kit ?? ""]))}
+                                onPress={() =>
+                                    setSelectedItem(
+                                        new Set([item.parent_kit ?? ""]),
+                                    )
+                                }
                                 className="ml-2"
                             >
-                                <MagnifyingGlassIcon className="size-6" /> {/* haha eyecon */}
+                                <MagnifyingGlassIcon className="size-6" />{" "}
+                                {/* haha eyecon */}
                             </Button>
                         </Tooltip>
                     </div>
@@ -735,9 +740,8 @@ export default function ItemEditorForm({
                             startContent={<PlusIcon className="size-5" />}
                             color="success"
                             isDisabled={isDisabled || isNew}
-                            className='flex-1'
+                            className="flex-1"
                             onPress={() => !isNew && setInvAuditOpen(true)}
-
                         >
                             New Audit
                         </Button>
@@ -749,7 +753,7 @@ export default function ItemEditorForm({
                         >
                             <ArrowPathRoundedSquareIcon className="size-5" />
                         </Button>
-                </div>
+                    </div>
                 </div>
                 {/* <Divider className="hidden sm:block h-[1px] bg-default-400" /> */}
                 <div className="px-4 w-full pt-4 pb-2 rounded-t-lg bg-default-50">
@@ -779,7 +783,9 @@ export default function ItemEditorForm({
                                 }
                                 // isIconOnly
                                 isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled px-2" : "px-2"}
+                                className={
+                                    isNew ? "opacity-disabled px-2" : "px-2"
+                                }
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <GlobeAmericasIcon className="size-7" />
@@ -804,7 +810,9 @@ export default function ItemEditorForm({
                                 onPress={() => !isNew && setReqcertsOpen(true)}
                                 // isIconOnly
                                 isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled px-2" : "px-2"}
+                                className={
+                                    isNew ? "opacity-disabled px-2" : "px-2"
+                                }
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <BookmarkIcon className="size-7" />
@@ -829,7 +837,9 @@ export default function ItemEditorForm({
                                 onPress={() => !isNew && setAcrolesOpen(true)}
                                 // isIconOnly
                                 isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled px-2" : "px-2"}
+                                className={
+                                    isNew ? "opacity-disabled px-2" : "px-2"
+                                }
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <UserIcon className="size-7" />
@@ -854,7 +864,9 @@ export default function ItemEditorForm({
                                 onPress={() => !isNew && setVwrolesOpen(true)}
                                 // isIconOnly
                                 isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled px-2" : "px-2"}
+                                className={
+                                    isNew ? "opacity-disabled px-2" : "px-2"
+                                }
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <EyeIcon className="size-7" />
@@ -877,10 +889,14 @@ export default function ItemEditorForm({
                                 <Button
                                     // variant="flat"
                                     color="primary"
-                                    onPress={() => !isNew && setKitEditorOpen(true)}
+                                    onPress={() =>
+                                        !isNew && setKitEditorOpen(true)
+                                    }
                                     // isIconOnly
                                     isDisabled={isDisabled}
-                                    className={isNew ? "opacity-disabled px-2" : "px-2"}
+                                    className={
+                                        isNew ? "opacity-disabled px-2" : "px-2"
+                                    }
                                     data-hover={!isNew && !isDisabled}
                                 >
                                     <BriefcaseIcon className="size-7" />
@@ -959,18 +975,19 @@ export default function ItemEditorForm({
                 onOpenChange={setLocationEditorOpen}
                 patchMutation={locationEditorMutation}
             />
-            <InventoryAuditModal 
+            <InventoryAuditModal
                 key={"invaudit-" + item.uuid}
                 item={item}
                 isOpen={invAuditOpen}
                 onOpenChange={setInvAuditOpen}
                 patchMutation={inventoryAuditMutation}
             />
-            <InventoryAuditLogsModal 
+            <InventoryAuditLogsModal
                 key={"invauditlogs-" + item.uuid}
                 item={item}
                 isOpen={invAuditLogsOpen}
                 onOpenChange={setInvAuditLogsOpen}
+            />
             <KitEditorModal
                 key={"kitedit-" + item.uuid}
                 element={item}
