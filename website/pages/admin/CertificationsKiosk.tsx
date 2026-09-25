@@ -5,6 +5,7 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { TCertification } from "common/certification";
 import React from "react";
 import { API_SCOPE } from "../../../common/global";
+import { useRoles } from "../../queries/useRoles";
 
 export default function CertificationsKiosk() {
     // Get all user data
@@ -12,7 +13,7 @@ export default function CertificationsKiosk() {
         queryKey: ["certification"],
         refetchOnWindowFocus: false,
     });
-
+    const { data: roles, isLoading: rolesLoading } = useRoles();
     const scopesQuery = useQuery<API_SCOPE[]>({
         queryKey: ["user", "self", "scopes"],
         refetchOnWindowFocus: false,
@@ -25,8 +26,6 @@ export default function CertificationsKiosk() {
             scope === API_SCOPE.UPDATE_CERTIFICATION,
     );
 
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
     const [selectedKeys, onSelectionChange] = React.useState<Selection>(
         new Set(),
     );
@@ -35,6 +34,7 @@ export default function CertificationsKiosk() {
         <AdminLayout pageHref={"/admin/certifications"}>
             <CertificationsTable
                 certs={data || []}
+                roles={roles || []}
                 selectedKeys={selectedKeys}
                 onSelectionChange={onSelectionChange}
                 isLoading={isLoading}
