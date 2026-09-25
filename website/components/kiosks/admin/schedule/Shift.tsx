@@ -342,6 +342,22 @@ export default function Shift({
                         type === "view" ||
                         type === "worker_view") &&
                         assignees.map((assignee) => {
+                            if (assignee == "") {
+                                return (
+                                    <div
+                                        className={clsx(
+                                            "w-full h-full",
+                                            "flex flex-row",
+                                            "items-center justify-center",
+                                            "text-danger-800",
+                                            "text-sm",
+                                        )}
+                                        title={assignee}
+                                    >
+                                        Open
+                                    </div>
+                                );
+                            }
                             const u = users.find((u) => u.uuid === assignee);
                             if (!u) {
                                 if (type === "worker_view") {
