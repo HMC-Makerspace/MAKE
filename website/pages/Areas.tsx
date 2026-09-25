@@ -50,7 +50,7 @@ export default function AreasPage() {
         scopes && verifyScopes(scopes, [API_SCOPE.UPDATE_MACHINE_INSTANCES]);
 
     const { visibleContent, hasMoreContent, loaderRef, scrollerRef } =
-        useScroll(areas ?? [], 2, 2);
+        useScroll(areas ?? [], 3, 3);
 
     return (
         <DefaultLayout className="p-4 lg:p-8" pageHref="/areas">

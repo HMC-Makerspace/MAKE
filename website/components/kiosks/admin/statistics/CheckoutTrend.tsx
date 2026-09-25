@@ -51,16 +51,38 @@ export default function CheckoutTrend({
             dayCounts[dayKey].count += 1;
         });
 
-        return Object.entries(dayCounts)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([, value]) => value);
+        const sortedKeys = Object.keys(dayCounts).sort();
+        if (sortedKeys.length === 0) return [];
+
+        const filled: { date: string; count: number }[] = [];
+        const cursor = new Date(sortedKeys[0]);
+        const end = new Date(sortedKeys[sortedKeys.length - 1]);
+
+        while (cursor <= end) {
+            const dayKey = cursor.toISOString().slice(0, 10); // "YYYY-MM-DD"
+
+            if (dayCounts[dayKey]) {
+                filled.push(dayCounts[dayKey]);
+            } else {
+                // Format the label the same way, but from a plain JS Date
+                const label = dateFormatter
+                    ? dateFormatter.format(new Date(cursor))
+                    : `${cursor.getMonth() + 1}/${cursor.getDate()}/${cursor.getFullYear()}`;
+                filled.push({ date: label, count: 0 });
+            }
+
+            cursor.setDate(cursor.getDate() + 1);
+        }
+        return filled;
     }, [checkouts, config?.schedule.locale, config?.schedule.timezone]);
 
     //just in case there is no data at all, display this
     if (data.length === 0) {
         return (
             <div className="bg-default-100 p-6 rounded-lg col-span-1">
-                <h2 className="text-xl font-bold mb-4">Checkout Trend</h2>
+                <h2 className="text-xl font-bold text-foreground-900 mb-4">
+                    Checkout Trend
+                </h2>
                 <p className="text-sm text-default-500">
                     No checkout data available.
                 </p>
@@ -71,11 +93,16 @@ export default function CheckoutTrend({
     //all this stuff is display stuff
     return (
         <div className="bg-default-100 p-6 rounded-lg col-span-1">
-            <h2 className="text-xl font-bold mb-4">Checkout Trend</h2>
+            <h2 className="text-xl font-bold text-foreground-900 mb-4">
+                Checkout Trend
+            </h2>
+            <p className="text-sm text-default-500 mb-3">
+                Daily checkout activity over the selected date range.
+            </p>
             <ResponsiveContainer width="100%" height={300}>
                 <LineChart
                     data={data}
-                    margin={{ top: 10, right: 20, left: 20, bottom: 10 }}
+                    margin={{ top: 20, right: 30, left: -10, bottom: 10 }}
                 >
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                     <XAxis
@@ -84,7 +111,7 @@ export default function CheckoutTrend({
                         textAnchor="end"
                         interval="preserveStartEnd"
                         tick={{ fontSize: 11 }}
-                        height={60}
+                        height={45}
                     />
                     <YAxis
                         allowDecimals={false}

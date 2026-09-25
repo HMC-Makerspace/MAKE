@@ -60,7 +60,7 @@ export const Certification = new mongoose.Schema<TCertification>(
         seconds_valid_for: { type: Number, required: false },
         documents: { type: [Document], required: false },
         required_certifications: { type: [RequiredCertificate], required: false },
-        authorized_roles: { type: [String], required: false },
+        visible_to: { type: [String], required: false },
     },
     { collection: "certifications" },
 );
@@ -79,7 +79,7 @@ export const CertificationSchema = Joi.object<TCertification>({
     required_certifications: Joi.array().items(
         RequiredCertificateSchema
     ).optional(),
-    authorized_roles: Joi.array().items(
+    visible_to: Joi.array().items(
         Joi.string()
     ).optional().allow(null)
 });

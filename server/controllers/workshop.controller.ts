@@ -63,8 +63,8 @@ export async function getWorkshopsVisibleToUser(
     // user has
     return Workshops.find({
         $or: [
-            { authorized_roles: null },
-            { authorized_roles: { $in: role_uuids } },
+            { visible_to: null },
+            { visible_to: { $in: role_uuids } },
         ],
     });
 }
@@ -80,7 +80,7 @@ export async function getPublicWorkshops(): Promise<TPublicWorkshopData[]> {
     // Get all workshops that are currently public
     return Workshops.find({
         timestamp_public: { $lte: Date.now() / 1000 },
-        authorized_roles: null,
+        visible_to: null,
     }).select([
         // Remove private information from workshop
         "-timestamp_public",
@@ -234,6 +234,25 @@ export async function rsvpToWorkshop(
         );
         res.status(StatusCodes.FORBIDDEN).json({
             error: `Missing one or more required certifications!`,
+        });
+        return null;
+    }
+    // If the user does not have any sufficient accessor roles, the RSVP fails
+    if (
+        workshop.available_to !== null &&
+        !workshop.available_to?.some(workshop_role_uuid =>
+            user.active_roles?.some(
+                user_role =>
+                    user_role.role_uuid ===
+                        workshop_role_uuid
+            ),
+        )
+    ) {
+        logger.info(
+            `User ${user.uuid} was missing required roles for workshop ${workshop.uuid}.`,
+        );
+        res.status(StatusCodes.FORBIDDEN).json({
+            error: `Missing a required role!`,
         });
         return null;
     }

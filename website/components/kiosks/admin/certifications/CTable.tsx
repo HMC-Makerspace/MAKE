@@ -45,9 +45,9 @@ const baseColumns = [
     { name: "Description", id: "description" },
     { name: "Max Level", id: "max_level" },
     { name: "Expires After", id: "seconds_valid_for" },
+    { name: "Viewer Roles", id: "visible_to" },
     { name: "Documents", id: "documents" },
     { name: "Prerequisites", id: "prerequisites" },
-    { name: "Authorized Roles", id: "authorized_roles" },
     { name: "Delete", id: "delete" }
 ];
 
@@ -82,17 +82,17 @@ export default function CertificationsTable({
         "description",
         "max_level",
         "seconds_valid_for",
+        "visible_to",
         "documents",
         "visibility",
         "prerequisites",
-        "authorized_roles",
-        "delete"
+        "delete",
     ],
     extraColumns = [],
     customColumnComponents = {},
 }: {
     certs: TCertification[];
-    roles?: TUserRole[];
+    roles: TUserRole[];
     selectedKeys: Selection;
     onSelectionChange: (selectedKeys: Selection) => void;
     isLoading: boolean;
@@ -122,7 +122,6 @@ export default function CertificationsTable({
     const [certOpenDoc, setCertOpenDoc] = React.useState<TCertification>(); // the certification with edited docs
     const [docOpen, setDocOpen] = React.useState<boolean>(false); // whether doc edit modal is open
     const [prereqOpen, setPrereqOpen] = React.useState<boolean>(false); // whether prereq edit modal is open
-
 
     const {
         isOpen: isDeleting,
@@ -168,6 +167,8 @@ export default function CertificationsTable({
     }, []);
 
     const numCerts = certs.length;
+
+    console.log("Roles", roles)
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -237,7 +238,6 @@ export default function CertificationsTable({
                                         max_level: 0,
                                         seconds_valid_for: 0,
                                         documents: [],
-                                        authorized_roles: [],
                                         required_certifications: [],
                                     });
                                     setIsNew(true);
@@ -273,6 +273,13 @@ export default function CertificationsTable({
                     }
                 }}
                 customColumnComponents={{
+                    visible_to: (cert: TCertification) => (
+                        cert.visible_to && cert.visible_to.length > 0 ? <UserRoleList
+                            list={cert.visible_to}
+                            roles={roles}
+                            size="lg"
+                        /> : "None"
+                    ),
                     documents: (cert: TCertification) => (
                         <div className="flex justify-center">
                             <Button
@@ -343,13 +350,6 @@ export default function CertificationsTable({
                             );
                         }
                     },
-                    authorized_roles: (cert: TCertification) => (
-                        <UserRoleList
-                            list={cert.authorized_roles}
-                            roles={roles || []}
-                            size="lg"
-                        />
-                    ),
                     delete: (cert: TCertification) => (
                         <Button
                             variant="flat"
@@ -402,6 +402,7 @@ export default function CertificationsTable({
                     key={"certdocprereq-" + certOpenDoc.uuid}
                     certifications={certs}
                     element={certOpenDoc}
+                    parentKitCerts={undefined}
                     isOpen={prereqOpen}
                     onOpenChange={setPrereqOpen}
                     patchMutation={mutation}

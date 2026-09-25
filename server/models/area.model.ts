@@ -17,7 +17,7 @@ export const Area = new mongoose.Schema<TArea>({
     equipment: { type: [String], required: false },
     images: { type: [String], required: false },
     required_certifications: { type: [RequiredCertificate], required: false },
-    authorized_roles: { type: [String], required: false },
+    available_to: { type: [String], required: false },
     reservable: { type: Boolean, required: false },
     reserved: { type: Boolean, required: false },
     visible_to: { type: [String], required: false },
@@ -39,7 +39,7 @@ export const AreaSchema = Joi.object<TArea>({
     required_certifications: Joi.array().items(
         RequiredCertificateSchema
     ).optional(),
-    authorized_roles: Joi.array().items(
+    available_to: Joi.array().items(
         Joi.string()
     ).optional().allow(null),
     reservable: Joi.boolean().optional(),

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     Button,
     Modal,
@@ -9,36 +9,27 @@ import {
     Select,
     useDisclosure,
     SelectItem,
-    SelectedItems,
     Form,
     Textarea,
     Input,
     DatePicker,
     DateRangePicker,
     NumberInput,
-    Autocomplete,
-    AutocompleteItem,
     addToast,
 } from "@heroui/react";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import { TWorkshop } from "../../../../../common/workshop";
-import { UserRoleUUID, UserUUID } from "../../../../../common/user";
-import { CertificationUUID } from "../../../../../common/certification";
-import { UnixTimestamp, UUID } from "../../../../../common/global";
-import { FileUUID } from "../../../../../common/file";
+import { UUID } from "../../../../../common/global";
 import { timestampToZonedDateTime } from "../../../../utils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TUser } from "../../../../../common/user";
 import { TCertification } from "../../../../../common/certification";
-import CertificationTag from "../certifications/CertificationTag";
 import { parseZonedDateTime, ZonedDateTime } from "@internationalized/date";
 import WorkshopImagesModal from "./WorkshopImagesModal.tsx";
-import RequiredCertsModal from "../certifications/RequiredCertsModal.tsx";
-
-
 import clsx from "clsx";
 import { TConfig } from "common/config";
 import axios from "axios";
+import RequiredCertsModal from "../certifications/RequiredCertsModal";
 
 const updateCreateWorkshop = async ({
     workshop,
@@ -257,13 +248,13 @@ export default function WorkshopEditModal({
     }
 
     const onSubmit = React.useCallback(
-        (e: React.FormEvent<HTMLFormElement>) => {
+        (e: React.SyntheticEvent<HTMLFormElement>) => {
             e.preventDefault();
             const formData = new FormData(e.currentTarget);
 
             const repeated_days: number = batchEdit
                 ? Number(formData.get("repeats"))
-                : 0;
+                : 1;
 
             const repeat_interval: number = batchEdit
                 ? Number(formData.get("repeat_interval"))
@@ -339,7 +330,8 @@ export default function WorkshopEditModal({
                     reminder_emails_sent: workshop.reminder_emails_sent,
                     sign_in_list: workshop.sign_in_list,
                     images: workshop.images,
-                    authorized_roles: workshop.authorized_roles,
+                    visible_to: workshop.visible_to,
+                    available_to: workshop.available_to,
                 };
 
                 workshops.push(new_workshop);
@@ -582,74 +574,6 @@ export default function WorkshopEditModal({
                                         ))}
                                     </Select>
                                 </div>
-
-                                {/* <Select<TCertification>
-                                    label="Required Certifications"
-                                    labelPlacement="inside"
-                                    selectionMode="multiple"
-                                    placeholder="Enter required certifications"
-                                    defaultSelectedKeys={
-                                        workshop.required_certifications
-                                    }
-                                    onSelectionChange={(keys) => {
-                                        if (keys === "all") {
-                                            wrapEdit("required_certifications")(
-                                                sortedFilteredWorkers.map(
-                                                    (u) => u.uuid,
-                                                ),
-                                            );
-                                        } else {
-                                            wrapEdit("required_certifications")(
-                                                Array.from(keys) as string[],
-                                            );
-                                        }
-                                    }}
-                                    // selectedKeys={requiredCertifications}
-                                    // onSelectionChange={wrapSetEdit(
-                                    //     setRequiredCertifications,
-                                    // )}
-                                    isMultiline
-                                    variant="faded"
-                                    color="primary"
-                                    classNames={{
-                                        value: clsx([
-                                            "text-default-500",
-                                            "italic",
-                                            "group-data-[has-value=true]:text-default-700",
-                                            "group-data-[has-value=true]:not-italic	",
-                                        ]),
-                                    }}
-                                    renderValue={(selectedKeys) => {
-                                        if (selectedKeys.length === 0) {
-                                            // If no prereqs are selected, show the placeholder
-                                            return "";
-                                        } else {
-                                            return (
-                                                // Otherwise, show the selected prereqs in a flexbox
-                                                <div className="flex flex-wrap gap-1 p-2">
-                                                    {selectedKeys.map((c) => {
-                                                        return c.key ? (
-                                                            <CertificationTag
-                                                                cert_uuid={
-                                                                    c.key as string
-                                                                }
-                                                                key={c.key}
-                                                            />
-                                                        ) : null;
-                                                    })}
-                                                </div>
-                                            );
-                                        }
-                                    }}
-                                >
-                                    {certs.map((cert) => (
-                                        <SelectItem key={cert.uuid}>
-                                            <CertificationTag
-                                                cert_uuid={cert.uuid}
-                                            />
-                                        </SelectItem>
-                                    ))}
-                                </Select> */}
 
                                 {batchEdit ? (
                                     <>

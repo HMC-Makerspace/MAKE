@@ -11,70 +11,46 @@ import {
 import { TInventoryItem } from "common/inventory";
 import { TCheckout } from "common/checkout";
 import { NumberInput } from "@heroui/react";
-import { TMachine } from "common/machine";
-import { TArea } from "common/area";
 
-export default function TopCheckedOutItems({
+export default function LeastCheckedOutItems({
     checkouts,
     inventory,
-    machines,
-    areas,
 }: {
     checkouts: TCheckout[];
     inventory: TInventoryItem[];
-    machines: TMachine[];
-    areas: TArea[];
 }) {
-    const [topN, setTopN] = useState(10);
+    const [bottomN, setBottomN] = useState(10);
 
-    const inventoryMap = useMemo(
-        () => new Map(inventory.map((item) => [item.uuid, item])),
-        [inventory],
-    );
-    const machineMap = useMemo(
-        () => new Map(machines.map((machine) => [machine.uuid, machine])),
-        [machines],
-    );
-    const areaMap = useMemo(
-        () => new Map(areas.map((area) => [area.uuid, area])),
-        [areas],
-    );
-
-    const sortedData = useMemo(() => {
-        const itemCounts: { [key: string]: number } = {};
+    const leastData = useMemo(() => {
+        const itemCounts = new Map(inventory.map((item) => [item.uuid, 0]));
 
         checkouts.forEach((checkout) => {
             checkout.items.forEach((checkoutItem) => {
-                const uuid =
-                    inventoryMap.get(checkoutItem.item_uuid)?.linked_uuid ||
-                    checkoutItem.item_uuid;
-                itemCounts[uuid] =
-                    (itemCounts[uuid] || 0) + checkoutItem.quantity;
+                itemCounts.set(
+                    checkoutItem.item_uuid,
+                    (itemCounts.get(checkoutItem.item_uuid) || 0) +
+                        checkoutItem.quantity,
+                );
             });
         });
 
-        return Object.entries(itemCounts)
-            .map(([uuid, count]) => ({
-                name:
-                    inventoryMap.get(uuid)?.name ||
-                    machineMap.get(uuid)?.name ||
-                    areaMap.get(uuid)?.name ||
-                    "Unknown Item",
-                count,
+        return inventory
+            .map((item) => ({
+                name: item.name,
+                count: itemCounts.get(item.uuid) || 0,
             }))
-            .sort((a, b) => b.count - a.count);
-    }, [areaMap, checkouts, inventoryMap, machineMap]);
+            .sort((a, b) => a.count - b.count)
+            .slice(0, bottomN);
+    }, [bottomN, checkouts, inventory]);
 
-    const data = sortedData.slice(0, topN);
-
-    if (sortedData.length === 0) {
+    if (inventory.length === 0) {
         return (
             <div className="bg-default-100 p-6 rounded-lg">
                 <h2 className="text-xl font-bold text-foreground-900 mb-4">
-                    Top Checked Out Items
+                    Least Checked Out Items
                 </h2>
                 <p className="text-sm text-default-500">
-                    No checkout data available.
+                    No inventory data available.
                 </p>
             </div>
         );
@@ -84,17 +60,17 @@ export default function TopCheckedOutItems({
         <div className="bg-default-100 p-6 rounded-lg">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-foreground-900">
-                    Top Checked Out Items
+                    Least Checked Out Items
                 </h2>
                 <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-sm text-default-700">Top</span>
+                    <span className="text-sm text-default-700">Bottom</span>
                     <NumberInput
-                        aria-label="Number of top checked-out items"
+                        aria-label="Number of least checked-out items"
                         min={1}
                         max={20}
-                        value={topN}
+                        value={bottomN}
                         onValueChange={(value) =>
-                            setTopN(Math.min(20, Math.max(1, value)))
+                            setBottomN(Math.min(20, Math.max(1, value)))
                         }
                         variant="bordered"
                         size="sm"
@@ -107,16 +83,16 @@ export default function TopCheckedOutItems({
                 </div>
             </div>
             <p className="text-sm text-default-500 mb-3">
-                Showing the top {topN} checked-out items.
+                Showing the bottom {bottomN} least checked-out items.
             </p>
             <ResponsiveContainer
                 width="100%"
-                height={Math.max(450, data.length * 32 + 40)}
+                height={Math.max(450, leastData.length * 32 + 40)}
             >
                 <BarChart
-                    data={data}
-                    margin={{ top: 20, right: 30, left: -30, bottom: 20 }}
+                    data={leastData}
                     layout="vertical"
+                    margin={{ top: 20, right: 30, left: -30, bottom: 20 }}
                 >
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                     <XAxis type="number" allowDecimals={false} />
@@ -135,7 +111,7 @@ export default function TopCheckedOutItems({
                     />
                     <Bar
                         dataKey="count"
-                        fill="hsl(var(--heroui-success-200))"
+                        fill="hsl(var(--heroui-warning-300))"
                     />
                 </BarChart>
             </ResponsiveContainer>

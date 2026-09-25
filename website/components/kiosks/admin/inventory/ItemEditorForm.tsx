@@ -35,17 +35,22 @@ import {
     GlobeAmericasIcon,
     ArrowPathRoundedSquareIcon,
     PlusIcon,
+    BriefcaseIcon,
+    EyeIcon,
+    MagnifyingGlassIcon,
 } from "@heroicons/react/24/solid";
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
-import AuthorizedRolesModal from "../certifications/AuthorizedRolesModal";
+import { AvailableToRolesModal, VisibleToRolesModal } from "../certifications/AuthorizedRolesModal";
 import { motion } from "motion/react";
 import ItemQuantityIcon from "./ItemQuantityIcon";
 import ItemLocationModal from "./ItemLocationModal";
 import { TArea } from "common/area";
 import InventoryAuditModal from "./InventoryAuditModal";
 import InventoryAuditLogsModal from "./InventoryAuditLogsModal";
+import KitEditorModal from "./KitEditorModal";
+import { mergeRequiredCerts } from "../../../../utils";
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateItem = async ({
@@ -93,19 +98,23 @@ export default function ItemEditorForm({
     certs,
     roles,
     areas,
+    items,
     isMultiple,
     isDisabled,
     isNew,
     onUpdate = () => {},
+    setSelectedItem,
 }: {
     item: TInventoryItem;
     certs: TCertification[];
     roles: TUserRole[];
     areas: TArea[];
+    items: TInventoryItem[];
     isMultiple: boolean;
     isDisabled: boolean;
     isNew: boolean;
     onUpdate?: (isNew: boolean) => void; // Function to run when the item is updated
+    setSelectedItem: (s: Set<string>) => void;
 }) {
     const [UUID, setUUID] = React.useState<string>(
         isNew ? crypto.randomUUID() : item.uuid,
@@ -182,7 +191,8 @@ export default function ItemEditorForm({
                 return_disclaimer:
                     (data.get("return_disclaimer") as string) || undefined,
                 required_certifications: item.required_certifications || [],
-                authorized_roles: item.authorized_roles || [],
+                available_to: item.available_to || [],
+                visible_to: item.visible_to || [],
                 quantity: quantity,
                 available: available,
                 audit_logs: [{
@@ -254,14 +264,17 @@ export default function ItemEditorForm({
     });
 
     const [reqcertsOpen, setReqcertsOpen] = React.useState<boolean>(false); // whether reqcerts edit modal is open
-    const [authrolesOpen, setAuthrolesOpen] = React.useState<boolean>(false); // whether authroles edit modal is open
+    const [acrolesOpen, setAcrolesOpen] = React.useState<boolean>(false); // whether accessor roles edit modal is open
+    const [vwrolesOpen, setVwrolesOpen] = React.useState<boolean>(false); // whether viewer roles edit modal is open
     const [locationEditorOpen, setLocationEditorOpen] =
         React.useState<boolean>(false); // whether location editor modal is open
     const [invAuditOpen, setInvAuditOpen] = React.useState<boolean>(false); // whether new inventory audit modal is open
     const [invAuditLogsOpen, setInvAuditLogsOpen] = React.useState<boolean>(false); // whether inventory audit logs modal is open
+    const [kitEditorOpen, setKitEditorOpen] = React.useState<boolean>(false); // whether kit content edit modal is open
 
     const reqcertsMutation = patchMutation(() => setReqcertsOpen(false));
-    const authrolesMutation = patchMutation(() => setAuthrolesOpen(false));
+    const acrolesMutation = patchMutation(() => setAcrolesOpen(false));
+    const vwrolesMutation = patchMutation(() => setVwrolesOpen(false));
     const locationEditorMutation = patchMutation(() =>
         setLocationEditorOpen(false),
     );
@@ -272,10 +285,14 @@ export default function ItemEditorForm({
             color: "success",
         });
     });
+    const kitEditorMutation = patchMutation(() => setKitEditorOpen(false));
 
     const [isNumericQuantity, setQtype] = React.useState<boolean>(
         item.quantity >= 0,
     ); // type of quantity (true: numerical, false: categorical)
+
+    const parent_kit = items.find(i => i.uuid == item.parent_kit);
+    const mergedReqCerts = mergeRequiredCerts(item.required_certifications || [], parent_kit?.required_certifications || []);
 
     return (
         <>
@@ -556,12 +573,7 @@ export default function ItemEditorForm({
                                     Area
                                 </span>
                             </SelectItem>
-                            <SelectItem
-                                key={ITEM_ROLE.KIT}
-                                textValue={"Kit"}
-                                isReadOnly
-                                className="text-default-400"
-                            >
+                            <SelectItem key={ITEM_ROLE.KIT} textValue={"Kit"}>
                                 <span className="flex gap-2 items-center">
                                     <ItemRoleIcon role={ITEM_ROLE.KIT} />
                                     Kit
@@ -631,6 +643,50 @@ export default function ItemEditorForm({
                             ]),
                         }}
                     />
+
+                    <div className="flex flex-row items-center">
+                        <Textarea
+                            type="text"
+                            label="Parent Kit"
+                            name="parent_kit"
+                            placeholder={placeholder("No parent kit")}
+                            isDisabled={true}
+                            defaultValue={parent_kit?.name}
+                            minRows={1}
+                            variant="faded"
+                            color="primary"
+                            size="md"
+                            classNames={{
+                                input: clsx([
+                                    "placeholder:text-default-500",
+                                    "placeholder:italic",
+                                    "text-default-700",
+                                ]),
+                            }}
+                        />
+
+                        <Tooltip
+                            content="View parent kit"
+                            className="w-fit p-2"
+                            delay={500}
+                            closeDelay={150}
+                            isDisabled={isDisabled}
+                        >
+                            <Button
+                                isIconOnly
+                                size="lg"
+                                color="primary"
+                                variant="flat"
+                                isDisabled={isDisabled || !item.parent_kit}
+                                onPress={() => setSelectedItem(new Set([item.parent_kit ?? ""]))}
+                                className="ml-2"
+                            >
+                                <MagnifyingGlassIcon className="size-6" /> {/* haha eyecon */}
+                            </Button>
+                        </Tooltip>
+                    </div>
+
+                    <Divider className="hidden sm:block h-[1px] bg-default-400" />
                     <Textarea
                         label="Checkout Disclaimer"
                         name="checkout_disclaimer"
@@ -723,7 +779,7 @@ export default function ItemEditorForm({
                                 }
                                 // isIconOnly
                                 isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled" : ""}
+                                className={isNew ? "opacity-disabled px-2" : "px-2"}
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <GlobeAmericasIcon className="size-7" />
@@ -748,19 +804,19 @@ export default function ItemEditorForm({
                                 onPress={() => !isNew && setReqcertsOpen(true)}
                                 // isIconOnly
                                 isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled" : ""}
+                                className={isNew ? "opacity-disabled px-2" : "px-2"}
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <BookmarkIcon className="size-7" />
-                                {item.required_certifications?.length ?? 0}
+                                {mergedReqCerts.length}
                             </Button>
                         </Tooltip>
 
                         <Tooltip
                             content={
                                 isNew
-                                    ? "Create the item first, before editing authorized roles."
-                                    : "Authorized Roles"
+                                    ? "Create the item first, before editing accessor roles."
+                                    : "Accessor Roles"
                             }
                             className="w-fit p-2"
                             delay={500}
@@ -770,16 +826,68 @@ export default function ItemEditorForm({
                             <Button
                                 // variant="flat"
                                 color="primary"
-                                onPress={() => !isNew && setAuthrolesOpen(true)}
+                                onPress={() => !isNew && setAcrolesOpen(true)}
                                 // isIconOnly
                                 isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled" : ""}
+                                className={isNew ? "opacity-disabled px-2" : "px-2"}
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <UserIcon className="size-7" />
-                                {item.authorized_roles?.length ?? 0}
+                                {item.available_to?.length ?? 0}
                             </Button>
                         </Tooltip>
+
+                        <Tooltip
+                            content={
+                                isNew
+                                    ? "Create the item first, before editing viewer roles."
+                                    : "Viewer Roles"
+                            }
+                            className="w-fit p-2"
+                            delay={500}
+                            closeDelay={150}
+                            isDisabled={isDisabled}
+                        >
+                            <Button
+                                // variant="flat"
+                                color="primary"
+                                onPress={() => !isNew && setVwrolesOpen(true)}
+                                // isIconOnly
+                                isDisabled={isDisabled}
+                                className={isNew ? "opacity-disabled px-2" : "px-2"}
+                                data-hover={!isNew && !isDisabled}
+                            >
+                                <EyeIcon className="size-7" />
+                                {item.visible_to?.length ?? 0}
+                            </Button>
+                        </Tooltip>
+
+                        {item.role == ITEM_ROLE.KIT && (
+                            <Tooltip
+                                content={
+                                    isNew
+                                        ? "Create the item first, before editing kit contents."
+                                        : "Kit Contents"
+                                }
+                                className="w-fit p-2"
+                                delay={500}
+                                closeDelay={150}
+                                isDisabled={isDisabled}
+                            >
+                                <Button
+                                    // variant="flat"
+                                    color="primary"
+                                    onPress={() => !isNew && setKitEditorOpen(true)}
+                                    // isIconOnly
+                                    isDisabled={isDisabled}
+                                    className={isNew ? "opacity-disabled px-2" : "px-2"}
+                                    data-hover={!isNew && !isDisabled}
+                                >
+                                    <BriefcaseIcon className="size-7" />
+                                    {item.kit_contents?.length ?? 0}
+                                </Button>
+                            </Tooltip>
+                        )}
                         {/* </div> */}
                     </ButtonGroup>
                 </div>
@@ -822,17 +930,26 @@ export default function ItemEditorForm({
                 key={"certreq-" + item.uuid}
                 certifications={certs}
                 element={item}
+                parentKitCerts={parent_kit?.required_certifications}
                 isOpen={reqcertsOpen}
                 onOpenChange={setReqcertsOpen}
                 patchMutation={reqcertsMutation}
             />
-            <AuthorizedRolesModal
-                key={"roleauth-" + item.uuid}
+            <AvailableToRolesModal
+                key={"acroleauth-" + item.uuid}
                 element={item}
                 roles={roles}
-                isOpen={authrolesOpen}
-                onOpenChange={setAuthrolesOpen}
-                patchMutation={authrolesMutation}
+                isOpen={acrolesOpen}
+                onOpenChange={setAcrolesOpen}
+                patchMutation={acrolesMutation}
+            />
+            <VisibleToRolesModal
+                key={"vwroleauth-" + item.uuid}
+                element={item}
+                roles={roles}
+                isOpen={vwrolesOpen}
+                onOpenChange={setVwrolesOpen}
+                patchMutation={vwrolesMutation}
             />
             <ItemLocationModal
                 key={"locedit-" + item.uuid}
@@ -854,6 +971,15 @@ export default function ItemEditorForm({
                 item={item}
                 isOpen={invAuditLogsOpen}
                 onOpenChange={setInvAuditLogsOpen}
+            <KitEditorModal
+                key={"kitedit-" + item.uuid}
+                element={item}
+                items={items}
+                isOpen={kitEditorOpen}
+                onOpenChange={setKitEditorOpen}
+                kitPatchMutation={kitEditorMutation}
+                contentPatchMutation={kitEditorMutation}
+                setSelectedItem={setSelectedItem}
             />
         </>
     );

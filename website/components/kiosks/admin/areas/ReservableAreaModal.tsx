@@ -48,15 +48,15 @@ export default function ReservableConfirmationModal({
     onOpenChange: (open: boolean) => void;
 }) {
     const [reservable, setReservable] = useState(area.reservable);
-    const [authorizedRoles, setAuthorizedRoles] = useState(
-        area.authorized_roles || [],
+    const [availableToRoles, setAvailableToRoles] = useState(
+        area.available_to || [],
     );
     const [requiredCerts, setRequiredCerts] = useState(
         area.required_certifications || [],
     );
 
     const [openAuthorized, setOpenAuthorized] = useState(
-        area.authorized_roles === null,
+        area.available_to == null,
     );
 
     const [hasEdits, setHasEdits] = useState(false);
@@ -89,7 +89,7 @@ export default function ReservableConfirmationModal({
                     If an area is reservable, it will appear in the checkout
                     kiosk for users to reserve. Any user with all of the
                     required certifications and at least one of the authorized
-                    roles for will be able to reserve the area.
+                    roles will be able to reserve the area.
                     <Divider className="bg-default-200 h-0.5" />
                     <div className="flex w-full justify-center gap-12 font-bold">
                         Reservable?
@@ -212,7 +212,7 @@ export default function ReservableConfirmationModal({
                     <div className="flex flex-row w-full gap-2 items-center">
                         <UserRoleSelect
                             roles={roles}
-                            selectedKeys={authorizedRoles}
+                            selectedKeys={availableToRoles}
                             isDisabled={!reservable || openAuthorized}
                             label="Authorized Roles"
                             labelPlacement="inside"
@@ -223,18 +223,18 @@ export default function ReservableConfirmationModal({
                             }
                             onSelectionChange={(s) => {
                                 if (s === "all") {
-                                    setAuthorizedRoles(
+                                    setAvailableToRoles(
                                         roles.map((r) => r.uuid),
                                     );
                                 } else {
-                                    setAuthorizedRoles(
+                                    setAvailableToRoles(
                                         Array.from(s) as string[],
                                     );
                                 }
                                 setHasEdits(
                                     hasEdits ||
-                                        authorizedRoles !=
-                                            area.authorized_roles,
+                                        availableToRoles !=
+                                            area.available_to,
                                 );
                             }}
                         />
@@ -252,7 +252,7 @@ export default function ReservableConfirmationModal({
                                 isDisabled={!reservable}
                                 onValueChange={(v) => {
                                     setOpenAuthorized(v);
-                                    setAuthorizedRoles([]);
+                                    setAvailableToRoles([]);
                                     setHasEdits(true);
                                 }}
                                 color="primary"
@@ -277,9 +277,9 @@ export default function ReservableConfirmationModal({
                                 uuid: area.uuid,
                                 patch: {
                                     reservable: reservable,
-                                    authorized_roles: openAuthorized
+                                    available_to: openAuthorized
                                         ? null
-                                        : authorizedRoles,
+                                        : availableToRoles,
                                     required_certifications: requiredCerts,
                                 },
                             });

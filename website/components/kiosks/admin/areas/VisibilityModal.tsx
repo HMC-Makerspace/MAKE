@@ -38,7 +38,7 @@ export default function RequiredRolesModal({
     // An open authorized object always has an empty role list and is available to anyone,
     // whereas an closed authorized object with an empty role list is available to no one.
     const [openVisible, setOpenVisible] = React.useState(
-        item.visible_to === null,
+        item.visible_to == null,
     );
 
     const onSubmit = React.useCallback(
