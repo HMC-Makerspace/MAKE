@@ -133,23 +133,47 @@ export default function ItemInfo({
                                     </div>
                                 )}
                             </div>
-                            <div
-                                className={`bg-primary p-2 h-fit w-full rounded-md text-center whitespace-nowrap, overflow-x-auto ${item_data ? "text-default-700" : "text-default-400"}`}
-                            >
-                                {item_data.reorder_url ? (
-                                    <HeroLink
-                                        isExternal
-                                        showAnchorIcon
-                                        as={Link}
-                                        to={item_data.reorder_url}
-                                        className="text-primary-foreground text-sm"
-                                    >
-                                        Reorder Link
-                                    </HeroLink>
-                                ) : (
-                                    "No Reorder Link"
-                                )}
-                            </div>
+                            <>
+                                {item_data.kit_contents?.length ? <>
+                                    {item_data.kit_contents?.map(i => {
+                                        let itm = inventory.find(a => a.uuid == i);
+                                        return (<div className="grid grid-cols-2">
+                                            <div className={`bg-default-200 mr-2 p-2 h-fit w-full rounded-md text-center whitespace-nowrap overflow-x-auto ${item_data ? "text-default-700" : "text-default-400"}`}>
+                                                {itm?.name}
+                                            </div>
+                                            <div className={`bg-primary p-2 ml-2 h-fit w-full rounded-md text-center whitespace-nowrap overflow-x-auto ${item_data ? "text-default-700" : "text-default-400"}`}>
+                                                {itm?.reorder_url ? (
+                                                    <HeroLink
+                                                        isExternal
+                                                        showAnchorIcon
+                                                        as={Link}
+                                                        to={itm.reorder_url}
+                                                        className="text-primary-foreground text-sm"
+                                                    >
+                                                        Reorder Link
+                                                    </HeroLink>
+                                                ) : (
+                                                    "No Reorder Link"
+                                                )}
+                                            </div>
+                                        </div>)
+                                    })}
+                                </> : <div className={`bg-primary p-2 h-fit w-full rounded-md text-center whitespace-nowrap overflow-x-auto ${item_data ? "text-default-700" : "text-default-400"}`}>
+                                    {item_data.reorder_url ? (
+                                        <HeroLink
+                                            isExternal
+                                            showAnchorIcon
+                                            as={Link}
+                                            to={item_data.reorder_url}
+                                            className="text-primary-foreground text-sm"
+                                        >
+                                            Reorder Link
+                                        </HeroLink>
+                                    ) : (
+                                        "No Reorder Link"
+                                    )}
+                                </div>}
+                            </>
                         </div>
                     </PopoverContent>
                 )}
