@@ -12,6 +12,7 @@ import {
     DropdownItem,
     DropdownMenu,
     DropdownTrigger,
+    SortDescriptor,
 } from "@heroui/react";
 import { useInfiniteScroll } from "@heroui/use-infinite-scroll";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
@@ -40,6 +41,7 @@ export default function MAKETable<Type extends { uuid: string }>({
         name: string;
         id: string;
         sortable?: boolean;
+        sortValue?: (item: Type) => string | number | null;
         hidden?: boolean;
     }[];
     visibleColumns: Selection;
@@ -66,6 +68,14 @@ export default function MAKETable<Type extends { uuid: string }>({
     showSelectionCheckboxes?: boolean;
     disabledRows?: string[]
 }) {
+
+    // The column the table is being sorted by
+    const [sortDescriptor, setSortDescriptor] =
+    React.useState<SortDescriptor>({
+        column: "",
+        direction: "ascending",
+    });
+
     // The current number of items in content that are loaded in the DOM and
     // are visible to the user
     const [visibleContentLength, setVisibleContentLength] = React.useState(
@@ -85,10 +95,51 @@ export default function MAKETable<Type extends { uuid: string }>({
         [visibleContentLength, content.length],
     );
 
+    const sortedContent = React.useMemo(() => {
+        if (!sortDescriptor.column) {
+            return content;
+        }
+
+        const column = columns.find(
+            (column) => column.id === sortDescriptor.column
+        );
+
+        if (!column) {
+            return content;
+        }
+
+        return [...content].sort((a, b) => {
+            const first = column.sortValue
+                ? column.sortValue(a)
+                : a[sortDescriptor.column as keyof Type];
+
+            const second = column.sortValue
+                ? column.sortValue(b)
+                : b[sortDescriptor.column as keyof Type];
+
+            // Handle N/A values first
+            if (first == null && second == null) return 0;
+            if (first == null) {
+                return sortDescriptor.direction === "ascending" ? -1 : 1;
+            }
+            if (second == null) {
+                return sortDescriptor.direction === "ascending" ? 1 : -1;
+            }
+            const cmp = String(first).localeCompare(String(second), undefined, {
+                numeric: true,
+                sensitivity: "base",
+            });
+
+            return sortDescriptor.direction === "ascending"
+                ? cmp
+                : -cmp;
+        });
+    }, [content, sortDescriptor]);
+
     // The list of currently visible content, sliced using visibleContentLength
     const visibleContent = React.useMemo(
-        () => content.slice(0, visibleContentLength),
-        [content, visibleContentLength],
+        () => sortedContent.slice(0, visibleContentLength),
+        [sortedContent, visibleContentLength],
     );
 
     // Create an infinite scroll ref to load more content as the user scrolls
@@ -141,13 +192,15 @@ export default function MAKETable<Type extends { uuid: string }>({
             onRowAction={multiSelect ? undefined : doubleClickAction}
             color={color}
             disabledKeys={disabledRows}
+            sortDescriptor={sortDescriptor}
+            onSortChange={setSortDescriptor}
         >
             <TableHeader columns={headerColumns}>
                 {(column) => (
                     <TableColumn
                         key={column.id as string}
                         align="start"
-                        // allowsSorting={column.sortable}
+                        allowsSorting={column.sortable}
                     >
                         {column.name}
                     </TableColumn>

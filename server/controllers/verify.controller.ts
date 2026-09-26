@@ -41,54 +41,21 @@ export async function verifyRequest(
  * @returns A promise to a boolean, true if the user has all required scopes
  */
 export async function verifyCompoundRequest(
-  user_uuid: UserUUID,
-  ...scope_groups: API_SCOPE[][]
+    user_uuid: UserUUID,
+    ...scope_groups: (API_SCOPE | false)[][]
 ): Promise<boolean> {
-  // Get a list of the user's scopes
-  const scopes = await getUserScopes(user_uuid);
-  // Check that the user's scopes list includes all required scopes,
-  // or that the user has the ADMIN scope
-  return (
-    scopes.includes(API_SCOPE.ADMIN) ||
-    scope_groups.some((group) => group.every((scope) => scopes.includes(scope)))
-  );
-}
-
-export function verifySchema<S, R extends Request>(
-    schema: Joi.ObjectSchema<S> | Joi.ArraySchema<S> ,
-    path_name: keyof R["body"],
-): (req: Request, res: Response, next: NextFunction) => void {
-    return async (
-        req: Request,
-        res: Response,
-        next: NextFunction
-    ) => {
-        const obj = req.body[path_name];
-        if (obj._id) {
-            delete obj._id;
-        }
-        if (obj.__v !== undefined) {
-            delete obj.__v;
-        }
-        const { error, value } = schema.validate(obj);
-        req.log.info("verifying schema")
-
-    if (error) {
-      req.log.error({
-        msg:
-          `An attempt was made to create a ` +
-          `${String(path_name)}, but was passed in a faulty data.`,
-        err: error,
-      });
-      res.status(StatusCodes.NOT_ACCEPTABLE).json({
-        error: `Failed to create ${String(path_name)} data. ${error}`,
-      });
-      next(error);
-    }
-    req.body[path_name] = value;
-
-    next();
-  };
+    // Get a list of the user's scopes
+    const scopes = await getUserScopes(user_uuid);
+    // Check that the user's scopes list includes all required scopes,
+    // or that the user has the ADMIN scope
+    return (
+        scopes.includes(API_SCOPE.ADMIN) ||
+        scope_groups.some((group) =>
+            group
+                .filter((scope) => scope !== false)
+                .every((scope) => scopes.includes(scope)),
+        )
+    );
 }
 
 export function verifySchema<S, R extends Request>(
