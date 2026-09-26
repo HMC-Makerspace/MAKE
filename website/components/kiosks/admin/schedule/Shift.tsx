@@ -15,7 +15,7 @@ import {
     addToast,
 } from "@heroui/react";
 import React from "react";
-import { getUserRoleHierarchy } from "../../../../utils";
+import { getUserRoleHierarchy, getWorkerDisplayName } from "../../../../utils";
 import WorkerInfo from "./WorkerInfo";
 
 const baseColors = [
@@ -111,7 +111,7 @@ export default function Shift({
     setSelectedShifts = () => {},
     dragging = false,
     setDragging = () => {},
-    firstNamesOnly = true,
+    workerNameDisplay = 1,
     availabilityChange = false,
 }: {
     schedule_uuid: UUID;
@@ -134,7 +134,7 @@ export default function Shift({
     setSelectedShifts?: (day_start_end: Set<string>) => void;
     dragging: boolean;
     setDragging: (dragging: boolean) => void;
-    firstNamesOnly?: boolean;
+    workerNameDisplay?: number;
     availabilityChange?: boolean;
 }) {
     const queryClient = useQueryClient();
@@ -342,6 +342,22 @@ export default function Shift({
                         type === "view" ||
                         type === "worker_view") &&
                         assignees.map((assignee) => {
+                            if (assignee == "") {
+                                return (
+                                    <div
+                                        className={clsx(
+                                            "w-full h-full",
+                                            "flex flex-row",
+                                            "items-center justify-center",
+                                            "text-danger-800",
+                                            "text-sm",
+                                        )}
+                                        title={assignee}
+                                    >
+                                        Open
+                                    </div>
+                                );
+                            }
                             const u = users.find((u) => u.uuid === assignee);
                             if (!u) {
                                 if (type === "worker_view") {
@@ -436,14 +452,12 @@ export default function Shift({
                                             "items-center justify-center",
                                             "text-default-800",
                                             " text-center",
-                                            firstNamesOnly
+                                            workerNameDisplay != 0
                                                 ? "text-xs lg:text-sm"
                                                 : "text-[9px] lg:text-xs",
                                         )}
                                     >
-                                        {firstNamesOnly
-                                            ? u.name.split(" ")[0]
-                                            : u.name}
+                                        {getWorkerDisplayName(u.name, workerNameDisplay)}
                                     </div>
                                 );
                             }

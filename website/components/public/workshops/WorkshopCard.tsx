@@ -17,7 +17,7 @@ import { CalendarBoldIcon } from "@heroui/shared-icons";
 import { TUser } from "common/user";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { timestampToZonedDateTime, verifyScopes } from "../../../utils";
+import { timestampToZonedDateTime, verifyScopes, getWorkerDisplayName } from "../../../utils";
 import { TConfig } from "common/config";
 import { DateFormatter } from "@internationalized/date";
 import { TCertification } from "common/certification";
@@ -259,11 +259,9 @@ export default function WorkshopCard({
                             ?.filter((user) =>
                                 workshop.instructors.includes(user.uuid),
                             )
-                            .map((user) =>
-                                config?.schedule.first_names_only
-                                    ? user.name.split(" ")[0]
-                                    : user.name,
-                            )
+                            .map((user) => {
+                                getWorkerDisplayName(user.name, config?.schedule.worker_name_display)
+                            })
                             .join(", ")}
                     </div>
                 </CardHeader>

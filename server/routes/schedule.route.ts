@@ -2,6 +2,7 @@ import { API_SCOPE, UUID } from "common/global";
 import {
     getActiveSchedule,
     getActivePublicSchedule,
+    getSimplifiedPublicSchedule,
     createSchedule,
     deleteSchedule,
     updateSchedule,
@@ -888,8 +889,17 @@ router.get("/public", async (req: Request, res: PublicScheduleResponse) => {
         req.log.warn(
             "No requesting_uuid was provided while getting the active public schedule.",
         );
-        res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
-        return;
+
+        const simplifiedSchedule = await getSimplifiedPublicSchedule();
+        if (!simplifiedSchedule) {
+            req.log.warn(`Simplified public schedule not found.`);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                error: `Unauthorized user and simplified public schedule not found.`,
+            });
+            return;
+        }
+        // If the user is not authorized, provide a simplified schedule
+        res.json(simplifiedSchedule);
     }
 
     req.log.debug({
@@ -925,8 +935,16 @@ router.get("/public", async (req: Request, res: PublicScheduleResponse) => {
             msg: "Forbidden user attempted to get the active public schedule",
             requesting_uuid: requesting_uuid,
         });
-        // If the user is not authorized, provide a status error
-        res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        const simplifiedSchedule = await getSimplifiedPublicSchedule();
+        if (!simplifiedSchedule) {
+            req.log.warn(`Simplified public schedule not found.`);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                error: `Forbidden user and simplified public schedule not found.`,
+            });
+            return;
+        }
+        // If the user is not authorized, provide a simplified schedule
+        res.json(simplifiedSchedule);
     }
 });
 

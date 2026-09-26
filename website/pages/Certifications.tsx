@@ -429,6 +429,7 @@ export default function CertificationsPage() {
                                                 className="w-full font-medium"
                                                 size="lg"
                                                 as={Link}
+                                                target="_blank"
                                                 isDisabled={!hasPrereqs}
                                                 to={docHref}
                                             >

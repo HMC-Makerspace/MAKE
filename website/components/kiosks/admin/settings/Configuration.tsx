@@ -11,9 +11,11 @@ import {
     SelectItem,
     Switch,
     addToast,
+    RadioGroup,
+    Radio,
 } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { TConfig } from "common/config";
+import { TConfig, WORKER_NAME_DISPLAY } from "../../../../../common/config.ts";
 import { SHIFT_DAYS } from "../../../../../common/shift";
 import { UserRoleSelect } from "../../../../components/user/UserRoleSelect";
 import axios, { AxiosError } from "axios";
@@ -163,9 +165,11 @@ export default function Configuration({
 
     // For whatever reason, switch components do not store a false value,
     // so to not override the existing setting this must be controlled.
-    const [firstNamesOnly, setFirstNamesOnly] = useState(
-        config.schedule.first_names_only ?? true,
-    );
+    const [workerNameDisplay, setWorkerNameDisplay] =
+        useState<WORKER_NAME_DISPLAY>(
+            config.schedule.worker_name_display ??
+                WORKER_NAME_DISPLAY.FIRST_NAME_ONLY,
+        );
 
     const [hideHomeEmbed, setHideHomeEmbed] = useState(
         config.general.hide_home_embed ?? false,
@@ -210,7 +214,7 @@ export default function Configuration({
                 days_open: config.schedule.days_open,
                 first_display_day: config.schedule.first_display_day,
                 worker_roles: config.schedule.worker_roles,
-                first_names_only: firstNamesOnly,
+                worker_name_display: workerNameDisplay,
                 increment_sec: config.schedule.increment_sec,
                 timezone: config.schedule.timezone,
                 locale: config.schedule.locale,
@@ -881,14 +885,36 @@ export default function Configuration({
                                     On the public schedule, show:
                                 </div>
                                 <div className="flex flex-row items-center justify-center gap-3">
-                                    Worker full names
-                                    <Switch
-                                        color="primary"
-                                        name="first_names_only"
-                                        isSelected={firstNamesOnly}
-                                        onValueChange={setFirstNamesOnly}
-                                    />
-                                    Only worker first names
+                                    <RadioGroup
+                                        value={String(workerNameDisplay)}
+                                        onValueChange={(value) =>
+                                            setWorkerNameDisplay(Number(value))
+                                        }
+                                    >
+                                        <Radio
+                                            value={String(
+                                                WORKER_NAME_DISPLAY.FULL_NAME,
+                                            )}
+                                        >
+                                            Worker full names
+                                        </Radio>
+
+                                        <Radio
+                                            value={String(
+                                                WORKER_NAME_DISPLAY.FIRST_NAME_ONLY,
+                                            )}
+                                        >
+                                            First names only
+                                        </Radio>
+
+                                        <Radio
+                                            value={String(
+                                                WORKER_NAME_DISPLAY.FIRST_NAME_LAST_INITIAL,
+                                            )}
+                                        >
+                                            First name + last initial
+                                        </Radio>
+                                    </RadioGroup>
                                 </div>
                             </ConfigItem>
                         </AccordionItem>

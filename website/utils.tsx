@@ -8,7 +8,7 @@ import {
 } from "@internationalized/date";
 import { API_SCOPE, UnixTimestamp } from "../common/global";
 import { TUser, TUserRole, TUserRoleLog, UserRoleUUID } from "common/user";
-import { TConfig } from "common/config";
+import { TConfig, WORKER_NAME_DISPLAY } from "../common/config";
 import { TShift, SHIFT_EVENT_TYPE, TShiftEvent } from "../common/shift";
 import { TRequiredCertificate } from "common/certification";
 
@@ -281,4 +281,32 @@ export function mergeRequiredCerts(a: TRequiredCertificate[] | undefined, b: TRe
     }
 
     return [...res, ...toMerge];
+}
+
+export function getWorkerDisplayName(
+    name: string,
+    setting: WORKER_NAME_DISPLAY = WORKER_NAME_DISPLAY.FIRST_NAME_ONLY,
+) {
+    const nameParts = name.split(" ");
+
+    if (setting === WORKER_NAME_DISPLAY.FULL_NAME) {
+        return name;
+    }
+
+    if (setting === WORKER_NAME_DISPLAY.FIRST_NAME_ONLY) {
+        return nameParts[0];
+    }
+
+    if (setting === WORKER_NAME_DISPLAY.FIRST_NAME_LAST_INITIAL) {
+        if (nameParts.length < 2) {
+            return name;
+        }
+
+        const firstName = nameParts[0];
+        const lastName = nameParts[nameParts.length - 1];
+
+        return `${firstName} ${lastName[0]}.`;
+    }
+
+    return name;
 }
