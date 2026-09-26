@@ -44,6 +44,7 @@ import {
     TGeneralConfig,
     TScheduleConfig,
     TWorkshopConfig,
+    WORKER_NAME_DISPLAY
 } from "common/config";
 import {
     createSchedule,
@@ -236,7 +237,7 @@ if (existingConfig) {
             first_display_day: 0, // Sunday
             worker_roles: [],
             increment_sec: 3600, // 1 hour shift delineation
-            first_names_only: true, // Only show worker first names on public schedule
+            worker_name_display: WORKER_NAME_DISPLAY.FIRST_NAME_ONLY, // Only show worker first names on public schedule
             timezone: "America/Los_Angeles",
             locale: "en-US",
         },
@@ -466,14 +467,19 @@ if (existingConfig) {
     });
 
     console.log(
-        colors.cyan("Should the public schedule show worker first names only?"),
+        colors.cyan(
+            "How should worker names be displayed on the public schedule? Options are:" +
+                "\n  - 0: Full names" +
+                "\n  - 1: First names only" +
+                "\n  - 2: First name + last initial",
+        ),
     );
-    const { firstNamesOnly } = await prompt.get({
-        name: "firstNamesOnly",
-        description: "Schedule: First Names Only [Y/n]",
-        pattern: /^(y|n)$/gi,
-        message: "Please enter y (for yes) or n (for no).",
-        before: (val) => (val ? val.toLowerCase() : "y"),
+    const { workerNameDisplay } = await prompt.get({
+        name: "workerNameDisplay",
+        description: "Schedule: Worker name display (default first names only - 1)",
+        pattern: /^[012]$/,
+        message: "Please enter an option as an integer.",
+        before: (val) => (val ? val.toLowerCase() : "1"),
     });
 
     console.log(
@@ -522,7 +528,7 @@ if (existingConfig) {
         first_display_day: parseInt(firstDisplayDay.toString()),
         worker_roles: [], // Set in dashboard
         increment_sec: parseInt(incrementSec.toString()),
-        first_names_only: firstNamesOnly == "y",
+        worker_name_display: parseInt(workerNameDisplay.toString()),
         timezone: timezone.toString(),
         locale: locale.toString(),
     };

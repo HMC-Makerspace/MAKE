@@ -438,9 +438,9 @@ export default function Schedule({
                                                     }
                                                     dragging={dragging}
                                                     setDragging={setDragging}
-                                                    firstNamesOnly={
+                                                    workerNameDisplay={
                                                         config.schedule
-                                                            .first_names_only
+                                                            .worker_name_display
                                                     }
                                                     availabilityChange={
                                                         availabilityChange
