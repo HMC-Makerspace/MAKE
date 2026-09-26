@@ -125,7 +125,7 @@ export default function SchedulePage() {
         setSelectedShifts,
         setSelectedUsers: selectShift,
     };
-    console.log(error?.response?.data )
+
     return (
         <DefaultLayout className="p-4 lg:px-8" pageHref="/schedule">
             <div

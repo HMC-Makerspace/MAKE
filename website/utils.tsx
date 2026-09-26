@@ -298,7 +298,7 @@ export function getWorkerDisplayName(
     }
 
     if (setting === WORKER_NAME_DISPLAY.FIRST_NAME_LAST_INITIAL) {
-        if (nameParts.length < 1) {
+        if (nameParts.length < 2) {
             return name;
         }
 
