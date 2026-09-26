@@ -101,7 +101,7 @@ export default function RestockRequestModal({
         queryKey: ["user", "by", "email", otherEmail],
         refetchOnMount: false,
         refetchOnWindowFocus: false,
-        retry: false,
+        retry: 1,
         enabled: !!otherEmail,
     });
 
@@ -183,7 +183,7 @@ export default function RestockRequestModal({
                   };
 
             // Add self or other user if not already on mailing list
-            const relevant_uuid = forOtherUser
+            const relevant_uuid = forOtherUser || type === "create_other"
                 ? otherUser?.uuid
                 : requestingUser.uuid;
             if (
