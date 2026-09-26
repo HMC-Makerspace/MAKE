@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import type { TInventoryItem, TInventoryItemLocation } from "common/inventory";
+import type { TInventoryItem, TInventoryItemLocation, TInventoryAudit } from "common/inventory";
 import { RequiredCertificate, RequiredCertificateSchema } from "./certification.model";
 import Joi from "joi";
 
@@ -18,6 +18,16 @@ const InventoryItemLocationSchema = Joi.object<TInventoryItemLocation>({
     container: Joi.string().optional().allow("", null),
     specific: Joi.string().optional().allow("", null),
 });
+
+const InventoryAuditSchema = Joi.object<TInventoryAudit>({
+    timestamp: Joi.number().required(),
+    description: Joi.string().optional().allow("", null),
+});
+
+const InventoryAudit = new mongoose.Schema<TInventoryAudit>({
+    timestamp: { type: Number, required: true },
+    description: { type: String, required: false }
+}, { _id: false })
 
 /**
  * See {@link TInventoryItem} documentation for type information.
@@ -40,6 +50,10 @@ export const InventoryItem = new mongoose.Schema<TInventoryItem>(
         return_disclaimer: { type: String, required: false },
         required_certifications: {
             type: [RequiredCertificate],
+            required: false,
+        },
+        audit_logs: {
+            type: [InventoryAudit],
             required: false,
         },
         available_to: { type: [String], required: false },
@@ -67,6 +81,9 @@ export const InventoryItemSchema = Joi.object<TInventoryItem>({
     return_disclaimer: Joi.string().optional().allow(""),
     required_certifications: Joi.array()
         .items(RequiredCertificateSchema)
+        .optional(),
+    audit_logs: Joi.array()
+        .items(InventoryAuditSchema)
         .optional(),
     available_to: Joi.array().items(Joi.string()).optional().allow(null),
     visible_to: Joi.array().items(Joi.string()).optional().allow(null),
