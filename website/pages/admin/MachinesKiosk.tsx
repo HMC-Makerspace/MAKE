@@ -1,7 +1,7 @@
 import { TSchedule } from "common/schedule";
 import AdminLayout from "../../layouts/AdminLayout";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Spinner, Card, Button, Input, addToast } from "@heroui/react"
+import { Spinner, Card, Button, Input, addToast } from "@heroui/react";
 import { TUserRole } from "common/user";
 import Machine from "../../components/kiosks/admin/machines/Machine";
 import { TCertification } from "common/certification";
