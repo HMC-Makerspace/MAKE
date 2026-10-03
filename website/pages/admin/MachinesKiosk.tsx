@@ -1,7 +1,7 @@
 import { TSchedule } from "common/schedule";
 import AdminLayout from "../../layouts/AdminLayout";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Spinner, Card, Button, addToast } from "@heroui/react";
+import { Spinner, Card, Button, Input, addToast } from "@heroui/react";
 import { TUserRole } from "common/user";
 import Machine from "../../components/kiosks/admin/machines/Machine";
 import { TCertification } from "common/certification";
@@ -11,10 +11,12 @@ import clsx from "clsx";
 import { TArea } from "common/area";
 import {
     EyeIcon,
+    MagnifyingGlassIcon as SearchIcon,
     PencilSquareIcon,
     PlusIcon,
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import Fuse from "fuse.js";
+import React, { useState } from "react";
 import axios from "axios";
 import { useRoles } from "../../queries/useRoles";
 
@@ -56,6 +58,43 @@ export default function MachinesKiosk() {
     });
 
     const [preview, setPreview] = useState(false);
+    const [search, setSearch] = React.useState<string>("");
+
+    // A fuse instance for filtering machines by name, description, and documents
+    const fuse = React.useMemo(() => {
+        return new Fuse(machines ?? [], {
+            keys: ["name", "description", "documents"],
+            getFn: (machine, path) => {
+                if (path.includes("documents")) {
+                    return (machine.documents ?? []).flatMap((document) => [
+                        document.name,
+                        document.link,
+                    ]);
+                } else if (path.includes("description")) {
+                    return machine.description ?? "";
+                } else if (path.includes("name")) {
+                    return machine.name;
+                } else {
+                    return "";
+                }
+            },
+            threshold: 0.3,
+        });
+    }, [machines]);
+
+    const filteredMachines = React.useMemo(() => {
+        if (search) {
+            return fuse.search(search).map((result) => result.item);
+        } else {
+            return machines ?? [];
+        }
+    }, [machines, fuse, search]);
+
+    const onInputChange = React.useCallback((value: string) => {
+        setSearch(value);
+    }, []);
+
+    const onSearchClear = React.useCallback(() => onInputChange(""), []);
 
     const queryClient = useQueryClient();
     const createMutation = useMutation({
@@ -92,7 +131,6 @@ export default function MachinesKiosk() {
             </div>
         );
     }
-
     return (
         <AdminLayout pageHref="/admin/machines">
             <div className="h-full overflow-auto flex flex-col gap-3">
@@ -124,6 +162,21 @@ export default function MachinesKiosk() {
                         </Button>
                     </div>
                 </div>
+                <div className="flex justify-between gap-3 items-end">
+                    <Input
+                        isClearable
+                        className="w-full sm:max-w-[44%] text-for"
+                        placeholder="Search..."
+                        startContent={<SearchIcon className="size-6" />}
+                        value={search}
+                        onClear={() => onSearchClear()}
+                        onValueChange={onInputChange}
+                        isDisabled={machinesLoading}
+                        classNames={{
+                            input: "placeholder:text-foreground-200",
+                        }}
+                    />
+                </div>
                 <div
                     className={clsx(
                         "w-full min-h-fit overflow-auto",
@@ -131,7 +184,7 @@ export default function MachinesKiosk() {
                         "md:grid-cols-2 3xl:grid-cols-3",
                     )}
                 >
-                    {machines.map((machine) => (
+                    {filteredMachines.map((machine) => (
                         <Machine
                             key={machine.uuid}
                             machine={machine}
