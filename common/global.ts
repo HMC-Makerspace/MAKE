@@ -28,6 +28,7 @@ export enum API_SCOPE {
     CERTIFICATION_KIOSK = "certification_kiosk",
     SETTINGS_KIOSK = "settings_kiosk",
     STATISTICS_KIOSK = "statistic_kiosk",
+    REVIEWS_KIOSK = "reviews_kiosk",
     // Embed scopes
     GET_ALL_EMBEDS = "get_embeds",
     CREATE_EMBED = "create_embed",
@@ -138,6 +139,11 @@ export enum API_SCOPE {
     DELETE_WORKSHOP = "delete_workshop",
     RSVP_WORKSHOP = "rsvp_workshop",
     SIGN_IN_WORKSHOP = "sign_in_workshop",
+    // Review scopes
+    GET_ALL_REVIEWS = "get_reviews",
+    CREATE_REVIEW = "create_review",
+    UPDATE_REVIEW = "update_review",
+    DELETE_REVIEW = "delete_review",
 }
 
 export type API_SCOPE_DESCRIPTOR = {
@@ -222,6 +228,16 @@ export const API_SCOPE_SECTIONS: {
                 scope: API_SCOPE.SETTINGS_KIOSK,
                 label: "Settings Kiosk",
                 description: "Access to settings kiosk",
+            },
+            {
+                scope: API_SCOPE.STATISTICS_KIOSK,
+                label: "Statistic Kiosk",
+                description: "Access to statistics kiosk",
+            },
+            {
+                scope: API_SCOPE.REVIEWS_KIOSK,
+                label: "Reviews Kiosk",
+                description: "Access to reviews kiosk",
             },
         ],
     },
@@ -766,6 +782,31 @@ export const API_SCOPE_SECTIONS: {
                 scope: API_SCOPE.DELETE_EMBED,
                 label: "Delete embed",
                 description: "Able to delete existing embeds",
+            },
+        ],
+    },
+    {
+        title: "Reviews",
+        scopes: [
+            {
+                scope: API_SCOPE.GET_ALL_REVIEWS,
+                label: "Get all reviews",
+                description: "Able to get all review cycles",
+            },
+            {
+                scope: API_SCOPE.CREATE_REVIEW,
+                label: "Create review",
+                description: "Able to create a new review cycle",
+            },
+            {
+                scope: API_SCOPE.UPDATE_REVIEW,
+                label: "Update review",
+                description: "Able to modify any existing review",
+            },
+            {
+                scope: API_SCOPE.DELETE_REVIEW,
+                label: "Delete review",
+                description: "Able to delete reviews",
             },
         ],
     },
