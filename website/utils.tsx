@@ -287,7 +287,7 @@ export function getWorkerDisplayName(
     name: string,
     setting: WORKER_NAME_DISPLAY = WORKER_NAME_DISPLAY.FIRST_NAME_ONLY,
 ) {
-    const nameParts = name.split(" ");
+    const nameParts = name.trim().split(" ");
 
     if (setting === WORKER_NAME_DISPLAY.FULL_NAME) {
         return name;
