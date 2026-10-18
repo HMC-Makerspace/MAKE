@@ -82,7 +82,7 @@ export function ReviewResponse({
     return (
         <div
             className={clsx(
-                "w-full bg-content1 py-2 px-4",
+                "w-full bg-content1 py-3 px-4",
                 "flex flex-row rounded-xl h-full overflow-auto",
             )}
         >
@@ -125,7 +125,7 @@ export function ReviewResponse({
             </div>
             <div className="w-[2px] bg-default-400/80 rounded-sm h-full" />
             <div
-                className="flex h-fit overflow-auto flex-1 flex-col px-3 gap-2"
+                className="h-full flex flex-col overflow-auto flex-1 px-3 gap-2"
                 key={response.uuid}
             >
                 {rubric.items.map((item, ridx) => {

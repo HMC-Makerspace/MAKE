@@ -1,11 +1,6 @@
 import { Button, RadioGroup, Radio } from "@heroui/react";
-import {
-    RegisterableHotkey,
-    useHotkey,
-    useHotkeys,
-} from "@tanstack/react-hotkeys";
 import clsx from "clsx";
-import { TRating, TRubricItem } from "common/review";
+import { TRubricItem } from "common/review";
 
 export function ReviewRubricItem({
     item,
@@ -25,7 +20,7 @@ export function ReviewRubricItem({
     return (
         <Button
             className={clsx(
-                "border-2 border-default-300 rounded-md w-full",
+                "border-2 border-default-300 rounded-md w-full min-h-fit",
                 "flex flex-col text-md px-2 py-1 h-fit items-start",
                 index === selectedRubricIndex && "border-primary-300",
             )}
@@ -37,7 +32,7 @@ export function ReviewRubricItem({
                 {item.category}
             </div>
             <RadioGroup
-                className="text-default-700"
+                className="text-default-700 max-w-full"
                 aria-label="Select a tier"
                 color="primary"
                 value={
@@ -48,10 +43,15 @@ export function ReviewRubricItem({
                 {item.tiers.map((tier) => (
                     <Radio
                         value={String(tier.value)}
-                        className="text-default-800"
+                        className="text-default-800 max-w-full"
                         tabIndex={tier.value}
                     >
-                        {tier.value} - {tier.description}
+                        <div className="w-full flex gap-2 items-center">
+                            <div>{tier.value}</div>-
+                            <div className="w-full text-wrap text-start">
+                                {tier.description}
+                            </div>
+                        </div>
                     </Radio>
                 ))}
             </RadioGroup>
