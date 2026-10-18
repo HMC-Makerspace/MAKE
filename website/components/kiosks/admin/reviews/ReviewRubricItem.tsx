@@ -1,6 +1,7 @@
 import { Button, RadioGroup, Radio } from "@heroui/react";
 import clsx from "clsx";
 import { TRubricItem } from "common/review";
+import { useEffect, useRef } from "react";
 
 export function ReviewRubricItem({
     item,
@@ -17,6 +18,13 @@ export function ReviewRubricItem({
     selectedRubricIndex: number;
     setRubricIndex: (idx: number) => void;
 }) {
+    // Scroll rubric into view when selected
+    const scrollRef = useRef<HTMLButtonElement>(null);
+    useEffect(() => {
+        if (selectedRubricIndex === index) {
+            scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [selectedRubricIndex, index]);
     return (
         <Button
             className={clsx(
@@ -27,6 +35,7 @@ export function ReviewRubricItem({
             variant="bordered"
             disableRipple
             onPress={() => setRubricIndex(index)}
+            ref={scrollRef}
         >
             <div className="text-primary-400 font-bold text-xl">
                 {item.category}

@@ -54,6 +54,13 @@ export function ReviewResponse({
             },
         },
         {
+            hotkey: "Shift+`",
+            callback: () => {
+                const l = rubric.items.length;
+                setRubricIndex((((selectedRubricIndex - 1) % l) + l) % l);
+            },
+        },
+        {
             hotkey: "Escape",
             callback: () => {
                 setRubricIndex(-1);
