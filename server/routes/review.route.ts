@@ -5,6 +5,7 @@ import {
     deleteReview,
     updateReview,
     patchReview,
+    updateRating,
 } from "controllers/review.controller";
 import { verifyRequest, verifySchema } from "controllers/verify.controller";
 import { Request, Response, Router } from "express";
@@ -16,11 +17,20 @@ import {
     VerifyRequestHeader,
     SuccessfulResponse,
 } from "common/verify";
-import { TReview } from "common/review";
-import { ReviewSchema, ReviewSchemaOptional } from "models/review.model";
+import { TRating, TReview } from "common/review";
+import {
+    RatingSchema,
+    ReviewSchema,
+    ReviewSchemaOptional,
+} from "models/review.model";
 
 // --- Request and Response Types ---
 type ReviewRequest = Request<{}, {}, { review_obj: TReview }>;
+type RatingRequest = Request<
+    { UUID: string; reviewer: string },
+    {},
+    { rating_obj: TRating }
+>;
 type ReviewResponse = Response<TReview | ErrorResponse>;
 type ReviewsResponse = Response<TReview[] | ErrorResponse>;
 
@@ -201,6 +211,7 @@ router.put(
         req.log.debug({
             msg: `Updating a review by uuid ${review_uuid}`,
             requesting_uuid: requesting_uuid,
+            ratings: review_obj.ratings,
         });
 
         // If the user is authorized, update a review's information
@@ -219,6 +230,62 @@ router.put(
                 return;
             }
             req.log.debug("Returned updated review.");
+            res.status(StatusCodes.OK).json(review);
+        } else {
+            req.log.warn({
+                msg: "Forbidden user attempted to update a review",
+                requesting_uuid: requesting_uuid,
+            });
+            // If the user is not authorized, provide a status error
+            res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
+        }
+    },
+);
+
+/**
+ * Add a specific rating for a review.
+ */
+router.patch(
+    "/:UUID/rating",
+    verifySchema(RatingSchema, "rating_obj"),
+    async (req: RatingRequest, res: ReviewResponse) => {
+        const headers = req.headers as VerifyRequestHeader;
+        const requesting_uuid: string = req.user?.uuid as string;
+        const rating_obj = req.body.rating_obj;
+        const review_uuid = req.params.UUID;
+
+        // If no requesting user uuid is provided, the call is not authorized
+        if (!requesting_uuid) {
+            req.log.warn(
+                "No requesting_uuid was provided while updating a review",
+            );
+            res.status(StatusCodes.UNAUTHORIZED).json(UNAUTHORIZED_ERROR);
+            return;
+        }
+
+        req.log.debug({
+            msg: `Adding rating to review by uuid ${review_uuid}`,
+            requesting_uuid: requesting_uuid,
+            rating: rating_obj,
+        });
+
+        // If the user is authorized, update a review's information
+        if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_REVIEW)) {
+            
+            const review = await updateRating(review_uuid, requesting_uuid, rating_obj);
+            if (!review) {
+                req.log.warn(
+                    `Could not update review with uuid ${review_uuid} ` +
+                        `because it was not found or not reviewer.`,
+                );
+                res.status(StatusCodes.NOT_FOUND).json({
+                    error:
+                        `Could not update review with uuid ` +
+                        `\`${review_uuid}\` because it was not found, ` + `or you are not a reviewer.`,
+                });
+                return;
+            }
+            req.log.debug("Successfully added rating.");
             res.status(StatusCodes.OK).json(review);
         } else {
             req.log.warn({

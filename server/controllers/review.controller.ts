@@ -1,5 +1,6 @@
 import { UUID } from "common/global";
-import { TReview } from "common/review";
+import { TRating, TReview } from "common/review";
+import { UserUUID } from "common/user";
 import { Review } from "models/review.model";
 import mongoose from "mongoose";
 
@@ -13,6 +14,16 @@ import mongoose from "mongoose";
 export async function getReviews(): Promise<TReview[]> {
     const Reviews = mongoose.model("Review", Review);
     return Reviews.find();
+}
+
+/**
+ * Get all reviews in the database
+ * @returns A promise to the list of TReview objects representing all
+ * reviews in the db
+ */
+export async function getReview(review_uuid: string) {
+    const Reviews = mongoose.model("Review", Review);
+    return Reviews.findOne({uuid: review_uuid}).lean();
 }
 
 /**
@@ -50,6 +61,38 @@ export async function patchReview(
         {
             // Updates the partial change
             $set: partial_review_obj,
+        },
+        { returnDocument: "after" },
+    );
+}
+
+export async function updateRating(
+    review_uuid: UUID,
+    reviewer_uuid: UserUUID,
+    rating_obj: TRating,
+) {
+    const review = await getReview(review_uuid);
+    if (!review) return null;
+    const reviewers = Object.keys(review.ratings);
+    if (!reviewers.includes(reviewer_uuid)) {
+        return false;
+    }
+    const Reviews = mongoose.model("Review", Review);
+    const key = `ratings.${reviewer_uuid}`;
+    // Update the given review with partial changes review_obj, searching by uuid
+    await Reviews.findOneAndUpdate(
+        { uuid: review_uuid },
+        {
+            // Remove any existing rating
+            $pull: { [key]: { response_uuid: rating_obj.response_uuid } },
+        },
+        { returnDocument: "after" },
+    );
+    return await Reviews.findOneAndUpdate(
+        { uuid: review_uuid },
+        {
+            // Add the new rating
+            $push: { [key]: rating_obj },
         },
         { returnDocument: "after" },
     );

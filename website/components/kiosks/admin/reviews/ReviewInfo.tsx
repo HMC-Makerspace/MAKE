@@ -1,6 +1,6 @@
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
-import { addToast, Button, Divider } from "@heroui/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { addToast, Button, Link } from "@heroui/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { TRating, TResponse, TReview, TRubricValue } from "common/review";
 import { TUser } from "common/user";
@@ -9,10 +9,20 @@ import { useState } from "react";
 import { ReviewResponse } from "./ReviewResponse";
 import { TConfig } from "common/config";
 import { useHotkeys } from "@tanstack/react-hotkeys";
+import { UUID } from "common/global";
 
-async function updateReview({ review }: { review: TReview }) {
-    return (await axios.put<TReview>("/api/v3/review", { review_obj: review }))
-        .data;
+async function submitRating({
+    review_uuid,
+    rating_obj,
+}: {
+    review_uuid: UUID;
+    rating_obj: TRating;
+}) {
+    return (
+        await axios.patch<TReview>(`/api/v3/review/${review_uuid}/rating`, {
+            rating_obj: rating_obj,
+        })
+    ).data;
 }
 
 export function ReviewInfo({
@@ -36,13 +46,15 @@ export function ReviewInfo({
           )
         : undefined;
     const ratings = isReviewer ? review.ratings[self.uuid] : undefined;
+    const [isSaved, setIsSaved] = useState(true);
 
     const mutation = useMutation({
-        mutationFn: updateReview,
+        mutationFn: submitRating,
         onSuccess: (result: TReview) => {
             queryClient.setQueryData(["review"], (old: TReview[]) => {
                 return old.map((u) => (u.uuid === result.uuid ? result : u));
             });
+            setIsSaved(true);
         },
         onError: (error) => {
             addToast({
@@ -62,6 +74,7 @@ export function ReviewInfo({
     );
 
     const updateRubricValue = (value: TRubricValue) => {
+        setIsSaved(false);
         if (!currentRating) return;
         const newValues = currentRating.rubric_values.filter(
             (r) => r.rubric_item !== value.rubric_item,
@@ -71,20 +84,8 @@ export function ReviewInfo({
         setCurrentRating(newRating);
     };
 
-    const updateRating = (rating: TRating) => {
-        if (
-            !self ||
-            !(self.uuid in review.ratings) ||
-            rating.rubric_values.length === 0
-        )
-            return;
-        const newRatings = review.ratings[self.uuid].filter(
-            (r) => r.response_uuid !== rating.response_uuid,
-        );
-        newRatings.push(rating);
-        const newReview = { ...review, ratings: { ...review.ratings } };
-        newReview.ratings[self.uuid] = newRatings;
-        mutation.mutate({ review: newReview });
+    const submitMutation = (rating: TRating) => {
+        mutation.mutate({ review_uuid: review.uuid, rating_obj: rating });
     };
 
     const [responseIndex, setResponseIndex] = useState(0);
@@ -99,7 +100,7 @@ export function ReviewInfo({
         )
             return;
         // Push rating to server
-        updateRating(currentRating);
+        if (!isSaved) submitMutation(currentRating);
         // Get next response
         const nextUp = requiredResponses[responseIndex + 1];
         // Check for existing rating
@@ -121,7 +122,7 @@ export function ReviewInfo({
         )
             return;
         // Push rating to server
-        updateRating(currentRating);
+        if (!isSaved) submitMutation(currentRating);
         // Get next response
         const prevUp = requiredResponses[responseIndex - 1];
         // Check for existing rating
@@ -234,9 +235,32 @@ export function ReviewInfo({
                         >
                             <ArrowLeftIcon className="size-6" strokeWidth={2} />
                         </Button>
+                        <div className="flex-1"></div>
+
                         <div className="text-lg font-bold text-default-800">
-                            Response {responseIndex + 1}
+                            Response {responseIndex + 1}{" "}
                         </div>
+                        <Link
+                            className={clsx(
+                                "flex-1  font-bold",
+                                "flex items-center h-full justify-end",
+                                !isSaved && !mutation.isPending
+                                    ? "text-danger-100/90 underline cursor-pointer"
+                                    : "text-default-400",
+                            )}
+                            isDisabled={isSaved || mutation.isPending}
+                            onPress={() =>
+                                currentRating &&
+                                !isSaved &&
+                                submitMutation(currentRating)
+                            }
+                        >
+                            {mutation.isPending
+                                ? "Saving..."
+                                : isSaved
+                                  ? "Saved"
+                                  : "Not Saved"}
+                        </Link>
                         <Button
                             isIconOnly
                             variant="flat"
