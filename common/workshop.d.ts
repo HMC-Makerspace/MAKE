@@ -6,7 +6,7 @@ import type {
     TRequiredCertificate,
 } from "./certification";
 import type { UserUUID } from "./user";
-import type { FileUUID } from "./file";
+import type { FileUUID, TDocument } from "./file";
 
 export type TWorkshopUserRecord = {
     user_uuid: UserUUID;
@@ -34,9 +34,11 @@ export type TWorkshopUserRecord = {
  * @property users_notified - a list of users who have been notified about the
  *      workshop
  * @property sign_in_list - a map of user UUIDs to the timestamp that they
- *     signed in to the workshop
+ *      signed in to the workshop
  * @property images - (optional) a list UUIDs of {@link TFile | image Files} to
  *      display for this workshop
+ * @property documents - (optional) a list of documents to workshop guides,
+ *      and other peripheral documents
  * @property available_to - (optional) a list of UserRole UUIDs that are allowed
  *      to RSVP to this workshop. If null, any user may RSVP.
  * @property visible_to - (optional) a list of UserRole UUIDs that are
@@ -60,6 +62,7 @@ export type TWorkshop = {
     sign_in_list: TWorkshopUserRecord[];
     reminder_emails_sent: number[];
     images?: FileUUID[];
+    documents?: TDocument[];
     available_to?: UserRoleUUID[] | null;
     visible_to?: UserRoleUUID[] | null;
     rsvp_disclaimer?: string;

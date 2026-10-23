@@ -61,12 +61,48 @@ export async function getWorkshopsVisibleToUser(
     const Workshops = mongoose.model("Workshop", Workshop);
     // Find all workshops that require no roles or which require roles that the
     // user has
-    return Workshops.find({
-        $or: [
-            { visible_to: null },
-            { visible_to: { $in: role_uuids } },
-        ],
-    });
+    return Workshops.aggregate([
+        {
+            $match: {
+                $or: [
+                    { visible_to: null },
+                    { visible_to: { $in: role_uuids } },
+                ],
+            },
+        },
+        {
+            $set: {
+                documents: {
+                    $filter: {
+                        input: "$documents",
+                        as: "docs",
+                        cond: {
+                            $or: [
+                                {
+                                    $not: {
+                                        $isArray: "$$docs.visible_to",
+                                    },
+                                },
+                                {
+                                    $gt: [
+                                        {
+                                            $size: {
+                                                $setIntersection: [
+                                                    "$$docs.visible_to",
+                                                    role_uuids,
+                                                ],
+                                            },
+                                        },
+                                        0,
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                },
+            },
+        },
+    ]);
 }
 
 /**
@@ -123,7 +159,6 @@ export async function deleteWorkshop(
 
     // Delete the workshop and get the document in one call
     return await Workshops.findOneAndDelete({ uuid: workshop_uuid });
-
 }
 
 /**
