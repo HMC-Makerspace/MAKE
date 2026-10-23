@@ -3,7 +3,15 @@ import AdminLayout from "../../layouts/AdminLayout";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { TConfig } from "common/config";
 import ScheduleBuffer from "../../components/kiosks/admin/schedule/SchedulesBuffer";
-import { Spinner, Selection, user, Button, useDisclosure, addToast } from "@heroui/react";
+import {
+    Spinner,
+    Selection,
+    user,
+    Button,
+    Input,
+    useDisclosure,
+    addToast,
+} from "@heroui/react";
 import { TUser, TUserRole, UserUUID } from "common/user";
 import React, { useEffect, useState } from "react";
 import { TArea } from "common/area";
@@ -14,12 +22,14 @@ import clsx from "clsx";
 import {
     AdjustmentsHorizontalIcon,
     EyeIcon,
+    MagnifyingGlassIcon as SearchIcon,
     PencilSquareIcon,
     PlusIcon,
 } from "@heroicons/react/24/outline";
 import axios from "axios";
 import RearrangeAreasModal from "../../components/kiosks/admin/areas/RearrangeAreasModal";
 import { useRoles } from "../../queries/useRoles";
+import Fuse from "fuse.js";
 
 const createEmptyArea = async () => {
     return (
@@ -74,6 +84,39 @@ export default function AreasKiosk() {
     });
 
     const [preview, setPreview] = useState(false);
+    const [search, setSearch] = React.useState<string>("");
+
+    const fuse = React.useMemo(
+        () =>
+            new Fuse(areas ?? [], {
+                keys: ["name", "description", "documents"],
+                getFn: (area, path) => {
+                    if (path.includes("documents")) {
+                        return (area.documents ?? []).flatMap((document) => [
+                            document.name,
+                            document.link,
+                        ]);
+                    }
+                    if (path.includes("description")) {
+                        return area.description ?? "";
+                    }
+                    if (path.includes("name")) {
+                        return area.name;
+                    }
+                    return "";
+                },
+                threshold: 0.3,
+            }),
+        [areas],
+    );
+
+    const filteredAreas = React.useMemo(
+        () =>
+            search
+                ? fuse.search(search).map((result) => result.item)
+                : (areas ?? []),
+        [areas, fuse, search],
+    );
 
     const {
         isOpen: rearrangeModal,
@@ -148,8 +191,20 @@ export default function AreasKiosk() {
                         </Button>
                     </div>
                 </div>
+                <Input
+                    isClearable
+                    className="w-full sm:max-w-[44%]"
+                    placeholder="Search..."
+                    startContent={<SearchIcon className="size-6" />}
+                    value={search}
+                    onClear={() => setSearch("")}
+                    onValueChange={setSearch}
+                    classNames={{
+                        input: "placeholder:text-foreground-200",
+                    }}
+                />
                 <div className="flex flex-col h-full gap-4 p-4 sm:p-0 overflow-auto">
-                    {areas.map((area) => (
+                    {filteredAreas.map((area) => (
                         <Area
                             key={area.uuid}
                             area={area}
