@@ -259,9 +259,12 @@ export default function WorkshopCard({
                             ?.filter((user) =>
                                 workshop.instructors.includes(user.uuid),
                             )
-                            .map((user) => {
-                                getWorkerDisplayName(user.name, config?.schedule.worker_name_display)
-                            })
+                            .map((user) =>
+                                getWorkerDisplayName(
+                                    user.name,
+                                    config?.schedule.worker_name_display,
+                                ),
+                            )
                             .join(", ")}
                     </div>
                 </CardHeader>

@@ -39,6 +39,11 @@ export default function RestockKiosk() {
         refetchOnWindowFocus: false,
     });
 
+    const { data: roles, isLoading: rolesLoading } = useQuery<TUserRole[]>({
+        queryKey: ["user", "role"],
+        refetchOnWindowFocus: false,
+    });
+
     const { data: certs, isLoading: certsLoading } = useQuery<TCertification[]>(
         {
             queryKey: ["certification"],
@@ -46,7 +51,13 @@ export default function RestockKiosk() {
         },
     );
 
-    const isLoading = inventoryLoading || areasLoading || usersLoading || restocksLoading || certsLoading;
+    const isLoading =
+        inventoryLoading ||
+        areasLoading ||
+        usersLoading ||
+        restocksLoading ||
+        certsLoading ||
+        rolesLoading;
 
 
     if (
@@ -55,11 +66,8 @@ export default function RestockKiosk() {
         !certs ||
         !areas ||
         !users ||
-        inventoryLoading ||
-        restocksLoading ||
-        certsLoading ||
-        areasLoading || 
-        usersLoading
+        !roles ||
+        isLoading
     ) {
         return (
             <div className="w-full h-screen flex justify-center py-auto">
@@ -76,11 +84,12 @@ export default function RestockKiosk() {
                 </div>
             ) : (
                 <RestockTable
-                    restocks={restocks ?? []}
-                    inventory={inventory ?? []}
-                    users={users ?? []}
-                    areas={areas ?? []}
-                    certs={certs ?? []}
+                    restocks={restocks}
+                    inventory={inventory}
+                    users={users}
+                    roles={roles}
+                    areas={areas}
+                    certs={certs}
                     isLoading={isLoading}
                 />
             )}
