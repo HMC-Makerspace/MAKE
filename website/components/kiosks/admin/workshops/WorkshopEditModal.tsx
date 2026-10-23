@@ -265,7 +265,7 @@ export default function WorkshopEditModal({
                     uuid: batchEdit ? crypto.randomUUID() : workshop.uuid, // never changes
                     title: (formData.get("title") as string) || workshop.title,
                     description:
-                        (formData.get("description") as string) ??
+                        (formData.get("description") as string) ||
                         workshop.description,
                     rsvp_disclaimer:
                         (formData.get("rsvp_disclaimer") as string) ??

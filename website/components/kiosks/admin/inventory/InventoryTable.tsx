@@ -434,6 +434,7 @@ export default function InventoryTable({
                                                       container: "",
                                                   }}
                                                   areas={areas}
+                                                  kit
                                               />
                                           ),
                                       );

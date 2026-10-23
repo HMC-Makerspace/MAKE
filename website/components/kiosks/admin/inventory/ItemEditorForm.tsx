@@ -28,14 +28,13 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { TCertification } from "common/certification";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, ArrowRightCircleIcon } from "@heroicons/react/24/outline";
 import {
     BookmarkIcon,
     UserIcon,
     GlobeAmericasIcon,
     BriefcaseIcon,
     EyeIcon,
-    MagnifyingGlassIcon,
 } from "@heroicons/react/24/solid";
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
@@ -668,7 +667,7 @@ export default function ItemEditorForm({
                                 onPress={() => setSelectedItem(new Set([item.parent_kit ?? ""]))}
                                 className="ml-2"
                             >
-                                <MagnifyingGlassIcon className="size-6" /> {/* haha eyecon */}
+                                <ArrowRightCircleIcon className="size-6" /> {/* haha eyecon */}
                             </Button>
                         </Tooltip>
                     </div>
@@ -800,31 +799,6 @@ export default function ItemEditorForm({
                             >
                                 <UserIcon className="size-7" />
                                 {mergedAcroles?.length ?? 0}
-                            </Button>
-                        </Tooltip>
-
-                        <Tooltip
-                            content={
-                                isNew
-                                    ? "Create the item first, before editing viewer roles."
-                                    : "Viewer Roles"
-                            }
-                            className="w-fit p-2"
-                            delay={500}
-                            closeDelay={150}
-                            isDisabled={isDisabled}
-                        >
-                            <Button
-                                // variant="flat"
-                                color="primary"
-                                onPress={() => !isNew && setVwrolesOpen(true)}
-                                // isIconOnly
-                                isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled px-2" : "px-2"}
-                                data-hover={!isNew && !isDisabled}
-                            >
-                                <EyeIcon className="size-7" />
-                                {mergedVwroles?.length ?? 0}
                             </Button>
                         </Tooltip>
 

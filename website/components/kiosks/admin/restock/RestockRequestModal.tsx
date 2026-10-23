@@ -125,9 +125,9 @@ export default function RestockRequestModal({
                 ? "Successfully created restock"
                 : requestingUser?.uuid &&
                     !(
-                        prevRestock.mailing_list.includes(
+                        prevRestock?.mailing_list.includes(
                             requestingUser.uuid,
-                        ) || prevRestock.requesting_user === requestingUser.uuid
+                        ) || prevRestock?.requesting_user === requestingUser.uuid
                     ) &&
                     data.mailing_list.includes(requestingUser.uuid)
                   ? "Successfully joined mailing list"

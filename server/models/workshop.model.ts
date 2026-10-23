@@ -54,7 +54,7 @@ export const Workshop = new mongoose.Schema<TWorkshop>(
 export const WorkshopSchema = Joi.object<TWorkshop>({
     uuid: Joi.string().required(),
     title: Joi.string().required(),
-    description: Joi.string().required(),
+    description: Joi.string().optional(),
     instructors: Joi.array().items(Joi.string()).required(),
     support_instructors: Joi.array().items(Joi.string()).optional(),
     capacity: Joi.number().optional(),
@@ -68,8 +68,8 @@ export const WorkshopSchema = Joi.object<TWorkshop>({
     reminder_emails_sent: Joi.array().items(Joi.number()).required(),
     sign_in_list: Joi.array().items(WorkshopUserRecordSchema).required(),
     images: Joi.array().items(Joi.string()).optional(),
-    available_to: Joi.array().items(Joi.string()).optional(),
-    visible_to: Joi.array().items(Joi.string()).optional(),
+    available_to: Joi.array().items(Joi.string()).allow(null).optional(),
+    visible_to: Joi.array().items(Joi.string()).allow(null).optional(),
     rsvp_disclaimer: Joi.string().allow(null, ""),
 });
 

@@ -7,7 +7,7 @@ import { UserRoleUUID, TUserRole } from "common/user";
 import { UUID } from "common/global";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
 import { EyeIcon, KeyIcon } from "@heroicons/react/24/outline";
-import UserRole from "../../../user/UserRole";
+import { UserRoleChip } from "../../../user/UserRoleChip";
 
 type Available = {
     uuid: UUID,
@@ -168,11 +168,11 @@ function RequiredRolesModal({
                                 <div className="grid grid-cols-2 w-full gap-y-3 justify-evenly p-4">
                                     {parentKitRoles?.map((role, i) => (
                                         <div className={`flex content-center justify-center col-span-${i < parentKitRoles?.length - parentKitRoles?.length % 2 ? 1 : 2}`}>
-                                            <UserRole
+                                            <UserRoleChip
                                                 key={role}
                                                 role_uuid={role}
                                                 role={roles.find((r) => r.uuid === role)}
-                                            ></UserRole>
+                                            ></UserRoleChip>
                                         </div>
                                     ))}
                                 </div>

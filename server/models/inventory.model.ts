@@ -70,6 +70,8 @@ export const InventoryItemSchema = Joi.object<TInventoryItem>({
         .optional(),
     available_to: Joi.array().items(Joi.string()).optional().allow(null),
     visible_to: Joi.array().items(Joi.string()).optional().allow(null),
+    kit_contents: Joi.array().items(Joi.string()).optional(),
+    parent_kit: Joi.string().optional().allow(""),
 });
 
 export const InventoryItemOptional = InventoryItemSchema.fork(

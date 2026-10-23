@@ -5,9 +5,11 @@ import { TInventoryItemLocation } from "common/inventory";
 export default function ItemLocationChip({
     location,
     areas,
+    kit,
 }: {
     location: TInventoryItemLocation;
     areas: TArea[];
+    kit?: boolean;
 }) {
     const base = clsx(
         "text-default-foreground py-1 sm:py-2 px-2 sm:px-3",
@@ -44,7 +46,7 @@ export default function ItemLocationChip({
                 <div
                     className={clsx(
                         base,
-                        "bg-default-300 rounded-b-xl",
+                        `${kit ? "bg-content2" : "bg-default-300"} rounded-b-xl`,
                         "sm:rounded-b-none sm:rounded-r-full",
                     )}
                 >
