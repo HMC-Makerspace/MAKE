@@ -38,6 +38,7 @@ import scheduleRoutes from "./routes/schedule.route";
 import userRoutes from "./routes/user.route";
 import workshopRoutes from "./routes/workshop.route";
 import emailRoutes from "routes/email.route";
+import reviewRoutes from "routes/review.route";
 import { getOAuthToken, getOAuthURL } from "controllers/email.controller";
 import {
     checkoutAvailabilityCron,
@@ -93,7 +94,7 @@ logger.debug("CORS setup");
 
 // Middleware
 app.use(
-    express.json(),
+    express.json({limit: '50mb'}),
     compression(),
     cookieParser(),
     loggerMiddleware({ logger: logger }),
@@ -182,6 +183,7 @@ app.use("/api/v3/schedule", scheduleRoutes);
 app.use("/api/v3/user", userRoutes);
 app.use("/api/v3/workshop", workshopRoutes);
 app.use("/api/v3/oauth", emailRoutes);
+app.use("/api/v3/review", reviewRoutes);
 
 app.get("/api/v3/test", (req, res) => {
     req.log.debug("Test log");

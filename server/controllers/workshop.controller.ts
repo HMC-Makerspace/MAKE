@@ -84,10 +84,8 @@ export async function getPublicWorkshops(): Promise<TPublicWorkshopData[]> {
     }).select([
         // Remove private information from workshop
         "-timestamp_public",
-        "-support_instructors",
-        "-rsvp_list",
-        "-users_notified",
         "-sign_in_list",
+        "-reminder_emails_sent"
     ]);
 }
 

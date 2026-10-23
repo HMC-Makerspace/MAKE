@@ -77,6 +77,11 @@ const ADMIN_PAGES: AdminPage[] = [
         href: "/admin/settings",
         scope: API_SCOPE.SETTINGS_KIOSK,
     },
+    {
+        name: "Reviews",
+        href: "/admin/reviews",
+        scope: API_SCOPE.REVIEWS_KIOSK,
+    },
 ];
 
 export default function AdminLayout({

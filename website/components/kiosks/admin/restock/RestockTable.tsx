@@ -44,7 +44,7 @@ import { convertTimestampToDate } from "../../../../utils";
 import { TArea } from "common/area";
 import { TCertification } from "common/certification";
 import { TInventoryItem } from "common/inventory";
-import { TUser, UserUUID } from "common/user";
+import { TUser, TUserRole, UserUUID } from "common/user";
 import axios, { AxiosError } from "axios";
 import clsx from "clsx";
 
@@ -251,6 +251,7 @@ export default function RestockTable({
     restocks,
     inventory,
     users,
+    roles,
     areas,
     certs,
     isLoading,
@@ -258,6 +259,7 @@ export default function RestockTable({
     restocks: TRestockRequest[];
     inventory: TInventoryItem[];
     users: TUser[];
+    roles: TUserRole[];
     areas: TArea[];
     certs: TCertification[];
     isLoading: boolean;
@@ -485,6 +487,12 @@ export default function RestockTable({
                                     startContent={
                                         <UserChip
                                             user_uuid={restock.requesting_user}
+                                            user={users.find(
+                                                (u) =>
+                                                    u.uuid ===
+                                                    restock.requesting_user,
+                                            )}
+                                            roles={roles}
                                             popoverPlacement="bottom"
                                             className="w-full justify-start"
                                         />
@@ -497,6 +505,12 @@ export default function RestockTable({
                                             <div className="pb-1 w-full flex flex-row items-center gap-2">
                                                 <UserChip
                                                     user_uuid={user_uuid}
+                                                    user={users.find(
+                                                        (u) =>
+                                                            u.uuid ===
+                                                            user_uuid,
+                                                    )}
+                                                    roles={roles}
                                                     popoverPlacement="bottom"
                                                     className="justify-start flex-grow"
                                                 />

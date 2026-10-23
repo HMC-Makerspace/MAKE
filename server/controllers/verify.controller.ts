@@ -41,17 +41,21 @@ export async function verifyRequest(
  * @returns A promise to a boolean, true if the user has all required scopes
  */
 export async function verifyCompoundRequest(
-  user_uuid: UserUUID,
-  ...scope_groups: API_SCOPE[][]
+    user_uuid: UserUUID,
+    ...scope_groups: (API_SCOPE | false)[][]
 ): Promise<boolean> {
-  // Get a list of the user's scopes
-  const scopes = await getUserScopes(user_uuid);
-  // Check that the user's scopes list includes all required scopes,
-  // or that the user has the ADMIN scope
-  return (
-    scopes.includes(API_SCOPE.ADMIN) ||
-    scope_groups.some((group) => group.every((scope) => scopes.includes(scope)))
-  );
+    // Get a list of the user's scopes
+    const scopes = await getUserScopes(user_uuid);
+    // Check that the user's scopes list includes all required scopes,
+    // or that the user has the ADMIN scope
+    return (
+        scopes.includes(API_SCOPE.ADMIN) ||
+        scope_groups.some((group) =>
+            group
+                .filter((scope) => scope !== false)
+                .every((scope) => scopes.includes(scope)),
+        )
+    );
 }
 
 export function verifySchema<S, R extends Request>(

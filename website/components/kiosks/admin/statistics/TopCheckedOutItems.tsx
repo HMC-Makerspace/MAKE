@@ -63,14 +63,14 @@ export default function TopCheckedOutItems({
                 count,
             }))
             .sort((a, b) => b.count - a.count);
-    }, [checkouts, inventoryMap]);
+    }, [areaMap, checkouts, inventoryMap, machineMap]);
 
     const data = sortedData.slice(0, topN);
 
     if (sortedData.length === 0) {
         return (
             <div className="bg-default-100 p-6 rounded-lg">
-                <h2 className="text-xl font-bold mb-4">
+                <h2 className="text-xl font-bold text-foreground-900 mb-4">
                     Top Checked Out Items
                 </h2>
                 <p className="text-sm text-default-500">
@@ -82,36 +82,51 @@ export default function TopCheckedOutItems({
 
     return (
         <div className="bg-default-100 p-6 rounded-lg">
-            <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold mb-2">
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-foreground-900">
                     Top Checked Out Items
                 </h2>
-                <NumberInput
-                    label="Count:"
-                    labelPlacement="outside-left"
-                    value={topN}
-                    onValueChange={setTopN}
-                    variant="bordered"
-                    className="w-fit px-3 py-1 rounded-md text-sm"
-                />
+                <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-sm text-default-700">Top</span>
+                    <NumberInput
+                        aria-label="Number of top checked-out items"
+                        min={1}
+                        max={20}
+                        value={topN}
+                        onValueChange={(value) =>
+                            setTopN(Math.min(20, Math.max(1, value)))
+                        }
+                        variant="bordered"
+                        size="sm"
+                        className="w-20"
+                        classNames={{
+                            inputWrapper: "h-8 min-h-0",
+                            input: "text-sm",
+                        }}
+                    />
+                </div>
             </div>
             <p className="text-sm text-default-500 mb-3">
-                Top {topN} most checked out items.
+                Showing the top {topN} checked-out items.
             </p>
-            <ResponsiveContainer width="100%" height={450}>
+            <ResponsiveContainer
+                width="100%"
+                height={Math.max(450, data.length * 32 + 40)}
+            >
                 <BarChart
                     data={data}
-                    margin={{ top: 20, right: 30, left: 5, bottom: 20 }}
+                    margin={{ top: 20, right: 30, left: -30, bottom: 20 }}
+                    layout="vertical"
                 >
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
-                    <XAxis
+                    <XAxis type="number" allowDecimals={false} />
+                    <YAxis
                         dataKey="name"
-                        angle={-10}
-                        textAnchor="end"
+                        type="category"
+                        width={140}
                         interval={0}
                         tick={{ fontSize: 11 }}
                     />
-                    <YAxis />
                     <Tooltip
                         formatter={(value: any) => [
                             `${value} checkouts`,

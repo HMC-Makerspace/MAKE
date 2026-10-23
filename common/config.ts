@@ -19,6 +19,12 @@ export type TCheckoutConfig = {
     notification_interval_sec?: number;
 };
 
+export enum WORKER_NAME_DISPLAY {
+    FULL_NAME = 0,
+    FIRST_NAME_ONLY = 1,
+    FIRST_NAME_LAST_INITIAL = 2,
+}
+
 export type TFileConfig = {
     /**
      * Maximum allowed individual file upload size (in bytes).
@@ -67,7 +73,7 @@ export type TScheduleConfig = {
      * Whether to only show worker first names (before first space) on
      * the public schedule page.
      */
-    first_names_only?: boolean;
+    worker_name_display?: WORKER_NAME_DISPLAY;
 
     /**
      * The IANA timezone to use for all date objects

@@ -42,7 +42,7 @@ const ScheduleConfig = new mongoose.Schema<TScheduleConfig>(
         first_display_day: { type: Number, required: false },
         worker_roles: { type: [String], required: true },
         increment_sec: { type: Number, required: true },
-        first_names_only: { type: Boolean, required: false },
+        worker_name_display: { type: Number, required: false },
         timezone: { type: String, required: true },
         locale: { type: String, required: true },
     },
@@ -58,7 +58,7 @@ const ScheduleConfigSchema = Joi.object<TScheduleConfig>({
         Joi.string()
     ).required(),
     increment_sec: Joi.number().required(),
-    first_names_only: Joi.boolean().optional(),
+    worker_name_display: Joi.number().optional(),
     timezone: Joi.string().required(),
     locale: Joi.string().required()
 });

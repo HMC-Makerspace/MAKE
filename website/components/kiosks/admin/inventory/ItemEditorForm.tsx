@@ -33,6 +33,8 @@ import {
     BookmarkIcon,
     UserIcon,
     GlobeAmericasIcon,
+    ArrowPathRoundedSquareIcon,
+    PlusIcon,
     BriefcaseIcon,
     EyeIcon,
 } from "@heroicons/react/24/solid";
@@ -44,6 +46,8 @@ import { motion } from "motion/react";
 import ItemQuantityIcon from "./ItemQuantityIcon";
 import ItemLocationModal from "./ItemLocationModal";
 import { TArea } from "common/area";
+import InventoryAuditModal from "./InventoryAuditModal";
+import InventoryAuditLogsModal from "./InventoryAuditLogsModal";
 import KitEditorModal from "./KitEditorModal";
 import { mergeAuthRoles, mergeRequiredCerts } from "../../../../utils";
 
@@ -190,6 +194,9 @@ export default function ItemEditorForm({
                 visible_to: item.visible_to || [],
                 quantity: quantity,
                 available: available,
+                audit_logs: [{
+                    timestamp: Date.now() / 1000
+                }, ...item.audit_logs ?? []]
             };
 
             // Reset the mutation (clears any previous errors)
@@ -260,6 +267,8 @@ export default function ItemEditorForm({
     const [vwrolesOpen, setVwrolesOpen] = React.useState<boolean>(false); // whether viewer roles edit modal is open
     const [locationEditorOpen, setLocationEditorOpen] =
         React.useState<boolean>(false); // whether location editor modal is open
+    const [invAuditOpen, setInvAuditOpen] = React.useState<boolean>(false); // whether new inventory audit modal is open
+    const [invAuditLogsOpen, setInvAuditLogsOpen] = React.useState<boolean>(false); // whether inventory audit logs modal is open
     const [kitEditorOpen, setKitEditorOpen] = React.useState<boolean>(false); // whether kit content edit modal is open
     const [rolesOpen, setRolesOpen] = React.useState<boolean>(false); // whether gen auth role edit modal is open
 
@@ -269,6 +278,13 @@ export default function ItemEditorForm({
     const locationEditorMutation = patchMutation(() =>
         setLocationEditorOpen(false),
     );
+    const inventoryAuditMutation = patchMutation(() => {
+        setInvAuditOpen(false)
+        addToast({
+            title: "Successfully audited item",
+            color: "success",
+        });
+    });
     const kitEditorMutation = patchMutation(() => setKitEditorOpen(false));
 
     const [isNumericQuantity, setQtype] = React.useState<boolean>(
@@ -664,7 +680,11 @@ export default function ItemEditorForm({
                                 color="primary"
                                 variant="flat"
                                 isDisabled={isDisabled || !item.parent_kit}
-                                onPress={() => setSelectedItem(new Set([item.parent_kit ?? ""]))}
+                                onPress={() =>
+                                    setSelectedItem(
+                                        new Set([item.parent_kit ?? ""]),
+                                    )
+                                }
                                 className="ml-2"
                             >
                                 <ArrowRightCircleIcon className="size-6" /> {/* haha eyecon */}
@@ -715,6 +735,26 @@ export default function ItemEditorForm({
                             ]),
                         }}
                     />
+                    <div className="w-full pb-2 rounded-t-lg flex flex-row gap-2">
+                        <Button
+                            size="md"
+                            startContent={<PlusIcon className="size-5" />}
+                            color="success"
+                            isDisabled={isDisabled || isNew}
+                            className="flex-1"
+                            onPress={() => !isNew && setInvAuditOpen(true)}
+                        >
+                            New Audit
+                        </Button>
+                        <Button
+                            size="md"
+                            isDisabled={isDisabled || isNew}
+                            isIconOnly
+                            onPress={() => !isNew && setInvAuditLogsOpen(true)}
+                        >
+                            <ArrowPathRoundedSquareIcon className="size-5" />
+                        </Button>
+                    </div>
                 </div>
                 {/* <Divider className="hidden sm:block h-[1px] bg-default-400" /> */}
                 <div className="px-4 w-full pt-4 pb-2 rounded-t-lg bg-default-50">
@@ -744,7 +784,9 @@ export default function ItemEditorForm({
                                 }
                                 // isIconOnly
                                 isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled px-2" : "px-2"}
+                                className={
+                                    isNew ? "opacity-disabled px-2" : "px-2"
+                                }
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <GlobeAmericasIcon className="size-7" />
@@ -769,7 +811,9 @@ export default function ItemEditorForm({
                                 onPress={() => !isNew && setReqcertsOpen(true)}
                                 // isIconOnly
                                 isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled px-2" : "px-2"}
+                                className={
+                                    isNew ? "opacity-disabled px-2" : "px-2"
+                                }
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <BookmarkIcon className="size-7" />
@@ -794,7 +838,9 @@ export default function ItemEditorForm({
                                 onPress={() => !isNew && setRolesOpen(true)}
                                 // isIconOnly
                                 isDisabled={isDisabled}
-                                className={isNew ? "opacity-disabled px-2" : "px-2"}
+                                className={
+                                    isNew ? "opacity-disabled px-2" : "px-2"
+                                }
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <UserIcon className="size-7" />
@@ -817,10 +863,14 @@ export default function ItemEditorForm({
                                 <Button
                                     // variant="flat"
                                     color="primary"
-                                    onPress={() => !isNew && setKitEditorOpen(true)}
+                                    onPress={() =>
+                                        !isNew && setKitEditorOpen(true)
+                                    }
                                     // isIconOnly
                                     isDisabled={isDisabled}
-                                    className={isNew ? "opacity-disabled px-2" : "px-2"}
+                                    className={
+                                        isNew ? "opacity-disabled px-2" : "px-2"
+                                    }
                                     data-hover={!isNew && !isDisabled}
                                 >
                                     <BriefcaseIcon className="size-7" />
@@ -900,6 +950,19 @@ export default function ItemEditorForm({
                 isOpen={locationEditorOpen}
                 onOpenChange={setLocationEditorOpen}
                 patchMutation={locationEditorMutation}
+            />
+            <InventoryAuditModal
+                key={"invaudit-" + item.uuid}
+                item={item}
+                isOpen={invAuditOpen}
+                onOpenChange={setInvAuditOpen}
+                patchMutation={inventoryAuditMutation}
+            />
+            <InventoryAuditLogsModal
+                key={"invauditlogs-" + item.uuid}
+                item={item}
+                isOpen={invAuditLogsOpen}
+                onOpenChange={setInvAuditLogsOpen}
             />
             <KitEditorModal
                 key={"kitedit-" + item.uuid}

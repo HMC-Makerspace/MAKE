@@ -69,6 +69,65 @@ export async function getStagingSchedule() {
 }
 
 /**
+ * Get the simplified public version of the current schedule
+ * @returns A promise to the TPublicScheduleData object representing the
+ *      current schedule, or null if no schedule is currently active
+ *      Simplified by merging any back to back shifts and removing 
+ *      any assignee information.
+ *      The simplified public schedule data only includes the shift data for the current
+ *      schedule, with the shift UUID and history removed.
+ */
+export async function getSimplifiedPublicSchedule(): Promise<TPublicScheduleData | null> {
+    const current_schedule = await getActiveSchedule();
+    // If there is no current schedule, there can be no current public schedule
+    if (current_schedule === null) {
+        return null;
+    }
+
+    // Sort the shifts by day and time
+    const sortedShifts = current_schedule.shifts
+        .sort((a, b) => a.day - b.day || a.sec_start - b.sec_start,
+    );
+
+    // Merge any back to back shifts and remove assignees
+    const mergedShifts: TShift[] = [];
+    for (const shift of sortedShifts) {
+        const last = mergedShifts[mergedShifts.length - 1];
+
+        if (
+            last &&
+            last.day === shift.day &&
+            last.sec_end === shift.sec_start
+        ) {
+            mergedShifts[mergedShifts.length - 1] = {
+                ...last,
+                sec_end: shift.sec_end,
+            };
+        } else {
+            mergedShifts.push({
+                uuid: shift.uuid,
+                day: shift.day,
+                sec_start: shift.sec_start,
+                sec_end: shift.sec_end,
+                history: shift.history,
+                assignee: "",
+            });
+        }
+    }
+
+    // Return the simplified, public version of each shift, which removes the UUID and history
+    return {
+        uuid: current_schedule.uuid,
+        shifts: mergedShifts
+            .map(getCurrentPublicShift)
+            // Remove dropped shifts
+            .filter((shift) => shift !== null),
+        daily_open_time: current_schedule.daily_open_time,
+        daily_close_time: current_schedule.daily_close_time,
+    };
+}
+
+/**
  * Get the public version of the current schedule
  * @returns A promise to the TPublicScheduleData object representing the
  *      current schedule, or null if no schedule is currently active

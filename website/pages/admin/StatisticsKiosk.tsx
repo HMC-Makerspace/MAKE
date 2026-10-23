@@ -8,8 +8,8 @@ import { TRestockRequest } from "../../../common/restock";
 import { Spinner } from "@heroui/react";
 import { TArea } from "common/area";
 import { TCertification } from "common/certification";
-import { useRoles } from "../../queries/useRoles";
 import { TMachine } from "common/machine";
+import { useRoles } from "../../queries/useRoles";
 
 //the kiosk's job is just to fetch the data needed from the server using useQuery
 //and display a loading circle when any of the data needed isn't ready

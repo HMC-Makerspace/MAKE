@@ -11,7 +11,8 @@ import {
     NumberInput,
     addToast,
     Select,
-    SelectItem
+    SelectItem,
+    Checkbox,
 } from "@heroui/react";
 import {
     TRestockRequest,
@@ -24,27 +25,35 @@ import { TUser } from "common/user";
 import axios from "axios";
 import clsx from "clsx";
 import React, { useState } from "react";
+import { XCircleIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
 const updateRestocks = async ({
     restock,
     isNew,
+    associated_uuid,
 }: {
     restock: TRestockRequest;
     isNew: boolean;
+    associated_uuid: string | undefined;
 }) => {
     if (isNew) {
         // Creating new restock request
         return (
             await axios.post<TRestockRequest>("/api/v3/restock/", {
                 request_obj: restock,
+                associated_uuid,
             })
         ).data;
     } else {
-        // Add the user to the restock request's mailing list
+        // Add the user to the restock request's mailing list or update reason
         return (
-            await axios.put<TRestockRequest>(`/api/v3/restock/`, {
-                request_obj: restock,
-            })
+            await axios.put<TRestockRequest>(
+                `/api/v3/restock/`,
+                {
+                    request_obj: restock,
+                    associated_uuid
+                },
+            )
         ).data;
     }
 };
@@ -56,6 +65,7 @@ export default function RestockRequestModal({
     editIsOpen,
     editOnOpenChange,
     inventory,
+    type,
 }: {
     requestingUser?: TUser;
     restocks: TRestockRequest[];
@@ -63,7 +73,9 @@ export default function RestockRequestModal({
     editIsOpen: boolean;
     editOnOpenChange: () => void;
     inventory: TInventoryItem[];
+    type: "create_self" | "create_other" | "both";
 }) {
+
     const restockOptions = [restockSelected.uuid, ...(restockSelected.kit_contents ?? [])];
 
     const prevRestocks = new Map<InventoryItemUUID, TRestockRequest | undefined>();
@@ -105,6 +117,29 @@ export default function RestockRequestModal({
         setUserCanRequest(canReq(updatedIsNew, newreq));
     }
 
+    const [forOtherUser, setForOtherUser] = useState(false);
+    const [otherEmail, setOtherEmail] = useState<string>();
+
+    // Whether the user is able to be added to the restock's mailing list
+    // (e.g. they are not already on the list)
+    const userCanJoinMailingList =
+        type !== "create_other" && prevRestock && requestingUser
+            ? !(
+                  prevRestock.mailing_list.includes(requestingUser.uuid) ||
+                  prevRestock.requesting_user == requestingUser.uuid
+              )
+            : true;
+    // Whether the user is able to add other people to the restock's mailing list
+    const userCanRequestOther = type === "create_other";
+
+    const { data: otherUser, isPending: otherUserLoading } = useQuery<TUser>({
+        queryKey: ["user", "by", "email", otherEmail],
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        retry: 1,
+        enabled: !!otherEmail,
+    });
+
     const queryClient = useQueryClient();
     const mutation = useMutation({
         mutationFn: updateRestocks,
@@ -136,6 +171,8 @@ export default function RestockRequestModal({
                 title,
                 color: "success",
             });
+            setForOtherUser(false);
+            setOtherEmail(undefined);
             editOnOpenChange();
         },
         onError: (error) => {
@@ -151,38 +188,48 @@ export default function RestockRequestModal({
             // Prevent default browser page refresh.
             e.preventDefault();
 
-            if (!requestingUser) {
+            if (!requestingUser || (otherEmail && otherUserLoading)) {
                 return;
             }
 
             // Get form data as an object.
             const data = new FormData(e.currentTarget);
+            // Reason can be added any time
+            const reason = data.get("reason_restock") as string;
 
-            const restock: TRestockRequest = isNew || !prevRestock
-                ? {
+            const restock: TRestockRequest | undefined = !isNew && prevRestock
+                ? { ...prevRestock }
+                : {
                       uuid: crypto.randomUUID(),
                       item_uuid: data.get("req_item") as InventoryItemUUID ?? restockSelected.uuid,
                       current_status: RESTOCK_REQUEST_STATUS.PENDING_APPROVAL,
                       quantity_requested: Number(data.get("req_quantity")),
-                      reason: data.get("reason_restock") as string,
-                      mailing_list: [],
-                      requesting_user: requestingUser.uuid,
+                      reason: reason,
+                      // Add other user to email list if necessary
+                      mailing_list:
+                          type !== "create_other" && !!otherUser
+                              ? [otherUser.uuid]
+                              : [],
+                      requesting_user:
+                          type === "create_other"
+                              ? (otherUser?.uuid ?? requestingUser.uuid)
+                              : requestingUser.uuid,
                       status_logs: [],
-                  }
-                : // User can be added to mailing list only if they are not already on it
-                  !prevRestock.mailing_list.includes(requestingUser.uuid) &&
-                    prevRestock.requesting_user !== requestingUser.uuid
-                  ? {
-                        ...prevRestock,
-                        mailing_list: [
-                            ...prevRestock.mailing_list,
-                            requestingUser.uuid,
-                        ],
-                    }
-                  : prevRestock;
-            // Reason can be added any time
-            const reason = data.get("reason_restock") as string;
+                  };
 
+            // Add self or other user if not already on mailing list
+            const relevant_uuid = forOtherUser || type === "create_other"
+                ? otherUser?.uuid
+                : requestingUser.uuid;
+            if (
+                relevant_uuid &&
+                !restock.mailing_list.includes(relevant_uuid) &&
+                restock.requesting_user !== relevant_uuid
+            ) {
+                restock.mailing_list.push(relevant_uuid);
+            }
+
+            // Add the new reason or an empty reason if the request is new
             if (reason || isNew) {
                 restock.status_logs.push({
                     timestamp: Date.now() / 1000,
@@ -193,23 +240,41 @@ export default function RestockRequestModal({
             // Reset the mutation (clears any previous errors)
             mutation.reset();
             // Run the mutation
-            mutation.mutate({ restock: restock, isNew: isNew ?? true });
+            mutation.mutate({
+                restock: restock,
+                isNew: isNew,
+                associated_uuid: otherUser?.uuid,
+            });
         },
-        [isNew, prevRestock, restockSelected.uuid, requestingUser?.uuid],
+        [
+            isNew,
+            prevRestock,
+            restockSelected.uuid,
+            requestingUser?.uuid,
+            otherUser,
+            otherEmail,
+            otherUserLoading,
+        ],
     );
 
     return (
         <Modal
             isOpen={editIsOpen}
             placement="top-center"
-            onOpenChange={editOnOpenChange}
+            onOpenChange={() => {
+                editOnOpenChange();
+                setForOtherUser(false);
+                setOtherEmail(undefined);
+            }}
             className="flex flex-col justify-center"
         >
             <ModalContent className="flex flex-col justify-center">
                 {(onClose) =>
                     restockSelected ? (
                         <div className="w-full overflow-auto">
-                            <ModalHeader>Restock Request Form</ModalHeader>
+                            <ModalHeader className="pb-2">
+                                Restock Request Form
+                            </ModalHeader>
                             <ModalBody>
                                 <Form onSubmit={onSubmit}>
                                     <div className="w-full flex flex-col gap-2">
@@ -259,25 +324,14 @@ export default function RestockRequestModal({
                                                 size="md"
                                             />)}
                                         </div>
-                                        {(isNew || !prevRestock) && (<Textarea
-                                            label="Reason for Restock"
-                                            name="reason_restock"
-                                            placeholder="Enter reason"
-                                            variant="faded"
-                                            color="primary"
-                                            classNames={{
-                                                input: clsx([
-                                                    "placeholder:text-default-500",
-                                                    "placeholder:italic",
-                                                    "text-default-700",
-                                                ]),
-                                                base: "w-full",
-                                            }}
-                                        />)}
                                     </div>
 
                                     {!isNew && prevRestock && (
-                                        <div>
+                                    <div className="w-full overflow-auto">
+                                        {userCanJoinMailingList && (
+                                            /* LEFT OFF HERE, NEED TO DO OTHER AND BOTH
+                                            JOINING AND OTHERING
+                                            */
                                             <p className="pb-2">
                                                 There is already a restock
                                                 request for this item. If
@@ -286,7 +340,7 @@ export default function RestockRequestModal({
                                                 restocked, please select
                                                 "Join Mailing List" below.
                                             </p>
-
+                                        )}
                                             <div className="flex flex-col gap-2">
                                                 <div className="flex flex-row gap-2 items-center ">
                                                     <h3 className="font-bold">
@@ -319,37 +373,99 @@ export default function RestockRequestModal({
                                                 additional comment, please enter
                                                 it in the textbox below.
                                             </p>
-                                            <Textarea
-                                                label="Updated Reason"
-                                                name="reason_restock"
-                                                placeholder="Enter reason"
-                                                variant="faded"
-                                                color="primary"
-                                                required={!userCanRequest}
-                                                isRequired={!userCanRequest}
-                                                classNames={{
-                                                    input: clsx([
-                                                        "placeholder:text-default-500",
-                                                        "placeholder:italic",
-                                                        "text-default-700",
-                                                    ]),
-                                                    base: "w-full",
-                                                }}
-                                            />
                                         </div>
                                     )}
-                                    
+                                    {type === "both" && (
+                                        <div className="flex flex-row gap-1 align-middle">
+                                            <Checkbox
+                                                color="primary"
+                                                checked={forOtherUser}
+                                                onValueChange={setForOtherUser}
+                                            />
+                                            <span className="text-sm">
+                                                For another user?
+                                            </span>
+                                        </div>
+                                    )}
+                                    {(type === "create_other" ||
+                                        (type === "both" && forOtherUser)) && (
+                                        <Input
+                                            name="user_email"
+                                            label="User Email"
+                                            placeholder="Enter email"
+                                            variant="faded"
+                                            color="primary"
+                                            size="md"
+                                            isRequired
+                                            classNames={{
+                                                input: clsx([
+                                                    "placeholder:text-default-500",
+                                                    "placeholder:italic",
+                                                    "text-default-700",
+                                                ]),
+                                            }}
+                                            onBlur={(e) =>
+                                                setOtherEmail(
+                                                    e.currentTarget.value ||
+                                                        undefined,
+                                                )
+                                            }
+                                            validate={(value) =>
+                                                value === ""
+                                                    ? "Please fill out this field"
+                                                    : otherEmail && !otherUser
+                                                      ? "No user found with given email."
+                                                      : null
+                                            }
+                                            endContent={
+                                                !otherEmail ||
+                                                otherUserLoading ? undefined : !otherUser ? (
+                                                    <XCircleIcon className="text-danger-300 size-5" />
+                                                ) : (
+                                                    <CheckCircleIcon className="text-success-300 size-5" />
+                                                )
+                                            }
+                                        />
+                                    )}
+                                    <Textarea
+                                        label={
+                                            isNew
+                                                ? "Reason for Restock"
+                                                : "Updated Reason"
+                                        }
+                                        name="reason_restock"
+                                        placeholder="Enter reason"
+                                        variant="faded"
+                                        color="primary"
+                                        classNames={{
+                                            input: clsx([
+                                                "placeholder:text-default-500",
+                                                "placeholder:italic",
+                                                "text-default-700",
+                                            ]),
+                                            base: "w-full",
+                                        }}
+                                        required={
+                                            !isNew && !userCanJoinMailingList
+                                        }
+                                        isRequired={
+                                            !isNew && !userCanJoinMailingList
+                                        }
+                                    />
                                     <ModalFooter className="w-full justify-between">
                                         <Button
                                             variant="shadow"
                                             color="primary"
                                             type="submit"
-                                            // isDisabled={!userCanRequest && }
+                                            isDisabled={
+                                                !!otherEmail && otherUserLoading
+                                            }
                                             isLoading={mutation.isPending}
                                         >
                                             {isNew
                                                 ? "Submit Request"
-                                                : userCanRequest
+                                                : userCanJoinMailingList &&
+                                                    !forOtherUser
                                                   ? "Join Mailing List"
                                                   : "Update Request"}
                                         </Button>

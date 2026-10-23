@@ -292,7 +292,7 @@ export default function QuickTransferPage() {
                             name="college_id"
                             className="pt-1 sm:pt-0"
                             classNames={{
-                                input: "text-large sm:text-base",
+                                input: "text-[16px] sm:text-base",
                                 label: "pb-1.5 sm:pb-0.5",
                             }}
                             onBlur={async (blurEvent) => {

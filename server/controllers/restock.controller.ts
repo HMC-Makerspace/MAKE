@@ -173,7 +173,7 @@ export async function updateRestockRequestStatuses(
 /**
  * Update the status of a restock request
  * @param request_uuid The UUID of the request to update
- * @param new_person: The new person to add to the mailing list
+ * @param new_list: The new mailing list
  * @returns The updated restock request object, or null if the request doesn't exist
  */
 export async function updateMailingList(

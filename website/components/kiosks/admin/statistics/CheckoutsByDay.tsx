@@ -44,7 +44,7 @@ export default function CheckoutsByDay({
     if (data.length === 0) {
         return (
             <div className="bg-default-100 p-6 rounded-lg">
-                <h2 className="text-xl font-bold mb-4">
+                <h2 className="text-xl font-bold text-foreground-900 mb-4">
                     Checkouts by Day of Week
                 </h2>
                 <p className="text-sm text-default-500">
@@ -56,14 +56,26 @@ export default function CheckoutsByDay({
 
     return (
         <div className="flex flex-col bg-default-100 p-6 rounded-lg justify-between">
-            <h2 className="text-xl font-bold mb-4">Checkouts by Day of Week</h2>
+            <h2 className="text-xl font-bold text-foreground-900 mb-4">
+                Checkouts by Day of Week
+            </h2>
+            <p className="text-sm text-default-500 mb-3">
+                Checkout activity grouped by the day of the week.
+            </p>
             <ResponsiveContainer width="100%" height={450}>
                 <BarChart
                     data={data}
-                    margin={{ top: 20, right: 30, left: 5, bottom: 20 }}
+                    margin={{ top: 20, right: 30, left: -10, bottom: 10 }}
                 >
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
-                    <XAxis dataKey="day" />
+                    <XAxis
+                        dataKey="day"
+                        interval={0}
+                        angle={0}
+                        textAnchor="middle"
+                        tick={{ fontSize: 11 }}
+                        height={30}
+                    />
                     <YAxis allowDecimals={false} />
                     <Tooltip
                         formatter={(value: any) => [
@@ -71,10 +83,7 @@ export default function CheckoutsByDay({
                             "Count",
                         ]}
                     />
-                    <Bar
-                        dataKey="count"
-                        fill="hsl(var(--heroui-secondary-400))"
-                    />
+                    <Bar dataKey="count" fill="hsl(var(--heroui-primary))" />
                 </BarChart>
             </ResponsiveContainer>
         </div>

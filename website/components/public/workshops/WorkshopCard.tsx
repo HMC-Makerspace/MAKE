@@ -10,14 +10,14 @@ import {
 } from "@heroui/react";
 import clsx from "clsx";
 import { FILE_RESOURCE_TYPE } from "../../../../common/file";
-import { TWorkshop } from "common/workshop";
+import { TPublicWorkshopData, TWorkshop } from "common/workshop";
 import ImageCarousel from "../../ImageCarousel";
 import CertificationTag from "../../kiosks/admin/certifications/CertificationTag";
 import { CalendarBoldIcon } from "@heroui/shared-icons";
 import { TUser } from "common/user";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { timestampToZonedDateTime, verifyScopes } from "../../../utils";
+import { timestampToZonedDateTime, verifyScopes, getWorkerDisplayName } from "../../../utils";
 import { TConfig } from "common/config";
 import { DateFormatter } from "@internationalized/date";
 import { TCertification } from "common/certification";
@@ -72,7 +72,7 @@ export default function WorkshopCard({
             const onWaitList =
                 data.capacity &&
                 data.capacity > 0 &&
-                data.rsvp_list.findIndex((rs) => rs.user_uuid === self?.uuid) >=
+                data.rsvp_list?.findIndex((rs) => rs.user_uuid === self?.uuid) >=
                     data.capacity;
             addToast({
                 title: hasCancelled
@@ -260,9 +260,10 @@ export default function WorkshopCard({
                                 workshop.instructors.includes(user.uuid),
                             )
                             .map((user) =>
-                                config?.schedule.first_names_only
-                                    ? user.name.split(" ")[0]
-                                    : user.name,
+                                getWorkerDisplayName(
+                                    user.name,
+                                    config?.schedule.worker_name_display,
+                                ),
                             )
                             .join(", ")}
                     </div>
