@@ -82,8 +82,6 @@ export default function WorkshopPage() {
         gap: 16,
     });
 
-    console.log(workshopVirtualizer.getTotalSize())
-
     return (
         <DefaultLayout className="p-8" pageHref="/workshops">
             <div
