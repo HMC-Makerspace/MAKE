@@ -11,7 +11,9 @@ import {
 import { TCertification } from "common/certification.ts";
 import { TConfig } from "common/config.js";
 import WorkshopCard from "../components/public/workshops/WorkshopCard.tsx";
-import { useScroll } from "../components/UseScroll.tsx";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { useMediaQuery } from "../utils.tsx"
+import React from "react";
 
 export default function WorkshopPage() {
     const [selected, setSelected] = useState<Key>("current-workshops");
@@ -66,8 +68,21 @@ export default function WorkshopPage() {
         filteredWorkshops = filteredWorkshops?.reverse();
     }
 
-    const { visibleContent, hasMoreContent, loaderRef, scrollerRef } =
-        useScroll(filteredWorkshops ?? [], 6, 4);
+    const scrollerRef = React.useRef<HTMLElement | null>(null);
+
+    const columns = useMediaQuery('(min-width:768px)') ? 2 : 1
+    const rows = Math.ceil((filteredWorkshops?.length ?? 0) / columns)
+
+    const workshopVirtualizer = useVirtualizer({
+        count: rows ?? 0,
+        getScrollElement: () => scrollerRef.current,
+        estimateSize: () => 360,
+        overscan: 4,
+        getItemKey: (index) => filteredWorkshops?.[index]?.uuid ?? index,
+        gap: 16,
+    });
+
+    console.log(workshopVirtualizer.getTotalSize())
 
     return (
         <DefaultLayout className="p-8" pageHref="/workshops">
@@ -104,39 +119,58 @@ export default function WorkshopPage() {
                 </Tabs>
                 <main
                     ref={scrollerRef}
-                    className="w-full h-full flex flex-col overflow-auto"
+                    className="w-full overflow-auto relative"
                 >
-                    {visibleContent &&
-                        (visibleContent.length > 0 ? (
-                            <>
-                                <div
-                                    id="card-container"
-                                    className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full w-full"
-                                >
-                                    {visibleContent.map((workshop) => (
-                                        <WorkshopCard
-                                            workshop={workshop}
-                                            self={self}
-                                            users={users}
-                                            certifications={certifications}
-                                            config={config}
-                                            key={workshop.uuid}
-                                        />
-                                    ))}
-                                    {hasMoreContent && (
-                                        <Spinner
-                                            ref={loaderRef}
-                                            color="primary"
-                                        />
-                                    )}
-                                </div>
-                            </>
-                        ) : (
+                    <div 
+                        style={{
+                            height: `${workshopVirtualizer.getTotalSize()}px`,
+                        }}
+                        className="w-full relative"
+                    >
+                    {filteredWorkshops ?(
+                        workshopVirtualizer.getVirtualItems() 
+                        .map(
+                            (virtualItem) => {
+                                const rowWorkshops = filteredWorkshops.slice(virtualItem.index*columns, virtualItem.index*columns + columns)
+
+                                return (
+                                    <div 
+                                        key={virtualItem.index}
+                                        data-index={virtualItem.index}
+                                        ref={workshopVirtualizer.measureElement}
+                                        className="absolute top-0 left-0 w-full flex flex-row gap-4"
+                                        style={{
+                                            transform: `translateY(${virtualItem.start}px)`,
+                                            height: `${virtualItem.size}px`
+                                        }}
+                                    >
+                                        {
+                                            rowWorkshops.map((workshop) => {
+                                                return (
+                                                    <div className={columns === 2 ? "w-1/2 min-w-0" : "w-full"}>
+                                                        <WorkshopCard
+                                                            workshop={workshop}
+                                                            self={self}
+                                                            users={users}
+                                                            certifications={certifications}
+                                                            config={config}
+                                                            key={workshop.uuid}
+                                                        />
+                                                    </div>
+                                                )
+                                            })
+                                        }
+                                    </div>
+                                )
+                            }
+                        )) : (
                             <div className="size-full flex items-center justify-center">
                                 No workshops are currently available. Please
                                 check back later!
                             </div>
-                        ))}
+                        )}
+                    </div>
+                    
                 </main>
             </div>
         </DefaultLayout>

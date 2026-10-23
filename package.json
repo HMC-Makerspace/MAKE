@@ -39,6 +39,7 @@
     "@internationalized/date": "^3.12.4",
     "@iroomit/rate-limit-mongodb": "^1.0.1",
     "@tanstack/react-query": "^5.90.20",
+    "@tanstack/react-virtual": "^3.14.14",
     "autoprefixer": "^10.4.24",
     "axios": "^1.13.4",
     "bun-plugin-html": "^2.2.8",
