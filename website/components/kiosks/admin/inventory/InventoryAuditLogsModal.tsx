@@ -47,9 +47,13 @@ export default function InventoryAuditLogsModal({
                     <>
                         <ModalHeader>{item.name} Audit Logs</ModalHeader>
                         <ModalBody>
-                            <div className="max-h-[400px] overflow-y-auto">
+                            <div className="h-[400px]">
                                 <Table
                                     isHeaderSticky
+                                    isVirtualized
+                                    classNames={{
+                                        base: "max-h-full overflow-auto",
+                                    }}
                                     aria-label="A table for restock status logs"
                                 >
                                     <TableHeader>

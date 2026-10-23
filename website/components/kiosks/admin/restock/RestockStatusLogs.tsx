@@ -30,6 +30,7 @@ export default function RestockStatusLog({
 
     return (
         <Table
+            isVirtualized
             isHeaderSticky
             aria-label="A table for restock status logs"
             classNames={{
