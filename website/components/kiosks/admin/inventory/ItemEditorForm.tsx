@@ -844,7 +844,7 @@ export default function ItemEditorForm({
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <UserIcon className="size-7" />
-                                {mergedAcroles?.length ?? 0}
+                                {mergeAuthRoles(mergedAcroles, mergedVwroles)?.length ?? 0}
                             </Button>
                         </Tooltip>
 

@@ -446,10 +446,10 @@ export default function RestockRequestModal({
                                             base: "w-full",
                                         }}
                                         required={
-                                            !isNew && !userCanJoinMailingList
+                                            !isNew && !userCanJoinMailingList && !forOtherUser
                                         }
                                         isRequired={
-                                            !isNew && !userCanJoinMailingList
+                                            !isNew && !userCanJoinMailingList && !forOtherUser
                                         }
                                     />
                                     <ModalFooter className="w-full justify-between">
