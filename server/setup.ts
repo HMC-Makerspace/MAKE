@@ -52,8 +52,6 @@ import {
     setStagingSchedule,
 } from "controllers/schedule.controller";
 
-const TIME_PATTERN = /^(\d+|\d+ minutes?|\d+ hours?|\d+ days?|\d weeks?)$/g;
-
 function simplifyNumericString(str: string): string {
     const parts = str.split(" ");
     if (parts.length === 1) {
@@ -349,8 +347,8 @@ if (existingConfig) {
         name: "notificationInterval",
         description: "Checkout: Notification Interval",
         message: "Invalid option.",
-        pattern: TIME_PATTERN,
-        before: simplifyNumericString,
+        pattern: /^(\d+|\d+ minutes?|\d+ hours?|\d+ days?|\d weeks?)$/g,
+        before: (s) => (s ? simplifyNumericString(s) : "0"),
     });
 
     const checkoutConfig: TCheckoutConfig = {
@@ -402,7 +400,7 @@ if (existingConfig) {
         name: "uploadDuration",
         description: "Files: User Upload Duration (default 1 week)",
         message: "Invalid option.",
-        pattern: TIME_PATTERN,
+        pattern: /^(\d+|\d+ minutes?|\d+ hours?|\d+ days?|\d weeks?)$/g,
         before: (s) => (s ? simplifyNumericString(s) : "604800"), // 1 week in seconds
     });
 
@@ -430,7 +428,7 @@ if (existingConfig) {
         before: (s) => (s ? s : "0,1,2,3,4,5,6"), // default open every day
     });
 
-    let daysOpen = daysOpenPrompt.toString().split(",").map(parseInt);
+    let daysOpen = daysOpenPrompt.toString().split(",").map(s => parseInt(s));
 
     console.log(
         colors.cyan(
@@ -462,7 +460,7 @@ if (existingConfig) {
         name: "incrementSec",
         description: "Schedule: Shift Duration (default 1 hour)",
         message: "Please enter a valid time.",
-        pattern: TIME_PATTERN,
+        pattern: /^(\d+|\d+ minutes?|\d+ hours?|\d+ days?|\d weeks?)$/g,
         before: (s) => (s ? simplifyNumericString(s) : "3600"), // 1 hour in seconds
     });
 
@@ -552,7 +550,8 @@ if (existingConfig) {
     const reminderTimes = reminderTimesPrompt
         .toString()
         .split(",")
-        .map(parseInt);
+        .filter(s => s) // remove empty times
+        .map(s => parseInt(s));
 
     const workshopConfig: TWorkshopConfig = {
         reminder_times: reminderTimes,
