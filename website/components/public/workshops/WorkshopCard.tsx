@@ -307,6 +307,7 @@ export default function WorkshopCard({
                             radius="lg"
                             size="sm"
                             variant="flat"
+                            className="empty:hidden"
                         >
                             {canRSVP &&
                                 !isWorkshopInstructor &&
@@ -399,6 +400,7 @@ export default function WorkshopCard({
                             radius="lg"
                             size="sm"
                             color="primary"
+                            className="empty:hidden"
                         >
                             {canSignIn &&
                                 !isWorkshopInstructor &&
