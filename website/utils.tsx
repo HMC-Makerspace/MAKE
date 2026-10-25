@@ -11,7 +11,7 @@ import { TUser, TUserRole, TUserRoleLog, UserRoleUUID } from "common/user";
 import { TConfig, WORKER_NAME_DISPLAY } from "../common/config";
 import { TShift, SHIFT_EVENT_TYPE, TShiftEvent } from "../common/shift";
 import { TRequiredCertificate } from "common/certification";
-
+import { useState, useEffect } from "react";
 /**
  * A file to contain useful utility functions for the website.
  * Items in this file should be general and not specific to any one component,
@@ -314,4 +314,21 @@ export function getWorkerDisplayName(
     }
 
     return name;
+}
+
+export function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(query);
+
+    const update = () => setMatches(mediaQuery.matches);
+
+    update();
+    mediaQuery.addEventListener("change", update);
+
+    return () => mediaQuery.removeEventListener("change", update);
+  }, [query]);
+
+  return matches;
 }

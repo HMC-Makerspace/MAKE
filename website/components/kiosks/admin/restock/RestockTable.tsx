@@ -166,7 +166,6 @@ function PastStatusLogs({
             isOpen={logsIsOpen}
             placement="top-center"
             onOpenChange={logsOnOpenChange}
-            className="flex flex-col justify-center overflow-auto"
             classNames={{
                 base: "w-full max-w-3xl overflow-auto",
             }}
@@ -177,7 +176,7 @@ function PastStatusLogs({
                         <ModalHeader className="flex flex-col gap-1">
                             Restock Status Log
                         </ModalHeader>
-                        <ModalBody className="overflow-auto">
+                        <ModalBody className="overflow-auto max-h-[400px]">
                             {restockSelected ? (
                                 <RestockStatusLogs restock={restockSelected} />
                             ) : (
