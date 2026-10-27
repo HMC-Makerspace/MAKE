@@ -1,19 +1,17 @@
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { useCallback, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import InventoryTable from "../components/kiosks/admin/inventory/InventoryTable";
 import DefaultLayout from "../layouts/Default";
-import { TPublicUser, TUserRole } from "common/user";
+import { TPublicUser } from "common/user";
 import { CertificationUUID, TCertification } from "common/certification";
-import { TInventoryItem } from "common/inventory";
-import { Skeleton, Spinner, user, Selection } from "@heroui/react";
+import { Spinner, Selection } from "@heroui/react";
 import { TSchedule } from "common/schedule";
-import { TConfig } from "common/config";
 import Schedule from "../components/kiosks/admin/schedule/Schedule";
 import ScheduleCertSelector from "../components/public/schedule/ScheduleCertSelector";
 import clsx from "clsx";
 import { StatusCodes } from "http-status-codes";
 import { useRoles } from "../queries/useRoles";
+import { useConfig } from "../queries/useConfig";
 
 export default function SchedulePage() {
     const {
@@ -44,18 +42,14 @@ export default function SchedulePage() {
             refetchOnMount: false,
         },
     );
-    const { data: config, isLoading: configLoading } = useQuery<TConfig>({
-        queryKey: ["config"],
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-    });
+    const config = useConfig();
 
     const workers = useMemo(
         () =>
             publicUsers
                 ? publicUsers.filter((u) =>
                       u.active_roles.some((r) =>
-                          config?.schedule.worker_roles.includes(r.role_uuid),
+                          config.schedule.worker_roles.includes(r.role_uuid),
                       ),
                   )
                 : [],
@@ -119,7 +113,6 @@ export default function SchedulePage() {
 
     const scheduleProps = {
         roles,
-        config,
         type: "view" as const,
         selectedShifts,
         setSelectedShifts,
@@ -147,8 +140,7 @@ export default function SchedulePage() {
                                 )}
                             ></div>
                             <div className="absolute left-0 right-0 bottom-[50%] text-center">
-                                Internal Server Error. Please
-                                check back later.
+                                Internal Server Error. Please check back later.
                             </div>
                         </div>
                     ) : (

@@ -30,14 +30,12 @@ import CheckoutTable from "../../components/kiosks/admin/checkouts/CheckoutTable
 import CheckoutSidebar from "../../components/kiosks/admin/checkouts/CheckoutSidebar";
 import clsx from "clsx";
 import axios from "axios";
-import { TConfig } from "common/config";
 import { TSchedule } from "common/schedule";
 import CertificationsTable from "../../components/kiosks/admin/certifications/CTable";
 import { CheckBadgeIcon, PercentBadgeIcon } from "@heroicons/react/24/solid";
 import UsersTable from "../../components/kiosks/admin/users/UsersTable";
 import GrantCertPopup from "../../components/kiosks/admin/checkouts/GrantCertPopup";
 import AssignIDPopup from "../../components/kiosks/admin/checkouts/AssignIDPopup";
-import CertificationTag from "../../components/kiosks/admin/certifications/CertificationTag";
 import { useRoles } from "../../queries/useRoles";
 
 async function getCartUnavailability({ cart }: { cart: TCheckoutItem[] }) {
@@ -79,10 +77,6 @@ export default function CheckoutsKiosk() {
     );
     const { data: areas, isLoading: areasLoading } = useQuery<TArea[]>({
         queryKey: ["area"],
-        refetchOnWindowFocus: false,
-    });
-    const { data: config, isLoading: configLoading } = useQuery<TConfig>({
-        queryKey: ["config"],
         refetchOnWindowFocus: false,
     });
     const { data: activeSchedule, isLoading: scheduleLoading } =
@@ -199,7 +193,6 @@ export default function CheckoutsKiosk() {
         !roles ||
         !certs ||
         !areas ||
-        !config ||
         !activeSchedule ||
         checkoutsLoading ||
         inventoryLoading ||
@@ -207,7 +200,6 @@ export default function CheckoutsKiosk() {
         rolesLoading ||
         certsLoading ||
         areasLoading ||
-        configLoading ||
         scheduleLoading
     ) {
         return (
@@ -224,11 +216,9 @@ export default function CheckoutsKiosk() {
                     cart={cart}
                     setCart={setCart}
                     unavailability={unavailability}
-                    checkouts={checkouts}
                     inventory={inventory}
                     certs={certs}
                     roles={roles}
-                    config={config}
                     activeSchedule={activeSchedule}
                     collegeID={collegeID}
                     setCollegeID={setCollegeID}
@@ -321,7 +311,6 @@ export default function CheckoutsKiosk() {
                                 checkouts={checkouts}
                                 inventory={inventory ?? []}
                                 users={users}
-                                config={config}
                                 activeSchedule={activeSchedule}
                                 areas={areas}
                                 certs={certs}

@@ -1,7 +1,5 @@
 import {
     TInventoryItem,
-    ITEM_ROLE,
-    ITEM_ACCESS_TYPE,
     InventoryItemUUID,
 } from "../../../../../common/inventory";
 import {
@@ -10,10 +8,9 @@ import {
     Form,
     Input,
     RangeValue,
-    Selection,
     useDisclosure,
 } from "@heroui/react";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { TCertification } from "common/certification";
 import { TUser, TUserRole, UserUUID } from "common/user";
 import clsx from "clsx";
@@ -26,20 +23,16 @@ import {
 } from "../../../../../common/checkout";
 import CheckoutUser from "./CheckoutUser";
 import CheckoutDateSelect from "./CheckoutDateSelect";
-import { TConfig } from "common/config";
 import { now, ZonedDateTime } from "@internationalized/date";
 import { TSchedule } from "common/schedule";
-import {
-    timestampToTime,
-    timeToTimestamp,
-    zonedDateTimeToTimestamp,
-} from "../../../../utils";
+import { timestampToTime, zonedDateTimeToTimestamp } from "../../../../utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { UnixTimestamp } from "common/global";
 import { ShoppingCartIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { validateCollegeID } from "../../../../../common/verify";
 import CheckoutDisclaimerModal from "./CheckoutDisclaimerModal";
+import { useConfig } from "../../../../queries/useConfig";
 
 async function createCheckout({
     user_uuid,
@@ -89,11 +82,9 @@ export default function CheckoutSidebar({
     cart,
     setCart,
     unavailability,
-    checkouts,
     inventory,
     certs,
     roles,
-    config,
     activeSchedule,
     collegeID,
     setCollegeID,
@@ -103,17 +94,16 @@ export default function CheckoutSidebar({
     cart: TCheckoutItem[];
     setCart: (items: TCheckoutItem[]) => void;
     unavailability: TCheckoutItemUnavailability[];
-    checkouts: TCheckout[];
     inventory: TInventoryItem[];
     certs: TCertification[];
     roles: TUserRole[];
-    config: TConfig;
     activeSchedule: TSchedule;
     collegeID: string;
     setCollegeID: (id: string) => void;
     setValidation: (v: TCheckoutValidation) => void;
     removeItemFromCart: (item_uuid: InventoryItemUUID, all?: boolean) => void;
 }) {
+    const config = useConfig();
     const { data: user, refetch: refetchUser } = useQuery<TUser>({
         queryKey: ["user", "by", "id", collegeID],
         refetchOnWindowFocus: false,
@@ -409,7 +399,6 @@ export default function CheckoutSidebar({
                     isDisabled={!collegeID}
                     dailyCloseTime={activeSchedule.daily_close_time}
                     cart={cart}
-                    config={config}
                     inventory={inventory}
                     // If any items have a disclaimer, open the disclaimer popup before checkout
                     onPress={() => {

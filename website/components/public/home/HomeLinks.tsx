@@ -1,8 +1,9 @@
-import { TConfig } from "common/config";
 import clsx from "clsx";
 import { Button } from "@heroui/react";
+import { useConfig } from "../../../queries/useConfig";
 
-export default function HomeLinks({ config }: { config: TConfig }) {
+export default function HomeLinks() {
+    const config = useConfig();
     return (
         <>
             {/* Tagline */}

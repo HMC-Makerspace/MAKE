@@ -1,9 +1,8 @@
-import { Button, Card, Image, Link } from "@heroui/react";
+import { Card } from "@heroui/react";
 // @ts-expect-error Static asset loading using Vite
 import brandingImage from "../../../../common/branding.webp";
 import clsx from "clsx";
-import { useQuery } from "@tanstack/react-query";
-import { TConfig } from "common/config";
+import { useConfig } from "../../../queries/useConfig";
 
 export default function Branding({
     width = 100,
@@ -16,12 +15,8 @@ export default function Branding({
     className?: string;
     href?: string;
 }) {
-    const { data: config, isLoading: configLoading } = useQuery<TConfig>({
-        queryKey: ["config"],
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-    });
-    const brandingHref = href || config?.general.branding_url;
+    const config = useConfig();
+    const brandingHref = href || config.general.branding_url;
     return (
         <Card
             isPressable={!!brandingHref}

@@ -9,8 +9,6 @@ import {
 } from "@heroui/react";
 import clsx from "clsx";
 import UserInfo from "../kiosks/admin/users/UserInfo";
-import { API_SCOPE } from "../../../common/global";
-import { verifyScopes } from "../../utils";
 import { AxiosError } from "axios";
 
 export function UserChip({

@@ -7,7 +7,6 @@ import { TUser } from "common/user";
 import axios from "axios";
 import { useState } from "react";
 import { ReviewResponse } from "./ReviewResponse";
-import { TConfig } from "common/config";
 import { useHotkeys } from "@tanstack/react-hotkeys";
 import { UUID } from "common/global";
 
@@ -25,17 +24,7 @@ async function submitRating({
     ).data;
 }
 
-export function ReviewInfo({
-    self,
-    review,
-    users,
-    config,
-}: {
-    self: TUser;
-    review: TReview;
-    users: TUser[];
-    config: TConfig;
-}) {
+export function ReviewInfo({ self, review }: { self: TUser; review: TReview }) {
     const queryClient = useQueryClient();
 
     const reviewers = Object.keys(review.ratings);
@@ -217,7 +206,6 @@ export function ReviewInfo({
                             rating={currentRating}
                             rubric={review.rubric}
                             updateRatingValue={updateRubricValue}
-                            config={config}
                         />
                     )}
                     <div

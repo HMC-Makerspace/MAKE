@@ -1,5 +1,5 @@
 import AdminLayout from "../../layouts/AdminLayout";
-import { Button, Card, Spinner, useDisclosure } from "@heroui/react";
+import { Button } from "@heroui/react";
 import clsx from "clsx";
 import { ArrowLeftIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { ReviewCard } from "../../components/kiosks/admin/reviews/ReviewCard";
@@ -8,22 +8,19 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { TUser } from "common/user";
 import { TReview } from "common/review";
-import { TConfig } from "common/config";
 import { timestampToZonedDateTime } from "../../utils";
 import { DateFormatter } from "@internationalized/date";
 import { ReviewInfo } from "../../components/kiosks/admin/reviews/ReviewInfo";
+import { useConfig } from "../../queries/useConfig";
 
 export default function ReviewsKiosk() {
+    const config = useConfig();
     const { data: users } = useQuery<TUser[]>({
         queryKey: ["user"],
         refetchOnWindowFocus: false,
     });
     const { data: reviews } = useQuery<TReview[]>({
         queryKey: ["review"],
-        refetchOnWindowFocus: false,
-    });
-    const { data: config } = useQuery<TConfig>({
-        queryKey: ["config"],
         refetchOnWindowFocus: false,
     });
     const { data: self } = useQuery<TUser>({ queryKey: ["user", "self"] });
@@ -39,10 +36,10 @@ export default function ReviewsKiosk() {
     const zdt = review
         ? timestampToZonedDateTime(
               review.timestamp_created,
-              config?.schedule.timezone,
+              config.schedule.timezone,
           )
         : undefined;
-    const date_formatter = config?.schedule.locale
+    const date_formatter = config.schedule.locale
         ? new DateFormatter(config.schedule.locale, {
               month: "short",
               day: "numeric",
@@ -116,12 +113,10 @@ export default function ReviewsKiosk() {
                 {isNew ? (
                     <ReviewUpload users={users ?? []} />
                 ) : reviewUuid ? (
-                    review && config && self ? (
+                    review && self ? (
                         <ReviewInfo
                             self={self}
                             review={review}
-                            users={users ?? []}
-                            config={config}
                         />
                     ) : (
                         <div>Unknown review uuid.</div>
@@ -135,11 +130,7 @@ export default function ReviewsKiosk() {
                         )}
                     >
                         {reviews?.map((review) => (
-                            <ReviewCard
-                                review={review}
-                                config={config}
-                                users={users || []}
-                            />
+                            <ReviewCard review={review} users={users || []} />
                         ))}
                     </div>
                 )}

@@ -1,13 +1,6 @@
-import {
-    CalendarDateTime,
-    fromAbsolute,
-    parseDateTime,
-    Time,
-    ZonedDateTime,
-    parseZonedDateTime,
-} from "@internationalized/date";
+import { fromAbsolute, Time, ZonedDateTime } from "@internationalized/date";
 import { API_SCOPE, UnixTimestamp } from "../common/global";
-import { TUser, TUserRole, TUserRoleLog, UserRoleUUID } from "common/user";
+import { TUserRole, TUserRoleLog, UserRoleUUID } from "common/user";
 import { TConfig, WORKER_NAME_DISPLAY } from "../common/config";
 import { TShift, SHIFT_EVENT_TYPE, TShiftEvent } from "../common/shift";
 import { TRequiredCertificate } from "common/certification";
@@ -259,7 +252,10 @@ export function getForegroundColor(hex: string): string {
     }
 }
 
-export function mergeRequiredCerts(a: TRequiredCertificate[] | undefined, b: TRequiredCertificate[] | undefined) {
+export function mergeRequiredCerts(
+    a: TRequiredCertificate[] | undefined,
+    b: TRequiredCertificate[] | undefined,
+) {
     // https://stackoverflow.com/questions/7486085/copy-array-by-value mfw
     const res: TRequiredCertificate[] = JSON.parse(JSON.stringify(a ?? []));
     const toMerge: TRequiredCertificate[] = JSON.parse(JSON.stringify(b ?? []));

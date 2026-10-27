@@ -1,11 +1,11 @@
 import { TSchedule } from "common/schedule";
-import { TConfig } from "common/config";
 import Schedule from "./Schedule";
 import ScheduleUserPicker from "./ScheduleUserPicker";
 import ScheduleSelector from "./ScheduleSelector";
-import { Selection, useDisclosure } from "@heroui/react";
+import { Selection } from "@heroui/react";
 import { TUser, TUserRole, UserUUID } from "common/user";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useConfig } from "../../../../queries/useConfig";
 
 function getUserTotalAvailableTime(user: TUser, schedule?: TSchedule) {
     if (!schedule) {
@@ -31,7 +31,6 @@ function getUserTotalAvailableTime(user: TUser, schedule?: TSchedule) {
  */
 export default function ScheduleBuffer({
     schedules,
-    config,
     roles,
     users,
     setSelectedUsers,
@@ -40,7 +39,6 @@ export default function ScheduleBuffer({
     selectedUsers,
 }: {
     schedules: TSchedule[];
-    config: TConfig;
     roles: TUserRole[];
     users: TUser[];
     selectedSchedules: Selection;
@@ -48,6 +46,7 @@ export default function ScheduleBuffer({
     selectedUsers: Selection;
     setSelectedUsers: (users: Selection) => void;
 }) {
+    const config = useConfig();
     // Opposite of schedule mode is availability mode
     const [scheduleMode, setScheduleMode] = React.useState<
         "schedule" | "availability"
@@ -107,7 +106,6 @@ export default function ScheduleBuffer({
             selectedUserUUID &&
             !availableUsers.has(selectedUserUUID)
         ) {
-
             setAvailableUsers(new Set());
         }
     };
@@ -143,7 +141,6 @@ export default function ScheduleBuffer({
                         defaultSchedule={defaultSchedule}
                         selectedSchedule={schedule}
                         setSelectedSchedules={setSelectedSchedules}
-                        config={config}
                         scheduleMode={scheduleMode}
                         setScheduleMode={switchScheduleMode}
                         setSelectedUsers={setSelectedUsers}
@@ -151,7 +148,6 @@ export default function ScheduleBuffer({
                     />
                     <Schedule
                         schedule={schedule}
-                        config={config}
                         users={users}
                         workers={filteredUsers}
                         roles={roles}
@@ -172,7 +168,6 @@ export default function ScheduleBuffer({
                 <>
                     <ScheduleUserPicker
                         schedule_uuid={schedule?.uuid}
-                        config={config}
                         users={sortedUsers}
                         roles={roles}
                         isLoading={false}
@@ -185,7 +180,6 @@ export default function ScheduleBuffer({
                     />
                     <ScheduleUserPicker
                         schedule_uuid={schedule?.uuid}
-                        config={config}
                         users={sortedAvailableUsers}
                         roles={roles}
                         isLoading={false}
