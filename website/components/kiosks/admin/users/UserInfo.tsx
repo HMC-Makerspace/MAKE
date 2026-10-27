@@ -3,6 +3,9 @@ import { TCertification } from "common/certification";
 import { TUser, TUserRole, UserUUID } from "common/user";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
 import { CertificationList } from "../certifications/CertificationList";
+import { timestampToZonedDateTime } from "../../../../utils";
+import { DateFormatter } from "@internationalized/date";
+import { useConfig } from "../../../../queries/useConfig";
 
 export default function UserInfo({
     user,
@@ -25,6 +28,18 @@ export default function UserInfo({
     unknownPlaceholders?: boolean;
     endContent?: React.ReactNode;
 }) {
+    const config = useConfig();
+    const zdt = user?.last_login
+        ? timestampToZonedDateTime(user.last_login, config?.schedule.timezone)
+        : undefined;
+
+    const date_formatter = new DateFormatter(config.schedule.locale, {
+        month: "2-digit",
+        day: "2-digit",
+        hour: "numeric",
+        minute: "2-digit",
+        year: "2-digit",
+    });
     return (
         <div
             className={clsx(
@@ -37,8 +52,8 @@ export default function UserInfo({
                 <div
                     className={clsx(
                         "bg-default-200 p-2 h-fit",
-                        "w-1/2 rounded-md text-center",
-                        "xl:w-2/3 whitespace-nowrap overflow-x-auto",
+                        "w-1/2 xl:w-2/3 rounded-md text-center",
+                        "whitespace-nowrap overflow-x-auto",
                         user ? "text-default-700" : "text-default-400",
                         size === "sm"
                             ? "text-sm"
@@ -53,8 +68,8 @@ export default function UserInfo({
                 <div
                     className={clsx(
                         "bg-default-200 p-2 h-fit",
-                        "w-1/2 rounded-md text-center",
-                        "xl:w-1/3 overflow-x-auto",
+                        "w-1/2 xl:w-1/3 rounded-md text-center",
+                        "overflow-x-auto",
                         user ? "text-default-700" : "text-default-400",
                         size === "sm"
                             ? "text-sm"
@@ -66,19 +81,38 @@ export default function UserInfo({
                     {user?.college_id || (unknownPlaceholders ? "No ID" : "ID")}
                 </div>
             </div>
-            <div
-                className={clsx(
-                    "bg-default-200 p-2 text-center min-h-fit",
-                    "col-span-full rounded-md overflow-x-auto",
-                    user ? "text-default-700" : "text-default-400",
-                    size === "sm"
-                        ? "text-sm"
-                        : size === "md"
-                          ? "text-md"
-                          : "text-lg",
-                )}
-            >
-                {user?.email || (unknownPlaceholders ? "No Email" : "Email")}
+            <div className="w-full flex gap-2">
+                <div
+                    className={clsx(
+                        "bg-default-200 p-2 text-center min-h-fit",
+                        "w-1/2 xl:w-2/3 rounded-md overflow-x-auto",
+                        user ? "text-default-700" : "text-default-400",
+                        size === "sm"
+                            ? "text-sm"
+                            : size === "md"
+                              ? "text-md"
+                              : "text-lg",
+                    )}
+                >
+                    {user?.email ||
+                        (unknownPlaceholders ? "No Email" : "Email")}
+                </div>
+
+                <div
+                    className={clsx(
+                        "bg-default-200 p-2 text-center min-h-fit",
+                        "w-1/2 xl:w-1/3 rounded-md overflow-x-auto",
+                        "flex flex-row gap-2 justify-center",
+                        user ? "text-default-700" : "text-default-400",
+                        size === "sm"
+                            ? "text-sm"
+                            : size === "md"
+                              ? "text-md"
+                              : "text-lg",
+                    )}
+                >
+                    {zdt && date_formatter.format(zdt.toDate())}
+                </div>
             </div>
             <UserRoleSelect
                 roles={roles}

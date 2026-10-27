@@ -10,16 +10,11 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { TCheckout } from "common/checkout";
-import { TConfig } from "common/config";
 import { timestampToZonedDateTime } from "../../../../../website/utils";
+import { useConfig } from "../../../../queries/useConfig";
 
-export default function CheckoutTrend({
-    checkouts,
-    config,
-}: {
-    checkouts: TCheckout[];
-    config?: TConfig;
-}) {
+export default function CheckoutTrend({ checkouts }: { checkouts: TCheckout[] }) {
+    const config = useConfig();
     const data = useMemo(() => {
         const dayCounts: Record<string, { date: string; count: number }> = {};
 

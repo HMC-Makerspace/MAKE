@@ -9,7 +9,6 @@ import {
     Input,
     Select,
     SelectItem,
-    Switch,
     addToast,
     RadioGroup,
     Radio,
@@ -26,6 +25,7 @@ import EditableFAQItem from "./EditableFAQItem";
 import { TEmbed } from "common/embed";
 import EditableEmbed from "./EditableEmbed";
 import { TUserRole } from "common/user";
+import { useConfig } from "../../../../queries/useConfig.tsx";
 
 const createEmbed = async () => {
     return (
@@ -67,20 +67,19 @@ function ConfigItem({
 async function updateConfig({ config }: { config: TConfig }) {
     return (
         await axios.post<TConfig>("/api/v3/config", {
-            config: config,
+            config: config
         })
     ).data;
 }
 
 export default function Configuration({
-    config,
     embeds,
     roles,
 }: {
-    config: TConfig;
     embeds: TEmbed[];
     roles: TUserRole[];
 }) {
+    const config = useConfig();
     const queryClient = useQueryClient();
 
     const mutation = useMutation({
@@ -228,7 +227,7 @@ export default function Configuration({
                             "workshop_sign_in_enabled_within",
                         ) as string) || "0",
                     ) || config.workshop.sign_in_enabled_within,
-            instructor_roles: config.workshop.instructor_roles,
+                instructor_roles: config.workshop.instructor_roles,
             },
         };
 
@@ -345,7 +344,9 @@ export default function Configuration({
             body.schedule.worker_roles = worker_roles;
         }
 
-        const instructor_roles = formData.getAll("instructor_roles") as string[];
+        const instructor_roles = formData.getAll(
+            "instructor_roles",
+        ) as string[];
         if (instructor_roles.length > 0) {
             body.workshop.instructor_roles = instructor_roles;
         }

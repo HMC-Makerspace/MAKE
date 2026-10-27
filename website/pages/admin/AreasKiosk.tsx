@@ -1,11 +1,7 @@
-import { TSchedule } from "common/schedule";
 import AdminLayout from "../../layouts/AdminLayout";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { TConfig } from "common/config";
-import ScheduleBuffer from "../../components/kiosks/admin/schedule/SchedulesBuffer";
-import { Spinner, Selection, user, Button, useDisclosure, addToast } from "@heroui/react";
-import { TUser, TUserRole, UserUUID } from "common/user";
-import React, { useEffect, useState } from "react";
+import { Spinner, Button, useDisclosure, addToast } from "@heroui/react";
+import { useState } from "react";
 import { TArea } from "common/area";
 import { TCertification } from "common/certification";
 import { TMachine, MACHINE_EDIT_LEVEL } from "../../../common/machine";

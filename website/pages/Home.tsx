@@ -3,20 +3,16 @@ import MAKE from "../components/public/home/MAKE";
 import clsx from "clsx";
 import ActiveAlert from "../components/public/home/ActiveAlert";
 import { useQuery } from "@tanstack/react-query";
-import { TConfig } from "common/config";
 import { AnimatePresence, motion, wrap } from "motion/react";
 import HomeLinks from "../components/public/home/HomeLinks";
 import { useState } from "react";
 import EmbedWrapper from "../components/public/home/EmbedWrapper";
 import { THomeEmbed, TEmbed } from "common/embed";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { useConfig } from "../queries/useConfig";
 
 export default function HomePage() {
-    const { data: config, isLoading: configLoading } = useQuery<TConfig>({
-        queryKey: ["config"],
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-    });
+    const config = useConfig();
 
     const { data: embeds, isLoading: embedsLoading } = useQuery<TEmbed[]>({
         queryKey: ["embed", "public"],
@@ -46,7 +42,7 @@ export default function HomePage() {
                     hover={false}
                     href={""}
                 />
-                {config && <HomeLinks config={config} />}
+                <HomeLinks />
             </>
         ),
         documents: [],

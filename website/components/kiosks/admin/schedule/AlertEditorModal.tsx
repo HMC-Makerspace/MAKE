@@ -1,18 +1,16 @@
 import { Button, Modal, Form, ModalContent, addToast } from "@heroui/react";
-import { LinkIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 
 import React from "react";
 import { UseMutationResult } from "@tanstack/react-query";
 import clsx from "clsx";
 import { ScheduleUUID, TAlert, TSchedule } from "common/schedule";
-
-import { TConfig } from "common/config";
 import EditableAlert from "./EditableAlert";
+import { useConfig } from "../../../../queries/useConfig";
 
 export default function AlertEditorModal({
     schedule,
     patchMutation,
-    config,
     isOpen,
     onOpenChange,
 }: {
@@ -25,10 +23,10 @@ export default function AlertEditorModal({
             partial_schedule: Partial<TSchedule>;
         }
     >;
-    config: TConfig;
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
 }) {
+    const config = useConfig();
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
 
     const [alerts, setAlerts] = React.useState<TAlert[]>(schedule.alerts);
@@ -54,13 +52,7 @@ export default function AlertEditorModal({
                 color: "success",
             });
         },
-        [
-            hasEdits,
-            patchMutation,
-            schedule.uuid,
-            alerts,
-            onOpenChange,
-        ],
+        [hasEdits, patchMutation, schedule.uuid, alerts, onOpenChange],
     );
 
     function wrapEdit<P extends keyof TAlert>(uuid: string, prop: P) {

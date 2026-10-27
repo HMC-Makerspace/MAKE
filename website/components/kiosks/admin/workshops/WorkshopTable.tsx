@@ -31,13 +31,13 @@ import {
 import WorkshopPeopleModal from "./WorkshopPeopleModal.tsx";
 import WorkshopImagesModal from "./WorkshopImagesModal.tsx";
 import WorkshopEditModal from "./WorkshopEditModal.tsx";
-import { TConfig } from "common/config.js";
 import RequiredCertsModal from "../certifications/RequiredCertsModal.tsx";
 import { UUID } from "common/global.ts";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getLocalTimeZone, now } from "@internationalized/date";
+import { now } from "@internationalized/date";
 import { AvailableToRolesModal, VisibleToRolesModal } from "../certifications/AuthorizedRolesModal.tsx";
+import { useConfig } from "../../../../queries/useConfig.tsx";
 
 // TODO-
 // [] FIX TIME
@@ -130,16 +130,17 @@ export default function WorkshopTable({
     users,
     certs,
     roles,
-    config,
+
     isLoading,
 }: {
     workshops: TWorkshop[];
     users: TUser[];
     certs: TCertification[];
     roles: TUserRole[];
-    config: TConfig;
+
     isLoading: boolean;
 }) {
+    const config = useConfig();
     const queryClient = useQueryClient();
     const patchMutation = useMutation({
         mutationFn: patchWorkshop,
@@ -469,7 +470,7 @@ export default function WorkshopTable({
                                 }}
                             />
                         ),
-                        "available_to": (workshop) => (
+                        available_to: (workshop) => (
                             <div className="flex w-full justify-center">
                                 <Button
                                     isIconOnly
@@ -484,7 +485,7 @@ export default function WorkshopTable({
                                 />
                             </div>
                         ),
-                        "visible_to": (workshop) => (
+                        visible_to: (workshop) => (
                             <div className="flex w-full justify-center">
                                 <Button
                                     isIconOnly
@@ -581,7 +582,6 @@ export default function WorkshopTable({
                         isNew={isNew}
                         isOpen={editIsOpen}
                         onOpenChange={editOnOpenChange}
-                        config={config}
                         batchEdit={isBatch}
                     />
                     <RequiredCertsModal
