@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 import type { NavigateOptions } from "react-router-dom";
 
 import { HeroUIProvider } from "@heroui/system";
-import { data, useHref, useNavigate } from "react-router-dom";
+import { useHref, useNavigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { ToastProvider } from "@heroui/react";
 
@@ -13,6 +13,7 @@ import {
     QueryFunctionContext,
 } from "@tanstack/react-query";
 import axios from "axios";
+import { ConfigProvider } from "./queries/useConfig";
 
 declare module "@react-types/shared" {
     interface RouterConfig {
@@ -65,7 +66,7 @@ export function Provider({ children }: { children: React.ReactNode }) {
                 themes={["dark", "light"]}
             >
                 <QueryClientProvider client={queryClient}>
-                    {children}
+                    <ConfigProvider>{children}</ConfigProvider>
                 </QueryClientProvider>
             </ThemeProvider>
         </HeroUIProvider>

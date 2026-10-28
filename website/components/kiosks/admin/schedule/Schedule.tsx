@@ -1,14 +1,14 @@
-import { Card, Selection, Table, TableRow } from "@heroui/react";
-import { TConfig } from "common/config";
+import { Card, Selection } from "@heroui/react";
 import { TSchedule } from "common/schedule";
 import Shift from "./Shift";
 import { SHIFT_DAY } from "../../../../../common/shift";
-import { TUser, TUserRole, UserUUID } from "common/user";
+import { TUser, TUserRole } from "common/user";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { motion } from "motion/react";
 import axios from "axios";
+import { useConfig } from "../../../../queries/useConfig";
 
 const toggleWorkerAvailability = async ({
     user_uuid,
@@ -52,7 +52,6 @@ export default function Schedule({
     users,
     workers,
     roles,
-    config,
     isLoading,
     selectedUser,
     setSelectedUsers = () => {},
@@ -65,7 +64,6 @@ export default function Schedule({
     users: TUser[];
     workers?: TUser[]; // users with a worker role
     roles: TUserRole[];
-    config: TConfig;
     isLoading: boolean;
     selectedUser?: TUser;
     setSelectedUsers?: (users: Selection) => void;
@@ -79,6 +77,8 @@ export default function Schedule({
         | "worker_view";
     hideMissingShifts?: boolean;
 }) {
+    const config = useConfig();
+
     if (!schedule) {
         // New schedule
         return (

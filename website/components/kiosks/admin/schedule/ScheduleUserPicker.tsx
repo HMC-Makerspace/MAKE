@@ -1,5 +1,4 @@
 import { Card, Selection } from "@heroui/react";
-import { TConfig } from "common/config";
 import { TUser, TUserRole } from "common/user";
 import UsersTable from "../users/UsersTable";
 import { ScheduleUUID } from "common/schedule";
@@ -9,7 +8,6 @@ export default function ScheduleUserPicker({
     schedule_uuid,
     users,
     roles,
-    config,
     isLoading,
     selectedUsers,
     setSelectedUsers,
@@ -19,7 +17,6 @@ export default function ScheduleUserPicker({
     schedule_uuid?: ScheduleUUID;
     users: TUser[];
     roles: TUserRole[];
-    config: TConfig;
     isLoading: boolean;
     selectedUsers: Selection;
     setSelectedUsers: (selectedUsers: Selection) => void;

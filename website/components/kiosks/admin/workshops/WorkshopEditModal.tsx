@@ -27,9 +27,9 @@ import { TCertification } from "../../../../../common/certification";
 import { parseZonedDateTime, ZonedDateTime } from "@internationalized/date";
 import WorkshopImagesModal from "./WorkshopImagesModal.tsx";
 import clsx from "clsx";
-import { TConfig } from "common/config";
 import axios from "axios";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
+import { useConfig } from "../../../../queries/useConfig.tsx";
 
 const updateCreateWorkshop = async ({
     workshop,
@@ -38,7 +38,6 @@ const updateCreateWorkshop = async ({
     workshop: TWorkshop;
     isNew: boolean;
 }) => {
-    console.log("Creating", workshop);
     if (isNew) {
         // Add the user to the shift
         return (
@@ -103,7 +102,7 @@ export default function WorkshopEditModal({
     workshop,
     users,
     certs,
-    config,
+
     isNew,
     isOpen,
     onOpenChange,
@@ -112,12 +111,13 @@ export default function WorkshopEditModal({
     workshop: TWorkshop;
     users: TUser[];
     certs: TCertification[];
-    config: TConfig;
+
     isNew: boolean;
     isOpen: boolean;
     onOpenChange: (open?: boolean) => void;
     batchEdit: boolean;
 }) {
+    const config = useConfig();
     // batch workshops storage
     const [batchWorkshopsUUIDS, setBatchWorkshopsUUIDS] = useState<UUID[]>([]);
     const workshops: TWorkshop[] = [];
@@ -174,7 +174,6 @@ export default function WorkshopEditModal({
             });
             onOpenChange(false);
             imagesOnOpen();
-            
         },
         onError: (e) => {
             addToast({
@@ -185,26 +184,26 @@ export default function WorkshopEditModal({
     });
 
     const patchBatchMutation = useMutation({
-            mutationFn: patchBatchWorkshop,
-            onSuccess: (data) => {
-                data.forEach((workshop) => {
-                    queryClient.setQueryData(["workshop", workshop.uuid], workshop);
-                });
-                queryClient.setQueryData(["workshop"], (old: TWorkshop[]) =>
-                    old.map((w) => data.find((d) => d.uuid === w.uuid) ?? w )
-                );
-                addToast({
-                    title: `Successfully updated workshops`,
-                    color: "success",
-                });
-            },
-            onError: (e) => {
-                addToast({
-                    title: `Error: ${e.message}`,
-                    color: "danger",
-                });
-            },
-        });
+        mutationFn: patchBatchWorkshop,
+        onSuccess: (data) => {
+            data.forEach((workshop) => {
+                queryClient.setQueryData(["workshop", workshop.uuid], workshop);
+            });
+            queryClient.setQueryData(["workshop"], (old: TWorkshop[]) =>
+                old.map((w) => data.find((d) => d.uuid === w.uuid) ?? w),
+            );
+            addToast({
+                title: `Successfully updated workshops`,
+                color: "success",
+            });
+        },
+        onError: (e) => {
+            addToast({
+                title: `Error: ${e.message}`,
+                color: "danger",
+            });
+        },
+    });
 
     const sortedFilteredWorkers = users
         .filter((user) =>
@@ -228,7 +227,6 @@ export default function WorkshopEditModal({
         onOpen: certsOnOpen,
         onOpenChange: certsOnOpenChange,
     } = useDisclosure();
-    
 
     function wrapEdit<P extends keyof TWorkshop>(prop: P) {
         return (val: TWorkshop[P]) => {
@@ -617,7 +615,7 @@ export default function WorkshopEditModal({
                                                     "data-[editable=true]:focus:text-default-700",
                                                 ]),
                                             }}
-                                        />                                       
+                                        />
                                         <div className="flex flex-row gap-2">
                                             <NumberInput
                                                 label="Public Announcement Date"

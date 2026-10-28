@@ -1,12 +1,4 @@
 import {
-    useMutation,
-    UseMutationResult,
-    useQuery,
-    useQueryClient,
-} from "@tanstack/react-query";
-import axios from "axios";
-import {
-    TCheckout,
     TCheckoutItem,
     TCheckoutItemUnavailability,
 } from "common/checkout";
@@ -14,7 +6,6 @@ import { timestampToTime, timestampToZonedDateTime } from "../../../../utils";
 import {
     Button,
     ButtonGroup,
-    DateInput,
     DateRangePicker,
     RangeValue,
 } from "@heroui/react";
@@ -24,10 +15,9 @@ import {
     getLocalTimeZone,
     now,
 } from "@internationalized/date";
-import { TConfig } from "common/config";
 import { TInventoryItem } from "common/inventory";
-import { UserUUID } from "common/user";
 import { UnixTimestamp } from "common/global";
+import { useConfig } from "../../../../queries/useConfig";
 
 const days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 
@@ -38,7 +28,6 @@ export default function CheckoutDateSelect({
     isDisabled,
     dailyCloseTime,
     cart,
-    config,
     inventory,
     onPress,
     isLoading,
@@ -49,11 +38,11 @@ export default function CheckoutDateSelect({
     isDisabled: boolean;
     dailyCloseTime: UnixTimestamp;
     cart: TCheckoutItem[];
-    config: TConfig;
     inventory: TInventoryItem[];
     onPress: () => void;
     isLoading: boolean;
 }) {
+    const config = useConfig();
     const unavailablePairs = unavailability.map((u) => [
         timestampToZonedDateTime(u.start_time, config.schedule.timezone),
         timestampToZonedDateTime(u.end_time, config.schedule.timezone),
