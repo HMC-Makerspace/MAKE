@@ -279,6 +279,11 @@ export function mergeRequiredCerts(
     return [...res, ...toMerge];
 }
 
+export function mergeAuthRoles(a: UserRoleUUID[] | null | undefined, b: UserRoleUUID[] | null | undefined) {
+    // merges & removes duplicates
+    return Array.from(new Set([...(a || []), ...(b || [])]));
+}
+
 export function getWorkerDisplayName(
     name: string,
     setting: WORKER_NAME_DISPLAY = WORKER_NAME_DISPLAY.FIRST_NAME_ONLY,

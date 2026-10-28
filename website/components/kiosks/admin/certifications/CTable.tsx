@@ -38,6 +38,7 @@ import RequiredCertsModal from "./RequiredCertsModal";
 import { relativeTimestampToString } from "../../../../utils";
 import { TUserRole } from "common/user";
 import { UserRoleList } from "../../../user/UserRoleList";
+import Fuse from "fuse.js";
 
 const baseColumns = [
     { name: "UUID", id: "uuid" },
@@ -123,6 +124,42 @@ export default function CertificationsTable({
     const [docOpen, setDocOpen] = React.useState<boolean>(false); // whether doc edit modal is open
     const [prereqOpen, setPrereqOpen] = React.useState<boolean>(false); // whether prereq edit modal is open
 
+
+    const vfilterCerts = certs.filter(c => visibilities.includes(c.visibility));
+
+    // A fuse instance for filtering the content, memoized to prevent
+    // unnecessary reinitialization on every render but updated when the
+    // content changes
+    const fuse = React.useMemo(() => {
+        return new Fuse(vfilterCerts, {
+            keys: [
+                "name",
+                "description"
+            ],
+            threshold: 0.3
+        });
+    }, [vfilterCerts]);
+
+    // The list of items after filtering and sorting
+    const filteredCerts = React.useMemo(() => {
+        if (search) {
+            return fuse.search(search).map((result) => result.item);
+        } else {
+            return vfilterCerts;
+        }
+    }, [vfilterCerts, fuse, search]);
+
+    const numCerts = vfilterCerts.length;
+
+    const onInputChange = React.useCallback((value: string) => {
+        setSearch(value);
+    }, []);
+
+    const onSearchClear = React.useCallback(() => {
+        setSearch("");
+        // Consider scroll to top
+    }, []);
+
     const {
         isOpen: isDeleting,
         onOpen: onDelete,
@@ -157,19 +194,6 @@ export default function CertificationsTable({
         },
     });
 
-    const onInputChange = React.useCallback((value: string) => {
-        setSearch(value);
-    }, []);
-
-    const onSearchClear = React.useCallback(() => {
-        setSearch("");
-        // Consider scroll to top
-    }, []);
-
-    const numCerts = certs.length;
-
-    console.log("Roles", roles)
-
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
             <div id="user-table-top-content" className="flex flex-col gap-4">
@@ -180,7 +204,7 @@ export default function CertificationsTable({
                         placeholder="Search..."
                         startContent={<SearchIcon className="size-6" />}
                         value={search}
-                        onClear={() => onSearchClear()}
+                        onClear={onSearchClear}
                         onValueChange={onInputChange}
                         isDisabled={isLoading}
                         classNames={{
@@ -251,14 +275,15 @@ export default function CertificationsTable({
                 </div>
                 <div className="flex justify-between items-center pb-2">
                     <span className="text-default-400 text-small">
-                        Total {numCerts} certifications
+                        {filteredCerts.length === numCerts
+                            ? `Total ${numCerts} certifications`
+                            : `Showing ${filteredCerts.length} of ${numCerts} certifications`}{" "}
                     </span>
                 </div>
             </div>
             <MAKETable
-                content={certs.filter((c) =>
-                    visibilities.includes(c.visibility),
-                )}
+                key={filteredCerts.length}
+                content={filteredCerts}
                 columns={columns}
                 visibleColumns={visibleColumns}
                 selectedKeys={selectedKeys}

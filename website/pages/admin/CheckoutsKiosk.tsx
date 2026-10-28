@@ -115,6 +115,8 @@ export default function CheckoutsKiosk() {
 
     const addItemToCart = React.useCallback(
         (item?: TInventoryItem) => {
+            let validAdd = false;
+
             console.log("Setting cart outside");
             // This callback format fixes a dependency array bug
             setCart((prevCart) => {
@@ -131,6 +133,7 @@ export default function CheckoutsKiosk() {
                         newCart[existing_item].quantity < item.quantity ||
                         item.quantity < 0
                     ) {
+                        validAdd = true;
                         newCart[existing_item] = {
                             ...newCart[existing_item],
                             quantity: newCart[existing_item].quantity + 1,
@@ -144,16 +147,27 @@ export default function CheckoutsKiosk() {
                         role: item.role,
                         linked_uuid: item.linked_uuid,
                     });
+                    validAdd = true;
                 }
                 validationMutation.mutate({ cart: newCart });
                 return newCart;
             });
+
+            if (validAdd) {
+                // recursively add kit contents to checkout
+                for (let item_uuid of item?.kit_contents ?? []) {
+                    let i = inventory?.find(itm => itm.uuid == item_uuid);
+                    addItemToCart(i);
+                }
+            }
         },
         [cart, setCart, validationMutation],
     );
 
     const removeItemFromCart = React.useCallback(
         (item_uuid: InventoryItemUUID, all?: boolean) => {
+            let validRem = false;
+
             // This callback format fixes a dependency array bug
             setCart((prevCart) => {
                 const newCart = [...prevCart];
@@ -166,12 +180,22 @@ export default function CheckoutsKiosk() {
                 } else if (newCart[existing_item].quantity === 1 || all) {
                     // Remove item entirely
                     newCart.splice(existing_item, 1);
+                    validRem = true;
                 } else {
                     newCart[existing_item].quantity--;
+                    validRem = true;
                 }
                 validationMutation.mutate({ cart: newCart });
                 return newCart;
             });
+
+            if (validRem) {
+                // recursively remove kit contents from checkout
+                let item = inventory?.find(itm => itm.uuid == item_uuid);
+                for (let itm_uuid of item?.kit_contents ?? []) {
+                    removeItemFromCart(itm_uuid);
+                }
+            }
         },
         [cart, setCart, validationMutation],
     );
@@ -258,7 +282,7 @@ export default function CheckoutsKiosk() {
                                 // }}
                                 multiSelect={true}
                                 isLoading={inventoryLoading}
-                                showsKitContents={true}
+                                showsKitContents={false}
                                 extraColumns={[{ name: "Cart", id: "cart" }]}
                                 defaultColumns={[
                                     "role",
@@ -268,6 +292,7 @@ export default function CheckoutsKiosk() {
                                     "required_certifications",
                                     "available_to",
                                     "visible_to",
+                                    "kit_contents",
                                     "cart",
                                 ]}
                                 customColumnComponents={{

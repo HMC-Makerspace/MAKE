@@ -133,7 +133,7 @@ export async function updateUser(user_obj: TUser): Promise<TUser | null> {
             { returnDocument: "after" },
         );
     }
-    return new_user;
+    return new_user?.save() ?? null;
 }
 
 /**
