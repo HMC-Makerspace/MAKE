@@ -294,7 +294,7 @@ export async function removeResourcesFromFile(
 export async function deleteFileOnServer(
     file_path: string,
     req: Request,
-    res: Response,
+    res?: Response,
     error_message: string = "authorized",
 ) {
     const normalizedPath = path.resolve(file_path);
@@ -309,7 +309,7 @@ export async function deleteFileOnServer(
             file_path: file_path,
             normalized_path: normalizedPath,
         });
-        res.status(StatusCodes.FORBIDDEN).json({
+        res?.status(StatusCodes.FORBIDDEN).json({
             error: "Invalid file path",
         });
         return Promise.reject("Invalid file path");
@@ -346,7 +346,7 @@ export async function deleteFileOnServer(
                             msg: `Error deleting file at ${file_path}`,
                             error: err,
                         });
-                        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                        res?.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                             error: "Error deleting file",
                         });
                     } else {
@@ -359,7 +359,7 @@ export async function deleteFileOnServer(
                             file_path: file_path,
                             error: err,
                         });
-                        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                        res?.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                             error:
                                 "The requesting user is not authorized to create a " +
                                 "file, and there was an error unlinking the " +
@@ -376,7 +376,7 @@ export async function deleteFileOnServer(
                 msg: `File not found: ${file_path}`,
                 error: err,
             });
-            res.status(StatusCodes.NOT_FOUND).json({
+            res?.status(StatusCodes.NOT_FOUND).json({
                 error: "File not found",
             });
             return Promise.reject(err); // Return a rejected promise to stop the chain

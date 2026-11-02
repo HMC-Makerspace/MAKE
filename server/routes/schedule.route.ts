@@ -900,6 +900,7 @@ router.get("/public", async (req: Request, res: PublicScheduleResponse) => {
         }
         // If the user is not authorized, provide a simplified schedule
         res.json(simplifiedSchedule);
+        return;
     }
 
     req.log.debug({
