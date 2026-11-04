@@ -54,7 +54,7 @@ export const Workshop = new mongoose.Schema<TWorkshop>(
 export const WorkshopSchema = Joi.object<TWorkshop>({
     uuid: Joi.string().required(),
     title: Joi.string().required(),
-    description: Joi.string().required(),
+    description: Joi.string().optional(),
     instructors: Joi.array().items(Joi.string()).required(),
     support_instructors: Joi.array().items(Joi.string()).optional(),
     capacity: Joi.number().optional(),

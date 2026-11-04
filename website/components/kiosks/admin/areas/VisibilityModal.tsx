@@ -31,6 +31,12 @@ export default function RequiredRolesModal({
         }
     >;
 }) {
+    if ("parent_kit" in item) {
+        // if you want to use visibilitymodal with an item that has a parent kit
+        // you need to change this file to work with parent kits first
+        throw new Error(`item of type ${typeof item} not compatible with VisibilityModal`);
+    }
+
     const [hasEdits, setHasEdits] = React.useState(false);
     const [currentRoles, setCurrentRoles] = React.useState<UserRoleUUID[]>(
         item.visible_to || [],

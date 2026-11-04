@@ -35,7 +35,7 @@ import {
 } from "./machine.controller";
 import { clearAreaReservations, patchArea } from "./area.controller";
 import { getConfig } from "./config.controller";
-import { mergeRequiredCerts } from "../../website/utils";
+import { mergeAuthRoles, mergeRequiredCerts } from "../../website/utils";
 
 /**
  * Get all checkouts in the database
@@ -107,13 +107,20 @@ export async function validateCheckout(
     );
 
     for (const item of items) {
+        const parent_kit = await Inventory.findOne({
+            uuid: item.parent_kit
+        });
+
+        const mergedAcroles = mergeAuthRoles(item.available_to, parent_kit?.available_to);
+        const mergedCerts = mergeRequiredCerts(item.required_certifications || [], parent_kit?.required_certifications || []);
+
         // For each item being checked out, verify that the user
         // has authorized roles and required certs as needed
         if (
-            item.available_to !== null &&
-            item.available_to !== undefined
+            mergedAcroles !== null &&
+            mergedAcroles !== undefined
         ) {
-            if (item.available_to.length === 0) {
+            if (mergedAcroles.length === 0) {
                 // No user roles are authorized
                 return {
                     status: CHECKOUT_VALIDATION.MISSING_ROLE,
@@ -121,7 +128,7 @@ export async function validateCheckout(
                 };
             }
             if (
-                !item.available_to.some((r) =>
+                !mergedAcroles.some((r) =>
                     user.active_roles.some((log) => log.role_uuid === r),
                 )
             ) {
@@ -133,12 +140,6 @@ export async function validateCheckout(
                 };
             }
         }
-
-        const parent_kit = await Inventory.findOne({
-            uuid: item.parent_kit
-        });
-
-        const mergedCerts = mergeRequiredCerts(item.required_certifications || [], parent_kit?.required_certifications || []);
 
         for (const cert of mergedCerts) {
             // User has no certs, so must not have the required certs.

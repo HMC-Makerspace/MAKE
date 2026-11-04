@@ -129,25 +129,61 @@ export default function ItemInfo({
                                     </div>
                                 )}
                             </div>
-                            <Button
-                                variant="solid"
-                                color="primary"
-                                as={Link}
-                                isDisabled={!item_data.reorder_url}
-                                // radius="none"
-                                to={item_data.reorder_url || ""}
-                                target="_blank"
-                                className="rounded-md"
-                            >
-                                {item_data.reorder_url ? (
-                                    <>
-                                        Reorder Link
-                                        <ArrowTopRightOnSquareIcon className="size-5" />
-                                    </>
-                                ) : (
-                                    "No Reorder Link"
-                                )}
-                            </Button>
+                            <>
+                                {item_data.kit_contents?.length ? <>
+                                    {item_data.kit_contents?.map(i => {
+                                        let itm = inventory.find(a => a.uuid == i);
+                                        return (<div className="grid grid-cols-2">
+                                            <div className={`bg-default-200 mr-2 p-2 h-full grid w-full rounded-md`}>
+                                                <span className={`h-fit my-auto text-center whitespace-nowrap overflow-x-auto ${item_data ? "text-default-700" : "text-default-400"}`}>{itm?.name}</span>
+                                            </div>
+                                            <div className={`bg-primary p-2 ml-2 h-fit rounded-md text-center whitespace-nowrap overflow-x-auto ${item_data ? "text-default-700" : "text-default-400"}`}>
+                                                
+                                                <Button
+                                                    variant="solid"
+                                                    color="primary"
+                                                    as={Link}
+                                                    isDisabled={!itm?.reorder_url}
+                                                    // radius="none"
+                                                    to={itm?.reorder_url || ""}
+                                                    target="_blank"
+                                                    className="rounded-md"
+                                                >
+                                                    {itm?.reorder_url ? (
+                                                        <>
+                                                            Reorder Link
+                                                            <ArrowTopRightOnSquareIcon className="size-5" />
+                                                        </>
+                                                    ) : (
+                                                        "No Reorder Link"
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        </div>)
+                                    })}
+                                </> : <div className={`bg-primary p-2 h-fit w-full rounded-md text-center whitespace-nowrap overflow-x-auto ${item_data ? "text-default-700" : "text-default-400"}`}>
+                                    
+                                    <Button
+                                        variant="solid"
+                                        color="primary"
+                                        as={Link}
+                                        isDisabled={!item_data?.reorder_url}
+                                        // radius="none"
+                                        to={item_data?.reorder_url || ""}
+                                        target="_blank"
+                                        className="rounded-md"
+                                    >
+                                        {item_data?.reorder_url ? (
+                                            <>
+                                                Reorder Link
+                                                <ArrowTopRightOnSquareIcon className="size-5" />
+                                            </>
+                                        ) : (
+                                            "No Reorder Link"
+                                        )}
+                                    </Button>
+                                </div>}
+                            </>
                         </div>
                     </PopoverContent>
                 )}

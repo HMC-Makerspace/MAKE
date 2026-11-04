@@ -6,6 +6,7 @@ import {
     Input,
     Autocomplete,
     AutocompleteItem,
+    Tooltip,
 } from "@heroui/react";
 import { EyeIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
@@ -75,19 +76,19 @@ export default function KitEditorModal<
 
             // Update "parent_kit" attribute of each (added or removed) item
 
-            for (const content of currentContents) {
-                contentPatchMutation.reset();
-                contentPatchMutation.mutate({
-                    uuid: content,
-                    patch: { parent_kit: element.uuid },
-                });
-            }
-
             for (const content of removedContents) {
                 contentPatchMutation.reset();
                 contentPatchMutation.mutate({
                     uuid: content,
                     patch: { parent_kit: "" },
+                });
+            }
+
+            for (const content of currentContents) {
+                contentPatchMutation.reset();
+                contentPatchMutation.mutate({
+                    uuid: content,
+                    patch: { parent_kit: element.uuid },
                 });
             }
 
@@ -180,32 +181,46 @@ export default function KitEditorModal<
                                         ))}
                                     </Autocomplete>
 
-                                    <Button
-                                        isIconOnly
-                                        color="primary"
-                                        variant="flat"
-                                        onPress={() => {
-                                            setSelectedItem(new Set([content ?? ""]));
-                                            onClose();
-                                        }}
+                                    <Tooltip
+                                        content="View item"
+                                        className="w-fit p-2"
+                                        delay={500}
+                                        closeDelay={150}
                                     >
-                                        <EyeIcon className="size-6" /> {/* haha eyecon */}
-                                    </Button>
+                                        <Button
+                                            isIconOnly
+                                            color="primary"
+                                            variant="flat"
+                                            onPress={() => {
+                                                setSelectedItem(new Set([content ?? ""]));
+                                                onClose();
+                                            }}
+                                        >
+                                            <EyeIcon className="size-6" /> {/* haha eyecon */}
+                                        </Button>
+                                    </Tooltip>
 
-                                    <Button
-                                        variant="flat"
-                                        color="danger"
-                                        onPress={() => {
-                                            removedContents.push(currentContents[i]);
-                                            setRemovedContents([...removedContents]);
-                                            currentContents.splice(i, 1); // remove that cert
-                                            setCurrentContents([...currentContents]);
-                                            setHasEdits(true);
-                                        }}
-                                        isIconOnly
+                                    <Tooltip
+                                        content="Remove item from kit"
+                                        className="w-fit p-2"
+                                        delay={500}
+                                        closeDelay={150}
                                     >
-                                        <TrashIcon className="size-6" />
-                                    </Button>
+                                        <Button
+                                            variant="flat"
+                                            color="danger"
+                                            onPress={() => {
+                                                removedContents.push(currentContents[i]);
+                                                setRemovedContents([...removedContents]);
+                                                currentContents.splice(i, 1); // remove that cert
+                                                setCurrentContents([...currentContents]);
+                                                setHasEdits(true);
+                                            }}
+                                            isIconOnly
+                                        >
+                                            <TrashIcon className="size-6" />
+                                        </Button>
+                                    </Tooltip>
                                 </div>
                             </div>
                         ))}

@@ -10,6 +10,8 @@ import {
     Textarea,
     NumberInput,
     addToast,
+    Select,
+    SelectItem,
     Checkbox,
 } from "@heroui/react";
 import {
@@ -17,7 +19,7 @@ import {
     RESTOCK_REQUEST_STATUS,
 } from "../../../../../common/restock";
 import RestockType from "./RestockType";
-import { TInventoryItem } from "common/inventory";
+import { InventoryItemUUID, TInventoryItem } from "common/inventory";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { TUser } from "common/user";
 import axios from "axios";
@@ -62,6 +64,7 @@ export default function RestockRequestModal({
     restockSelected,
     editIsOpen,
     editOnOpenChange,
+    inventory,
     type,
 }: {
     requestingUser?: TUser;
@@ -69,18 +72,50 @@ export default function RestockRequestModal({
     restockSelected: TInventoryItem;
     editIsOpen: boolean;
     editOnOpenChange: () => void;
+    inventory: TInventoryItem[];
     type: "create_self" | "create_other" | "both";
 }) {
-    const prevRestock = restocks.findLast(
-        (r) => r.item_uuid == restockSelected.uuid,
-    );
 
-    // is a new restock if it isn't in the list, or if it is on the list and
-    // its status isn't restock or pending
-    const isNew =
-        !prevRestock ||
-        prevRestock.current_status === RESTOCK_REQUEST_STATUS.RESTOCKED ||
-        prevRestock.current_status === RESTOCK_REQUEST_STATUS.DENIED;
+    const restockOptions = [restockSelected.uuid, ...(restockSelected.kit_contents ?? [])];
+
+    const prevRestocks = new Map<InventoryItemUUID, TRestockRequest | undefined>();
+    for (let i of restockOptions) {
+        prevRestocks.set(i, restocks.findLast(
+            (r) => r.item_uuid == i,
+        ));
+    }
+
+    const isPrevOld = function(prev: TRestockRequest | undefined) {
+        // this is a new restock if it isn't in the list, or if it is on the list and
+        // its status isn't restock or pending
+        return !prev ||
+            prev.current_status === RESTOCK_REQUEST_STATUS.RESTOCKED ||
+            prev.current_status === RESTOCK_REQUEST_STATUS.DENIED;
+    }
+
+    const canReq = function(isNew: boolean, restockRequest: TRestockRequest | undefined) {
+        // Whether the user is able to be added to the restock's mailing list
+        // (e.g. they are not already on the list)
+        return !isNew && requestingUser && restockRequest
+            ? !(
+                restockRequest.mailing_list.includes(requestingUser.uuid) ||
+                restockRequest.requesting_user == requestingUser.uuid
+            )
+            : true;
+    }
+
+    const [prevRestock, setPrevRestock_] = useState<TRestockRequest | undefined>(prevRestocks.get(restockSelected.uuid));
+    const [isNew, setIsNew] = useState<boolean>(isPrevOld(prevRestock));
+    const [userCanRequest, setUserCanRequest] = useState<boolean>(canReq(isNew, prevRestock));
+
+    const setPrevRestock = function(newreq: TRestockRequest | undefined) {
+        setPrevRestock_(newreq);
+        
+        let updatedIsNew = isPrevOld(newreq);
+        setIsNew(updatedIsNew);
+
+        setUserCanRequest(canReq(updatedIsNew, newreq));
+    }
 
     const [forOtherUser, setForOtherUser] = useState(false);
     const [otherEmail, setOtherEmail] = useState<string>();
@@ -125,9 +160,9 @@ export default function RestockRequestModal({
                 ? "Successfully created restock"
                 : requestingUser?.uuid &&
                     !(
-                        prevRestock.mailing_list.includes(
+                        prevRestock?.mailing_list.includes(
                             requestingUser.uuid,
-                        ) || prevRestock.requesting_user === requestingUser.uuid
+                        ) || prevRestock?.requesting_user === requestingUser.uuid
                     ) &&
                     data.mailing_list.includes(requestingUser.uuid)
                   ? "Successfully joined mailing list"
@@ -162,11 +197,11 @@ export default function RestockRequestModal({
             // Reason can be added any time
             const reason = data.get("reason_restock") as string;
 
-            const restock: TRestockRequest | undefined = !isNew
+            const restock: TRestockRequest | undefined = !isNew && prevRestock
                 ? { ...prevRestock }
                 : {
                       uuid: crypto.randomUUID(),
-                      item_uuid: restockSelected.uuid,
+                      item_uuid: data.get("req_item") as InventoryItemUUID ?? restockSelected.uuid,
                       current_status: RESTOCK_REQUEST_STATUS.PENDING_APPROVAL,
                       quantity_requested: Number(data.get("req_quantity")),
                       reason: reason,
@@ -242,45 +277,70 @@ export default function RestockRequestModal({
                             </ModalHeader>
                             <ModalBody>
                                 <Form onSubmit={onSubmit}>
-                                    {isNew ? (
-                                        <div className="w-full flex flex-col gap-2">
-                                            <div className="flex flex-row gap-2">
-                                                <Input
-                                                    label="Item Requested"
-                                                    isDisabled
-                                                    defaultValue={
-                                                        restockSelected.name
-                                                    }
-                                                    variant="faded"
-                                                    color="primary"
-                                                    size="md"
-                                                />
-                                                <NumberInput
-                                                    label="Requested Quantity"
-                                                    name="req_quantity"
-                                                    minValue={1}
-                                                    defaultValue={1}
-                                                    variant="faded"
-                                                    color="primary"
-                                                    size="md"
-                                                />
-                                            </div>
+                                    <div className="w-full flex flex-col gap-2">
+                                        <div className="flex flex-row gap-2">
+                                            <Select<TInventoryItem>
+                                                label="Item Requested"
+                                                name="req_item"
+                                                placeholder="Pick an item to restock"
+                                                defaultSelectedKeys={[restockSelected.uuid]}
+                                                isRequired
+                                                isDisabled={restockSelected.kit_contents?.length == 0 || !isPrevOld(prevRestocks.get(restockSelected.uuid))}
+                                                onSelectionChange={keys => {
+                                                    let key = Array.from(keys)[0];
+                                                    setPrevRestock(prevRestocks.get(key as InventoryItemUUID));
+                                                }}
+                                                size="md"
+                                                variant="faded"
+                                                color="primary"
+                                                labelPlacement="inside"
+                                                classNames={{
+                                                    value: "text-default-500",
+                                                }}
+                                                itemHeight={45}
+                                            >
+                                                {restockOptions.map((a) => {
+                                                    let itm = inventory.find(i => i.uuid === a);
+                                                    if (itm == undefined) return (<></>);
+                                                    return (
+                                                        <SelectItem
+                                                            key={itm.uuid}
+                                                            textValue={itm.name}
+                                                            className="h-[45px]"
+                                                        >
+                                                            {itm.name}
+                                                        </SelectItem>
+                                                    );
+                                                })}
+                                            </Select>
+
+                                            {(isNew || !prevRestock) && (<NumberInput
+                                                label="Requested Quantity"
+                                                name="req_quantity"
+                                                minValue={1}
+                                                defaultValue={1}
+                                                variant="faded"
+                                                color="primary"
+                                                size="md"
+                                            />)}
                                         </div>
-                                    ) : (
-                                        <div className="w-full overflow-auto">
-                                            {userCanJoinMailingList && (
-                                                /* LEFT OFF HERE, NEED TO DO OTHER AND BOTH
-                                                JOINING AND OTHERING
-                                                */
-                                                <p className="pb-2">
-                                                    There is already a restock
-                                                    request for this item. If
-                                                    you would like to be
-                                                    notified when it is
-                                                    restocked, please select
-                                                    "Join Mailing List" below.
-                                                </p>
-                                            )}
+                                    </div>
+
+                                    {!isNew && prevRestock && (
+                                    <div className="w-full overflow-auto">
+                                        {userCanJoinMailingList && (
+                                            /* LEFT OFF HERE, NEED TO DO OTHER AND BOTH
+                                            JOINING AND OTHERING
+                                            */
+                                            <p className="pb-2">
+                                                There is already a restock
+                                                request for this item. If
+                                                you would like to be
+                                                notified when it is
+                                                restocked, please select
+                                                "Join Mailing List" below.
+                                            </p>
+                                        )}
                                             <div className="flex flex-col gap-2">
                                                 <div className="flex flex-row gap-2 items-center ">
                                                     <h3 className="font-bold">
@@ -302,8 +362,8 @@ export default function RestockRequestModal({
                                                             -1,
                                                         )
                                                             ? prevRestock.status_logs.at(
-                                                                  -1,
-                                                              )?.message
+                                                                    -1,
+                                                                )?.message
                                                             : ""}
                                                     </p>
                                                 </div>
@@ -386,10 +446,10 @@ export default function RestockRequestModal({
                                             base: "w-full",
                                         }}
                                         required={
-                                            !isNew && !userCanJoinMailingList
+                                            !isNew && !userCanJoinMailingList && !forOtherUser
                                         }
                                         isRequired={
-                                            !isNew && !userCanJoinMailingList
+                                            !isNew && !userCanJoinMailingList && !forOtherUser
                                         }
                                     />
                                     <ModalFooter className="w-full justify-between">

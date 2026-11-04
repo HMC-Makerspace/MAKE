@@ -476,7 +476,7 @@ function EditRoleModal({
                                         : ""
                                 }
                                 onValueChange={wrapEdit((value: string) =>
-                                    setDisplayHierarchy(parseInt(value)),
+                                    setDisplayHierarchy(value == "" ? undefined : parseInt(value)),
                                 )}
                                 variant="faded"
                                 color="primary"

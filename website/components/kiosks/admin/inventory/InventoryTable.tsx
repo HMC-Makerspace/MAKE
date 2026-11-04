@@ -31,7 +31,7 @@ import { TUser, TUserRole } from "common/user";
 import { TCertification, TRequiredCertificate } from "common/certification";
 import { TRestockRequest } from "../../../../../common/restock";
 import { API_SCOPE } from "../../../../../common/global.ts";
-import { mergeRequiredCerts, verifyScopes, convertTimestampToDate } from "../../../../utils.tsx";
+import { mergeAuthRoles, mergeRequiredCerts, verifyScopes, convertTimestampToDate } from "../../../../utils.tsx";
 import clsx from "clsx";
 import CertificationTag from "../certifications/CertificationTag";
 import { UserRoleChip } from "../../../user/UserRoleChip.tsx";
@@ -40,6 +40,7 @@ import ItemLocationChip from "./ItemLocationChip";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RestockRequestModal from "../restock/RestockRequestModal";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import ItemInfo from "./ItemInfo.tsx";
 import { UserRoleList } from "../../../user/UserRoleList.tsx";
 import { CertificationList } from "../certifications/CertificationList.tsx";
 
@@ -143,8 +144,22 @@ export default function InventoryTable({
                 "role",
                 "locations.container",
                 "locations.specific",
+                "kit_contents"
             ],
+            getFn: (obj, key) => {
+                if (key == "kit_contents") {
+                    let fullKitContents = [];
+                    for (let contentUUID of obj.kit_contents ?? []) {
+                        let item = inventory.find(k => k.uuid == contentUUID);
+                        fullKitContents.push(`${item?.name} ${item?.long_name ?? ""} ${item?.keywords ?? ""}`)
+                    }
+                    return fullKitContents;
+                }
+
+                return obj[key as keyof TInventoryItem] as string;
+            },
             threshold: 0.3,
+            distance: 50000
         });
     }, [inventory]);
 
@@ -444,6 +459,7 @@ export default function InventoryTable({
                                                       container: "",
                                                   }}
                                                   areas={areas}
+                                                  kit
                                               />
                                           ),
                                       );
@@ -472,14 +488,18 @@ export default function InventoryTable({
                     ),
                     available_to: (i) => (
                         <UserRoleList
-                            list={i.available_to}
+                            list={mergeAuthRoles(i.available_to,
+                                inventory.find(k => k.uuid == i.parent_kit)?.available_to
+                            )}
                             roles={roles}
                             size="lg"
                         />
                     ),
                     visible_to: (i) => (
                         <UserRoleList
-                            list={i.visible_to}
+                            list={mergeAuthRoles(i.visible_to,
+                                inventory.find(k => k.uuid == i.parent_kit)?.visible_to
+                            )}
                             roles={roles}
                             size="lg"
                         />
@@ -488,10 +508,12 @@ export default function InventoryTable({
                         <div className="flex flex-col gap-1 overflow-auto max-w-1/2">
                             {i.kit_contents?.map((content) => (
                                 <div key={i.uuid + "-item-" + content}>
-                                    {
-                                        inventory.find((a) => a.uuid == content)
-                                            ?.name
-                                    }
+                                    <ItemInfo
+                                        item_data={inventory.find(a => a.uuid == content)}
+                                        inventory={inventory}
+                                        areas={areas}
+                                        certs={certifications}
+                                    />
                                 </div>
                             ))}
                         </div>
@@ -521,13 +543,14 @@ export default function InventoryTable({
                 )}
             />
 
-            {restocks && (
+            {restocks && restockIsOpen && (
                 <RestockRequestModal
                     requestingUser={requestingUser}
                     restocks={restocks}
                     restockSelected={selectedItem}
                     editIsOpen={restockIsOpen}
                     editOnOpenChange={restockOnOpenChange}
+                    inventory={inventory}
                     type={
                         restockSelfAccess && restockOtherAccess
                             ? "both"

@@ -28,7 +28,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { TCertification } from "common/certification";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, ArrowRightCircleIcon } from "@heroicons/react/24/outline";
 import {
     BookmarkIcon,
     UserIcon,
@@ -37,12 +37,11 @@ import {
     PlusIcon,
     BriefcaseIcon,
     EyeIcon,
-    MagnifyingGlassIcon,
 } from "@heroicons/react/24/solid";
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
-import { AvailableToRolesModal, VisibleToRolesModal } from "../certifications/AuthorizedRolesModal";
+import { AvailableToRolesModal, EditAuthrolesModal, VisibleToRolesModal } from "../certifications/AuthorizedRolesModal";
 import { motion } from "motion/react";
 import ItemQuantityIcon from "./ItemQuantityIcon";
 import ItemLocationModal from "./ItemLocationModal";
@@ -50,7 +49,7 @@ import { TArea } from "common/area";
 import InventoryAuditModal from "./InventoryAuditModal";
 import InventoryAuditLogsModal from "./InventoryAuditLogsModal";
 import KitEditorModal from "./KitEditorModal";
-import { mergeRequiredCerts } from "../../../../utils";
+import { mergeAuthRoles, mergeRequiredCerts } from "../../../../utils";
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateItem = async ({
@@ -271,6 +270,7 @@ export default function ItemEditorForm({
     const [invAuditOpen, setInvAuditOpen] = React.useState<boolean>(false); // whether new inventory audit modal is open
     const [invAuditLogsOpen, setInvAuditLogsOpen] = React.useState<boolean>(false); // whether inventory audit logs modal is open
     const [kitEditorOpen, setKitEditorOpen] = React.useState<boolean>(false); // whether kit content edit modal is open
+    const [rolesOpen, setRolesOpen] = React.useState<boolean>(false); // whether gen auth role edit modal is open
 
     const reqcertsMutation = patchMutation(() => setReqcertsOpen(false));
     const acrolesMutation = patchMutation(() => setAcrolesOpen(false));
@@ -293,6 +293,8 @@ export default function ItemEditorForm({
 
     const parent_kit = items.find(i => i.uuid == item.parent_kit);
     const mergedReqCerts = mergeRequiredCerts(item.required_certifications || [], parent_kit?.required_certifications || []);
+    const mergedAcroles = mergeAuthRoles(item.available_to, parent_kit?.available_to);
+    const mergedVwroles = mergeAuthRoles(item.visible_to, parent_kit?.visible_to);
 
     return (
         <>
@@ -685,8 +687,7 @@ export default function ItemEditorForm({
                                 }
                                 className="ml-2"
                             >
-                                <MagnifyingGlassIcon className="size-6" />{" "}
-                                {/* haha eyecon */}
+                                <ArrowRightCircleIcon className="size-6" /> {/* haha eyecon */}
                             </Button>
                         </Tooltip>
                     </div>
@@ -823,8 +824,8 @@ export default function ItemEditorForm({
                         <Tooltip
                             content={
                                 isNew
-                                    ? "Create the item first, before editing accessor roles."
-                                    : "Accessor Roles"
+                                    ? "Create the item first, before editing authorized roles."
+                                    : "Authorized Roles"
                             }
                             className="w-fit p-2"
                             delay={500}
@@ -834,7 +835,7 @@ export default function ItemEditorForm({
                             <Button
                                 // variant="flat"
                                 color="primary"
-                                onPress={() => !isNew && setAcrolesOpen(true)}
+                                onPress={() => !isNew && setRolesOpen(true)}
                                 // isIconOnly
                                 isDisabled={isDisabled}
                                 className={
@@ -843,34 +844,7 @@ export default function ItemEditorForm({
                                 data-hover={!isNew && !isDisabled}
                             >
                                 <UserIcon className="size-7" />
-                                {item.available_to?.length ?? 0}
-                            </Button>
-                        </Tooltip>
-
-                        <Tooltip
-                            content={
-                                isNew
-                                    ? "Create the item first, before editing viewer roles."
-                                    : "Viewer Roles"
-                            }
-                            className="w-fit p-2"
-                            delay={500}
-                            closeDelay={150}
-                            isDisabled={isDisabled}
-                        >
-                            <Button
-                                // variant="flat"
-                                color="primary"
-                                onPress={() => !isNew && setVwrolesOpen(true)}
-                                // isIconOnly
-                                isDisabled={isDisabled}
-                                className={
-                                    isNew ? "opacity-disabled px-2" : "px-2"
-                                }
-                                data-hover={!isNew && !isDisabled}
-                            >
-                                <EyeIcon className="size-7" />
-                                {item.visible_to?.length ?? 0}
+                                {mergeAuthRoles(mergedAcroles, mergedVwroles)?.length ?? 0}
                             </Button>
                         </Tooltip>
 
@@ -958,6 +932,7 @@ export default function ItemEditorForm({
                 isOpen={acrolesOpen}
                 onOpenChange={setAcrolesOpen}
                 patchMutation={acrolesMutation}
+                parentKitAcroles={parent_kit?.available_to}
             />
             <VisibleToRolesModal
                 key={"vwroleauth-" + item.uuid}
@@ -966,6 +941,7 @@ export default function ItemEditorForm({
                 isOpen={vwrolesOpen}
                 onOpenChange={setVwrolesOpen}
                 patchMutation={vwrolesMutation}
+                parentKitVwroles={parent_kit?.visible_to}
             />
             <ItemLocationModal
                 key={"locedit-" + item.uuid}
@@ -997,6 +973,15 @@ export default function ItemEditorForm({
                 kitPatchMutation={kitEditorMutation}
                 contentPatchMutation={kitEditorMutation}
                 setSelectedItem={setSelectedItem}
+            />
+            <EditAuthrolesModal
+                key={"kitefdssffdsdit-" + item.uuid}
+                isOpen={rolesOpen}
+                onOpenChange={setRolesOpen}
+                setVwrolesOpen={setVwrolesOpen}
+                setAcrolesOpen={setAcrolesOpen}
+                numVwroles={mergedVwroles.length}
+                numAcroles={mergedAcroles.length}
             />
         </>
     );

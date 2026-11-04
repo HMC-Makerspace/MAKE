@@ -243,8 +243,8 @@ export default function UsersTable({
                 <div className="flex justify-between items-center pb-2">
                     <span className="text-default-400 text-small">
                         {filteredUsers.length === numUsers
-                            ? `Total ${numUsers} items`
-                            : `Showing ${filteredUsers.length} of ${numUsers} items`}{" "}
+                            ? `Total ${numUsers} users`
+                            : `Showing ${filteredUsers.length} of ${numUsers} users`}{" "}
                     </span>
                 </div>
             </div>
