@@ -23,7 +23,7 @@ import {
     UserRoleUUID,
     UserUUID,
 } from "common/user";
-import React from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
 import { UserRoleSelect } from "../../../user/UserRoleSelect";
 import {
@@ -262,6 +262,7 @@ export default function UserEditorForm({
                     className="w-full text-default-500 relative h-14"
                     timeout={1000}
                     classNames={{
+                        pre: "overflow-x-auto whitespace-nowrap pr-12",
                         copyButton:
                             "absolute right-2 bg-default-200 hover:!bg-default-300",
                     }}

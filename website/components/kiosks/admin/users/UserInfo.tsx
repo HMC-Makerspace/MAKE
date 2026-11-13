@@ -33,12 +33,13 @@ export default function UserInfo({
                 className,
             )}
         >
-            <div className="w-full flex flex-row gap-2">
+            <div className="w-full flex flex-col sm:flex-row gap-2">
                 <div
                     className={clsx(
                         "bg-default-200 p-2 h-fit",
-                        "w-1/2 rounded-md text-center",
+                        "rounded-md text-center",
                         "xl:w-2/3 whitespace-nowrap overflow-x-auto",
+                        "sm:w-1/2",
                         user ? "text-default-700" : "text-default-400",
                         size === "sm"
                             ? "text-sm"
@@ -53,8 +54,9 @@ export default function UserInfo({
                 <div
                     className={clsx(
                         "bg-default-200 p-2 h-fit",
-                        "w-1/2 rounded-md text-center",
+                        "rounded-md text-center",
                         "xl:w-1/3 overflow-x-auto",
+                        "sm:w-1/2",
                         user ? "text-default-700" : "text-default-400",
                         size === "sm"
                             ? "text-sm"

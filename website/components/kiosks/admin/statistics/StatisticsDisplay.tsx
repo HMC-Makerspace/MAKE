@@ -96,11 +96,13 @@ export default function StatisticsDisplay({
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
-            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 p-6 pb-0">
-                <div />
-                <h1 className="text-3xl font-bold text-foreground-900 mb-2">
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-center gap-4 p-6 pb-0">
+                <div className="hidden sm:block" />
+
+                <h1 className="text-3xl font-bold text-foreground-900 mb-2 text-center sm:text-left">
                     Statistics
                 </h1>
+
                 <DateRangePicker<CalendarDate>
                     label="Statistics Date Range"
                     value={dateRange}
@@ -109,7 +111,7 @@ export default function StatisticsDisplay({
                     hideTimeZone
                     variant="faded"
                     color="primary"
-                    className="w-full max-w-md justify-self-end"
+                    className="w-full sm:max-w-md sm:justify-self-end"
                     classNames={{
                         segment:
                             "text-xs sm:text-small text-default-700 data-[editable=true]:text-default-700 data-[editable=true]:data-[placeholder=true]:text-default-500 data-[editable=true]:data-[placeholder=true]:italic focus:text-default-700 data-[editable=true]:focus:text-default-700",
@@ -117,7 +119,7 @@ export default function StatisticsDisplay({
                 />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
-                <div className="col-span-1 lg:col-span-2">
+                <div className="col-span-1 lg:col-span-2 min-w-0">
                     <UsersByDomain users={filteredUsers} />
                     {/* <CheckoutsByRole
                         users={users}

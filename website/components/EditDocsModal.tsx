@@ -1,4 +1,11 @@
-import { Button, Modal, Form, ModalContent, Input, Dropdown } from "@heroui/react";
+import {
+    Button,
+    Modal,
+    Form,
+    ModalContent,
+    Input,
+    Dropdown,
+} from "@heroui/react";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 import React from "react";
@@ -39,7 +46,7 @@ export default function EditDocsModal<
             };
         }
     >;
-    roleOption?: boolean
+    roleOption?: boolean;
 }) {
     const [hasEdits, setHasEdits] = React.useState<boolean>(false);
     const [docs, setDocs] = React.useState<TDocument[]>(
@@ -73,7 +80,9 @@ export default function EditDocsModal<
         return (val: any) => {
             if (!docs[i]) docs[i] = { ...emptyDoc }; // copy the emptyDoc template if necessary
             docs[i]["visible_to"] = Array.from(val) as UserRoleUUID[]; // update the value
-            if (docs[i]["visible_to"].length == 0) {docs[i]["visible_to"] = null}; // makes sure empty lists not allowed
+            if (docs[i]["visible_to"].length == 0) {
+                docs[i]["visible_to"] = null;
+            } // makes sure empty lists not allowed
             setDocs([...docs]); // update the docs list
 
             setHasEdits(true);
@@ -106,7 +115,7 @@ export default function EditDocsModal<
 
                         {docs.map((doc, i) => (
                             <div
-                                className="flex flex-row w-full gap-2 items-center"
+                                className="flex flex-col sm:flex-row w-full gap-2 items-center"
                                 key={element.uuid + "-doc" + i}
                             >
                                 <Input
@@ -149,38 +158,41 @@ export default function EditDocsModal<
                                     }}
                                     className="w-full"
                                 />
-
-                                {roleOption && ( // TODO: doesn't currently allow the distinction between [] (only visible to admins) and null (public)
-                                    <div className="min-w-[15vw] max-w-full">
-                                        <UserRoleSelect
-                                            selectedKeys={
-                                                docs[i]["visible_to"] ??
-                                                undefined
-                                            }
-                                            onSelectionChange={wrapRolesEdit(i)}
-                                            placeholder="Select viewer roles"
-                                            label="Viewer Roles"
-                                            labelPlacement="inside"
-                                            classNames={{
-                                                value: "text-default-500",
-                                            }}
-                                            size="md"
-                                            multiline={false}
-                                        />
-                                    </div>
-                                )}
-                                <Button
-                                    variant="flat"
-                                    color="danger"
-                                    onPress={() => {
-                                        docs.splice(i, 1); // remove that doc
-                                        setDocs([...docs]);
-                                        setHasEdits(true);
-                                    }}
-                                    isIconOnly
-                                >
-                                    <TrashIcon className="size-6" />
-                                </Button>
+                                <div className="flex flex-row justify-center items-center gap-2 w-full">
+                                    {roleOption && ( // TODO: doesn't currently allow the distinction between [] (only visible to admins) and null (public)
+                                        <div className="sm:min-w-[15vw] sm:max-w-full w-full">
+                                            <UserRoleSelect
+                                                selectedKeys={
+                                                    docs[i]["visible_to"] ??
+                                                    undefined
+                                                }
+                                                onSelectionChange={wrapRolesEdit(
+                                                    i,
+                                                )}
+                                                placeholder="Select viewer roles"
+                                                label="Viewer Roles"
+                                                labelPlacement="inside"
+                                                classNames={{
+                                                    value: "text-default-500",
+                                                }}
+                                                size="md"
+                                                multiline={false}
+                                            />
+                                        </div>
+                                    )}
+                                    <Button
+                                        variant="flat"
+                                        color="danger"
+                                        onPress={() => {
+                                            docs.splice(i, 1); // remove that doc
+                                            setDocs([...docs]);
+                                            setHasEdits(true);
+                                        }}
+                                        isIconOnly
+                                    >
+                                        <TrashIcon className="size-6" />
+                                    </Button>
+                                </div>
                             </div>
                         ))}
 

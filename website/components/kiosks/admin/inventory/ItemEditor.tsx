@@ -39,7 +39,7 @@ export default function ItemEditor({
             className={clsx(
                 "flex flex-col rounded-xl bg-content1",
                 "h-1/3 lg:h-full relative",
-                "w-full lg:w-2/3 xl:w-1/2 2xl:w-1/3 p-1.5",
+                "w-full lg:p-1.5",
             )}
         >
             <h1 className="3xl font-bold text-center p-3 bg-default-50 rounded-t-lg">

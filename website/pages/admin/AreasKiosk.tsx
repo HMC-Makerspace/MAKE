@@ -113,7 +113,7 @@ export default function AreasKiosk() {
                         <Button
                             variant="flat"
                             color="primary"
-                            className="text-md"
+                            className="text-md hidden sm:flex" 
                             startContent={
                                 <AdjustmentsHorizontalIcon className="size-6" />
                             }
@@ -121,17 +121,26 @@ export default function AreasKiosk() {
                         >
                             Rearrange
                         </Button>
+                        <Button
+                            variant="flat"
+                            color="primary"
+                            className="text-md sm:hidden flex" 
+                            isIconOnly
+                            onPress={rearrangeModalOpen}
+                        >
+                            <AdjustmentsHorizontalIcon className="size-6" />
+                        </Button>
                         <RearrangeAreasModal
                             areas={areas}
                             isOpen={rearrangeModal}
                             onOpenChange={rearrangeModalOpenChange}
                         />
                     </div>
-                    <span className="flex justify-center flex-1 text-xl text-default-700 font-bold">
+                    <span className="flex justify-center flex-1 text-xl text-default-700 font-bold text-center">
                         Area Editor
                     </span>
                     <div className="flex-1 ml-auto flex gap-3 items-center justify-end">
-                        <span className="text-default-700 font-semibold">
+                        <span className="text-default-700 font-semibold sm:block hidden">
                             {preview ? "Preview Mode" : "Edit Mode"}
                         </span>
                         <Button

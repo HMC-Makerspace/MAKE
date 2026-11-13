@@ -76,10 +76,10 @@ export default function WorkshopPage() {
     const workshopVirtualizer = useVirtualizer({
         count: rows ?? 0,
         getScrollElement: () => scrollerRef.current,
-        estimateSize: () => 360,
+        estimateSize: () => 380,
         overscan: 4,
         getItemKey: (index) => filteredWorkshops?.[index]?.uuid ?? index,
-        gap: 16,
+        gap: 12,
     });
 
     return (

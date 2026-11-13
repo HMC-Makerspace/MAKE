@@ -8,7 +8,8 @@ import {
     DropdownItem,
     Spinner,
     addToast,
-    useDisclosure
+    useDisclosure,
+    ButtonGroup,
 } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
@@ -16,7 +17,7 @@ import {
     PlusIcon,
     PencilSquareIcon,
     BookmarkIcon,
-    TrashIcon
+    TrashIcon,
 } from "@heroicons/react/24/outline";
 
 import React from "react";
@@ -38,6 +39,7 @@ import RequiredCertsModal from "./RequiredCertsModal";
 import { relativeTimestampToString } from "../../../../utils";
 import { TUserRole } from "common/user";
 import { UserRoleList } from "../../../user/UserRoleList";
+import { ColumnSelect } from "../../../Table";
 
 const baseColumns = [
     { name: "UUID", id: "uuid" },
@@ -48,7 +50,7 @@ const baseColumns = [
     { name: "Viewer Roles", id: "visible_to" },
     { name: "Documents", id: "documents" },
     { name: "Prerequisites", id: "prerequisites" },
-    { name: "Delete", id: "delete" }
+    { name: "Delete", id: "delete" },
 ];
 
 const updateCertDocs = async ({
@@ -168,7 +170,7 @@ export default function CertificationsTable({
 
     const numCerts = certs.length;
 
-    console.log("Roles", roles)
+    console.log("Roles", roles);
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -187,9 +189,46 @@ export default function CertificationsTable({
                             input: "placeholder:text-foreground-200",
                         }}
                     />
-                    <div className="flex gap-3">
+                    {/* Small screens: compact controls */}
+                    <div className="flex sm:hidden">
+                        <ButtonGroup>
+                            <ColumnSelect
+                                columns={columns}
+                                visibleColumns={visibleColumns}
+                                setVisibleColumns={setVisibleColumns}
+                                isLoading={isLoading}
+                                isIconOnly
+                            />
+                            <Button
+                                color="primary"
+                                isDisabled={isLoading}
+                                startContent={<PlusIcon className="size-6" />}
+                                onPress={() => {
+                                    setEditCert({
+                                        uuid: crypto.randomUUID(),
+                                        name: "",
+                                        description: "",
+                                        visibility:
+                                            CERTIFICATION_VISIBILITY.PRIVATE,
+                                        color: "",
+                                        max_level: 0,
+                                        seconds_valid_for: 0,
+                                        documents: [],
+                                        required_certifications: [],
+                                    });
+                                    setIsNew(true);
+                                    setIsOpen(true);
+                                }}
+                            >
+                                Create
+                            </Button>
+                        </ButtonGroup>
+                    </div>
+
+                    {/* sm and above: full controls */}
+                    <div className="hidden sm:flex gap-3">
                         <Dropdown isDisabled={isLoading}>
-                            <DropdownTrigger className="hidden sm:flex">
+                            <DropdownTrigger>
                                 <Button
                                     endContent={
                                         <ChevronDownIcon className="size-6 text-small" />
@@ -199,6 +238,7 @@ export default function CertificationsTable({
                                     Filter Columns
                                 </Button>
                             </DropdownTrigger>
+
                             <DropdownMenu
                                 disallowEmptySelection
                                 aria-label="Table Columns"
@@ -273,13 +313,16 @@ export default function CertificationsTable({
                     }
                 }}
                 customColumnComponents={{
-                    visible_to: (cert: TCertification) => (
-                        cert.visible_to && cert.visible_to.length > 0 ? <UserRoleList
-                            list={cert.visible_to}
-                            roles={roles}
-                            size="lg"
-                        /> : "None"
-                    ),
+                    visible_to: (cert: TCertification) =>
+                        cert.visible_to && cert.visible_to.length > 0 ? (
+                            <UserRoleList
+                                list={cert.visible_to}
+                                roles={roles}
+                                size="lg"
+                            />
+                        ) : (
+                            "None"
+                        ),
                     documents: (cert: TCertification) => (
                         <div className="flex justify-center">
                             <Button
@@ -420,4 +463,3 @@ export default function CertificationsTable({
         </div>
     );
 }
-

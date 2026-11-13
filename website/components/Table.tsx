@@ -15,7 +15,10 @@ import {
     SortDescriptor,
 } from "@heroui/react";
 import { useInfiniteScroll } from "@heroui/use-infinite-scroll";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+    ChevronDownIcon,
+    AdjustmentsVerticalIcon,
+} from "@heroicons/react/24/outline";
 
 const initialVisibleContentLength = 20;
 const incrementVisibleContentLength = 20;
@@ -66,12 +69,10 @@ export default function MAKETable<Type extends { uuid: string }>({
         | "warning"
         | "danger";
     showSelectionCheckboxes?: boolean;
-    disabledRows?: string[]
+    disabledRows?: string[];
 }) {
-
     // The column the table is being sorted by
-    const [sortDescriptor, setSortDescriptor] =
-    React.useState<SortDescriptor>({
+    const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
         column: "",
         direction: "ascending",
     });
@@ -101,7 +102,7 @@ export default function MAKETable<Type extends { uuid: string }>({
         }
 
         const column = columns.find(
-            (column) => column.id === sortDescriptor.column
+            (column) => column.id === sortDescriptor.column,
         );
 
         if (!column) {
@@ -130,9 +131,7 @@ export default function MAKETable<Type extends { uuid: string }>({
                 sensitivity: "base",
             });
 
-            return sortDescriptor.direction === "ascending"
-                ? cmp
-                : -cmp;
+            return sortDescriptor.direction === "ascending" ? cmp : -cmp;
         });
     }, [content, sortDescriptor]);
 
@@ -159,16 +158,19 @@ export default function MAKETable<Type extends { uuid: string }>({
     }, [columns, visibleColumns]);
 
     //  The function to render each value in the table
-    const renderCell = React.useCallback((item: Type, columnKey: React.Key) => {
-        const keyString = columnKey as string;
-        // If there exists a custom component function for this component, use it
-        if (customColumnComponents && keyString in customColumnComponents) {
-            return customColumnComponents[keyString](item);
-        } else {
-            // Otherwise, just return the cell value as a string
-            return item[columnKey as keyof Type] as string;
-        }
-    }, [customColumnComponents]);
+    const renderCell = React.useCallback(
+        (item: Type, columnKey: React.Key) => {
+            const keyString = columnKey as string;
+            // If there exists a custom component function for this component, use it
+            if (customColumnComponents && keyString in customColumnComponents) {
+                return customColumnComponents[keyString](item);
+            } else {
+                // Otherwise, just return the cell value as a string
+                return item[columnKey as keyof Type] as string;
+            }
+        },
+        [customColumnComponents],
+    );
 
     return (
         <Table
@@ -181,7 +183,7 @@ export default function MAKETable<Type extends { uuid: string }>({
             baseRef={scrollerRef}
             classNames={{
                 base: "max-h-full overflow-auto",
-                tbody: "[&>tr[data-disabled='true']]:opacity-50"
+                tbody: "[&>tr[data-disabled='true']]:opacity-50",
             }}
             bottomContent={
                 hasMoreContent
@@ -212,14 +214,14 @@ export default function MAKETable<Type extends { uuid: string }>({
                 isLoading={isLoading}
             >
                 {(item) => (
-                        <TableRow
-                            key={item.uuid}
+                    <TableRow
+                        key={item.uuid}
                         // className="data-[selected=true]:bg-default-400"
-                        >
-                            {(columnKey) => (
-                                <TableCell>{renderCell(item, columnKey)}</TableCell>
-                            )}
-                        </TableRow>
+                    >
+                        {(columnKey) => (
+                            <TableCell>{renderCell(item, columnKey)}</TableCell>
+                        )}
+                    </TableRow>
                 )}
             </TableBody>
         </Table>
@@ -231,6 +233,7 @@ export function ColumnSelect({
     visibleColumns,
     setVisibleColumns,
     isLoading,
+    isIconOnly = false,
 }: {
     columns: {
         name: string;
@@ -241,19 +244,31 @@ export function ColumnSelect({
     visibleColumns: Selection;
     setVisibleColumns: (newColumns: Selection) => void;
     isLoading: boolean;
+    isIconOnly?: boolean;
 }) {
     return (
         <Dropdown isDisabled={isLoading}>
-            <DropdownTrigger className="hidden sm:flex">
-                <Button
-                    startContent={
-                        <ChevronDownIcon className="size-6 text-small" />
-                    }
-                    variant="flat"
-                >
-                    Columns
-                </Button>
-            </DropdownTrigger>
+            {isIconOnly ? (
+                <DropdownTrigger className="">
+                    <Button variant="faded" isIconOnly>
+                        <AdjustmentsVerticalIcon
+                            className="size-6"
+                            color="secondary"
+                        />
+                    </Button>
+                </DropdownTrigger>
+            ) : (
+                <DropdownTrigger className="hidden sm:flex">
+                    <Button
+                        startContent={
+                            <ChevronDownIcon className="size-6 text-small" />
+                        }
+                        variant="flat"
+                    >
+                        Columns
+                    </Button>
+                </DropdownTrigger>
+            )}
             <DropdownMenu
                 disallowEmptySelection
                 aria-label="Table Columns"

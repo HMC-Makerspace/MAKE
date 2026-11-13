@@ -301,7 +301,7 @@ export default function WorkshopCard({
                             ))}
                     </div>
 
-                    <div className="absolute w-full h-fit bottom-3 flex justify-evenly z-20">
+                    <div className="absolute w-full h-fit bottom-3 flex flex-col gap-2 md:gap-0 md:flex-row justify-evenly z-20">
                         <ButtonGroup
                             color="primary"
                             radius="lg"

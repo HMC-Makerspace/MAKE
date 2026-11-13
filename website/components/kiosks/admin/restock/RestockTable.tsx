@@ -129,7 +129,7 @@ function ModifyRestockModal({
     return (
         <Modal
             isOpen={editIsOpen}
-            placement="top-center"
+            placement="bottom-center"
             onOpenChange={editOnOpenChange}
             className="flex flex-col justify-center"
         >

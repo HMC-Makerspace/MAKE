@@ -310,17 +310,20 @@ export default function ItemEditorForm({
                         className="w-full text-default-500 relative h-14"
                         timeout={1000}
                         classNames={{
+                            pre: "overflow-x-auto whitespace-nowrap pr-12",
                             copyButton:
                                 "absolute right-2 bg-default-200 hover:!bg-default-300",
                         }}
                     >
-                        {UUID}
+                            {UUID}
+                        
+                        
                     </Snippet>
                 </div>
 
                 <div
                     className={clsx(
-                        "w-full grid grid-cols-2 gap-2",
+                        "w-full grid grid-cols-1 gap-2",
                         " lg:grid-cols-1 overflow-auto",
                         "bg-content1 p-2 flex-1",
                     )}

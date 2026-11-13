@@ -5,6 +5,12 @@ import {
     Spinner,
     Checkbox,
     useDisclosure,
+    Dropdown,
+    DropdownSection,
+    DropdownTrigger,
+    DropdownMenu,
+    DropdownItem,
+    ButtonGroup,
 } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
@@ -25,6 +31,10 @@ import UserExportModal from "./UserExportModal";
 import { convertTimestampToDate } from "../../../../utils";
 import { UserRoleList } from "../../../user/UserRoleList";
 import { CertificationList } from "../certifications/CertificationList";
+import {
+    AdjustmentsHorizontalIcon,
+    ChevronDownIcon,
+} from "@heroicons/react/24/solid";
 
 const baseColumns = [
     { name: "UUID", id: "uuid" }, // No need to show
@@ -167,10 +177,7 @@ export default function UsersTable({
                 <div className="flex justify-between gap-3 items-end">
                     <Input
                         isClearable
-                        className={clsx(
-                            "w-full text-for",
-                            fullHeader ? "sm:max-w-[44%]" : "",
-                        )}
+                        className={clsx("w-full text-for")}
                         placeholder="Search..."
                         startContent={<SearchIcon className="size-6" />}
                         value={search}
@@ -182,61 +189,136 @@ export default function UsersTable({
                         }}
                     />
                     {fullHeader && (
-                        <div className="flex gap-3">
-                            <Button
-                                color="default"
-                                variant="bordered"
-                                onPress={openExportMenu}
-                                className="px-2 xl:px-4 min-w-fit"
-                            >
-                                <ArrowTopRightOnSquareIcon className="size-5" />
-                                <div className="hidden xl:flex">Export</div>
-                            </Button>
-                            <ColumnSelect
-                                columns={columns}
-                                visibleColumns={visibleColumns}
-                                setVisibleColumns={setVisibleColumns}
-                                isLoading={isLoading}
-                            />
-                            {/* TODO: Make a filter by dropdown that has sub-selection part for role, cert, etc. */}
-                            {multiSelect ? (
+                        <div>
+                            {/* Full  */}
+                            <div className="hidden lg:flex lg:gap-3">
                                 <Button
-                                    color="danger"
-                                    isDisabled={isLoading}
-                                    startContent={
-                                        <PencilSquareIcon className="size-6" />
-                                    }
-                                    onPress={() => batchEdit(false)}
+                                    color="default"
+                                    variant="bordered"
+                                    onPress={openExportMenu}
+                                    className="px-2 xl:px-4 min-w-fit"
                                 >
-                                    End Batch Edit
+                                    <ArrowTopRightOnSquareIcon className="size-5" />
+                                    <div className="hidden xl:flex">Export</div>
                                 </Button>
-                            ) : (
-                                <Button
-                                    color="warning"
-                                    // TODO: Make batch editing work
-                                    isDisabled
-                                    // isDisabled={isLoading}
-                                    startContent={
-                                        <PencilSquareIcon className="size-6" />
-                                    }
-                                    onPress={() => batchEdit(true)}
-                                >
-                                    Batch Edit
-                                </Button>
-                            )}
+                                <ColumnSelect
+                                    columns={columns}
+                                    visibleColumns={visibleColumns}
+                                    setVisibleColumns={setVisibleColumns}
+                                    isLoading={isLoading}
+                                />
+                                {/* TODO: Make a filter by dropdown that has sub-selection part for role, cert, etc. */}
+                                {multiSelect ? (
+                                    <Button
+                                        color="danger"
+                                        isDisabled={isLoading}
+                                        startContent={
+                                            <PencilSquareIcon className="size-6" />
+                                        }
+                                        onPress={() => batchEdit(false)}
+                                    >
+                                        End Batch Edit
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        color="warning"
+                                        // TODO: Make batch editing work
+                                        isDisabled
+                                        // isDisabled={isLoading}
+                                        startContent={
+                                            <PencilSquareIcon className="size-6" />
+                                        }
+                                        onPress={() => batchEdit(true)}
+                                    >
+                                        Batch Edit
+                                    </Button>
+                                )}
 
-                            {onCreate && (
-                                <Button
-                                    color="primary"
-                                    isDisabled={isLoading}
-                                    startContent={
-                                        <PlusIcon className="size-6" />
-                                    }
-                                    onPress={createUser}
-                                >
-                                    Create
-                                </Button>
-                            )}
+                                {onCreate && (
+                                    <Button
+                                        color="primary"
+                                        isDisabled={isLoading}
+                                        startContent={
+                                            <PlusIcon className="size-6" />
+                                        }
+                                        onPress={createUser}
+                                    >
+                                        Create
+                                    </Button>
+                                )}
+                            </div>
+
+                            <div className="lg:hidden block flex flex-row gap-3">
+                                <ButtonGroup>
+                                    <ColumnSelect
+                                        columns={columns}
+                                        visibleColumns={visibleColumns}
+                                        setVisibleColumns={setVisibleColumns}
+                                        isLoading={isLoading}
+                                        isIconOnly
+                                    />
+                                    <Dropdown>
+                                        <DropdownTrigger>
+                                            <Button isIconOnly variant="faded">
+                                                <ChevronDownIcon
+                                                    className="size-6"
+                                                    color="secondary"
+                                                />
+                                            </Button>
+                                        </DropdownTrigger>
+                                        <DropdownMenu>
+                                            <DropdownItem
+                                                key="edit"
+                                                onPress={openExportMenu}
+                                                startContent={
+                                                    <ArrowTopRightOnSquareIcon className="size-5" />
+                                                }
+                                            >
+                                                Export
+                                            </DropdownItem>
+
+                                            {multiSelect ? (
+                                                <DropdownItem
+                                                    key="batch-edit"
+                                                    startContent={
+                                                        <PencilSquareIcon className="size-6" />
+                                                    }
+                                                    onPress={() =>
+                                                        batchEdit(false)
+                                                    }
+                                                >
+                                                    End Batch Edit
+                                                </DropdownItem>
+                                            ) : (
+                                                <DropdownItem
+                                                    key="batch-edit"
+                                                    // TODO: Make batch editing work
+                                                    isDisabled
+                                                    // isDisabled={isLoading}
+                                                    startContent={
+                                                        <PencilSquareIcon className="size-6" />
+                                                    }
+                                                    onPress={() =>
+                                                        batchEdit(true)
+                                                    }
+                                                >
+                                                    Batch Edit
+                                                </DropdownItem>
+                                            )}
+
+                                            <DropdownItem
+                                                key="create"
+                                                onPress={createUser}
+                                                startContent={
+                                                    <PlusIcon className="size-6" />
+                                                }
+                                            >
+                                                Create
+                                            </DropdownItem>
+                                        </DropdownMenu>
+                                    </Dropdown>
+                                </ButtonGroup>
+                            </div>
                         </div>
                     )}
                 </div>

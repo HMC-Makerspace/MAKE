@@ -23,6 +23,7 @@ import {
     SelectSection,
     ListboxSection,
     addToast,
+    ButtonGroup,
 } from "@heroui/react";
 import {
     MagnifyingGlassIcon as SearchIcon,
@@ -33,7 +34,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { TUserRole, UserRoleUUID } from "common/user";
 import MAKETable, { ColumnSelect } from "../../../Table";
-import {UserRoleChip} from "../../../user/UserRoleChip";
+import { UserRoleChip } from "../../../user/UserRoleChip";
 import Fuse from "fuse.js";
 import React from "react";
 import {
@@ -654,13 +655,24 @@ export default function RolesTable({
                             input: "placeholder:text-foreground-200",
                         }}
                     />
-                    <div className="flex gap-3">
-                        <ColumnSelect
-                            columns={columns}
-                            visibleColumns={visibleColumns}
-                            setVisibleColumns={setVisibleColumns}
-                            isLoading={isLoading}
-                        />
+                    <div className="flex gap-1 sm:gap-3">
+                        <div className="hidden sm:block">
+                            <ColumnSelect
+                                columns={columns}
+                                visibleColumns={visibleColumns}
+                                setVisibleColumns={setVisibleColumns}
+                                isLoading={isLoading}
+                            />
+                        </div>
+                        <div className="block sm:hidden">
+                            <ColumnSelect
+                                columns={columns}
+                                visibleColumns={visibleColumns}
+                                setVisibleColumns={setVisibleColumns}
+                                isLoading={isLoading}
+                                isIconOnly
+                            />
+                        </div>
                         {canEdit && (
                             <Button
                                 color="primary"
@@ -688,7 +700,8 @@ export default function RolesTable({
                     <span className="text-default-400 text-small">
                         {filteredRoles.length === numRoles
                             ? `Total ${numRoles} items`
-                            : `Showing ${filteredRoles.length} of ${numRoles} items`}                    </span>
+                            : `Showing ${filteredRoles.length} of ${numRoles} items`}{" "}
+                    </span>
                     {canEdit && (
                         <span className="text-default-400 text-small">
                             Double click to edit role

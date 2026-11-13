@@ -9,6 +9,7 @@ import {
 import {
     Modal,
     ModalContent,
+    ModalBody,
     Selection,
     Spinner,
     useDisclosure,
@@ -21,6 +22,7 @@ import { TArea } from "common/area";
 import { TRestockRequest } from "../../../common/restock";
 import { API_SCOPE } from "common/global";
 import { useRoles } from "../../queries/useRoles";
+import { useMediaQuery } from "../../utils";
 
 const DEFAULT_ITEM: TInventoryItem = {
     uuid: "",
@@ -81,6 +83,32 @@ export default function InventoryKiosk() {
         queryKey: ["restock"],
         refetchOnWindowFocus: false,
     });
+    const isMobile = useMediaQuery("(max-width: 1023px)");
+    const {
+        isOpen: editIsOpen,
+        onOpen: editOnOpen,
+        onClose: editOnClose,
+        onOpenChange: editOnOpenChange,
+    } = useDisclosure();
+
+    const betterSelectionChange = (s: Selection) => {
+        if (s === "all") {
+            onSelectionChange(new Set([""]));
+        } else {
+            const keys = Array.from(s);
+            onSelectionChange(new Set([keys[keys.length - 1]]));
+        }
+    };
+
+    React.useEffect(() => {
+        if (selectedItems !== "all") {
+            if (isMobile && (selectedItems.size > 0 || isNewItem)) {
+                editOnOpen();
+            } else {
+                editOnClose();
+            }
+        }
+    }, [selectedItems, isNewItem]);
 
     if (
         !inventory ||
@@ -105,15 +133,6 @@ export default function InventoryKiosk() {
         );
     }
 
-    const betterSelectionChange = (s: Selection) => {
-        if (s === "all") {
-            onSelectionChange(new Set([""]));
-        } else {
-            const keys = Array.from(s);
-            onSelectionChange(new Set([keys[keys.length - 1]]));
-        }
-    };
-
     const selectedArray =
         selectedItems == "all"
             ? [DEFAULT_ITEM]
@@ -124,22 +143,24 @@ export default function InventoryKiosk() {
     return (
         <AdminLayout pageHref={"/admin/inventory"}>
             <div className="flex flex-col lg:flex-row overflow-auto h-full gap-8 p-3">
-                <ItemEditor
-                    item={item ?? DEFAULT_ITEM}
-                    certs={certs}
-                    roles={roles}
-                    areas={areas}
-                    items={inventory}
-                    isDisabled={
-                        !isNewItem &&
-                        (!item ||
-                            item.role === ITEM_ROLE.MACHINE ||
-                            item.role === ITEM_ROLE.AREA)
-                    }
-                    isNew={isNewItem}
-                    onUpdate={() => setIsNewItem(false)}
-                    setSelectedItem={onSelectionChange}
-                />
+                <div className="hidden lg:block w-2/5">
+                    <ItemEditor
+                        item={item ?? DEFAULT_ITEM}
+                        certs={certs}
+                        roles={roles}
+                        areas={areas}
+                        items={inventory}
+                        isDisabled={
+                            !isNewItem &&
+                            (!item ||
+                                item.role === ITEM_ROLE.MACHINE ||
+                                item.role === ITEM_ROLE.AREA)
+                        }
+                        isNew={isNewItem}
+                        onUpdate={() => setIsNewItem(false)}
+                        setSelectedItem={onSelectionChange}
+                    />
+                </div>
                 <InventoryTable
                     requestingUser={requestingUser}
                     scopes={scopes}
@@ -156,6 +177,42 @@ export default function InventoryKiosk() {
                     onCreate={setIsNewItem}
                 />
             </div>
+
+            {isMobile && (
+                <Modal
+                    isOpen={editIsOpen}
+                    onOpenChange={editOnOpenChange}
+                    placement="bottom"
+                    scrollBehavior="inside"
+                    // size="full"
+                    classNames={{
+                        // wrapper: "items-end",
+                        base: "max-h-[85vh] h-auto rounded-t-2xl overflow-hidden w-full",
+                        body: "overflow-y-auto",
+                    }}
+                >
+                    <ModalContent>
+                        <ModalBody>
+                            <ItemEditor
+                                item={item ?? DEFAULT_ITEM}
+                                certs={certs}
+                                roles={roles}
+                                areas={areas}
+                                items={inventory}
+                                isDisabled={
+                                    !isNewItem &&
+                                    (!item ||
+                                        item.role === ITEM_ROLE.MACHINE ||
+                                        item.role === ITEM_ROLE.AREA)
+                                }
+                                isNew={isNewItem}
+                                onUpdate={() => setIsNewItem(false)}
+                                setSelectedItem={onSelectionChange}
+                            />
+                        </ModalBody>
+                    </ModalContent>
+                </Modal>
+            )}
         </AdminLayout>
     );
 }

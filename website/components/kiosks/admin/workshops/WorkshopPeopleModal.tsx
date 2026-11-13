@@ -91,7 +91,7 @@ export default function WorkshopPeopleModal({
     return (
         <Modal
             isOpen={isOpen}
-            placement="top-center"
+            placement="bottom-center"
             onOpenChange={onOpenChange}
             className="flex flex-col max-h-[85%]"
             size="lg"

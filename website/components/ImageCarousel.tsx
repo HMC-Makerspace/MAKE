@@ -194,7 +194,7 @@ export default function ImageCarousel({
             )}
             <Modal
                 isOpen={editIsOpen}
-                placement="top-center"
+                placement="bottom-center"
                 onOpenChange={editOnOpenChange}
                 className="flex flex-col justify-center overflow-auto"
                 size="xl"

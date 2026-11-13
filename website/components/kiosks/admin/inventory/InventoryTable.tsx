@@ -10,6 +10,7 @@ import {
     Spinner,
     Tooltip,
     useDisclosure,
+    ButtonGroup,
 } from "@heroui/react";
 import { useInfiniteScroll } from "@heroui/use-infinite-scroll";
 import {
@@ -31,7 +32,11 @@ import { TUser, TUserRole } from "common/user";
 import { TCertification, TRequiredCertificate } from "common/certification";
 import { TRestockRequest } from "../../../../../common/restock";
 import { API_SCOPE } from "../../../../../common/global.ts";
-import { mergeRequiredCerts, verifyScopes, convertTimestampToDate } from "../../../../utils.tsx";
+import {
+    mergeRequiredCerts,
+    verifyScopes,
+    convertTimestampToDate,
+} from "../../../../utils.tsx";
 import clsx from "clsx";
 import CertificationTag from "../certifications/CertificationTag";
 import { UserRoleChip } from "../../../user/UserRoleChip.tsx";
@@ -42,7 +47,7 @@ import RestockRequestModal from "../restock/RestockRequestModal";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { UserRoleList } from "../../../user/UserRoleList.tsx";
 import { CertificationList } from "../certifications/CertificationList.tsx";
-
+import { ColumnSelect } from "../../../Table";
 const baseColumns = [
     // { name: "UUID", id: "uuid" },
     { name: "Type", id: "role" },
@@ -244,8 +249,8 @@ export default function InventoryTable({
                             input: "placeholder:text-foreground-200 text-medium",
                         }}
                     />
-                    <div className="gap-3 flex">
-                        <div className="hidden sm:flex gap-3">
+                    <div className="gap-3 sm:flex hidden ">
+                        <div className="gap-3 sm:flex">
                             <Dropdown isDisabled={isLoading}>
                                 <DropdownTrigger>
                                     <Button
@@ -345,6 +350,95 @@ export default function InventoryTable({
                                 Create
                             </Button>
                         )}
+                    </div>
+                    <div className="sm:hidden block flex flex-row gap-3">
+                        <ButtonGroup>
+                            <Dropdown>
+                                <DropdownTrigger>
+                                    <Button variant="faded" isIconOnly>
+                                        <GlobeAmericasIcon className="size-6 text-small" />
+                                    </Button>
+                                </DropdownTrigger>
+                                <DropdownMenu
+                                    aria-label="Locations"
+                                    closeOnSelect={false}
+                                    selectionMode="multiple"
+                                    selectedKeys={searchableLocations}
+                                    onSelectionChange={setSearchableLocations}
+                                >
+                                    {areas.map((area) => (
+                                        <DropdownItem
+                                            key={area.uuid}
+                                            className="capitalize"
+                                        >
+                                            {area.name}
+                                        </DropdownItem>
+                                    ))}
+                                </DropdownMenu>
+                            </Dropdown>
+
+                            <ColumnSelect
+                                columns={columns}
+                                visibleColumns={visibleColumns}
+                                setVisibleColumns={setVisibleColumns}
+                                isLoading={isLoading}
+                                isIconOnly
+                            />
+                            <Dropdown>
+                                <DropdownTrigger>
+                                    <Button isIconOnly variant="faded">
+                                        <ChevronDownIcon
+                                            className="size-6"
+                                            color="secondary"
+                                        />
+                                    </Button>
+                                </DropdownTrigger>
+                                <DropdownMenu>
+                                    {[
+                                        ...(restockButtonAccess
+                                            ? [
+                                                  <DropdownItem
+                                                      key="restock"
+                                                      startContent={
+                                                          <PlusIcon className="size-6" />
+                                                      }
+                                                      isDisabled={
+                                                          selectedItem.name ===
+                                                          ""
+                                                      }
+                                                      onPress={restockOnOpen}
+                                                      description={
+                                                          selectedItem.name ===
+                                                          ""
+                                                              ? "Select an item to restock"
+                                                              : undefined
+                                                      }
+                                                  >
+                                                      Restock
+                                                  </DropdownItem>,
+                                              ]
+                                            : []),
+                                        ...(editable
+                                            ? [
+                                                  <DropdownItem
+                                                      key="create"
+                                                      color="primary"
+                                                      startContent={
+                                                          <PlusIcon className="size-6" />
+                                                      }
+                                                      isDisabled={isLoading}
+                                                      onPress={createItem}
+                                                      className="bg-primary text-primary-foreground"
+                                                      
+                                                  >
+                                                      Create
+                                                  </DropdownItem>,
+                                              ]
+                                            : []),
+                                    ]}
+                                </DropdownMenu>
+                            </Dropdown>
+                        </ButtonGroup>
                     </div>
                 </div>
                 <div className="flex justify-between items-center pb-2">
@@ -498,9 +592,12 @@ export default function InventoryTable({
                     ),
                     access_type: (i) => (
                         <div className="text-default-700 bg-default-200 p-2 rounded-md flex justify-center align-center">
-                            {ITEM_ACCESS_DESCRIPTORS.find(
-                                (descriptor) => descriptor.type === i.access_type
-                            )?.label}
+                            {
+                                ITEM_ACCESS_DESCRIPTORS.find(
+                                    (descriptor) =>
+                                        descriptor.type === i.access_type,
+                                )?.label
+                            }
                         </div>
                     ),
                     keywords: (i) => i.keywords?.join(", "),

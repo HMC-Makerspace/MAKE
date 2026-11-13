@@ -225,7 +225,7 @@ export default function RestockRequestModal({
     return (
         <Modal
             isOpen={editIsOpen}
-            placement="top-center"
+            placement="bottom-center"
             onOpenChange={() => {
                 editOnOpenChange();
                 setForOtherUser(false);

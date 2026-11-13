@@ -90,6 +90,7 @@ export default function ShiftHistoryModal({
             isOpen={isOpen}
             onOpenChange={onOpenChange}
             className="overflow-auto"
+            placement="top-center"
         >
             <ModalContent className="overflow-auto">
                 {(onClose) => (

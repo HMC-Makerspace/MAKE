@@ -57,7 +57,7 @@ function ConfigItem({
         <div className="flex flex-col gap-2 w-full rounded-xl bg-content1 p-4">
             <h1 className="text-lg font-bold">{name}</h1>
             <p className="text-sm">{description}</p>
-            <div className={clsx("flex flex-row gap-2", className)}>
+            <div className={clsx("flex flex-col sm:flex-row gap-2", className)}>
                 {children}
             </div>
         </div>
@@ -376,8 +376,8 @@ export default function Configuration({
                 className="w-full h-full overflow-auto"
                 validationBehavior="native"
             >
-                <Card className="w-4/5 h-full p-4 mx-auto flex flex-col gap-4 items-center overflow-auto">
-                    <h1 className="text-2xl font-bold align-center text-primary-400">
+                <Card className="w-full sm:w-4/5 h-full p-4 mx-auto flex flex-col gap-4 items-center overflow-auto">
+                    <h1 className="text-2xl text-center font-bold align-center text-primary-400">
                         Settings & Configuration
                     </h1>
                     <Divider className="w-4/5 h-[1px] bg-primary-100" />
@@ -390,7 +390,7 @@ export default function Configuration({
                             title: "text-default-800 font-semibold text-lg",
                             content: "flex flex-col gap-2 pb-5",
                         }}
-                        className="w-4/5"
+                        className="sm:w-4/5 w-full"
                     >
                         <AccordionItem key="general" title="General Config">
                             <ConfigItem

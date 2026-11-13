@@ -37,7 +37,7 @@ import {
     verifyScopes,
 } from "../../utils";
 import { API_SCOPE } from "../../../common/global";
-import { UserMinusIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import { ClockIcon, UserMinusIcon, UserPlusIcon } from "@heroicons/react/24/solid";
 import {
     parseDate,
     parseZonedDateTime,
@@ -340,13 +340,28 @@ export default function AdminKiosk() {
                             </div>
                         ) : selectedTab === "worker_view" && historyVisible ? (
                             <div className="flex flex-1 justify-end">
-                                <Button
-                                    onPress={openHistory}
-                                    variant="faded"
-                                    color="primary"
-                                >
-                                    Open History
-                                </Button>
+                                {/* Large screen history */}
+                                <div className='hidden sm:block'>
+                                    <Button
+                                        onPress={openHistory}
+                                        variant="faded"
+                                        color="primary"
+                                    >
+                                        Open History
+                                    </Button>
+                                </div>
+
+                                <div className='sm:hidden justify-end'>
+                                    <Button
+                                        onPress={openHistory}
+                                        variant="faded"
+                                        color="primary"
+                                        isIconOnly
+                                    >
+                                        <ClockIcon className="size-6" />
+                                    </Button>
+                                </div>
+
                             </div>
                         ) : (
                             <div className="flex-1"></div>

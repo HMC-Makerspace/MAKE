@@ -155,6 +155,7 @@ export default function CustomNavbar({
                                 size="lg"
                                 loginColor="primary"
                                 onClick={onOpen}
+                                popoverPlacement="top-start"
                             />
                             <div className="flex flex-row w-full justify-between">
                                 <ThemeSwitcher

@@ -109,7 +109,7 @@ export default function MachinesKiosk() {
                         Machine Editor
                     </span>
                     <div className="flex-1 ml-auto flex gap-3 items-center justify-end">
-                        <span className="text-default-700 font-semibold">
+                        <span className="text-default-700 font-semibold hidden sm:block">
                             {preview ? "Preview Mode" : "Edit Mode"}
                         </span>
                         <Button

@@ -33,7 +33,7 @@ export default function UserEditor({
     const key = isNew ? "new" : isSingle ? selectedUsers[0].uuid : "multiple";
 
     return (
-        <div className="flex flex-col h-fit lg:h-full w-full lg:w-2/5 rounded-xl bg-content1 p-4 relative">
+        <div className="flex flex-col h-fit lg:h-full rounded-xl bg-content1 p-4 relative">
             <h1 className="3xl font-bold text-center pb-2">User Editor</h1>
             {isLoading ? (
                 <div>Loading...</div>

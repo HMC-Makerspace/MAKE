@@ -126,14 +126,12 @@ export default function UsersByDomain({ users }: { users: TUser[] }) {
             <h2 className="text-xl font-bold text-foreground-900 mb-2">
                 Users by Domain
             </h2>
-
             <p className="text-sm text-default-500 -mb-10">
                 Users grouped by email domain based on last login. Total users:{" "}
                 {users.length}
             </p>
-
             <ResponsiveContainer width="100%" height={500}>
-                <PieChart>
+                <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                     <Pie
                         data={data}
                         cx="50%"
@@ -142,7 +140,7 @@ export default function UsersByDomain({ users }: { users: TUser[] }) {
                         label={(entry: any) =>
                             `${entry.name}: ${(entry.percent * 100).toFixed(1)}%`
                         }
-                        outerRadius={200}
+                        outerRadius="80%"
                         fill="#8884d8"
                         dataKey="value"
                     >

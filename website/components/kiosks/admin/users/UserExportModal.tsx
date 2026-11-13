@@ -74,7 +74,7 @@ export default function UserExportModal({
     return (
         <Modal
             isOpen={isOpen}
-            placement="top-center"
+            placement="bottom-center"
             onOpenChange={onOpenChange}
             size="lg"
             className="flex flex-col justify-center"

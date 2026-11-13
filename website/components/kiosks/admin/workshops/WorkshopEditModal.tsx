@@ -85,7 +85,7 @@ async function patchWorkshop({
 
 const patchBatchWorkshop = async ({
     uuids,
-    patch
+    patch,
 }: {
     uuids: UUID[];
     patch: Partial<TWorkshop>;
@@ -174,7 +174,6 @@ export default function WorkshopEditModal({
             });
             onOpenChange(false);
             imagesOnOpen();
-            
         },
         onError: (e) => {
             addToast({
@@ -185,26 +184,26 @@ export default function WorkshopEditModal({
     });
 
     const patchBatchMutation = useMutation({
-            mutationFn: patchBatchWorkshop,
-            onSuccess: (data) => {
-                data.forEach((workshop) => {
-                    queryClient.setQueryData(["workshop", workshop.uuid], workshop);
-                });
-                queryClient.setQueryData(["workshop"], (old: TWorkshop[]) =>
-                    old.map((w) => data.find((d) => d.uuid === w.uuid) ?? w )
-                );
-                addToast({
-                    title: `Successfully updated workshops`,
-                    color: "success",
-                });
-            },
-            onError: (e) => {
-                addToast({
-                    title: `Error: ${e.message}`,
-                    color: "danger",
-                });
-            },
-        });
+        mutationFn: patchBatchWorkshop,
+        onSuccess: (data) => {
+            data.forEach((workshop) => {
+                queryClient.setQueryData(["workshop", workshop.uuid], workshop);
+            });
+            queryClient.setQueryData(["workshop"], (old: TWorkshop[]) =>
+                old.map((w) => data.find((d) => d.uuid === w.uuid) ?? w),
+            );
+            addToast({
+                title: `Successfully updated workshops`,
+                color: "success",
+            });
+        },
+        onError: (e) => {
+            addToast({
+                title: `Error: ${e.message}`,
+                color: "danger",
+            });
+        },
+    });
 
     const sortedFilteredWorkers = users
         .filter((user) =>
@@ -228,7 +227,6 @@ export default function WorkshopEditModal({
         onOpen: certsOnOpen,
         onOpenChange: certsOnOpenChange,
     } = useDisclosure();
-    
 
     function wrapEdit<P extends keyof TWorkshop>(prop: P) {
         return (val: TWorkshop[P]) => {
@@ -361,7 +359,7 @@ export default function WorkshopEditModal({
         <>
             <Modal
                 isOpen={isOpen}
-                placement="top-center"
+                placement="bottom-center"
                 onOpenChange={onOpenChange}
                 className="flex flex-col justify-center align-center"
                 size="2xl"
@@ -605,20 +603,25 @@ export default function WorkshopEditModal({
                                             onChange={() => setHasEdits(true)}
                                             variant="faded"
                                             color="primary"
-                                            className="w-full"
+                                            className="w-full "
                                             classNames={{
+                                                inputWrapper: "overflow-hidden relative pr-8",
+                                                innerWrapper:
+                                                    "overflow-x-auto overflow-y-hidden",
                                                 segment: clsx([
                                                     "text-xs sm:text-small",
                                                     "text-default-700",
-                                                    "data-[editable=true]:text-default-700 ",
+                                                    "data-[editable=true]:text-default-700",
                                                     "data-[editable=true]:data-[placeholder=true]:text-default-500",
                                                     "data-[editable=true]:data-[placeholder=true]:italic",
                                                     "focus:text-default-700",
                                                     "data-[editable=true]:focus:text-default-700",
+                                                    "whitespace-nowrap shrink-0",
                                                 ]),
+                                                selectorButton: "absolute right-3",
                                             }}
-                                        />                                       
-                                        <div className="flex flex-row gap-2">
+                                        />
+                                        <div className="flex flex-col sm:flex-row gap-2">
                                             <NumberInput
                                                 label="Public Announcement Date"
                                                 name="timestamp_public"
@@ -657,7 +660,7 @@ export default function WorkshopEditModal({
                                                 }}
                                             />
                                             <NumberInput
-                                                className="w-3/4"
+                                                className="w-full sm:w-3/4 "
                                                 label="Total Repeats"
                                                 name="repeats"
                                                 placeholder="Repeat x times"
@@ -700,14 +703,20 @@ export default function WorkshopEditModal({
                                             color="primary"
                                             className="w-full"
                                             classNames={{
+                                                inputWrapper: "overflow-hidden relative pr-8",
+                                                innerWrapper:
+                                                    "overflow-x-auto overflow-y-hidden",
                                                 segment: clsx([
+                                                    "text-xs sm:text-small",
                                                     "text-default-700",
-                                                    "data-[editable=true]:text-default-700 ",
+                                                    "data-[editable=true]:text-default-700",
                                                     "data-[editable=true]:data-[placeholder=true]:text-default-500",
                                                     "data-[editable=true]:data-[placeholder=true]:italic",
                                                     "focus:text-default-700",
                                                     "data-[editable=true]:focus:text-default-700",
+                                                    "whitespace-nowrap shrink-0",
                                                 ]),
+                                                selectorButton: "absolute right-3",
                                             }}
                                         />
                                         <DateRangePicker
@@ -740,15 +749,20 @@ export default function WorkshopEditModal({
                                             color="primary"
                                             className="w-full"
                                             classNames={{
+                                                inputWrapper: "overflow-hidden relative pr-8",
+                                                innerWrapper:
+                                                    "overflow-x-auto overflow-y-hidden",
                                                 segment: clsx([
                                                     "text-xs sm:text-small",
                                                     "text-default-700",
-                                                    "data-[editable=true]:text-default-700 ",
+                                                    "data-[editable=true]:text-default-700",
                                                     "data-[editable=true]:data-[placeholder=true]:text-default-500",
                                                     "data-[editable=true]:data-[placeholder=true]:italic",
                                                     "focus:text-default-700",
                                                     "data-[editable=true]:focus:text-default-700",
+                                                    "whitespace-nowrap shrink-0",
                                                 ]),
+                                                selectorButton: "absolute right-3",
                                             }}
                                         />
                                     </>

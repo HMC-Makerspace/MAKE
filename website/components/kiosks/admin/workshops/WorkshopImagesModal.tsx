@@ -33,7 +33,7 @@ export default function WorkshopImagesModal({
     return (
         <Modal
             isOpen={isOpen}
-            placement="top-center"
+            placement="bottom-center"
             size="lg"
             onOpenChange={onOpenChange}
             className="flex flex-col justify-center"
