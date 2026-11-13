@@ -3,7 +3,7 @@ import DefaultLayout from "../layouts/Default";
 import { Tabs, Tab, Spinner } from "@heroui/react";
 import { TWorkshop } from "../../common/workshop.ts";
 import { TUser } from "common/user.js";
-import { Key, useState } from "react";
+import { Key, useMemo, useState } from "react";
 import {
     CalendarDateRangeIcon,
     CalendarDaysIcon,
@@ -53,13 +53,17 @@ export default function WorkshopPage() {
         retry: false,
     });
 
-    let filteredWorkshops = workshops?.filter((workshop) => {
-        const isFuture = workshop.timestamp_end > Date.now() / 1000;
-        return selected === "past-workshops" ? !isFuture : isFuture;
-    });
-    if (selected === "current-workshops") {
-        filteredWorkshops = filteredWorkshops?.reverse();
-    }
+    const filteredWorkshops = useMemo(() => {
+        const filter = workshops?.filter((workshop) => {
+            const isFuture = workshop.timestamp_end > Date.now() / 1000;
+            return selected === "past-workshops" ? !isFuture : isFuture;
+        });
+        if (selected === "current-workshops") {
+            filter?.reverse();
+        }
+        return filter;
+    }, [workshops, selected]);
+    
 
     const scrollerRef = React.useRef<HTMLElement | null>(null);
 
@@ -116,9 +120,9 @@ export default function WorkshopPage() {
                         style={{
                             height: `${workshopVirtualizer.getTotalSize()}px`,
                         }}
-                        className="w-full relative"
+                        className="w-full relative min-h-5"
                     >
-                        {filteredWorkshops ? (
+                        {filteredWorkshops && filteredWorkshops.length > 0 ? (
                             workshopVirtualizer
                                 .getVirtualItems()
                                 .map((virtualItem) => {
@@ -139,7 +143,6 @@ export default function WorkshopPage() {
                                             className="absolute top-0 left-0 w-full flex flex-row gap-4"
                                             style={{
                                                 transform: `translateY(${virtualItem.start}px)`,
-                                                height: `${virtualItem.size}px`,
                                             }}
                                         >
                                             {rowWorkshops.map((workshop) => {

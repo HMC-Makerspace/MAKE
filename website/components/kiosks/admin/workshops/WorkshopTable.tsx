@@ -36,8 +36,8 @@ import { UUID } from "common/global.ts";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { now } from "@internationalized/date";
-import { AvailableToRolesModal, VisibleToRolesModal } from "../certifications/AuthorizedRolesModal.tsx";
 import { useConfig } from "../../../../queries/useConfig.tsx";
+import { RequiredRolesModal } from "../../../RequiredRoles.tsx";
 
 // TODO-
 // [] FIX TIME
@@ -271,6 +271,8 @@ export default function WorkshopTable({
                                 rsvp_list: [],
                                 reminder_emails_sent: [],
                                 sign_in_list: [],
+                                available_to: null, // RSVP-able by everyone
+                                visible_to: null, // visible to everyone
                             });
                             setIsBatch(false);
                             editOnOpen();
@@ -298,6 +300,8 @@ export default function WorkshopTable({
                                 rsvp_list: [],
                                 reminder_emails_sent: [],
                                 sign_in_list: [],
+                                available_to: null, // RSVP-able by everyone
+                                visible_to: null, // visible to everyone
                             });
                             setIsBatch(true);
                             editOnOpen();
@@ -579,6 +583,7 @@ export default function WorkshopTable({
                         workshop={selectedWorkshop}
                         users={users}
                         certs={certs}
+                        roles={roles}
                         isNew={isNew}
                         isOpen={editIsOpen}
                         onOpenChange={editOnOpenChange}
@@ -594,7 +599,8 @@ export default function WorkshopTable({
                         onOpenChange={certsOnOpenChange}
                         patchMutation={patchMutation}
                     />
-                    <AvailableToRolesModal
+                    <RequiredRolesModal
+                        type="available_to"
                         key={`${selectedWorkshop.uuid}-acroles`}
                         element={selectedWorkshop}
                         roles={roles}
@@ -602,7 +608,8 @@ export default function WorkshopTable({
                         onOpenChange={acrolesOnOpenChange}
                         patchMutation={patchMutation}
                     />
-                    <VisibleToRolesModal
+                    <RequiredRolesModal
+                        type="visible_to"
                         key={`${selectedWorkshop.uuid}-vwroles`}
                         element={selectedWorkshop}
                         roles={roles}

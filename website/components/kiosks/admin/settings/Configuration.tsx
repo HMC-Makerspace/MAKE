@@ -36,7 +36,7 @@ const createEmbed = async () => {
                 src: window.location.origin,
                 documents: [],
                 auto_dark: false,
-                visible_to: [], // Start embeds as not visible
+                visible_to: null, // Start embeds as visible to everyone
             },
         })
     ).data;
