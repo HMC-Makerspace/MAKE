@@ -20,7 +20,7 @@ import { TCertification } from "common/certification";
 import ImageCarousel from "../../../ImageCarousel";
 import { FILE_RESOURCE_TYPE } from "../../../../../common/file";
 import MachineStatus from "./MachineStatus";
-import EditDocsModal from "../../../EditDocsModal";
+import EditDocsModal from "../../../EditDocs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import {
@@ -37,8 +37,8 @@ import ReservableConfirmationModal from "./ReservableConfirmationModal";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
 import DeleteModal from "../../../DeleteModal";
 import { Link } from "react-router-dom";
-import { AvailableToRolesModal, VisibleToRolesModal } from "../certifications/AuthorizedRolesModal";
 import { CertificationList } from "../certifications/CertificationList";
+import { RequiredRolesModal } from "../../../RequiredRoles";
 
 const patchMachine = async ({
     uuid,
@@ -412,15 +412,18 @@ export default function Machine({
                             isOpen={editDocs}
                             onOpenChange={editDocsModalOpenChange}
                             patchMutation={patchMutation}
+                            roles={roles}
                         />
-                        <AvailableToRolesModal
+                        <RequiredRolesModal
+                            type="available_to"
                             element={machine}
                             roles={roles}
                             isOpen={acroleModal}
                             onOpenChange={acroleModalOpenChange}
                             patchMutation={patchMutation}
                         />
-                        <VisibleToRolesModal
+                        <RequiredRolesModal
+                            type="visible_to"
                             element={machine}
                             roles={roles}
                             isOpen={vwroleModal}

@@ -28,7 +28,7 @@ import { CERTIFICATION_VISIBILITY } from "../../../../../common/certification";
 
 import CertificationTag from "./CertificationTag";
 import EditCertModal from "./EditCertModal";
-import EditDocsModal from "../../../EditDocsModal";
+import EditDocsModal from "../../../EditDocs";
 import DeleteCertModal from "./DelCertModal";
 
 import { UserRoleChip } from "../../../user/UserRoleChip";
@@ -393,6 +393,7 @@ export default function CertificationsTable({
                     isOpen={docOpen}
                     onOpenChange={setDocOpen}
                     patchMutation={mutation}
+                    roles={roles}
                 />
             )}
 

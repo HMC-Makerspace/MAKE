@@ -128,6 +128,9 @@ export function UserRoleSelect({
                                                 selected_role.data?.uuid,
                                         )}
                                         size={multiline ? "md" : "sm"}
+                                        className={
+                                            size === "sm" ? "text-xs" : ""
+                                        }
                                     />
                                 ),
                             )}

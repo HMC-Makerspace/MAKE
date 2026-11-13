@@ -1,4 +1,6 @@
+import { Spinner } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
 import { TConfig } from "common/config";
 import { createContext, useContext } from "react";
 
@@ -11,7 +13,16 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
         refetchOnMount: false,
     });
     if (!config) {
-        return children;
+        return (
+            <div
+                className={clsx(
+                    "h-screen w-screen flex",
+                    "items-center justify-center",
+                )}
+            >
+                <Spinner />
+            </div>
+        );
     }
     return (
         <ConfigContext.Provider value={config}>

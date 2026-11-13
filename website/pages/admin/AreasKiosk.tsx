@@ -23,7 +23,8 @@ const createEmptyArea = async () => {
             area_obj: {
                 uuid: crypto.randomUUID(),
                 name: "New Area",
-                visible_to: [], // Start areas as not visible
+                visible_to: null, // Start areas as visible to all
+                available_to: [], // Start areas as reservable by none
             },
         })
     ).data;
