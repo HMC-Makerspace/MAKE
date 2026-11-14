@@ -47,7 +47,7 @@ export function RequiredRoles({
     const openAuthorized = currentRoles == null;
 
     return (
-        <div className={clsx("flex flex-col gap-2", className)}>
+        <div className={clsx("flex flex-col gap-2 w-full", className)}>
             {size === "lg" && (
                 <div>
                     Users with at least one of the selected roles will have

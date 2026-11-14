@@ -131,6 +131,18 @@ export function EditDocs({
                     </div>
                 </div>
             ))}
+            <Button
+                color="default"
+                variant="bordered"
+                size="sm"
+                className="p-2 min-w-fit"
+                onPress={() => {
+                    setDocs([...docs, { ...emptyDoc }]); // add a copy of the emptyDoc template
+                    setHasEdits?.(true);
+                }}
+            >
+                <PlusIcon className="size-6" />
+            </Button>
         </div>
     );
 }
@@ -219,25 +231,13 @@ export default function EditDocsModal<
                             >
                                 Submit
                             </Button>
-                            <div className="flex gap-2">
-                                <Button
-                                    color="primary"
-                                    className="p-2 min-w-fit"
-                                    onPress={() => {
-                                        setDocs([...docs, { ...emptyDoc }]); // add a copy of the emptyDoc template
-                                        setHasEdits(true);
-                                    }}
-                                >
-                                    <PlusIcon className="size-6" />
-                                </Button>
-                                <Button
-                                    variant="flat"
-                                    color="danger"
-                                    onPress={onClose}
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
+                            <Button
+                                variant="flat"
+                                color="danger"
+                                onPress={onClose}
+                            >
+                                Cancel
+                            </Button>
                         </div>
                     </div>
                 )}

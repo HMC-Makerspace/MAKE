@@ -53,6 +53,158 @@ type BatchPatch<T> = {
     >;
 };
 
+export function RequiredCerts({
+    currentCerts,
+    setCurrentCerts,
+    certifications,
+    parentKitCerts,
+    setHasEdits,
+    className = "",
+}: {
+    currentCerts: TRequiredCertificate[];
+    setCurrentCerts: (newCerts: TRequiredCertificate[]) => void;
+    certifications: TCertification[];
+    parentKitCerts?: TRequiredCertificate[];
+    setHasEdits?: (has: boolean) => void;
+    className?: string;
+}) {
+    function wrapEdit<P extends keyof TRequiredCertificate>(
+        i: number,
+        prop: P,
+    ) {
+        return (val: TRequiredCertificate[P]) => {
+            if (!currentCerts[i]) {
+                currentCerts[i] = emptyCert;
+            }
+
+            const cert = { ...currentCerts[i] };
+            cert[prop] = val;
+            const certs = [...currentCerts];
+            certs[i] = cert;
+            setCurrentCerts(certs); // update the instance list
+            setHasEdits?.(true);
+        };
+    }
+
+    return (
+        <div
+            className={clsx(
+                "flex flex-col gap-3 p-4 overflow-auto",
+                "size-full",
+                className,
+            )}
+        >
+            {currentCerts.map((cert, i) => (
+                <div
+                    className="flex flex-col sm:flex-row w-full gap-2 items-top"
+                    key={"cert-" + cert.certification_uuid}
+                >
+                    <CertSelect
+                        certifications={certifications}
+                        defaultSelectedKeys={[cert.certification_uuid]}
+                        disabledKeys={currentCerts
+                            .filter((_, j) => j != i)
+                            .map((c) => c.certification_uuid)}
+                        onSelectionChange={(s) => {
+                            if (s == "all") return;
+                            wrapEdit(
+                                i,
+                                "certification_uuid",
+                            )(Array.from(s)[0] as string);
+                        }}
+                        placeholder="Select a certification"
+                        label=""
+                        isRequired
+                        selectionMode="single"
+                        classNames={{
+                            value: "text-default-500 min-h-[60.66px] content-center",
+                            trigger: "bg-default-100/50 backdrop-blur-sm",
+                            listbox: "bg-default-100/50",
+                        }}
+                    />
+
+                    <div className="w-full h-full flex gap-2 items-center">
+                        <NumberInput
+                            isRequired
+                            label="Minimum Level"
+                            name="required_level"
+                            placeholder="0 for any level"
+                            minValue={0}
+                            value={cert.required_level}
+                            onValueChange={wrapEdit(i, "required_level")}
+                            variant="faded"
+                            color="primary"
+                            size="lg"
+                            classNames={{
+                                mainWrapper: "h-full",
+                                base: "h-full",
+                                input: clsx([
+                                    "placeholder:text-default-500",
+                                    "placeholder:italic",
+                                    "text-default-700",
+                                ]),
+                            }}
+                        />
+
+                        <Button
+                            variant="flat"
+                            color="danger"
+                            onPress={() => {
+                                currentCerts.splice(i, 1); // remove that cert
+                                setCurrentCerts([...currentCerts]);
+                                setHasEdits?.(true);
+                            }}
+                            isIconOnly
+                        >
+                            <TrashIcon className="size-6" />
+                        </Button>
+                    </div>
+                </div>
+            ))}
+
+            {parentKitCerts && (
+                <>
+                    {currentCerts.length != 0 && (
+                        <Divider className="hidden sm:block h-[1px] bg-default-400" />
+                    )}
+                    <div className="w-full">
+                        <div className="text-lg font-semibold text-center">
+                            Parent Kit Required Certifications
+                        </div>
+                        <div className="grid grid-cols-2 w-full gap-y-3 justify-evenly p-4">
+                            {parentKitCerts?.map((cert, i) => (
+                                <div
+                                    className={`flex content-center justify-center col-span-${i < parentKitCerts?.length - (parentKitCerts?.length % 2) ? 1 : 2}`}
+                                >
+                                    <CertificationTag
+                                        cert_uuid={cert.certification_uuid}
+                                        certifications={certifications}
+                                        showVisibility={false}
+                                        level={cert.required_level}
+                                    ></CertificationTag>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </>
+            )}
+
+            <Button
+                color="default"
+                variant="bordered"
+                size="sm"
+                className="p-2 w-full"
+                onPress={() => {
+                    setCurrentCerts([...currentCerts, { ...emptyCert }]); // add a copy of the emptyCert template
+                    setHasEdits?.(true);
+                }}
+            >
+                <PlusIcon className="size-6" />
+            </Button>
+        </div>
+    );
+}
+
 export default function RequiredCertsModal<
     // Allow any type that has a uuid and optional required_certs list
     T extends { uuid: UUID; required_certifications?: TRequiredCertificate[] },
@@ -110,24 +262,6 @@ export default function RequiredCertsModal<
         ],
     );
 
-    function wrapEdit<P extends keyof TRequiredCertificate>(
-        i: number,
-        prop: P,
-    ) {
-        return (val: TRequiredCertificate[P]) => {
-            if (!currentCerts[i]) {
-                currentCerts[i] = emptyCert;
-            }
-
-            const cert = { ...currentCerts[i] };
-            cert[prop] = val;
-            const certs = [...currentCerts];
-            certs[i] = cert;
-            setCurrentCerts(certs); // update the instance list
-            setHasEdits(true);
-        };
-    }
-
     const isValid = React.useMemo(() => {
         for (let i = 0; i < currentCerts.length; i++) {
             if (currentCerts[i].certification_uuid == "") {
@@ -143,7 +277,7 @@ export default function RequiredCertsModal<
             isOpen={isOpen}
             onOpenChange={onOpenChange}
             backdrop="blur"
-            size="xl"
+            size="2xl"
         >
             <ModalContent>
                 {(onClose) => (
@@ -157,114 +291,12 @@ export default function RequiredCertsModal<
                                 : "Batch Edit Required Certifications"}
                         </div>
 
-                        {currentCerts.map((cert, i) => (
-                            <div
-                                className="flex flex-col sm:flex-row w-full gap-2 items-top"
-                                key={
-                                    mutationProps.element +
-                                    "-cert-" +
-                                    cert.certification_uuid
-                                }
-                            >
-                                <CertSelect
-                                    certifications={certifications}
-                                    defaultSelectedKeys={[
-                                        cert.certification_uuid,
-                                    ]}
-                                    disabledKeys={currentCerts
-                                        .filter((_, j) => j != i)
-                                        .map((c) => c.certification_uuid)}
-                                    onSelectionChange={(s) => {
-                                        if (s == "all") return;
-                                        wrapEdit(
-                                            i,
-                                            "certification_uuid",
-                                        )(Array.from(s)[0] as string);
-                                    }}
-                                    placeholder="Select a certification"
-                                    label=""
-                                    isRequired
-                                    selectionMode="single"
-                                    classNames={{
-                                        value: "text-default-500 min-h-[60.66px] content-center",
-                                        trigger:
-                                            "bg-default-100/50 backdrop-blur-sm",
-                                        listbox: "bg-default-100/50",
-                                    }}
-                                />
-
-                                <div className="w-full h-full flex gap-2 items-center">
-                                    <NumberInput
-                                        isRequired
-                                        label="Minimum Level"
-                                        name="required_level"
-                                        placeholder="0 for any level"
-                                        minValue={0}
-                                        value={cert.required_level}
-                                        onValueChange={wrapEdit(
-                                            i,
-                                            "required_level",
-                                        )}
-                                        variant="faded"
-                                        color="primary"
-                                        size="lg"
-                                        classNames={{
-                                            mainWrapper: "h-full",
-                                            base: "h-full",
-                                            input: clsx([
-                                                "placeholder:text-default-500",
-                                                "placeholder:italic",
-                                                "text-default-700",
-                                            ]),
-                                        }}
-                                    />
-
-                                    <Button
-                                        variant="flat"
-                                        color="danger"
-                                        onPress={() => {
-                                            currentCerts.splice(i, 1); // remove that cert
-                                            setCurrentCerts([...currentCerts]);
-                                            setHasEdits(true);
-                                        }}
-                                        isIconOnly
-                                    >
-                                        <TrashIcon className="size-6" />
-                                    </Button>
-                                </div>
-                            </div>
-                        ))}
-
-                        {parentKitCerts && (
-                            <>
-                                {currentCerts.length != 0 && (
-                                    <Divider className="hidden sm:block h-[1px] bg-default-400" />
-                                )}
-                                <div className="w-full">
-                                    <div className="text-lg font-semibold text-center">
-                                        Parent Kit Required Certifications
-                                    </div>
-                                    <div className="grid grid-cols-2 w-full gap-y-3 justify-evenly p-4">
-                                        {parentKitCerts?.map((cert, i) => (
-                                            <div
-                                                className={`flex content-center justify-center col-span-${i < parentKitCerts?.length - (parentKitCerts?.length % 2) ? 1 : 2}`}
-                                            >
-                                                <CertificationTag
-                                                    cert_uuid={
-                                                        cert.certification_uuid
-                                                    }
-                                                    certifications={
-                                                        certifications
-                                                    }
-                                                    showVisibility={false}
-                                                    level={cert.required_level}
-                                                ></CertificationTag>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </>
-                        )}
+                        <RequiredCerts
+                            currentCerts={currentCerts}
+                            setCurrentCerts={setCurrentCerts}
+                            certifications={certifications}
+                            setHasEdits={setHasEdits}
+                    />
 
                         <div className="flex flex-row justify-between w-full gap-2">
                             <Button
@@ -279,28 +311,13 @@ export default function RequiredCertsModal<
                             >
                                 Submit
                             </Button>
-                            <div className="flex gap-2">
-                                <Button
-                                    color="primary"
-                                    className="p-2 min-w-fit sm:w-1/3"
-                                    onPress={() => {
-                                        setCurrentCerts([
-                                            ...currentCerts,
-                                            { ...emptyCert },
-                                        ]); // add a copy of the emptyCert template
-                                        setHasEdits(true);
-                                    }}
-                                >
-                                    <PlusIcon className="size-6" />
-                                </Button>
-                                <Button
-                                    variant="flat"
-                                    color="danger"
-                                    onPress={onClose}
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
+                            <Button
+                                variant="flat"
+                                color="danger"
+                                onPress={onClose}
+                            >
+                                Cancel
+                            </Button>
                         </div>
                     </Form>
                 )}
