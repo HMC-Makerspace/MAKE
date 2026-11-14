@@ -139,7 +139,21 @@ export default function MachinesKiosk() {
                         "flex gap-4 items-center",
                     )}
                 >
-                    <div className="flex-1 mr-auto hidden sm:block"></div>
+                    <div className="flex-1 mr-auto">
+                        <Input
+                            isClearable
+                            variant="bordered"
+                            className="w-full"
+                            placeholder="Search..."
+                            startContent={<SearchIcon className="size-6" />}
+                            value={search}
+                            onClear={() => setSearch("")}
+                            onValueChange={setSearch}
+                            classNames={{
+                                input: "placeholder:text-foreground-200",
+                            }}
+                        />
+                    </div>
                     <span className="flex justify-center flex-1 text-xl text-default-700 font-bold">
                         Machine Editor
                     </span>
@@ -161,18 +175,6 @@ export default function MachinesKiosk() {
                         </Button>
                     </div>
                 </div>
-                <Input
-                    isClearable
-                    className="w-full sm:max-w-[44%]"
-                    placeholder="Search..."
-                    startContent={<SearchIcon className="size-6" />}
-                    value={search}
-                    onClear={() => setSearch("")}
-                    onValueChange={setSearch}
-                    classNames={{
-                        input: "placeholder:text-foreground-200",
-                    }}
-                />
                 <div
                     className={clsx(
                         "w-full min-h-fit overflow-auto",

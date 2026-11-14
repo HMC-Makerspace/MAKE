@@ -148,11 +148,29 @@ export default function AreasKiosk() {
             <div className="h-full overflow-auto flex flex-col gap-3">
                 <div
                     className={clsx(
-                        "bg-default-200 p-3 rounded-lg",
+                        "bg-default-100 p-3 rounded-lg",
                         "flex gap-4 items-center",
                     )}
                 >
                     <div className="flex-1 mr-auto">
+                        <Input
+                            isClearable
+                            variant="bordered"
+                            className="w-full"
+                            placeholder="Search..."
+                            startContent={<SearchIcon className="size-6" />}
+                            value={search}
+                            onClear={() => setSearch("")}
+                            onValueChange={setSearch}
+                            classNames={{
+                                input: "placeholder:text-foreground-200",
+                            }}
+                        />
+                    </div>
+                    <span className="flex justify-center flex-1 text-xl text-default-700 font-bold">
+                        Area Editor
+                    </span>
+                    <div className="flex-1 ml-auto flex gap-3 items-center justify-end">
                         <Button
                             variant="flat"
                             color="primary"
@@ -169,11 +187,6 @@ export default function AreasKiosk() {
                             isOpen={rearrangeModal}
                             onOpenChange={rearrangeModalOpenChange}
                         />
-                    </div>
-                    <span className="flex justify-center flex-1 text-xl text-default-700 font-bold">
-                        Area Editor
-                    </span>
-                    <div className="flex-1 ml-auto flex gap-3 items-center justify-end">
                         <span className="text-default-700 font-semibold">
                             {preview ? "Preview Mode" : "Edit Mode"}
                         </span>
@@ -191,18 +204,6 @@ export default function AreasKiosk() {
                         </Button>
                     </div>
                 </div>
-                <Input
-                    isClearable
-                    className="w-full sm:max-w-[44%]"
-                    placeholder="Search..."
-                    startContent={<SearchIcon className="size-6" />}
-                    value={search}
-                    onClear={() => setSearch("")}
-                    onValueChange={setSearch}
-                    classNames={{
-                        input: "placeholder:text-foreground-200",
-                    }}
-                />
                 <div className="flex flex-col h-full gap-4 p-4 sm:p-0 overflow-auto">
                     {filteredAreas.map((area) => (
                         <Area
