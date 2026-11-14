@@ -222,6 +222,7 @@ if (existingConfig) {
             instagram_url: "",
             tiktok_url: "",
             extra_urls: [],
+            hide_home_embed: false,
         },
         checkout: {
             notification_interval_sec: 0, // No checkout reminder emails
@@ -241,6 +242,8 @@ if (existingConfig) {
         },
         workshop: {
             reminder_times: [], // No workshop reminder emails
+            sign_in_enabled_within: 3600,
+            instructor_roles: [],
         },
     });
     console.log(colors.green("Created default config."));
@@ -319,6 +322,18 @@ if (existingConfig) {
 
     const extraURLsList = extraURLs.toString().replace(/\s/g, "").split(",");
 
+    const { hideHomeEmbed } = await prompt.get([
+        {
+            name: "hideHomeEmbed",
+            description: colors.cyan(
+                "Do you want to hide the homepage and only show embeds? [y/N]",
+                    ) + "\nGeneral: Hide Home Embed",
+            pattern: /^(y|n)$/gi,
+            message: "Please enter y (for yes) or n (for no).",
+            before: (val) => (val ? val.toLowerCase() : "n"),
+        },
+    ]);
+
     const generalConfig: TGeneralConfig = {
         branding_url: brandingURL.toString(),
         discord_url: discordURL.toString(),
@@ -326,6 +341,7 @@ if (existingConfig) {
         tiktok_url: tiktokURL.toString(),
         extra_urls: extraURLsList.filter((u) => u), // filter out empty urls
         tagline: tagline.toString(),
+        hide_home_embed: hideHomeEmbed.toString().toLowerCase() == "y",
     };
 
     console.log(colors.cyan("--- CHECKOUTS ---"));
@@ -553,8 +569,25 @@ if (existingConfig) {
         .filter(s => s) // remove empty times
         .map(s => parseInt(s));
 
+    console.log(
+        colors.cyan(
+            "How soon should users be able to sign into a workshop?\nEnter a " +
+                "time in seconds before the workshop occurs. Default 3600.",
+        ),
+    );
+
+    const { signInEnabledWithin } = await prompt.get({
+        name: "signInEnabledWithin",
+        pattern: /^\d+$/,
+        description: "Workshops: Sign In Enabled Within",
+        message: "Please enter an integer.",
+        before: (t) => (t ? t : "3600"), // default 1 hour
+    });
+
     const workshopConfig: TWorkshopConfig = {
         reminder_times: reminderTimes,
+        sign_in_enabled_within: parseInt(signInEnabledWithin.toString()),
+        instructor_roles: [], // Set in dashboard
     };
 
     const config: TConfig = {
