@@ -50,7 +50,8 @@ import { TArea } from "common/area";
 import InventoryAuditModal from "./InventoryAuditModal";
 import InventoryAuditLogsModal from "./InventoryAuditLogsModal";
 import KitEditorModal from "./KitEditorModal";
-import { mergeRequiredCerts } from "../../../../utils";
+import { mergeRequiredCerts, useMediaQuery } from "../../../../utils";
+
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateItem = async ({
@@ -293,6 +294,7 @@ export default function ItemEditorForm({
 
     const parent_kit = items.find(i => i.uuid == item.parent_kit);
     const mergedReqCerts = mergeRequiredCerts(item.required_certifications || [], parent_kit?.required_certifications || []);
+    const isMobile = useMediaQuery("(max-width: 1023px)");
 
     return (
         <>
@@ -761,7 +763,7 @@ export default function ItemEditorForm({
                 {/* <Divider className="hidden sm:block h-[1px] bg-default-400" /> */}
                 <div className="px-4 w-full pt-4 pb-2 rounded-t-lg bg-default-50">
                     <ButtonGroup
-                        size="lg"
+                        size={`${isMobile ? "sm" : "lg" }`}
                         fullWidth
                         className="min-w-full"
                         variant="bordered"

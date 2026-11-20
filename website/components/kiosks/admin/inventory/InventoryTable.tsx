@@ -48,6 +48,8 @@ import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { UserRoleList } from "../../../user/UserRoleList.tsx";
 import { CertificationList } from "../certifications/CertificationList.tsx";
 import { ColumnSelect } from "../../../Table";
+import { useMediaQuery } from "../../../../utils.tsx";
+
 const baseColumns = [
     // { name: "UUID", id: "uuid" },
     { name: "Type", id: "role" },
@@ -88,15 +90,7 @@ export default function InventoryTable({
     multiSelect = true,
     isLoading,
     extraColumns = [],
-    defaultColumns = [
-        "role",
-        "name",
-        // "access_type",
-        "quantity_ratio",
-        "locations",
-        "required_certifications",
-        "available_to",
-    ],
+    defaultColumns,
     customColumnComponents,
     showsKitContents = false,
     editable = false,
@@ -125,10 +119,26 @@ export default function InventoryTable({
     editable?: boolean;
     onCreate?: (state: boolean) => void;
 }) {
+    const isMobile = useMediaQuery("(max-width: 640px)");
+
+    const defColumns =
+        defaultColumns ??
+        (isMobile
+            ? ["role", "name", "locations"]
+            : [
+                  "role",
+                  "name",
+                  "quantity_ratio",
+                  "locations",
+                  "required_certifications",
+                  "available_to",
+              ]);
+
     // The set of columns that are visible
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
-        new Set(defaultColumns),
+        new Set(defColumns),
     );
+    
     // Location filtering dropdown menu
     const [searchableLocations, setSearchableLocations] =
         React.useState<Selection>(new Set());
@@ -228,6 +238,7 @@ export default function InventoryTable({
         scopes.length !== 0 &&
         verifyScopes(scopes, [API_SCOPE.CREATE_RESTOCK_FOR_USER]);
     const restockButtonAccess = restockSelfAccess || restockOtherAccess;
+    const hasEditableDropdown = restockButtonAccess || editable;
 
     return (
         <div className="flex flex-col max-h-full overflow-auto w-full">
@@ -384,60 +395,63 @@ export default function InventoryTable({
                                 isLoading={isLoading}
                                 isIconOnly
                             />
-                            <Dropdown>
-                                <DropdownTrigger>
-                                    <Button isIconOnly variant="faded">
-                                        <ChevronDownIcon
-                                            className="size-6"
-                                            color="secondary"
-                                        />
-                                    </Button>
-                                </DropdownTrigger>
-                                <DropdownMenu>
-                                    {[
-                                        ...(restockButtonAccess
-                                            ? [
-                                                  <DropdownItem
-                                                      key="restock"
-                                                      startContent={
-                                                          <PlusIcon className="size-6" />
-                                                      }
-                                                      isDisabled={
-                                                          selectedItem.name ===
-                                                          ""
-                                                      }
-                                                      onPress={restockOnOpen}
-                                                      description={
-                                                          selectedItem.name ===
-                                                          ""
-                                                              ? "Select an item to restock"
-                                                              : undefined
-                                                      }
-                                                  >
-                                                      Restock
-                                                  </DropdownItem>,
-                                              ]
-                                            : []),
-                                        ...(editable
-                                            ? [
-                                                  <DropdownItem
-                                                      key="create"
-                                                      color="primary"
-                                                      startContent={
-                                                          <PlusIcon className="size-6" />
-                                                      }
-                                                      isDisabled={isLoading}
-                                                      onPress={createItem}
-                                                      className="bg-primary text-primary-foreground"
-                                                      
-                                                  >
-                                                      Create
-                                                  </DropdownItem>,
-                                              ]
-                                            : []),
-                                    ]}
-                                </DropdownMenu>
-                            </Dropdown>
+                            {hasEditableDropdown && (
+                                <Dropdown>
+                                    <DropdownTrigger>
+                                        <Button isIconOnly variant="faded">
+                                            <ChevronDownIcon
+                                                className="size-6"
+                                                color="secondary"
+                                            />
+                                        </Button>
+                                    </DropdownTrigger>
+                                    <DropdownMenu>
+                                        {[
+                                            ...(restockButtonAccess
+                                                ? [
+                                                      <DropdownItem
+                                                          key="restock"
+                                                          startContent={
+                                                              <PlusIcon className="size-6" />
+                                                          }
+                                                          isDisabled={
+                                                              selectedItem.name ===
+                                                              ""
+                                                          }
+                                                          onPress={
+                                                              restockOnOpen
+                                                          }
+                                                          description={
+                                                              selectedItem.name ===
+                                                              ""
+                                                                  ? "Select an item to restock"
+                                                                  : undefined
+                                                          }
+                                                      >
+                                                          Restock
+                                                      </DropdownItem>,
+                                                  ]
+                                                : []),
+                                            ...(editable
+                                                ? [
+                                                      <DropdownItem
+                                                          key="create"
+                                                          color="primary"
+                                                          startContent={
+                                                              <PlusIcon className="size-6" />
+                                                          }
+                                                          isDisabled={isLoading}
+                                                          onPress={createItem}
+                                                          className="bg-primary text-primary-foreground"
+                                                      >
+                                                          Create
+                                                      </DropdownItem>,
+                                                  ]
+                                                : []),
+                                        ]}
+                                    </DropdownMenu>
+                                </Dropdown>
+                            )}
                         </ButtonGroup>
                     </div>
                 </div>

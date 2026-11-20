@@ -250,7 +250,7 @@ export function ColumnSelect({
         <Dropdown isDisabled={isLoading}>
             {isIconOnly ? (
                 <DropdownTrigger className="">
-                    <Button variant="faded" isIconOnly>
+                    <Button variant="faded" isIconOnly >
                         <AdjustmentsVerticalIcon
                             className="size-6"
                             color="secondary"

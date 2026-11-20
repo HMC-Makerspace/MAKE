@@ -23,7 +23,11 @@ import {
     TCheckoutItemUnavailability,
     TCheckoutValidation,
 } from "../../../common/checkout";
-import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
+import {
+    ArchiveBoxIcon,
+    MinusIcon,
+    PlusIcon,
+} from "@heroicons/react/24/outline";
 import AdminLayout from "../../layouts/AdminLayout";
 import InventoryTable from "../../components/kiosks/admin/inventory/InventoryTable";
 import CheckoutTable from "../../components/kiosks/admin/checkouts/CheckoutTable";
@@ -33,12 +37,19 @@ import axios from "axios";
 import { TConfig } from "common/config";
 import { TSchedule } from "common/schedule";
 import CertificationsTable from "../../components/kiosks/admin/certifications/CTable";
-import { CheckBadgeIcon, PercentBadgeIcon } from "@heroicons/react/24/solid";
+import {
+    BookmarkIcon,
+    CheckBadgeIcon,
+    PercentBadgeIcon,
+    ShoppingCartIcon,
+    UserIcon,
+} from "@heroicons/react/24/solid";
 import UsersTable from "../../components/kiosks/admin/users/UsersTable";
 import GrantCertPopup from "../../components/kiosks/admin/checkouts/GrantCertPopup";
 import AssignIDPopup from "../../components/kiosks/admin/checkouts/AssignIDPopup";
 import CertificationTag from "../../components/kiosks/admin/certifications/CertificationTag";
 import { useRoles } from "../../queries/useRoles";
+import { useMediaQuery } from "../../utils";
 
 async function getCartUnavailability({ cart }: { cart: TCheckoutItem[] }) {
     return (
@@ -102,6 +113,8 @@ export default function CheckoutsKiosk() {
         enabled: !!collegeID,
         retry: false,
     });
+
+    const isMobile = useMediaQuery("(max-width: 640px)");
 
     const validationMutation = useMutation({
         mutationFn: getCartUnavailability,
@@ -218,8 +231,11 @@ export default function CheckoutsKiosk() {
     }
 
     return (
-        <AdminLayout pageHref={"/admin/checkouts"} className="max-w-full px-4">
-            <div className="flex flex-col lg:flex-row overflow-auto h-full gap-4 p-1">
+        <AdminLayout
+            pageHref={"/admin/checkouts"}
+            className="max-w-full p-0 sm:px-4"
+        >
+            <div className="flex flex-col lg:flex-row overflow-auto h-full gap-2 sm:gap-4 p-0 sm:p-3">
                 <CheckoutSidebar
                     cart={cart}
                     setCart={setCart}
@@ -241,16 +257,27 @@ export default function CheckoutsKiosk() {
                     }}
                     removeItemFromCart={removeItemFromCart}
                 />
-                <div className="flex flex-col h-full w-full p-3 bg-default-50 rounded-xl overflow-auto">
+                <div className="flex flex-col h-full w-full p-1 sm:p-3 bg-default-50 rounded-xl overflow-auto">
                     <Tabs
                         color="primary"
-                        size="lg"
+                        size={`${isMobile ? "sm" : "lg"}`}
                         radius="full"
                         classNames={{
-                            panel: "overflow-auto h-full",
+                            panel: "overflow-auto h-full py-1 sm:py-3",
                         }}
                     >
-                        <Tab key={"inventory"} title={"Inventory"}>
+                        <Tab
+                            key={"inventory"}
+                            title={
+                                isMobile ? (
+                                    <div>
+                                        <ArchiveBoxIcon className="size-6" />
+                                    </div>
+                                ) : (
+                                    "Inventory"
+                                )
+                            }
+                        >
                             <InventoryTable
                                 inventory={inventory ?? []}
                                 roles={roles}
@@ -270,16 +297,20 @@ export default function CheckoutsKiosk() {
                                 isLoading={inventoryLoading}
                                 showsKitContents={true}
                                 extraColumns={[{ name: "Cart", id: "cart" }]}
-                                defaultColumns={[
-                                    "role",
-                                    "name",
-                                    "quantity_ratio",
-                                    "locations",
-                                    "required_certifications",
-                                    "available_to",
-                                    "visible_to",
-                                    "cart",
-                                ]}
+                                defaultColumns={
+                                    isMobile
+                                        ? ["name", "quantity_ratio", "cart"]
+                                        : [
+                                              "role",
+                                              "name",
+                                              "quantity_ratio",
+                                              "locations",
+                                              "required_certifications",
+                                              "available_to",
+                                              "visible_to",
+                                              "cart",
+                                          ]
+                                }
                                 customColumnComponents={{
                                     cart: (i) => (
                                         <div
@@ -315,7 +346,7 @@ export default function CheckoutsKiosk() {
                                 }}
                             />
                         </Tab>
-                        <Tab key={"checkouts"} title={"Checkouts"}>
+                        <Tab key={"checkouts"} title={isMobile ? <div><ShoppingCartIcon className="size-6" /></div> : "Checkouts"}>
                             <CheckoutTable
                                 key={user?.uuid}
                                 checkouts={checkouts}
@@ -326,6 +357,15 @@ export default function CheckoutsKiosk() {
                                 areas={areas}
                                 certs={certs}
                                 selectedKeys={new Set()}
+                                defaultColumns={
+                                    isMobile
+                                        ? [
+                                              "checked_out_by",
+                                              "items",
+                                              "return",
+                                          ]
+                                        : undefined
+                                }
                                 isLoading={
                                     inventoryLoading ||
                                     checkoutsLoading ||
@@ -335,7 +375,18 @@ export default function CheckoutsKiosk() {
                                 }
                             />
                         </Tab>
-                        <Tab key={"users"} title={"Users"}>
+                        <Tab
+                            key={"users"}
+                            title={
+                                isMobile ? (
+                                    <div>
+                                        <UserIcon className="size-6" />
+                                    </div>
+                                ) : (
+                                    "Users"
+                                )
+                            }
+                        >
                             <UsersTable
                                 users={users}
                                 roles={roles}
@@ -369,7 +420,18 @@ export default function CheckoutsKiosk() {
                                 fullHeader={false}
                             />
                         </Tab>
-                        <Tab key={"certifications"} title={"Certifications"}>
+                        <Tab
+                            key={"certifications"}
+                            title={
+                                isMobile ? (
+                                    <div>
+                                        <BookmarkIcon className="size-6" />
+                                    </div>
+                                ) : (
+                                    "Certifications"
+                                )
+                            }
+                        >
                             <CertificationsTable
                                 key={user?.active_certificates
                                     ?.map((c) => c.certification_uuid)

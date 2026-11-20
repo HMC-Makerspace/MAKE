@@ -33,6 +33,7 @@ import {
     timestampToTime,
     timeToTimestamp,
     zonedDateTimeToTimestamp,
+    useMediaQuery,
 } from "../../../../utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -40,6 +41,13 @@ import { UnixTimestamp } from "common/global";
 import { ShoppingCartIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { validateCollegeID } from "../../../../../common/verify";
 import CheckoutDisclaimerModal from "./CheckoutDisclaimerModal";
+import { UserChip } from "../../../user/UserChip";
+import {
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
+} from "@heroui/react";
+import { ShoppingBagIcon } from "@heroicons/react/24/solid";
 
 async function createCheckout({
     user_uuid,
@@ -210,8 +218,6 @@ export default function CheckoutSidebar({
         },
     });
 
-    const [mobileCart, setMobileCart] = useState(false);
-
     const submitCheckout = useCallback(() => {
         if (!user?.uuid || !range) {
             return;
@@ -237,19 +243,20 @@ export default function CheckoutSidebar({
         onOpenChange: checkoutDisclaimerOpenChange,
     } = useDisclosure();
 
+    const isMobile = useMediaQuery("(max-width: 640px)");
+
     return (
         <div
             className={clsx(
-                "flex flex-col rounded-xl bg-default-50 p-4",
-                "h-2/5 lg:h-full overflow-auto",
+                "flex flex-col rounded-xl bg-default-50 p-1 sm:p-4",
+                "h-fit sm:h-2/5 lg:h-full overflow-auto",
                 // "w-full lg:w-2/3 xl:w-1/2 2xl:w-1/3",
-                "w-full lg:w-[27%] flex-none gap-4",
+                "w-full lg:w-[27%] flex-none gap-1 sm:gap-4",
             )}
         >
             <div
                 className={clsx(
-                    "grow-0 sm:h-[50%] flex flex-col gap-4 w-full",
-                    mobileCart && "hidden sm:flex",
+                    "grow-0 flex flex-col gap-4 w-full",
                 )}
             >
                 <Form
@@ -288,7 +295,7 @@ export default function CheckoutSidebar({
                         key={collegeID}
                         type="text"
                         name="college_id"
-                        size="lg"
+                        size={`${isMobile ? "sm" : "lg"}`}
                         color="primary"
                         placeholder="Enter College ID..."
                         defaultValue={collegeID}
@@ -296,7 +303,7 @@ export default function CheckoutSidebar({
                         aria-label="Enter College ID"
                         variant="bordered"
                         onClear={() => setCollegeID("")}
-                        className="-mb-2"
+                        className="flex-1 min-w-0"
                         classNames={{
                             input: "placeholder:text-default-400",
                             inputWrapper: clsx(
@@ -306,27 +313,29 @@ export default function CheckoutSidebar({
                             ),
                         }}
                     />
-                    <Button
-                        isIconOnly
-                        endContent={<ShoppingCartIcon className="size-5" />}
-                        className="sm:hidden self-center mt-2 mr-2"
-                        color="primary"
-                        variant="ghost"
-                        size="sm"
-                        onPress={() => setMobileCart(!mobileCart)}
-                    />
+                    <div className="sm:hidden shrink-0 w-40 h-10 bg-default-300 rounded-md flex items-center justify-center overflow-hidden">
+                        {user && user.uuid ? (
+                            <UserChip
+                                user_uuid={user.uuid}
+                                size="sm"
+                                className="min-w-0 w-full justify-center"
+                            />
+                        ) : (
+                            <p className="text-sm">No user selected</p>
+                        )}
+                    </div>
                 </Form>
-                <CheckoutUser
-                    college_id={collegeID}
-                    certs={certs}
-                    roles={roles}
-                />
+
+                <div className="hidden sm:flex">
+                    <CheckoutUser
+                        college_id={collegeID}
+                        certs={certs}
+                        roles={roles}
+                    />
+                </div>
             </div>
             <div
-                className={clsx(
-                    "flex flex-col gap-4 h-full",
-                    !mobileCart && "hidden sm:flex",
-                )}
+                className="hidden sm:flex flex-col gap-4 h-full"
             >
                 <div
                     className={clsx(
@@ -335,22 +344,8 @@ export default function CheckoutSidebar({
                     )}
                 >
                     <div className="flex flex-row">
-                        <div className="flex-1 w-full"></div>
                         <div className="flex-1 text-xl font-semibold text-center w-full pb-2">
                             Cart
-                        </div>
-                        <div className="flex-1 w-full flex justify-end">
-                            <Button
-                                isIconOnly
-                                endContent={
-                                    <ShoppingCartIcon className="size-5" />
-                                }
-                                className="sm:hidden "
-                                size="sm"
-                                color="primary"
-                                variant="ghost"
-                                onPress={() => setMobileCart(!mobileCart)}
-                            />
                         </div>
                     </div>
 
@@ -426,6 +421,100 @@ export default function CheckoutSidebar({
                     isOpen={checkoutDisclaimerOpen}
                     onOpenChange={checkoutDisclaimerOpenChange}
                 />
+            </div>
+            <div className="flex flex-col h-full sm:hidden">
+                <Popover placement="bottom">
+                    <PopoverTrigger>
+                        <Button
+                            startContent={
+                                <ShoppingBagIcon className="size-5" />
+                            }
+                            className="flex-1 text-l font-semibold text-center w-full p-2 justify-items-center px-3 bg-default-300"
+                        >
+                            Cart
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full">
+                        <div
+                            className={clsx(
+                                "bg-default-200 rounded-lg w-80 min-h-32 overflow-y-auto",
+                                "p-2 flex flex-col gap-2",
+                            )}
+                        >
+                            {cart.map((item) => (
+                                <div
+                                    key={item.item_uuid}
+                                    className={clsx(
+                                        "bg-default-300 text-default-700 p-2 pl-3 text-lg",
+                                        "flex flex-row justify-between rounded-md",
+                                        "items-center",
+                                    )}
+                                >
+                                    {inventory.find(
+                                        (i) => i.uuid === item.item_uuid,
+                                    )?.name || "Unknown Item"}
+                                    <Button
+                                        isIconOnly
+                                        size="lg"
+                                        radius="sm"
+                                        color="danger"
+                                        variant="flat"
+                                        onPress={() =>
+                                            removeItemFromCart(
+                                                item.item_uuid,
+                                                true,
+                                            )
+                                        }
+                                        className="hover:bg-danger/20 bg-default-100"
+                                    >
+                                        <TrashIcon
+                                            className={clsx(
+                                                "group-hover:opacity-100 opacity-0",
+                                                "transition-opacity size-5",
+                                            )}
+                                        />
+                                        <div
+                                            className={clsx(
+                                                "absolute group-hover:opacity-0",
+                                                "transition-opacity text-default-700",
+                                            )}
+                                        >
+                                            {item.quantity}
+                                        </div>
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                        <div className='w-full py-2'>
+                            <CheckoutDateSelect
+                            range={range}
+                            setRange={setRange}
+                            unavailability={unavailability}
+                            isDisabled={!collegeID}
+                            dailyCloseTime={activeSchedule.daily_close_time}
+                            cart={cart}
+                            config={config}
+                            inventory={inventory}
+                            // If any items have a disclaimer, open the disclaimer popup before checkout
+                            onPress={() => {
+                                itemsWithDisclaimers.length > 0
+                                    ? checkoutDisclaimerOnOpen()
+                                    : submitCheckout();
+                            }}
+                            isLoading={createMutation.isPending}
+                            
+                        />
+                        <CheckoutDisclaimerModal
+                            type="checkout"
+                            items={itemsWithDisclaimers}
+                            onSubmit={submitCheckout}
+                            isOpen={checkoutDisclaimerOpen}
+                            onOpenChange={checkoutDisclaimerOpenChange}
+                        />
+                        </div>
+                        
+                    </PopoverContent>
+                </Popover>
             </div>
         </div>
     );

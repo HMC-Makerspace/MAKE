@@ -13,6 +13,7 @@ import {
     Selection,
     Spinner,
     useDisclosure,
+    ModalHeader,
 } from "@heroui/react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import React from "react";
@@ -142,7 +143,7 @@ export default function InventoryKiosk() {
 
     return (
         <AdminLayout pageHref={"/admin/inventory"}>
-            <div className="flex flex-col lg:flex-row overflow-auto h-full gap-8 p-3">
+            <div className="flex flex-col lg:flex-row overflow-auto h-full gap-8 sm:p-3">
                 <div className="hidden lg:block w-2/5">
                     <ItemEditor
                         item={item ?? DEFAULT_ITEM}
@@ -184,14 +185,17 @@ export default function InventoryKiosk() {
                     onOpenChange={editOnOpenChange}
                     placement="bottom"
                     scrollBehavior="inside"
-                    // size="full"
+                    size="xl"
                     classNames={{
                         // wrapper: "items-end",
                         base: "max-h-[85vh] h-auto rounded-t-2xl overflow-hidden w-full",
-                        body: "overflow-y-auto",
+                        body: "overflow-y-auto px-4",
                     }}
                 >
                     <ModalContent>
+                        <ModalHeader>
+
+                        </ModalHeader>
                         <ModalBody>
                             <ItemEditor
                                 item={item ?? DEFAULT_ITEM}
