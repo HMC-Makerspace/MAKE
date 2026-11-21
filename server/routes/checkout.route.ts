@@ -309,7 +309,8 @@ router.post(
  * header is required to call it. The user must have the
  * {@link API_SCOPE.CREATE_CHECKOUT} scope.
  */
-router.post("/", 
+router.post(
+    "/",
     verifySchema(CheckoutSchema, "checkout_obj"),
     async (req: CheckoutRequest, res: CheckoutResponse) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -354,7 +355,8 @@ router.post("/",
             // If the user is not authorized, provide a status error
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
-    });
+    },
+);
 
 /**
  * Update a specific checkout. This route will not create a new checkout if the
@@ -362,7 +364,8 @@ router.post("/",
  * protected route, and a `requesting_uuid` header is required to call it.
  * The user must have the {@link API_SCOPE.UPDATE_CHECKOUT} scope.
  */
-router.put("/",
+router.put(
+    "/",
     verifySchema(CheckoutSchema, "checkout_obj"),
     async (req: CheckoutRequest, res: CheckoutResponse) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -409,7 +412,8 @@ router.put("/",
             // If the user is not authorized, provide a status error
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
-    });
+    },
+);
 
 /**
  * Check in a specific checkout. This is a protected route, and a
@@ -559,9 +563,7 @@ router.patch(
         const new_timestamp_due = req.body.new_timestamp_due;
 
         if (typeof new_timestamp_due !== "number") {
-            req.log.warn(
-                "New timestamp not of type number"
-            );
+            req.log.warn("New timestamp not of type number");
             return;
         }
 
@@ -650,7 +652,10 @@ router.delete(
                 });
                 return;
             }
-            req.log.debug(`Deleted checkout ${checkout_uuid}`);
+            req.log.debug({
+                msg: `Deleted checkout ${checkout_uuid}`,
+                deleted_checkout: checkout,
+            });
             res.status(StatusCodes.OK).json(checkout);
         } else {
             req.log.warn({

@@ -414,7 +414,10 @@ router.delete(
                         });
                 }
             }
-            req.log.debug(`Deleted workshop ${workshop_uuid}`);
+            req.log.debug({
+                msg: `Deleted workshop ${workshop_uuid}`,
+                deleted_workshop: workshop,
+            });
             res.status(StatusCodes.NO_CONTENT).json({});
         } else {
             req.log.warn({

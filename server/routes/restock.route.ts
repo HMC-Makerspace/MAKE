@@ -25,7 +25,11 @@ import {
     updateRestockRequestStatuses,
     removeUserFromMailingList,
 } from "controllers/restock.controller";
-import { RestockRequestSchema, RestockRequestSchemaOptional, RestockRequestLogSchema } from "models/restock.model";
+import {
+    RestockRequestSchema,
+    RestockRequestSchemaOptional,
+    RestockRequestLogSchema,
+} from "models/restock.model";
 
 // --- Request and Response Types ---
 // ok, this is a bad name but its a request related to restock requests,
@@ -197,7 +201,8 @@ router.get("/", async (req: Request, res: RestocksResponse) => {
  * a status error is returned. If the user is authorized, the updated restock
  * request object is returned.
  */
-router.put("/", 
+router.put(
+    "/",
     verifySchema(RestockRequestSchema, "request_obj"),
     async (req: RestockRequestRequest, res: RestockResponse) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -222,7 +227,9 @@ router.put("/",
         if (await verifyRequest(requesting_uuid, API_SCOPE.UPDATE_RESTOCK)) {
             const restock = await updateRestockRequest(request_obj);
             if (!restock) {
-                req.log.warn(`No restock request found with uuid ${request_uuid}`);
+                req.log.warn(
+                    `No restock request found with uuid ${request_uuid}`,
+                );
                 res.status(StatusCodes.NOT_FOUND).json({
                     error: `No restock request found with uuid \`${request_uuid}\`.`,
                 });
@@ -238,7 +245,8 @@ router.put("/",
             });
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
-    });
+    },
+);
 
 /**
  * Update the status of a single restock request
@@ -379,7 +387,8 @@ router.patch(
  * not authorized, a status error is returned. If the user is authorized, the
  * updated user role object is returned.
  */
-router.post("/", 
+router.post(
+    "/",
     verifySchema(RestockRequestSchema, "request_obj"),
     async (req: RestockRequestRequest, res: RestockResponse) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -435,9 +444,8 @@ router.post("/",
             });
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
-    });
-
-
+    },
+);
 
 /**
  * Update a restock request. This is a protected route, and a `requesting_uuid`
@@ -539,7 +547,10 @@ router.delete(
                 });
                 return;
             }
-            req.log.debug(`Deleted restock request with uuid ${restock_uuid}`);
+            req.log.debug({
+                msg: `Deleted restock request with uuid ${restock_uuid}`,
+                deleted_restock_request: deleted,
+            });
             res.status(StatusCodes.NO_CONTENT).json({});
         } else {
             // If the user is not authorized, provide a status error

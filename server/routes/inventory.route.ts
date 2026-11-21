@@ -355,7 +355,10 @@ router.delete(
                 });
                 return;
             } else {
-                req.log.debug(`Deleted item with uuid ${item_uuid}`);
+                req.log.debug({
+                    msg: `Deleted item with uuid ${item_uuid}`,
+                    deleted_item,
+                });
                 // Return a status ok, deleted item object is not returned
                 res.status(StatusCodes.NO_CONTENT).json({});
             }

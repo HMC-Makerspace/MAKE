@@ -253,7 +253,10 @@ router.delete(
                 });
                 return;
             } else {
-                req.log.debug(`Deleted embed with uuid ${embed_uuid}`);
+                req.log.debug({
+                    msg: `Deleted embed with uuid ${embed_uuid}`,
+                    deleted_embed,
+                });
                 // Return a status ok, deleted embed object is not returned
                 res.status(StatusCodes.NO_CONTENT).json({});
             }

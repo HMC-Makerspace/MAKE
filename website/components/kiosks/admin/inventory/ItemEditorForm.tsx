@@ -10,6 +10,7 @@ import {
     Snippet,
     Textarea,
     Tooltip,
+    useDisclosure,
 } from "@heroui/react";
 import { Select, SelectSection, SelectItem } from "@heroui/select";
 import { Accordion, AccordionItem } from "@heroui/accordion";
@@ -42,6 +43,7 @@ import { motion } from "motion/react";
 import ItemQuantityIcon from "./ItemQuantityIcon";
 import ItemLocationModal from "./ItemLocationModal";
 import { TArea } from "common/area";
+import DeleteModal from "../../../DeleteModal";
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateItem = async ({
@@ -245,6 +247,13 @@ export default function ItemEditorForm({
             });
         },
     });
+
+    const {
+        isOpen: deleteModal,
+        onOpen: deleteModalOpen,
+        onClose: deleteModalClose,
+        onOpenChange: deleteModalOpenChange,
+    } = useDisclosure();
 
     const [reqcertsOpen, setReqcertsOpen] = React.useState<boolean>(false); // whether reqcerts edit modal is open
     const [authrolesOpen, setAuthrolesOpen] = React.useState<boolean>(false); // whether authroles edit modal is open
@@ -770,15 +779,25 @@ export default function ItemEditorForm({
                             variant="flat"
                             isDisabled={isDisabled || isNew}
                             isLoading={deleteMutation.isPending}
-                            onPress={() =>
-                                deleteMutation.mutate({ item_uuid: UUID })
-                            }
+                            onPress={deleteModalOpen}
                         >
                             <TrashIcon className="size-5" />
                         </Button>
                     </div>
                 </div>
             </Form>
+
+            <DeleteModal
+                itemType="item"
+                itemName={item.name}
+                onSubmit={() => {
+                    deleteMutation.mutate({ item_uuid: UUID });
+                    deleteModalClose();
+                }}
+                isOpen={deleteModal}
+                onOpenChange={deleteModalOpenChange}
+                isLoading={deleteMutation.isPending}
+            />
 
             <RequiredCertsModal
                 mode="single"

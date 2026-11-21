@@ -148,7 +148,8 @@ router.get(
  * not authorized, a status error is returned. If the user is authorized, the
  * updated user role object is returned.
  */
-router.put("/role/", 
+router.put(
+    "/role/",
     verifySchema(UserRoleSchema, "role_obj"),
     async (req: UserRoleRequest, res: UserRoleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -189,7 +190,8 @@ router.put("/role/",
             });
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
-    });
+    },
+);
 
 /**
  * Create a user role. This is a protected route, and a
@@ -198,7 +200,8 @@ router.put("/role/",
  * status error is returned. If the user is authorized, the newly created
  * user role object is returned.
  */
-router.post("/role/", 
+router.post(
+    "/role/",
     verifySchema(UserRoleSchema, "role_obj"),
     async (req: UserRoleRequest, res: UserRoleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -221,7 +224,6 @@ router.post("/role/",
 
         // If the user is authorized, create the role
         if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_ROLE)) {
-
             const user_role = await createUserRole(role_obj);
             if (!user_role) {
                 req.log.warn(
@@ -235,7 +237,6 @@ router.post("/role/",
             }
             req.log.debug(`Created user role with uuid ${role_uuid}`);
             res.status(StatusCodes.CREATED).json(user_role);
-        
         } else {
             // If the user is not authorized, provide a status error
             req.log.warn({
@@ -244,7 +245,8 @@ router.post("/role/",
             });
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
-    });
+    },
+);
 
 /**
  * Delete a single user role by UUID. This is a protected route, and a
@@ -282,7 +284,10 @@ router.delete(
                 });
                 return;
             }
-            req.log.debug(`Deleted user role with uuid ${role_uuid}`);
+            req.log.debug({
+                msg: `Deleted user role with uuid ${role_uuid}`,
+                deleted_user_role: user_role,
+            });
             // Return a status ok, deleted user role object is not returned
             res.status(StatusCodes.NO_CONTENT).json({});
         } else {
@@ -887,12 +892,13 @@ router.get("/", async (req: UsersRequest, res: UsersResponse) => {
  * the user is not authorized, a status error is returned. If the user is
  * authorized, the updated user object is returned.
  */
-router.put("/", 
+router.put(
+    "/",
     verifySchema(UserSchema, "user_obj"),
     async (req: UserRequest, res: UserResponse) => {
         // Get the user object from the request body
         const user_obj = req.body.user_obj;
-        req.log.info(user_obj)
+        req.log.info(user_obj);
         if (!user_obj) {
             req.log.warn("No user object provided to update");
             res.status(StatusCodes.BAD_REQUEST).json({
@@ -940,7 +946,8 @@ router.put("/",
             });
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
-    });
+    },
+);
 
 /**
  * Create a new user.
@@ -949,7 +956,8 @@ router.put("/",
  * user is not authorized, a status error is returned. If the user is
  * authorized, the new user object is returned.
  */
-router.post("/", 
+router.post(
+    "/",
     verifySchema(UserSchema, "user_obj"),
     async (req: UserRequest, res: UserResponse) => {
         // Get the user object from the request body
@@ -995,7 +1003,6 @@ router.post("/",
             req.log.debug(`Created user with uuid ${new_user_uuid}`);
             // Return the new user object
             res.status(StatusCodes.CREATED).json(user);
-        
         } else {
             // If the user is not authorized, provide a status error
             req.log.warn({
@@ -1004,7 +1011,8 @@ router.post("/",
             });
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
-    });
+    },
+);
 
 /**
  * Update a user's public information by UUID
@@ -1339,7 +1347,7 @@ router.patch(
             // If the user is authorized, perform the update
             const updated_user = await removeBatchUserAvailability(
                 user_uuid,
-                selectedShifts
+                selectedShifts,
             );
             if (!updated_user) {
                 req.log.warn(
@@ -1485,7 +1493,12 @@ router.delete(
                 });
                 return;
             } else {
-                req.log.debug(`Deleted user with uuid ${user_uuid}`);
+                const { passkey: _passkey, ...user_without_passkey } =
+                    deleted_user;
+                req.log.debug({
+                    msg: `Deleted user with uuid ${user_uuid}`,
+                    deleted_user: user_without_passkey,
+                });
                 // Return a status ok, deleted user object is not returned
                 res.status(StatusCodes.NO_CONTENT).json({});
             }

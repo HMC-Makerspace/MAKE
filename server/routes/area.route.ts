@@ -455,7 +455,10 @@ router.delete(
                         });
                 }
             }
-            req.log.debug(`Deleted area ${area_uuid}`);
+            req.log.debug({
+                msg: `Deleted area ${area_uuid}`,
+                deleted_area: area,
+            });
             res.status(StatusCodes.NO_CONTENT).json({});
         } else {
             req.log.warn({

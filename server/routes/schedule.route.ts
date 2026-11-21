@@ -36,7 +36,15 @@ import {
 } from "common/verify";
 import { TAlert, TPublicScheduleData, TSchedule } from "common/schedule";
 import { TShift, TShiftEvent } from "common/shift";
-import { ScheduleSchema, ShiftSchema, AlertSchema, ShiftEventSchema, ScheduleSchemaOptional, ShiftSchemaOptional, AlertSchemaOptional } from "models/schedule.model";
+import {
+    ScheduleSchema,
+    ShiftSchema,
+    AlertSchema,
+    ShiftEventSchema,
+    ScheduleSchemaOptional,
+    ShiftSchemaOptional,
+    AlertSchemaOptional,
+} from "models/schedule.model";
 
 // --- Request and Response Types ---
 type ScheduleRequest = Request<{}, {}, { schedule_obj: TSchedule }>;
@@ -290,7 +298,6 @@ router.post(
                 API_SCOPE.UPDATE_SCHEDULE,
             )
         ) {
-
             if (shift_obj) {
                 const new_schedule = await createShiftInSchedule(
                     schedule_uuid,
@@ -309,7 +316,6 @@ router.post(
                 req.log.debug(`Created shift with uuid ${shift_obj.uuid}`);
                 res.status(StatusCodes.CREATED).json(new_schedule);
             }
-
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to create a shift",
@@ -441,9 +447,10 @@ router.delete(
                 });
                 return;
             }
-            req.log.debug(
-                `Deleted shift with uuid ${shift_uuid} in schedule ${schedule_uuid}`,
-            );
+            req.log.debug({
+                msg: `Deleted shift with uuid ${shift_uuid} in schedule ${schedule_uuid}`,
+                schedule_after_deletion: new_schedule,
+            });
             res.status(StatusCodes.OK).json(new_schedule);
         } else {
             req.log.warn({
@@ -604,7 +611,6 @@ router.post(
                 API_SCOPE.CREATE_ALERT,
             )
         ) {
-
             if (alert_obj) {
                 const new_schedule = await createAlertInSchedule(
                     schedule_uuid,
@@ -759,9 +765,10 @@ router.delete(
                 });
                 return;
             }
-            req.log.debug(
-                `Deleted alert with uuid ${alert_uuid} in schedule ${schedule_uuid}`,
-            );
+            req.log.debug({
+                msg: `Deleted alert with uuid ${alert_uuid} in schedule ${schedule_uuid}`,
+                schedule_after_deletion: new_schedule,
+            });
             res.status(StatusCodes.OK).json(new_schedule);
         } else {
             req.log.warn({
@@ -1038,7 +1045,8 @@ router.get(
  * header is required to call it. The user must have the
  * {@link API_SCOPE.CREATE_SCHEDULE} scope.
  */
-router.post("/",
+router.post(
+    "/",
     verifySchema(ScheduleSchema, "schedule_obj"),
     async (req: ScheduleRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -1062,7 +1070,6 @@ router.post("/",
 
         // If the user is authorized, create a schedule
         if (await verifyRequest(requesting_uuid, API_SCOPE.CREATE_SCHEDULE)) {
-            
             if (schedule_obj) {
                 const schedule = await createSchedule(schedule_obj);
                 if (!schedule) {
@@ -1086,7 +1093,8 @@ router.post("/",
             // If the user is not authorized, provide a status error
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
-    });
+    },
+);
 
 /**
  * Update a specific schedule. This route will not create a new schedule if the
@@ -1094,7 +1102,8 @@ router.post("/",
  * protected route, and a `requesting_uuid` header is required to call it.
  * The user must have the {@link API_SCOPE.UPDATE_SCHEDULE} scope.
  */
-router.put("/", 
+router.put(
+    "/",
     verifySchema(ScheduleSchema, "schedule_obj"),
     async (req: ScheduleRequest, res: ScheduleResponse) => {
         const headers = req.headers as VerifyRequestHeader;
@@ -1141,7 +1150,8 @@ router.put("/",
             // If the user is not authorized, provide a status error
             res.status(StatusCodes.FORBIDDEN).json(FORBIDDEN_ERROR);
         }
-    });
+    },
+);
 
 /**
  * Set the active schedule by uuid. Requires the {@link API_SCOPE.UPDATE_SCHEDULE} scope.
@@ -1352,7 +1362,10 @@ router.delete(
                 });
                 return;
             }
-            req.log.debug(`Deleted schedule ${schedule_uuid}`);
+            req.log.debug({
+                msg: `Deleted schedule ${schedule_uuid}`,
+                deleted_schedule: schedule,
+            });
             res.status(StatusCodes.NO_CONTENT).json({});
         } else {
             req.log.warn({

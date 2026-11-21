@@ -19,7 +19,10 @@ import {
     SuccessfulResponse,
 } from "common/verify";
 import { TCertification } from "common/certification";
-import { CertificationSchema, CertificationSchemaOptional } from "models/certification.model";
+import {
+    CertificationSchema,
+    CertificationSchemaOptional,
+} from "models/certification.model";
 
 // --- Request and Response Types ---
 type CertificationRequest = Request<
@@ -332,7 +335,10 @@ router.delete(
                 });
                 return;
             }
-            req.log.debug(`Deleted certification ${certification_uuid}`);
+            req.log.debug({
+                msg: `Deleted certification ${certification_uuid}`,
+                deleted_certification: certification,
+            });
             res.status(StatusCodes.NO_CONTENT).json({});
         } else {
             req.log.warn({

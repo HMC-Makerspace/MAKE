@@ -36,6 +36,7 @@ import {
     LockOpenIcon,
     XCircleIcon,
 } from "@heroicons/react/24/solid";
+import DeleteModal from "../../../DeleteModal";
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateUser = async ({
@@ -136,6 +137,13 @@ export default function UserEditorForm({
             });
         },
     });
+
+    const {
+        isOpen: deleteModal,
+        onOpen: deleteModalOpen,
+        onClose: deleteModalClose,
+        onOpenChange: deleteModalOpenChange,
+    } = useDisclosure();
 
     const onSubmit = React.useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
@@ -452,12 +460,21 @@ export default function UserEditorForm({
                         isDisabled={isEmpty || isMultiple}
                         isLoading={deleteMutation.isPending}
                         startContent={<TrashIcon className="size-5" />}
-                        onPress={() =>
-                            deleteMutation.mutate({ user_uuid: user.uuid })
-                        }
+                        onPress={deleteModalOpen}
                     ></Button>
                 </div>
             </Form>
+            <DeleteModal
+                itemType="user"
+                itemName={user.name ?? user.email}
+                onSubmit={() => {
+                    deleteMutation.mutate({ user_uuid: user.uuid });
+                    deleteModalClose();
+                }}
+                isOpen={deleteModal}
+                onOpenChange={deleteModalOpenChange}
+                isLoading={deleteMutation.isPending}
+            />
             <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
                 <ModalContent>
                     <Form

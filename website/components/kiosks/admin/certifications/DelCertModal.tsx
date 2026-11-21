@@ -1,16 +1,9 @@
-import {
-    Button,
-    Modal,
-    Form,
-    ModalContent,
-    addToast
-} from "@heroui/react";
-
 import React from "react";
 import axios from "axios";
+import { addToast } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
 import { TCertification } from "common/certification";
+import DeleteModal from "../../../DeleteModal";
 
 export default function DeleteCertModal({
     cert,
@@ -31,11 +24,14 @@ export default function DeleteCertModal({
                 title: `Successfully deleted certification "${cert.name}"`,
                 color: "success",
             });
-            
+
             // Remove the cert from the query cache
-            queryClient.setQueryData(["certification"], (old: TCertification[]) => {
-                return old.filter((c) => c.uuid !== cert.uuid);
-            });
+            queryClient.setQueryData(
+                ["certification"],
+                (old: TCertification[]) => {
+                    return old.filter((c) => c.uuid !== cert.uuid);
+                },
+            );
             queryClient.removeQueries({
                 queryKey: ["certification", cert.uuid],
             });
@@ -56,57 +52,18 @@ export default function DeleteCertModal({
             // Run the mutation
             mutation.mutate();
             onOpenChange(false);
-
         },
         [mutation],
     );
 
     return (
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="blur">
-            <ModalContent>
-                {(onClose) => (
-                    <Form
-                        onSubmit={onSubmit}
-                        className="flex flex-col gap-4 p-4"
-                    >
-                        <div className="text-lg font-semibold">Delete Certification</div>
-                        <div className="flex flex-col gap-2">
-                            <p>
-                                Are you sure you want to delete the certification{" "}
-                                <span className="font-semibold">
-                                    {cert.name}
-                                </span>
-                                ?
-                            </p>
-                            <p className="text-sm text-default-400">
-                                This action cannot be undone.
-                            </p>
-                        </div>
-                        <div
-                            id="role-bottom-buttons"
-                            className="flex flex-row justify-between w-full"
-                        >
-                            <Button
-                                variant="shadow"
-                                type="submit"
-                                color="danger"
-                                className="w-full sm:w-1/4"
-                                isLoading={mutation.isPending}
-                            >
-                                Delete
-                            </Button>
-                            <Button
-                                variant="flat"
-                                color="secondary"
-                                className="w-1/4"
-                                onPress={onClose}
-                            >
-                                Cancel
-                            </Button>
-                        </div>
-                    </Form>
-                )}
-            </ModalContent>
-        </Modal>
+        <DeleteModal
+            itemType="certification"
+            itemName={cert.name}
+            onSubmit={onSubmit}
+            isOpen={isOpen}
+            onOpenChange={onOpenChange}
+            isLoading={mutation.isPending}
+        />
     );
 }

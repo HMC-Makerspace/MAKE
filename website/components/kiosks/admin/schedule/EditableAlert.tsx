@@ -11,6 +11,7 @@ import {
     PopoverTrigger,
     RangeCalendar,
     Checkbox,
+    useDisclosure,
 } from "@heroui/react";
 import clsx from "clsx";
 import { TAlert } from "common/schedule";
@@ -32,6 +33,7 @@ import {
     timestampToZonedDateTime,
     zonedDateTimeToTimestamp,
 } from "../../../../utils";
+import DeleteModal from "../../../DeleteModal";
 
 export default function EditableAlert({
     alert,
@@ -45,6 +47,12 @@ export default function EditableAlert({
     timezone: string;
 }) {
     const isDefault = !(alert.timestamp_end && alert.timestamp_start);
+    const {
+        isOpen: deleteModal,
+        onOpen: deleteModalOpen,
+        onClose: deleteModalClose,
+        onOpenChange: deleteModalOpenChange,
+    } = useDisclosure();
     return (
         <div className="flex flex-col sm:flex-row w-full gap-2 items-top">
             <div
@@ -70,7 +78,7 @@ export default function EditableAlert({
                                 <Button
                                     variant="flat"
                                     color="danger"
-                                    onPress={deleteAlert}
+                                    onPress={deleteModalOpen}
                                     isIconOnly
                                 >
                                     <TrashIcon className="size-6" />
@@ -221,6 +229,17 @@ export default function EditableAlert({
                     }
                 />
             </div>
+            <DeleteModal
+                itemType="alert"
+                itemName={alert.header}
+                onSubmit={() => {
+                    deleteAlert();
+                    deleteModalClose();
+                }}
+                isOpen={deleteModal}
+                onOpenChange={deleteModalOpenChange}
+                isLoading={false}
+            />
         </div>
     );
 }

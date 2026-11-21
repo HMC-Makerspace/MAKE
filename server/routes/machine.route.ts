@@ -469,7 +469,10 @@ router.delete(
                         });
                 }
             }
-            req.log.debug(`Deleted machine ${machine_uuid}`);
+            req.log.debug({
+                msg: `Deleted machine ${machine_uuid}`,
+                deleted_machine: machine,
+            });
             res.status(StatusCodes.NO_CONTENT).json({});
         } else {
             req.log.warn({

@@ -36,6 +36,7 @@ import { UUID } from "common/global.ts";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { now } from "@internationalized/date";
+import DeleteModal from "../../../DeleteModal";
 
 // TODO-
 // [] FIX TIME
@@ -204,6 +205,12 @@ export default function WorkshopTable({
     >(undefined);
     const [isNew, setIsNew] = React.useState<boolean>(false);
     const [isBatch, setIsBatch] = React.useState<boolean>(false);
+    const {
+        isOpen: deleteIsOpen,
+        onOpen: deleteOnOpen,
+        onClose: deleteOnClose,
+        onOpenChange: deleteOnOpenChange,
+    } = useDisclosure();
 
     const {
         isOpen: peopleIsOpen,
@@ -519,9 +526,8 @@ export default function WorkshopTable({
                                             <TrashIcon className="size-6" />
                                         }
                                         onPress={() => {
-                                            deleteMutation.mutate({
-                                                workshop_uuid: workshop.uuid,
-                                            });
+                                            setSelectedWorkshop(workshop);
+                                            deleteOnOpen();
                                         }}
                                     ></Button>
                                 </>
@@ -534,6 +540,19 @@ export default function WorkshopTable({
             )}
             {selectedWorkshop && (
                 <>
+                    <DeleteModal
+                        itemType="workshop"
+                        itemName={selectedWorkshop.title}
+                        onSubmit={() => {
+                            deleteMutation.mutate({
+                                workshop_uuid: selectedWorkshop.uuid,
+                            });
+                            deleteOnClose();
+                        }}
+                        isOpen={deleteIsOpen}
+                        onOpenChange={deleteOnOpenChange}
+                        isLoading={deleteMutation.isPending}
+                    />
                     <WorkshopPeopleModal
                         key={`${selectedWorkshop.uuid}-people`}
                         workshop={selectedWorkshop}
