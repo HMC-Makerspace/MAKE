@@ -214,7 +214,7 @@ export function UserLoginChip({
                         )}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="p-2 xl:min-w-[20vw] xl:max-w-[30vw]">
+                <PopoverContent className="p-2 max-w-[95vw] xl:min-w-[20vw] xl:max-w-[30vw]">
                     {user_uuid && user && roles && (
                         <UserInfo
                             user={user}

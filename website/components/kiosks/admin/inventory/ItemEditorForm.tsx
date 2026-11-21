@@ -237,10 +237,17 @@ export default function ItemEditorForm({
                         return old.map((i) => (i.uuid === obj.uuid ? obj : i));
                     },
                 );
-
+                addToast({
+                    title: `Successfully updated item${isMultiple ? "s" : ""}`,
+                    color: "success",
+                });
                 successExtras();
             },
             onError: (error) => {
+                addToast({
+                    title: `Error: ${error.message}`,
+                    color: "danger",
+                });
                 alert(`Error: ${error.message}`);
             },
         });

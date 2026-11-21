@@ -36,12 +36,12 @@ export default function ItemEditor({
 
     return (
         <div
-    className={clsx(
-        "flex flex-col rounded-xl bg-content1",
-        "h-1/3 lg:h-full min-h-0 overflow-hidden relative",
-        "w-full lg:p-1.5",
-    )}
->
+            className={clsx(
+                "flex flex-col rounded-xl bg-content1",
+                "h-1/3 lg:h-full min-h-0 overflow-hidden relative",
+                "w-full lg:p-1.5",
+            )}
+        >
             <h1 className="3xl font-bold text-center p-3 bg-default-50 rounded-t-lg">
                 Item Editor
             </h1>

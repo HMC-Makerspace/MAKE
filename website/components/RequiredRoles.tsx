@@ -216,7 +216,7 @@ export function RequiredRolesModal({
             setHasEdits(false);
             onOpenChange(false);
         },
-        [patchMutation],
+        [patchMutation, currentRoles],
     );
     return (
         <Modal

@@ -145,8 +145,6 @@ export default function InventoryTable({
         );
     }, [isMobile, defaultColumns]);
 
-    console.log(visibleColumns);
-
     // Location filtering dropdown menu
     const [searchableLocations, setSearchableLocations] =
         React.useState<Selection>(new Set());

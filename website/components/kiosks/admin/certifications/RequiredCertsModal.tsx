@@ -89,7 +89,7 @@ export function RequiredCerts({
     return (
         <div
             className={clsx(
-                "flex flex-col gap-3 p-4 overflow-auto",
+                "flex flex-col gap-3 sm:p-4 overflow-auto",
                 "size-full",
                 className,
             )}

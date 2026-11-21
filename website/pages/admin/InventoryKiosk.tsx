@@ -102,14 +102,16 @@ export default function InventoryKiosk() {
     };
 
     React.useEffect(() => {
-        if (selectedItems !== "all") {
-            if (isMobile && (selectedItems.size > 0 || isNewItem)) {
-                editOnOpen();
-            } else {
-                editOnClose();
-            }
+        const hasSelectedItem =
+            selectedItems !== "all" &&
+            [...selectedItems].some((key) => key != null);
+
+        if (isMobile && (hasSelectedItem || isNewItem)) {
+            editOnOpen();
+        } else {
+            editOnClose();
         }
-    }, [selectedItems, isNewItem]);
+    }, [selectedItems, isNewItem, isMobile]);
 
     if (
         !inventory ||
@@ -193,9 +195,7 @@ export default function InventoryKiosk() {
                     }}
                 >
                     <ModalContent>
-                        <ModalHeader>
-
-                        </ModalHeader>
+                        <ModalHeader></ModalHeader>
                         <ModalBody>
                             <ItemEditor
                                 item={item ?? DEFAULT_ITEM}
