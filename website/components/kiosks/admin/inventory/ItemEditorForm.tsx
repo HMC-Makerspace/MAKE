@@ -42,7 +42,10 @@ import {
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
-import { AvailableToRolesModal, VisibleToRolesModal } from "../certifications/AuthorizedRolesModal";
+import {
+    AvailableToRolesModal,
+    VisibleToRolesModal,
+} from "../certifications/AuthorizedRolesModal";
 import { motion } from "motion/react";
 import ItemQuantityIcon from "./ItemQuantityIcon";
 import ItemLocationModal from "./ItemLocationModal";
@@ -51,7 +54,6 @@ import InventoryAuditModal from "./InventoryAuditModal";
 import InventoryAuditLogsModal from "./InventoryAuditLogsModal";
 import KitEditorModal from "./KitEditorModal";
 import { mergeRequiredCerts, useMediaQuery } from "../../../../utils";
-
 
 // Define the mutation function that will run when the form is submitted
 const createUpdateItem = async ({
@@ -196,9 +198,12 @@ export default function ItemEditorForm({
                 visible_to: item.visible_to || [],
                 quantity: quantity,
                 available: available,
-                audit_logs: [{
-                    timestamp: Date.now() / 1000
-                }, ...item.audit_logs ?? []]
+                audit_logs: [
+                    {
+                        timestamp: Date.now() / 1000,
+                    },
+                    ...(item.audit_logs ?? []),
+                ],
             };
 
             // Reset the mutation (clears any previous errors)
@@ -270,7 +275,8 @@ export default function ItemEditorForm({
     const [locationEditorOpen, setLocationEditorOpen] =
         React.useState<boolean>(false); // whether location editor modal is open
     const [invAuditOpen, setInvAuditOpen] = React.useState<boolean>(false); // whether new inventory audit modal is open
-    const [invAuditLogsOpen, setInvAuditLogsOpen] = React.useState<boolean>(false); // whether inventory audit logs modal is open
+    const [invAuditLogsOpen, setInvAuditLogsOpen] =
+        React.useState<boolean>(false); // whether inventory audit logs modal is open
     const [kitEditorOpen, setKitEditorOpen] = React.useState<boolean>(false); // whether kit content edit modal is open
 
     const reqcertsMutation = patchMutation(() => setReqcertsOpen(false));
@@ -280,7 +286,7 @@ export default function ItemEditorForm({
         setLocationEditorOpen(false),
     );
     const inventoryAuditMutation = patchMutation(() => {
-        setInvAuditOpen(false)
+        setInvAuditOpen(false);
         addToast({
             title: "Successfully audited item",
             color: "success",
@@ -292,15 +298,18 @@ export default function ItemEditorForm({
         item.quantity >= 0,
     ); // type of quantity (true: numerical, false: categorical)
 
-    const parent_kit = items.find(i => i.uuid == item.parent_kit);
-    const mergedReqCerts = mergeRequiredCerts(item.required_certifications || [], parent_kit?.required_certifications || []);
+    const parent_kit = items.find((i) => i.uuid == item.parent_kit);
+    const mergedReqCerts = mergeRequiredCerts(
+        item.required_certifications || [],
+        parent_kit?.required_certifications || [],
+    );
     const isMobile = useMediaQuery("(max-width: 1023px)");
 
     return (
         <>
             <Form
                 onSubmit={onSubmit}
-                className="overflow-auto h-full gap-0 relative items-center"
+                className="flex flex-col overflow-hidden h-full min-h-0 gap-0 relative items-stretch"
             >
                 <div className="px-4 w-full pb-4 rounded-b-lg bg-default-50">
                     <Snippet
@@ -312,22 +321,19 @@ export default function ItemEditorForm({
                         className="w-full text-default-500 relative h-14"
                         timeout={1000}
                         classNames={{
-                            pre: "overflow-x-auto whitespace-nowrap pr-12",
+                            pre: "overflow-x-auto whitespace-nowrap",
                             copyButton:
                                 "absolute right-2 bg-default-200 hover:!bg-default-300",
                         }}
                     >
-                            {UUID}
-                        
-                        
+                        {UUID}
                     </Snippet>
                 </div>
 
                 <div
                     className={clsx(
                         "w-full grid grid-cols-1 gap-2",
-                        " lg:grid-cols-1 overflow-auto",
-                        "bg-content1 p-2 flex-1",
+                        "bg-content1 p-2 flex-1 min-h-0 overflow-y-auto",
                     )}
                 >
                     <Input // Name
@@ -761,130 +767,49 @@ export default function ItemEditorForm({
                     </div>
                 </div>
                 {/* <Divider className="hidden sm:block h-[1px] bg-default-400" /> */}
-                <div className="px-4 w-full pt-4 pb-2 rounded-t-lg bg-default-50">
-                    <ButtonGroup
-                        size={`${isMobile ? "sm" : "lg" }`}
-                        fullWidth
-                        className="min-w-full"
-                        variant="bordered"
-                    >
-                        {/* <div className="flex justify-evenly"> */}
-                        <Tooltip
-                            content={
-                                isNew
-                                    ? "Create the item first, before editing locations."
-                                    : "Locations"
-                            }
-                            className="w-fit p-2"
-                            delay={500}
-                            closeDelay={150}
-                            isDisabled={isDisabled}
+                <div className="w-full shrink-0 mt-auto z-10 bg-content1 border-t border-default-200">
+                    <div className="px-4 w-full pt-4 pb-2 rounded-t-lg bg-default-50">
+                        <ButtonGroup
+                            size={`${isMobile ? "sm" : "lg"}`}
+                            fullWidth
+                            className="min-w-full"
+                            variant="bordered"
                         >
-                            <Button
-                                // variant="bordered"
-                                color="primary"
-                                onPress={() =>
-                                    !isNew && setLocationEditorOpen(true)
-                                }
-                                // isIconOnly
-                                isDisabled={isDisabled}
-                                className={
-                                    isNew ? "opacity-disabled px-2" : "px-2"
-                                }
-                                data-hover={!isNew && !isDisabled}
-                            >
-                                <GlobeAmericasIcon className="size-7" />
-                                {item.locations?.length ?? 0}
-                            </Button>
-                        </Tooltip>
-
-                        <Tooltip
-                            content={
-                                isNew
-                                    ? "Create the item first, before editing required certifications."
-                                    : "Required Certifications"
-                            }
-                            className="w-fit p-2"
-                            delay={500}
-                            closeDelay={150}
-                            isDisabled={isDisabled}
-                        >
-                            <Button
-                                // variant="flat"
-                                color="primary"
-                                onPress={() => !isNew && setReqcertsOpen(true)}
-                                // isIconOnly
-                                isDisabled={isDisabled}
-                                className={
-                                    isNew ? "opacity-disabled px-2" : "px-2"
-                                }
-                                data-hover={!isNew && !isDisabled}
-                            >
-                                <BookmarkIcon className="size-7" />
-                                {mergedReqCerts.length}
-                            </Button>
-                        </Tooltip>
-
-                        <Tooltip
-                            content={
-                                isNew
-                                    ? "Create the item first, before editing accessor roles."
-                                    : "Accessor Roles"
-                            }
-                            className="w-fit p-2"
-                            delay={500}
-                            closeDelay={150}
-                            isDisabled={isDisabled}
-                        >
-                            <Button
-                                // variant="flat"
-                                color="primary"
-                                onPress={() => !isNew && setAcrolesOpen(true)}
-                                // isIconOnly
-                                isDisabled={isDisabled}
-                                className={
-                                    isNew ? "opacity-disabled px-2" : "px-2"
-                                }
-                                data-hover={!isNew && !isDisabled}
-                            >
-                                <UserIcon className="size-7" />
-                                {item.available_to?.length ?? 0}
-                            </Button>
-                        </Tooltip>
-
-                        <Tooltip
-                            content={
-                                isNew
-                                    ? "Create the item first, before editing viewer roles."
-                                    : "Viewer Roles"
-                            }
-                            className="w-fit p-2"
-                            delay={500}
-                            closeDelay={150}
-                            isDisabled={isDisabled}
-                        >
-                            <Button
-                                // variant="flat"
-                                color="primary"
-                                onPress={() => !isNew && setVwrolesOpen(true)}
-                                // isIconOnly
-                                isDisabled={isDisabled}
-                                className={
-                                    isNew ? "opacity-disabled px-2" : "px-2"
-                                }
-                                data-hover={!isNew && !isDisabled}
-                            >
-                                <EyeIcon className="size-7" />
-                                {item.visible_to?.length ?? 0}
-                            </Button>
-                        </Tooltip>
-
-                        {item.role == ITEM_ROLE.KIT && (
+                            {/* <div className="flex justify-evenly"> */}
                             <Tooltip
                                 content={
                                     isNew
-                                        ? "Create the item first, before editing kit contents."
-                                        : "Kit Contents"
+                                        ? "Create the item first, before editing locations."
+                                        : "Locations"
+                                }
+                                className="w-fit p-2"
+                                delay={500}
+                                closeDelay={150}
+                                isDisabled={isDisabled}
+                            >
+                                <Button
+                                    // variant="bordered"
+                                    color="primary"
+                                    onPress={() =>
+                                        !isNew && setLocationEditorOpen(true)
+                                    }
+                                    // isIconOnly
+                                    isDisabled={isDisabled}
+                                    className={
+                                        isNew ? "opacity-disabled px-2" : "px-2"
+                                    }
+                                    data-hover={!isNew && !isDisabled}
+                                >
+                                    <GlobeAmericasIcon className="size-7" />
+                                    {item.locations?.length ?? 0}
+                                </Button>
+                            </Tooltip>
+
+                            <Tooltip
+                                content={
+                                    isNew
+                                        ? "Create the item first, before editing required certifications."
+                                        : "Required Certifications"
                                 }
                                 className="w-fit p-2"
                                 delay={500}
@@ -895,7 +820,7 @@ export default function ItemEditorForm({
                                     // variant="flat"
                                     color="primary"
                                     onPress={() =>
-                                        !isNew && setKitEditorOpen(true)
+                                        !isNew && setReqcertsOpen(true)
                                     }
                                     // isIconOnly
                                     isDisabled={isDisabled}
@@ -904,44 +829,135 @@ export default function ItemEditorForm({
                                     }
                                     data-hover={!isNew && !isDisabled}
                                 >
-                                    <BriefcaseIcon className="size-7" />
-                                    {item.kit_contents?.length ?? 0}
+                                    <BookmarkIcon className="size-7" />
+                                    {mergedReqCerts.length}
                                 </Button>
                             </Tooltip>
-                        )}
-                        {/* </div> */}
-                    </ButtonGroup>
-                </div>
-                <div className="px-4 w-full bg-default-50 rounded-b-lg pb-4">
-                    <div className="w-full mt-auto col-span-2 flex flex-row gap-2">
-                        <Button
-                            size="lg"
-                            className="w-full"
-                            isDisabled={!hasEdits}
-                            isLoading={mutation.isPending}
-                            color={"primary"}
-                            variant="shadow"
-                            type="submit"
-                        >
-                            {isNew
-                                ? "Create Item"
-                                : isMultiple
-                                  ? "Apply Batch Edit"
-                                  : "Update Item"}
-                        </Button>
-                        <Button
-                            isIconOnly
-                            size="lg"
-                            color="danger"
-                            variant="flat"
-                            isDisabled={isDisabled || isNew}
-                            isLoading={deleteMutation.isPending}
-                            onPress={() =>
-                                deleteMutation.mutate({ item_uuid: UUID })
-                            }
-                        >
-                            <TrashIcon className="size-5" />
-                        </Button>
+
+                            <Tooltip
+                                content={
+                                    isNew
+                                        ? "Create the item first, before editing accessor roles."
+                                        : "Accessor Roles"
+                                }
+                                className="w-fit p-2"
+                                delay={500}
+                                closeDelay={150}
+                                isDisabled={isDisabled}
+                            >
+                                <Button
+                                    // variant="flat"
+                                    color="primary"
+                                    onPress={() =>
+                                        !isNew && setAcrolesOpen(true)
+                                    }
+                                    // isIconOnly
+                                    isDisabled={isDisabled}
+                                    className={
+                                        isNew ? "opacity-disabled px-2" : "px-2"
+                                    }
+                                    data-hover={!isNew && !isDisabled}
+                                >
+                                    <UserIcon className="size-7" />
+                                    {item.available_to?.length ?? 0}
+                                </Button>
+                            </Tooltip>
+
+                            <Tooltip
+                                content={
+                                    isNew
+                                        ? "Create the item first, before editing viewer roles."
+                                        : "Viewer Roles"
+                                }
+                                className="w-fit p-2"
+                                delay={500}
+                                closeDelay={150}
+                                isDisabled={isDisabled}
+                            >
+                                <Button
+                                    // variant="flat"
+                                    color="primary"
+                                    onPress={() =>
+                                        !isNew && setVwrolesOpen(true)
+                                    }
+                                    // isIconOnly
+                                    isDisabled={isDisabled}
+                                    className={
+                                        isNew ? "opacity-disabled px-2" : "px-2"
+                                    }
+                                    data-hover={!isNew && !isDisabled}
+                                >
+                                    <EyeIcon className="size-7" />
+                                    {item.visible_to?.length ?? 0}
+                                </Button>
+                            </Tooltip>
+
+                            {item.role == ITEM_ROLE.KIT && (
+                                <Tooltip
+                                    content={
+                                        isNew
+                                            ? "Create the item first, before editing kit contents."
+                                            : "Kit Contents"
+                                    }
+                                    className="w-fit p-2"
+                                    delay={500}
+                                    closeDelay={150}
+                                    isDisabled={isDisabled}
+                                >
+                                    <Button
+                                        // variant="flat"
+                                        color="primary"
+                                        onPress={() =>
+                                            !isNew && setKitEditorOpen(true)
+                                        }
+                                        // isIconOnly
+                                        isDisabled={isDisabled}
+                                        className={
+                                            isNew
+                                                ? "opacity-disabled px-2"
+                                                : "px-2"
+                                        }
+                                        data-hover={!isNew && !isDisabled}
+                                    >
+                                        <BriefcaseIcon className="size-7" />
+                                        {item.kit_contents?.length ?? 0}
+                                    </Button>
+                                </Tooltip>
+                            )}
+                            {/* </div> */}
+                        </ButtonGroup>
+                    </div>
+                    <div className="px-4 w-full bg-default-50 rounded-b-lg pb-4">
+                        <div className="w-full mt-auto col-span-2 flex flex-row gap-2">
+                            <Button
+                                size="lg"
+                                className="w-full"
+                                isDisabled={!hasEdits}
+                                isLoading={mutation.isPending}
+                                color={"primary"}
+                                variant="shadow"
+                                type="submit"
+                            >
+                                {isNew
+                                    ? "Create Item"
+                                    : isMultiple
+                                      ? "Apply Batch Edit"
+                                      : "Update Item"}
+                            </Button>
+                            <Button
+                                isIconOnly
+                                size="lg"
+                                color="danger"
+                                variant="flat"
+                                isDisabled={isDisabled || isNew}
+                                isLoading={deleteMutation.isPending}
+                                onPress={() =>
+                                    deleteMutation.mutate({ item_uuid: UUID })
+                                }
+                            >
+                                <TrashIcon className="size-5" />
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </Form>

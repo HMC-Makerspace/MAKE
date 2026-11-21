@@ -9,7 +9,7 @@ import { API_SCOPE } from "../../../common/global";
 import { TCertification } from "common/certification";
 import { useRoles } from "../../queries/useRoles";
 import { Modal, ModalBody, useDisclosure } from "@heroui/react";
-import { useMediaQuery } from "../../utils.tsx"
+import { useMediaQuery } from "../../utils.tsx";
 
 export default function UsersKiosk() {
     // Get all user data
@@ -54,7 +54,6 @@ export default function UsersKiosk() {
 
     const isMobile = useMediaQuery("(max-width: 1023px)");
 
-
     React.useEffect(() => {
         if (selectedKeys !== "all") {
             if (isMobile && (selectedKeys.size > 0 || isNewUser)) {
@@ -65,11 +64,10 @@ export default function UsersKiosk() {
         }
     }, [selectedKeys, isNewUser]);
 
-
     return (
         <AdminLayout pageHref={"/admin/users"}>
             <div className="flex flex-col lg:flex-row overflow-auto h-full gap-8">
-                <div className="hidden lg:block w-2/5">
+                <div className="hidden lg:flex w-2/5 shrink-1">
                     {canEdit && (
                         <UserEditor
                             users={users ?? []}
@@ -101,14 +99,14 @@ export default function UsersKiosk() {
             </div>
 
             {/* Modal user editor */}
-            <div className='block lg:hidden '>
+            <div className="block lg:hidden ">
                 {isMobile && canEdit && (
                     <Modal
                         isOpen={editIsOpen}
                         onOpenChange={editOnOpenChange}
                         placement="bottom"
                     >
-                        <ModalContent className='overflow-auto'>
+                        <ModalContent className="overflow-auto">
                             <ModalBody>
                                 <UserEditor
                                     users={users ?? []}

@@ -129,7 +129,7 @@ export default function CheckoutsKiosk() {
     useEffect(() => {
         setDefaultColumns(
             isMobile
-                ? ["role", "name", "locations"]
+                ? ["name", "quantity_ratio", "cart"]
                 : [
                       "role",
                       "name",
@@ -137,6 +137,8 @@ export default function CheckoutsKiosk() {
                       "locations",
                       "required_certifications",
                       "available_to",
+                      "visible_to",
+                      "cart",
                   ],
         );
     }, [isMobile]);

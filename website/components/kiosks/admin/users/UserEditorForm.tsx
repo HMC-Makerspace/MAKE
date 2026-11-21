@@ -262,7 +262,7 @@ export default function UserEditorForm({
                     className="w-full text-default-500 relative h-14"
                     timeout={1000}
                     classNames={{
-                        pre: "overflow-x-auto whitespace-nowrap pr-12",
+                        pre: "overflow-x-auto whitespace-nowrap",
                         copyButton:
                             "absolute right-2 bg-default-200 hover:!bg-default-300",
                     }}
