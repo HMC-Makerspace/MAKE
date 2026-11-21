@@ -17,7 +17,7 @@ import clsx from "clsx";
 import { AreaUUID, TArea } from "common/area";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import EditDocsModal from "../../../EditDocsModal";
+import EditDocsModal from "../../../EditDocs";
 import {
     EyeIcon,
     EyeSlashIcon,
@@ -26,10 +26,10 @@ import {
     ShoppingCartIcon,
     TrashIcon,
 } from "@heroicons/react/24/outline";
-import VisibilityModal from "./VisibilityModal";
 import ReservableAreaModal from "./ReservableAreaModal";
 import DeleteModal from "../../../DeleteModal";
 import { Link } from "react-router-dom";
+import { VisibleToRolesModal } from "../../../RequiredRoles";
 
 const patchArea = async ({
     uuid,
@@ -244,9 +244,8 @@ export default function Area({
                                             onPress={visibilityModalOpen}
                                         />
                                     </Tooltip>
-                                    <VisibilityModal
-                                        item={area}
-                                        itemType="area"
+                                    <VisibleToRolesModal
+                                        element={area}
                                         roles={roles}
                                         isOpen={visibilityModal}
                                         onOpenChange={visibilityModalOpenChange}
@@ -386,6 +385,7 @@ export default function Area({
                             isOpen={editDocs}
                             onOpenChange={editDocsModalOpenChange}
                             patchMutation={patchMutation}
+                            roles={roles}
                         />
                     </>
                 ) : (

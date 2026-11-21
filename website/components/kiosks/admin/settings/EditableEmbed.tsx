@@ -12,7 +12,7 @@ import clsx from "clsx";
 import { TEmbed } from "common/embed";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import EditDocsModal from "../../../EditDocsModal";
+import EditDocsModal from "../../../EditDocs";
 import {
     DocumentIcon,
     EyeIcon,
@@ -20,8 +20,8 @@ import {
     TrashIcon,
 } from "@heroicons/react/24/outline";
 import DeleteModal from "../../../DeleteModal";
-import VisibilityModal from "../areas/VisibilityModal";
 import { UUID } from "common/global";
+import { VisibleToRolesModal } from "../../../RequiredRoles";
 
 const patchEmbed = async ({
     uuid,
@@ -196,9 +196,8 @@ export default function EditableEmbed({
                                     onPress={visibilityModalOpen}
                                 />
                             </Tooltip>
-                            <VisibilityModal
-                                item={embed}
-                                itemType="embed"
+                            <VisibleToRolesModal
+                                element={embed}
                                 roles={roles}
                                 isOpen={visibilityModal}
                                 onOpenChange={visibilityModalOpenChange}
@@ -294,7 +293,7 @@ export default function EditableEmbed({
                     isOpen={editDocs}
                     onOpenChange={editDocsModalOpenChange}
                     patchMutation={patchMutation}
-                    roleOption
+                    roles={roles}
                 />
             </div>
         </Card>

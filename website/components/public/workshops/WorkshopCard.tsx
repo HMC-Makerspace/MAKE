@@ -10,7 +10,7 @@ import {
 } from "@heroui/react";
 import clsx from "clsx";
 import { FILE_RESOURCE_TYPE } from "../../../../common/file";
-import { TPublicWorkshopData, TWorkshop } from "common/workshop";
+import { TWorkshop } from "common/workshop";
 import ImageCarousel from "../../ImageCarousel";
 import CertificationTag from "../../kiosks/admin/certifications/CertificationTag";
 import { CalendarBoldIcon } from "@heroui/shared-icons";
@@ -18,13 +18,13 @@ import { TUser } from "common/user";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { timestampToZonedDateTime, verifyScopes, getWorkerDisplayName } from "../../../utils";
-import { TConfig } from "common/config";
 import { DateFormatter } from "@internationalized/date";
 import { TCertification } from "common/certification";
 import { API_SCOPE } from "../../../../common/global";
 import WorkshopSigninModal from "./WorkshopSigninModal";
 import WorkshopUserListModal from "./WorkshopUserListModal";
 import WorkshopRSVPDisclaimerModal from "./WorkshopRSVPDisclaimer";
+import { useConfig } from "../../../queries/useConfig";
 
 // cancel means cancel_rsvp
 async function rsvp({
@@ -53,15 +53,14 @@ export default function WorkshopCard({
     workshop,
     self,
     users,
-    config,
     certifications,
 }: {
     workshop: TWorkshop;
     self?: TUser;
     users?: TUser[];
-    config?: TConfig;
     certifications?: TCertification[];
 }) {
+    const config = useConfig();
     const queryClient = useQueryClient();
     const rsvpMutation = useMutation({
         mutationFn: rsvp,
@@ -124,11 +123,11 @@ export default function WorkshopCard({
 
     const startZDT = timestampToZonedDateTime(
         workshop.timestamp_start,
-        config?.schedule.timezone,
+        config.schedule.timezone,
     );
     const endZDT = timestampToZonedDateTime(
         workshop.timestamp_end,
-        config?.schedule.timezone,
+        config.schedule.timezone,
     );
     const isSameDay =
         startZDT.year == endZDT.year &&
@@ -144,7 +143,7 @@ export default function WorkshopCard({
         : false;
 
     const date_formatter =
-        config?.schedule.locale &&
+        config.schedule.locale &&
         new DateFormatter(config.schedule.locale, {
             month: "long",
             day: "numeric",
@@ -153,7 +152,7 @@ export default function WorkshopCard({
         });
 
     const time_formatter =
-        config?.schedule.locale &&
+        config.schedule.locale &&
         new DateFormatter(config.schedule.locale, {
             hour: "numeric",
             minute: "2-digit",
@@ -262,7 +261,7 @@ export default function WorkshopCard({
                             .map((user) =>
                                 getWorkerDisplayName(
                                     user.name,
-                                    config?.schedule.worker_name_display,
+                                    config.schedule.worker_name_display,
                                 ),
                             )
                             .join(", ")}
@@ -409,7 +408,7 @@ export default function WorkshopCard({
                                         color="primary"
                                         content={
                                             workshop.timestamp_start &&
-                                            config?.workshop
+                                            config.workshop
                                                 .sign_in_enabled_within &&
                                             date_formatter &&
                                             (workshop.timestamp_start -
@@ -433,7 +432,7 @@ export default function WorkshopCard({
                                                 // Only sign in if workshop is public
                                                 if (
                                                     workshop.timestamp_start &&
-                                                    config?.workshop
+                                                    config.workshop
                                                         .sign_in_enabled_within &&
                                                     workshop.timestamp_start -
                                                         config.workshop

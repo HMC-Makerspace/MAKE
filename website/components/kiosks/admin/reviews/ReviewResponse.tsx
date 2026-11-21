@@ -1,23 +1,17 @@
 import {
     TRating,
     TResponse,
-    TReview,
     TReviewQuestion,
     TRubric,
     TRubricValue,
 } from "common/review";
 import clsx from "clsx";
-import { TConfig } from "common/config";
 import { DateFormatter } from "@internationalized/date";
 import { timestampToZonedDateTime } from "../../../../utils";
-import { Button, Radio, RadioGroup } from "@heroui/react";
-import { useRef, useState } from "react";
-import {
-    RegisterableHotkey,
-    useHotkey,
-    useHotkeys,
-} from "@tanstack/react-hotkeys";
+import { useState } from "react";
+import { RegisterableHotkey, useHotkeys } from "@tanstack/react-hotkeys";
 import { ReviewRubricItem } from "./ReviewRubricItem";
+import { useConfig } from "../../../../queries/useConfig";
 
 export function ReviewResponse({
     questions,
@@ -25,7 +19,6 @@ export function ReviewResponse({
     rubric,
     rating,
     updateRatingValue,
-    config,
     hideConfidential = true,
 }: {
     questions: TReviewQuestion[];
@@ -33,10 +26,10 @@ export function ReviewResponse({
     rubric: TRubric;
     rating: TRating;
     updateRatingValue: (value: TRubricValue) => void;
-    config: TConfig;
     hideConfidential?: boolean;
 }) {
-    const formatter = config?.schedule.locale
+    const config = useConfig();
+    const formatter = config.schedule.locale
         ? new DateFormatter(config.schedule.locale, {
               month: "long",
               day: "numeric",

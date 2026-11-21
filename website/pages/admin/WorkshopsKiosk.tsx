@@ -2,12 +2,10 @@ import AdminLayout from "../../layouts/AdminLayout";
 import { Spinner } from "@heroui/react";
 import { TWorkshop } from "common/workshop";
 import { TCertification } from "common/certification";
-import { TUser, TUserRole } from "common/user";
+import { TUser } from "common/user";
 
 import { useQuery } from "@tanstack/react-query";
 import WorkshopTable from "../../components/kiosks/admin/workshops/WorkshopTable";
-import React from "react";
-import { TConfig } from "common/config";
 import { useRoles } from "../../queries/useRoles";
 
 export default function WorkshopKiosk() {
@@ -37,22 +35,15 @@ export default function WorkshopKiosk() {
 
     const { data: roles, isLoading: rolesLoading } = useRoles();
 
-    const { data: config, isLoading: configLoading } = useQuery<TConfig>({
-        queryKey: ["config"],
-        refetchOnWindowFocus: false,
-    });
-
     if (
         workshops === undefined ||
         certs === undefined ||
         users === undefined ||
         roles === undefined ||
-        config === undefined ||
         workshopsLoading ||
         certsLoading ||
         usersLoading ||
-        rolesLoading ||
-        configLoading
+        rolesLoading
     ) {
         return (
             <div className="w-full h-screen flex justify-center py-auto">
@@ -73,7 +64,6 @@ export default function WorkshopKiosk() {
                     users={users}
                     certs={certs}
                     roles={roles}
-                    config={config}
                     isLoading={workshopsLoading}
                 />
             )}

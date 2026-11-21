@@ -20,7 +20,6 @@ import {
     Tabs,
     useDisclosure,
 } from "@heroui/react";
-import { TConfig } from "common/config";
 import { TUser, TUserAvailability, UserUUID } from "common/user";
 import { useState } from "react";
 import {
@@ -31,7 +30,6 @@ import {
 } from "../../../common/shift";
 import clsx from "clsx";
 import {
-    convertTimestampToDate,
     getActiveEvents,
     timestampToZonedDateTime,
     verifyScopes,
@@ -40,12 +38,12 @@ import { API_SCOPE } from "../../../common/global";
 import { ClockIcon, UserMinusIcon, UserPlusIcon } from "@heroicons/react/24/solid";
 import {
     parseDate,
-    parseZonedDateTime,
     today,
     ZonedDateTime,
 } from "@internationalized/date";
 import axios, { AxiosError } from "axios";
 import ShiftHistoryModal from "../../components/kiosks/admin/dashboard/ShiftHistoryModal";
+import { useConfig } from "../../queries/useConfig";
 
 async function createShiftEvent({
     schedule_uuid,
@@ -92,6 +90,7 @@ async function patchShiftCount({
 }
 
 export default function AdminKiosk() {
+    const config = useConfig();
 
     const { data: self } = useQuery<TUser>({
         queryKey: ["user", "self"],
@@ -127,11 +126,6 @@ export default function AdminKiosk() {
         queryKey: ["schedule", "staging"],
         refetchOnWindowFocus: false,
         enabled: !!user_uuid,
-    });
-
-    const { data: config } = useQuery<TConfig>({
-        queryKey: ["config"],
-        refetchOnWindowFocus: false,
     });
 
     const queryClient = useQueryClient();
@@ -176,7 +170,7 @@ export default function AdminKiosk() {
         onError: (err) => alert(err),
     });
 
-    const isLoading = !config || !schedule || !users;
+    const isLoading = !schedule || !users;
 
     const [selectedTab, setSelectedTab] = useState<React.Key>("worker_view");
 
@@ -379,7 +373,6 @@ export default function AdminKiosk() {
                                 }
                                 users={users_with_full_self}
                                 roles={[]}
-                                config={config}
                                 isLoading={isLoading}
                                 selectedUser={self}
                                 setSelectedShifts={onShiftSelect}
@@ -478,7 +471,7 @@ export default function AdminKiosk() {
                     )}
                 </div>
             </div>
-            {config && users && schedule && (
+            {users && schedule && (
                 <Modal
                     isOpen={popupShifts.length > 0}
                     onOpenChange={() => setPopupShifts([])}
@@ -621,10 +614,8 @@ export default function AdminKiosk() {
                                     )}
                                 >
                                     {popupShifts.map((shift, i) => {
-                                        const activeEvents = getActiveEvents(
-                                            shift,
-                                            config,
-                                        );
+                                        const activeEvents =
+                                            getActiveEvents(shift, config);
                                         // Filter out other user's pickups
                                         const relevantEvents =
                                             activeEvents.filter(
@@ -676,6 +667,7 @@ export default function AdminKiosk() {
                                                         <DateInput
                                                             key={`date-${i}`}
                                                             aria-label="Date"
+                                                            //@ts-ignore its the same type
                                                             value={timestampToZonedDateTime(
                                                                 event.shift_date,
                                                                 config.schedule

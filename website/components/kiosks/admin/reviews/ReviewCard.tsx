@@ -1,5 +1,4 @@
 import { Button, Card, useDisclosure } from "@heroui/react";
-import { TConfig } from "common/config";
 import { TReview } from "common/review";
 import { timestampToZonedDateTime } from "../../../../utils";
 import { DateFormatter } from "@internationalized/date";
@@ -9,23 +8,17 @@ import { ReviewExportModal } from "./ReviewExportModal";
 import { TUser } from "common/user";
 import clsx from "clsx";
 import { UserChip } from "../../../user/UserChip";
+import { useConfig } from "../../../../queries/useConfig";
 
-export function ReviewCard({
-    review,
-    users,
-    config,
-}: {
-    review: TReview;
-    users: TUser[];
-    config?: TConfig;
-}) {
+export function ReviewCard({ review, users }: { review: TReview; users: TUser[] }) {
+    const config = useConfig();
     const navigate = useNavigate();
     const zdt = timestampToZonedDateTime(
         review.timestamp_created,
-        config?.schedule.timezone,
+        config.schedule.timezone,
     );
 
-    const date_formatter = config?.schedule.locale
+    const date_formatter = config.schedule.locale
         ? new DateFormatter(config.schedule.locale, {
               month: "long",
               day: "numeric",

@@ -29,7 +29,6 @@ import { TCertification } from "common/certification";
 import clsx from "clsx";
 import { TArea } from "common/area";
 import { TCheckout } from "common/checkout";
-import { TConfig } from "common/config";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UUID } from "common/global";
 import axios from "axios";
@@ -44,6 +43,7 @@ import { now, ZonedDateTime } from "@internationalized/date";
 import { UserChip } from "../../../user/UserChip";
 import CheckoutDisclaimerModal from "./CheckoutDisclaimerModal";
 import { ColumnSelect } from "../../../Table";
+import { useConfig } from "../../../../queries/useConfig";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" },
@@ -90,7 +90,6 @@ export default function CheckoutTable({
     checkouts,
     inventory,
     users: usersParam,
-    config,
     activeSchedule,
     areas,
     certs,
@@ -113,7 +112,6 @@ export default function CheckoutTable({
     checkouts: TCheckout[];
     inventory: TInventoryItem[];
     users?: TUser[];
-    config: TConfig;
     activeSchedule: TSchedule;
     areas: TArea[];
     certs: TCertification[];
@@ -126,6 +124,7 @@ export default function CheckoutTable({
         [column_id: string]: (item: TCheckout) => React.ReactNode;
     };
 }) {
+    const config = useConfig();
     const { data: users, isLoading: usersLoading } = useQuery<TUser[]>({
         queryKey: ["user"],
         refetchOnWindowFocus: false,

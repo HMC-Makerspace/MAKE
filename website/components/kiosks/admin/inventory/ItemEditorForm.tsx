@@ -42,10 +42,7 @@ import {
 import { TUserRole } from "common/user";
 import ItemRoleIcon from "./ItemRoleIcon";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
-import {
-    AvailableToRolesModal,
-    VisibleToRolesModal,
-} from "../certifications/AuthorizedRolesModal";
+import { RequiredRolesModal } from "../../../RequiredRoles";
 import { motion } from "motion/react";
 import ItemQuantityIcon from "./ItemQuantityIcon";
 import ItemLocationModal from "./ItemLocationModal";
@@ -972,7 +969,8 @@ export default function ItemEditorForm({
                 onOpenChange={setReqcertsOpen}
                 patchMutation={reqcertsMutation}
             />
-            <AvailableToRolesModal
+            <RequiredRolesModal
+                type="available_to"
                 key={"acroleauth-" + item.uuid}
                 element={item}
                 roles={roles}
@@ -980,7 +978,8 @@ export default function ItemEditorForm({
                 onOpenChange={setAcrolesOpen}
                 patchMutation={acrolesMutation}
             />
-            <VisibleToRolesModal
+            <RequiredRolesModal
+                type="visible_to"
                 key={"vwroleauth-" + item.uuid}
                 element={item}
                 roles={roles}

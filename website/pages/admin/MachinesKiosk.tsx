@@ -25,8 +25,8 @@ const createEmptyMachine = async () => {
         count: 0,
         instances: [],
         status_logs: [],
-        available_to: [],
-        visible_to: [],
+        visible_to: null, // Start machines as visible to all
+        available_to: [], // Start machines as reservable to none
     };
     return (
         await axios.post<TMachine>("/api/v3/machine/", {

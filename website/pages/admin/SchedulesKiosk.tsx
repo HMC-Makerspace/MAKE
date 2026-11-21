@@ -1,12 +1,11 @@
 import { TSchedule } from "common/schedule";
-import AdminLayout from "../../layouts/AdminLayout";
 import { useQuery } from "@tanstack/react-query";
-import { TConfig } from "common/config";
-import ScheduleBuffer from "../../components/kiosks/admin/schedule/SchedulesBuffer";
-import { Spinner, Selection, user } from "@heroui/react";
-import { TUser, TUserRole, UserUUID } from "common/user";
-import React, { useEffect } from "react";
+import { Selection, Spinner } from "@heroui/react";
+import { TUser } from "common/user";
+import React from "react";
 import { useRoles } from "../../queries/useRoles";
+import AdminLayout from "../../layouts/AdminLayout";
+import ScheduleBuffer from "../../components/kiosks/admin/schedule/SchedulesBuffer";
 
 export default function ScheduleKiosk() {
     const {
@@ -17,11 +16,6 @@ export default function ScheduleKiosk() {
         queryKey: ["schedule"],
         refetchOnWindowFocus: false,
         placeholderData: [],
-    });
-
-    const { data: config, isLoading: configLoading } = useQuery<TConfig>({
-        queryKey: ["config"],
-        refetchOnWindowFocus: false,
     });
 
     const { data: users, isLoading: usersLoading } = useQuery<TUser[]>({
@@ -41,11 +35,9 @@ export default function ScheduleKiosk() {
 
     if (
         schedules === undefined ||
-        config === undefined ||
         users === undefined ||
         roles === undefined ||
         schedulesLoading ||
-        configLoading ||
         usersLoading ||
         rolesLoading
     ) {
@@ -60,7 +52,6 @@ export default function ScheduleKiosk() {
         <AdminLayout pageHref="/admin/schedule">
             <ScheduleBuffer
                 schedules={schedules}
-                config={config}
                 roles={roles}
                 users={users}
                 setSelectedUsers={setSelectedUsers}

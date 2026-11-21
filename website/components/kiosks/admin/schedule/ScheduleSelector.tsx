@@ -17,7 +17,7 @@ import {
     addToast
 } from "@heroui/react";
 import { TSchedule } from "common/schedule";
-import { fromAbsolute, Time } from "@internationalized/date";
+import { fromAbsolute } from "@internationalized/date";
 import {
     ChevronDownIcon,
     ClipboardDocumentIcon,
@@ -33,12 +33,11 @@ import React, { Key, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import clsx from "clsx";
-import { TConfig } from "common/config";
 import DeleteModal from "../../../DeleteModal";
 import { timestampToTime, timeToTimestamp } from "../../../../utils";
 import AlertEditorModal from "./AlertEditorModal";
-import { ITEM_RELATIVE_QUANTITY } from "../../../../../common/inventory";
 import ShiftHistoryModal from "../dashboard/ShiftHistoryModal";
+import { useConfig } from "../../../../queries/useConfig";
 
 const createUpdateSchedule = async ({
     schedule,
@@ -157,7 +156,6 @@ export default function ScheduleSelector({
     defaultSchedule,
     selectedSchedule,
     setSelectedSchedules = () => {},
-    config,
     scheduleMode,
     setScheduleMode,
     setSelectedUsers,
@@ -166,11 +164,11 @@ export default function ScheduleSelector({
     defaultSchedule?: TSchedule;
     selectedSchedule?: TSchedule;
     setSelectedSchedules: (selection: Selection) => void;
-    config: TConfig;
     scheduleMode: "schedule" | "availability";
     setScheduleMode: (mode: "schedule" | "availability") => void;
     setSelectedUsers: (users: Selection) => void;
 }) {
+    const config = useConfig();
     const queryClient = useQueryClient();
 
     const createReplaceMutation = useMutation({
@@ -695,7 +693,6 @@ export default function ScheduleSelector({
                     <AlertEditorModal
                         schedule={schedule}
                         patchMutation={patchMutation}
-                        config={config}
                         isOpen={isAlertModalOpen}
                         onOpenChange={onAlertModalChange}
                     />

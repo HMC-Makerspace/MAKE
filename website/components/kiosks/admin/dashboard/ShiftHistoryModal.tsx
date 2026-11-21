@@ -1,7 +1,5 @@
 import { Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/react";
 import { TSchedule } from "common/schedule";
-import { TUser } from "common/user";
-import MAKETable from "../../../Table";
 import clsx from "clsx";
 import { SHIFT_EVENT_TYPE } from "../../../../../common/shift";
 import { useQuery } from "@tanstack/react-query";

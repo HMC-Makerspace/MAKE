@@ -335,6 +335,7 @@ router.delete(
                 return;
             }
             // Delete all associated files
+            const errors: string[] = [];
             if (workshop.images?.length) {
                 for (const image of workshop.images) {
                     await removeResourcesFromFile(image, [workshop.uuid], false)
@@ -344,63 +345,62 @@ router.delete(
                                 req.log.warn(
                                     `File with uuid ${image} not found, failed to delete`,
                                 );
-                                res.status(StatusCodes.NOT_FOUND).json({
-                                    error: `File with uuid \`${image}\` not found.`,
-                                });
+                                errors.push(
+                                    `File with uuid \`${image}\` not found, failed to remove workshop.`,
+                                );
                             } else if (
                                 updated_file.resource_uuid.length === 0
                             ) {
-                                deleteFileOnServer(
-                                    updated_file.path,
-                                    req,
-                                    res,
-                                ).then((error_message) => {
-                                    deleteFile(image)
-                                        .then((deleted_file) => {
-                                            if (!deleted_file) {
-                                                req.log.warn(
-                                                    `File with uuid ${image} not found, failed to delete`,
-                                                );
-                                                res.status(
-                                                    StatusCodes.NOT_FOUND,
-                                                ).json({
-                                                    error: `File with uuid \`${image}\` not found.`,
+                                deleteFileOnServer(updated_file.path, req, res)
+                                    .then((error_message) => {
+                                        deleteFile(image)
+                                            .then((deleted_file) => {
+                                                if (!deleted_file) {
+                                                    req.log.warn(
+                                                        `File with uuid ${image} not found, failed to delete`,
+                                                    );
+                                                    errors.push(
+                                                        `File with uuid \`${image}\` not found, failed to delete.`,
+                                                    );
+                                                } else if (
+                                                    error_message ===
+                                                    "Successfully deleted file"
+                                                ) {
+                                                    req.log.debug(
+                                                        `Deleted file ${image} successfully.`,
+                                                    );
+                                                } else {
+                                                    req.log.error(
+                                                        `Error deleting file ${image}: ${error_message}`,
+                                                    );
+                                                    errors.push(
+                                                        `Error deleting file ${image}: ${error_message}`,
+                                                    );
+                                                }
+                                            })
+                                            .catch((err: Error) => {
+                                                req.log.error({
+                                                    msg: `Error deleting file with uuid ${image}`,
+                                                    err: err,
                                                 });
-                                            } else if (
-                                                error_message ===
-                                                "Successfully deleted file"
-                                            ) {
-                                                req.log.debug(
-                                                    "Deleted file successfully.",
+                                                errors.push(
+                                                    `Error deleting file obj ${image}: ${err.message}`,
                                                 );
-                                                res.status(StatusCodes.OK).json(
-                                                    {},
-                                                );
-                                            } else {
-                                                res.status(
-                                                    StatusCodes.INTERNAL_SERVER_ERROR,
-                                                ).json({
-                                                    error: error_message,
-                                                });
-                                            }
-                                        })
-                                        .catch((err: Error) => {
-                                            req.log.error({
-                                                msg: `Error deleting file with uuid ${image}`,
-                                                err: err,
                                             });
-                                            res.status(
-                                                StatusCodes.INTERNAL_SERVER_ERROR,
-                                            ).json({
-                                                error: err.message,
-                                            });
+                                    })
+                                    .catch((err: Error) => {
+                                        req.log.error({
+                                            msg: `Error deleting file on server ${updated_file.path}`,
+                                            err: err,
                                         });
-                                });
+                                        errors.push(
+                                            `Error deleting file on server ${updated_file.path}: ${err.message}`,
+                                        );
+                                    });
                             } else {
                                 req.log.debug(
-                                    "Removed user from file successfully.",
+                                    "Removed workshop from file successfully.",
                                 );
-                                res.status(StatusCodes.OK).json({});
                             }
                         })
                         .catch((err: Error) => {
@@ -408,14 +408,24 @@ router.delete(
                                 msg: `Error removing workshop with ${workshop.uuid} from file with uuid ${image}`,
                                 err: err,
                             });
-                            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                                error: err.message,
-                            });
+                            errors.push(
+                                `Error removing workshop with ${workshop.uuid} from file with uuid ${image}: ${err.message}`,
+                            );
                         });
                 }
             }
-            req.log.debug(`Deleted workshop ${workshop_uuid}`);
+            if (errors.length > 0) {
+                req.log.debug({
+                    msg: `Workshop deletion error for ${workshop.uuid}`,
+                    err: errors.join("\n"),
+                });
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                    error: errors.join("\n"),
+                });
+            } else {
+                req.log.debug(`Deleted workshop ${workshop_uuid}`);
             res.status(StatusCodes.NO_CONTENT).json({});
+            }
         } else {
             req.log.warn({
                 msg: "Forbidden user attempted to delete a workshop",

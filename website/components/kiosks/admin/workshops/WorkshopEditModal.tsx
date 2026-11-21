@@ -16,20 +16,23 @@ import {
     DateRangePicker,
     NumberInput,
     addToast,
+    Accordion,
+    AccordionItem,
 } from "@heroui/react";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import { TWorkshop } from "../../../../../common/workshop";
 import { UUID } from "../../../../../common/global";
 import { timestampToZonedDateTime } from "../../../../utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { TUser } from "../../../../../common/user";
+import { TUser, TUserRole, UserRoleUUID } from "../../../../../common/user";
 import { TCertification } from "../../../../../common/certification";
 import { parseZonedDateTime, ZonedDateTime } from "@internationalized/date";
 import WorkshopImagesModal from "./WorkshopImagesModal.tsx";
 import clsx from "clsx";
-import { TConfig } from "common/config";
 import axios from "axios";
 import RequiredCertsModal from "../certifications/RequiredCertsModal";
+import { useConfig } from "../../../../queries/useConfig.tsx";
+import { RequiredRoles } from "../../../RequiredRoles.tsx";
 
 const updateCreateWorkshop = async ({
     workshop,
@@ -38,7 +41,6 @@ const updateCreateWorkshop = async ({
     workshop: TWorkshop;
     isNew: boolean;
 }) => {
-    console.log("Creating", workshop);
     if (isNew) {
         // Add the user to the shift
         return (
@@ -103,7 +105,7 @@ export default function WorkshopEditModal({
     workshop,
     users,
     certs,
-    config,
+    roles,
     isNew,
     isOpen,
     onOpenChange,
@@ -112,12 +114,13 @@ export default function WorkshopEditModal({
     workshop: TWorkshop;
     users: TUser[];
     certs: TCertification[];
-    config: TConfig;
+    roles: TUserRole[];
     isNew: boolean;
     isOpen: boolean;
     onOpenChange: (open?: boolean) => void;
     batchEdit: boolean;
 }) {
+    const config = useConfig();
     // batch workshops storage
     const [batchWorkshopsUUIDS, setBatchWorkshopsUUIDS] = useState<UUID[]>([]);
     const workshops: TWorkshop[] = [];
@@ -245,6 +248,13 @@ export default function WorkshopEditModal({
         return shifted_date;
     }
 
+    const [currentAccessRoles, setCurrentAccessRoles] = useState<
+        UserRoleUUID[] | null
+    >(workshop.available_to || null);
+    const [currentViewRoles, setCurrentViewRoles] = useState<
+        UserRoleUUID[] | null
+    >(workshop.visible_to || null);
+
     const onSubmit = React.useCallback(
         (e: React.SyntheticEvent<HTMLFormElement>) => {
             e.preventDefault();
@@ -328,8 +338,8 @@ export default function WorkshopEditModal({
                     reminder_emails_sent: workshop.reminder_emails_sent,
                     sign_in_list: workshop.sign_in_list,
                     images: workshop.images,
-                    visible_to: workshop.visible_to,
-                    available_to: workshop.available_to,
+                    visible_to: currentViewRoles,
+                    available_to: currentAccessRoles,
                 };
 
                 workshops.push(new_workshop);
@@ -351,8 +361,15 @@ export default function WorkshopEditModal({
                     workshops: workshops,
                 });
             }
+            setHasEdits(false);
         },
-        [isNew, workshop, batchEdit],
+        [
+            isNew,
+            workshop,
+            batchEdit,
+            currentAccessRoles,
+            currentViewRoles,
+        ],
     );
 
     return (
@@ -768,6 +785,40 @@ export default function WorkshopEditModal({
                                     </>
                                 )}
                             </div>
+                            <Accordion
+                                variant="splitted"
+                                itemClasses={{
+                                    base: "mt-1 -mx-2",
+                                    content: "pt-0",
+                                }}
+                            >
+                                <AccordionItem
+                                    key="access"
+                                    title="Access roles"
+                                >
+                                    <RequiredRoles
+                                        type="available_to"
+                                        roles={roles}
+                                        currentRoles={currentAccessRoles}
+                                        setCurrentRoles={setCurrentAccessRoles}
+                                        setHasEdits={setHasEdits}
+                                        className="text-sm"
+                                    />
+                                </AccordionItem>
+                                <AccordionItem
+                                    key="visible"
+                                    title="Visibility Roles"
+                                >
+                                    <RequiredRoles
+                                        type="visible_to"
+                                        roles={roles}
+                                        currentRoles={currentViewRoles}
+                                        setCurrentRoles={setCurrentViewRoles}
+                                        setHasEdits={setHasEdits}
+                                        className="text-sm"
+                                    />
+                                </AccordionItem>
+                            </Accordion>
                             <div className="flex flex-row gap-2 justify-between w-full pt-4">
                                 <Button
                                     color="primary"

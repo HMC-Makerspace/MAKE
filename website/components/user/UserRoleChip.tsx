@@ -54,7 +54,7 @@ export function UserRoleChip({
         return (
             <Card
                 className={clsx(
-                    "p-1.5 flex flex-row gap-1 w-fit px-2.5",
+                    "p-1.5 flex flex-row gap-1 w-fit px-2.5 text-sm",
                     className,
                 )}
                 style={{ backgroundColor: color, zIndex: zIndex }}
@@ -69,7 +69,7 @@ export function UserRoleChip({
                     />
                 ) : null}
                 <h1
-                    className="text-sm font-semibold text-nowrap"
+                    className="font-semibold text-nowrap"
                     style={{
                         color: foregroundColor,
                     }}

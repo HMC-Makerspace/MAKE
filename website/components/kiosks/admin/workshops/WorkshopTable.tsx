@@ -31,13 +31,13 @@ import {
 import WorkshopPeopleModal from "./WorkshopPeopleModal.tsx";
 import WorkshopImagesModal from "./WorkshopImagesModal.tsx";
 import WorkshopEditModal from "./WorkshopEditModal.tsx";
-import { TConfig } from "common/config.js";
 import RequiredCertsModal from "../certifications/RequiredCertsModal.tsx";
 import { UUID } from "common/global.ts";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getLocalTimeZone, now } from "@internationalized/date";
-import { AvailableToRolesModal, VisibleToRolesModal } from "../certifications/AuthorizedRolesModal.tsx";
+import { now } from "@internationalized/date";
+import { useConfig } from "../../../../queries/useConfig.tsx";
+import { RequiredRolesModal } from "../../../RequiredRoles.tsx";
 
 // TODO-
 // [] FIX TIME
@@ -130,16 +130,17 @@ export default function WorkshopTable({
     users,
     certs,
     roles,
-    config,
+
     isLoading,
 }: {
     workshops: TWorkshop[];
     users: TUser[];
     certs: TCertification[];
     roles: TUserRole[];
-    config: TConfig;
+
     isLoading: boolean;
 }) {
+    const config = useConfig();
     const queryClient = useQueryClient();
     const patchMutation = useMutation({
         mutationFn: patchWorkshop,
@@ -270,6 +271,8 @@ export default function WorkshopTable({
                                 rsvp_list: [],
                                 reminder_emails_sent: [],
                                 sign_in_list: [],
+                                available_to: null, // RSVP-able by everyone
+                                visible_to: null, // visible to everyone
                             });
                             setIsBatch(false);
                             editOnOpen();
@@ -297,6 +300,8 @@ export default function WorkshopTable({
                                 rsvp_list: [],
                                 reminder_emails_sent: [],
                                 sign_in_list: [],
+                                available_to: null, // RSVP-able by everyone
+                                visible_to: null, // visible to everyone
                             });
                             setIsBatch(true);
                             editOnOpen();
@@ -469,7 +474,7 @@ export default function WorkshopTable({
                                 }}
                             />
                         ),
-                        "available_to": (workshop) => (
+                        available_to: (workshop) => (
                             <div className="flex w-full justify-center">
                                 <Button
                                     isIconOnly
@@ -484,7 +489,7 @@ export default function WorkshopTable({
                                 />
                             </div>
                         ),
-                        "visible_to": (workshop) => (
+                        visible_to: (workshop) => (
                             <div className="flex w-full justify-center">
                                 <Button
                                     isIconOnly
@@ -578,10 +583,10 @@ export default function WorkshopTable({
                         workshop={selectedWorkshop}
                         users={users}
                         certs={certs}
+                        roles={roles}
                         isNew={isNew}
                         isOpen={editIsOpen}
                         onOpenChange={editOnOpenChange}
-                        config={config}
                         batchEdit={isBatch}
                     />
                     <RequiredCertsModal
@@ -594,7 +599,8 @@ export default function WorkshopTable({
                         onOpenChange={certsOnOpenChange}
                         patchMutation={patchMutation}
                     />
-                    <AvailableToRolesModal
+                    <RequiredRolesModal
+                        type="available_to"
                         key={`${selectedWorkshop.uuid}-acroles`}
                         element={selectedWorkshop}
                         roles={roles}
@@ -602,7 +608,8 @@ export default function WorkshopTable({
                         onOpenChange={acrolesOnOpenChange}
                         patchMutation={patchMutation}
                     />
-                    <VisibleToRolesModal
+                    <RequiredRolesModal
+                        type="visible_to"
                         key={`${selectedWorkshop.uuid}-vwroles`}
                         element={selectedWorkshop}
                         roles={roles}

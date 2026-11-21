@@ -81,7 +81,7 @@ export default function AreasPage() {
                                         key={area.uuid}
                                         data-index={virtualItem.index}
                                         ref={areasVirtualizer.measureElement}
-                                        className="absolute top-0 left-0"
+                                        className="absolute top-0 left-0 w-full"
                                         style={{
                                             transform: `translateY(${virtualItem.start}px)`,
                                         }}
