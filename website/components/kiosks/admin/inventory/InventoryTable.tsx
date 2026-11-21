@@ -121,24 +121,32 @@ export default function InventoryTable({
 }) {
     const isMobile = useMediaQuery("(max-width: 640px)");
 
-    const defColumns =
-        defaultColumns ??
-        (isMobile
-            ? ["role", "name", "locations"]
-            : [
-                  "role",
-                  "name",
-                  "quantity_ratio",
-                  "locations",
-                  "required_certifications",
-                  "available_to",
-              ]);
-
     // The set of columns that are visible
     const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
-        new Set(defColumns),
+        new Set(defaultColumns),
     );
-    
+
+    React.useEffect(() => {
+        if (defaultColumns) return;
+
+        setVisibleColumns(
+            new Set(
+                isMobile
+                    ? ["role", "name", "locations"]
+                    : [
+                          "role",
+                          "name",
+                          "quantity_ratio",
+                          "locations",
+                          "required_certifications",
+                          "available_to",
+                      ],
+            ),
+        );
+    }, [isMobile, defaultColumns]);
+
+    console.log(visibleColumns);
+
     // Location filtering dropdown menu
     const [searchableLocations, setSearchableLocations] =
         React.useState<Selection>(new Set());

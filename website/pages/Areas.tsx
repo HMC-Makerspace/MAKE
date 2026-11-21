@@ -60,7 +60,7 @@ export default function AreasPage() {
         scopes && verifyScopes(scopes, [API_SCOPE.UPDATE_MACHINE_INSTANCES]);
 
     return (
-        <DefaultLayout className="p-4 lg:p-8" pageHref="/areas">
+        <DefaultLayout className="p-2 lg:p-8" pageHref="/areas">
             {areas && machines && roles && certs && (
                 <main
                     className="h-full overflow-auto rounded-xl relative"

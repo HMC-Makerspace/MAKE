@@ -186,12 +186,11 @@ export default function CertificationsTable({
                         onValueChange={onInputChange}
                         isDisabled={isLoading}
                         classNames={{
-                            input: "placeholder:text-foreground-200",
+                            input: "placeholder:text-foreground-200 text-medium",
                         }}
                     />
                     {/* Small screens: compact controls */}
-                    <div className="flex sm:hidden">
-                        <ButtonGroup>
+                    <div className="flex sm:hidden gap-2">
                             <ColumnSelect
                                 columns={columns}
                                 visibleColumns={visibleColumns}
@@ -222,7 +221,6 @@ export default function CertificationsTable({
                             >
                                 Create
                             </Button>
-                        </ButtonGroup>
                     </div>
 
                     {/* sm and above: full controls */}
@@ -235,7 +233,7 @@ export default function CertificationsTable({
                                     }
                                     variant="flat"
                                 >
-                                    Filter Columns
+                                    Columns
                                 </Button>
                             </DropdownTrigger>
 

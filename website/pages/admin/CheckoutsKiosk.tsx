@@ -9,7 +9,7 @@ import {
     useDisclosure,
 } from "@heroui/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TUser, TUserRole } from "common/user";
 import {
     CERTIFICATION_VISIBILITY,
@@ -115,6 +115,31 @@ export default function CheckoutsKiosk() {
     });
 
     const isMobile = useMediaQuery("(max-width: 640px)");
+    const [defaultColumns, setDefaultColumns] = useState([
+        "role",
+        "name",
+        "quantity_ratio",
+        "locations",
+        "required_certifications",
+        "available_to",
+        "visible_to",
+        "cart",
+    ]);
+
+    useEffect(() => {
+        setDefaultColumns(
+            isMobile
+                ? ["role", "name", "locations"]
+                : [
+                      "role",
+                      "name",
+                      "quantity_ratio",
+                      "locations",
+                      "required_certifications",
+                      "available_to",
+                  ],
+        );
+    }, [isMobile]);
 
     const validationMutation = useMutation({
         mutationFn: getCartUnavailability,
@@ -297,20 +322,7 @@ export default function CheckoutsKiosk() {
                                 isLoading={inventoryLoading}
                                 showsKitContents={true}
                                 extraColumns={[{ name: "Cart", id: "cart" }]}
-                                defaultColumns={
-                                    isMobile
-                                        ? ["name", "quantity_ratio", "cart"]
-                                        : [
-                                              "role",
-                                              "name",
-                                              "quantity_ratio",
-                                              "locations",
-                                              "required_certifications",
-                                              "available_to",
-                                              "visible_to",
-                                              "cart",
-                                          ]
-                                }
+                                defaultColumns={defaultColumns}
                                 customColumnComponents={{
                                     cart: (i) => (
                                         <div
@@ -346,7 +358,18 @@ export default function CheckoutsKiosk() {
                                 }}
                             />
                         </Tab>
-                        <Tab key={"checkouts"} title={isMobile ? <div><ShoppingCartIcon className="size-6" /></div> : "Checkouts"}>
+                        <Tab
+                            key={"checkouts"}
+                            title={
+                                isMobile ? (
+                                    <div>
+                                        <ShoppingCartIcon className="size-6" />
+                                    </div>
+                                ) : (
+                                    "Checkouts"
+                                )
+                            }
+                        >
                             <CheckoutTable
                                 key={user?.uuid}
                                 checkouts={checkouts}
@@ -359,11 +382,7 @@ export default function CheckoutsKiosk() {
                                 selectedKeys={new Set()}
                                 defaultColumns={
                                     isMobile
-                                        ? [
-                                              "checked_out_by",
-                                              "items",
-                                              "return",
-                                          ]
+                                        ? ["checked_out_by", "items", "return"]
                                         : undefined
                                 }
                                 isLoading={

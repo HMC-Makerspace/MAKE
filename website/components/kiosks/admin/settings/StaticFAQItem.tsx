@@ -90,7 +90,7 @@ export default function StaticFAQItem({
                 <Spacer y={2} />
                 {faq_item.children && faq_item.children.length > 0 && (
                     <div
-                        className="w-full grid gap-2"
+                        className="w-full sm:grid gap-2"
                         style={{
                             gridTemplateColumns: `repeat(${faq_item.children_columns ?? 1}, minmax(0, 1fr))`,
                         }}

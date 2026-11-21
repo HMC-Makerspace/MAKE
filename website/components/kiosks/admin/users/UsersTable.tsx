@@ -185,7 +185,7 @@ export default function UsersTable({
                         onValueChange={onInputChange}
                         isDisabled={isLoading}
                         classNames={{
-                            input: "placeholder:text-foreground-200",
+                            input: "placeholder:text-foreground-200 text-medium",
                         }}
                     />
                     {fullHeader && (

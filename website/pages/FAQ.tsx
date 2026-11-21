@@ -11,7 +11,7 @@ export default function FAQPage() {
     });
 
     return (
-        <DefaultLayout className="px-4 lg:p-8" pageHref="/faq">
+        <DefaultLayout className="px-2 lg:p-8" pageHref="/faq">
             <div className="size-full rounded-xl bg-default-50 p-3 overflow-auto">
                 <div className="h-fit">
                     {config &&

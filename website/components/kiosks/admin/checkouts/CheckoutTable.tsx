@@ -43,6 +43,7 @@ import {
 import { now, ZonedDateTime } from "@internationalized/date";
 import { UserChip } from "../../../user/UserChip";
 import CheckoutDisclaimerModal from "./CheckoutDisclaimerModal";
+import { ColumnSelect } from "../../../Table";
 
 const baseColumns = [
     // { name: "UUID", id: "uuid" },
@@ -323,7 +324,7 @@ export default function CheckoutTable({
                 id="inventory-table-top-content"
                 className="flex flex-col gap-4"
             >
-                <div className="flex justify-between gap-3 items-end">
+                <div className="flex justify-between gap-1 items-end">
                     <Input
                         isClearable
                         className="w-full sm:max-w-[44%] text-for"
@@ -334,9 +335,18 @@ export default function CheckoutTable({
                         onValueChange={onInputChange}
                         isDisabled={isLoading}
                         classNames={{
-                            input: "placeholder:text-foreground-200",
+                            input: "placeholder:text-foreground-200 text-medium",
                         }}
                     />
+                    <div className="sm:hidden block">
+                    <ColumnSelect
+                        columns={columns}
+                        visibleColumns={visibleColumns}
+                        setVisibleColumns={setVisibleColumns}
+                        isLoading={isLoading}
+                        isIconOnly
+                    />
+                </div>
                     {/* TODO: add a tab selector to change from active/future/past checkouts */}
                     <div className="gap-3 flex">
                         <div className="hidden sm:block">
@@ -373,6 +383,7 @@ export default function CheckoutTable({
                         </div>
                     </div>
                 </div>
+                
                 <div className="flex justify-between items-center pb-2">
                     <span className="text-default-400 text-small">
                         Total {numActiveCheckouts} active of {numCheckouts}{" "}
